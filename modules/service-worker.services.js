@@ -132,6 +132,7 @@
 	) => {
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
+		const changesStore = storage.stores.changes;
 
 		try {
 			const { id } = params;
@@ -193,26 +194,17 @@
 			const filesToDelete = [];
 			const binaryFiles = [];
 
-			// update or create all files in update
-			for (let i = 0; i < updateAsStore.length; i++) {
-				const file = updateAsStore[i];
-				const storageFile = storageFiles.find((x) => x.path === file.key);
-				// if(file.key.includes('/.keep')){
-				//     continue;
-				// }
-				if (file && (!storageFile || !storageFile.code)) {
-					filesToUpdate.push(file);
-					continue;
-				}
-				if (typeof storageFile.code !== "string") {
-					binaryFiles.push(file);
-					continue;
-				}
-				if (file.value && file.value.code === storageFile.code) {
-					continue;
-				}
-				filesToUpdate.push(file);
-			}
+			await changesStore.iterate(async (path, { type, value }) => {
+				const [parent] = path.split('/').filter(x => x != '.');
+				if(parent !== service.name || type !== 'update') return;
+				await providers.fileChange({
+					code: value,
+					parent: service,
+					path,
+				})
+				await changesStore.removeItem(key);
+				console.log(`save to provider and remove change record for: ${path}`)
+			});
 
 			// TODO: binary files
 			//console.warn(`may need to update binary files!`);

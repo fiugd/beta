@@ -218,7 +218,6 @@
 
 		//TODO: maybe all this template logic should live elsewhere
 		const filesStore = storage.stores.files;
-
 		const templateSetup = filesStore.iterate((value, key) => {
 			if (!key.includes(`/.templates/`)) return;
 			const name = key.split("/").pop();
