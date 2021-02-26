@@ -1,5 +1,4 @@
 //import JSTreeView from "/shared/vendor/js-treeview.1.1.5.js";
-//import JSTreeView from "https://dev.jspm.io/js-treeview@1.1.5";
 import TreeView from "/shared/modules/TreeView.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
@@ -713,6 +712,8 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 };
 
 const updateTree = (treeView) => (change, { name, id, file }) => {
+	return;
+	//TODO: fix this (should be handled by tree module)
 	if (change !== "dirty") {
 		return;
 	}
