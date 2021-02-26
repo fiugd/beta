@@ -190,7 +190,6 @@
 				}
 			});
 
-			const filesToUpdate = [];
 			const filesToDelete = [];
 			const binaryFiles = [];
 
@@ -223,30 +222,6 @@
 				filesToDelete.push(serviceFile.key);
 			}
 
-			// update files
-			for (let i = 0; i < filesToUpdate.length; i++) {
-				const update = filesToUpdate[i];
-				let code;
-				try {
-					code = update.value.code.code;
-				} catch (e) {}
-				try {
-					code = code || update.value.code;
-				} catch (e) {}
-				try {
-					code = code || "\n\n";
-				} catch (e) {}
-
-				await filesStore.setItem(
-					"." + update.key.replace("/welcome/", "/.welcome/"),
-					code
-				);
-				await providers.fileChange({
-					path: "." + update.key,
-					code,
-					parent: service,
-				});
-			}
 			// delete files
 			for (let i = 0; i < filesToDelete.length; i++) {
 				const key = filesToDelete[i];
