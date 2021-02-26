@@ -135,28 +135,8 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		);
 		return;
 	}
-	const currentService = getCurrentService({ pure: true });
-	const filePath = `/${currentService.name}/${parent ? parent + '/': ''}${name}`;
-	const fileBody = currentService.code.find((x) => x.path === filePath) || 
-		currentService.code.find((x) => x.name === fileName);
-
-	let trimmedBody = true; // grrr.....
-	if(typeof fileBody?.code === 'string'){
-		trimmedBody = fileBody.code.trim();
-	}
-
-	if(fileBody && !trimmedBody && fileBody.path){
-		fileBody.code = await (await fetch(fileBody.path)).text();
-	}
-
-	if (!fileBody) {
-		console.error(
-			`[editor:fileSelect] Current service (${currentService.id}:${currentService.name}) does not contain file: ${fileName}`
-		);
-		switchEditor(null, "nothingOpen");
-		return;
-	}
-	switchEditor(fileName, null, fileBody.code);
+	const filePath = `${parent ? parent + '/': ''}${name}`;
+	switchEditor(filePath);
 };
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {

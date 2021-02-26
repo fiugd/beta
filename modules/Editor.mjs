@@ -7,7 +7,10 @@ import {
 	CursorActivityHandler,
 } from "./editorEvents.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
-import { getCodeFromService, getState, getAllServices, getSettings } from "./state.mjs";
+import {
+	getState, getAllServices, getSettings,
+	setCurrentFile, getCurrentFileFull
+} from "./state.mjs";
 import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import "/shared/vendor/localforage.min.js";
 
@@ -1074,7 +1077,7 @@ function _Editor(callback) {
 			e.target.classList.contains("provider-add-service"),
 	});
 
-	const switchEditor = (filename, mode, fileBody) => {
+	const switchEditor = async (filename, mode) => {
 		if (mode === "systemDoc") {
 			const editorCallback = () => {
 				editorDom = document.querySelector(".CodeMirror");
@@ -1122,12 +1125,13 @@ function _Editor(callback) {
 			return;
 		}
 
+		setCurrentFile({ filePath: filename });
 		const {
 			code = "error",
 			name,
 			id,
 			filename: defaultFile,
-		} = getCodeFromService(null, filename);
+		} = await getCurrentFileFull();
 
 		if (!showFileInEditor(filename, code)) {
 			const editorCallback = () => {

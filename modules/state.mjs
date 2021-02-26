@@ -9,6 +9,8 @@ let listenerQueue = [];
 
 let currentService;
 let currentFile;
+let currentFilePath;
+
 let currentFolder;
 let allServices;
 
@@ -158,6 +160,31 @@ const getCurrentService = ({ pure } = {}) => {
 //    setCurrentFile, setCurrentService
 //    getCurrentFile, getCurrentService
 
+function setCurrentFile({ filePath, fileName }){
+	if(filePath){
+		currentFile = filePath.split('/').pop();
+		currentFilePath = `/${currentService.name}/${filePath}`;
+		return;
+	}
+	currentFile = fileName;
+	currentFilePath = undefined;
+}
+
+function getCurrentFile(){
+	return currentFile;
+}
+async function getCurrentFileFull(){
+	const fileBody = currentFilePath
+		? currentService.code.find((x) => x.path === currentFilePath)
+		: currentService.code.find((x) => x.name === currentFile);
+
+	if(fileBody && fileBody.path){
+		fileBody.code = await (await fetch(fileBody.path)).text();
+	}
+
+	return fileBody;
+}
+
 function setCurrentService(service) {
 	return getCodeFromService(service);
 }
@@ -198,6 +225,12 @@ function getCodeFromService(service, file) {
 		: "";
 
 	//TODO: if file has a path, then fetch and return that
+	const fileBody = currentService.code.find((x) => x.path === filePath) || 
+		currentService.code.find((x) => x.name === fileName);
+
+	if(fileBody && fileBody.path){
+		fileBody.code = await (await fetch(fileBody.path)).text();
+	}
 
 	return {
 		name: currentService.name,
@@ -241,7 +274,6 @@ function setState(change) {
 	return currentFile;
 }
 
-const getCurrentFile = () => currentFile;
 const getCurrentFolder = () => currentFolder;
 const setCurrentFolder = (path) => {
 	currentFolder = path;
@@ -359,7 +391,11 @@ function getSettings(){
 export {
 	getAllServices,
 	getCodeFromService,
+
 	getCurrentFile,
+	getCurrentFileFull,
+	setCurrentFile,
+
 	getCurrentService,
 	getCurrentServiceTree,
 	getDefaultFile,
