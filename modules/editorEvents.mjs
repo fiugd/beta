@@ -137,7 +137,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	}
 	const currentService = getCurrentService({ pure: true });
 	const filePath = `/${currentService.name}/${parent ? parent + '/': ''}${name}`;
-	const fileBody = currentService.code.find((x) => x.name === fileName) || 
+	const fileBody = currentService.code.find((x) => x.path === filePath) || 
 		currentService.code.find((x) => x.name === fileName);
 
 	let trimmedBody = true; // grrr.....
