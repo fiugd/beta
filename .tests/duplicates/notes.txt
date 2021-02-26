@@ -1,0 +1,6 @@
+1) import this folder in fiug.dev
+2) make changes to one of the notes.txt files
+3) save the repo
+
+expect:  one file named "notes.txt" should not overwrite the other named the same
+
