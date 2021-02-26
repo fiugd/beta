@@ -105,7 +105,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
-	const { name, next } = event.detail;
+	const { name, next, parent } = event.detail;
 	let savedFileName;
 
 	if (firstLoad) {
@@ -136,7 +136,9 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		return;
 	}
 	const currentService = getCurrentService({ pure: true });
-	const fileBody = currentService.code.find((x) => x.name === fileName);
+	const filePath = `/${currentService.name}/${parent ? parent + '/': ''}${name}`;
+	const fileBody = currentService.code.find((x) => x.name === fileName) || 
+		currentService.code.find((x) => x.name === fileName);
 
 	let trimmedBody = true; // grrr.....
 	if(typeof fileBody?.code === 'string'){
