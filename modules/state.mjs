@@ -224,14 +224,6 @@ function getCodeFromService(service, file) {
 		? currentService.code
 		: "";
 
-	//TODO: if file has a path, then fetch and return that
-	const fileBody = currentService.code.find((x) => x.path === filePath) || 
-		currentService.code.find((x) => x.name === fileName);
-
-	if(fileBody && fileBody.path){
-		fileBody.code = await (await fetch(fileBody.path)).text();
-	}
-
 	return {
 		name: currentService.name,
 		id: currentService.id,
