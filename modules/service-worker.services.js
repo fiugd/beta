@@ -193,7 +193,7 @@
 			const filesToDelete = [];
 			const binaryFiles = [];
 
-			await changesStore.iterate(async (path, { type, value }) => {
+			await changesStore.iterate(async ({ type, value }, path) => {
 				const [parent] = path.split('/').filter(x => x != '.');
 				if(parent !== service.name || type !== 'update') return;
 				await providers.fileChange({
