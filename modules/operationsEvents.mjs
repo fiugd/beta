@@ -1,4 +1,5 @@
 /*
+2021-02-26 15:21
 
 there are two different ways of handling a Management Operation
 
@@ -336,13 +337,8 @@ const fileChangeHandler = (...args) =>
 		const operations = getOperations();
 		const changeOp = (operations || []).find((x) => x.name === "change");
 
-		const { file, code } = event.detail;
-		const path =
-			"." +
-			(state.paths.find((x) => x.name === file) || { path: "" }).path.replace(
-				"/welcome/",
-				"/.welcome/"
-			);
+		const { file: filePath, code } = event.detail;
+		const path = `./${service}/${filePath}`;
 
 		(async () => {
 			const results = await performOperation(changeOp, {
