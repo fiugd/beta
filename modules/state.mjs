@@ -1,3 +1,5 @@
+//2021-02-26 14:59
+
 import { isString } from "./Types.mjs";
 import { attach, attachTrigger } from "./Listeners.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
@@ -138,7 +140,10 @@ const getCurrentService = ({ pure } = {}) => {
 
 	// SIDE EFFECTS!!!
 	mostRecent.forEach((m) => {
-		const found = currentService.code.find((x) => x.name === m.filename);
+		const found = currentService.code.find((x) => {
+			x.path === `/${currentService.name}/${m.filename}` ||
+			x.name === m.filename
+		});
 		if (!found) {
 			console.error({
 				changedArray,
@@ -251,6 +256,7 @@ function setState(change) {
 	//console.log(change);
 	const stateKey = `${id}|${name}|${filename}`;
 
+/*
 	if (!state.changedFiles[stateKey]) {
 		state.changedFiles[stateKey] = [
 			{
@@ -261,7 +267,7 @@ function setState(change) {
 		];
 	}
 	state.changedFiles[stateKey].push({ name, id, code, filename });
-
+*/
 	openFile({ name: filename });
 	return currentFile;
 }

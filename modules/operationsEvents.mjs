@@ -332,7 +332,7 @@ const fileChangeHandler = (...args) =>
 			getCurrentService,
 		} = args[0];
 		const state = getState();
-		const service = getCurrentService().name;
+		const service = getCurrentService({ pure: true }).name;
 		const operations = getOperations();
 		const changeOp = (operations || []).find((x) => x.name === "change");
 
