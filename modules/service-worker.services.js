@@ -201,7 +201,7 @@
 					parent: service,
 					path,
 				})
-				await changesStore.removeItem(key);
+				await changesStore.removeItem(path);
 				console.log(`save to provider and remove change record for: ${path}`)
 			});
 
