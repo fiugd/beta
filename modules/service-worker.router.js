@@ -214,23 +214,23 @@
 
 	const _expressHandler = ({ TemplateEngine, storage }) => {
 		const { getFile } = storage;
-
-		//TODO: maybe all this template logic should live elsewhere
-		const filesStore = storage.stores.files;
 		const templates = new TemplateEngine();
-		const templatesFromStorage = [];
-		await filesStore.iterate((value, key) => {
-			if (!key.includes(`/.templates/`)) return;
-			templatesFromStorage.push({ value, key });
-		});
-		templatesFromStorage.forEach((t) => {
-			const { value, key } = t;
-			const name = key.split("/").pop();
-			templates.add(name, value);
+
+		const templateSetup = new Promise(async (resolve) => {
+			//TODO: maybe all this template logic should live elsewhere
+			const filesStore = storage.stores.files;
+			await filesStore.iterate((value, key) => {
+				if (!key.includes(`/.templates/`)) return;
+				const name = key.split("/").pop();
+				templates.add(name, value);
+			});
+			resolve();
 		});
 
 		//bind to base
 		return async (base, msg) => {
+			await templateSetup;
+
 			//handle individual request
 			return async (params, event) => {
 				const { path, query } = params;
@@ -259,8 +259,8 @@
 					xformedFile = templates.convert(filename, fileJSONString);
 				}
 
-				// NOTE: would rather update template when saved, but templates not available then
-				// for now, this will do
+				// NOTE: prefer update template on save, but not available then
+				// this will do for now
 				if (templateUrl) {
 					templates.update(filename, file);
 				}
