@@ -71,6 +71,7 @@
 	) => {
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
+		const changesStore = storage.stores.changes;
 		let jsonData;
 		try {
 			const clonedRequest = event.request.clone();
@@ -105,7 +106,8 @@
 			if(service.type === 'github' && `${path[0]}${path[1]}` === './'){
 				path = path.slice(2);
 			}
-			await filesStore.setItem(path, code);
+
+			await changesStore.setItem(path, { type: 'update', value: code });
 
 			if (service && command === "upsert") {
 				service.tree = utils.treeInsertFile(path, service.tree);

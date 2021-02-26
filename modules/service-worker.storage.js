@@ -372,6 +372,19 @@
 		});
 	}
 
+	async function getFile(path){
+		const changesStore = this.stores.changes;
+		const filesStore = this.stores.files;
+
+		const changes = await changesStore.getItem(path);
+		if(changes && changes.type === 'update'){
+			return changes.value;
+		}
+
+		const file = await filesStore.getItem(path);
+		return file;
+	}
+
 	const handleServiceSearch = (fileStore) => async (params, event) => {
 		const serviceSearch = new ServiceSearch();
 		await serviceSearch.init({ ...params, fileStore });
@@ -470,6 +483,7 @@
 		defaultServices = defaultServices;
 		getCodeFromStorageUsingTree = getCodeFromStorageUsingTree.bind(this);
 		fileSystemTricks = fileSystemTricks.bind(this);
+		getFile = getFile.bind(this);
 
 		constructor({ utils, ui }) {
 			this.utils = utils;

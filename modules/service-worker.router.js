@@ -212,69 +212,72 @@
 		});
 	};
 
-	const _expressHandler = ({ TemplateEngine, storage }) => async (base, msg) => {
-		const filesStore = storage.stores.files;
+	const _expressHandler = ({ TemplateEngine, storage }) => {
+		const { getFile } = storage;
 
 		//TODO: maybe all this template logic should live elsewhere
+		const filesStore = storage.stores.files;
 		const templates = new TemplateEngine();
-
 		const templatesFromStorage = [];
 		await filesStore.iterate((value, key) => {
 			if (!key.includes(`/.templates/`)) return;
 			templatesFromStorage.push({ value, key });
 		});
-
 		templatesFromStorage.forEach((t) => {
 			const { value, key } = t;
 			const name = key.split("/").pop();
 			templates.add(name, value);
 		});
 
-		return async (params, event) => {
-			const { path, query } = params;
-			const cleanPath = decodeURI(path.replace("/::preview::/", ""));
-			const previewMode = path.includes("/::preview::/");
-			const templateUrl = path.includes(".templates/");
+		//bind to base
+		return async (base, msg) => {
+			//handle individual request
+			return async (params, event) => {
+				const { path, query } = params;
+				const cleanPath = decodeURI(path.replace("/::preview::/", ""));
+				const previewMode = path.includes("/::preview::/");
+				const templateUrl = path.includes(".templates/");
 
-			const filename = previewMode
-				? cleanPath.split("/").pop()
-				: path.split("/").pop();
-			let xformedFile;
+				const filename = previewMode
+					? cleanPath.split("/").pop()
+					: path.split("/").pop();
+				let xformedFile;
 
-			// TODO: settle on just one filesStore key pattern to avoid this
-			const file = await filesStore.getItem(`${base}/${cleanPath}`)
-				|| await filesStore.getItem(`./${base}/${cleanPath}`);
-			let fileJSONString;
-			try {
-				if (typeof file !== "string") {
-					fileJSONString = file ? JSON.stringify(file, null, 2) : "";
-				} else {
-					fileJSONString = file;
+				const file = await getFile(`${base}/${cleanPath}`)
+					|| await getFile(`./${base}/${cleanPath}`);
+
+				let fileJSONString;
+				try {
+					if (typeof file !== "string") {
+						fileJSONString = file ? JSON.stringify(file, null, 2) : "";
+					} else {
+						fileJSONString = file;
+					}
+				} catch (e) {}
+
+				if (previewMode) {
+					xformedFile = templates.convert(filename, fileJSONString);
 				}
-			} catch (e) {}
 
-			if (previewMode) {
-				xformedFile = templates.convert(filename, fileJSONString);
-			}
+				// NOTE: would rather update template when saved, but templates not available then
+				// for now, this will do
+				if (templateUrl) {
+					templates.update(filename, file);
+				}
 
-			// NOTE: would rather update template when saved, but templates not available then
-			// for now, this will do
-			if (templateUrl) {
-				templates.update(filename, file);
-			}
+				if (previewMode && !xformedFile) {
+					return templates.NO_PREVIEW;
+				}
 
-			if (previewMode && !xformedFile) {
-				return templates.NO_PREVIEW;
-			}
+				// most likely a blob
+				if (file && file.type && file.size) {
+					//xformedFile because there may be a template for blob type file
+					return xformedFile || file;
+				}
 
-			// most likely a blob
-			if (file && file.type && file.size) {
-				//xformedFile because there may be a template for blob type file
-				return xformedFile || file;
-			}
-
-			//TODO: need to know file type so that it can be returned properly
-			return xformedFile || fileJSONString || file;
+				//TODO: need to know file type so that it can be returned properly
+				return xformedFile || fileJSONString || file;
+			};
 		};
 	};
 	
