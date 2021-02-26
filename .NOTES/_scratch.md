@@ -18,6 +18,26 @@ why I keep vscode open
 - [X] highlight is weird (themeing and color issues)
 - [X] no search in file
 
+2021-02-26 todo
+---------------
+- [ ] straighten the way that files are stored in service worker (full path for id)
+- [ ] templates that work across services
+- [ ] fix preview/lock
+
+- [ ] version endpoint in SW - version and commit hash
+- [ ] https://github.com/marketplace/actions/gh-pages-deploy
+- [ ] https://dev.to/pierresaid/deploy-node-projects-to-github-pages-with-github-actions-4jco
+
+- [ ] load file withut service being open
+- [ ] better "first view" for people that are new
+- [ ] better loading view
+- [ ] favicon
+
+- [ ] switching between services is awkward
+
+- [ ] dumbdown, tree languages - https://github.com/treenotation/jtree
+
+
 2020-10-11 todo
 ---------------
 - [ ] minimap
@@ -40,13 +60,13 @@ why I keep vscode open
 - [ ] connect context menu commands
 - [ ] arrange images on single image (use spritemap techniques/code)
 - [ ] clean up and connect listeners/triggers
-- [ ] hover highlighting expand/collapse indicators
+- [ ] hover highlighting expand/collapse indicators (??? not sure what this is about)
 - [ ] themes: font/colors
 - [ ] automatic add vendor deps to service manifest (cached offline)
 - [ ] package storage (like package.json/node_modules)
 - [ ] all terminal commands working well (like unix)
 - [ ] git support integrated
-- [ ] share project (zip/torrent
+- [ ] share project (zip/torrent)
 - [ ] one template/multiple file extensions supported
 - [ ] connect action bar things
 - [X] messaging between template and editor
@@ -113,23 +133,21 @@ image processing
 ---------------
 
 - [X] save a file with Bartok Basic Server provider
-
 - [x] project switch
-
-- list of curent providers in settings
+- [X] list of curent providers in settings
 
 - tons of issues
 	- [X] tab closing closes tabs that shouldn't close
 	- [X] preview doesn't show if project doesn't have templates (global templates)
-	- [ ] project loads index.js even if it doesn't exist
+	- [X] project loads index.js even if it doesn't exist
 	- [X] tabs are not recalled for projects other than welcome project
 	- [X] switching between preview and terminal is broken in some cases
 	- [X] settings view has tab switching problems
 	- [X] preview fails after fresh boot
 
 - preview full screen
-	- should hide most UI elements; only show fullscreen controls
-	- fullscreen state is wonky
+	- [ ] should hide most UI elements; only show fullscreen controls
+	- [ ] fullscreen state is wonky
 
 2020-08-16 Note and Musing
 ==========================
@@ -139,7 +157,6 @@ image processing
 - lot's of things suck and need improved
 - many things are cool and not big impact but fun to work on
 - anxiety about first item and pain relieving effect of second item
-
 
 ### browsersysnc integration
 - http://localhost:3222/browser-sync/browser-sync-client.js
@@ -175,14 +192,11 @@ image processing
 
 2020-08-01_1829 TODO
 ====================
-
-	- [IP] trying to get service worker fully fleshed out
-
-	- [1/2] make terminal not rely on callback pattern
-		- [X] instead, it should fire an event and only pop that event off pending queue when answer is heard
-		- [ ] should have a timeout with this
-
-	- [ ] seperate template listening and DOM updating from terminal code
+- [IP] trying to get service worker fully fleshed out
+- [1/2] make terminal not rely on callback pattern
+	- [X] instead, it should fire an event and only pop that event off pending queue when answer is heard
+	- [ ] should have a timeout with this
+- [ ] seperate template listening and DOM updating from terminal code
 
 
 DEPLOY | VERSION CONTROL
@@ -323,8 +337,8 @@ stream from service worker - https://developers.google.com/web/updates/2016/06/s
 websocket from service worker?
 
 
-2020-07-01
-==========
+2020-07-01 TODO
+===============
 - bitcoin/blockchain in browser (and why?)
 - [x] indent using tabs
 - [X] code folding

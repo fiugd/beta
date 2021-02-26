@@ -16,10 +16,12 @@
       "bartokv0.3.md": {},
       "bartokv0.4.1.md": {},
       "bartokv0.4.md": {},
-      "bartokv0.5.md": {}
+      "bartokv0.5.md": {},
+      "fiugv0.6.md": {}
     },
     "service.json": {},
     "test_scenarios.md": {},
+    "tree-musing.png": {},
     "yesterday.md": {},
     "_bugs.md": {},
     "_scratch.md": {}
@@ -70,6 +72,10 @@
       "path": ".NOTES/releases/bartokv0.5.md"
     },
     {
+      "name": "fiugv0.6.md",
+      "path": ".NOTES/releases/fiugv0.6.md"
+    },
+    {
       "name": "future.md",
       "path": ".NOTES/future.md"
     },
@@ -104,6 +110,10 @@
     {
       "name": "test_scenarios.md",
       "path": ".NOTES/test_scenarios.md"
+    },
+    {
+      "name": "tree-musing.png",
+      "path": ".NOTES/tree-musing.png"
     },
     {
       "name": "yesterday.md",

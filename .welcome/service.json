@@ -398,8 +398,6 @@
         }
       }
     },
-    "index.js": {},
-    "package.json": {},
     "paste-image.png": {},
     "Readme.md": {},
     "service.json": {},
@@ -885,10 +883,6 @@
       "path": ".welcome/examples/ui frameworks/vue/imageRemix.md"
     },
     {
-      "name": "index.js",
-      "path": ".welcome/index.js"
-    },
-    {
       "name": "ini.ini",
       "path": ".welcome/examples/data/ini.ini"
     },
@@ -1063,10 +1057,6 @@
     {
       "name": "operational.transforms.js",
       "path": ".welcome/3xplore/operational.transforms.js"
-    },
-    {
-      "name": "package.json",
-      "path": ".welcome/package.json"
     },
     {
       "name": "pas.html",
