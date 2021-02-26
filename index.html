@@ -26,6 +26,8 @@
 </head>
 
 <script>
+  document.location.origin.includes('beta') && (document.title += " (beta)");
+
   const themeHighlightColor = localStorage.getItem('themeHighlightColor');
   if(themeHighlightColor){
     document.documentElement.style
