@@ -337,7 +337,7 @@ const fileChangeHandler = (...args) =>
 		const operations = getOperations();
 		const changeOp = (operations || []).find((x) => x.name === "change");
 
-		const { file: filePath, code } = event.detail;
+		const { filePath, code } = event.detail;
 		const path = `./${service}/${filePath}`;
 
 		(async () => {

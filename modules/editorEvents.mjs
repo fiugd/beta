@@ -20,7 +20,7 @@ const ChangeHandler = (doc) => {
 
 		const event = new CustomEvent("fileChange", {
 			bubbles: true,
-			detail: { name, id, file, code: contents },
+			detail: { name, id, filePath: filename, code: contents },
 		});
 		document.body.dispatchEvent(event);
 	};
