@@ -216,15 +216,13 @@
 		const { getFile } = storage;
 		const templates = new TemplateEngine();
 
-		const templateSetup = new Promise(async (resolve) => {
-			//TODO: maybe all this template logic should live elsewhere
-			const filesStore = storage.stores.files;
-			await filesStore.iterate((value, key) => {
-				if (!key.includes(`/.templates/`)) return;
-				const name = key.split("/").pop();
-				templates.add(name, value);
-			});
-			resolve();
+		//TODO: maybe all this template logic should live elsewhere
+		const filesStore = storage.stores.files;
+
+		const templateSetup = filesStore.iterate((value, key) => {
+			if (!key.includes(`/.templates/`)) return;
+			const name = key.split("/").pop();
+			templates.add(name, value);
 		});
 
 		//bind to base
