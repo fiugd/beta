@@ -198,7 +198,7 @@
 				const path = changes[i];
 				const [parent] = path.split('/').filter(x => x != '.');
 				if(parent !== service.name) continue;
-				const { type, value: code } = await changesStore.getItem('path');
+				const { type, value: code } = await changesStore.getItem(path);
 				if(type !== 'update') continue;
 				await providers.fileChange({ code, parent: service, path });
 				await changesStore.removeItem(path);
