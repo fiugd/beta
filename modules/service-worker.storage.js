@@ -414,6 +414,7 @@
 				});
 
 				//TODO: may not want to return all code!!!
+				/*
 				for (var i = 0, len = savedServices.length; i < len; i++) {
 					const service = savedServices[i];
 					const code = await this.getCodeFromStorageUsingTree(
@@ -424,18 +425,15 @@
 					service.code = code;
 				}
 				//console.log({ defaults, savedServices });
+				*/
 
 				const allServices = [...defaults, ...savedServices]
 					.sort((a, b) => Number(a.id) - Number(b.id))
 					.map((x) => ({ id: x.id, name: x.name }));
 
-				return JSON.stringify(
-					{
-						result: this.utils.unique(allServices, (x) => Number(x.id)),
-					},
-					null,
-					2
-				);
+				return JSON.stringify({
+					result: this.utils.unique(allServices, (x) => Number(x.id)),
+				}, null, 2);
 			}
 
 			// if id, return that service
@@ -443,20 +441,17 @@
 			await filesStore.setItem("lastService", params.id);
 
 			const foundService = await servicesStore.getItem(params.id);
-
 			if (foundService) {
+				/*
 				foundService.code = await this.getCodeFromStorageUsingTree(
 					foundService.tree,
 					filesStore,
 					foundService.name
 				);
-				return JSON.stringify(
-					{
-						result: [foundService],
-					},
-					null,
-					2
-				);
+				*/
+				return JSON.stringify({
+					result: [foundService],
+				}, null, 2);
 			}
 
 			//TODO (AND WANRING): get this from store instead!!!
