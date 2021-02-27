@@ -1,7 +1,7 @@
 <!-- no-select -->
 
 
-- files that have same name across tree will show bugs!
+- [X] files that have same name across tree will show bugs!
 
 - file add -> rename -> delete - issues somewhere in this flow
 
