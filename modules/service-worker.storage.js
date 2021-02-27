@@ -72,35 +72,26 @@
 		tree: defaultTree(_name),
 	});
 
-	async function getCodeFromStorageUsingTree(tree, store, serviceName) {
+	async function getCodeFromStorageUsingTree(tree, fileStore, serviceName) {
 		const flattenTree = this.utils.flattenTree;
 		// flatten the tree (include path)
 		// pass back array of  { name: filename, code: path, path }
 		const files = flattenTree(tree);
 
 		const allFilesFromService = {};
-		await store.iterate((value, key) => {
+		await fileStore.iterate((value, key) => {
 			if (key.startsWith(`./${serviceName}/`)) {
 				allFilesFromService[key] = {
 					key,
-					code: value,
 					untracked: true,
 				};
 			}
 		});
 
-		// UI should call network(sw) for file
-		// BUT for now, will bundle entire filesystem with its contents
 		for (let index = 0; index < files.length; index++) {
 			const file = files[index];
 			let storedFile = allFilesFromService["." + file.path];
-			file.code = storedFile ? storedFile.code : "";
 			storedFile && (storedFile.untracked = false);
-
-			// OMG, live it up in text-only world... for now (templates code expects text format)
-			file.code = file.size
-				? null
-				: file.code;
 		}
 
 		const untracked = Object.entries(allFilesFromService)
@@ -413,8 +404,6 @@
 					savedServices.push(value);
 				});
 
-				//TODO: may not want to return all code!!!
-				/*
 				for (var i = 0, len = savedServices.length; i < len; i++) {
 					const service = savedServices[i];
 					const code = await this.getCodeFromStorageUsingTree(
@@ -425,7 +414,6 @@
 					service.code = code;
 				}
 				//console.log({ defaults, savedServices });
-				*/
 
 				const allServices = [...defaults, ...savedServices]
 					.sort((a, b) => Number(a.id) - Number(b.id))
@@ -442,13 +430,11 @@
 
 			const foundService = await servicesStore.getItem(params.id);
 			if (foundService) {
-				/*
 				foundService.code = await this.getCodeFromStorageUsingTree(
 					foundService.tree,
 					filesStore,
 					foundService.name
 				);
-				*/
 				return JSON.stringify({
 					result: [foundService],
 				}, null, 2);
