@@ -202,7 +202,7 @@
 				if(type !== 'update') continue;
 				await providers.fileChange({ code, parent: service, path });
 				await changesStore.removeItem(path);
-				console.log(`save to provider and remove change record for: ${path}`)
+				await filesStore.setItem(path, code);
 			}
 
 			// TODO: binary files
