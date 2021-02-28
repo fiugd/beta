@@ -1032,7 +1032,7 @@ function _TreeView(op) {
 		'folderDelete'
 	].reduce((all, operation) => {
 		const handler = connectTrigger({
-			eventName: operation,
+			eventName: 'operations',
 			type: "raw",
 		});
 		const operationAdapt = {
