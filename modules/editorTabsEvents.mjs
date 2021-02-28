@@ -215,7 +215,7 @@ const fileChangeHandler = ({
 	const { filePath } = event.detail;
 	const { foundTab } = getTabsToUpdate(filePath);
 	if (!foundTab) {
-		console.error(`Could not find a tab named ${file} to update`);
+		console.error(`Could not find a tab named ${filePath} to update`);
 		return;
 	}
 	foundTab.changed = true;
