@@ -972,7 +972,7 @@ function _TreeView(op) {
 
 	const newTree = ({ service, treeState }) => {
 		const treeRootId = "tree-view";
-		// clear old tree if exists
+		// TODO: clear old tree if exists?
 		const extensionMapper = (extension) => {
 			const override = {
 				md: "info",
@@ -982,7 +982,7 @@ function _TreeView(op) {
 		tree = new TreeView(service, treeRootId, treeState, extensionMapper);
 		Object.entries(triggers)
 			.forEach( ([event, handler]) => tree.on(event, handler) )
-		return tree.on;
+		updateTreeMenu({ project: service.name });
 	};
 
 	const Update = {
