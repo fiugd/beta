@@ -1126,14 +1126,15 @@ function _Editor(callback) {
 		}
 
 		setCurrentFile({ filePath: filename });
+		const currentFile = await getCurrentFileFull();
 		const {
 			code = "error",
 			name,
 			id,
 			filename: defaultFile,
-		} = await getCurrentFileFull();
+		} = currentFile || {};
 
-		if (!showFileInEditor(filename, code)) {
+		if (!currentFile || !showFileInEditor(filename, code)) {
 			const editorCallback = () => {
 				editorDom = document.querySelector(".CodeMirror");
 				editorDom && editorDom.classList.add("hidden");
