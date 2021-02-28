@@ -1045,7 +1045,7 @@ function _TreeView(op) {
 			return handler({
 				detail: {
 					name, src: source, tgt: target, parent,
-					operation: operationAdapt(operation) || operation,
+					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,
 					body: {}
