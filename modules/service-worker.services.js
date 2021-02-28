@@ -190,19 +190,61 @@
 				}
 			});
 
+			// TODO: file delete and updates should be registered as changes
+			// ALSO: update is used on add/delete, but /change should probably be used
+			// SO: (add/delete) should exist in /change handler
+			// AND: app should use /change for update and delete
+			// OR: just call add/delete endpoints
+
+			/*
+			const filesToUpdate = [];
 			const filesToDelete = [];
 			const binaryFiles = [];
 
-			const changes = await changesStore.keys();
-			for(let i = 0, len=changes.length; i < len; i++){
-				const path = changes[i];
-				const [parent] = path.split('/').filter(x => x != '.');
-				if(parent !== service.name) continue;
-				const { type, value: code } = await changesStore.getItem(path);
-				if(type !== 'update') continue;
-				await providers.fileChange({ code, parent: service, path });
-				await changesStore.removeItem(path);
-				await filesStore.setItem(path, code);
+			// update or create all files in update
+			for (let i = 0; i < updateAsStore.length; i++) {
+				const file = updateAsStore[i];
+				const storageFile = storageFiles.find((x) => x.path === file.key);
+				// if(file.key.includes('/.keep')){
+				//     continue;
+				// }
+				if (file && (!storageFile || !storageFile.code)) {
+					filesToUpdate.push(file);
+					continue;
+				}
+				if (typeof storageFile.code !== "string") {
+					binaryFiles.push(file);
+					continue;
+				}
+				if (file.value && file.value.code === storageFile.code) {
+					continue;
+				}
+				filesToUpdate.push(file);
+			}
+
+			// update files
+			for (let i = 0; i < filesToUpdate.length; i++) {
+				const update = filesToUpdate[i];
+				let code;
+				try {
+					code = update.value.code.code;
+				} catch (e) {}
+				try {
+					code = code || update.value.code;
+				} catch (e) {}
+				try {
+					code = code || "\n\n";
+				} catch (e) {}
+
+				await filesStore.setItem(
+					"." + update.key.replace("/welcome/", "/.welcome/"),
+					code
+				);
+				await providers.fileChange({
+					path: "." + update.key,
+					code,
+					parent: service,
+				});
 			}
 
 			// TODO: binary files
@@ -231,6 +273,20 @@
 					parent: service,
 					deleteFile: true,
 				});
+			}
+			*/
+
+			// should handle more than just updates
+			const changes = await changesStore.keys();
+			for(let i = 0, len=changes.length; i < len; i++){
+				const path = changes[i];
+				const [parent] = path.split('/').filter(x => x != '.');
+				if(parent !== service.name) continue;
+				const { type, value: code } = await changesStore.getItem(path);
+				if(type !== 'update') continue;
+				await providers.fileChange({ code, parent: service, path });
+				await changesStore.removeItem(path);
+				await filesStore.setItem(path, code);
 			}
 
 			return stringify({ result: [body] });
