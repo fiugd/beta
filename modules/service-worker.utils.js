@@ -66,6 +66,8 @@
 				key: file.path,
 				value: files.find((x) => x.name === file.path.split("/").pop()),
 			};
+			flat[index].value.path = flat[index].value.path || file.path;
+			flat[index].value.code = flat[index].value.code || file.code;
 		}
 		const untracked = files
 			.filter((x) => x.untracked)

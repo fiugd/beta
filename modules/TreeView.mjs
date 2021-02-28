@@ -996,7 +996,7 @@ function _TreeView(op) {
 	].reduce((all, one) => {
 			all['tree'+one] = (...args) => {
 				try {
-					if(!tree) return;
+					if(!tree) return; //should keep track of this instead of blindly returning
 					if(one === 'Add' && typeof args[2] === 'undefined'){
 						return tree.add(args[0], null, tree.currentFolder);
 					}
