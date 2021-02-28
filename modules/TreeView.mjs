@@ -1016,6 +1016,7 @@ function _TreeView(op) {
 		showServiceChooser: showServiceChooser(treeView),
 	});
 
+
 	// these get attached each newly created tree module
 	triggers = [
 		'fileSelect',
@@ -1034,15 +1035,20 @@ function _TreeView(op) {
 			eventName: operation,
 			type: "raw",
 		});
+		const operationAdapt = {
+			fileAdd: 'addFile'
+		};
 		const treeEventHandler = (args) => {
 			const { source, target } = args;
 			const name = (target || source).split('/').pop();
 			const parent = (target || source).split('/').slice(0,-1).join('/');
 			return handler({
 				detail: {
-					name, src: source, tgt: target, parent, operation,
+					name, src: source, tgt: target, parent,
+					operation: operationAdapt(operation) || operation,
 					filename: name,
-					folderName: name
+					folderName: name,
+					body: {}
 				}
 			});
 		};
