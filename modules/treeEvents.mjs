@@ -773,26 +773,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 			- requires tree state and service
 			- those are safe to get here
 	*/
-
-	// probably get this fron state?
-	// just do this in module???
-	
-	const treeState = {
-		expand: [],
-		select: '',
-		changed: [],
-		new: []
-	};
-	/*
-	const serviceName = result[0].name;
-	const storedTreeName = 
-	tree = JSON.parse(sessionStorage.getItem(`tree-${serviceName}`)) || tree;
-	*/
-	
-	//assemble tree state here
-	
-	newTree({ service: result[0], treeState })
-
+	newTree({ service: result[0], result[0]?.treeState });
 };
 
 function newAttachListener(
@@ -802,30 +783,7 @@ function newAttachListener(
 		showSearch, updateTreeMenu, showServiceChooser
 	}
 ){
-	const saveTree = (fn) => (...args) => {
-		const result = fn(...args);
-		if (tree) {
-			try {
-				const storeTree = JSON.parse(sessionStorage.getItem("tree"));
-				// console.log(JSON.stringify({
-				// 	oldSelected: storeTree.selected,
-				// 	newSelected: tree.selected
-				// }, null, 2));
-				// console.log(JSON.stringify({
-				// 	oldExpanded: storeTree.expanded,
-				// 	newExpanded: tree.expanded
-				// }, null, 2));
-				storeTree.selected = tree.selected;
-				//storeTree.expanded = tree.expanded;
-				sessionStorage.setItem("tree", JSON.stringify(storeTree));
-			} catch (e) {
-				debugger;
-			}
-		}
-		return result;
-	};
 	const { updateTree, treeView } = UpdateTree;
-
 	attach({
 		name: "Explorer",
 		eventName: "noServiceSelected",
@@ -857,6 +815,7 @@ function newAttachListener(
 		listener: (event) => searchProject({ showSearch, hideSearch: true }),
 	});
 
+	// tirggered by rest of system
 	attach({
 		name: "Explorer",
 		eventName: "operationDone",
@@ -865,7 +824,7 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "fileSelect",
-		listener: saveTree(fileSelectHandler(treeSelect)),
+		listener: fileSelectHandler(treeSelect),
 	});
 	attach({
 		name: "Explorer",
@@ -875,12 +834,12 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "fileClose",
-		listener: saveTree(fileSelectHandler(treeSelect)),
+		listener: fileSelectHandler(treeSelect),
 	});
 	attach({
 		name: "Explorer",
 		eventName: "fileChange",
-		listener: saveTree(fileChangeHandler(updateTree)),
+		listener: fileChangeHandler(updateTree),
 	});
 	attach({
 		name: "Explorer",

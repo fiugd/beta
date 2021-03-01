@@ -440,7 +440,7 @@
 				}, null, 2);
 			}
 
-			//TODO (AND WANRING): get this from store instead!!!
+			//TODO (AND WARNING): get this from store instead!!!
 			// currently will only return fake/default services
 			const lsServices = defaultServices() || [];
 			const result = {
@@ -456,6 +456,17 @@
 				cache: cacheHeader,
 				fetchFileContents,
 			});
+		
+			const addTreeState = (service) => {
+				service.treeState = {
+					expand: (sessionStorage.getItem(`tree-${service.name}-expand`) || '')
+						.split(',').filter(x=>!!x),
+					select: sessionStorage.getItem(`tree-${service.name}-select`),
+					changed: [], //TODO: from changes store
+					new: [], //TODO: from changes store
+				};
+			};
+			result.forEach(addTreeState);
 			return JSON.stringify(result, null, 2);
 		};
 
