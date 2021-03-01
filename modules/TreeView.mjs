@@ -1048,15 +1048,18 @@ function _TreeView(op) {
 			const { source, target } = args;
 			const name = (target || source).split('/').pop();
 			const parent = (target || source).split('/').slice(0,-1).join('/');
-			return handler({
+			const handlerMessage = {
 				detail: {
-					name, src: source, tgt: target, parent,
+					name,
+					src: source,
+					tgt: target, parent,
 					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,
 					body: {}
 				}
-			});
+			};
+			return handler(handlerMessage);
 		};
 
 		all[operation] = treeEventHandler;

@@ -279,7 +279,7 @@ const contextMenuSelectHandler = ({
 				: data.path;
 		return treeAdd(data.type, null, parent);
 	}
-	if (which === "Delete") return treeDelete(data.type, data.path);
+	if (which === "Delete") return treeDelete(data.path);
 	if (which === "Rename") return treeRename(data.path);
 
 	if (which === "Copy Path") {
