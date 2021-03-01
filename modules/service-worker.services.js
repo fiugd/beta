@@ -192,7 +192,7 @@
 				.filter(file => !filesInStore.includes(file));
 			for (let i = 0; i < filesToAdd.length; i++) {
 				const code = '↵↵'; //TODO: should be default for file type
-				await filesStore.setItem(key, );
+				await filesStore.setItem(filesToAdd[i], code);
 				await providers.fileChange({
 					path: filesToAdd[i],
 					code,
