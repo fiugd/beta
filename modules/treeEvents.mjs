@@ -264,7 +264,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 
 
 const contextMenuSelectHandler = ({
-	newFile, newFolder, treeRename, treeDelete
+	treeAdd, treeRename, treeDelete
 }) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
