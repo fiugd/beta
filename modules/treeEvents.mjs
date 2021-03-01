@@ -273,25 +273,15 @@ const contextMenuSelectHandler = ({
 	}
 	
 	// this should in a listener for 'addFile'
-	if (which === "New File") {
-		return newFile({
-			parent: data.type === 'file'
+	if (["New File", "New Folder"].includes(which)) {
+		const parent = data.type === 'file'
 				? data.parent.path
-				: data.path
-		});
+				: data.path;
+		return treeAdd(data.type, null, parent);
 	}
-
-	if (which === "New Folder") {
-		return newFolder({
-			parent: data.type === 'file'
-				? data.parent.path
-				: data.path
-		});
-	}
-
 	if (which === "Delete") return treeDelete(data.type, data.path);
-	if (which === "Rename") return treeRename(data);
-	
+	if (which === "Rename") return treeRename(data.path);
+
 	if (which === "Copy Path") {
 		const state = getState();
 		const { name } = data;
@@ -904,10 +894,9 @@ function newAttachListener(
 		name: "Explorer",
 		eventName: "contextmenu-select",
 		listener: contextMenuSelectHandler({
-			newFile: ({ parent }) => treeAdd('file', null, noFrontSlash(parent)),
-			newFolder: ({ parent }) => treeAdd('folder', null, noFrontSlash(parent)),
+			treeAdd,
 			treeDelete,
-			treeRename: ({ parent, name }) => treeRename(noFrontSlash(`${parent||''}/${name}`)),
+			treeRename,
 		}),
 	});
 	attach({
