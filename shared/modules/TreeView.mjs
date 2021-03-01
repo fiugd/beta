@@ -764,6 +764,8 @@ class ServiceTree {
 		});
 	}
 
+	context(domNode){ return new LeafNode(domNode); }
+
 	/*
 		this is for programmatically selecting a file/folder
 	*/
