@@ -1039,7 +1039,8 @@ function _TreeView(op) {
 			type: "raw",
 		});
 		const operationAdapt = {
-			fileAdd: 'addFile'
+			fileAdd: 'addFile',
+			folderAdd: 'addFolder'
 		};
 		const treeEventHandler = (args) => {
 			const { source, target } = args;
