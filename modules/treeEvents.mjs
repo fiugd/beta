@@ -301,7 +301,7 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	if (which === "New Folder") {
 		return newFolder({
 			parent: data.type === 'folder'
-				? `${data.parent}/${data.name}`
+				? `${data.parent ? data.parent + '/' : ''}${data.name}`
 				: data.parent
 		});
 	}
