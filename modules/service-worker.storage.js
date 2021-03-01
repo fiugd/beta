@@ -428,8 +428,8 @@
 
 			const addTreeState = (service) => {
 				service.treeState = {
-					expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
-					select: await changesStore.getItem(`tree-${service.name}-selected`) || '',
+					expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
+					select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
 					changed: [], //TODO: from changes store
 					new: [], //TODO: from changes store
 				};
