@@ -773,7 +773,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 			- requires tree state and service
 			- those are safe to get here
 	*/
-	newTree({ service: result[0], result[0]?.treeState });
+	newTree({ service: result[0], treeState: result[0]?.treeState });
 };
 
 function newAttachListener(
