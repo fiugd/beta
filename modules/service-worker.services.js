@@ -173,21 +173,23 @@
 			const filesInStore = (await filesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 
+			// TODO: binary files
 			const binaryFiles = [];
 
 			const filesToDelete = filesInStore
 				.filter(file => !filesFromUpdate.includes(file));
+			for (let i = 0; i < filesToDelete.length; i++) {
+				const key = filesToDelete[i];
+				await filesStore.removeItem(key);
+				await providers.fileChange({
+					path: key,
+					parent: service,
+					deleteFile: true,
+				});
+			}
 
 			const filesToAdd = filesFromUpdate
 				.filter(file => !filesInStore.includes(file));
-
-			console.log(JSON.stringify({ filesToAdd, filesToDelete }));
-
-			/*
-
-			// TODO: binary files
-
-			// update files
 			for (let i = 0; i < filesToAdd.length; i++) {
 				const code = '↵↵'; //TODO: should be default for file type
 				await filesStore.setItem(key, );
@@ -198,19 +200,6 @@
 				});
 			}
 
-			// delete files
-			for (let i = 0; i < filesToDelete.length; i++) {
-				const key = filesToDelete[i];
-				await filesStore.removeItem(key);
-				await providers.fileChange({
-					path: key,
-					parent: service,
-					deleteFile: true,
-				});
-			}
-			*/
-
-			// should handle more than just updates
 			const changedFiles = (await changesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 			for(let i = 0, len=changedFiles.length; i < len; i++){
