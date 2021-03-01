@@ -251,39 +251,21 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		},
 	];
 	// ^^^ this list should be built based on what was clicked
-	let data;
-	try {
-		data = {
-			name: context.name,
-			type: context.type,
-			path: context.path,
-			parent: treeContext(context.parent).path
-		};
-	} catch (e) {
-		data = {
-			name: "",
-			type: "folder",
-		};
-	}
 
-	if (!data) {
-		console.error("some issue finding data for this context click!");
-		return;
-	}
-
-	// debugger;
 	showMenu()({
 		x: e.clientX,
 		y: e.clientY,
 		list: listItems,
 		parent: "TreeView",
-		data,
+		data: context,
 	});
 	return false;
 };
 
 
-const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
+const contextMenuSelectHandler = ({
+	newFile, newFolder, treeRename, treeDelete
+}) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
 		//console.log('TreeView ignored a context-select event');
@@ -294,7 +276,7 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	if (which === "New File") {
 		return newFile({
 			parent: data.type === 'file'
-				? data.parent
+				? data.parent.path
 				: data.path
 		});
 	}
@@ -302,38 +284,14 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	if (which === "New Folder") {
 		return newFolder({
 			parent: data.type === 'file'
-				? data.parent
+				? data.parent.path
 				: data.path
 		});
 	}
 
-	if (which === "Delete") {
-		return console.log('File and Folder delete currently messed up!');
-
-		const { name, type, parent="" } = data;
-
-		if (!["folder", "file"].includes(type)) {
-			console.error("cannot delete object of unknown type");
-			return;
-		}
-		const detail = { body: {} }; //TODO: sucks that body is needed!!!
-
-		if (type === "folder") {
-			detail.operation = "deleteFolder";
-			detail.folderName = name;
-			detail.parent = parent.replace(new RegExp(`/${data.name}$`, "g"), "");
-		}
-		if (type === "file") {
-			detail.operation = "deleteFile";
-			detail.filename = name;
-			detail.parent = parent;
-		}
-
-		const event = new CustomEvent("operations", { bubbles: true, detail });
-		document.body.dispatchEvent(event);
-		return;
-	}
-
+	if (which === "Delete") return treeDelete(data.type, data.path);
+	if (which === "Rename") return treeRename(data);
+	
 	if (which === "Copy Path") {
 		const state = getState();
 		const { name } = data;
@@ -397,11 +355,8 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 		});
 		document.body.dispatchEvent(event);
 	}
-	
-	if (which === "Rename") {
-		const { name, parent } = data;
-		return rename({ parent, name });
-	}
+
+
 };
 
 const searchProject = ({ showSearch, hideSearch }) => {
@@ -951,7 +906,8 @@ function newAttachListener(
 		listener: contextMenuSelectHandler({
 			newFile: ({ parent }) => treeAdd('file', null, noFrontSlash(parent)),
 			newFolder: ({ parent }) => treeAdd('folder', null, noFrontSlash(parent)),
-			rename: ({ parent, name }) => treeRename(noFrontSlash(`${parent||''}/${name}`)),
+			treeDelete,
+			treeRename: ({ parent, name }) => treeRename(noFrontSlash(`${parent||''}/${name}`)),
 		}),
 	});
 	attach({
