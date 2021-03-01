@@ -426,7 +426,7 @@
 				}, null, 2);
 			}
 
-			const addTreeState = (service) => {
+			const addTreeState = async (service) => {
 				service.treeState = {
 					expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
 					select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
@@ -446,7 +446,7 @@
 					filesStore,
 					foundService.name
 				);
-				addTreeState(foundService);
+				await addTreeState(foundService);
 				return JSON.stringify({
 					result: [foundService],
 				}, null, 2);
