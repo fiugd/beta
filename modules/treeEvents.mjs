@@ -215,7 +215,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		return true;
 	}
 	e.preventDefault();
-	
+
 	const context = treeContext(e.target);
 
 	const listItems = [
@@ -256,7 +256,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		data = {
 			name: context.name,
 			type: context.type,
-			parent: context.parent.path
+			parent: treeContext(context.parent).path
 		};
 	} catch (e) {
 		data = {
@@ -291,19 +291,11 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	
 	// this should in a listener for 'addFile'
 	if (which === "New File") {
-		return newFile({
-			parent: data.type === 'folder'
-				? `${data.parent ? data.parent + '/' : ''}${data.name}`
-				: data.parent
-		});
+		return newFile({ parent });
 	}
 
 	if (which === "New Folder") {
-		return newFolder({
-			parent: data.type === 'folder'
-				? `${data.parent ? data.parent + '/' : ''}${data.name}`
-				: data.parent
-		});
+		return newFolder({ parent });
 	}
 
 	if (which === "Delete") {
