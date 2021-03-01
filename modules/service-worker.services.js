@@ -178,34 +178,31 @@
 
 			const filesToDelete = filesInStore
 				.filter(file => !filesFromUpdate.includes(file));
-			for (let i = 0; i < filesToDelete.length; i++) {
-				const key = filesToDelete[i];
-				await filesStore.removeItem(key);
-				await providers.fileChange({
-					path: key,
-					parent: service,
-					deleteFile: true,
-				});
+			for (let i = 0, len = filesToDelete.length; i < len; i++) {
+				const parent = service;
+				const path = filesToDelete[i];
+				await filesStore.removeItem(path);
+				await providers.fileChange({ path, parent, deleteFile: true });
 			}
 
 			const filesToAdd = filesFromUpdate
 				.filter(file => !filesInStore.includes(file));
-			for (let i = 0; i < filesToAdd.length; i++) {
+			for (let i = 0, len = filesToAdd.length; i < len; i++) {
+				const parent = service;
+				const path = filesToAdd[i];
 				const code = '↵↵'; //TODO: should be default for file type
-				await filesStore.setItem(filesToAdd[i], code);
-				await providers.fileChange({
-					path: filesToAdd[i],
-					code,
-					parent: service,
-				});
+				await providers.fileChange({ path, code, parent });
+				await filesStore.setItem(path, code);
 			}
 
 			const changedFiles = (await changesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 			for(let i = 0, len=changedFiles.length; i < len; i++){
-				const { type, value: code } = await changesStore.getItem(changedFiles[i]);
+				const parent = service;
+				const path = changedFiles[i];
+				const { type, value: code } = await changesStore.getItem(path);
 				if(type !== 'update') continue;
-				await providers.fileChange({ code, parent: service, path });
+				await providers.fileChange({ path, code, parent });
 				await changesStore.removeItem(path);
 				await filesStore.setItem(path, code);
 			}
