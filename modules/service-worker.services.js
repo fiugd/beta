@@ -190,7 +190,7 @@
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
 				const parent = service;
 				const path = filesToAdd[i];
-				const code = '↵↵'; //TODO: should be default for file type
+				const code = '\n'; //TODO: should be default for file type
 				await providers.fileChange({ path, code, parent });
 				await filesStore.setItem(path, code);
 			}
