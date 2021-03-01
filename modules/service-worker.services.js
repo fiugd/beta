@@ -170,16 +170,16 @@
 				body.code,
 				service.name
 			).map(x => x.path);
+			const filesInStore = (await filesStore.keys())
+				.filter(key => !key.startsWith(`./${name}/`));
 
 			const binaryFiles = [];
 
-			const filesToDelete = (await filesStore.keys())
-				.filter(key => !key.startsWith(`./${name}/`))
-				.filter(key => !filesFromUpdate.includes(key));
+			const filesToDelete = filesInStore
+				.filter(file => !filesFromUpdate.includes(file));
 
-			const filesToAdd = filesFromUpdate.filter(file => {
-				return !filesInStore.includes(file)
-			});
+			const filesToAdd = filesFromUpdate
+				.filter(file => !filesInStore.includes(file));
 
 			console.log(JSON.stringify({ filesToAdd, filesToDelete }));
 
