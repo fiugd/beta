@@ -165,103 +165,37 @@
 			}
 			await servicesStore.setItem(id + "", service);
 
-			const storageFiles = await storage.getCodeFromStorageUsingTree(
-				body.tree,
-				filesStore,
-				service.name
-			);
-			const updateAsStore = utils.getCodeAsStorage(
+			const filesFromUpdate = utils.getCodeAsStorage(
 				body.tree,
 				body.code,
 				service.name
-			);
+			).map(x => x.path);
 
-			const allServiceFiles = [];
-			await filesStore.iterate((value, key) => {
-				if (
-					new RegExp(
-						name === "welcome" ? "^./.welcome/" : "^./" + name + "/"
-					).test(key)
-				) {
-					const path = key
-						.replace("./", "/")
-						.replace("/.welcome/", "/welcome/");
-					allServiceFiles.push({ key, value, path });
-				}
-			});
-
-			// TODO: file delete and updates should be registered as changes
-			// ALSO: update is used on add/delete, but /change should probably be used
-			// SO: (add/delete) should exist in /change handler
-			// AND: app should use /change for update and delete
-			// OR: just call add/delete endpoints
-
-			/*
-			const filesToUpdate = [];
-			const filesToDelete = [];
 			const binaryFiles = [];
 
-			// update or create all files in update
-			for (let i = 0; i < updateAsStore.length; i++) {
-				const file = updateAsStore[i];
-				const storageFile = storageFiles.find((x) => x.path === file.key);
-				// if(file.key.includes('/.keep')){
-				//     continue;
-				// }
-				if (file && (!storageFile || !storageFile.code)) {
-					filesToUpdate.push(file);
-					continue;
-				}
-				if (typeof storageFile.code !== "string") {
-					binaryFiles.push(file);
-					continue;
-				}
-				if (file.value && file.value.code === storageFile.code) {
-					continue;
-				}
-				filesToUpdate.push(file);
-			}
+			const filesToDelete = (await filesStore.keys())
+				.filter(key => !key.startsWith(`./${name}/`))
+				.filter(key => !filesFromUpdate.includes(key));
+
+			const filesToAdd = filesFromUpdate.filter(file => {
+				return !filesInStore.includes(file)
+			});
+
+			console.log(JSON.stringify({ filesToAdd, filesToDelete }));
+
+			/*
+
+			// TODO: binary files
 
 			// update files
-			for (let i = 0; i < filesToUpdate.length; i++) {
-				const update = filesToUpdate[i];
-				let code;
-				try {
-					code = update.value.code.code;
-				} catch (e) {}
-				try {
-					code = code || update.value.code;
-				} catch (e) {}
-				try {
-					code = code || "\n\n";
-				} catch (e) {}
-
-				await filesStore.setItem(
-					"." + update.key.replace("/welcome/", "/.welcome/"),
-					code
-				);
+			for (let i = 0; i < filesToAdd.length; i++) {
+				const code = '↵↵'; //TODO: should be default for file type
+				await filesStore.setItem(key, );
 				await providers.fileChange({
-					path: "." + update.key,
+					path: filesToAdd[i],
 					code,
 					parent: service,
 				});
-			}
-
-			// TODO: binary files
-			//console.warn(`may need to update binary files!`);
-			//console.log(binaryFiles.map((x) => x.key));
-
-			// delete any storage files that are not in service
-			for (let i = 0; i < allServiceFiles.length; i++) {
-				const serviceFile = allServiceFiles[i];
-				if (serviceFile.key.includes("/.keep")) {
-					continue;
-				}
-				const found = updateAsStore.find(
-					(x) => x.key === serviceFile.path || "." + x.key === serviceFile.key
-				);
-				if (found) continue;
-				filesToDelete.push(serviceFile.key);
 			}
 
 			// delete files
@@ -277,11 +211,9 @@
 			*/
 
 			// should handle more than just updates
-			const changes = await changesStore.keys();
+			const changedFiles = (await changesStore.keys())
+				.filter(key => !key.startsWith(`./${name}/`));
 			for(let i = 0, len=changes.length; i < len; i++){
-				const path = changes[i];
-				const [parent] = path.split('/').filter(x => x != '.');
-				if(parent !== service.name) continue;
 				const { type, value: code } = await changesStore.getItem(path);
 				if(type !== 'update') continue;
 				await providers.fileChange({ code, parent: service, path });
