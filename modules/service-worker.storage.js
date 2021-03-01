@@ -424,6 +424,16 @@
 				}, null, 2);
 			}
 
+			const addTreeState = (service) => {
+				service.treeState = {
+					expand: (sessionStorage.getItem(`tree-${service.name}-expand`) || '')
+						.split(',').filter(x=>!!x),
+					select: sessionStorage.getItem(`tree-${service.name}-select`),
+					changed: [], //TODO: from changes store
+					new: [], //TODO: from changes store
+				};
+			};
+			
 			// if id, return that service
 			// (currently doesn't do anything since app uses localStorage version of this)
 			await filesStore.setItem("lastService", params.id);
@@ -435,6 +445,7 @@
 					filesStore,
 					foundService.name
 				);
+				addTreeState(foundService);
 				return JSON.stringify({
 					result: [foundService],
 				}, null, 2);
@@ -456,16 +467,7 @@
 				cache: cacheHeader,
 				fetchFileContents,
 			});
-		
-			const addTreeState = (service) => {
-				service.treeState = {
-					expand: (sessionStorage.getItem(`tree-${service.name}-expand`) || '')
-						.split(',').filter(x=>!!x),
-					select: sessionStorage.getItem(`tree-${service.name}-select`),
-					changed: [], //TODO: from changes store
-					new: [], //TODO: from changes store
-				};
-			};
+
 			result.forEach(addTreeState);
 			return JSON.stringify(result, null, 2);
 		};
