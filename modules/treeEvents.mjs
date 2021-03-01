@@ -291,11 +291,11 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	
 	// this should in a listener for 'addFile'
 	if (which === "New File") {
-		return newFile({ parent });
+		return newFile({ parent: data.parent });
 	}
 
 	if (which === "New Folder") {
-		return newFolder({ parent });
+		return newFolder({ parent: data.parent });
 	}
 
 	if (which === "Delete") {
