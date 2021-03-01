@@ -213,7 +213,7 @@
 			// should handle more than just updates
 			const changedFiles = (await changesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
-			for(let i = 0, len=changes.length; i < len; i++){
+			for(let i = 0, len=changedFiles.length; i < len; i++){
 				const { type, value: code } = await changesStore.getItem(path);
 				if(type !== 'update') continue;
 				await providers.fileChange({ code, parent: service, path });

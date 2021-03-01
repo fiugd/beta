@@ -307,7 +307,9 @@ const contextMenuSelectHandler = ({ newFile, newFolder, rename }) => (e) => {
 	}
 
 	if (which === "Delete") {
-		const { name, type, parent } = data;
+		return console.log('File and Folder delete currently messed up!');
+
+		const { name, type, parent="" } = data;
 
 		if (!["folder", "file"].includes(type)) {
 			console.error("cannot delete object of unknown type");
