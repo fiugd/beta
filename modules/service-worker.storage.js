@@ -382,7 +382,9 @@
 		return serviceSearch.stream;
 	};
 
-	const handleServiceRead = (servicesStore, filesStore, fetchFileContents, ui) =>
+	const handleServiceRead = (
+		servicesStore, filesStore, fetchFileContents, ui, changesStore
+	) =>
 		async function (params, event) {
 			//also, what if not "file service"?
 			//also, what if "offline"?
@@ -426,9 +428,8 @@
 
 			const addTreeState = (service) => {
 				service.treeState = {
-					expand: (sessionStorage.getItem(`tree-${service.name}-expand`) || '')
-						.split(',').filter(x=>!!x),
-					select: sessionStorage.getItem(`tree-${service.name}-select`),
+					expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
+					select: await changesStore.getItem(`tree-${service.name}-selected`) || '',
 					changed: [], //TODO: from changes store
 					new: [], //TODO: from changes store
 				};
@@ -487,7 +488,8 @@
 					this.stores.services,
 					this.stores.files,
 					utils.fetchFileContents,
-					ui
+					ui,
+					this.stores.changes
 				).bind(this),
 			};
 		}
