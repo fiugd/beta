@@ -169,9 +169,9 @@
 				body.tree,
 				body.code,
 				service.name
-			).map(x => `./${x.key}`);
+			).map(x => `.${x.key}`);
 			const filesInStore = (await filesStore.keys())
-				.filter(key => key.startsWith(`./${name}/`));
+				.filter(key => key.startsWith(`./${service.name}/`));
 
 			const binaryFiles = [];
 
@@ -212,7 +212,7 @@
 
 			// should handle more than just updates
 			const changedFiles = (await changesStore.keys())
-				.filter(key => key.startsWith(`./${name}/`));
+				.filter(key => key.startsWith(`./${service.name}/`));
 			for(let i = 0, len=changes.length; i < len; i++){
 				const { type, value: code } = await changesStore.getItem(path);
 				if(type !== 'update') continue;
