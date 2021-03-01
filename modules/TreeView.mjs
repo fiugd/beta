@@ -998,7 +998,7 @@ function _TreeView(op) {
 				try {
 					if(!tree) return; //should keep track of this instead of blindly returning
 					if(one === 'Add' && typeof args[2] === 'undefined'){
-						return tree.add(args[0], null, tree.currentFolder);
+						return tree.add(args[0], null, tree.currentFolder || '');
 					}
 					return tree[one.toLowerCase()](...args);
 				} catch(e){
