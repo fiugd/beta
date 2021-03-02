@@ -954,6 +954,10 @@ function _TreeView(op) {
 				font-size: 1.1em;
 				margin-right: 0.4em;
 				margin-left: 0;
+				transform: rotate(0deg);
+			}
+			#tree-view .tree-expando:not(.expanded, .hidden) + .tree-leaf-text:before {
+				transform: rotate(-90deg);
 			}
 			#tree-view .tree-leaf.file div[class*='icon-'] {
 				margin-left: -0.3em;
