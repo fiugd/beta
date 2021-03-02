@@ -165,7 +165,10 @@
 			}
 			await servicesStore.setItem(id + "", service);
 
-			const filesFromUpdate = utils.flattenTree(body.tree).map(x => `.${x.path}`);
+			const filesFromUpdateTree = utils
+				.keepHelper(body.tree, body.code)
+				.map(x => `.${x}`);
+			
 			const filesInStore = (await filesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 
@@ -173,7 +176,7 @@
 			const binaryFiles = [];
 
 			const filesToDelete = filesInStore
-				.filter(file => !filesFromUpdate.includes(file));
+				.filter(file => !filesFromUpdateTree.includes(file));
 			for (let i = 0, len = filesToDelete.length; i < len; i++) {
 				const parent = service;
 				const path = filesToDelete[i];
@@ -181,7 +184,7 @@
 				await providers.fileChange({ path, parent, deleteFile: true });
 			}
 
-			const filesToAdd = filesFromUpdate
+			const filesToAdd = filesFromUpdateTree
 				.filter(file => !filesInStore.includes(file));
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
 				const parent = service;

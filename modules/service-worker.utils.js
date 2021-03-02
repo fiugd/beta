@@ -57,6 +57,23 @@
 		return results;
 	};
 
+	const keepHelper = (tree, code) => {
+		const treeFlat = flattenTree(tree).map(x => x.path.replace('/.keep', ''));
+		const treeFiles = code.map(x => x.path).filter(x => !x.includes('/.keep'));
+		const addKeepFiles = treeFlat.reduce((all, one, i, array) => {
+			const found = array.filter((x) => x !== one && x.startsWith(one));
+			if(found.length === 0 && !treeFiles.includes(one)) all.push(one);
+			return all;
+		}, []);
+		return treeFlat.map(
+			x => addKeepFiles.includes(x)
+				? x + '/.keep'
+				: treeFiles.includes(x)
+					? x
+					: undefined
+		).filter(x => !!x);
+	};
+
 	// this makes a service from UI look like files got from storage
 	function getCodeAsStorage(tree, files, serviceName) {
 		const flat = flattenTree(tree);
@@ -142,6 +159,7 @@
 	module.exports = {
 		fetchJSON,
 		flattenTree,
+		keepHelper,
 		getCodeAsStorage,
 		getMime,
 		initMimeTypes,
