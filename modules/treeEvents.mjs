@@ -11,7 +11,7 @@ const tryFn = (fn, _default) => {
 };
 
 
-let tree, clipboard;
+let tree, clipboard, currentServiceName;
 
 const sortFn = (a, b) => {
 	const afilename =
@@ -244,7 +244,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		},
 		{
 			name: "Paste",
-			hidden: !clipboard && context.type === 'folder'
+			hidden: !clipboard || context.type === 'folder'
 		},
 		{
 			name: "Copy Path",
@@ -257,7 +257,6 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 			name: "Delete",
 		},
 	].filter(x => !x.hidden);
-	// ^^^ this list should be built based on what was clicked
 
 	showMenu()({
 		x: e.clientX,
@@ -302,7 +301,7 @@ const contextMenuSelectHandler = ({
 	}
 
 	if (which === "Copy Path") {
-		const path = new URL(data.path, document.baseURI).href;
+		const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
 		navigator.clipboard
 			.writeText(path)
 			.then((x) => console.log(`Wrote path to clipboard: ${path}`))
@@ -313,7 +312,7 @@ const contextMenuSelectHandler = ({
 	}
 
 	if (which === "Open in New Window") {
-		const path = new URL(data.path, document.baseURI).href;
+		const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
 
 		const shouldExclude = [
 			".svg",
@@ -769,7 +768,8 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 			- requires tree state and service
 			- those are safe to get here
 	*/
-	newTree({ service: result[0], treeState: result[0]?.treeState });
+	currentServiceName = result[0].name;
+	newTree({ service: result[0], treeState: result[0].treeState });
 };
 
 function newAttachListener(
