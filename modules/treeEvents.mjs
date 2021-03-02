@@ -236,9 +236,12 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		},
 		{
 			name: "Open in Terminal",
-			disabled: true
+			hidden: true //TODO: revisit this with terminal revamp
 		},
 		"seperator",
+		{
+			name: "Cut",
+		},
 		{
 			name: "Copy",
 		},
@@ -246,8 +249,12 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 			name: "Paste",
 			hidden: !clipboard || context.type === 'folder'
 		},
+		"seperator",
 		{
 			name: "Copy Path",
+		},
+		{
+			name: "Copy Relative Path",
 		},
 		"seperator",
 		{
@@ -291,17 +298,24 @@ const contextMenuSelectHandler = ({
 	if (which === "Delete") return treeDelete(data.path);
 	if (which === "Rename") return treeRename(data.path);
 
+	if(which === 'Cut'){
+		clipboard = { operation: 'cut', data };
+	}
 	if(which === 'Copy'){
-		clipboard = data;
+		clipboard = { operation: 'copy', data };
 	}
 	if(which === 'Paste'){
-		console.log(`paste should be a move?`)
+		clipboard.operation === 'cut'
+			? console.log(`paste should be a move`)
+			? console.log(`paste should be an add`)
 		console.log({ clipboard, data })
 		clipboard = undefined;
 	}
 
-	if (which === "Copy Path") {
-		const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+	if (["Copy Path", "Copy Relative Path"].includes(which)) {
+		const path = which.includes('Relative')
+			? data.path
+			: new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
 		navigator.clipboard
 			.writeText(path)
 			.then((x) => console.log(`Wrote path to clipboard: ${path}`))
@@ -313,22 +327,24 @@ const contextMenuSelectHandler = ({
 
 	if (which === "Open in New Window") {
 		const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
-
-		const shouldExclude = [
+		const shouldNotPreview = [
 			".svg",
 			".less",
 			".scss",
 			".css",
-			".js",
 			".json",
-			".templates",
+			".txt",
+			".htm",
+			".mjs",
+			".templates/",
 		].find((x) => path.includes(x));
-		// this overrides excludes
-		const shouldInclude = [".jsx"].find((x) => path.includes(x));
-
-		const query =
-			shouldExclude && !shouldInclude ? "/::preview::/" : "/::preview::/";
-
+		// overrides shouldNotPreview
+		const shouldPreview = [
+			".jsx"
+		].find((x) => path.includes(x));
+		const query = shouldNotPreview && !shouldPreview
+			? ""
+			: "/::preview::/";
 		window.open(path + query);
 	}
 
@@ -340,8 +356,6 @@ const contextMenuSelectHandler = ({
 		});
 		document.body.dispatchEvent(event);
 	}
-
-
 };
 
 const searchProject = ({ showSearch, hideSearch }) => {

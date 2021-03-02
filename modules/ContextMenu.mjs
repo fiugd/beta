@@ -527,7 +527,15 @@ function ContextPane() {
 
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.add("open");
-		Menu.style.top = y + "px";
+		
+		const menuGoesOffScreen = y + Menu.clientHeight > (window.innerHeight)
+		if(menuGoesOffScreen){
+			Menu.style.top = undefined;
+			Menu.style.bottom = `calc(100vh - ${y}px)`;
+		} else {
+			Menu.style.top = y + "px";
+			Menu.style.bottom = undefined;
+		}
 		Menu.style.left = x + "px";
 
 		//attach a listener to body that hides menu and detaches itself
