@@ -816,3 +816,8 @@ mod tracker
 ===========
 
 - https://www.youtube.com/watch?v=j5K3D_40VhQ&list=PLZbQ5WGwsCLGOWSS9wC2iPUI-sGcF2Hpy
+
+graphs on the fly
+-----------------
+- https://flowchart.fun/ - I love the way they do it
+- a ton more at this HN discussion - https://news.ycombinator.com/item?id=26303784
