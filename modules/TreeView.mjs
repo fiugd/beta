@@ -965,6 +965,9 @@ function _TreeView(op) {
 			.tree-leaf {
 				user-select: none;
 			}
+			.tree-leaf.hidden-leaf {
+				display: none;
+			}
 			${treeDepthStyles("tree-view", 20, 0.9)}
 		</style>
 	`);
