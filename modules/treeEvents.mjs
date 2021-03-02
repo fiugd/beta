@@ -307,7 +307,7 @@ const contextMenuSelectHandler = ({
 	if(which === 'Paste'){
 		clipboard.operation === 'cut'
 			? console.log(`paste should be a move`)
-			? console.log(`paste should be an add`)
+			: console.log(`paste should be an add`)
 		console.log({ clipboard, data })
 		clipboard = undefined;
 	}
