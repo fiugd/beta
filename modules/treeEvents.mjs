@@ -277,7 +277,10 @@ const contextMenuSelectHandler = ({
 		const parent = data.type === 'file'
 				? data.parent.path
 				: data.path;
-		return treeAdd(data.type, null, parent);
+		const typeToAdd = which === 'New File'
+			: 'file'
+			: 'folder';
+		return treeAdd(typeToAdd, null, parent);
 	}
 	if (which === "Delete") return treeDelete(data.path);
 	if (which === "Rename") return treeRename(data.path);
