@@ -275,10 +275,10 @@ const contextMenuSelectHandler = ({
 	// this should in a listener for 'addFile'
 	if (["New File", "New Folder"].includes(which)) {
 		const parent = data.type === 'file'
-				? data.parent.path
-				: data.path;
+			? data.parent.path
+			: data.path;
 		const typeToAdd = which === 'New File'
-			: 'file'
+			? 'file'
 			: 'folder';
 		return treeAdd(typeToAdd, null, parent);
 	}
