@@ -131,8 +131,8 @@ function addFile(e, currentService, currentFile) {
 		currentServiceCode = JSON.parse(JSON.stringify(currentService.code));
 		currentServiceCode.push({
 			name: file || filename,
-			code: filename,
-			path: filename,
+			code: `/${currentService.name}/${filename}`,
+			path: `/${currentService.name}/${filename}`,
 		});
 
 		if(e.detail.untracked){
