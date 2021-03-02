@@ -225,7 +225,8 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		{
 			name: "New Folder",
 		},
-		"seperator",
+
+		context.type === 'file' ? "seperator" : '',
 		{
 			name: "Open in Preview",
 			hidden: context.type === 'folder'
@@ -238,6 +239,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 			name: "Open in Terminal",
 			hidden: true //TODO: revisit this with terminal revamp
 		},
+
 		"seperator",
 		{
 			name: "Cut",
@@ -263,7 +265,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		{
 			name: "Delete",
 		},
-	].filter(x => !x.hidden);
+	].filter(x => !!x && !x.hidden);
 
 	showMenu()({
 		x: e.clientX,
