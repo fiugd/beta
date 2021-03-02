@@ -336,9 +336,7 @@ const contextMenuSelectHandler = ({
 			".css",
 			".json",
 			".txt",
-			".htm",
 			".mjs",
-			".templates/",
 		].find((x) => path.includes(x));
 		// overrides shouldNotPreview
 		const shouldPreview = [
