@@ -11,7 +11,7 @@ const tryFn = (fn, _default) => {
 };
 
 
-let tree;
+let tree, clipboard;
 
 const sortFn = (a, b) => {
 	const afilename =
@@ -228,16 +228,23 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		"seperator",
 		{
 			name: "Open in Preview",
+			hidden: context.type === 'folder'
 		},
 		{
 			name: "Open in New Window",
+			hidden: context.type === 'folder'
 		},
 		{
 			name: "Open in Terminal",
+			disabled: true
 		},
 		"seperator",
 		{
 			name: "Copy",
+		},
+		{
+			name: "Paste",
+			hidden: !clipboard && context.type === 'folder'
 		},
 		{
 			name: "Copy Path",
@@ -249,7 +256,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		{
 			name: "Delete",
 		},
-	];
+	].filter(x => !x.hidden);
 	// ^^^ this list should be built based on what was clicked
 
 	showMenu()({
@@ -285,21 +292,17 @@ const contextMenuSelectHandler = ({
 	if (which === "Delete") return treeDelete(data.path);
 	if (which === "Rename") return treeRename(data.path);
 
+	if(which === 'Copy'){
+		clipboard = data;
+	}
+	if(which === 'Paste'){
+		console.log(`paste should be a move?`)
+		console.log({ clipboard, data })
+		clipboard = undefined;
+	}
+
 	if (which === "Copy Path") {
-		const state = getState();
-		const { name } = data;
-		let url;
-		try {
-			url = state.paths
-				.find((x) => x.name === name)
-				.path.replace("/welcome/", "/.welcome/")
-				.replace(/^\//, "./");
-		} catch (e) {}
-		if (!url) {
-			console.log("TODO: make Copy Path work with folders!");
-			return;
-		}
-		const path = new URL(url, document.baseURI).href;
+		const path = new URL(data.path, document.baseURI).href;
 		navigator.clipboard
 			.writeText(path)
 			.then((x) => console.log(`Wrote path to clipboard: ${path}`))
@@ -310,17 +313,7 @@ const contextMenuSelectHandler = ({
 	}
 
 	if (which === "Open in New Window") {
-		const state = getState();
-		const { name } = data;
-		let url;
-		try {
-			url = state.paths
-				.find((x) => x.name === name)
-				.path.replace("/welcome/", "/.welcome/")
-				.replace(/^\//, "./");
-		} catch (e) {}
-		if (!url) return;
-		const path = new URL(url, document.baseURI).href;
+		const path = new URL(data.path, document.baseURI).href;
 
 		const shouldExclude = [
 			".svg",
