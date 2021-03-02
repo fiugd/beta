@@ -165,11 +165,7 @@
 			}
 			await servicesStore.setItem(id + "", service);
 
-			const filesFromUpdate = utils.getCodeAsStorage(
-				body.tree,
-				body.code,
-				service.name
-			).map(x => `.${x.key}`);
+			const filesFromUpdate = utils.flattenTree(body.tree).map(x => `.${x.path}`);
 			const filesInStore = (await filesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 
