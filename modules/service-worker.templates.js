@@ -39,12 +39,15 @@
 	class TemplateEngine {
 		templates = [];
 
-		constructor(){
+		constructor({ storage }){
+			this.storage = storage;
+			this.refresh = this.refresh.bind(this);
 			this.NO_PREVIEW = NO_PREVIEW();
 		}
 
 		add(name, template) {
 			const newTemp = {
+				name,
 				extensions: [],
 				body: template,
 				tokens: ["{{template_value}}", "{{markdown}}", "{{template_input}}"],
@@ -115,6 +118,23 @@
 			const foundTemplate = this.getTemplate(filename, contents);
 			if (!foundTemplate) return;
 			return foundTemplate.convert(contents);
+		}
+	
+		async refresh(){
+			const filesStore = this.storage.stores.files;
+			const currentTemplateNames = (await filesStore.keys())
+				.filter(x => x.includes(`/.templates/`));
+			for(var i=0, len=currentTemplateNames.length; i < len; i++){
+				const key = currentTemplateNames[i];
+				const value = await filesStore.getItem(key);
+				const name = key.split("/").pop();
+				const existing = this.templates.find((x) => x.name === name);
+				if(existing) {
+					this.update(name, value);
+					continue;
+				}
+				this.add(name, value);
+			}
 		}
 	}
 

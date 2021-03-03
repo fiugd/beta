@@ -212,21 +212,11 @@
 		});
 	};
 
-	const _expressHandler = ({ TemplateEngine, storage }) => {
+	const _expressHandler = ({ templates, storage }) => {
 		const { getFile } = storage;
-		const templates = new TemplateEngine();
-
-		//TODO: maybe all this template logic should live elsewhere
-		const filesStore = storage.stores.files;
-		const templateSetup = filesStore.iterate((value, key) => {
-			if (!key.includes(`/.templates/`)) return;
-			const name = key.split("/").pop();
-			templates.add(name, value);
-		});
 
 		//bind to base
 		return async (base, msg) => {
-			await templateSetup;
 
 			//handle individual request
 			return async (params, event) => {
@@ -254,12 +244,6 @@
 
 				if (previewMode) {
 					xformedFile = templates.convert(filename, fileJSONString);
-				}
-
-				// NOTE: prefer update template on save, but not available then
-				// this will do for now
-				if (templateUrl) {
-					templates.update(filename, file);
 				}
 
 				if (previewMode && !xformedFile) {
@@ -347,12 +331,12 @@
 	class Router {
 		_handlers=[];
 
-		constructor({ storage, TemplateEngine, swHandlers }){
+		constructor({ storage, templates, swHandlers }){
 			this.swHandlers = swHandlers;
 
 			this.storage = storage;
-			this.TemplateEngine = TemplateEngine;
-			
+			this.templates = templates;
+
 			this.generic = _generic(this);
 			this.get = this.generic("get");
 			this.post = this.generic("post");

@@ -65,7 +65,7 @@
 		});
 	};
 
-	const handleServiceChange = ({ storage, ui, utils }) => async (
+	const handleServiceChange = ({ storage, ui, utils, templates }) => async (
 		params,
 		event
 	) => {
@@ -96,9 +96,10 @@
 				return ui.change({ path, code, command, service });
 
 			const service = await servicesStore.iterate((value, key) => {
-					if (value.name === serviceName) return value;
-					return;
-				});
+				if (value.name === serviceName) return value;
+				return;
+			});
+
 			// github services don't store files with ./ prepended
 			// and also this should be done through provider...
 			// also, would expect to not change the file, instead add a change in changes table
@@ -112,6 +113,10 @@
 			if (service && command === "upsert") {
 				service.tree = utils.treeInsertFile(path, service.tree);
 				await servicesStore.setItem(service.id + "", service);
+			}
+
+			if(path.includes('/.templates/')){
+				await templates.refresh();
 			}
 
 			const metaData = () => ""; //TODO
@@ -219,7 +224,7 @@
 	};
 
 	class ServicesManager {
-		constructor({ app, storage, providers, ui, utils }) {
+		constructor({ app, storage, providers, templates, ui, utils }) {
 			this.app = app;
 			this.storage = storage;
 			this.providers = providers;
