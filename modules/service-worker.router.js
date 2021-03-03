@@ -214,13 +214,12 @@
 
 	const _expressHandler = ({ templates, storage }) => {
 		const { getFile } = storage;
-		const templateSetup = templates.refresh();
 
-		//bind to base
+		//bind to base, ie. when a service is added
 		return async (base, msg) => {
-			await templateSetup;
+			await templates.refresh();
 
-			//handle individual request
+			//handle individual network request
 			return async (params, event) => {
 				const { path, query } = params;
 				const cleanPath = decodeURI(path.replace("/::preview::/", ""));
