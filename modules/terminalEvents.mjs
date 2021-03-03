@@ -12,7 +12,7 @@ if (lsLocked === null) {
 	lsLocked = "false";
 	localStorage.setItem("previewLocked", "false");
 }
-locked = lsLocked !== "true";
+locked = lsLocked === "true";
 
 let currentFile;
 let currentFileName;
