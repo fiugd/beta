@@ -27,7 +27,6 @@ const require = (url) => {
 	ui.init(storage.stores.handlers, storage.stores.changes);
 
 	const templates = new TemplateEngine({ storage });
-	await templates.refresh();
 
 	const app = new Router({ storage, templates, swHandlers });
 	const providers = await new ProviderManager({

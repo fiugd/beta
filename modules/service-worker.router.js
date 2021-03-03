@@ -214,9 +214,11 @@
 
 	const _expressHandler = ({ templates, storage }) => {
 		const { getFile } = storage;
+		const templateSetup = templates.refresh();
 
 		//bind to base
 		return async (base, msg) => {
+			await templateSetup;
 
 			//handle individual request
 			return async (params, event) => {

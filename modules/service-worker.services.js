@@ -228,6 +228,7 @@
 			this.app = app;
 			this.storage = storage;
 			this.providers = providers;
+			this.templates = templates;
 			this.ui = ui;
 			this.utils = utils;
 
