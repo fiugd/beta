@@ -9,10 +9,10 @@ import { getCurrentFolder } from "./state.mjs";
 let locked;
 let lsLocked = localStorage.getItem("previewLocked");
 if (lsLocked === null) {
-	lsLocked = "true";
-	localStorage.setItem("previewLocked", "true");
+	lsLocked = "false";
+	localStorage.setItem("previewLocked", "false");
 }
-locked = lsLocked === "true";
+locked = lsLocked !== "true";
 
 let currentFile;
 let currentFileName;
