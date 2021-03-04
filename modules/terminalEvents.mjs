@@ -27,7 +27,12 @@ const PROMPT = "\x1B[38;5;14m \r∑ \x1B[0m";
 
 const NO_PREVIEW = `
 <!-- NO_PREVIEW -->
-<html>
+<!DOCTYPE html>
+<html class="dark-enabled">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="/colors.css" />
+	</head>
 	<style>
 		.no-preview {
 			position: absolute;
@@ -52,7 +57,7 @@ const NO_PREVIEW = `
 	</style>
 	<body>
 		<pre>
-			<div class="no-preview">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
+			<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
 			</pre>
 	</body>
 </html>
