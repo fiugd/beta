@@ -1,10 +1,13 @@
 (() => {
 
-	const noPreviewBraille = '\u{281D}\u{2815} \u{280F}\u{2817}\u{2811}\u{2827}\u{280A}\u{2811}\u{283A}';
+
 	const NO_PREVIEW = () => {
 		return `
-		<!-- NO_PREVIEW -->
+		<!DOCTYPE html>
 		<html>
+			<head>
+				<meta charset="UTF-8">
+			</head>
 			<style>
 				.no-preview {
 					position: absolute;
@@ -30,7 +33,7 @@
 			</style>
 			<body>
 				<pre>
-					<div class="no-preview" title="No preview!">${noPreviewBraille}</div>
+					<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
 				</pre>
 			</body>
 		</html>
