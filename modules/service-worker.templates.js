@@ -4,7 +4,7 @@
 	const NO_PREVIEW = () => {
 		return `
 		<!DOCTYPE html>
-		<html>
+		<html class="dark-enabled">
 			<head>
 				<meta charset="UTF-8">
 			</head>
@@ -19,18 +19,19 @@
 					justify-content: center;
 					align-items: center;
 					font-size: 1.5em;
-					color: #666;
+					color: var(--main-theme-text-color);
 				}
 				body {
 					margin: 0px;
 					margin-top: 40px;
 					height: calc(100vh - 40px);
 					overflow: hidden;
-					color: #ccc;
-					background: #1d1d1d;
+					color: var(--main-theme-text-color);
+					background: var(--main-theme-color);
 					font-family: sans-serif;
 				}
 			</style>
+			<link rel="stylesheet" href="/colors.css" />
 			<body>
 				<pre>
 					<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
