@@ -52,7 +52,7 @@ const NO_PREVIEW = `
 	</style>
 	<body>
 		<pre>
-			<div class="no-preview">No preview available.</div>
+			<div class="no-preview">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
 			</pre>
 	</body>
 </html>

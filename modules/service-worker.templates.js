@@ -29,7 +29,7 @@
 			</style>
 			<body>
 				<pre>
-					<div class="no-preview">No preview available.</div>
+					<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>
 				</pre>
 			</body>
 		</html>
