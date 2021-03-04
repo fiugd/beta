@@ -2236,7 +2236,7 @@ notes-section.loading:after {
   height: 100% !important;
   margin: 0px !important;
   border: 0 !important;
-  width: 100% !important;
+  width: calc(100% - 18px) !important;
   box-sizing: border-box !important;
   background: var(--main-theme-background-color) !important;
   outline: 1px solid rgb(var(--main-theme-highlight-color)) !important;
