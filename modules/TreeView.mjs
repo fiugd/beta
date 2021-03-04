@@ -943,6 +943,7 @@ function _TreeView(op) {
 			#tree-view {
 				opacity: .7;
 				transition: opacity 25s;
+				padding-top: 0.1em;
 			}
 			#tree-view:hover, #tree-view.nothing-open {
 				opacity: 1;
