@@ -51,15 +51,19 @@ async function Operations() {
 	// APPLICATION STATE BOOTSTRAP
 	const operations = getOperations(
 		() => {},
+		// after call to init?
 		(...args) => {
-			const { result = {} } = args[0] || {};
-			const services = result.result;
+			const service = args[0]?.result?.result[0];
+			if(!service) return console.error('no service!')
+			setCurrentService(service);
 
-			//TODO: should really be firing a service read done event (or similar)
-			const { filename: name } = setCurrentService(services[0]);
+			const selected = service.treeState?.select;
+			if(!selected) return console.error('no tree state!');
+			setCurrentFile(selected);
+
 			const event = new CustomEvent("fileSelect", {
 				bubbles: true,
-				detail: { name },
+				detail: { name: selected },
 			});
 			document.body.dispatchEvent(event);
 		}
