@@ -24,7 +24,7 @@ const treeMemory = (service, tree, action) => (...args) => {
 	const handlers = {
 		expand: async (args) => {
 			const expanded = tree.context(args[0].target).path;
-			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
+			const oldExpanded = (await changesStore.getItem(`tree-${service.name}-expanded`)) || [];
 			const newExpanded = oldExpanded.includes(expanded)
 				? oldExpanded
 				: [...oldExpanded, expanded];
@@ -32,7 +32,7 @@ const treeMemory = (service, tree, action) => (...args) => {
 		},
 		collapse: async (args) => {
 			const collapsed = tree.context(args[0].target).path;
-			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
+			const oldExpanded = (await changesStore.getItem(`tree-${service.name}-expanded`)) || [];
 			const newExpanded = oldExpanded.filter(x => x !== collapsed);
 			await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
 		},
