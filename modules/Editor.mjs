@@ -14,6 +14,9 @@ import {
 import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import "/shared/vendor/localforage.min.js";
 
+// call editor tabs once early so event handlers are attached
+EditorTabs()
+
 const { indentWithTabs, tabSize } = getSettings();
 
 let getMime = () => {};
