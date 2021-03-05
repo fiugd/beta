@@ -727,6 +727,7 @@ class ServiceTree {
 		this.select = this.select.bind(this);
 		this.delete = this.delete.bind(this);
 		this.move = this.move.bind(this);
+		this.change = this.change.bind(this);
 		this.rootNode = document.getElementById(domRoot);
 		this.dragAndDrop = new DragAndDrop(this);
 
@@ -737,6 +738,10 @@ class ServiceTree {
 			this.select(treeState.select);
 			this.currentFile = treeState.select;
 			this.currentFolder = treeState.select.split('/').slice(0,-1).join('/');
+		}
+		
+		if(treeState.changed?.length){
+			treeState.changed.forEach(this.change);
 		}
 		
 		// LISTENING to jstreeview to update ServiceTree
@@ -954,7 +959,7 @@ class ServiceTree {
 		const domNode = this.select(path, 'skipDomUpdate');
 
 		const leaf = new LeafNode(domNode);
-		
+
 		const selectedChild = domNode.querySelector(':scope .selected');
 		const selected = selectedChild
 			? selectedChild && new LeafNode(selectedChild)
@@ -983,6 +988,12 @@ class ServiceTree {
 				node: leaf.parent
 			},
 		};
+	}
+
+	change(path){
+		const domNode = this.select(path, 'skipDomUpdate');
+		const treeLeafContent = domNode.querySelector(':scope > .tree-leaf-content');
+		treeLeafContent.classList.add('changed');
 	}
 	
 }
