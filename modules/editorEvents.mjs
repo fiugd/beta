@@ -135,7 +135,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		);
 		return;
 	}
-	const filePath = `${parent ? parent + '/': ''}${name}`;
+	const filePath = `${parent ? parent + '/': ''}${fileName}`;
 	switchEditor(filePath);
 };
 
