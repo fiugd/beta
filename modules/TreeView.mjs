@@ -23,14 +23,18 @@ const changesStore = localforage.createInstance({
 const treeMemory = (service, tree, action) => (...args) => {
 	const handlers = {
 		expand: async (args) => {
+			const expanded = tree.context(args[0].target).path;
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
-			const expanded = [];
-			await changesStore.setItem(`tree-${service.name}-expanded`, expanded);
+			const newExpanded = oldExpanded.includes(expanded)
+				? oldExpanded
+				: [...oldExpanded, expanded];
+			await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
 		},
 		collapse: async (args) => {
+			const collapsed = tree.context(args[0].target).path;
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
-			const expanded = [];
-			await changesStore.setItem(`tree-${service.name}-expanded`, expanded);
+			const newExpanded = oldExpanded.filter(x => x !== collapsed);
+			await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
 		},
 		select: async (args) => {
 			const selected = tree.context(args[0].target).path;
