@@ -25,16 +25,16 @@ const treeMemory = (service, action) => (...args) => {
 		expand: async (args) => {
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
 			const expanded = [];
-			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
+			await changesStore.setItem(`tree-${service.name}-expanded`, expanded);
 		},
 		collapse: async (args) => {
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
 			const expanded = [];
-			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
+			await changesStore.setItem(`tree-${service.name}-expanded`, expanded);
 		},
 		select: async (args) => {
 			const selected = ''
-			await changesStore.getItem(`tree-${service.name}-selected`, selected);
+			await changesStore.setItem(`tree-${service.name}-selected`, selected);
 		}
 	};
 	if(!handlers[action]) return;
