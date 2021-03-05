@@ -33,7 +33,7 @@ const treeMemory = (service, action) => (...args) => {
 			await changesStore.setItem(`tree-${service.name}-expanded`, expanded);
 		},
 		select: async (args) => {
-			const selected = ''
+			const selected = tree.context(args[0].target).path;
 			await changesStore.setItem(`tree-${service.name}-selected`, selected);
 		}
 	};
@@ -1024,8 +1024,8 @@ function _TreeView(op) {
 		};
 		tree = new TreeView(service, treeRootId, treeState, extensionMapper);
 		tree.on('expand', treeMemory(service, 'expand'));
-		tree.on('collapse', treeMemory(service, 'expand'));
-		tree.on('select', treeMemory(service, 'expand'));
+		tree.on('collapse', treeMemory(service, 'collapse'));
+		tree.on('select', treeMemory(service, 'select'));
 		Object.entries(triggers)
 			.forEach( ([event, handler]) => tree.on(event, handler) )
 		updateTreeMenu({ project: service.name });
