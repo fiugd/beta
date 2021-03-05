@@ -20,7 +20,7 @@ const changesStore = localforage.createInstance({
 	description: "keep track of changes not pushed to provider",
 });
 
-const treeMemory = (service, action) => (...args) => {
+const treeMemory = (service, tree, action) => (...args) => {
 	const handlers = {
 		expand: async (args) => {
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
@@ -1023,9 +1023,10 @@ function _TreeView(op) {
 			return "icon-" + (override[extension] || ext[extension] || "default");
 		};
 		tree = new TreeView(service, treeRootId, treeState, extensionMapper);
-		tree.on('expand', treeMemory(service, 'expand'));
-		tree.on('collapse', treeMemory(service, 'collapse'));
-		tree.on('select', treeMemory(service, 'select'));
+		const memoryHandler = (action) => treeMemory(service, tree, action);
+		tree.on('expand', memoryHandler('expand'));
+		tree.on('collapse', memoryHandler('collapse'));
+		tree.on('select', memoryHandler('select'));
 		Object.entries(triggers)
 			.forEach( ([event, handler]) => tree.on(event, handler) )
 		updateTreeMenu({ project: service.name });
