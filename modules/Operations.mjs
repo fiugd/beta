@@ -7,6 +7,7 @@ import {
 	getCurrentFile,
 	getCurrentService,
 	getCurrentFolder,
+	setCurrentFile,
 	setCurrentFolder,
 	getState,
 	resetState,
@@ -59,7 +60,7 @@ async function Operations() {
 
 			const selected = service.treeState?.select;
 			if(!selected) return console.error('no tree state!');
-			setCurrentFile(selected);
+			setCurrentFile({ filePath: selected });
 
 			const event = new CustomEvent("fileSelect", {
 				bubbles: true,
