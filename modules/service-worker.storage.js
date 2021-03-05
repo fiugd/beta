@@ -429,7 +429,7 @@
 			const addTreeState = async (service) => {
 				const changed = (await changesStore.keys())
 					.filter(x => x.startsWith(`./${service.name}`))
-					.map(x => x.split(service.name)[1]);
+					.map(x => x.split(service.name+'/')[1]);
 				service.treeState = {
 					expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
 					select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
