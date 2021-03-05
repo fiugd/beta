@@ -2202,6 +2202,10 @@ notes-section.loading:after {
   transform: translateY(2px);
 }
 
+.tree-leaf-content {
+  position: relative;
+}
+
 .tree-leaf-content.changed:not(.selected) {
   color: #e2c08d;
 }
