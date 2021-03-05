@@ -3,8 +3,43 @@ import TreeView from "/shared/modules/TreeView.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
 import { attachListener, connectTrigger } from "./treeEvents.mjs";
+import "/shared/vendor/localforage.min.js";
 
 let treeView, opener, tree, triggers;
+
+const driver = [
+	localforage.INDEXEDDB,
+	localforage.WEBSQL,
+	localforage.LOCALSTORAGE,
+];
+const changesStore = localforage.createInstance({
+	driver,
+	name: "service-worker",
+	version: 1.0,
+	storeName: "changes",
+	description: "keep track of changes not pushed to provider",
+});
+
+const treeMemory = (service, action) => (...args) => {
+	const handlers = {
+		expand: async (args) => {
+			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
+			const expanded = [];
+			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
+		},
+		collapse: (args) => {
+			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
+			const expanded = [];
+			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
+		},
+		select: (args) => {
+			const selected = ''
+			await changesStore.getItem(`tree-${service.name}-selected`, selected);
+		}
+	};
+	if(!handlers[action]) return;
+	handlers[action](args);
+};
 
 function htmlToElement(html) {
 	var template = document.createElement("template");
@@ -988,6 +1023,9 @@ function _TreeView(op) {
 			return "icon-" + (override[extension] || ext[extension] || "default");
 		};
 		tree = new TreeView(service, treeRootId, treeState, extensionMapper);
+		tree.on('expand', treeMemory(service, 'expand'));
+		tree.on('collapse', treeMemory(service, 'expand'));
+		tree.on('select', treeMemory(service, 'expand'));
 		Object.entries(triggers)
 			.forEach( ([event, handler]) => tree.on(event, handler) )
 		updateTreeMenu({ project: service.name });
