@@ -2237,7 +2237,7 @@ notes-section.loading:after {
 
 /* adding,renaming files and folders */
 .tree-leaf .tree-leaf-content .tree-leaf-text input {
-  height: 100% !important;
+  height: 97% !important;
   margin: 0px !important;
   border: 0 !important;
   width: calc(100% - 18px) !important;
