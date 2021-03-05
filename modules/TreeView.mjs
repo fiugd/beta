@@ -261,7 +261,7 @@ const TreeMenu = () => {
 									<a class="action-label icon explorer-action collapse-explorer" role="button" title="Collapse Folders in Explorer">
 									</a>
 								</li>
-								<li class="action-item">
+								<li class="action-item hidden">
 									<div class="monaco-dropdown">
 										<div class="dropdown-label">
 											<a class="action-label codicon codicon-toolbar-more" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" title="Views and More Actions..."></a>
