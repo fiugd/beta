@@ -27,12 +27,12 @@ const treeMemory = (service, action) => (...args) => {
 			const expanded = [];
 			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
 		},
-		collapse: (args) => {
+		collapse: async (args) => {
 			const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`);
 			const expanded = [];
 			await changesStore.getItem(`tree-${service.name}-expanded`, expanded);
 		},
-		select: (args) => {
+		select: async (args) => {
 			const selected = ''
 			await changesStore.getItem(`tree-${service.name}-selected`, selected);
 		}
