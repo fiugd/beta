@@ -881,6 +881,7 @@ class ServiceTree {
 			? newTreeNode.container
 			: new TreeNode({ name, type, id });
 		const targetNode = this.select(target, 'skipDomUpdate');
+		const targetExpando = targetNode.querySelector(':scope > .tree-expando');
 		const targetChildLeaves = targetNode.querySelector(':scope > .tree-child-leaves');
 		this.insertDomNode(targetChildLeaves || targetNode, domNode);
 
@@ -890,8 +891,12 @@ class ServiceTree {
 			const leaf = new LeafNode(domNode);
 			this.emit(type+'Add', { source: leaf.path });
 		};
-		
+
 		if(!newTreeNode) return nodeAddDone();
+
+		targetExpando && targetExpando.classList.remove('closed');
+		targetExpando && targetExpando.classList.add("open", "expanded");
+		targetChildLeaves && targetChildLeaves.classList.remove('hidden');
 
 		const doneCreating = (err, data) => {
 			if(err) {
