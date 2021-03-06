@@ -128,8 +128,6 @@ const noFrontSlash = (path) => {
 };
 
 
-
-
 const fileSelectHandler = (treeSelect) => (e) => {
 	if(e?.detail?.source === 'Explorer') return;
 
@@ -202,9 +200,9 @@ const folderSelectHandler = (e) => {
 	});
 };
 
-const fileChangeHandler = (updateTree) => (event) => {
-	const { name, id, file } = event.detail;
-	updateTree("dirty", { name, id, file });
+const fileChangeHandler = (treeChange) => (event) => {
+	const { filePath } = event.detail;
+	treeChange(filePath);
 };
 
 const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
@@ -792,7 +790,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 function newAttachListener(
 	UpdateTree,
 	{
-		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext,
+		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext, treeChange,
 		showSearch, updateTreeMenu, showServiceChooser
 	}
 ){
@@ -852,7 +850,7 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "fileChange",
-		listener: fileChangeHandler(updateTree),
+		listener: fileChangeHandler(treeChange),
 	});
 	attach({
 		name: "Explorer",

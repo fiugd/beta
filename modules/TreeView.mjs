@@ -1043,7 +1043,7 @@ function _TreeView(op) {
 	};
 
 	const treeMethods = [
-		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context'
+		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change'
 	].reduce((all, one) => {
 			all['tree'+one] = (...args) => {
 				try {
