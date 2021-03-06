@@ -121,21 +121,22 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		}
 	}
 
+	const fileName = savedFileName || next || name;
+	const filePath = `${parent ? parent + '/': ''}${fileName}`;
+
 	if (!savedFileName) {
-		sessionStorage.setItem("editorFile", next || name);
+		sessionStorage.setItem("editorFile", filePath);
 	}
 
-	const fileName = savedFileName || next || name;
 	if (name.includes("system::") || fileName.includes("systemDoc::")) {
-		switchEditor(
-			(savedFileName || name)
+		switchEditor(filePath
 				.replace("system::", "")
 				.replace("systemDoc::", ""),
 			"systemDoc"
 		);
 		return;
 	}
-	const filePath = `${parent ? parent + '/': ''}${fileName}`;
+
 	switchEditor(filePath);
 };
 
