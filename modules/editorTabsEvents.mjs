@@ -157,7 +157,7 @@ const fileSelectHandler = ({
 	const firstLoad = typeof tabs === 'undefined';
 	if(firstLoad){
 		tabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
-		tabs.forEach(createTab);
+		initTabs(tabs);
 		return;
 	}
 
@@ -243,8 +243,8 @@ const operationDoneHandler = ({
 	if (op !== "read" || !id) {
 		return;
 	}
-	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
-	tabs = storedTabs;
+	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || 'null');
+	tabs = storedTabs || undefined;
 	initTabs(tabs);
 };
 
