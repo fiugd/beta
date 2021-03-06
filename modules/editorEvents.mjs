@@ -115,7 +115,11 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 			switchEditor(null, "nothingOpen");
 			return;
 		}
-		if (savedFileName && savedFileName.includes("system::")) {
+		if (
+			savedFileName &&
+			savedFileName.includes("system::") &&
+			savedFileName.includes("systemDoc::")
+		){
 			switchEditor(savedFileName.replace("system::", ""), "systemDoc");
 			return;
 		}
