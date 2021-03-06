@@ -67,7 +67,8 @@ async function Operations() {
 				? selected.split('/').pop()
 				: selected;
 			const parent = selected.includes('/')
-				? selected.replace(`/${name}`, '');
+				? selected.replace(`/${name}`, '')
+				: '';
 			
 			const event = new CustomEvent("fileSelect", {
 				bubbles: true,
