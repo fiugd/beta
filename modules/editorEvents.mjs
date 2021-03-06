@@ -146,7 +146,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		sessionStorage.setItem("editorFile", filePath);
 	}
 
-	if (name.includes("system::") || fileName.includes("systemDoc::")) {
+	if (name.includes("system::") || filePath.includes("systemDoc::")) {
 		switchEditor(filePath
 				.replace("system::", "")
 				.replace("systemDoc::", ""),
