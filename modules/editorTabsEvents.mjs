@@ -154,13 +154,6 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const firstLoad = typeof tabs === 'undefined';
-	if(firstLoad){
-		tabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
-		initTabs(tabs);
-		return;
-	}
-
 	const { name, changed } = event.detail;
 	let systemDocsName;
 	if (name.includes("system::")) {
@@ -243,8 +236,8 @@ const operationDoneHandler = ({
 	if (op !== "read" || !id) {
 		return;
 	}
-	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || 'null');
-	tabs = storedTabs || undefined;
+	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
+	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
 
