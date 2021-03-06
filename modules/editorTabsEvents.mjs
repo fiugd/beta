@@ -64,6 +64,7 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	let name;
 	try {
 		name = event.target.dataset.name.trim();
+		parent = (event.target.dataset.parent||'').trim();
 	} catch (e) {
 		console.log("error trying to handle close tab click");
 		console.log(e);
@@ -71,8 +72,8 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	if (!name) {
 		return;
 	}
-	const closedTab = tabs.find((x) => x.name === name);
-	const nextTabs = tabs.filter((x) => x.name !== name);
+	const closedTab = tabs.find((x) => x.name === name && (x.parent||'') === parent);
+	const nextTabs = tabs.filter((x) => x.name !== name && (x.parent||'') !== parent);
 	const nextTab = closedTab.active
 		? (nextTabs[nextTabs.length - 1] || {})
 		: (tabs.filter((x) => x.active) || [{}])[0];
@@ -80,13 +81,15 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	fileCloseTrigger({
 		detail: {
 			name: closedTab.name,
-			next: nextTab.name
+			path: closedFile.parent,
+			next: nextTab.name,
+			nextPath: nextTab.parent,
 		},
 	});
 }
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
-	const { name, next } = event.detail;
+	const { name, path, next, nextPath } = event.detail;
 
 	const found = tabs.find((x) => x.name === name);
 	tabs = tabs.filter((x) => x.name !== name);
@@ -98,7 +101,7 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 		return;
 	}
 	const nextTab = tabs.find(
-		(x) => x.name === next || x.systemDocsName === next
+		(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
 	);
 	if (!nextTab) {
 		return;
@@ -158,7 +161,7 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const { name, changed } = event.detail;
+	const { name, changed, parent } = event.detail;
 	if(name.includes('system::')){
 		tabs = tabs || [];
 	}
@@ -183,6 +186,7 @@ const fileSelectHandler = ({
 
 	createTab({
 		name,
+		parent,
 		active: true,
 		id,
 		changed,
@@ -197,6 +201,7 @@ const fileSelectHandler = ({
 	tabsToUpdate.map(updateTab);
 	tabs.push({
 		name,
+		parent,
 		systemDocsName,
 		active: true,
 		id,

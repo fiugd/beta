@@ -169,6 +169,7 @@ const createTab = (parent, init) => (tabDef) => {
 				<li class="action-item" role="presentation">
 					<a class="action-label icon close-editor-action"
 						data-name="${tabDef.name}"
+						data-parent="${tabDef.parent}"
 						role="button"
 						title="Close"
 					>
