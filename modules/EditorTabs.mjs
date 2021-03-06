@@ -162,7 +162,7 @@ const createTab = (parent, init) => (tabDef) => {
   tab.innerHTML = `
 		<span style="pointer-events: none;"
 			class="${systemClass ? systemClass + " " : ""}icon-${systemType || fileType}"
-		>${systemName || tabDef.name}</span>
+		>${systemName || tabDef.name.split('/').pop()}</span>
 		<div class="tab-close">
 		<div class="monaco-action-bar animated">
 			<ul class="actions-container" role="toolbar" aria-label="Tab actions">
