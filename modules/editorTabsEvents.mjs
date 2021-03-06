@@ -242,7 +242,10 @@ const operationDoneHandler = ({
 		return;
 	}
 	service = result[0];
-	const storedTabs = JSON.parse(sessionStorage.getItem("tabs/"+(service?.name||'')) || '[]');
+	const tabsStorageKey = service?.treeState?.select
+		? "tabs/"+(service?.name||'')
+		: "tabs/";
+	const storedTabs = JSON.parse(sessionStorage.getItem(tabsStorageKey) || '[]');
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
