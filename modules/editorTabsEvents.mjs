@@ -27,7 +27,7 @@ function copyPath(data, relative) {
 }
 
 function clearLastTab({ tabs, removeTab }) {
-	const lastTab = tabs[tabs.length - 1];
+	if(!tabs.length) return;
 	if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
 		return;
 	tabs = tabs.filter((t) => t.id !== lastTab.id);
