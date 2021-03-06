@@ -59,8 +59,8 @@ async function Operations() {
 			setCurrentService(service);
 
 			const selected = service.treeState?.select;
-			if(!selected) return console.error('no tree state!');
-			setCurrentFile({ filePath: selected });
+			if(!selected) console.error('no tree state!');
+			setCurrentFile({ filePath: selected || "" });
 
 			const event = new CustomEvent("fileSelect", {
 				bubbles: true,
