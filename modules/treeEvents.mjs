@@ -250,7 +250,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		},
 		{
 			name: "Paste",
-			hidden: !clipboard || context.type === 'folder'
+			hidden: !clipboard || context.type === 'file'
 		},
 		"seperator",
 		{
