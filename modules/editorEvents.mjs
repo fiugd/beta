@@ -133,7 +133,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	}
 
 
-	const nameWithPathIfPresent = (_path, _name) => path
+	const nameWithPathIfPresent = (_path, _name) => _path
 		? noFrontSlash(`${_path}/${_name}`)
 		: noFrontSlash(_name);
 	const fileNameWithPath = next

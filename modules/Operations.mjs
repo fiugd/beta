@@ -52,7 +52,8 @@ async function Operations() {
 	// APPLICATION STATE BOOTSTRAP
 	const operations = getOperations(
 		() => {},
-		// after call to init?
+		// occurs after call to init?
+		// TODO: would be nice to do away with this
 		(...args) => {
 			const service = args[0]?.result?.result[0];
 			if(!service) return console.error('no service!')
@@ -62,9 +63,15 @@ async function Operations() {
 			if(!selected) console.error('no tree state!');
 			setCurrentFile({ filePath: selected || "" });
 
+			const name = selected.includes('/')
+				? selected.split('/').pop()
+				: selected;
+			const parent = selected.includes('/')
+				? selected.replace(`/${name}`, '');
+			
 			const event = new CustomEvent("fileSelect", {
 				bubbles: true,
-				detail: { name: selected },
+				detail: { name, parent },
 			});
 			document.body.dispatchEvent(event);
 		}
