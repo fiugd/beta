@@ -211,6 +211,9 @@
 				await filesStore.setItem(path, code);
 			}
 
+			body?.treeState?.changed = [];
+			body?.treeState?.new = [];
+
 			return stringify({ result: [body] });
 		} catch (error) {
 			console.error(error);

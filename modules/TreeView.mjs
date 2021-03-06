@@ -1043,13 +1043,16 @@ function _TreeView(op) {
 	};
 
 	const treeMethods = [
-		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change'
+		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
 	].reduce((all, one) => {
 			all['tree'+one] = (...args) => {
 				try {
 					if(!tree) return; //should keep track of this instead of blindly returning
 					if(one === 'Add' && typeof args[2] === 'undefined'){
 						return tree.add(args[0], null, tree.currentFolder || '');
+					}
+					if(one === 'ClearChanged'){
+						return tree.clearChanged();
 					}
 					return tree[one.toLowerCase()](...args);
 				} catch(e){

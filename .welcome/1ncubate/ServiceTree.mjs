@@ -709,7 +709,7 @@ class ServiceTree {
 			const key = exposedAPI[i];
 			this[key] = this.jstreeview[key].bind(this.jstreeview);
 		}
-		
+
 		const jsTreeViewEvents = ['expand', 'expandAll', 'collapse', 'collapseAll', 'select'];
 		this.jstreeviewOn = this.on;
 		this.on = (name, callback, scope) => {
@@ -728,6 +728,7 @@ class ServiceTree {
 		this.delete = this.delete.bind(this);
 		this.move = this.move.bind(this);
 		this.change = this.change.bind(this);
+		this.clearChanged = this.clearChanged.bind(this);
 		this.rootNode = document.getElementById(domRoot);
 		this.dragAndDrop = new DragAndDrop(this);
 
@@ -881,7 +882,6 @@ class ServiceTree {
 			? newTreeNode.container
 			: new TreeNode({ name, type, id });
 		const targetNode = this.select(target, 'skipDomUpdate');
-		const targetExpando = targetNode.querySelector(':scope > .tree-expando');
 		const targetChildLeaves = targetNode.querySelector(':scope > .tree-child-leaves');
 		this.insertDomNode(targetChildLeaves || targetNode, domNode);
 
@@ -891,12 +891,8 @@ class ServiceTree {
 			const leaf = new LeafNode(domNode);
 			this.emit(type+'Add', { source: leaf.path });
 		};
-
+		
 		if(!newTreeNode) return nodeAddDone();
-
-		targetExpando && targetExpando.classList.remove('closed');
-		targetExpando && targetExpando.classList.add("open", "expanded");
-		targetChildLeaves && targetChildLeaves.classList.remove('hidden');
 
 		const doneCreating = (err, data) => {
 			if(err) {
@@ -996,11 +992,21 @@ class ServiceTree {
 	}
 
 	change(path){
+		this.changed = this.changed || [];
+		this.changed.push(path);
 		const domNode = this.select(path, 'skipDomUpdate');
 		const treeLeafContent = domNode.querySelector(':scope > .tree-leaf-content');
 		treeLeafContent.classList.add('changed');
 	}
-	
+
+	clearChanged(){
+		this.changed.forEach(path => {
+			const domNode = this.select(path, 'skipDomUpdate');
+			const treeLeafContent = domNode.querySelector(':scope > .tree-leaf-content');
+			treeLeafContent.classList.remove('changed');
+		});
+	}
+
 }
 
 export default ServiceTree;

@@ -790,7 +790,8 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 function newAttachListener(
 	UpdateTree,
 	{
-		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext, treeChange,
+		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext,
+		treeChange, treeClearChanged,
 		showSearch, updateTreeMenu, showServiceChooser
 	}
 ){
@@ -830,7 +831,7 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "operationDone",
-		listener: OperationDoneListener(UpdateTree),
+		listener: OperationDoneListener(UpdateTree, treeClearChanged),
 	});
 	attach({
 		name: "Explorer",
