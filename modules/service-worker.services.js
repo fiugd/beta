@@ -211,10 +211,12 @@
 				await filesStore.setItem(path, code);
 			}
 
-			body.treeState = body.treeState || {};
-			body.treeState.changed = [];
-			body.treeState.new = [];
-
+			body.treeState = {
+				expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
+				select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
+				changed: [],
+				new: []
+			};
 			return stringify({ result: [body] });
 		} catch (error) {
 			console.error(error);
