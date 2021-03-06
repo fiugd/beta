@@ -133,10 +133,13 @@ const noFrontSlash = (path) => {
 const fileSelectHandler = (treeSelect) => (e) => {
 	if(e?.detail?.source === 'Explorer') return;
 
-	const { name, next, path } = e.detail;
-	const fileNameWithPath = path
-		? noFrontSlash(`${path}/${name}`)
-		: name;
+	const { name, path, next, nextPath } = e.detail;
+	const nameWithPathIfPresent = (_path, _name) => path
+		? noFrontSlash(`${_path}/${_name}`)
+		: noFrontSlash(_name);
+	const fileNameWithPath = next
+		? nameWithPathIfPresent(nextPath, next)
+		: nameWithPathIfPresent(path, name);
 	treeSelect(fileNameWithPath);
 
 	/* TODO: add this to TreeView module

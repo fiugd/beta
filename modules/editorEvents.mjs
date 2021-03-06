@@ -6,6 +6,13 @@ import {
 	getCurrentService,
 } from "./state.mjs";
 
+const noFrontSlash = (path) => {
+	if(!path) return path;
+	if(!path.includes('/')) return path;
+	if(path[0] === '/') return path.slice(1);
+	return path;
+};
+
 const ChangeHandler = (doc) => {
 	const { code, name, id, filename } = doc;
 	// TODO: if handler already exists, return it
@@ -105,7 +112,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
-	const { name, next, parent } = event.detail;
+	const { name, path, next, nextPath, parent } = event.detail;
 	let savedFileName;
 
 	if (firstLoad) {
@@ -125,8 +132,15 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		}
 	}
 
-	const fileName = savedFileName || next || name;
-	const filePath = `${parent ? parent + '/': ''}${fileName}`;
+
+	const nameWithPathIfPresent = (_path, _name) => path
+		? noFrontSlash(`${_path}/${_name}`)
+		: noFrontSlash(_name);
+	const fileNameWithPath = next
+		? nameWithPathIfPresent(nextPath, next)
+		: nameWithPathIfPresent(parent || path, name);
+
+	const filePath = savedFileName || fileNameWithPath;
 
 	if (!savedFileName) {
 		sessionStorage.setItem("editorFile", filePath);

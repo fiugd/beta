@@ -73,12 +73,15 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	}
 	const closedTab = tabs.find((x) => x.name === name);
 	const nextTabs = tabs.filter((x) => x.name !== name);
-	const next = closedTab.active
-		? (nextTabs[nextTabs.length - 1] || {}).name
-		: (tabs.filter((x) => x.active) || [{}])[0].name;
+	const nextTab = closedTab.active
+		? (nextTabs[nextTabs.length - 1] || {})
+		: (tabs.filter((x) => x.active) || [{}])[0];
 
 	fileCloseTrigger({
-		detail: { name, next },
+		detail: {
+			name: closedTab.name,
+			next: nextTab.name
+		},
 	});
 }
 
