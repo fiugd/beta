@@ -226,6 +226,7 @@ const fileChangeHandler = ({
 	}
 	foundTab.changed = true;
 	[foundTab].map(updateTab);
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const operationDoneHandler = ({
