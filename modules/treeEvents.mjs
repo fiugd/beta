@@ -134,7 +134,7 @@ const fileSelectHandler = (treeSelect) => (e) => {
 	if(e?.detail?.source === 'Explorer') return;
 
 	const { name, path, next, nextPath } = e.detail;
-	const nameWithPathIfPresent = (_path, _name) => path
+	const nameWithPathIfPresent = (_path, _name) => _path
 		? noFrontSlash(`${_path}/${_name}`)
 		: noFrontSlash(_name);
 	const fileNameWithPath = next
