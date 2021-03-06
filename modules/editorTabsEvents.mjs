@@ -243,24 +243,8 @@ const operationDoneHandler = ({
 	if (op !== "read" || !id) {
 		return;
 	}
-	const storedTabs = (() => {
-		try {
-			return JSON.parse(sessionStorage.getItem("tabs"));
-		} catch (e) {}
-	})();
-	if (storedTabs) {
-		tabs = storedTabs;
-	} else {
-		const defaultFile = getDefaultFile(result[0]);
-		tabs = [
-			{
-				name: defaultFile,
-				active: true,
-				id: "TAB" + Math.random().toString().replace("0.", ""),
-			},
-		];
-	}
-
+	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
+	tabs = storedTabs;
 	initTabs(tabs);
 };
 
