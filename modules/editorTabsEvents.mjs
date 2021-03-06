@@ -1,6 +1,6 @@
 import { attach, attachTrigger } from "./Listeners.mjs";
 import { getDefaultFile, getState } from "./state.mjs";
-let tabs = [];
+let tabs;
 
 function copyPath(data, relative) {
 	const state = getState();
@@ -154,12 +154,12 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const firstLoad = tabs.length < 1;
-	// TODO: need a finer defintion of first load
-	// because all tabs may be exited later in usage
-	// if(firstLoad){
-	// 	return;
-	// }
+	const firstLoad = typeof tabs === 'undefined';
+	if(firstLoad){
+		tabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
+		tabs.forEach(createTab);
+		return;
+	}
 
 	const { name, changed } = event.detail;
 	let systemDocsName;
