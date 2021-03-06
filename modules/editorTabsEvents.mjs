@@ -1,6 +1,6 @@
 import { attach, attachTrigger } from "./Listeners.mjs";
 import { getDefaultFile, getState } from "./state.mjs";
-let tabs;
+let tabs, service;
 
 function copyPath(data, relative) {
 	const state = getState();
@@ -87,7 +87,7 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 
 	const found = tabs.find((x) => x.name === name);
 	tabs = tabs.filter((x) => x.name !== name);
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
 	removeTab(found);
 
@@ -101,7 +101,7 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 		return;
 	}
 	nextTab.active = true;
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
 	updateTab(nextTab);
 };
@@ -174,7 +174,7 @@ const fileSelectHandler = ({
 	let { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
-		sessionStorage.setItem("tabs", JSON.stringify(tabs));
+		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
@@ -199,7 +199,7 @@ const fileSelectHandler = ({
 		id,
 		changed,
 	});
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const fileChangeHandler = ({
@@ -241,7 +241,8 @@ const operationDoneHandler = ({
 	if (op !== "read" || !id) {
 		return;
 	}
-	const storedTabs = JSON.parse(sessionStorage.getItem("tabs") || '[]');
+	service = result[0];
+	const storedTabs = JSON.parse(sessionStorage.getItem("tabs/"+(service?.name||'')) || '[]');
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
