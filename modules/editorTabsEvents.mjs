@@ -81,7 +81,7 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	fileCloseTrigger({
 		detail: {
 			name: closedTab.name,
-			path: closedFile.parent,
+			path: closedTab.parent,
 			next: nextTab.name,
 			nextPath: nextTab.parent,
 		},
