@@ -211,8 +211,9 @@
 				await filesStore.setItem(path, code);
 			}
 
-			body?.treeState?.changed = [];
-			body?.treeState?.new = [];
+			body.treeState = body.treeState || {};
+			body.treeState.changed = [];
+			body.treeState.new = [];
 
 			return stringify({ result: [body] });
 		} catch (error) {
