@@ -235,6 +235,7 @@ const operationDoneHandler = ({
 			delete t.changed;
 		});
 		tabs.map(updateTab);
+		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
