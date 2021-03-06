@@ -182,9 +182,9 @@ const fileSelectHandler = ({
 	});
 	const shouldClearTab = !name.includes("Untitled-");
 
-	const { cleared, tabs: newTabs } = firstLoad
-		? {}
-		: (shouldClearTab && clearLastTab({ tabs, removeTab })) || {};
+	const { cleared, tabs: newTabs } = (shouldClearTab && clearLastTab({
+		tabs, removeTab 
+	})) || {};
 	if (newTabs) tabs = newTabs;
 	if (cleared) tabsToUpdate = tabsToUpdate.filter((t) => t.id !== cleared.id);
 	tabsToUpdate.map(updateTab);
