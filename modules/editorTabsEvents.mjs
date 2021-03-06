@@ -155,8 +155,11 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	tabs = tabs || [];
 	const { name, changed } = event.detail;
+	if(name.includes('system::')){
+		tabs = tabs || [];
+	}
+	if(!tabs) return;
 	let systemDocsName;
 	if (name.includes("system::")) {
 		systemDocsName = {
