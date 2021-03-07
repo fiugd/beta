@@ -319,7 +319,6 @@ function addFolder(e, currentService, currentFile){
 }
 
 function renameFolder(e, currentService, currentFile){
-	//console.log('renameFolder');
 	const { oldName, newName } = e.detail;
 
 	//TODO: is either current selected folder or parent of currentFile

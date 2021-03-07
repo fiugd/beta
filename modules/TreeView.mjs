@@ -1110,8 +1110,11 @@ function _TreeView(op) {
 			const handlerMessage = {
 				detail: {
 					name,
+					oldName: source,
+					newName: target,
 					src: source,
-					tgt: target, parent,
+					tgt: target,
+					parent,
 					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,
