@@ -37,6 +37,8 @@
 		- file drop (to upload)
 		- webcam
 		- hex edit
+		
+#### [2020-10-20 - bartok | fiug 2020-10-21 video](https://www.youtube.com/watch?v=UVkLaif92Xg)
 
 #### 2020-10-05 | 2020-10-15 -
 	- intial effort of tracking language/template progress (Oct 6)

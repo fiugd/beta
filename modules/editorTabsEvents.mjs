@@ -72,8 +72,8 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	if (!name) {
 		return;
 	}
-	const closedTab = tabs.find((x) => x.name === name && (x.parent||'') === parent);
-	const nextTabs = tabs.filter((x) => x.name !== name && (x.parent||'') !== parent);
+	const closedTab = tabs.find((x) => `${x.parent}/${x.name}` === `${name}/${parent}`);
+	const nextTabs = tabs.filter((x) => `${x.parent}/${x.name}` !== `${name}/${parent}`);
 	const nextTab = closedTab.active
 		? (nextTabs[nextTabs.length - 1] || {})
 		: (tabs.filter((x) => x.active) || [{}])[0];
