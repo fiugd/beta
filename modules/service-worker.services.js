@@ -145,8 +145,8 @@
 			const { name, operation } = body;
 
 			if(
-				operation.includes('rename') ||
-				operation.includes('move')
+				operation?.name?.includes('rename') ||
+				operation?.name?.includes('move')
 			){
 				const service = await servicesStore.getItem(id + "");
 
