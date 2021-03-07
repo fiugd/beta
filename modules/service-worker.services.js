@@ -157,6 +157,10 @@
 					const key = filesFromService[i];
 					body.code.push({
 						name: key.split('/').pop(),
+						code: key.replace(
+							`./${service.name}/${operation.source}`,
+							`/${service.name}/${operation.target}`
+						),
 						update: await filesStore.getItem(key),
 						path: key.replace(
 							`./${service.name}/${operation.source}`,
