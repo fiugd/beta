@@ -142,7 +142,43 @@
 		try {
 			const { id } = params;
 			const body = await event.request.json();
-			const { name } = body;
+			const { name, operation } = body;
+
+			if(
+				operation.includes('rename') ||
+				operation.includes('move')
+			){
+				const service = await servicesStore.getItem(id + "");
+
+				const filesFromService = (await filesStore.keys())
+					.filter(key => key.startsWith(`./${service.name}/`));
+				body.code = [];
+				for(var i=0, len=filesFromService.length; i < len; i++){
+					const key = filesFromService[i];
+					body.code.push({
+						name: key.split('/').pop(),
+						update: await filesStore.getItem(key),
+						path: key.replace(
+							`./${service.name}/${operation.source}`,
+							`/${service.name}/${operation.target}`
+						)
+					});
+				}
+				body.tree = service.tree;
+				const getPosInTree = (path:any, tree:any) => ({
+					parent: path.split('/')
+						.slice(0, -1)
+						.reduce((all:any, one:any) => {
+							all[one] = all[one] || {};
+							return all[one]
+						}, body.tree),
+					param: path.split('/').pop()
+				});
+				const sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree);
+				const targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
+				targetPos.parent[targetPos.param] = sourcePos.parent[sourcePos.param];
+				delete sourcePos.parent[sourcePos.param];
+			}
 
 			const parsedCode =
 				!Array.isArray(body.code) && utils.safe(() => JSON.parse(body.code));
@@ -192,9 +228,10 @@
 			const filesToAdd = filesFromUpdateTree
 				.filter(file => !filesInStore.includes(file));
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
-				const parent = service;
 				const path = filesToAdd[i];
-				const code = '\n'; //TODO: should be default for file type
+				const fileUpdate = body.code.find(x => `.${x.path}` === path);
+				const parent = service;
+				const code = fileUpdate?.update || ''; //TODO: if not in update, default for file
 				await providers.fileChange({ path, code, parent });
 				await filesStore.setItem(path, code);
 			}
