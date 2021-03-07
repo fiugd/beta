@@ -149,6 +149,7 @@ const clickHandler = ({ event, container, triggers }) => {
 	triggers["fileSelect"]({
 		detail: {
 			name: foundTab.name,
+			parent: foundTab.parent
 		},
 	});
 };
