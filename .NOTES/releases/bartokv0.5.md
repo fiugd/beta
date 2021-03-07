@@ -16,6 +16,7 @@ Current State
   - [ ] cleaner loading view
   - [X] import files
   - [X] export files
+  - [ ] !!! bartok version at bottom left should be connected to real something
 
 ##### paneView
   - [ ] golden layout or similar for pane splitting

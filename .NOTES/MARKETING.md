@@ -1,17 +1,17 @@
 <!-- no-select -->
 
 ## Introduction
-* Bartok does(will do) things that other things do.
-* Consequently, one may think Bartok IS one of those things.
-* Possibly, Bartok can be used as one of those things.
+* fiug does(will do) things that other things do.
+* Consequently, one may think fiug IS one of those things.
+* Possibly, fiug can be used as one of those things.
 * However, it may not be that thing and that is not the sole vision for it.
-* Consider the following an exploration of what bartok is(will be).
+* Consider the following an exploration of what fiug is(will be).
 
 ## TL;DR
-* bartok takes inspiration from all of the following in some regard
-* bartok will most likely not do any one of these things as well as any one of these do
+* fiug takes inspiration from all of the following in some regard
+* fiug will most likely not do any one of these things as well as any one of these do
 
-## Bartok IS or NOT (maybe)
+## Fiug IS or NOT (maybe)
 
 ### Editor
 - modify and manage files sometimes with other integrations/tasks
@@ -19,13 +19,13 @@
 
 ### IDE | Playground
 - online editor and web-based code share/run
-- examples: plunker, codepen, stackblitz, runkit, glitch, observables, iodide.io, jupyter notebook
+- examples: plunker, codepen, stackblitz, runkit, repl.it, glitch, observables, iodide.io, jupyter notebook
 - more: https://codeframe.co/, https://slingcode.net/, https://codefence.io/
 - https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds
 - https://tio.run/#
 
 ### Mindmap | Knowledge Management Tool
-- example: dendron.so, roam, athens, foam, vscode-memo
+- examples: dendron.so, roam, athens, foam, vscode-memo
 
 ### Continuous Integration Tool
 - code, build, deployment automation

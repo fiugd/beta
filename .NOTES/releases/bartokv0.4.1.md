@@ -10,7 +10,6 @@
 ### meta
   - [X] !!! storage and backup
   - [X] !!! connect to server UI
-  - [ ] !!! bartok version at bottom left should be connected to real something
   - [X] !!! settings icon (gear) should be connected to something
 
 ### panes
