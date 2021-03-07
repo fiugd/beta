@@ -128,10 +128,13 @@ const noFrontSlash = (path) => {
 };
 
 
-const fileSelectHandler = (treeSelect) => (e) => {
+const fileSelectHandler = (treeSelect, type='') => (e) => {
 	if(e?.detail?.source === 'Explorer') return;
 
 	const { name, path, next, nextPath } = e.detail;
+	if(type === 'close' && !next){
+		return;
+	}
 	const nameWithPathIfPresent = (_path, _name) => _path
 		? noFrontSlash(`${_path}/${_name}`)
 		: noFrontSlash(_name);
@@ -846,7 +849,7 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "fileClose",
-		listener: fileSelectHandler(treeSelect),
+		listener: fileSelectHandler(treeSelect, 'close'),
 	});
 	attach({
 		name: "Explorer",
