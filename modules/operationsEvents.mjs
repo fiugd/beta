@@ -442,10 +442,10 @@ const operationsHandler = ({
 			detail?.operation.includes('move')
 		){
 			const updateOp = allOperations.find((x) => x.name === "update");
-			const service = getCurrentService();
+			const currentService = getCurrentService();
 			const body = {
-				name: service.name,
-				id: service.id,
+				name: currentService.name,
+				id: currentService.id,
 				operation: {
 					name: event.detail.operation,
 					source: event.detail.src,
@@ -453,8 +453,8 @@ const operationsHandler = ({
 				}
 			};
 			const result = await performOperation(updateOp, { body });
-			const service = result?.result[0];
-			setCurrentService(service);
+			const updatedService = result?.result[0];
+			setCurrentService(updatedService);
 			triggerOperationDone(result);
 			return;
 		}
