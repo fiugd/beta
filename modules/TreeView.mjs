@@ -1094,9 +1094,14 @@ function _TreeView(op) {
 		});
 		const operationAdapt = {
 			fileAdd: 'addFile',
-			folderAdd: 'addFolder',
 			fileDelete: 'deleteFile',
+			fileRename: 'renameFile',
+			fileMove: 'moveFile',
+
+			folderAdd: 'addFolder',
 			folderDelete: 'deleteFolder',
+			folderRename: 'renameFolder',
+			folderMove: 'moveFolder',
 		};
 		const treeEventHandler = (args) => {
 			const { source, target } = args;
