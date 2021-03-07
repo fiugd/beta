@@ -165,10 +165,10 @@
 					});
 				}
 				body.tree = service.tree;
-				const getPosInTree = (path:any, tree:any) => ({
+				const getPosInTree = (path, tree) => ({
 					parent: path.split('/')
 						.slice(0, -1)
-						.reduce((all:any, one:any) => {
+						.reduce((all, one) => {
 							all[one] = all[one] || {};
 							return all[one]
 						}, body.tree),
