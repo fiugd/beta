@@ -435,6 +435,27 @@ const operationsHandler = ({
 		const { detail } = event;
 		const { callback } = detail;
 
+		// NOTE: simple operations handling - tell service worker to do everything
+		if(
+			detail?.operation.includes('rename') ||
+			detail?.operation.includes('move')
+		){
+			const updateOp = allOperations.find((x) => x.name === "update");
+			const service = getCurrentService();
+			const eventData = {
+				name: service.name,
+				id: service.id,
+				operation: {
+					name: event.detail.operation,
+					source: event.detail.src,
+					target: event.detail.tgt,
+				}
+			};
+			const result = await performOperation(updateOp, eventData);
+			triggerOperationDone(result);
+			return;
+		}
+
 		if (detail && detail.operation === "showCurrentFolder") {
 			return showCurrentFolderHandler({
 				getCurrentFile,
