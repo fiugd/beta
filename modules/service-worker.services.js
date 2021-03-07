@@ -233,7 +233,12 @@
 				const path = filesToAdd[i];
 				const fileUpdate = body.code.find(x => `.${x.path}` === path);
 				const parent = service;
-				const code = fileUpdate?.update || ''; //TODO: if not in update, default for file
+				let fileUpdateCode;
+				if(fileUpdate?.update){
+					fileUpdateCode = fileUpdate.update;
+					delete fileUpdate.update;
+				}
+				const code = fileUpdateCode || ''; //TODO: if not in update, default for file
 				await providers.fileChange({ path, code, parent });
 				await filesStore.setItem(path, code);
 			}
