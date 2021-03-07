@@ -453,7 +453,7 @@ const operationsHandler = ({
 				}
 			};
 			const result = await performOperation(updateOp, { body });
-			const updatedService = result?.result[0];
+			const updatedService = result?.detail?.result[0];
 			setCurrentService(updatedService);
 			triggerOperationDone(result);
 			return;
