@@ -414,6 +414,7 @@ const operationsHandler = ({
 	externalStateRequest,
 	getCurrentFile,
 	getCurrentService,
+	setCurrentService,
 	getCurrentFolder,
 	setCurrentFolder,
 	getState,
@@ -452,6 +453,8 @@ const operationsHandler = ({
 				}
 			};
 			const result = await performOperation(updateOp, { body });
+			const service = result?.result[0];
+			setCurrentService(service);
 			triggerOperationDone(result);
 			return;
 		}
@@ -557,6 +560,7 @@ const providerHandler = ({
 	externalStateRequest,
 	getCurrentFile,
 	getCurrentService,
+	setCurrentService,
 	getCurrentFolder,
 	setCurrentFolder,
 	getState,
@@ -599,6 +603,7 @@ const providerHandler = ({
 		externalStateRequest,
 		getCurrentFile,
 		getCurrentService,
+		setCurrentService,
 		getCurrentFolder,
 		setCurrentFolder,
 		getState,
