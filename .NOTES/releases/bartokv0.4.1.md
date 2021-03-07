@@ -19,10 +19,10 @@
 ### explorer
   - [X] hook up new file icon
   - [X] hook up new folder action
-  - [ ] rename project/service
   - [X] open parent folders when file/folder selected
     - selected from tabs
     - selected in terminal
+  - [X] complete rewrite of tree module
 
 ### preview
   - nothing
@@ -34,7 +34,7 @@
   - nothing
 
 ### terminal
-  - [ ] current folder above prompt when applicable (maybe?)
+  - nothing
 
 ### server
   - [X] !!! git persistance

@@ -1,6 +1,51 @@
 <!-- no-select -->
 <br>
 
+#### 2021-01-29 | 2021-03-06 - Github, Tree Module, Repo/Name dancing
+	- add github read integraion (Jan 30 - Feb 1st week end)
+	- move "welcome" into it's own repo "fiug-welcome" (Jan 31)
+	- new tree module ( Feb 14 - March 6++ )
+	- create a beta environment for fiug (Feb 22)
+
+#### 2020-11-15 | 2021-01-29 - Angular+, Service Worker, misc exploring
+	- Editor Recall; was reverted (Nov 15)
+	- misc exploration (Nov 15 - Jan 27)
+		- old experiments: quadcopter, rangersAdvent, encrytWebWorker
+		- UI frameworks exploration: vue, angular, ember, svelte
+		- asciidoc, systemjs
+		- move bartok out of experiments & call it fiug (Jan 27)
+	- service worker refactor ( Jan 29 )
+
+#### 2020-10-15 | 2020-11-15 - Stylus, Search, languages, experiments
+	- Stylus support (Oct 15)
+	- Search Project (Oct 18 - Nov 15)
+	- open parent when child is selected
+	- untracked files (files that are not in tree)
+	- edit fiug/bartok in fiug/bartok (service id:0)
+	- languages
+		- wat (web assembly)
+		- ocaml (fail)
+		- pascal
+		- julia
+		- typescript
+		- ascii to svg (markdown)
+	- experiments
+		- texture packer
+		- 2-way messaging (template)
+		- zip a project
+		- editor linting
+		- file drop (to upload)
+		- webcam
+		- hex edit
+
+#### 2020-10-05 | 2020-10-15 -
+	- intial effort of tracking language/template progress (Oct 6)
+	- Command Palette (Oct 9)
+	- JSX example refactor (Oct 12)
+		- begin improved support for including files
+	- gml parsing with Ohm (Oct 12)
+	- experiments golden-layout, image pasting (Oct 13)
+
 #### 2020-09-29 | 2020-10-05 - languages, CRUD, & tightening overall use
 	- more languages, syntax, templates
 	- tighten provider file CRUD
