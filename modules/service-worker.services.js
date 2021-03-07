@@ -255,13 +255,20 @@
 				await filesStore.setItem(path, code);
 			}
 
-			body.treeState = {
-				expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
-				select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
-				changed: [],
-				new: []
-			};
-			return stringify({ result: [body] });
+			return stringify({
+				result: [{
+					id: service.id,
+					name: service.name,
+					code: body.code,
+					tree: body.tree,
+					treeState: {
+						expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
+						select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
+						changed: [],
+						new: []
+					}
+				}]
+			});
 		} catch (error) {
 			console.error(error);
 			return stringify({ error });
