@@ -1,6 +1,6 @@
 /* doing the same thing as workbox here? */
 
-const cacheName = "v0.4.8";
+const cacheName = "v0.4.9";
 
 importScripts("/shared/vendor/localforage.min.js");
 importScripts("/shared/vendor/json5v-2.0.0.min.js");
@@ -134,14 +134,22 @@ function asyncFetchHandler(event) {
   // 	return;
   // }
 
-  if (
-    event.request.url.includes("unpkg") ||
-    event.request.url.includes("cdn.skypack.dev")
-  ) {
-    console.warn(`NOT AVAILABLE OFFLINE: ${event.request.url}`);
-    // TODO: cache this!!!
-    return;
-  }
+	if (
+		event.request.url.includes("unpkg") ||
+		event.request.url.includes("cdn.skypack.dev")
+	) {
+		const response = async () => {
+			const cache = await caches.open(cacheName);
+			const cacheResponse = await cache.match(event.request);
+			if(cacheResponse) return cacheResponse;
+
+			const networkResponse = await fetch(event.request);
+			cache.put(event.request, networkResponse.clone());
+			return networkResponse;
+		};
+		event.respondWith(response());
+		return;
+	}
 
   if (
     event.request.url.includes("https://webtorrent.io/torrents/") ||
