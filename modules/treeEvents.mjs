@@ -141,7 +141,7 @@ const fileSelectHandler = (treeSelect, type='') => (e) => {
 	const fileNameWithPath = next
 		? nameWithPathIfPresent(nextPath, next)
 		: nameWithPathIfPresent(path, name);
-	treeSelect(fileNameWithPath);
+	treeSelect(fileNameWithPath, null, 'noSelect');
 
 	/* TODO: add this to TreeView module
 	if (found.scrollIntoViewIfNeeded) {

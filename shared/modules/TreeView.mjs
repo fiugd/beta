@@ -779,7 +779,7 @@ class ServiceTree {
 	/*
 		this is for programmatically selecting a file/folder
 	*/
-	select(path, skipDomUpdate){
+	select(path, skipDomUpdate, noEmit){
 		const splitPath = path.split('/');
 		let success = false;
 		let currentNode = this.rootNode;
@@ -810,7 +810,7 @@ class ServiceTree {
 
 		if(skipDomUpdate) return currentNode;
 
-		this.emit('select', { target: currentNode });
+		!noEmit && this.emit('select', { target: currentNode });
 		return currentNode;
 	}
 
