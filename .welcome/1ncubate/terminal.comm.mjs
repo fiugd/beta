@@ -1,7 +1,8 @@
 const target = window.top;
 const queue = {};
 
-const list = () => Object.entries(queue).map(([key,value]) => ({ key, value }));
+const kvArrayToObject = ([key, value]) => ({ key, value })
+const list = () => Object.entries(queue).map(kvArrayToObject);
 
 window.onmessage = function(e){
 	const { key, ...rest } = e.data;

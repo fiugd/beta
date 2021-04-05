@@ -65,6 +65,11 @@ const replaceCurrentLine = (replace) => {
 	eraseToPrompt();
 	term.write(replace);
 };
+const safeHistoryToBuffer = () => {
+	if(![...history].reverse()[currentCommand]) return;
+	charBuffer = [...history].reverse()[currentCommand].split();
+	currentCommand = -1;
+};
 
 term.attachCustomKeyEventHandler((event) => {
 	const F5 = 116;
@@ -97,8 +102,10 @@ const clearTerminal = (e) => {
 const printHistory = (e) => {
 	term.write('\n');
 	const padding = Math.floor(history.length/10)+3;
-	console.log(padding)
-	history.forEach((h,i) => term.write(`${chalk.dim((i+1+'').padStart(padding, ' '))}  ${h}\n`))
+	history.slice(1,-1)
+		.forEach((h,i) => {
+			term.write(`${chalk.dim((i+1+'').padStart(padding, ' '))}  ${h}\n`)
+		})
 };
 const supportedCommands = {
 	cls: clearTerminal,
@@ -112,41 +119,72 @@ const enterCommand = (e) => {
 	onEnter(execute);
 };
 const backspaceCommand = (e) => {
-	if([...history].reverse()[currentCommand]){
-		charBuffer = [...history].reverse()[currentCommand].split();
-		currentCommand = -1;
-	}
+	safeHistoryToBuffer();
+
 	// Do not delete the prompt
 	if (term._core.buffer.x > 2) {
 		charBuffer.pop();
 		term.write("\b \b");
 	}
 };
-
 const keys = {
 	ArrowUp: prevCommand,
 	ArrowDown: nextCommand,
 	Enter: enterCommand,
-	BackSpace: backspaceCommand,
+	Backspace: backspaceCommand,
+};
+
+const copyCommand = async (e) => {
+	try {
+		const clip = term.getSelection();
+		await navigator.clipboard.writeText(clip);
+	} catch(e){}
+};
+const pasteCommand = async (e) => {
+	try {
+		safeHistoryToBuffer();
+		const clip = (await navigator.clipboard.readText()).split('\n')[0].trim();
+		charBuffer = `${charBuffer.join('')}${clip}`.split();
+		eraseToPrompt()
+		term.write(charBuffer.join(''));
+	} catch(e){}
+};
+
+const controlKeys = {
+	c: copyCommand,
+	v: pasteCommand,
 };
 
 term.onKey((e) => {
-	const printable =
-		!e.domEvent.altKey &&
-		!e.domEvent.altGraphKey &&
-		!e.domEvent.ctrlKey &&
-		!e.domEvent.metaKey;
-	if(keys[e.domEvent.key])return keys[e.domEvent.key](e);
-	if (!printable) return;
+	const key = e.domEvent.key;
+	const termKey = e.key;
 
-	if([...history].reverse()[currentCommand]){
-		charBuffer = [...history].reverse()[currentCommand].split();
-		currentCommand = -1;
+	const modBitmask = [
+		e.domEvent.altKey || 0,
+		e.domEvent.altGraphKey || 0,
+		e.domEvent.metaKey || 0,
+		e.domEvent.ctrlKey || 0,
+	].map(Number).join('');
+
+	const mods = {
+		onlyControl: modBitmask === '0001',
+		printable: modBitmask === '0000',
+	};
+
+	if(mods.onlyControl && controlKeys[key]){
+		return controlKeys[key](e);
 	}
-	if (e.key.length === 1) {
-		charBuffer.push(e.key);
+
+	if(keys[key]) return keys[key](e);
+
+	if (!mods.printable) return;
+
+	safeHistoryToBuffer();
+
+	if (termKey.length === 1) {
+		charBuffer.push(termKey);
 	}
-	term.write(e.key);
+	term.write(termKey);
 
 });
 
@@ -156,19 +194,10 @@ term.on('paste', function(data) {
 });
 */
 
-term.onResize(() => {
-	fitAddon.fit();
-});
-
-// not sure if this is really needed
-window.termResize = () => {
-	fitAddon.fit();
-};
-
-window.addEventListener("resize", function () {
-	fitAddon.fit();
-});
-
+const fitHandler = fitAddon.fit.bind(fitAddon);
+term.onResize(fitHandler);
+window.termResize = fitHandler;
+window.addEventListener("resize", fitHandler);
 fitAddon.fit();
 
 term.write('\n');
