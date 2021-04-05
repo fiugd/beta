@@ -147,18 +147,18 @@ window.listListeners = list;
 
 window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
-	const { register='', name, eventName } = data;
-	messageEvent.source.postMessage(
+	const { register='', name, eventName, key } = data;
+	const source = messageEvent.source;
+	const origin = messageEvent.source;
+	source.postMessage(
 		{ msg: 'ACK', ...data },
 		messageEvent.origin
 	);
 	if(register !== 'listener' || !name || !eventName) return;
 
-	const source = messageEvent.source;
-	const origin = messageEvent.source;
 	const listener = (listenerEvent) => {
 		const { detail } = listenerEvent;
-		source.postMessage({ detail }, origin);
+		source.postMessage({ key, detail }, origin);
 	};
 	attach({ name, listener, eventName });
 

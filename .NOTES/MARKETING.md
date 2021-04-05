@@ -24,6 +24,9 @@
 - https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds
 - https://tio.run/#
 
+### Nocode platform
+- https://www.outsystems.com/
+
 ### Mindmap | Knowledge Management Tool
 - examples: dendron.so, roam, athens, foam, vscode-memo
 

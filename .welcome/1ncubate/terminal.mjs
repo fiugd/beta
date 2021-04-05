@@ -1,3 +1,4 @@
+import { Watch } from './terminal.exec.mjs';
 import chalk from 'https://cdn.skypack.dev/chalk';
 const SYSTEM_NAME = 'fiug.dev v0.4';
 const CURRENT_FOLDER = '.welcome/current';
@@ -16,16 +17,19 @@ const CURRENT_FOLDER = '.welcome/current';
 
 
 let charBuffer = [];
-const history = [];
+const history = [
+	'watch -e fileSelect'
+];
 let currentCommand = -1;
 
-const onEnter = function (callback) {
+const onEnter = function (callback, noExit) {
 	const command = [...history].reverse()[currentCommand] || charBuffer.join("");
 	history.push(command);
 	currentCommand = -1;
 	charBuffer = [];
 	if(!callback) term.write("\n");
 	callback && callback();
+	if(noExit) return;
 	term.write("\n");
 	prompt(term);
 };
@@ -107,14 +111,29 @@ const printHistory = (e) => {
 			term.write(`${chalk.dim((i+1+'').padStart(padding, ' '))}  ${h}\n`)
 		})
 };
+
+const watch = new Watch();
+const watchCommand = (args) => (e) => {
+	const done = () => {
+		term.write("\n\n");
+		prompt(term);
+	};
+	watch.invoke(args, term, done);
+};
+
 const supportedCommands = {
 	cls: clearTerminal,
 	clear: clearTerminal,
-	history: printHistory,
+	history: printHistory
 };
 
 const enterCommand = (e) => {
+	safeHistoryToBuffer();
 	const buffer = charBuffer.join("");
+	const watchArgs = (new RegExp('^watch(.*)').exec(buffer)||[])[1]
+	if(watchArgs){
+		return onEnter(watchCommand(watchArgs), 'noExit')
+	}
 	const execute = supportedCommands[buffer];
 	onEnter(execute);
 };
