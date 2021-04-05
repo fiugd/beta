@@ -145,19 +145,23 @@ window.listTriggers = listTriggers;
 window.listListeners = list;
 
 
-window.addEventListener('message',function(event) {
-	const { data } = event;
+window.addEventListener('message', function(messageEvent) {
+	const { data } = messageEvent;
 	const { register='', name, eventName } = data;
-	if(register === 'listener' && name && eventName){
-		const source = event.source;
-		const origin = event.source;
-		const listener = (event) => {
-			const { detail } = event;
-			event.source.postMessage({ detail }, event.origin);
-		};
-		attach({ name, listener, eventName });
-	}
-	event.source.postMessage({ msg: 'ACK', ...data }, event.origin);
+	messageEvent.source.postMessage(
+		{ msg: 'ACK', ...data },
+		messageEvent.origin
+	);
+	if(register !== 'listener' || !name || !eventName) return;
+
+	const source = messageEvent.source;
+	const origin = messageEvent.source;
+	const listener = (listenerEvent) => {
+		const { detail } = listenerEvent;
+		source.postMessage({ detail }, origin);
+	};
+	attach({ name, listener, eventName });
+
 }, false);
 
 export {
