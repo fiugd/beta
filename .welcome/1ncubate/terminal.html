@@ -26,13 +26,23 @@
 		</div>
 	</body>
 	<script type="module">
-		import { execute, list } from './terminal.comm.mjs';
+		import { execute, list, attach } from './terminal.comm.mjs';
 		
 		(async () => {
-			const response = await execute(window.top)({
-				hello: 'there'
-			})
-			console.log(list())
+			{
+				const response = await execute({ foo: 'bar' });
+				console.log(response)
+				console.log(list())
+			}
+			{
+				const response = await attach({
+					name: "TerminalWIP",
+					eventName: "fileSelect",
+					listener: (...args) => console.log(JSON.stringify(args, null, 2)),
+				});
+				console.log(response)
+				console.log(list())
+			}
 		})()
 	</script>
 </html>

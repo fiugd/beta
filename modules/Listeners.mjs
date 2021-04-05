@@ -29,7 +29,6 @@ function list(){
 	return Object.keys(listeners);
 }
 
-
 /*
 future todo:
 
@@ -148,8 +147,12 @@ window.listListeners = list;
 
 window.addEventListener('message',function(event) {
 	const { data } = event;
-	const msg = 'Listeners.mjs heard your message!';
-	event.source.postMessage({ msg, ...data },event.origin);
+	const { register='', name, eventName } = data;
+	if(register === 'listener' && name && eventName){
+		const listener = (...args) => event.source.postMessage(args, event.origin);
+		attach({ name, listener, eventName });
+	}
+	event.source.postMessage({ msg: 'ACK', ...data }, event.origin);
 }, false);
 
 export {
