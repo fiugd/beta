@@ -153,7 +153,7 @@ window.addEventListener('message',function(event) {
 		const origin = event.source;
 		const listener = (event) => {
 			const { detail } = event;
-			even.source.postMessage({ detail }, event.origin);
+			event.source.postMessage({ detail }, event.origin);
 		};
 		attach({ name, listener, eventName });
 	}
