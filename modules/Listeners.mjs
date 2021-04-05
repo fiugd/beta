@@ -149,8 +149,9 @@ window.addEventListener('message',function(event) {
 	const { data } = event;
 	const { register='', name, eventName } = data;
 	if(register === 'listener' && name && eventName){
-		const messageSource = event.source;
-		const listener = (...args) => messageSource.postMessage(args, event.origin);
+		const source = event.source;
+		const origin = event.source;
+		const listener = (...args) => source.postMessage(args, origin);
 		attach({ name, listener, eventName });
 	}
 	event.source.postMessage({ msg: 'ACK', ...data }, event.origin);
