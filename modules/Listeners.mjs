@@ -145,6 +145,13 @@ function listTriggers(){
 window.listTriggers = listTriggers;
 window.listListeners = list;
 
+
+window.addEventListener('message',function(event) {
+	const { data } = event;
+	const msg = 'Listeners.mjs heard your message!';
+	event.source.postMessage({ msg, ...data },event.origin);
+}, false);
+
 export {
 	trigger, //deprecate exporting this?
 	attach, remove, list,
