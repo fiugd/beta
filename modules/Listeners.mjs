@@ -10,32 +10,33 @@ function attach({
 		return;
 	}
 	const listenerName = `${eventName}__${name}`;
-	if(listeners[listenerName]){
-		return;
-	}
+	if(listeners[listenerName]) return;
+
+	// TODO: alter this approach, instead use ONE event listener attached to window (?)
+	// this approach kinda sucks because a lot of listeners get added to window
+	// also there is less control over events as they are handled
 	window.addEventListener(eventName, listener, options);
 	listeners[listenerName] = listener;
 	if(key){
-		listeners[listenerName]._meta = { key, name, eventName };
+		listeners[listenerName]._meta = { key, name, eventName, options };
 	}
 }
 
-function remove({
-	name, eventName, options, key
-}){
+function remove({ name, eventName, options, key }){
 	let listenerName = `${eventName}__${name}`;
-	if(key){
-		listenerName = Object.keys(listeners)
-			.find(x => listeners[x]._meta && listeners[x]._meta.key === key);
-		if(!listenerName) return;
+	if(!key){
+		window.removeEventListener(eventName, listeners[listenerName], options);
+		delete listeners[listenerName];
 	}
-	window.removeEventListener(eventName, listeners[listenerName], options);
+	listenerName = Object.keys(listeners)
+		.find(x => listeners[x]._meta && listeners[x]._meta.key === key);
+	if(!listenerName) return;
+	const { _meta } = listeners[listenerName]
+	window.removeEventListener(_meta.eventName, listeners[listenerName], _meta.options);
 	delete listeners[listenerName];
 }
 
-function list(){
-	return Object.keys(listeners);
-}
+function list(){ return Object.keys(listeners); }
 
 /*
 future todo:

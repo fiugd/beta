@@ -5,15 +5,17 @@ const kvArrayToObject = ([key, value]) => ({ key, value })
 const list = () => Object.entries(queue).map(kvArrayToObject);
 
 window.onmessage = function(e){
-	const { key, ...rest } = e.data;
+	const { key, unregister } = e.data;
 	if(!queue[key]) return;
 
-	if(!queue[key].resolve){
-		queue[key].listener(rest);
+	if(unregister) queue[key].listener = undefined;
+
+	if(!queue[key].resolve && queue[key].listener){
+		queue[key].listener(e.data);
 		return
 	}
 
-	queue[key].resolve(rest);
+	queue[key].resolve(e.data);
 	if(queue[key].listener){
 		delete queue[key].resolve;
 	} else {
@@ -48,7 +50,7 @@ const attach = ({ name, eventName, listener }) => {
 
 const detach = (key) => {
 	const unregister = 'listener';
-	const data = { register, key };
+	const data = { unregister, key };
 	const handler = (resolve) => {
 		queue[key] = { resolve };
 		target.postMessage({ ...data, key }, '*');

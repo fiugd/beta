@@ -15,10 +15,15 @@ const CURRENT_FOLDER = '.welcome/current';
 	chalk.level = levels.trueColor;
 })()
 
+const alotOfEvents = [
+	'ui', 'fileClose', 'fileSelect', 'operations', 'operationDone',
+];
+
 let running = undefined;
 let charBuffer = [];
 const history = [
-	'watch -e fileSelect'
+	'watch -e fileSelect',
+	`watch -e ${alotOfEvents.join(' ')}`,
 ];
 let currentCommand = -1;
 
