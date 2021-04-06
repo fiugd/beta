@@ -6,5 +6,5 @@ document.body.innerHTML = `
 		color: #e91e63;
 	}
 </style>
-<h1>test.js OUTER</h1>
+<h1>test.js INNER</h1>
 `;
