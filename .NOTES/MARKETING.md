@@ -24,11 +24,20 @@
 - https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds
 - https://tio.run/#
 
-### Nocode platform
-- https://www.outsystems.com/
+### Nocode platform / Multiexperience Development Platforms (MXDP)
+- examples
+	- https://www.outsystems.com/
+	- https://webflow.com/
+	- https://airtable.com/
+	- https://bubble.io/
 
 ### Mindmap | Knowledge Management Tool
-- examples: dendron.so, roam, athens, foam, vscode-memo
+- examples
+	- https://dendron.so
+	- https://roamresearch.com/
+	- https://athensresearch.github.io/athens/
+	- https://github.com/foambubble/foam
+	- https://github.com/svsool/vscode-memo
 
 ### Continuous Integration Tool
 - code, build, deployment automation
