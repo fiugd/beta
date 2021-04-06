@@ -170,7 +170,7 @@ window.addEventListener('message', function(messageEvent) {
 
 	const listener = (listenerEvent) => {
 		const { detail } = listenerEvent;
-		const safeObject = (obj) => ({ ...obj })
+		const safeObject = (obj) => JSON.parse(JSON.stringify(obj));
 		source.postMessage(safeObject({ key, detail }), origin);
 	};
 	attach({ name, listener, eventName, key });
