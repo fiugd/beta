@@ -1,9 +1,10 @@
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 import { execute, list, attach, detach } from './terminal.comm.mjs';
 
-
+//NOTE: sucks that I have to customize internal instance of chalk
 import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
 import colorize from 'https://cdn.skypack.dev/json-colorizer';
+// enable browser support for chalk
 (() => {
 	const levels = {
 		disabled: 0,

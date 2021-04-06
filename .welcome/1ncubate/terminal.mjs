@@ -1,4 +1,4 @@
-import { Watch } from './terminal.exec.mjs';
+import { Watch } from './terminal.watch.mjs';
 import chalk from 'https://cdn.skypack.dev/chalk';
 const SYSTEM_NAME = 'fiug.dev v0.4';
 const CURRENT_FOLDER = '.welcome/current';
@@ -76,7 +76,7 @@ const replaceCurrentLine = (replace) => {
 };
 const safeHistoryToBuffer = () => {
 	if(![...history].reverse()[currentCommand]) return;
-	charBuffer = [...history].reverse()[currentCommand].split();
+	charBuffer = [...history].reverse()[currentCommand].split('');
 	currentCommand = -1;
 };
 
