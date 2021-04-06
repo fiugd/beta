@@ -130,6 +130,7 @@ const supportedCommands = {
 };
 
 const enterCommand = (e) => {
+	if(running) return term.write('\n');
 	safeHistoryToBuffer();
 	const buffer = charBuffer.join("");
 	const watchArgs = (new RegExp('^watch(.*)').exec(buffer)||[])[1]
