@@ -158,14 +158,14 @@ const keys = {
 
 const copyKillCommand = async (e) => {
 	try {
-		if(running){
+		const clip = term.getSelection();
+		if(running && !clip){
 			await running.exit();
 			running = undefined;
 			term.write("\n");
 			prompt(term);
 			return;
 		}
-		const clip = term.getSelection();
 		await navigator.clipboard.writeText(clip);
 	} catch(e){}
 };
