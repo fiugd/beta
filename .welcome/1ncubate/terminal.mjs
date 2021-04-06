@@ -15,7 +15,7 @@ const CURRENT_FOLDER = '.welcome/current';
 	chalk.level = levels.trueColor;
 })()
 
-
+let running = undefined;
 let charBuffer = [];
 const history = [
 	'watch -e fileSelect'
@@ -112,13 +112,10 @@ const printHistory = (e) => {
 		})
 };
 
-const watch = new Watch();
+const watch = new Watch(term);
 const watchCommand = (args) => (e) => {
-	const done = () => {
-		term.write("\n\n");
-		prompt(term);
-	};
-	watch.invoke(args, term, done);
+	running = watch;
+	watch.invoke(args);
 };
 
 const supportedCommands = {
@@ -153,8 +150,15 @@ const keys = {
 	Backspace: backspaceCommand,
 };
 
-const copyCommand = async (e) => {
+const copyKillCommand = async (e) => {
 	try {
+		if(running){
+			await running.exit();
+			running = undefined;
+			term.write("\n");
+			prompt(term);
+			return;
+		}
 		const clip = term.getSelection();
 		await navigator.clipboard.writeText(clip);
 	} catch(e){}
@@ -170,7 +174,7 @@ const pasteCommand = async (e) => {
 };
 
 const controlKeys = {
-	c: copyCommand,
+	c: copyKillCommand,
 	v: pasteCommand,
 };
 

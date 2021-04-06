@@ -2,7 +2,7 @@ const listeners = {};
 const triggers = {};
 
 function attach({
-	name, listener, eventName, options
+	name, listener, eventName, options, key
 }){
 	if(!name || !listener || !eventName){
 		console.error('Attempt to improperly attach an event listener');
@@ -15,12 +15,20 @@ function attach({
 	}
 	window.addEventListener(eventName, listener, options);
 	listeners[listenerName] = listener;
+	if(key){
+		listeners[listenerName]._meta = { key, name, eventName };
+	}
 }
 
 function remove({
-	name, eventName, options
+	name, eventName, options, key
 }){
-	const listenerName = `${eventName}__${name}`;
+	let listenerName = `${eventName}__${name}`;
+	if(key){
+		listenerName = Object.keys(listeners)
+			.find(x => listeners[x]._meta && listeners[x]._meta.key === key);
+		if(!listenerName) return;
+	}
 	window.removeEventListener(eventName, listeners[listenerName], options);
 	delete listeners[listenerName];
 }
@@ -147,20 +155,23 @@ window.listListeners = list;
 
 window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
-	const { register='', name, eventName, key } = data;
+	const { register='', unregister, name, eventName, key } = data;
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
 	source.postMessage(
 		{ msg: 'ACK', ...data },
 		messageEvent.origin
 	);
+
+	if(unregister === 'listener') return remove({ key });
+
 	if(register !== 'listener' || !name || !eventName) return;
 
 	const listener = (listenerEvent) => {
 		const { detail } = listenerEvent;
 		source.postMessage({ key, detail }, origin);
 	};
-	attach({ name, listener, eventName });
+	attach({ name, listener, eventName, key });
 
 }, false);
 

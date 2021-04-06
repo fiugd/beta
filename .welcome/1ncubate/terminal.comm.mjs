@@ -46,8 +46,19 @@ const attach = ({ name, eventName, listener }) => {
 	return new Promise(handler)
 };
 
+const detach = (key) => {
+	const unregister = 'listener';
+	const data = { register, key };
+	const handler = (resolve) => {
+		queue[key] = { resolve };
+		target.postMessage({ ...data, key }, '*');
+	};
+	return new Promise(handler)
+};
+
 export {
 	attach,
+	detach,
 	execute,
 	list
 }

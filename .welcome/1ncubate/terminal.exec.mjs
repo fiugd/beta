@@ -1,6 +1,30 @@
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
-import { execute, list, attach } from './terminal.comm.mjs';
+import { execute, list, attach, detach } from './terminal.comm.mjs';
 
+
+import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
+import colorize from 'https://cdn.skypack.dev/json-colorizer';
+(() => {
+	const levels = {
+		disabled: 0,
+		basic16: 1,
+		more256: 2,
+		trueColor: 3
+	}
+	chalk2.enabled = true
+	chalk2.level = levels.trueColor;
+})()
+const colors = {
+	BRACE: '#BBBBBB',
+	BRACKET: '#BBBBBB',
+	COLON: '#BBBBBB',
+	COMMA: '#BBBBBB',
+	STRING_KEY: '#dcdcaa',
+	STRING_LITERAL: '#ce9178',
+	NUMBER_LITERAL: '#b5cea8',
+	BOOLEAN_LITERAL: '#569cd6',
+	NULL_LITERAL: '#569cd6',
+};
 
 /*
 
@@ -23,7 +47,7 @@ const optionDefinitions = [{
 	multiple: true,
 }];
 
-async function invoke(args, term, done){
+async function invoke(args){
 	const options = {
 		argv: args.trim().split(' ')
 	};
@@ -33,12 +57,11 @@ async function invoke(args, term, done){
 		done();
 		return
 	}
-
-	console.log(result);
 	const { events } = result;
-	const listener = (...args) => {
-		debugger
-		console.log(JSON.stringify(args, null, 2))
+	const listener = (args) => {
+		const { detail } = args;
+		this.term.write(colorize(detail, { colors, pretty: true }));
+		this.term.write('\n');
 	};
 	const name = "TerminalWIP";
 	for(var i=0, len=events.length; i<len; i++){
@@ -46,15 +69,28 @@ async function invoke(args, term, done){
 			name, listener,
 			eventName: events[i],
 		});
-		console.log(response);
+		this.listenerKeys.push(response?.key)
 	}
-	done();
+	this.term.write('\n');
+}
+
+async function exit(){
+	try {
+		for(var i=0, len=this.listenerKeys.length; i<len; i++){
+			await detach(this.listenerKeys[i]);
+		}
+	} catch(e){}
+	return;
 }
 
 export class Watch {
 	keyword = 'watch';
+	listenerKeys = [];
+	term = undefined;
 
-	constructor(){
-		this.invoke = invoke;
+	constructor(term){
+		this.term = term;
+		this.invoke = invoke.bind(this);
+		this.exit = exit.bind(this)
 	}
 }
