@@ -216,12 +216,6 @@ term.onKey((e) => {
 
 });
 
-/*
-term.on('paste', function(data) {
-	term.write(data);
-});
-*/
-
 const fitHandler = fitAddon.fit.bind(fitAddon);
 term.onResize(fitHandler);
 window.termResize = fitHandler;
