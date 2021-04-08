@@ -14,6 +14,14 @@ import chalk from 'https://cdn.skypack.dev/chalk';
 	chalk.level = levels.trueColor;
 })()
 
+const getSupportedCommands = (commands) => ({
+	cls: commands.clearTerminal,
+	clear: commands.clearTerminal,
+	history: commands.history.print,
+	watch: commands.watch
+});
+
+
 //TODO: use state for this
 const SYSTEM_NAME = 'fiug.dev v0.4';
 const CURRENT_FOLDER = '.welcome/current';
@@ -35,39 +43,41 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 	const eraseToPrompt = () => eraseLine() & writePromptIndicator(false/*no new line*/);
 	const setLine = (replace) => eraseToPrompt() & term.write(replace);
 	const clearTerminal = (e) => eraseLine() & term.clear();
-
+	const unrecognizedCommand = (keyword) => (e) => term.write(`\n${keyword}: command not found\n`)
 	const history = new History({ chalk, writeLine, setLine, setBuffer, getBuffer });
 	const watch = new Watch(term, comm);
-	const watchCommand = (args) => (e) => {
-		setRunning(watch);
-		watch.invoke(args);
-	};
 
-	const supportedCommands = {
-		cls: clearTerminal,
-		clear: clearTerminal,
-		history: history.print
-	};
+	const supportedCommands = getSupportedCommands({
+		clearTerminal, history, watch
+	});
 	
-	const onEnter = function (callback, noExit) {
-		const command = history.currentItem || getBuffer();
-		history.push(command);
-		setBuffer('');
-		if(!callback) term.write("\n");
-		callback && callback();
-		if(noExit) return;
-		term.write("\n");
-		prompt(term);
-	};
-
 	const enterCommand = (e) => {
 		if(getRunning()) return term.write('\n');
 		history.updateBuffer();
 		const buffer = getBuffer();
-		const watchArgs = (new RegExp('^watch(.*)').exec(buffer)||[])[1]
-		if(watchArgs) return onEnter(watchCommand(watchArgs), 'noExit');
-		const execute = supportedCommands[buffer];
-		onEnter(execute);
+		if(!buffer) return prompt(term);
+
+		const [,keyword, args] = new RegExp(`^(.+?)(?:\\s|$)(.*)$`).exec(buffer) || [];
+		const command = supportedCommands[keyword] || unrecognizedCommand(keyword);
+
+		const done = () => {
+			setRunning(undefined);
+			term.write('\n');
+			prompt(term);
+		};
+		
+		const handler = !command.invoke
+			? command
+			: (e) => {
+				setRunning(command);
+				command.invoke(args, done);
+			};
+
+		history.push(buffer);
+		setBuffer('');
+		handler && handler();
+		if(command.invoke) return;
+		done()
 	};
 
 	const backspaceCommand = (e) => {

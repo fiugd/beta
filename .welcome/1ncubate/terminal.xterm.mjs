@@ -1,3 +1,5 @@
+import { WebLinksAddon } from 'https://cdn.skypack.dev/xterm-addon-web-links';
+
 export default () => {
 	const options = {
 		theme: {
@@ -19,6 +21,13 @@ export default () => {
 	//term.onResize(fit);
 	window.addEventListener("resize", fit);
 	fit();
+
+	/*
+	term.loadAddon(new WebLinksAddon({
+		handler: (e, uri) => alert(`Attempt to navigate to: ${uri}`)
+	}));
+	*/
+	term.loadAddon(new WebLinksAddon());
 
 	term._attachHandlers = ({ bubbleHandler, keyHandler }) => {
 		term.attachCustomKeyEventHandler(bubbleHandler);

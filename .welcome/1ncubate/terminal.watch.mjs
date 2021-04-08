@@ -1,7 +1,11 @@
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
+// also consider: https://www.npmjs.com/package/minimist
+// https://www.sitepoint.com/javascript-command-line-interface-cli-node-js/
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Shells
 
 //NOTE: sucks that I have to customize internal instance of chalk
 import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
+const chalk = chalk2;
 import colorize from 'https://cdn.skypack.dev/json-colorizer';
 // enable browser support for chalk
 (() => {
@@ -26,35 +30,43 @@ const colors = {
 	NULL_LITERAL: '#569cd6',
 };
 
-/*
+const usage = `
 
-the idea here is to register a command with terminal
+${chalk.bold('Usage:')} watch ${chalk.hex('#BBB')('[OPTION]... [ARGUMENT(S)]...')}
 
-for example:
+Print details of chosen events as they occur in the system.
 
-watch (better name pending) 
-- takes -event argument which is followed by a list of events
-- registers an event listener with main app
-- logs those events to terminal until CTRL-C is pressed
-- once exited, removes the event listener
+  -e, --event  ${chalk.hex('#BBB')('event(s)')}    Events to watch
+  -h, --help   ${chalk.hex('#BBB')('string')}      Prints this guide
 
-*/
+${chalk.bold('Examples:')}
+  watch -e fileSelect
+  watch -e ui fileClose fileSelect operations operationDone
+
+${chalk.italic(`
+Online help: <https://github.com/crosshj/fiug/wiki/>
+Report bugs: <https://github.com/crosshj/fiug/issues/>
+`)}
+
+`;
 
 const optionDefinitions = [{
 	name: 'events',
 	alias: 'e',
 	type: String,
-	multiple: true,
+	multiple: true
 }];
 
-async function invoke(args){
+async function invoke(args, done){
 	const { execute, list, attach, detach } = this.comm;
 	const options = {
-		argv: args.trim().split(' ')
+		argv: args.trim().split(' '),
+		partial: true
 	};
 	const result = commandLineArgs(optionDefinitions, options);
 
 	if(!result?.events){
+		this.term.write(usage);
 		done();
 		return
 	}
