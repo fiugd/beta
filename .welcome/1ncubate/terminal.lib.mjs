@@ -1,5 +1,6 @@
 import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
+
 import chalk from 'https://cdn.skypack.dev/chalk';
 // enable browser support for chalk
 (() => {
