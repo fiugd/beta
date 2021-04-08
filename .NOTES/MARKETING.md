@@ -1,11 +1,15 @@
 <!-- no-select -->
 
+*The cloud service you don't have to register for.*
+*The editor / IDE you didn't have to install.*
+*The tool that will change the way you work.*
+
 ## Introduction
 * fiug does(will do) things that other things do.
 * Consequently, one may think fiug IS one of those things.
 * Possibly, fiug can be used as one of those things.
 * However, it may not be that thing and that is not the sole vision for it.
-* Consider the following an exploration of what fiug is(will be).
+* Consider the following an exploration of what fiug is and will be.
 
 ## TL;DR
 * fiug takes inspiration from all of the following in some regard
@@ -13,11 +17,17 @@
 
 ## Fiug (IS | IS NOT)
 
-### Editor
-- modify and manage files sometimes with other integrations/tasks
-- examples: vscode, atom, brackets, Eclipse Theia, Light Table
+### Editor | IDE
+- modify and manage files sometimes with other integrations/features
+- examples
+	- [vscode](https://code.visualstudio.com)
+	- [sublime](https://www.sublimetext.com)
+	- [Eclipse Theia](https://eclipsesource.com/technology/eclipse-theia)
+	- [Light Table](http://lighttable.com)
+	- [atom](https://atom.io)
+	- [brackets RIP](http://brackets.io)
 
-### IDE | Playground | Coce Runner
+### IDE | Playground | Code Runner
 - online editor and web-based code share/run
 - [wiki source code playgrounds](https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds)
 - examples

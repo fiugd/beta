@@ -1,9 +1,11 @@
 const alotOfEvents = [
-	'ui', 'fileClose', 'fileSelect', 'operations', 'operationDone',
+	'ui', 'fileClose', 'fileSelect', 'operations', 'operationDone', 'contextmenu',
+	'contextmenu-select'
 ];
 const history = [
 	'watch -e fileSelect',
 	`watch -e ${alotOfEvents.join(' ')}`,
+	`watch`
 ];
 
 export class History {

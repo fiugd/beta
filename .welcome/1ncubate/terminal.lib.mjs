@@ -1,18 +1,12 @@
 import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
+import { chalk } from './terminal.utils.mjs';
 
-import chalk from 'https://cdn.skypack.dev/chalk';
-// enable browser support for chalk
-(() => {
-	const levels = {
-		disabled: 0,
-		basic16: 1,
-		more256: 2,
-		trueColor: 3
-	}
-	chalk.enabled = true
-	chalk.level = levels.trueColor;
-})()
+import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
+// also consider: https://www.npmjs.com/package/minimist
+// https://www.sitepoint.com/javascript-command-line-interface-cli-node-js/
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Shells
+
 
 const getSupportedCommands = (commands) => ({
 	cls: commands.clearTerminal,
@@ -21,12 +15,22 @@ const getSupportedCommands = (commands) => ({
 	watch: commands.watch
 });
 
-
 //TODO: use state for this
 const SYSTEM_NAME = 'fiug.dev v0.4';
 const CURRENT_FOLDER = '.welcome/current';
 
+const parseArgs = (model, argString) => {
+	if(!model?.cliArgOptions) return argString;
+	const options = {
+		argv: argString.trim().split(' '),
+		partial: true
+	};
+	const result = commandLineArgs(model.cliArgOptions, options);
+	return result;
+}
+
 export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) => {
+
 	//const writePromptIndicator = () => term.write(chalk.white.bold('∑ '));
 	const writePromptIndicator = () => term.write(chalk.white.bold('$ '));
 	const writeSysName = () => term.write(chalk.rgb(60, 180, 190)(SYSTEM_NAME));
@@ -43,14 +47,14 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 	const eraseToPrompt = () => eraseLine() & writePromptIndicator(false/*no new line*/);
 	const setLine = (replace) => eraseToPrompt() & term.write(replace);
 	const clearTerminal = (e) => eraseLine() & term.clear();
+	// TODO: ask if the user meant some other command & provide link to run it
 	const unrecognizedCommand = (keyword) => (e) => term.write(`\n${keyword}: command not found\n`)
+
 	const history = new History({ chalk, writeLine, setLine, setBuffer, getBuffer });
 	const watch = new Watch(term, comm);
 
-	const supportedCommands = getSupportedCommands({
-		clearTerminal, history, watch
-	});
-	
+	const supportedCommands = getSupportedCommands({ clearTerminal, history, watch });
+
 	const enterCommand = (e) => {
 		if(getRunning()) return term.write('\n');
 		history.updateBuffer();
@@ -70,7 +74,7 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 			? command
 			: (e) => {
 				setRunning(command);
-				command.invoke(args, done);
+				command.invoke(parseArgs(command, args), done);
 			};
 
 		history.push(buffer);
