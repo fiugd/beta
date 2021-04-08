@@ -18,7 +18,7 @@ import { templateJSX, templateSVC3, transform } from "./Templates.mjs";
 const { SYSTEM_NAME } = getSettings();
 
 const iframeSandboxPermissions =
-	"allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation";
+	"allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox";
 
 let EventTrigger;
 
