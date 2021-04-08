@@ -1,5 +1,4 @@
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
-import { execute, list, attach, detach } from './terminal.comm.mjs';
 
 //NOTE: sucks that I have to customize internal instance of chalk
 import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
@@ -49,6 +48,7 @@ const optionDefinitions = [{
 }];
 
 async function invoke(args){
+	const { execute, list, attach, detach } = this.comm;
 	const options = {
 		argv: args.trim().split(' ')
 	};
@@ -89,8 +89,9 @@ export class Watch {
 	listenerKeys = [];
 	term = undefined;
 
-	constructor(term){
+	constructor(term, Communicate){
 		this.term = term;
+		this.comm = Communicate;
 		this.invoke = invoke.bind(this);
 		this.exit = exit.bind(this)
 	}

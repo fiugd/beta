@@ -58,7 +58,24 @@ const detach = (key) => {
 	return new Promise(handler)
 };
 
-export {
+/*
+const execTrigger = attachTrigger({
+	name: "Terminal",
+	eventName: "operations",
+	type: "raw",
+});
+	execTrigger({
+		detail: {
+			operation: op,
+			listener: commandQueueId,
+			filename,
+			newName,
+			body,
+		},
+	});
+*/
+
+export default {
 	attach,
 	detach,
 	execute,
