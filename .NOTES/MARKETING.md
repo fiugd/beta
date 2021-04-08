@@ -11,33 +11,46 @@
 * fiug takes inspiration from all of the following in some regard
 * fiug will most likely not do any one of these things as well as any one of these do
 
-## Fiug IS or NOT (maybe)
+## Fiug (IS | IS NOT)
 
 ### Editor
 - modify and manage files sometimes with other integrations/tasks
 - examples: vscode, atom, brackets, Eclipse Theia, Light Table
 
-### IDE | Playground
+### IDE | Playground | Coce Runner
 - online editor and web-based code share/run
-- examples: plunker, codepen, stackblitz, runkit, repl.it, glitch, observables, iodide.io, jupyter notebook
-- more: https://codeframe.co/, https://slingcode.net/, https://codefence.io/
-- https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds
-- https://tio.run/#
+- [wiki source code playgrounds](https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds)
+- examples
+	- [jsfiddle](https://jsfiddle.net/)
+	- [plunker](https://plnkr.co/)
+	- [codepen](https://codepen.io/)
+	- [stackblitz](https://stackblitz.com/)
+	- [runkit](https://runkit.com/)
+	- [replit.it](https://replit.com/)
+	- [glitch](https://glitch.com/)
+	- [observables](https://observablehq.com/)
+	- [iodide.io](https://github.com/iodide-project/iodide)
+	- [jupyter notebook hosts](https://www.dataschool.io/cloud-services-for-jupyter-notebook/)
+	- [codeframe](https://codeframe.co/)
+	- [sligncode](https://slingcode.net/)
+	- [codefence](https://codefence.io/)
+	- [tio](https://tio.run/#)
 
 ### Nocode platform / Multiexperience Development Platforms (MXDP)
 - examples
-	- https://www.outsystems.com/
-	- https://webflow.com/
-	- https://airtable.com/
-	- https://bubble.io/
+	- [outsystems](https://www.outsystems.com/)
+	- [webflow](https://webflow.com/)
+	- [airtable](https://airtable.com/)
+	- [bubble.io](https://bubble.io/)
+	- [kintone](https://www.kintone.com/)
 
 ### Mindmap | Knowledge Management Tool
 - examples
-	- https://dendron.so
-	- https://roamresearch.com/
-	- https://athensresearch.github.io/athens/
-	- https://github.com/foambubble/foam
-	- https://github.com/svsool/vscode-memo
+	- [dendron](https://dendron.so)
+	- [roam](https://roamresearch.com/)
+	- [athens](https://athensresearch.github.io/athens/)
+	- [foam](https://github.com/foambubble/foam)
+	- [vs code memo](https://github.com/svsool/vscode-memo)
 
 ### Continuous Integration Tool
 - code, build, deployment automation
@@ -45,14 +58,15 @@
 
 ### ALM
 - application lifecycle management
-- examples: many solutions all mostly unknown; difficult to find good examples
+- examples: many solutions all mostly unknown; difficult to find good examples by name
 
 ### APM
 - application performance management
 - examples: weavescope, splunk, datadog, kubernetes dashboard, ELK/EFK/Kibana
 
 ### Editor Extension
-- example: https://github.com/codespaces-contrib/codeswing
+- examples
+	- [codeswing](https://github.com/codespaces-contrib/codeswing)
 
 ### XaaS
 
