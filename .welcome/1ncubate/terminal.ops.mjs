@@ -37,7 +37,9 @@ const commands = [
 		keyword: "rm",
 		event: ["deleteFile", "deleteFolder"],
 		args: [
-			{ name: 'path', type: String, defaultOption: true }
+			{ name: 'path', type: String, defaultOption: true },
+			{ name: 'recursive', type: Boolean, alias: 'r' },
+			{ name: 'force', type: Boolean, alias: 'f' },
 		],
 	},
 	{
@@ -50,6 +52,14 @@ const commands = [
 		name: 'Touch',
 		keyword: "touch",
 		event: "addFile",
+		args: [
+			{ name: 'path', type: String, defaultOption: true }
+		],
+	},
+	{
+		name: 'Concat',
+		keyword: "cat",
+		event: "",
 		args: [
 			{ name: 'path', type: String, defaultOption: true }
 		],
@@ -89,7 +99,7 @@ const ConstructObject = (all, one) => {
 };
 
 const {
-	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch
+	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat
 } = commands.reduce(ConstructObject, {});
 
-export { PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch };
+export { PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat };

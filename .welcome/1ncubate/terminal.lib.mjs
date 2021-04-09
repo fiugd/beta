@@ -2,7 +2,7 @@ import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
 import { chalk } from './terminal.utils.mjs';
 import {
-	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch
+	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat
 } from './terminal.ops.mjs';
 
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
@@ -12,13 +12,13 @@ import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 
 
 const getSupportedCommands = (commands) => {
-	const [watch, pwd, cd, md, ls, rm, mv, touch] = commands.ops;
+	const [watch, pwd, cd, md, ls, rm, mv, touch, cat] = commands.ops;
 	return {
 		cls: commands.clearTerminal,
 		clear: commands.clearTerminal,
 		history: commands.history.print,
 
-		watch, pwd, cd, md, ls, rm, mv, touch,
+		watch, pwd, cd, md, ls, rm, mv, touch, cat,
 		dir: ls,
 		mkdir: md,
 	};
@@ -63,7 +63,7 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 
 	const history = new History({ chalk, writeLine, setLine, setBuffer, getBuffer });
 	const InstantiateOp = (op) => new op(term, comm);
-	const ops = [Watch, PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch]
+	const ops = [Watch, PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat]
 		.map(InstantiateOp);
 	const supportedCommands = getSupportedCommands({ clearTerminal, history, ops });
 
