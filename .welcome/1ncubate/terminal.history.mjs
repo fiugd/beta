@@ -8,9 +8,29 @@ const history = [
 	`watch`
 ];
 
+const usage = (chalk) => {
+	const link = url => chalk.hex('#9cdcfe')(url)
+	return `
+
+${chalk.bold('Usage:')} history ${chalk.hex('#BBB')('')}
+
+Prints history of entered commands.
+
+  -h, --help   ${/* SPACER                */''}    Prints this guide
+
+${chalk.italic(`
+Online help: ${link('https://github.com/crosshj/fiug/wiki')}
+Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+`)}
+	`;
+}
+
+
 export class History {
+	keyword = 'history';
 	current = -1;
 	history = history;
+	args = [];
 
 	constructor({ chalk, getBuffer, setLine, setBuffer, writeLine }){
 		this.chalk = chalk;
@@ -19,9 +39,11 @@ export class History {
 		this.setLine = setLine;
 		this.writeLine = writeLine;
 
+		this.help = () => usage(chalk);
+
 		this.next = this.next.bind(this);
 		this.prev = this.prev.bind(this);
-		this.print = this.print.bind(this);
+		this.invoke = this.invoke.bind(this);
 		this.push = this.push.bind(this);
 		this.updateBuffer = this.updateBuffer.bind(this);
 		this.updateLine = this.updateLine.bind(this);
@@ -43,7 +65,7 @@ export class History {
 		this.updateLine();
 	}
 
-	print(){
+	invoke(args, done){
 		const { chalk, history, writeLine } = this;
 		writeLine('\n');
 		const EXTRA_PADDING = 3;
@@ -52,6 +74,7 @@ export class History {
 			.forEach((h,i) => {
 				writeLine(`${chalk.dim((i+1+'').padStart(padding, ' '))}  ${h}\n`)
 			})
+		done();
 	}
 
 	push(command){

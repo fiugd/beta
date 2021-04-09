@@ -5,12 +5,12 @@ const link = url => chalk.hex('#9cdcfe')(url)
 // TODO: would be nice if this were auto-generated
 const usage = `
 
-${chalk.bold('Usage:')} watch ${chalk.hex('#BBB')('[OPTION]... [ARGUMENT(S)]...')}
+${chalk.bold('Usage:')} watch -e ${chalk.hex('#BBB')('[EVENT(S)]...')}
 
-Print details of chosen events as they occur in the system.
+Prints EVENT(S) as they occur in the system.
 
-  -e, --event  ${chalk.hex('#BBB')('event(s)')}    Events to watch
-  -h, --help   ${/* SPACER                */''}    Prints this guide
+  -e, --event  ${chalk.hex('#BBB')('EVENT(S)')}    Events to watch
+  -h, --help   ${/* SPACER        */'        '}    Prints this guide
 
 ${chalk.bold('Examples:')}
   watch -e fileSelect
@@ -25,7 +25,7 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 async function invoke(args, done){
 	const { execute, list, attach, detach } = this.comm;
 
-	if(args.help || !args?.events?.length){
+	if(!args?.events?.length){
 		this.term.write(usage);
 		done();
 		return
@@ -64,14 +64,14 @@ export class Watch {
 	listenerKeys = [];
 	term = undefined;
 
-	cliArgOptions = [
-		{ name: 'events', alias: 'e', type: String, multiple: true },
-		{ name: 'help', alias: 'h', type: Boolean }
+	args = [
+		{ name: 'events', alias: 'e', type: String, multiple: true, required: true },
 	]
 
 	constructor(term, Communicate){
 		this.term = term;
 		this.comm = Communicate;
+		this.help = () => usage;
 		this.invoke = invoke.bind(this);
 		this.exit = exit.bind(this)
 	}

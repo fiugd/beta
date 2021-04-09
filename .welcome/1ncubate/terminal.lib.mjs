@@ -1,9 +1,7 @@
 import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
 import { chalk } from './terminal.utils.mjs';
-import {
-	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat
-} from './terminal.ops.mjs';
+import GetOps from './terminal.ops.mjs';
 
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 // also consider: https://www.npmjs.com/package/minimist
@@ -12,31 +10,48 @@ import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 
 
 const getSupportedCommands = (commands) => {
-	const [watch, pwd, cd, md, ls, rm, mv, touch, cat] = commands.ops;
-	return {
+	const supported = {
+		help: commands.help,
 		cls: commands.clearTerminal,
 		clear: commands.clearTerminal,
-		history: commands.history.print,
-
-		watch, pwd, cd, md, ls, rm, mv, touch, cat,
-		dir: ls,
-		mkdir: md,
 	};
+	commands.ops.forEach(op => {
+		supported[op.keyword] = op;
+	});
+	return supported;
 };
 
 //TODO: use state for this
 const SYSTEM_NAME = 'fiug.dev v0.4';
 const CURRENT_FOLDER = '.welcome/current';
 
+const missingArg = (op, missing) => `
+${op}: missing argument${missing.length?'s':''}: ${missing.join(', ')}
+Try '${op} --help' for more information.
+`;
+
 const parseArgs = (model, argString) => {
-	if(!model?.cliArgOptions) return argString;
+	if(!model?.args) return argString;
+	if(argString.includes('-h') || argString.includes('-h')) return { help: true };
 	const options = {
 		argv: argString.trim().split(' '),
 		partial: true
 	};
-	if(typeof model.cliArgOptions === 'function') return model.cliArgOptions(options.argv);
+	const result = typeof model.argsGet === 'function'
+		? model.argsGet(options.argv)
+		: commandLineArgs(model.args, options);
+	const resultProps = Object.keys(result).sort();
+	(model?.args || []).forEach(x => {
+		if(!x.defaultValue || result[x.name]) return;
+		result[x.name] = x.defaultValue;
+	});
+	if(!model?.required?.length) return result;
 
-	const result = commandLineArgs(model.cliArgOptions, options);
+	const argsEqual = resultProps.join('') === model.required.sort().join('');
+	const missing = model.required
+		.filter(x => !resultProps.includes(x) || !result[x]);
+	if(missing.length) return { missing };
+
 	return result;
 }
 
@@ -58,14 +73,17 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 	const eraseToPrompt = () => eraseLine() & writePromptIndicator(false/*no new line*/);
 	const setLine = (replace) => eraseToPrompt() & term.write(replace);
 	const clearTerminal = (e) => eraseLine() & term.clear();
+	const help = (e) => term.write('\n'+
+		Object.keys(supportedCommands)
+			.filter(x=> !['help', 'cls', 'clear'].includes(x))
+			.sort().join('\n') + '\n'
+	);
 	// TODO: ask if the user meant some other command & provide link to run it
 	const unrecognizedCommand = (keyword) => (e) => term.write(`\n${keyword}: command not found\n`)
 
 	const history = new History({ chalk, writeLine, setLine, setBuffer, getBuffer });
-	const InstantiateOp = (op) => new op(term, comm);
-	const ops = [Watch, PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch, Concat]
-		.map(InstantiateOp);
-	const supportedCommands = getSupportedCommands({ clearTerminal, history, ops });
+	const ops = [ history, new Watch(term, comm), ...GetOps(term, comm)];
+	const supportedCommands = getSupportedCommands({ help, clearTerminal, ops });
 
 	const enterCommand = (e) => {
 		if(getRunning()) return term.write('\n');
@@ -86,6 +104,20 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 			? command
 			: (e) => {
 				setRunning(command);
+				const parsedArgs = parseArgs(command, args);
+				if(parsedArgs.help){
+					const helpCommand = command.help
+						? command.help
+						: () => {};
+					term.write(helpCommand() || '\nHelp unavailable.\n');
+					done();
+					return;
+				}
+				if(parsedArgs.missing){
+					term.write(missingArg(command.keyword, parsedArgs.missing));
+					done();
+					return;
+				}
 				command.invoke(parseArgs(command, args), done);
 			};
 
