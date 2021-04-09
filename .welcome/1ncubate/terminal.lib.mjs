@@ -1,6 +1,9 @@
 import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
 import { chalk } from './terminal.utils.mjs';
+import {
+	PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch
+} from './terminal.ops.mjs';
 
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 // also consider: https://www.npmjs.com/package/minimist
@@ -8,12 +11,18 @@ import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Shells
 
 
-const getSupportedCommands = (commands) => ({
-	cls: commands.clearTerminal,
-	clear: commands.clearTerminal,
-	history: commands.history.print,
-	watch: commands.watch
-});
+const getSupportedCommands = (commands) => {
+	const [watch, pwd, cd, md, ls, rm, mv, touch] = commands.ops;
+	return {
+		cls: commands.clearTerminal,
+		clear: commands.clearTerminal,
+		history: commands.history.print,
+
+		watch, pwd, cd, md, ls, rm, mv, touch,
+		dir: ls,
+		mkdir: md,
+	};
+};
 
 //TODO: use state for this
 const SYSTEM_NAME = 'fiug.dev v0.4';
@@ -25,6 +34,8 @@ const parseArgs = (model, argString) => {
 		argv: argString.trim().split(' '),
 		partial: true
 	};
+	if(typeof model.cliArgOptions === 'function') return model.cliArgOptions(options.argv);
+
 	const result = commandLineArgs(model.cliArgOptions, options);
 	return result;
 }
@@ -51,9 +62,10 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 	const unrecognizedCommand = (keyword) => (e) => term.write(`\n${keyword}: command not found\n`)
 
 	const history = new History({ chalk, writeLine, setLine, setBuffer, getBuffer });
-	const watch = new Watch(term, comm);
-
-	const supportedCommands = getSupportedCommands({ clearTerminal, history, watch });
+	const InstantiateOp = (op) => new op(term, comm);
+	const ops = [Watch, PrintWorkingDir, ChangeDir, MakeDir, List, Remove, Move, Touch]
+		.map(InstantiateOp);
+	const supportedCommands = getSupportedCommands({ clearTerminal, history, ops });
 
 	const enterCommand = (e) => {
 		if(getRunning()) return term.write('\n');
@@ -126,6 +138,6 @@ export default ({ term, setBuffer, getBuffer, setRunning, getRunning, comm }) =>
 	return {
 		clearTerminal, prompt, eraseToPrompt, writeLine, selectAll,
 		enterCommand, backspaceCommand, copyKillCommand, pasteCommand,
-		history, watch
+		history
 	}
 };
