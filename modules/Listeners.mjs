@@ -159,10 +159,6 @@ window.addEventListener('message', function(messageEvent) {
 	const { register='', unregister, triggerEvent, name, eventName, key } = data;
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
-	source.postMessage(
-		{ msg: 'ACK', ...data },
-		messageEvent.origin
-	);
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
@@ -172,6 +168,11 @@ window.addEventListener('message', function(messageEvent) {
 		trigger(triggerEvent)
 		return;
 	}
+
+	source.postMessage(
+		{ msg: 'ACK', ...data },
+		messageEvent.origin
+	);
 
 	if(unregister === 'listener') return remove({ key });
 
