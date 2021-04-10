@@ -3,6 +3,8 @@ SUPER IMPORTANT:
 - need git...
 
 PRETTY IMPORTANT:
+- watch events keeps logging even after CTRL-C
+- some commands don't exit properly after running
 - ls needs to display contents better
 - history has issues with wrapped lines
 - cat doesn't work
