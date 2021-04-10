@@ -14,6 +14,7 @@ PRETTY IMPORTANT:
 - not sure if rm works
 
 INSANE WITH VARYING LEVELS OF MASOCHISM:
+- triggers should be attached and used instead of one-off triggers
 - help includes args notes for commands listed
 - watch runs javascript files kinda like nodemon/node does
 - indication of file versus folder in ls
