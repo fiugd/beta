@@ -75,15 +75,18 @@ const prompt = async (term, ops) => {
 export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm }) => {
 	const showPrompt = async () => await prompt(term, ops);
 	const writeLine = term.write.bind(term);
-	const eraseLine = () => term.write('\x1B[2K\r');
-	const eraseToPrompt = () => eraseLine() & writePromptIndicator(false/*no new line*/);
+	const eraseLine = () => {
+		//TODO: need to delete backwards (and up for overflowed lines) until reaching prompt
+		term.write('\x1B[2K\r');
+	}
+	const eraseToPrompt = () => eraseLine() & writePromptIndicator(term);
 	const setLine = (replace) => eraseToPrompt() & term.write(replace);
 
 	const history = ops.find(x => x.keyword === "history");
 	history.writeLine = writeLine; //NOTE: hate to do this..
 	history.setLine = setLine; //NOTE: hate to do this..
 
-	const clearTerminal = (e) => eraseLine() & term.clear();
+	const clearTerminal = (e) => term.clear() & eraseLine();
 	const help = (e) => term.write('\n'+
 		Object.keys(supportedCommands)
 			.filter(x=> !['help', 'cls', 'clear'].includes(x))
