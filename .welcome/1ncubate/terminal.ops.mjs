@@ -16,6 +16,7 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, defaultValue: '~' }
 		],
+		map: ({ directory }) => ({ folderPath: directory })
 	},
 	{
 		name: 'MakeDir',
@@ -26,6 +27,7 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, required: true }
 		],
+		map: ({ directory }) => ({ folderName: directory })
 	},
 	{
 		name: 'List',
@@ -72,6 +74,7 @@ const commands = [
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true }
 		],
+		map: ({ file }) => ({ filename: file })
 	},
 	{
 		name: 'Concat',
@@ -107,31 +110,30 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
-const operationsListener = (...args) => {
-	// check queue for who is listening
-	// fire the Promise.resolve for that listener
-	console.log(args);
-};
-
 async function exec(data){
 	return await this.comm.execute(data);
 }
 
 async function invoke(args, done){
 	this.term.write('\n');
-	const ackEventTrigger = await this.exec({
+	const mappedArgs = this.map ? this.map(args) : args;
+	const { error, response } = await this.exec({
 		triggerEvent: {
 			type: 'operations',
 			detail: {
 				source: 'TerminalWIP',
-				operation: this.event[0], //TODO:
-				//data: this.args
+				operation: this.event[0], //TODO: duh
+				...mappedArgs
 			},
 		}
 	});
-	// await real event response from operationsListener
-	this.term.write(jsonColors(ackEventTrigger));
-	this.term.write(notImplemented(this));
+	if(error){
+		this.term.write(jsonColors({ error }));
+	}
+	if(response){
+		this.term.write(response+'\n');
+	}
+	//this.term.write(notImplemented(this));
 	done();
 };
 async function exit(){}
@@ -149,15 +151,10 @@ const Operation = (config, term, comm) => ({
 	required: (config.args || [])
 		.filter(x => x.required)
 		.map(x => x.name),
-	help: () => commandHelp(config)
+	help: () => commandHelp(config),
 });
 
 const GetOps = (term, comm) => {
-	comm.attach({
-		name: 'TerminalWIP',
-		listener: operationsListener,
-		eventName: 'operations',
-	});
 	const opmap = config => Operation(config, term, comm)
 	return commands.map(opmap);
 };
