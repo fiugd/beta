@@ -31,13 +31,13 @@ export class History {
 	current = -1;
 	history = history;
 	args = [];
+	setLine = undefined;
+	writeLine = undefined;
 
-	constructor({ chalk, getBuffer, setLine, setBuffer, writeLine }){
+	constructor({ chalk, getBuffer, setBuffer }){
 		this.chalk = chalk;
 		this.getBuffer = getBuffer;
 		this.setBuffer = setBuffer;
-		this.setLine = setLine;
-		this.writeLine = writeLine;
 
 		this.help = () => usage(chalk);
 

@@ -110,14 +110,9 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
-async function exec(data){
-	return await this.comm.execute(data);
-}
-
-async function invoke(args, done){
-	this.term.write('\n');
+async function invokeRaw(args){
 	const mappedArgs = this.map ? this.map(args) : args;
-	const { error, response } = await this.exec({
+	const { error, response } = await this.comm.execute({
 		triggerEvent: {
 			type: 'operations',
 			detail: {
@@ -127,6 +122,12 @@ async function invoke(args, done){
 			},
 		}
 	});
+	return { error, response };
+}
+
+async function invoke(args, done){
+	this.term.write('\n');
+	const { error, response } = await this.invokeRaw(args);
 	if(error){
 		this.term.write(jsonColors({ error }));
 	}
@@ -143,7 +144,7 @@ const Operation = (config, term, comm) => ({
 	term,
 	comm,
 	invoke,
-	exec,
+	invokeRaw,
 	exit,
 	listenerKeys: [],
 	args: config.args || [],
