@@ -105,12 +105,33 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 `)}
 `;
 
+const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
+
+const operationsListener = (...args) => {
+	// check queue for who is listening
+	// fire the Promise.resolve for that listener
+	console.log(args);
+};
+
+async function exec(data){
+	return await this.comm.execute(data);
+}
+
 async function invoke(args, done){
 	this.term.write('\n');
-	this.term.write(jsonColors(args));
-	this.term.write(chalk.hex('#ccc')(
-		`\n${this.keyword}: not implemented\n`
-	));
+	const ackEventTrigger = await this.exec({
+		triggerEvent: {
+			type: 'operations',
+			detail: {
+				source: 'TerminalWIP',
+				operation: this.event[0], //TODO:
+				//data: this.args
+			},
+		}
+	});
+	// await real event response from operationsListener
+	this.term.write(jsonColors(ackEventTrigger));
+	this.term.write(notImplemented(this));
 	done();
 };
 async function exit(){}
@@ -120,6 +141,7 @@ const Operation = (config, term, comm) => ({
 	term,
 	comm,
 	invoke,
+	exec,
 	exit,
 	listenerKeys: [],
 	args: config.args || [],
@@ -131,7 +153,13 @@ const Operation = (config, term, comm) => ({
 });
 
 const GetOps = (term, comm) => {
-	return commands.map((config) => Operation(config, term, comm));
+	comm.attach({
+		name: 'TerminalWIP',
+		listener: operationsListener,
+		eventName: 'operations',
+	});
+	const opmap = config => Operation(config, term, comm)
+	return commands.map(opmap);
 };
 
 export default GetOps;
