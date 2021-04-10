@@ -58,16 +58,19 @@ const ghFetch = async (templateUrl, params={}, extraOpts={}) => {
 	return await fetchJSON(filledUrl, {...opts, ...extraOpts });
 };
 
-const files = [{
-	path: 'commitTest/file-PRANK.md',
-	content: new Array(25).fill().map(x => `TANDY`).join('\n')
-}, {
-	path: 'commitTest/file-BOOST.md',
-	content: new Array(25).fill().map(x => `CART`).join('\n')
-}, {
-	path: 'commitTest/file-PHYSICAL.md',
-	content: new Array(25).fill().map(x => `TOAST`).join('\n')
-}];
+const FakeFile = (name, content) => {
+	return {
+		path: `commitTest/file-${name.toUpperCase()}.md`,
+		content: new Array(25).fill()
+			.map(x => content.toUpperCase())
+			.join('   \n')
+	}
+}
+const files = [
+	FakeFile('dice', 'cramp'),
+	FakeFile('taste', 'ease'),
+	FakeFile('bereft', 'moniker'),
+];
 
 (async () => {
 
