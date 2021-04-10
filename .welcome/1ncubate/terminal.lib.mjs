@@ -19,7 +19,6 @@ const getSupportedCommands = (commands) => {
 
 //TODO: use state for this
 const SYSTEM_NAME = 'fiug.dev v0.4';
-const CURRENT_FOLDER = '.welcome/current';
 
 const missingArg = (op, missing) => `
 ${op}: missing argument${missing.length?'s':''}: ${missing.join(', ')}
