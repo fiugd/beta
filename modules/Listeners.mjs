@@ -165,6 +165,10 @@ window.addEventListener('message', function(messageEvent) {
 	);
 
 	if(triggerEvent){
+		triggerEvent.detail = triggerEvent.detail || {};
+		triggerEvent.detail.callback = (error, response) => {
+			source.postMessage({ response, error, key }, messageEvent.origin);
+		}
 		trigger(triggerEvent)
 		return;
 	}
