@@ -588,7 +588,8 @@ const inlineEditor = (ChangeHandler) => ({
 		return false;
 	}
 	function toggleComment(cm){
-		cm.execCommand('toggleComment');
+		//TODO: would love block comments first, then line
+		cm.toggleComment({ indent: true });
 	}
 	const extraKeys = {
 		"Cmd-D": selectNextOccurrence,
