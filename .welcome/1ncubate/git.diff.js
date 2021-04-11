@@ -40,7 +40,6 @@ lines
 are
 not
 changed
-
 `;
 var text4 = `
 //TODO: delete backwards (and up for overflowed lines) until reaching prompt
@@ -84,7 +83,7 @@ showDiff(text3,text4)
 
 const showDiffLines = (t1,t2) => {
 	const diff = Diff(text3, text4, {
-		n_surrounding: -1
+		n_surrounding: 0
 	})
 
 	const diffEl = document.createElement('pre');
@@ -92,9 +91,11 @@ const showDiffLines = (t1,t2) => {
 	diffEl.innerHTML = diff.split('\n').map(x => {
 			const space = (str) => `${str[0]}  ${str.slice(1)}`;
 		if(x[0] === '-') return `
-<div style="background:#4a1212;">${space(x)}</div>`.trim();
+			<div style="background:#4a1212;">${space(x)}</div>`.trim();
 		if(x[0] === '+') return `
-<div style="background: #113111;">${space(x)}</div>`.trim();
+			<div style="background: #113111;">${space(x)}</div>`.trim();
+		if(x.slice(0,2) === '@@') return `
+			<div style="color:#B753B7;">\n${x}</div>`.trim();
 		return `<div>  ${x}</div>`;
 	}).join('');
 	document.body.append(diffEl);
