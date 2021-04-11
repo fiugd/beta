@@ -1,0 +1,85 @@
+//show-preview
+/*
+- diff:
+	- https://github.com/google/diff-match-patch
+	- https://www.npmjs.com/package/diff
+	- https://www.npmjs.com/package/git-diff
+	- https://www.npmjs.com/package/diff-lines
+	- algos: https://link.springer.com/article/10.1007/s10664-019-09772-z
+*/
+
+import { appendUrls, consoleHelper, htmlToElement, importCSS, prism } from '../.tools/misc.mjs';
+import 	'../shared.styl';
+consoleHelper();
+
+import DiffMatchPatch from 'https://cdn.skypack.dev/diff-match-patch';
+
+import Diff from 'https://cdn.skypack.dev/diff-lines';
+
+const logJSON = obj => console.log(JSON.stringify(obj, null, 2));
+
+var text1 = 'The quick brown fox jumps over the lazy dog.';
+var text2 = 'That quick brown fox jumped over a lazy dog.';
+
+var text3 = `
+//TODO: need to delete backwards (and up for overflowed lines) until reaching prompt
+Let's change this in the next release.
+dos
+tres
+quatro
+cinco
+const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`)
+	.exec(buffer) || [];
+Peace is necesary.
+Perfect.
+`;
+var text4 = `
+//TODO: delete backwards (and up for overflowed lines) until reaching prompt
+Let's change this in the next release to prod!
+Peace is necesary.
+I have never made a point about that.
+const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`).exec(buffer) || [];
+uno
+tres
+quatro
+cinco
+gross
+tres
+`;
+
+const showDiff = (t1,t2) => {
+	const dmp = new DiffMatchPatch();
+	const diff = dmp.diff_main(t1, t2);
+	dmp.diff_cleanupSemantic(diff)
+
+	const diffEl = document.createElement('pre');
+	diffEl.className = 'info';
+	diffEl.style.background = '#fff'
+	diffEl.style.color = '#222';
+	diffEl.style.filter = 'invert(.85) saturate(2) hue-rotate(175deg)'
+	diffEl.innerHTML = dmp.diff_prettyHtml(diff);
+	document.body.append(diffEl);
+}
+
+showDiff(text1,text2)
+showDiff(text3,text4)
+
+const showDiffLines = (t1,t2) => {
+	const diff = Diff(text3, text4, {
+		n_surrounding: 0
+	})
+
+	const diffEl = document.createElement('pre');
+	diffEl.className = 'info';
+	diffEl.innerHTML = diff.split('\n').map(x => {
+			const space = (str) => `${str[0]}  ${str.slice(11)}`;
+		if(x[0] === '-') return `
+<div style="background:#4a1212;">${space(x)}</div>`.trim();
+		if(x[0] === '+') return `
+<div style="background: #113111;">${space(x)}</div>`.trim();
+		return `<div>  ${x}</div>`;
+	}).join('');
+	document.body.append(diffEl);
+}
+
+showDiffLines(text3, text4);
