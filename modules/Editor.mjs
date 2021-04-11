@@ -592,6 +592,7 @@ const inlineEditor = (ChangeHandler) => ({
 		cm.toggleComment({ indent: true });
 	}
 	function SwapLineUp(cm) {
+		var Pos = CodeMirror.Pos;
 		if (cm.isReadOnly()) return CodeMirror.Pass
 		var ranges = cm.listSelections(), linesToMove = [], at = cm.firstLine() - 1, newSels = [];
 		for (var i = 0; i < ranges.length; i++) {
@@ -618,6 +619,7 @@ const inlineEditor = (ChangeHandler) => ({
 		});
 	};
 	function SwapLineDown(cm) {
+		var Pos = CodeMirror.Pos;
 		if (cm.isReadOnly()) return CodeMirror.Pass
 		var ranges = cm.listSelections(), linesToMove = [], at = cm.lastLine() + 1;
 		for (var i = ranges.length - 1; i >= 0; i--) {
