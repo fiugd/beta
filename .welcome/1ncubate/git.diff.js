@@ -23,28 +23,46 @@ var text2 = 'That quick brown fox jumped over a lazy dog.';
 
 var text3 = `
 //TODO: need to delete backwards (and up for overflowed lines) until reaching prompt
+these
+lines
+are
+not
+changed
 Let's change this in the next release.
-dos
-tres
-quatro
-cinco
-const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`)
-	.exec(buffer) || [];
-Peace is necesary.
-Perfect.
+these
+lines
+are
+not
+changed
+const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`).exec(buffer) || [];
+these
+lines
+are
+not
+changed
+
 `;
 var text4 = `
 //TODO: delete backwards (and up for overflowed lines) until reaching prompt
+these
+lines
+are
+not
+changed
 Let's change this in the next release to prod!
-Peace is necesary.
-I have never made a point about that.
-const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`).exec(buffer) || [];
-uno
-tres
-quatro
-cinco
-gross
-tres
+these
+lines
+are
+not
+changed
+const [,keyword, args] = new RegExp(\`^(.+?)(?:\\s|$)(.*)$\`)
+	.exec(buffer) || [];
+these
+lines
+are
+not
+changed
+final addition
 `;
 
 const showDiff = (t1,t2) => {
@@ -66,13 +84,13 @@ showDiff(text3,text4)
 
 const showDiffLines = (t1,t2) => {
 	const diff = Diff(text3, text4, {
-		n_surrounding: 0
+		n_surrounding: -1
 	})
 
 	const diffEl = document.createElement('pre');
 	diffEl.className = 'info';
 	diffEl.innerHTML = diff.split('\n').map(x => {
-			const space = (str) => `${str[0]}  ${str.slice(11)}`;
+			const space = (str) => `${str[0]}  ${str.slice(1)}`;
 		if(x[0] === '-') return `
 <div style="background:#4a1212;">${space(x)}</div>`.trim();
 		if(x[0] === '+') return `
