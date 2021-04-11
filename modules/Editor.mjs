@@ -587,9 +587,13 @@ const inlineEditor = (ChangeHandler) => ({
 		}
 		return false;
 	}
+	function toggleComment(cm){
+		cm.execCommand('toggleComment');
+	}
 	const extraKeys = {
 		"Cmd-D": selectNextOccurrence,
 		"Ctrl-D": selectNextOccurrence,
+		"Ctrl-/": toggleComment
 	};
 
 	const editorCallback = (error, editor) => {
