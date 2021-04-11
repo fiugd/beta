@@ -5,6 +5,7 @@
 	const urls = {
 		rateLimit: baseUrl + '/rate_limit',
 		latestCommit: baseUrl + '/repos/{owner}/{repo}/branches/{branch}',
+		tree: baseUrl + '/repos/{owner}/{repo}/git/trees',
 		getTreeRecursive: baseUrl + '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true',
 		rawBlob: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{blob.path}'
 	};

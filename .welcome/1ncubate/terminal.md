@@ -1,6 +1,6 @@
 
 SUPER IMPORTANT:
-- need git...
+- need git commits | pulls | branch | etc
 
 PRETTY IMPORTANT:
 - watch events keeps logging even after CTRL-C

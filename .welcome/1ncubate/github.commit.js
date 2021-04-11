@@ -31,16 +31,20 @@ const logJSON = obj => console.log(JSON.stringify(obj, null, 2));
 
 const baseUrl = "https://api.github.com";
 const urls = {
-	rateLimit: baseUrl + '/rate_limit',
-	branch: baseUrl + '/repos/{owner}/{repo}/branches/{branch}',
-	tree: baseUrl + '/repos/{owner}/{repo}/git/trees',
-	getTreeRecursive: baseUrl + '/repos/{owner}/{repo}/git/trees/{sha}?recursive=true',
-	commit: baseUrl + '/repos/{owner}/{repo}/git/commits/{sha}',
-	createCommit: baseUrl + '/repos/{owner}/{repo}/git/commits',
-	createBlob: baseUrl + '/repos/{owner}/{repo}/git/blobs',
-	rawBlob: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{blob.path}',
-	refs: baseUrl + '/repos/{owner}/{repo}/git/refs/heads/{branch}'
+	rateLimit: '/rate_limit',
+	branch: '/repos/{owner}/{repo}/branches/{branch}',
+	tree: '/repos/{owner}/{repo}/git/trees',
+	treeRecurse: '/repos/{owner}/{repo}/git/trees/{sha}?recursive=true',
+	commit: '/repos/{owner}/{repo}/git/commits/{sha}',
+	createCommit: '/repos/{owner}/{repo}/git/commits',
+	blobCreate: '/repos/{owner}/{repo}/git/blobs',
+	blobRaw: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{blob.path}',
+	refs: '/repos/{owner}/{repo}/git/refs/heads/{branch}'
 };
+Object.entries(urls).forEach(([k,v]) => {
+	if(v[0] !== '/') return
+	urls[k] = baseUrl + urls[k];
+})
 const auth = getStored('Github Personal Access Token');
 
 const opts = { headers: {} };
@@ -67,28 +71,28 @@ const FakeFile = (name, content) => {
 	}
 }
 const files = [
-	FakeFile('dice', 'cramp'),
-	FakeFile('taste', 'ease'),
-	FakeFile('bereft', 'moniker'),
+	FakeFile('weiner', 'hotdog'),
+	FakeFile('fan', 'light'),
+	FakeFile('read', 'webtoons'),
 ];
 
 (async () => {
 
-const createBlob = (file) => ghFetch(urls.createBlob, null, {
+const blobCreate = (file) => ghFetch(urls.blobCreate, null, {
 	method: 'POST',
 	body: JSON.stringify({
 		content: btoa(file.content),
 		encoding: 'base64'
 	})
 });
-const blobs = await Promise.all(files.map(createBlob))
+const blobs = await Promise.all(files.map(blobCreate))
 
 const latest = await ghFetch(urls.branch);
 
 const baseTree = await ghFetch(urls.commit, { sha: latest.commit.sha });
 //logJSON({ baseTree });
 
-const fullTree = await ghFetch(urls.getTreeRecursive, { sha: latest.commit.sha })
+const fullTree = await ghFetch(urls.treeRecurse, { sha: latest.commit.sha })
 //logJSON(fullTree);
 const mapTreeItem = ({path,mode,type,sha})=>({path,mode,type,sha});
 
@@ -131,6 +135,10 @@ const updateRefs = await ghFetch(urls.refs, null, {
 		//force: true
 	})
 })
-logJSON({ updateRefs });
+//logJSON({ updateRefs });
+if(updateRefs?.object?.sha)
+	return console.info('seems like it worked!')
+else
+	console.error('maybe a fail?')
 
 })();
