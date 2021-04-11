@@ -76,7 +76,7 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 	const showPrompt = async () => await prompt(term, ops);
 	const writeLine = term.write.bind(term);
 	const eraseLine = () => {
-		//TODO: need to delete backwards (and up for overflowed lines) until reaching prompt
+		//TODO: delete backwards (and up for overflowed lines) until reaching prompt
 		term.write('\x1B[2K\r');
 	}
 	const eraseToPrompt = () => eraseLine() & writePromptIndicator(term);
@@ -93,7 +93,8 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 			.sort().join('\n') + '\n'
 	);
 	// TODO: ask if the user meant some other command & provide link to run it
-	const unrecognizedCommand = (keyword) => (e) => term.write(`\n${keyword}: command not found\n`)
+	const unrecognizedCommand = (keyword) => (e) =>
+		term.write(`\n${keyword}: command not found\n`)
 	const supportedCommands = getSupportedCommands({ help, clearTerminal, ops });
 
 	const enterCommand = async (e) => {
@@ -102,7 +103,8 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 		const buffer = getBuffer();
 		if(!buffer) return await showPrompt();
 
-		const [,keyword, args] = new RegExp(`^(.+?)(?:\\s|$)(.*)$`).exec(buffer) || [];
+		const [,keyword, args] = new RegExp(`^(.+?)(?:\\s|$)(.*)$`)
+			.exec(buffer) || [];
 		const command = supportedCommands[keyword] || unrecognizedCommand(keyword);
 
 		const done = async () => {
@@ -110,27 +112,27 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 			term.write('\n');
 			await showPrompt();
 		};
-		
-		const handler = !command.invoke
-			? command
-			: (e) => {
-				setRunning(command);
-				const parsedArgs = parseArgs(command, args);
-				if(parsedArgs.help){
-					const helpCommand = command.help
-						? command.help
-						: () => {};
-					term.write(helpCommand() || '\nHelp unavailable.\n');
-					done();
-					return;
-				}
-				if(parsedArgs.missing){
-					term.write(missingArg(command.keyword, parsedArgs.missing));
-					done();
-					return;
-				}
-				command.invoke(parseArgs(command, args), done);
-			};
+
+		const standardHandler = (e) => {
+			setRunning(command);
+			const parsedArgs = parseArgs(command, args);
+			if(parsedArgs.help){
+				const helpCommand = command.help
+					? command.help
+					: () => {};
+				term.write(helpCommand() || '\nHelp unavailable.\n');
+				done();
+				return;
+			}
+			if(parsedArgs.missing){
+				term.write(missingArg(command.keyword, parsedArgs.missing));
+				done();
+				return;
+			}
+			command.invoke(parseArgs(command, args), done);
+		};
+
+		const handler = command.invoke ? standardHandler : command;
 
 		history.push(buffer);
 		setBuffer('');
