@@ -140,8 +140,8 @@
 		const changesStore = storage.stores.changes;
 
 		let jsonData;
-		const changes = await changes.keys();
-		
+		const changes = await changesStore.keys();
+
 		try {
 			return stringify({ changes,});
 		} catch (error) {
