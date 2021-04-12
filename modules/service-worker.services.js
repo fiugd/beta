@@ -131,6 +131,25 @@
 		}
 	};
 
+	const handleServiceGetChanges = ({ storage, ui, utils, templates }) => async (
+		params,
+		event
+	) => {
+		const [ servicesStore ] = [
+			storage.stores.services,
+			storage.stores.files,
+			storage.stores.changes
+		];
+		let jsonData;
+		const changes = await changesStore.keys();
+		
+		try {
+			return stringify({ changes,});
+		} catch (error) {
+			return stringify({ error });
+		}
+	};
+
 	const handleServiceUpdate = ({ storage, providers, ui, utils }) => async (
 		params,
 		event
@@ -292,6 +311,7 @@
 			this.handlers = {
 				serviceCreate: handleServiceCreate(this),
 				serviceChange: handleServiceChange(this),
+				serviceGetChanges: handleServiceGetChanges(this),
 				serviceUpdate: handleServiceUpdate(this),
 				serviceDelete: handleServiceDelete(this),
 			};

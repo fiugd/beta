@@ -9,26 +9,16 @@ https://github.com/crosshj/fiug-welcome/commits/WIP-testing-github-commiting
 */
 
 
-import { appendUrls, consoleHelper, htmlToElement, importCSS, prism } from '../.tools/misc.mjs';
-import 	'../shared.styl';
+import { consoleHelper, importCSS, logJSON, fetchJSON, stringify, getStored } from '../.tools/misc.mjs';
+import '../shared.styl';
 consoleHelper();
 
-const commitMessage = 'github commits like woh!'
+const commitMessage = 'github commits check it out now'
 
-const stringify = o => JSON.stringify(o,null,2);
-const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
-const getStored = (varName) => {
-	const stored = sessionStorage.getItem(varName);
-	if(stored) return stored;
-	const prompted = prompt(varName);
-	sessionStorage.setItem(varName, prompted);
-	return prompted;
-};
 const fill = (template, obj) =>
 	Object.keys(obj).reduce((all,one) =>
 		all.replace(`{${one}}`, obj[one]),
 	template);
-const logJSON = obj => console.log(JSON.stringify(obj, null, 2));
 
 const baseUrl = "https://api.github.com";
 const urls = {
@@ -45,7 +35,7 @@ const urls = {
 Object.entries(urls).forEach(([k,v]) => {
 	if(v[0] !== '/') return
 	urls[k] = baseUrl + urls[k];
-})
+});
 const auth = getStored('Github Personal Access Token');
 
 const opts = { headers: {} };
