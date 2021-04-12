@@ -1,12 +1,19 @@
-import { chalk, jsonColors } from './terminal.utils.mjs';
+/*
 
+https://medium.com/@mehulgala77/github-fundamentals-clone-fetch-push-pull-fork-16d79bb16b79
+https://googlechrome.github.io/samples/service-worker/post-message/
+
+*/
 import DiffMatchPatch from 'https://cdn.skypack.dev/diff-match-patch';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
+import { chalk, jsonColors } from './terminal.utils.mjs';
 
 const link = url => chalk.hex('#9cdcfe')(url)
-const bold = chalk.bold.bind(chalk);
-const hex = chalk.hex.bind(chalk);
-const italic = chalk.italic.bind(chalk);
+const [ bold, hex, italic ] = [
+	chalk.bold.bind(chalk),
+	chalk.hex.bind(chalk),
+	chalk.italic.bind(chalk),
+];
 
 const commandHelp = (command) => `
 
@@ -50,20 +57,26 @@ const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not imp
 
 const unrecognizedCommand = (command) => `\n${command}: command not found\n`
 
-const commands = {
-	clone: async (term) => term.write(notImplemented('clone')),
-	init: async (term) => term.write(notImplemented('init')),
-
-	diff: async (term) => term.write(notImplemented('diff')),
-	status: async (term) => term.write(notImplemented('status')),
-
-	branch: async (term) => term.write(notImplemented('branch')),
-	commit: async (term) => term.write(notImplemented('commit')),
-
-	fetch: async (term) => term.write(notImplemented('fetch')),
-	push: async (term) => term.write(notImplemented('push')),
-	pull: async (term) => term.write(notImplemented('pull')),
+const clone = async (term) => {
+	// do what settings does when it clones a github repo
+	term.write(notImplemented('clone'));
 }
+const diff = async (term) => {
+	// get all changed files
+	// write diff to terminal
+	term.write(notImplemented('diff'));
+};
+const status = async (term) => {
+	// get all changed files
+	// write their file names to terminal
+	term.write(notImplemented('status'));
+};
+const branch = async (term) => term.write(notImplemented('branch'));
+const commit = async (term) => term.write(notImplemented('commit'));
+const push = async (term) => term.write(notImplemented('push'));
+const pull = async (term) => term.write(notImplemented('pull'));
+
+const commands = { clone, diff, status, branch, commit, push, pull };
 
 async function invokeRaw(args){}
 
@@ -71,7 +84,7 @@ async function invoke(args, done){
 	const { term } = this;
 	const { command } = args;
 	if(!command){
-		this.term.write(commandHelp(this));
+		this.term.write(this.help());
 		done();
 		return
 	}

@@ -4,6 +4,8 @@
 https://gist.github.com/StephanHoyer/91d8175507fcae8fb31a
 https://gist.github.com/harlantwood/2935203
 https://mdswanson.com/blog/2011/07/23/digging-around-the-github-api-take-2.html
+
+https://github.com/crosshj/fiug-welcome/commits/WIP-testing-github-commiting
 */
 
 
@@ -11,8 +13,7 @@ import { appendUrls, consoleHelper, htmlToElement, importCSS, prism } from '../.
 import 	'../shared.styl';
 consoleHelper();
 
-const commitMessage = 'WIP create commit programmatically'
-	+ ' - change some files'
+const commitMessage = 'github commits like woh!'
 
 const stringify = o => JSON.stringify(o,null,2);
 const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
@@ -66,14 +67,19 @@ const FakeFile = (name, content) => {
 	return {
 		path: `commitTest/file-${name.toUpperCase()}.md`,
 		content: new Array(25).fill()
-			.map(x => content.toUpperCase())
+			.map(x => '### ' + content.toUpperCase())
 			.join('   \n')
 	}
-}
+};
+const randomWords = `
+poker talk
+carrot frenzy
+dance makeup
+`.trim().split('\n').map(x => x.trim().split(' '))
 const files = [
-	FakeFile('weiner', 'hotdog'),
-	FakeFile('fan', 'light'),
-	FakeFile('read', 'webtoons'),
+	FakeFile(...randomWords[0]),
+	FakeFile(...randomWords[1]),
+	FakeFile(...randomWords[2]),
 ];
 
 (async () => {

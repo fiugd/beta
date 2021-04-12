@@ -6,6 +6,11 @@
 	- https://www.npmjs.com/package/git-diff
 	- https://www.npmjs.com/package/diff-lines
 	- algos: https://link.springer.com/article/10.1007/s10664-019-09772-z
+
+https://codemirror.net/mode/diff/index.html
+https://github.blog/2020-11-17-introducing-split-diffs-in-github-desktop/
+https://github.com/desktop/desktop/blob/development/app/src/lib/diff-parser.ts
+
 */
 
 import { appendUrls, consoleHelper, htmlToElement, importCSS, prism } from '../.tools/misc.mjs';
