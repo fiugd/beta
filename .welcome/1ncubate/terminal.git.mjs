@@ -15,18 +15,18 @@ ${bold('Usage:')} ${command.keyword} ${hex('#BBB')(command.usage||'')}
 These are common Git COMMANDs which are supported in some form here:
 
 ${hex('#BBB')('start a working area')}
-   ${bold('clone')}      Clone a remote repository
+   ${bold('clone')}      Copy a remote repository to local
 
 ${hex('#BBB')('examine the history and state')}
-   ${bold('diff')}       Show what changed internally in files
-   ${bold('status')}     List all files changed
+   ${bold('diff')}       Show local changes per file
+   ${bold('status')}     List all files changed locally
 
 ${hex('#BBB')('grow, mark and tweak your common history')}
    ${bold('branch')}     List, create, or delete branches
    ${bold('commit')}     Record changes to the repository
 
 ${hex('#BBB')('collaborate')}
-   ${bold('pull')}       Fetch changes from remote
+   ${bold('pull')}       Fetch recent changes from remote
    ${bold('push')}       Update remote with local commits
 
 ${italic(`
@@ -69,8 +69,13 @@ async function invokeRaw(args){}
 
 async function invoke(args, done){
 	const { term } = this;
-	term.write('\n');
 	const { command } = args;
+	if(!command){
+		this.term.write(commandHelp(this));
+		done();
+		return
+	}
+	term.write('\n');
 	const thisCommand = commands[command];
 	if(!thisCommand) {
 		term.write(unrecognizedCommand(`git ${command}`));
