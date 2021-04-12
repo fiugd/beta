@@ -315,12 +315,12 @@
 	const _find = ({ _handlers, restorePrevious }) => async (request) => {
 		const { url, method } = request;
 		let found = _handlers.find((x) => {
-			return method.toLowerCase() === x.method && x.match(url);
+			return method.toLowerCase() === x.method && x.match(url.split('?')[0]);
 		});
 		if (!found) {
 			await restorePrevious();
 			found = _handlers.find((x) => {
-				return method.toLowerCase() === x.method && x.match(url);
+				return method.toLowerCase() === x.method && x.match(url.split('?')[0]);
 			});
 
 			if (!found) {
