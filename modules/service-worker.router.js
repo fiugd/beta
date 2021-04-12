@@ -314,6 +314,14 @@
 
 	const _find = ({ _handlers, restorePrevious }) => async (request) => {
 		const { url, method } = request;
+		const query = (() => {
+			try {
+				return Object.fromEntries([ ...(new URL(url)).searchParams ]);
+			} catch(e){
+				return {};
+			}
+		})();
+
 		let found = _handlers.find((x) => {
 			return method.toLowerCase() === x.method && x.match(url.split('?')[0]);
 		});
@@ -327,9 +335,14 @@
 				return;
 			}
 		}
+
 		return {
 			exec: async (event) => {
-				return await found.handler(found.params(url.split('?')[0]), event);
+				return await found.handler(
+					found.params(url.split('?')[0]),
+					event,
+					query
+				);
 			},
 		};
 	};

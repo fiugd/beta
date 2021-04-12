@@ -133,17 +133,22 @@
 
 	const handleServiceGetChanges = ({ storage, ui, utils, templates }) => async (
 		params,
-		event
+		event,
+		query
 	) => {
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
 		const changesStore = storage.stores.changes;
 
+		const { cwd } = query;
 		let jsonData;
 		const changes = await changesStore.keys();
 
 		try {
-			return stringify({ changes,});
+			return stringify({
+				changes, cwd,
+				msg: 'would use cwd to determine service and only return service changes'
+			});
 		} catch (error) {
 			return stringify({ error });
 		}
