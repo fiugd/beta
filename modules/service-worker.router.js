@@ -312,11 +312,16 @@
 		// could run in to problems with this ^^^ because those may be in the process of being added
 	};
 
-	const _find = ({ _handlers, restorePrevious }) => async (url) => {
-		let found = _handlers.find((x) => x.match(url));
+	const _find = ({ _handlers, restorePrevious }) => async (request) => {
+		const { url, method } = request;
+		let found = _handlers.find((x) => {
+			return method.toLowerCase() === x.method && x.match(url);
+		});
 		if (!found) {
 			await restorePrevious();
-			found = _handlers.find((x) => x.match(url));
+			found = _handlers.find((x) => {
+				return method.toLowerCase() === x.method && x.match(url);
+			});
 
 			if (!found) {
 				return;

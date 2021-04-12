@@ -69,7 +69,7 @@ const require = (url) => {
 			}
 		} catch (e) {}
 
-		const serviceAPIMatch = await app.find(event.request.url);
+		const serviceAPIMatch = await app.find(event.request);
 
 		const res = serviceAPIMatch
 			? await serviceAPIMatch.exec(event)
