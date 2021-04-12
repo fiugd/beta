@@ -329,7 +329,7 @@
 		}
 		return {
 			exec: async (event) => {
-				return await found.handler(found.params(url), event);
+				return await found.handler(found.params(url.split('?')[0]), event);
 			},
 		};
 	};
