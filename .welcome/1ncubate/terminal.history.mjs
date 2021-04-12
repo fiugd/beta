@@ -5,7 +5,15 @@ const alotOfEvents = [
 const history = [
 	'watch -e fileSelect',
 	`watch -e ${alotOfEvents.join(' ')}`,
-	`watch`
+	`watch`,
+	`git clone`,
+	`git branch`,
+	`git commit`,
+	`git fetch`,
+	`git push`,
+	`git pull`,
+	`git diff`,
+	`git status`,
 ];
 
 const usage = (chalk) => {

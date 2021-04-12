@@ -13,7 +13,6 @@ import 	'../shared.styl';
 consoleHelper();
 
 import DiffMatchPatch from 'https://cdn.skypack.dev/diff-match-patch';
-
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 
 const logJSON = obj => console.log(JSON.stringify(obj, null, 2));
@@ -22,6 +21,11 @@ var text1 = 'The quick brown fox jumps over the lazy dog.';
 var text2 = 'That quick brown fox jumped over a lazy dog.';
 
 var text3 = `
+these
+lines
+are
+not
+changed
 //TODO: need to delete backwards (and up for overflowed lines) until reaching prompt
 these
 lines
@@ -42,6 +46,11 @@ not
 changed
 `;
 var text4 = `
+these
+lines
+are
+not
+changed
 //TODO: delete backwards (and up for overflowed lines) until reaching prompt
 these
 lines
@@ -88,14 +97,14 @@ const showDiffLines = (t1,t2) => {
 
 	const diffEl = document.createElement('pre');
 	diffEl.className = 'info';
-	diffEl.innerHTML = diff.split('\n').map(x => {
+	diffEl.innerHTML = `@@\n${diff}`.split('\n').map((x,i,all) => {
 			const space = (str) => `${str[0]}  ${str.slice(1)}`;
 		if(x[0] === '-') return `
 			<div style="background:#4a1212;">${space(x)}</div>`.trim();
 		if(x[0] === '+') return `
 			<div style="background: #113111;">${space(x)}</div>`.trim();
 		if(x.slice(0,2) === '@@') return `
-			<div style="color:#B753B7;">\n${x}</div>`.trim();
+			<div style="color:#B753B7;">\n...\n\n</div>`.trim();
 		return `<div>  ${x}</div>`;
 	}).join('');
 	document.body.append(diffEl);

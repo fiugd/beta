@@ -6,6 +6,8 @@ import GetOps from './terminal.ops.mjs';
 
 import { Watch } from './terminal.watch.mjs';
 import { History } from './terminal.history.mjs';
+import { Git } from './terminal.git.mjs';
+
 import { chalk } from './terminal.utils.mjs';
 
 const term = Xterm();
@@ -19,7 +21,7 @@ const getRunning = () => running;
 const setRunning = (target) => running = target;
 
 const history = new History({ chalk, setBuffer, getBuffer });
-const ops = [ history, new Watch(term, comm), ...GetOps(term, comm)];
+const ops = [ history, new Watch(term, comm), Git(term, comm), ...GetOps(term, comm)];
 const lib = Lib({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm });
 
 const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
