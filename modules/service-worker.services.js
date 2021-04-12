@@ -135,13 +135,12 @@
 		params,
 		event
 	) => {
-		const [ servicesStore ] = [
-			storage.stores.services,
-			storage.stores.files,
-			storage.stores.changes
-		];
+		const servicesStore = storage.stores.services;
+		const filesStore = storage.stores.files;
+		const changesStore = storage.stores.changes;
+
 		let jsonData;
-		const changes = await changesStore.keys();
+		const changes = await changes.keys();
 		
 		try {
 			return stringify({ changes,});
