@@ -33,6 +33,7 @@
 		}
 	};
 
+	// this flattens tree files, not structure
 	const flattenTree = (tree) => {
 		const results = [];
 		const recurse = (branch, parent = "/") => {
@@ -55,6 +56,19 @@
 		};
 		recurse(tree);
 		return results;
+	};
+
+	// this flattens tree structure
+	const flattenObject = (obj) => {
+		const flattened = {}
+		Object.keys(obj).forEach((key) => {
+			if (typeof obj[key] === 'object' && obj[key] !== null) {
+				Object.assign(flattened, flattenObject(obj[key]))
+			} else {
+				flattened[key] = obj[key]
+			}
+		})
+		return flattened;
 	};
 
 	const keepHelper = (tree, code) => {
@@ -159,6 +173,7 @@
 	module.exports = {
 		fetchJSON,
 		flattenTree,
+		flattenObject,
 		keepHelper,
 		getCodeAsStorage,
 		getMime,

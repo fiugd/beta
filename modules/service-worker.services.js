@@ -140,7 +140,7 @@
 		event,
 		query
 	) => {
-		const { flattenTree } = utils;
+		const { flattenObject } = utils;
 
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
@@ -151,7 +151,7 @@
 		let service;
 		cwd && await servicesStore.iterate((value, key) => {
 			const { tree } = value;
-			if(flattenTree(tree).includes(cwd)){
+			if(flattenObject(tree).includes(cwd)){
 				service = value
 				return true;
 			}

@@ -5,7 +5,7 @@ import '../shared.styl';
 consoleHelper();
 
 const showDiffLines = ({ fileName, original, value }) => {
-	const diff = Diff(original, value, { n_surrounding: -1 });
+	const diff = Diff(original, value, { n_surrounding: 0 });
 
 	const diffEl = document.createElement('pre');
 	diffEl.className = 'info';
@@ -34,4 +34,3 @@ const getChanges = async () => {
 };
 
 getChanges();
-
