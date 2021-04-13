@@ -8,6 +8,8 @@ import DiffMatchPatch from 'https://cdn.skypack.dev/diff-match-patch';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 import { chalk, jsonColors } from './terminal.utils.mjs';
 
+const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
+
 const link = url => chalk.hex('#9cdcfe')(url)
 const [ bold, hex, italic ] = [
 	chalk.bold.bind(chalk),
@@ -66,15 +68,26 @@ const diff = async (term) => {
 	// write diff to terminal
 	term.write(notImplemented('diff'));
 };
-const status = async (term) => {
-	// get all changed files
-	// write their file names to terminal
-	term.write(notImplemented('status'));
+const status = async ({ term }) => {
+	const cwd = '.welcome/1ncubate';
+	const changesUrl = "/service/change";
+	const changesResponse = await fetchJSON(changesUrl
+		+"?cwd=" + cwd
+	);
+
+	if(!changesResponse.changes.length){
+		return term.write('no changes!');
+	}
+	term.write('\n' +
+		changesResponse.changes.map(x => 
+			'   ' + chalk.bold('modified: ') + x.fileName
+		).join('\n')
+	+ '\n');
 };
-const branch = async (term) => term.write(notImplemented('branch'));
-const commit = async (term) => term.write(notImplemented('commit'));
-const push = async (term) => term.write(notImplemented('push'));
-const pull = async (term) => term.write(notImplemented('pull'));
+const branch = async ({ term }) => term.write(notImplemented('branch'));
+const commit = async ({ term }) => term.write(notImplemented('commit'));
+const push = async ({ term }) => term.write(notImplemented('push'));
+const pull = async ({ term }) => term.write(notImplemented('pull'));
 
 const commands = { clone, diff, status, branch, commit, push, pull };
 
@@ -84,7 +97,7 @@ async function invoke(args, done){
 	const { term } = this;
 	const { command } = args;
 	if(!command){
-		this.term.write(this.help());
+		term.write(this.help());
 		done();
 		return
 	}
@@ -94,7 +107,7 @@ async function invoke(args, done){
 		term.write(unrecognizedCommand(`git ${command}`));
 		return done();
 	}
-	await thisCommand(term)
+	await thisCommand(this)
 	done();
 };
 
