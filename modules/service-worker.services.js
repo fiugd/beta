@@ -104,11 +104,15 @@
 			// and also this should be done through provider...
 			// also, would expect to not change the file, instead add a change in changes table
 			// ^^ and restore that on read
-			if(service.type === 'github' && `${path[0]}${path[1]}` === './'){
+			if(service.type === 'github' && `${path.slice(0,2)}` === './'){
 				path = path.slice(2);
 			}
 
-			await changesStore.setItem(path, { type: 'update', value: code });
+			await changesStore.setItem(path, {
+				type: 'update',
+				value: code,
+				service
+			});
 
 			if (service && command === "upsert") {
 				service.tree = utils.treeInsertFile(path, service.tree);
@@ -136,18 +140,41 @@
 		event,
 		query
 	) => {
+		const { flattenTree } = utils;
+
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
 		const changesStore = storage.stores.changes;
 
 		const { cwd } = query;
-		let jsonData;
-		const changes = await changesStore.keys();
+
+		let service;
+		cwd && await servicesStore.iterate((value, key) => {
+			const { tree } = value;
+			if(flattenTree(tree).includes(cwd)){
+				service = value
+				return true;
+			}
+		});
+
+		const changes = [];
+		await changesStore.iterate(async (value, key) => {
+			const { service: parent } = value;
+
+			if(service && parent !== service) return false;
+
+			changes.push({
+				fileName: key,
+				...value
+				original: await fileStore.getItem(key)
+			});
+		});
 
 		try {
 			return stringify({
-				changes, cwd,
-				msg: 'would use cwd to determine service and only return service changes'
+				changes,
+				cwd,
+				msg: 'service changes'
 			});
 		} catch (error) {
 			return stringify({ error });
