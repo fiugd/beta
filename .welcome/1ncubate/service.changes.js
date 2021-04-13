@@ -6,9 +6,8 @@ consoleHelper();
 
 const getChanges = async () => {
 	const changesUrl = "/service/change";
-	const { changes } = await fetchJSON(changesUrl+"?cwd=.welcome/1ncubate");
+	const changesResponse = await fetchJSON(changesUrl+"?cwd=.welcome/1ncubate");
 	
-	logJSON(changes);
+	logJSON(changesResponse);
 };
-
 getChanges();
