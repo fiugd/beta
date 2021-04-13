@@ -151,7 +151,8 @@
 		let service;
 		cwd && await servicesStore.iterate((value, key) => {
 			const { tree } = value;
-			if(flattenObject(tree).includes(cwd)){
+			const flattened = flattenObject(tree);
+			if(flattened.includes(cwd)){
 				service = value
 				return true;
 			}
