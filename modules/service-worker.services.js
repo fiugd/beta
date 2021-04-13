@@ -160,7 +160,7 @@
 
 		const changes = [];
 		await changesStore.iterate(async (value, key) => {
-			const { service: parent } = value;
+			const { service: { name: parent } } = value;
 
 			if(service && parent !== service) return true;
 
