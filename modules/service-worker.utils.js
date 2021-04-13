@@ -60,7 +60,7 @@
 
 	// this flattens tree structure
 	// thanks: https://lowrey.me/getting-all-paths-of-an-javascript-object/
-	const flattenObject = (obj) =>  {
+	const flattenObject = (root) =>  {
 		let paths = [];
 		let nodes = [{
 			obj: root,
