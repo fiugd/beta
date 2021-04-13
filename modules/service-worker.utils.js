@@ -59,16 +59,25 @@
 	};
 
 	// this flattens tree structure
-	const flattenObject = (obj) => {
-		const flattened = {}
-		Object.keys(obj).forEach((key) => {
-			if (typeof obj[key] === 'object' && obj[key] !== null) {
-				Object.assign(flattened, flattenObject(obj[key]))
-			} else {
-				flattened[key] = obj[key]
-			}
-		})
-		return flattened;
+	// thanks: https://lowrey.me/getting-all-paths-of-an-javascript-object/
+	const flattenObject = (obj) =>  {
+		let paths = [];
+		let nodes = [{
+			obj: root,
+			path: []
+		}];
+		while (nodes.length > 0) {
+			const n = nodes.pop();
+			Object.keys(n.obj)
+				.forEach(k => {
+					const obj = n.obj[k];
+					if (typeof obj !== 'object') return;
+					const path = n.path.concat(k);
+					paths.push(path);
+					nodes.unshift({ obj, path });
+				});
+		}
+		return paths.map(x => x.join('/'));
 	};
 
 	const keepHelper = (tree, code) => {
