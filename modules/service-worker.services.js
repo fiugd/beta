@@ -166,7 +166,7 @@
 			changes.push({
 				fileName: key,
 				...value,
-				original: await fileStore.getItem(key)
+				original: await filesStore.getItem(key)
 			});
 		});
 
