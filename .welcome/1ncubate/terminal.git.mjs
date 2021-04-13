@@ -69,6 +69,7 @@ const diff = async (term) => {
 	term.write(notImplemented('diff'));
 };
 const status = async ({ term }) => {
+	//TODO: get cwd dynamically
 	const cwd = '.welcome/1ncubate';
 	const changesUrl = "/service/change";
 	const changesResponse = await fetchJSON(changesUrl
@@ -76,7 +77,7 @@ const status = async ({ term }) => {
 	);
 
 	if(!changesResponse.changes.length){
-		return term.write('no changes!');
+		return term.write('\n   no changes\n');
 	}
 	term.write('\n' +
 		changesResponse.changes.map(x => 
