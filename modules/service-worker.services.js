@@ -153,7 +153,7 @@
 			const { tree } = value;
 			const flattened = flattenObject(tree);
 			if(flattened.includes(cwd)){
-				service = value
+				service = value.name;
 				return true;
 			}
 		});
