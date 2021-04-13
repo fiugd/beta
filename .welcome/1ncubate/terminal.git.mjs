@@ -59,11 +59,11 @@ const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not imp
 
 const unrecognizedCommand = (command) => `\n${command}: command not found\n`
 
-const clone = async (term) => {
+const clone = async ({ term }) => {
 	// do what settings does when it clones a github repo
 	term.write(notImplemented('clone'));
 }
-const diff = async (term) => {
+const diff = async ({ term }) => {
 	// get all changed files
 	// write diff to terminal
 	term.write(notImplemented('diff'));
