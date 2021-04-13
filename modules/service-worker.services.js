@@ -161,7 +161,7 @@
 		await changesStore.iterate(async (value, key) => {
 			const { service: parent } = value;
 
-			if(service && parent !== service) return false;
+			if(service && parent !== service) return true;
 
 			changes.push({
 				fileName: key,
