@@ -159,23 +159,25 @@
 		});
 
 		const changes = [];
-		await changesStore.iterate(async (value, key) => {
+		const changesKeys = await changesStore.keys();
+		for(let i=0, len=changesKeys.length; i<len; i++){
+			const key = changesKeys[i];
+			const value = await changesStore.getItem(key);
 			const { service: { name: parent } } = value;
 
-			if(service && parent !== service) return;
+			if(service && parent !== service) continue;
 
 			changes.push({
 				fileName: key,
 				...value,
 				original: await filesStore.getItem(key)
 			});
-		});
+		}
 
 		try {
 			return stringify({
 				changes,
 				cwd,
-				msg: 'service changes'
 			});
 		} catch (error) {
 			return stringify({ error });
