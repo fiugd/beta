@@ -4,5 +4,4 @@ import 	'../shared.styl';
 
 consoleHelper();
 
-
 // https://codemirror.net/demo/merge.html

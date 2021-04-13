@@ -22,7 +22,4 @@ https://langserver.org/
 
 https://lsif.dev/
 
-
-
-
 */

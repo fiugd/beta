@@ -118,6 +118,4 @@ const code = `
 	const systemJsSrc = "(async () => {\n" + code.replace(/require\(/g, 'await System.import(') + "\n})()";
 	eval(systemJsSrc)
 	//appendNewScript(systemJsSrc, 'systemjs')
-
-
 })();

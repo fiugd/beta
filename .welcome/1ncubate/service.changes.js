@@ -25,12 +25,17 @@ const showDiffLines = ({ fileName, original, value }) => {
 
 const getChanges = async () => {
 	const changesUrl = "/service/change";
-	const changesResponse = await fetchJSON(changesUrl+"?cwd=.welcome/1ncubate");
+	const changesResponse = await fetchJSON(changesUrl
+		+"?cwd=.welcome/1ncubate"
+	);
 	//logJSON(changesResponse)
-	changesResponse.changes.forEach(x => {
-		console.log(Object.keys(x))
-		showDiffLines(x);
-	})
+	if(!changesResponse.changes.length){
+		return console.info('no changes!');
+	}
+	console.info(
+		changesResponse.changes.map(x => 'modified: ' + x.fileName).join('\n')
+	)
+	changesResponse.changes.forEach(showDiffLines);
 };
 
 getChanges();
