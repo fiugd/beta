@@ -111,7 +111,10 @@
 			await changesStore.setItem(path, {
 				type: 'update',
 				value: code,
-				service
+				service: (() => {
+					const { tree, ...rest } = service;
+					return rest;
+				})()
 			});
 
 			if (service && command === "upsert") {
