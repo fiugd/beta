@@ -163,8 +163,8 @@
 		for(let i=0, len=changesKeys.length; i<len; i++){
 			const key = changesKeys[i];
 			const value = await changesStore.getItem(key);
-			const { service: { name: parent } } = value;
-
+			const parent = value?.service?.name;
+			if(!parent) continue;
 			if(service && parent !== service) continue;
 
 			changes.push({
