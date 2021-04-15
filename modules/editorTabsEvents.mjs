@@ -91,7 +91,9 @@ function triggerCloseTab(event, fileCloseTrigger) {
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 	const { name, path, next, nextPath } = event.detail;
 
-	const found = tabs.find((x) => x.name === name);
+	const found = tabs.find((x) => {
+		(x.parent ? `${x.parent}/${x.name}` : x.name) === name
+	});
 	tabs = tabs.filter((x) => x.name !== name);
 	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
