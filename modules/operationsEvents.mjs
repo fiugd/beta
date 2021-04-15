@@ -675,10 +675,11 @@ const handlers = {
 const getChainedTrigger = ({ triggers }) => (event) => {
 	const handler = {
 		addFile: async () => {
+			const name = event.detail.parent
+				? `${event.detail.parent}/${event.detail.name}`
+				: event.detail.name;
 			triggers.triggerFileSelect({
-				detail: {
-					name: event.detail.filename,
-				},
+				detail: { name },
 			});
 		},
 		deleteFile: async () => {

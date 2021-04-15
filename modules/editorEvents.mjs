@@ -142,7 +142,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		}
 	}
 
-	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath })
+	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
 
 	const filePath = savedFileName || fileNameWithPath;
 
