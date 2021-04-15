@@ -631,10 +631,10 @@ const operationDoneHandler = ({
 	const wasAllServicesRead = !event.detail.id && event.detail.id !== 0;
 
 	const readOneServiceDone =
-		result.length === 1 &&
+		result?.length === 1 &&
 		op === "read" &&
-		(inboundService.id || inboundService.id === 0) &&
-		inboundService.id !== "*" &&
+		(inboundService?.id || inboundService?.id === 0) &&
+		inboundService?.id !== "*" &&
 		!wasAllServicesRead;
 
 	const handledHere = [readOneServiceDone];
