@@ -14,17 +14,17 @@
 
 ### Closed Mind, The Game: Software Dev Edition
 
-```Let's play the game and never think that it's a game.```
-```Let's think about the game and never play it.```
+```Let's play the game and never think about the game.``` - John Wayne
+```Let's think about the game and never play the game.``` - Socrates
 
 ##### PREMISE:
-soul of the mind: topics | policies | discussions | theory | debates | decisions
-body of the mind: groups and individuals that make up the group
+soul of the mind: _topics | policies | discussions | theory | debates | decisions_
+body of the mind: _groups and individuals that make up the group_
 when is it safe/best to have a closed vs open mind?
 
 ##### RULES:
-1) there is a button with words like _*JUST LET ME DO MY DAMNED JOB!*_ on it
-2) at any point in the game this button can be pressed by any player to exit a topic
+1) there is a button with words written on it: _*JUST LET ME DO MY DAMNED JOB!*_
+2) at any point this button can be pressed by any player to exit a topic
 3) topic switches when an X number of players have hit the button
 4) during the course of the game, players take turns discussing concepts such as those below
 5) the game proceeds until only X players are left standing and/or all topics are exhausted
@@ -39,12 +39,12 @@ when is it safe/best to have a closed vs open mind?
 - add your own topics!
 
 ##### ROLES:
-- certain players can veto discussion (and end the game) or require a topic to open | remain open:
-	- product manager, product owner
-	- dev lead (maybe)
+- certain players can veto discussion (and end the game) or force a topic open:
+	- product manager, product owner, customer
+	- dev lead
 	- architect
 	- manager
-- other players can assume these roles which sometimes have the same effect
+- other players can assume these roles which sometimes have the same effect:
 	- comedian
 	- pervert
 	- criminal

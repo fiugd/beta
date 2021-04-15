@@ -50,3 +50,5 @@
 	- government
 	- theoretical physics
 	- gender issues
+
+- see closeYourMindGame.md
