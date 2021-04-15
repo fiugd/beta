@@ -89,7 +89,15 @@ function triggerCloseTab(event, fileCloseTrigger) {
 }
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
-	const { name, path, next, nextPath } = event.detail;
+	let { name, path, next, nextPath } = event.detail;
+	if(!path && name.includes('/')){
+		path = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
+	}
+	if(!nextPath && next.includes('/')){
+		nextPath = next.split('/').slice(0,-1).join('/');
+		next = next.split('/').pop();
+	}
 
 	const found = tabs.find((x) => {
 		(x.parent ? `${x.parent}/${x.name}` : x.name) === name
