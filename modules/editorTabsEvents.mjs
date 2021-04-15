@@ -165,8 +165,8 @@ const fileSelectHandler = ({
 }) => {
 	let { name, changed, parent } = event.detail;
 	if(!parent && name.includes('/')){
-		name = name.split('/').pop();
 		parent = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
 	}
 	if(name.includes('system::')){
 		tabs = tabs || [];
