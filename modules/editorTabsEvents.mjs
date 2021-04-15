@@ -163,7 +163,11 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const { name, changed, parent } = event.detail;
+	let { name, changed, parent } = event.detail;
+	if(!parent && name.includes('/')){
+		name = name.split('/').pop();
+		parent = name.split('/').slice(0,-1).join('/');
+	}
 	if(name.includes('system::')){
 		tabs = tabs || [];
 	}
@@ -179,7 +183,10 @@ const fileSelectHandler = ({
 	}
 	let id = "TAB" + Math.random().toString().replace("0.", "");
 
-	let { tabsToUpdate, foundTab } = getTabsToUpdate(name);
+	let { tabsToUpdate, foundTab } = getTabsToUpdate(parent
+		? `${parent}/${name}`
+		: name
+	);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
 		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));

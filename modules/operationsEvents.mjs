@@ -688,11 +688,11 @@ const getChainedTrigger = ({ triggers }) => (event) => {
 			if (opened.length) {
 				next = opened[opened.length - 1].name;
 			}
+			const name = event.detail.parent
+				? `${event.detail.parent}/${event.detail.name}`
+				: event.detail.name;
 			triggers.triggerFileClose({
-				detail: {
-					name: event.detail.filename,
-					next,
-				},
+				detail: { name, next },
 			});
 		},
 	}[event.detail.operation];
