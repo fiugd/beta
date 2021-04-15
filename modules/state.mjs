@@ -316,15 +316,22 @@ function openFile({ name, parent, ...other }) {
 	const fullName = parent
 		? `${parent}/${name}`
 		: name;
-	const order = state.openedFiles[fullName]
-		? state.openedFiles[fullName].order
-		: (Math.max(Object.entries(state.openedFiles).map(([k, v]) => v.order)) ||
-				-1) + 1;
+	const SOME_BIG_NUMBER = Math.floor(Number.MAX_SAFE_INTEGER/1.1);
+	Object.entries(state.openedFiles)
+		.forEach(([k,v]) => {
+			v.selected = false;
+		});
 	state.openedFiles[fullName] = {
 		name: fullName,
 		...other,
-		order,
+		selected: true,
+		order: SOME_BIG_NUMBER,
 	};
+	Object.entries(state.openedFiles)
+		.sort(([ka,a],[kb,b]) => a.order - b.order)
+		.forEach(([k,v], i) => {
+			v.order = i;
+		});
 }
 
 function closeFile({ name }) {
