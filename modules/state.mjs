@@ -380,9 +380,11 @@ const operationDoneHandler = (event) => {
 };
 
 const fileCloseHandler = (event) => {
+	closeFile(event.detail);
 	console.log('state sees that file was closed');
 };
 const fileSelectHandler = (event) => {
+	openFile(event.detail);
 	console.log('state sees that file was selected');
 };
 
