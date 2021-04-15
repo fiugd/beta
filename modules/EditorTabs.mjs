@@ -222,6 +222,8 @@ const updateTab = (parent) => (tabDef) => {
 };
 
 const removeTab = (parent) => async (tabDef) => {
+	if(!tabDef) return console.error('attempt to remove tab without a tab definition');
+
 	const child = parent.querySelector("#" + tabDef.id);
 	child.parentNode.removeChild(child);
 
