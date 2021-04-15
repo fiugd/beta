@@ -312,13 +312,16 @@ async function getAllServices() {
 	return await queueListener();
 }
 
-function openFile({ name, ...other }) {
-	const order = state.openedFiles[name]
-		? state.openedFiles[name].order
+function openFile({ name, parent, ...other }) {
+	const fullName = parent
+		? `${parent}/${name}`
+		: name;
+	const order = state.openedFiles[fullName]
+		? state.openedFiles[fullName].order
 		: (Math.max(Object.entries(state.openedFiles).map(([k, v]) => v.order)) ||
 				-1) + 1;
-	state.openedFiles[name] = {
-		name,
+	state.openedFiles[fullName] = {
+		name: fullName,
 		...other,
 		order,
 	};
