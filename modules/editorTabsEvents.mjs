@@ -99,13 +99,15 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 		next = next.split('/').pop();
 	}
 
-	const found = tabs.find((x) => {
-		(x.parent ? `${x.parent}/${x.name}` : x.name) === name
-	});
-	tabs = tabs.filter((x) => x.name !== name);
+	const closedFullName = path ? `${path}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+
+	const found = tabs.find((x) => tabFullName(x) === closedFullName);
+	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
+
 	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
-	removeTab(found);
+	found && removeTab(found);
 
 	if (!next) {
 		return;
