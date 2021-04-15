@@ -686,12 +686,18 @@ const getChainedTrigger = ({ triggers }) => (event) => {
 			const name = event.detail.parent
 				? `${event.detail.parent}/${event.detail.name}`
 				: event.detail.name;
-			const opened = getOpenedFiles().filter(x => x.name !== name);
+			const allOpen = getOpenedFiles() || [];
+			const opened = allOpen.filter(x => x.name !== name);
+			if(allOpen?.length === opened?.length) return;
+
 			let next;
 			if (opened.length) {
 				next = opened[opened.length - 1].name;
 			}
-
+			const alreadySelected = allOpen.find(x => x.selected);
+			if(alreadySelected){
+				next = alreadySelected.name;
+			}
 			triggers.triggerFileClose({
 				detail: { name, next },
 			});
