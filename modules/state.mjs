@@ -6,7 +6,12 @@ import ext from "/shared/icons/seti/ext.json.mjs";
 
 const SYSTEM_NAME = `fiug.dev v0.4`;
 
-let execTrigger;
+const execTrigger = attachTrigger({
+	name: "State",
+	eventName: "operations",
+	type: "raw",
+});
+
 let listenerQueue = [];
 
 let currentService;
@@ -307,37 +312,6 @@ async function getAllServices() {
 	return await queueListener();
 }
 
-const operationDoneHandler = (event) => {
-	if (listenerQueue.length === 0) {
-		//console.warn('nothing listening!');
-		return;
-	}
-	const { detail } = event;
-	const { op, id, result, operation, listener } = detail;
-
-	const foundQueueItem =
-		listener && listenerQueue.find((x) => x.id === listener);
-	if (!foundQueueItem) {
-		//console.warn(`nothing listening for ${listener}`);
-		return false;
-	}
-	listenerQueue = listenerQueue.filter((x) => x.id !== listener);
-	foundQueueItem.after && foundQueueItem.after({ result: { result } });
-	return true;
-};
-
-execTrigger = attachTrigger({
-	name: "State",
-	eventName: "operations",
-	type: "raw",
-});
-
-attach({
-	name: "State",
-	eventName: "operationDone",
-	listener: operationDoneHandler,
-});
-
 function openFile({ name, ...other }) {
 	const order = state.openedFiles[name]
 		? state.openedFiles[name].order
@@ -385,6 +359,50 @@ function getSettings(){
 		...storedSettings
 	}
 }
+
+const operationDoneHandler = (event) => {
+	if (listenerQueue.length === 0) {
+		//console.warn('nothing listening!');
+		return;
+	}
+	const { detail } = event;
+	const { op, id, result, operation, listener } = detail;
+
+	const foundQueueItem =
+		listener && listenerQueue.find((x) => x.id === listener);
+	if (!foundQueueItem) {
+		//console.warn(`nothing listening for ${listener}`);
+		return false;
+	}
+	listenerQueue = listenerQueue.filter((x) => x.id !== listener);
+	foundQueueItem.after && foundQueueItem.after({ result: { result } });
+	return true;
+};
+
+const fileCloseHandler = (event) => {
+	console.log('state sees that file was closed');
+};
+const fileSelectHandler = (event) => {
+	console.log('state sees that file was selected');
+};
+
+attach({
+	name: "State",
+	eventName: "operationDone",
+	listener: operationDoneHandler,
+});
+
+attach({
+	name: "State",
+	eventName: "fileClose",
+	listener: fileCloseHandler,
+});
+
+attach({
+	name: "State",
+	eventName: "fileSelect",
+	listener: fileSelectHandler,
+});
 
 export {
 	getAllServices,
