@@ -388,33 +388,19 @@ const operationDoneHandler = (event) => {
 	foundQueueItem.after && foundQueueItem.after({ result: { result } });
 	return true;
 };
-
-const fileCloseHandler = (event) => {
-	closeFile(event.detail);
-	console.log('state sees that file was closed');
-};
-const fileSelectHandler = (event) => {
-	openFile(event.detail);
-	console.log('state sees that file was selected');
-};
-
-attach({
-	name: "State",
+const events = [{
 	eventName: "operationDone",
 	listener: operationDoneHandler,
-});
-
-attach({
-	name: "State",
+}, {
 	eventName: "fileClose",
-	listener: fileCloseHandler,
-});
-
-attach({
-	name: "State",
+	listener: (event) => closeFile(event.detail),
+}, {
 	eventName: "fileSelect",
-	listener: fileSelectHandler,
-});
+	listener: (event) => openFile(event.detail),
+}];
+events.map((args) =>
+	attach({ name: 'State', ...args })
+);
 
 export {
 	getAllServices,
