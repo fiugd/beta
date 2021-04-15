@@ -37,7 +37,7 @@ function clearLastTab({ tabs, removeTab }) {
 }
 
 function getTabsToUpdate(filePath) {
-	const name = filePath.split('/').pop();
+	const name = filePath?.split('/').pop();
 	const tabsToUpdate = [];
 	let foundTab;
 	for (var i = 0, len = tabs.length; i < len; i++) {
@@ -90,11 +90,11 @@ function triggerCloseTab(event, fileCloseTrigger) {
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 	let { name, path, next, nextPath } = event.detail;
-	if(!path && name.includes('/')){
+	if(!path && name?.includes('/')){
 		path = name.split('/').slice(0,-1).join('/');
 		name = name.split('/').pop();
 	}
-	if(!nextPath && next.includes('/')){
+	if(!nextPath && next?.includes('/')){
 		nextPath = next.split('/').slice(0,-1).join('/');
 		next = next.split('/').pop();
 	}
@@ -176,16 +176,16 @@ const fileSelectHandler = ({
 	removeTab,
 }) => {
 	let { name, changed, parent } = event.detail;
-	if(!parent && name.includes('/')){
+	if(!parent && name?.includes('/')){
 		parent = name.split('/').slice(0,-1).join('/');
 		name = name.split('/').pop();
 	}
-	if(name.includes('system::')){
+	if(name?.includes('system::')){
 		tabs = tabs || [];
 	}
 	if(!tabs) return;
 	let systemDocsName;
-	if (name.includes("system::")) {
+	if (name?.includes("system::")) {
 		systemDocsName = {
 			"add-service-folder": "Open Folder",
 			"connect-service-provider": "Connect to a Provider",
