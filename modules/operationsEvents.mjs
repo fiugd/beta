@@ -683,14 +683,15 @@ const getChainedTrigger = ({ triggers }) => (event) => {
 			});
 		},
 		deleteFile: async () => {
-			const opened = getOpenedFiles();
+			const name = event.detail.parent
+				? `${event.detail.parent}/${event.detail.name}`
+				: event.detail.name;
+			const opened = getOpenedFiles().filter(x => x.name !== name);
 			let next;
 			if (opened.length) {
 				next = opened[opened.length - 1].name;
 			}
-			const name = event.detail.parent
-				? `${event.detail.parent}/${event.detail.name}`
-				: event.detail.name;
+
 			triggers.triggerFileClose({
 				detail: { name, next },
 			});
