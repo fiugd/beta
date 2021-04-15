@@ -68,6 +68,7 @@ const diff = async ({ term }) => {
 	// write diff to terminal
 	term.write(notImplemented('diff'));
 };
+
 const status = async ({ term }) => {
 	//TODO: get cwd dynamically
 	const cwd = '.welcome/1ncubate';

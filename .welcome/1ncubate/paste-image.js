@@ -5,7 +5,6 @@ consoleHelper();
 
 /*
 
-
 https://stackoverflow.com/questions/490908/paste-an-image-from-clipboard-using-javascript/4400761
 https://stackoverflow.com/questions/8578136/how-to-read-a-file-on-paste-event-in-html5
 

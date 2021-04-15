@@ -1,7 +1,7 @@
 //show-preview
 import { appendUrls, consoleHelper, htmlToElement, importCSS } from '../.tools/misc.mjs';
-import '../shared.styl';
 import 'hexedit.styl';
+import '../shared.styl';
 
 consoleHelper();
 

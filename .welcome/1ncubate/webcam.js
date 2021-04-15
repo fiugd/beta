@@ -7,6 +7,8 @@ consoleHelper();
 /*
 https://github.com/jtangelder/webcam/blob/master/greenscreen.html
 
+https://towardsdatascience.com/virtual-background-in-webcam-with-body-segmentation-technique-fc8106ca3038
+
 */
 
 
