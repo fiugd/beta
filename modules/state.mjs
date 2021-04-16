@@ -328,7 +328,8 @@ function openFile({ name, parent, ...other }) {
 		selected: true,
 		order: SOME_BIG_NUMBER,
 	};
-	currentFile = fullName;
+	//NOTE: well-intentioned, but not currently working right
+	//currentFile = fullName;
 	Object.entries(state.openedFiles)
 		.sort(([ka,a],[kb,b]) => a.order - b.order)
 		.forEach(([k,v], i) => {
