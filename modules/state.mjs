@@ -334,17 +334,28 @@ function openFile({ name, parent, ...other }) {
 		});
 }
 
-function closeFile({ name }) {
-	state.openedFiles = Object.fromEntries(
-		Object.entries(state.openedFiles)
-			.map(([key, value]) => value)
-			.filter((x) => x.name !== name)
-			.sort((a, b) => a.order - b.order)
-			.map((x, i) => {
-				return { ...x, order: i };
-			})
-			.map((x) => [x.name, x])
-	);
+function closeFile({ name, path, next, nextPath }) {
+	const fullName = parent
+		? `${parent}/${name}`
+		: name;
+	const nextFullName = nextPath
+		? `${nextPath}/${next}`
+		: next;
+	const objEntries = Object.entries(state.openedFiles)
+		.map(([key, value]) => value)
+		.filter((x) => x.name !== fullName)
+		.sort((a, b) => a.order - b.order)
+		.map((x, i) => {
+			const selected = x.name === nextFullName;
+			return { ...x, order: i, selected };
+		})
+		.map((x) => {
+			const fullName = x.parent
+				? `${x.parent}/${x.name}`
+				: x.name;
+			return [fullName, x]
+		});
+	state.openedFiles = Object.fromEntries(objEntries);
 }
 
 function moveFile({ name, order }) {
@@ -397,6 +408,11 @@ const events = [{
 }, {
 	eventName: "fileSelect",
 	listener: (event) => openFile(event.detail),
+}, {
+	eventName: "open-settings-view",
+	listener: (event) => openFile({
+		name: "system::open-settings-view"
+	})
 }];
 events.map((args) =>
 	attach({ name: 'State', ...args })
