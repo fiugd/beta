@@ -173,7 +173,8 @@ const getCurrentService = ({ pure } = {}) => {
 function setCurrentFile({ filePath, fileName }){
 	if(filePath){
 		currentFile = filePath.split('/').pop();
-		currentFilePath = `/${currentService.name}/${filePath}`;
+		//currentFilePath = `/${currentService.name}/${filePath}`;
+		currentFilePath = filePath;
 		return;
 	}
 	currentFile = fileName;
