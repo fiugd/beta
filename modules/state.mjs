@@ -181,7 +181,7 @@ function setCurrentFile({ filePath, fileName }){
 }
 
 function getCurrentFile(){
-	return currentFile;
+	return currentFilePath || currentFile;
 }
 async function getCurrentFileFull(){
 	const fileBody = currentFilePath
@@ -327,6 +327,7 @@ function openFile({ name, parent, ...other }) {
 		selected: true,
 		order: SOME_BIG_NUMBER,
 	};
+	currentFile = fullName;
 	Object.entries(state.openedFiles)
 		.sort(([ka,a],[kb,b]) => a.order - b.order)
 		.forEach(([k,v], i) => {
