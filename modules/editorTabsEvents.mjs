@@ -2,6 +2,17 @@ import { attach, attachTrigger } from "./Listeners.mjs";
 import { getDefaultFile, getState } from "./state.mjs";
 let tabs, service;
 
+function removeTabByEventDetail(removeTab, eventDetail){
+	const { name, path, parent } = eventDetail;
+	const closedFullName = (path||parent) ? `${(path||parent)}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+	const found = tabs.find((x) => tabFullName(x) === closedFullName);
+	if(!found) return;
+	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	removeTab(found);
+}
+
 function copyPath(data, relative) {
 	const state = getState();
 	const { name } = data;
@@ -99,15 +110,7 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 		next = next.split('/').pop();
 	}
 
-	const closedFullName = path ? `${path}/${name}` : name;
-	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
-
-	const found = tabs.find((x) => tabFullName(x) === closedFullName);
-	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
-
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-
-	found && removeTab(found);
+	removeTabByEventDetail(removeTab, event.detail);
 
 	if (!next) {
 		return;
@@ -258,7 +261,7 @@ const operationDoneHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const { op, id, result = [] } = event.detail || "";
+	const { op, id, result = [] } = event.detail || {};
 	if (op === "update") {
 		tabs.forEach((t) => {
 			if (t.changed) t.touched = true;
@@ -280,6 +283,24 @@ const operationDoneHandler = ({
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
+
+const operationsHandler = (args) => {
+	const {
+		event,
+		container,
+		initTabs,
+		createTab,
+		updateTab,
+		removeTab,
+	} = args;
+	const { operation } = event.detail || {};
+	if(!operation || !['deleteFile'].includes(operation)) return;
+
+	if(operation === 'deleteFile'){
+		removeTabByEventDetail(removeTab, event.detail);
+		return;
+	}
+}
 
 const contextMenuHandler = ({ event, showMenu }) => {
 	const editorDom = document.querySelector("#editor-tabs-container");
@@ -426,6 +447,7 @@ const handlers = {
 	fileSelect: fileSelectHandler,
 	fileClose: fileCloseHandler,
 	fileChange: fileChangeHandler,
+	operations: operationsHandler,
 	operationDone: operationDoneHandler,
 	contextmenu: contextMenuHandler,
 	"contextmenu-select": contextMenuSelectHandler,
