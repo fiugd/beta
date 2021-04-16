@@ -52,8 +52,8 @@ when is it safe/best to have a closed vs open mind?
 	- lunch or GTFH
 
 ##### WINNING/LOSING:
-- once the game is over, all players evaluate the results and learn something about theirselves, I guess
-- you may have ideas for solutions to some problems at this point
+- once the game is over, all players evaluate the results and learn something, we hope
+- we may have some ideas for solutions to some problems at this point
 - you will definitely have some answers (right?); did someone take notes?
 
 ##### BONUS ROUND:
