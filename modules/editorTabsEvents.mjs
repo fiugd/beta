@@ -72,7 +72,7 @@ function getTabsToUpdate(filePath) {
 }
 
 function triggerCloseTab(event, fileCloseTrigger) {
-	let name;
+	let name, parent;
 	try {
 		name = event.target.dataset.name.trim();
 		parent = (event.target.dataset.parent||'').trim();
@@ -83,8 +83,11 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	if (!name) {
 		return;
 	}
-	const closedTab = tabs.find((x) => `${x.parent}/${x.name}` === `${parent}/${name}`);
-	const nextTabs = tabs.filter((x) => `${x.parent}/${x.name}` !== `${parent}/${name}`);
+	const closedFullName = parent ? `${parent}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+
+	const closedTab = tabs.find((x) => closedFullName === tabFullName(x));
+	const nextTabs = tabs.filter((x) => closedFullName !== tabFullName(x));
 	const nextTab = closedTab.active
 		? (nextTabs[nextTabs.length - 1] || {})
 		: (tabs.filter((x) => x.active) || [{}])[0];
