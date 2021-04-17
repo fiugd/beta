@@ -22,14 +22,14 @@
 
 	const githubRequestHandler = (githubProvider) => async (which, handlerArgs) => {
 		try {
-			const { params, event, service } = handlerArgs;
+			const { params, event, service, parent } = handlerArgs;
 			const req = event && event?.request?.clone();
 			const payload = req && await req?.json();
 			const { providerType } = (payload || {});
 			
 			const isSupported = providerType
 				? providerType === "github-provider"
-				: service?.type === 'github';
+				: (service||parent)?.type === 'github';
 
 			if(!isSupported) return;
 
