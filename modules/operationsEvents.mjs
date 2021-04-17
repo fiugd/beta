@@ -45,7 +45,27 @@ const guessCurrentFolder = (currentFile, currentService) => {
 	if(currentFile.includes('/')){
 		return currentService.name + '/' + currentFile.split('/').slice(0,-1).join('/')
 	}
-	return currentService.name;
+	//return currentService.name;
+	let parent;
+	try {
+		const flat = flattenTree(
+			currentService.tree[Object.keys(currentService.tree)[0]]
+		);
+		// TODO: should follow parents up tree and build path from that
+		let done;
+		let path = [];
+		let file = currentFile;
+		while (!done) {
+			file = flat.find((x) => x.name === file).parent;
+			if (file === "/") {
+				done = true;
+			} else {
+				path.push(file);
+			}
+		}
+		parent = "/" + path.reverse().join("/");
+	} catch (e) {}
+	return parent;
 };
 
 async function performOp(
