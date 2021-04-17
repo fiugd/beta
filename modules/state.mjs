@@ -187,7 +187,7 @@ function getCurrentFile(){
 async function getCurrentFileFull(){
 	const pathWithServiceName = currentFilePath.includes(currentService.name)
 		? currentFilePath
-		: `/${currentService.name}/${filePath}`
+		: `/${currentService.name}/${currentFilePath}`;
 	const fileBody = currentFilePath
 		? currentService.code.find((x) => x.path === pathWithServiceName)
 		: currentService.code.find((x) => x.name === currentFile);
