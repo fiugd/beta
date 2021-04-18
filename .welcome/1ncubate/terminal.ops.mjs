@@ -110,7 +110,7 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
-async function invokeRaw(args){
+async function invokeRaw(args={}){
 	const mappedArgs = this.map ? this.map(args) : args;
 	const { error, response } = await this.comm.execute({
 		triggerEvent: {

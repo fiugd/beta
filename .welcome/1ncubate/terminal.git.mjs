@@ -4,7 +4,7 @@ https://medium.com/@mehulgala77/github-fundamentals-clone-fetch-push-pull-fork-1
 https://googlechrome.github.io/samples/service-worker/post-message/
 
 */
-import DiffMatchPatch from 'https://cdn.skypack.dev/diff-match-patch';
+import GetOps from './terminal.ops.mjs';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 import { chalk, jsonColors } from './terminal.utils.mjs';
 
@@ -55,48 +55,100 @@ const config = {
 	map: ({ }) => ({ })
 };
 
-const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not implemented\n`);
-
-const unrecognizedCommand = (command) => `\n${command}: command not found\n`
-
-const clone = async ({ term }) => {
-	// do what settings does when it clones a github repo
-	term.write(notImplemented('clone'));
-}
-const diff = async ({ term }) => {
-	// get all changed files
-	// write diff to terminal
-	term.write(notImplemented('diff'));
-};
-
-const status = async ({ term }) => {
-	//TODO: get cwd dynamically
-	const cwd = '.welcome/1ncubate';
+const _getChanges = async ({ ops }) => {
+	const pwdCommand = ops.find(x => x.keyword === 'pwd');
+	const { response: cwd = '' } = await pwdCommand.invokeRaw();
 	const changesUrl = "/service/change";
 	const changesResponse = await fetchJSON(changesUrl
 		+"?cwd=" + cwd
 	);
+	return changesResponse;
+};
 
-	if(!changesResponse.changes.length){
-		return term.write('\n   no changes\n');
+const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not implemented\n`);
+
+const unrecognizedCommand = (command) => `\n${command}: command not found\n`
+
+const clone = async ({}, args) => {
+	// do what settings does when it clones a github repo
+	return notImplemented('clone');
+}
+const diff = async ({ ops }, args) => {
+	const { _unknown: files } = args;
+	const { changes } = await _getChanges({ ops });
+
+	let filesToShow = changes;
+	if(files && Array.isArray(files)){
+		filesToShow = [];
+		for(let i=0, len=files.length; i<len; i++){
+			const file = files[i];
+			const foundChange = changes.find(x => x.fileName.includes(file));
+			const alreadyAdded = foundChange && filesToShow.find(x => x.fileName === foundChange.fileName)
+			if(alreadyAdded) continue;
+			filesToShow.push(foundChange);
+		}
 	}
-	term.write('\n' +
+	const getDiff = (t1, t2) => Diff(t1, t2, { n_surrounding: 0 });
+	return filesToShow
+		.filter(x => x && getDiff(x.original, x.value).trim())
+		.map(x => {
+			return `\n${x.fileName}\n\n${getDiff(x.original, x.value)}\n`
+		})
+		.join('\n');
+};
+
+const diffPretty = (diff) => {
+	const colors = {
+		invisible: '#555',
+		deleted: '#c96d71',
+		added: '#b1e26d',
+		special: '#38b8bf',
+		normal: '#ddd',
+	};
+	return diff.split('\n').map((x,i,all) => {
+		const invisibles = (str) => str
+			.replace(/ /g, chalk.hex(colors.invisible)('·'))
+			.replace(/\t/g, chalk.hex(colors.invisible)('  →  '));
+		const fmtLine = (str) => `${str[0]}  ${invisibles(str).slice(1)}`
+
+		if(x[0] === '-') return chalk.hex(colors.deleted)(fmtLine(x).trim()+'\n');
+		if(x[0] === '+') return chalk.hex(colors.added)(fmtLine(x).trim()+'\n');
+		if(x.slice(0,2) === '@@') return chalk.hex(colors.special)('...\n');
+		return `${chalk.hex(colors.normal)(x)}\n`;
+	}).join('');
+};
+
+const status = async ({ ops }) => {
+	const changesResponse = await _getChanges({ ops });
+	if(!changesResponse.changes.length){
+		return '\n   no changes\n';
+	}
+	return '\n' +
 		changesResponse.changes.map(x => 
 			'   ' + chalk.bold('modified: ') + x.fileName
 		).join('\n')
-	+ '\n');
+	+ '\n';
 };
-const branch = async ({ term }) => term.write(notImplemented('branch'));
-const commit = async ({ term }) => term.write(notImplemented('commit'));
-const push = async ({ term }) => term.write(notImplemented('push'));
-const pull = async ({ term }) => term.write(notImplemented('pull'));
+const commit = async ({ term }) => {
+	return notImplemented('commit');
+};
+const branch = async ({ term }) => notImplemented('branch');
+const push = async ({ term }) => notImplemented('push');
+const pull = async ({ term }) => notImplemented('pull');
 
 const commands = { clone, diff, status, branch, commit, push, pull };
 
-async function invokeRaw(args){}
+async function invokeRaw(_this, args){
+	const { command } = args;
+	const thisCommand = commands[command];
+	if(!thisCommand){
+		return { error: unrecognizedCommand(`git ${command}`) }
+	}
+	return await thisCommand(_this, args);
+}
 
 async function invoke(args, done){
-	const { term } = this;
+	const { term, invokeRaw } = this;
 	const { command } = args;
 	if(!command){
 		term.write(this.help());
@@ -104,12 +156,18 @@ async function invoke(args, done){
 		return
 	}
 	term.write('\n');
-	const thisCommand = commands[command];
-	if(!thisCommand) {
-		term.write(unrecognizedCommand(`git ${command}`));
+	const response = await invokeRaw(this, args);
+	if(response?.error) {
+		term.write(response.error);
 		return done();
 	}
-	await thisCommand(this)
+	if(command === 'diff' && response){
+		term.write(diffPretty(response));
+		return done();
+	}
+	if(response){
+		term.write(response);
+	}
 	done();
 };
 
@@ -117,6 +175,7 @@ async function exit(){}
 
 const Git = (term, comm) => ({
 	...config,
+	ops: GetOps(term, comm),
 	term,
 	comm,
 	invoke,

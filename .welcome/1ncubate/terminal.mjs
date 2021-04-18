@@ -22,8 +22,8 @@ const setRunning = (target) => running = target;
 
 const history = new History({ chalk, setBuffer, getBuffer });
 const ops = [
+	...GetOps(term, comm),
 	history, new Watch(term, comm), Git(term, comm),
-	...GetOps(term, comm)
 ];
 const lib = Lib({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm });
 
