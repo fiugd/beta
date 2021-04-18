@@ -45,8 +45,8 @@ const guessCurrentFolder = (currentFile, currentService) => {
 	if(currentFile.includes('/')){
 		const parent = currentFile.split('/').slice(0,-1).join('/');
 		return parent.includes(currentService.name)
-			? parent
-			: currentService.name + '/' + parent;
+			? parent.replace(`${currentService.name}/`, '')
+			: parent;
 	}
 	//return currentService.name;
 	let parent;
