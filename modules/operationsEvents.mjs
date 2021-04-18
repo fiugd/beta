@@ -43,7 +43,10 @@ const flattenTree = (tree) => {
 
 const guessCurrentFolder = (currentFile, currentService) => {
 	if(currentFile.includes('/')){
-		return currentService.name + '/' + currentFile.split('/').slice(0,-1).join('/')
+		const parent = currentFile.split('/').slice(0,-1).join('/');
+		return parent.includes(currentService.name)
+			? parent
+			: currentService.name + '/' + parent;
 	}
 	//return currentService.name;
 	let parent;
