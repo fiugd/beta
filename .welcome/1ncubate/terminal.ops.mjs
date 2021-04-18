@@ -129,7 +129,8 @@ async function invoke(args, done){
 	this.term.write('\n');
 	const { error, response } = await this.invokeRaw(args);
 	if(error){
-		this.term.write(jsonColors({ error }));
+		this.term.write(jsonColors({ error })+'\n');
+		return done();
 	}
 	if(response){
 		this.term.write(response+'\n');
