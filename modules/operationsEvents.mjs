@@ -124,7 +124,7 @@ const showCurrentFolderHandler = ({
 		: guessCurrentFolder(currentFile, currentService);
 
 	callback &&
-		callback(!parent ? "trouble finding current path" : false, `${currentService.name}${parent}`);
+		callback(!parent ? "trouble finding current path" : false, `${currentService.name}/${parent}`);
 };
 
 const changeCurrentFolderHandler = ({
