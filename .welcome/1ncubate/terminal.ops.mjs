@@ -40,6 +40,19 @@ const commands = [
 			{ name: 'all', type: Boolean, alias: 'a' },
 			{ name: 'long', type: Boolean, alias: 'l' },
 		],
+		mapResponse: (res) => {
+			return res
+				.sort((a,b) => {
+					const bothFolders = a.includes('/') && b.includes('/');
+					const bothFiles = !a.includes('/') && !b.includes('/');
+					if(bothFolders || bothFiles){
+						return a.toLowerCase().localeCompare(b.toLowerCase());
+					}
+					if(a.includes('/') && !b.includes('/')) return -1;
+					if(!a.includes('/') && b.includes('/')) return 1;
+				})
+				.join('\n')
+		}
 	},
 	{
 		name: 'Remove',
@@ -130,6 +143,10 @@ async function invoke(args, done){
 	const { error, response } = await this.invokeRaw(args);
 	if(error){
 		this.term.write(jsonColors({ error })+'\n');
+		return done();
+	}
+	if(response && this.mapResponse){
+		this.term.write(this.mapResponse(response)+'\n');
 		return done();
 	}
 	if(response){

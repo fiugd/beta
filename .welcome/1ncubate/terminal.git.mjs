@@ -108,7 +108,7 @@ const diffPretty = (diff) => {
 	return diff.split('\n').map((x,i,all) => {
 		const invisibles = (str) => str
 			.replace(/ /g, chalk.hex(colors.invisible)('·'))
-			.replace(/\t/g, chalk.hex(colors.invisible)('  →  '));
+			.replace(/\t/g, chalk.hex(colors.invisible)(' → '));
 		const fmtLine = (str) => `${str[0]}  ${invisibles(str).slice(1)}`
 
 		if(x[0] === '-') return chalk.hex(colors.deleted)(fmtLine(x).trim()+'\n');
