@@ -830,3 +830,8 @@ graphs on the fly
 - transducers (clojure) https://www.youtube.com/watch?v=4KqUvG8HPYo
 
 
+
+
+### boxes and wires
+- https://reactflow.dev/
+- https://crosshj.com/experiments/svg/

@@ -391,6 +391,8 @@ useDefault: false
 </script>
 <script>
 		(function () {
+			const proxy = 'https://api.allorigins.win/raw?url=';
+
 			//const comments = Array.from(document.childNodes)
 			//  .filter(x => x.nodeType == Node.COMMENT_NODE)
 			//  .map(x => {
@@ -436,7 +438,7 @@ useDefault: false
 				templateInput
 					.replace('{{' + 'markdown' + '}}', '')
 					.replace(/\/b\s/g, '<br/>')
-					.replaceAll('{{PROXY}}', 'http://localhost:3333/proxy') //TODO: get from system settings
+					.replaceAll('{{PROXY}}', proxy) //TODO: get from system settings
 			).replace(/disabled/g, '');
 			contain.innerHTML = output;
 			const scripts = Array.from(contain.querySelectorAll('script'));
