@@ -274,8 +274,7 @@
 
 		const safeBase64 = (content) => {
 			try {
-				return { content, encoding: "utf-8" }
-				//return { content: btoa(content), encoding: 'base64' }
+				return { content: btoa(content), encoding: 'base64' }
 			} catch(e) {
 				return { content, encoding: "utf-8" }
 			}
