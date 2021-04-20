@@ -322,7 +322,7 @@
 		});
 		if(service?.type !== 'github') return;
 
-		const { owner, repo, branch } = value;
+		const { owner, repo, branch } = service;
 		const git = { owner, repo, branch };
 
 		const files = [];
