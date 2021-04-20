@@ -8,7 +8,20 @@ import GetOps from './terminal.ops.mjs';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 import { chalk, jsonColors } from './terminal.utils.mjs';
 
+const getStored = (varName) => {
+	const stored = sessionStorage.getItem(varName);
+	if(stored) return stored;
+	const prompted = prompt(varName);
+	sessionStorage.setItem(varName, prompted);
+	return prompted;
+};
+
 const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
+const postJSON = (url, opts={}, body) => fetchJSON(url, {
+	method: 'POST',
+	body: JSON.stringify(body),
+	...opts
+});
 
 const link = url => chalk.hex('#9cdcfe')(url)
 const [ bold, hex, italic ] = [
@@ -88,7 +101,7 @@ const diff = async ({ ops }, args) => {
 			filesToShow.push(foundChange);
 		}
 	}
-	const getDiff = (t1, t2) => Diff(t1, t2, { n_surrounding: 0 });
+	const getDiff = (t1, t2) => Diff(t1||'', t2||'', { n_surrounding: 0 });
 	return filesToShow
 		.filter(x => x && getDiff(x.original, x.value).trim())
 		.map(x => {
@@ -129,7 +142,19 @@ const status = async ({ ops }) => {
 		).join('\n')
 	+ '\n';
 };
-const commit = async ({ term }) => {
+const commit = async ({ ops }, args) => {
+	const { _unknown } = args;
+	const message = _unknown.join(' ')
+		.match(/(?:"[^"]*"|^[^"]*$)/)[0]
+		.replace(/"/g, "");
+	const pwdCommand = ops.find(x => x.keyword === 'pwd');
+	const { response: cwd = '' } = await pwdCommand.invokeRaw();
+	const commitUrl = '/service/commit';
+	const auth = getStored('Github Personal Access Token');
+	const commitResponse = await postJSON(commitUrl, null, {
+		cwd, message, auth
+	});
+	console.log({ commitResponse, args, cwd, message })
 	return notImplemented('commit');
 };
 const branch = async ({ term }) => notImplemented('branch');
