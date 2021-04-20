@@ -15,7 +15,7 @@
 - option to use fonts with ligatures eg. https://github.com/tonsky/FiraCode
 
 # themes
-- https://themes.vscode.one/faq/welcome/
+- https://themes.vscode.one/
 
 # tabs
 - tabs can be reordered
