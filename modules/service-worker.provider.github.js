@@ -272,9 +272,14 @@
 			body: JSON.stringify(body)
 		});
 
-		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null,
-			{ content: btoa(content), encoding: 'base64' }
-		);
+		const safeBase64 = (content) => {
+			try {
+				return { content: btoa(content), encoding: 'base64' }
+			} catch(e) {
+				return { content, encoding: "utf-8" }
+			}
+		}
+		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null, safeBase64(content));
 		const blobs = await Promise.all(files.map(blobCreate));
 		const latest = await ghFetch(urls.branch);
 		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
