@@ -101,7 +101,7 @@ const diff = async ({ ops }, args) => {
 			filesToShow.push(foundChange);
 		}
 	}
-	const getDiff = (t1, t2) => Diff(t1, t2, { n_surrounding: 0 });
+	const getDiff = (t1, t2) => Diff(t1||'', t2||'', { n_surrounding: 0 });
 	return filesToShow
 		.filter(x => x && getDiff(x.original, x.value).trim())
 		.map(x => {
