@@ -282,13 +282,21 @@
 		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null, safeBase64(content));
 		const blobs = await Promise.all(files.map(blobCreate));
 		const latest = await ghFetch(urls.branch);
+
 		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
 		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
 		const fileToTree = ({ path }, index) => ({
 			path, mode: '100644', type: 'blob',	sha: blobs[index].sha
 		});
 		// in case files are deleted, should filter from fullTree here
-		const tree = [ ...files.map(fileToTree), ...fullTree.tree.map(treeToTree)];
+		const filePaths = files.map(x => x.path);
+		const tree = [
+			...files.map(fileToTree),
+			...fullTree.tree
+				.filter(x => !filePaths.includes(x.path))
+				.map(treeToTree)
+		];
+
 		const createdTree = await ghPost(urls.tree, null, { tree });
 		const newCommit = await ghPost(urls.createCommit, null, {
 			message, tree: createdTree.sha, parents: [ latest.commit.sha ]
