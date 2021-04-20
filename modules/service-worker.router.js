@@ -49,6 +49,17 @@
 				}),
 			};
 		})(),
+		"/service/commit": (() => {
+			const regex = new RegExp(
+				/^((?:.*))\/service\/commit(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i
+			);
+			return {
+				match: (url) => regex.test(url),
+				params: (url) => ({
+					id: regex.exec(url)[2],
+				}),
+			};
+		})(),
 		"/service/delete/:id?": (() => {
 			const regex = new RegExp(
 				/^((?:.*))\/service\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i
