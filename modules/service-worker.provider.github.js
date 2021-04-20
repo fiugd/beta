@@ -92,7 +92,7 @@
 			const { providerType } = (payload || {});
 
 			if(which === 'createCommit'){
-				return await githubHandler(payload, params);
+				return await githubProvider.createCommit(payload, params);
 			}
 			
 			const isSupported = providerType
