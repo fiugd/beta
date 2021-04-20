@@ -307,17 +307,18 @@
 		const changesStore = stores.changes;
 		
 		let service;
-		let git;
 		await servicesStore.iterate((value, key) => {
 			const { tree } = value;
 			const flattened = flattenObject(tree);
 			if(flattened.includes(cwd)){
-				service = value.name;
-				const { owner, repo, branch } = value;
-				git = { owner, repo, branch };
+				service = value;
 				return true;
 			}
 		});
+		if(service?.type !== 'github') return;
+
+		const { owner, repo, branch } = value;
+		const git = { owner, repo, branch };
 
 		const files = [];
 		const changes = [];
@@ -327,8 +328,8 @@
 			const change = await changesStore.getItem(key);
 			const {type: operation, value: content, service: { name: parent } } = change;
 			if(!parent) continue;
-			if(service && parent !== service) continue;
-			const path = key.replace(service + '/', '');
+			if(parent !== service?.name) continue;
+			const path = key.replace(service?.name + '/', '');
 			files.push({ path, content, operation });
 			changes.push({ ...change, key });
 		}
