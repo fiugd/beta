@@ -272,18 +272,32 @@
 			body: JSON.stringify(body)
 		});
 
-		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null,
-			{ content: btoa(content), encoding: 'base64' }
-		);
+		const safeBase64 = (content) => {
+			try {
+				return { content, encoding: "utf-8" }
+				//return { content: btoa(content), encoding: 'base64' }
+			} catch(e) {
+				return { content, encoding: "utf-8" }
+			}
+		}
+		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null, safeBase64(content));
 		const blobs = await Promise.all(files.map(blobCreate));
 		const latest = await ghFetch(urls.branch);
+
 		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
 		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
 		const fileToTree = ({ path }, index) => ({
 			path, mode: '100644', type: 'blob',	sha: blobs[index].sha
 		});
 		// in case files are deleted, should filter from fullTree here
-		const tree = [ ...files.map(fileToTree), ...fullTree.tree.map(treeToTree)];
+		const filePaths = files.map(x => x.path);
+		const tree = [
+			...files.map(fileToTree),
+			...fullTree.tree
+				.filter(x => !filePaths.includes(x.path) && x.type !== 'tree')
+				.map(treeToTree)
+		];
+
 		const createdTree = await ghPost(urls.tree, null, { tree });
 		const newCommit = await ghPost(urls.createCommit, null, {
 			message, tree: createdTree.sha, parents: [ latest.commit.sha ]
@@ -299,52 +313,57 @@
 		cwd will not be supported and instead some other method used to get current service, etc (maybe)
 	*/
 	const githubCreateCommit = (githubProvider) => async (payload, params) => {
-		const { message, auth, cwd } = payload;
+		try {
+			const { message, auth, cwd } = payload;
 
-		if(!message) return stringify({ error: 'commit message is required' });
-		if(!auth) return stringify({ error: 'auth token is required for commit' });
-		if(!cwd) return stringify({ error: 'current working directory (cwd) is required for commit' });
+			if(!message) return stringify({ error: 'commit message is required' });
+			if(!auth) return stringify({ error: 'auth token is required for commit' });
+			if(!cwd) return stringify({ error: 'current working directory (cwd) is required for commit' });
 
-		const { storage: { stores }, utils } = githubProvider;
-		const servicesStore = stores.services;
-		const changesStore = stores.changes;
-		const { flattenObject } = utils;
-		
-		let service;
-		await servicesStore.iterate((value, key) => {
-			const { tree } = value;
-			const flattened = flattenObject(tree);
-			if(flattened.includes(cwd)){
-				service = value;
-				return true;
+			const { storage: { stores }, utils } = githubProvider;
+			const servicesStore = stores.services;
+			const changesStore = stores.changes;
+			const { flattenObject } = utils;
+			
+			let service;
+			await servicesStore.iterate((value, key) => {
+				const { tree } = value;
+				const flattened = flattenObject(tree);
+				if(flattened.includes(cwd)){
+					service = value;
+					return true;
+				}
+			});
+			if(service?.type !== 'github') return;
+
+			const { owner, repo, branch } = service;
+			const git = { owner, repo, branch };
+
+			const files = [];
+			const changes = [];
+			const changesKeys = await changesStore.keys();
+			for(let i=0, len=changesKeys.length; i<len; i++){
+				const key = changesKeys[i];
+				const change = await changesStore.getItem(key);
+				if(!change?.service) continue;
+				const {type: operation, value: content, service: { name: parent } } = change;
+				if(!parent) continue;
+				if(parent !== service?.name) continue;
+				const path = key.replace(service?.name + '/', '');
+				files.push({ path, content, operation });
+				changes.push({ ...change, key });
 			}
-		});
-		if(service?.type !== 'github') return;
 
-		const { owner, repo, branch } = service;
-		const git = { owner, repo, branch };
+			const commitResponse = await commit({ auth, files, git, message })
 
-		const files = [];
-		const changes = [];
-		const changesKeys = await changesStore.keys();
-		for(let i=0, len=changesKeys.length; i<len; i++){
-			const key = changesKeys[i];
-			const change = await changesStore.getItem(key);
-			if(!change?.service) continue;
-			const {type: operation, value: content, service: { name: parent } } = change;
-			if(!parent) continue;
-			if(parent !== service?.name) continue;
-			const path = key.replace(service?.name + '/', '');
-			files.push({ path, content, operation });
-			changes.push({ ...change, key });
+			// if commit is successful, should remove each change from store
+			// if commit is successful, should update file with contents of change
+
+			return stringify({ commitResponse });
+		} catch(e){
+			debugger;
+			return;
 		}
-
-		const commitResponse = await commit({ auth, files, git, message })
-
-		// if commit is successful, should remove each change from store
-		// if commit is successful, should update file with contents of change
-
-		return stringify({ commitResponse });
 	}
 
 	class GithubProvider {
