@@ -331,6 +331,7 @@
 		for(let i=0, len=changesKeys.length; i<len; i++){
 			const key = changesKeys[i];
 			const change = await changesStore.getItem(key);
+			if(!change?.service) continue;
 			const {type: operation, value: content, service: { name: parent } } = change;
 			if(!parent) continue;
 			if(parent !== service?.name) continue;
