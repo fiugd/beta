@@ -296,7 +296,7 @@
 		cwd will not be supported and instead some other method used to get current service, etc (maybe)
 	*/
 	const githubCreateCommit = (githubProvider) => async (payload, params) => {
-		const { message, auth, cwd, branch } = payload;
+		const { message, auth, cwd } = payload;
 
 		if(!message) return stringify({ error: 'commit message is required' });
 		if(!auth) return stringify({ error: 'auth token is required for commit' });
