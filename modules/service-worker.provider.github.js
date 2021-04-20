@@ -90,6 +90,10 @@
 			const req = event && event?.request?.clone();
 			const payload = req && await req?.json();
 			const { providerType } = (payload || {});
+
+			if(which === 'createCommit'){
+				return await githubHandler(payload, params);
+			}
 			
 			const isSupported = providerType
 				? providerType === "github-provider"
