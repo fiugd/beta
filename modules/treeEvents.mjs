@@ -128,16 +128,20 @@ const noFrontSlash = (path) => {
 };
 
 
-
-
-const fileSelectHandler = (treeSelect) => (e) => {
+const fileSelectHandler = (treeSelect, type='') => (e) => {
 	if(e?.detail?.source === 'Explorer') return;
 
-	const { name, next, path } = e.detail;
-	const fileNameWithPath = path
-		? noFrontSlash(`${path}/${name}`)
-		: name;
-	treeSelect(fileNameWithPath);
+	const { name, path, next, nextPath } = e.detail;
+	if(type === 'close' && !next){
+		return;
+	}
+	const nameWithPathIfPresent = (_path, _name) => _path
+		? noFrontSlash(`${_path}/${_name}`)
+		: noFrontSlash(_name);
+	const fileNameWithPath = next
+		? nameWithPathIfPresent(nextPath, next)
+		: nameWithPathIfPresent(path, name);
+	treeSelect(fileNameWithPath, null, 'noSelect');
 
 	/* TODO: add this to TreeView module
 	if (found.scrollIntoViewIfNeeded) {
@@ -199,9 +203,9 @@ const folderSelectHandler = (e) => {
 	});
 };
 
-const fileChangeHandler = (updateTree) => (event) => {
-	const { name, id, file } = event.detail;
-	updateTree("dirty", { name, id, file });
+const fileChangeHandler = (treeChange) => (event) => {
+	const { filePath } = event.detail;
+	treeChange(filePath);
 };
 
 const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
@@ -249,7 +253,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 		},
 		{
 			name: "Paste",
-			hidden: !clipboard || context.type === 'folder'
+			hidden: !clipboard || context.type === 'file'
 		},
 		"seperator",
 		{
@@ -790,6 +794,7 @@ function newAttachListener(
 	UpdateTree,
 	{
 		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext,
+		treeChange, treeClearChanged,
 		showSearch, updateTreeMenu, showServiceChooser
 	}
 ){
@@ -829,7 +834,7 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "operationDone",
-		listener: OperationDoneListener(UpdateTree),
+		listener: OperationDoneListener(UpdateTree, treeClearChanged),
 	});
 	attach({
 		name: "Explorer",
@@ -844,12 +849,12 @@ function newAttachListener(
 	attach({
 		name: "Explorer",
 		eventName: "fileClose",
-		listener: fileSelectHandler(treeSelect),
+		listener: fileSelectHandler(treeSelect, 'close'),
 	});
 	attach({
 		name: "Explorer",
 		eventName: "fileChange",
-		listener: fileChangeHandler(updateTree),
+		listener: fileChangeHandler(treeChange),
 	});
 	attach({
 		name: "Explorer",

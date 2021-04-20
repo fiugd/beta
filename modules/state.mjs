@@ -6,7 +6,12 @@ import ext from "/shared/icons/seti/ext.json.mjs";
 
 const SYSTEM_NAME = `fiug.dev v0.4`;
 
-let execTrigger;
+const execTrigger = attachTrigger({
+	name: "State",
+	eventName: "operations",
+	type: "raw",
+});
+
 let listenerQueue = [];
 
 let currentService;
@@ -168,7 +173,8 @@ const getCurrentService = ({ pure } = {}) => {
 function setCurrentFile({ filePath, fileName }){
 	if(filePath){
 		currentFile = filePath.split('/').pop();
-		currentFilePath = `/${currentService.name}/${filePath}`;
+		//currentFilePath = `/${currentService.name}/${filePath}`;
+		currentFilePath = filePath;
 		return;
 	}
 	currentFile = fileName;
@@ -176,11 +182,14 @@ function setCurrentFile({ filePath, fileName }){
 }
 
 function getCurrentFile(){
-	return currentFile;
+	return currentFilePath || currentFile;
 }
 async function getCurrentFileFull(){
+	const pathWithServiceName = currentFilePath.includes(currentService.name)
+		? currentFilePath
+		: `/${currentService.name}/${currentFilePath}`;
 	const fileBody = currentFilePath
-		? currentService.code.find((x) => x.path === currentFilePath)
+		? currentService.code.find((x) => x.path === pathWithServiceName)
 		: currentService.code.find((x) => x.name === currentFile);
 
 	if(fileBody && fileBody.path){
@@ -307,60 +316,52 @@ async function getAllServices() {
 	return await queueListener();
 }
 
-const operationDoneHandler = (event) => {
-	if (listenerQueue.length === 0) {
-		//console.warn('nothing listening!');
-		return;
-	}
-	const { detail } = event;
-	const { op, id, result, operation, listener } = detail;
-
-	const foundQueueItem =
-		listener && listenerQueue.find((x) => x.id === listener);
-	if (!foundQueueItem) {
-		//console.warn(`nothing listening for ${listener}`);
-		return false;
-	}
-	listenerQueue = listenerQueue.filter((x) => x.id !== listener);
-	foundQueueItem.after && foundQueueItem.after({ result: { result } });
-	return true;
-};
-
-execTrigger = attachTrigger({
-	name: "State",
-	eventName: "operations",
-	type: "raw",
-});
-
-attach({
-	name: "State",
-	eventName: "operationDone",
-	listener: operationDoneHandler,
-});
-
-function openFile({ name, ...other }) {
-	const order = state.openedFiles[name]
-		? state.openedFiles[name].order
-		: (Math.max(Object.entries(state.openedFiles).map(([k, v]) => v.order)) ||
-				-1) + 1;
-	state.openedFiles[name] = {
-		name,
+function openFile({ name, parent, ...other }) {
+	const fullName = parent
+		? `${parent}/${name}`
+		: name;
+	const SOME_BIG_NUMBER = Math.floor(Number.MAX_SAFE_INTEGER/1.1);
+	Object.entries(state.openedFiles)
+		.forEach(([k,v]) => {
+			v.selected = false;
+		});
+	state.openedFiles[fullName] = {
+		name: fullName,
 		...other,
-		order,
+		selected: true,
+		order: SOME_BIG_NUMBER,
 	};
+	//NOTE: well-intentioned, but not currently working right
+	//currentFile = fullName;
+	Object.entries(state.openedFiles)
+		.sort(([ka,a],[kb,b]) => a.order - b.order)
+		.forEach(([k,v], i) => {
+			v.order = i;
+		});
 }
 
-function closeFile({ name }) {
-	state.openedFiles = Object.fromEntries(
-		Object.entries(state.openedFiles)
-			.map(([key, value]) => value)
-			.filter((x) => x.name !== name)
-			.sort((a, b) => a.order - b.order)
-			.map((x, i) => {
-				return { ...x, order: i };
-			})
-			.map((x) => [x.name, x])
-	);
+function closeFile({ name, path, next, nextPath }) {
+	const fullName = parent
+		? `${parent}/${name}`
+		: name;
+	const nextFullName = nextPath
+		? `${nextPath}/${next}`
+		: next;
+	const objEntries = Object.entries(state.openedFiles)
+		.map(([key, value]) => value)
+		.filter((x) => x.name !== fullName)
+		.sort((a, b) => a.order - b.order)
+		.map((x, i) => {
+			const selected = x.name === nextFullName;
+			return { ...x, order: i, selected };
+		})
+		.map((x) => {
+			const fullName = x.parent
+				? `${x.parent}/${x.name}`
+				: x.name;
+			return [fullName, x]
+		});
+	state.openedFiles = Object.fromEntries(objEntries);
 }
 
 function moveFile({ name, order }) {
@@ -385,6 +386,43 @@ function getSettings(){
 		...storedSettings
 	}
 }
+
+const operationDoneHandler = (event) => {
+	if (listenerQueue.length === 0) {
+		//console.warn('nothing listening!');
+		return;
+	}
+	const { detail } = event;
+	const { op, id, result, operation, listener } = detail;
+
+	const foundQueueItem =
+		listener && listenerQueue.find((x) => x.id === listener);
+	if (!foundQueueItem) {
+		//console.warn(`nothing listening for ${listener}`);
+		return false;
+	}
+	listenerQueue = listenerQueue.filter((x) => x.id !== listener);
+	foundQueueItem.after && foundQueueItem.after({ result: { result } });
+	return true;
+};
+const events = [{
+	eventName: "operationDone",
+	listener: operationDoneHandler,
+}, {
+	eventName: "fileClose",
+	listener: (event) => closeFile(event.detail),
+}, {
+	eventName: "fileSelect",
+	listener: (event) => openFile(event.detail),
+}, {
+	eventName: "open-settings-view",
+	listener: (event) => openFile({
+		name: "system::open-settings-view"
+	})
+}];
+events.map((args) =>
+	attach({ name: 'State', ...args })
+);
 
 export {
 	getAllServices,

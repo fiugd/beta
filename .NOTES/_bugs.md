@@ -28,8 +28,10 @@ file is deleted, but "no file opened" screen shows up in editor and stays that w
 1) open some files
 2) switch project
 
-files stay open
-should close, also should settings stay open when switching?
+expect: files should close
+expect: settings stays open when switching?
+
+actual: files stay open
 
 
 ## lingering settings
@@ -39,6 +41,18 @@ should close, also should settings stay open when switching?
 3) open settings
 4) close settings
 
-expect: file that is remaining shows its text; settings body disappears
+expect: file that is remaining shows its text
+expect: settings body disappears
 
 actaul: settings body shows for remaining file instead of file's text
+
+
+## new file issue
+1) create a file
+2) file opens in editor
+
+expect: file is selected in tree
+expect: should show blank file contents
+
+actual: editor says "no editable.."
+actual: file is not selected in tree

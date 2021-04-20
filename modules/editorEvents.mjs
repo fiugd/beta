@@ -6,6 +6,23 @@ import {
 	getCurrentService,
 } from "./state.mjs";
 
+const noFrontSlash = (path) => {
+	if(!path) return path;
+	if(!path.includes('/')) return path;
+	if(path[0] === '/') return path.slice(1);
+	return path;
+};
+
+const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
+	const nameWithPathIfPresent = (_path, _name) => _path
+		? noFrontSlash(`${_path}/${_name}`)
+		: noFrontSlash(_name);
+	const fileNameWithPath = next
+		? nameWithPathIfPresent(nextPath, next)
+		: nameWithPathIfPresent(parent || path, name);
+	return fileNameWithPath;
+};
+
 const ChangeHandler = (doc) => {
 	const { code, name, id, filename } = doc;
 	// TODO: if handler already exists, return it
@@ -105,7 +122,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
-	const { name, next, parent } = event.detail;
+	const { name, path, next, nextPath, parent } = event.detail;
 	let savedFileName;
 
 	if (firstLoad) {
@@ -115,27 +132,33 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 			switchEditor(null, "nothingOpen");
 			return;
 		}
-		if (savedFileName && savedFileName.includes("system::")) {
+		if (
+			savedFileName &&
+			savedFileName.includes("system::") &&
+			savedFileName.includes("systemDoc::")
+		){
 			switchEditor(savedFileName.replace("system::", ""), "systemDoc");
 			return;
 		}
 	}
 
+	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
+
+	const filePath = savedFileName || fileNameWithPath;
+
 	if (!savedFileName) {
-		sessionStorage.setItem("editorFile", next || name);
+		sessionStorage.setItem("editorFile", filePath);
 	}
 
-	const fileName = savedFileName || next || name;
-	if (name.includes("system::") || fileName.includes("systemDoc::")) {
-		switchEditor(
-			(savedFileName || name)
+	if (name.includes("system::") || filePath.includes("systemDoc::")) {
+		switchEditor(filePath
 				.replace("system::", "")
 				.replace("systemDoc::", ""),
 			"systemDoc"
 		);
 		return;
 	}
-	const filePath = `${parent ? parent + '/': ''}${fileName}`;
+
 	switchEditor(filePath);
 };
 
@@ -172,7 +195,7 @@ function attachListener({ switchEditor, messageEditor }) {
 			switchEditor(null, "nothingOpen");
 			return;
 		}
-		const { name, next } = e.detail;
+		const { name, parent, path, next, nextPath } = e.detail;
 
 		if (e.type === "fileClose" && next && next.includes("system::")) {
 			switchEditor(next.replace("system::", ""), "systemDoc");
@@ -189,11 +212,14 @@ function attachListener({ switchEditor, messageEditor }) {
 			return;
 		}
 
+		const filePath = getFilePath({ name, parent, path, next, nextPath });
+
 		let savedFileName;
-		if (!savedFileName) {
-			sessionStorage.setItem("editorFile", next || name);
+		if (!savedFileName && filePath) {
+			sessionStorage.setItem("editorFile", filePath);
 		}
-		switchEditor(savedFileName || next || name);
+		// should include path here if needed
+		switchEditor(savedFileName || filePath);
 	};
 
 	attach({

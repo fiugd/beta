@@ -821,3 +821,12 @@ graphs on the fly
 -----------------
 - https://flowchart.fun/ - I love the way they do it
 - a ton more at this HN discussion - https://news.ycombinator.com/item?id=26303784
+
+
+# toObject for a class with getters -https://www.typescriptlang.org/play?#code/MYGwhgzhAEBCkFNoG8BQBIAZpYYAmCA-AFzQQAuATgJYB2A5gNoC6GoA9rUgLzQAUAB0rsBEEmSp0mzAJTRuAPmgApAMoB5AHIA6AWEoQEfNVu0UaDapgCefcgAtqEADTQhIiDJmoM5dic15fjlFaAcnbWwIXAJCbUoEPABXYCM+diTyYjBaa1d3AWJzKRClNHR0DPJGAuYgu0cYSGgc6xka4QFWCoTyJMpaaCqMAF9XZBHvEZ9QSBgAWXZgAGtoBAAPcgRaPBh4QxQMKJieaEYAcjwwLfPXc8ocvHYAW1voc9p2cgBRdadyc7degIcjQK5bPgycroXr9QZcADu0AAItcjDJtH4AJIaVSSBiQswCEDUch8ABEABVye0AAzdaboYGgh47F6Q6GwgbQebXezxR7s7zoRmfH5-CiQw49EFw96Ydjsc6jVDTVDATgUaCYYQAL22QURPKWy0hAG4fAB6S0a2gQdggBDaEDseh8dQAIwAVghgORtMz1AjaAAFToISjkazIhDRGgCPwGPiLFa6YR+KMCBBeGaah1Ol1ugJmfH0Ky2HXsfW0Vy0JIgECuABMOaAA
+
+# lanugauge features I am curious about
+- specs (clojure) https://clojure.org/guides/spec
+- transducers (clojure) https://www.youtube.com/watch?v=4KqUvG8HPYo
+
+

@@ -16,17 +16,22 @@ Current State
   - [ ] cleaner loading view
   - [X] import files
   - [X] export files
+  - [ ] !!! bartok version at bottom left should be connected to real something
 
 ##### paneView
+  - [ ] golden layout or similar for pane splitting
 
 ##### explorer
+  - [ ] rename project/service
 
 ##### editor
-  - [X] linter - https://codemirror.net/demo/lint.html
+  - [ ] auto-detect tabs vs spaces
+  - [ ] linter - https://codemirror.net/demo/lint.html
   - [ ] show 80 char limit line
   - [ ] scrolled shadow at top to indicate file is scrolled down
 
 ##### terminal
+  - [ ] current folder above prompt when applicable (maybe?)
   - [ ] cleanup commands (like unix)
   - [X] some resize issues remain (scrollbars)?
   - [ ] mouse clicks on terminal to select menu items (?)

@@ -147,12 +147,31 @@ function consoleHelper(){
 	};
 }
 
+
+const stringify = o => JSON.stringify(o,null,2);
+const logJSON = (obj, replacer, space=2) => console.log(
+	JSON.stringify(obj, replacer, space)
+);
+const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
+const getStored = (varName) => {
+	const stored = sessionStorage.getItem(varName);
+	if(stored) return stored;
+	const prompted = prompt(varName);
+	sessionStorage.setItem(varName, prompted);
+	return prompted;
+};
+
 export {
 	delay,
 	importCSS,
 	htmlToElement,
 	prism,
 	consoleHelper,
+	
+	stringify,
+	logJSON,
+	fetchJSON,
+	getStored,
 
 	//DEPRECATE exporting these?
 	appendUrls,

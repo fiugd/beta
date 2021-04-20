@@ -1,31 +1,66 @@
 <!-- no-select -->
 
+*The cloud service you don't have to register for.*
+*The editor / IDE you didn't have to install.*
+*The tool that will change the way you work.*
+
 ## Introduction
-* Bartok does(will do) things that other things do.
-* Consequently, one may think Bartok IS one of those things.
-* Possibly, Bartok can be used as one of those things.
+* fiug does(will do) things that other things do.
+* Consequently, one may think fiug IS one of those things.
+* Possibly, fiug can be used as one of those things.
 * However, it may not be that thing and that is not the sole vision for it.
-* Consider the following an exploration of what bartok is(will be).
+* Consider the following an exploration of what fiug is and will be.
 
 ## TL;DR
-* bartok takes inspiration from all of the following in some regard
-* bartok will most likely not do any one of these things as well as any one of these do
+* fiug takes inspiration from all of the following in some regard
+* fiug will most likely not do any one of these things as well as any one of these do
 
-## Bartok IS or NOT (maybe)
+## Fiug (IS | IS NOT)
 
-### Editor
-- modify and manage files sometimes with other integrations/tasks
-- examples: vscode, atom, brackets, Eclipse Theia, Light Table
+### Editor | IDE
+- modify and manage files sometimes with other integrations/features
+- examples
+	- [vscode](https://code.visualstudio.com)
+	- [sublime](https://www.sublimetext.com)
+	- [Eclipse Theia](https://eclipsesource.com/technology/eclipse-theia)
+	- [Light Table](http://lighttable.com)
+	- [atom](https://atom.io)
+	- [brackets RIP](http://brackets.io)
 
-### IDE | Playground
+### IDE | Playground | Code Runner
 - online editor and web-based code share/run
-- examples: plunker, codepen, stackblitz, runkit, glitch, observables, iodide.io, jupyter notebook
-- more: https://codeframe.co/, https://slingcode.net/, https://codefence.io/
-- https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds
-- https://tio.run/#
+- [wiki source code playgrounds](https://en.wikipedia.org/wiki/Comparison_of_online_source_code_playgrounds)
+- examples
+	- [jsfiddle](https://jsfiddle.net/)
+	- [plunker](https://plnkr.co/)
+	- [codepen](https://codepen.io/)
+	- [stackblitz](https://stackblitz.com/)
+	- [runkit](https://runkit.com/)
+	- [replit.it](https://replit.com/)
+	- [glitch](https://glitch.com/)
+	- [observables](https://observablehq.com/)
+	- [iodide.io](https://github.com/iodide-project/iodide)
+	- [jupyter notebook hosts](https://www.dataschool.io/cloud-services-for-jupyter-notebook/)
+	- [codeframe](https://codeframe.co/)
+	- [sligncode](https://slingcode.net/)
+	- [codefence](https://codefence.io/)
+	- [tio](https://tio.run/#)
+
+### Nocode platform / Multiexperience Development Platforms (MXDP)
+- examples
+	- [outsystems](https://www.outsystems.com/)
+	- [webflow](https://webflow.com/)
+	- [airtable](https://airtable.com/)
+	- [bubble.io](https://bubble.io/)
+	- [kintone](https://www.kintone.com/)
 
 ### Mindmap | Knowledge Management Tool
-- example: dendron.so, roam, athens, foam, vscode-memo
+- examples
+	- [dendron](https://dendron.so)
+	- [roam](https://roamresearch.com/)
+	- [athens](https://athensresearch.github.io/athens/)
+	- [foam](https://github.com/foambubble/foam)
+	- [vs code memo](https://github.com/svsool/vscode-memo)
 
 ### Continuous Integration Tool
 - code, build, deployment automation
@@ -33,14 +68,15 @@
 
 ### ALM
 - application lifecycle management
-- examples: many solutions all mostly unknown; difficult to find good examples
+- examples: many solutions all mostly unknown; difficult to find good examples by name
 
 ### APM
 - application performance management
 - examples: weavescope, splunk, datadog, kubernetes dashboard, ELK/EFK/Kibana
 
 ### Editor Extension
-- example: https://github.com/codespaces-contrib/codeswing
+- examples
+	- [codeswing](https://github.com/codespaces-contrib/codeswing)
 
 ### XaaS
 

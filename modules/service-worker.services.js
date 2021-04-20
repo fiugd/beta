@@ -104,11 +104,18 @@
 			// and also this should be done through provider...
 			// also, would expect to not change the file, instead add a change in changes table
 			// ^^ and restore that on read
-			if(service.type === 'github' && `${path[0]}${path[1]}` === './'){
+			if(service.type === 'github' && `${path.slice(0,2)}` === './'){
 				path = path.slice(2);
 			}
 
-			await changesStore.setItem(path, { type: 'update', value: code });
+			await changesStore.setItem(path, {
+				type: 'update',
+				value: code,
+				service: (() => {
+					const { tree, ...rest } = service;
+					return rest;
+				})()
+			});
 
 			if (service && command === "upsert") {
 				service.tree = utils.treeInsertFile(path, service.tree);
@@ -131,6 +138,55 @@
 		}
 	};
 
+	const handleServiceGetChanges = ({ storage, ui, utils, templates }) => async (
+		params,
+		event,
+		query
+	) => {
+		const { flattenObject } = utils;
+
+		const servicesStore = storage.stores.services;
+		const filesStore = storage.stores.files;
+		const changesStore = storage.stores.changes;
+
+		const { cwd } = query;
+
+		let service;
+		cwd && await servicesStore.iterate((value, key) => {
+			const { tree } = value;
+			const flattened = flattenObject(tree);
+			if(flattened.includes(cwd)){
+				service = value.name;
+				return true;
+			}
+		});
+
+		const changes = [];
+		const changesKeys = await changesStore.keys();
+		for(let i=0, len=changesKeys.length; i<len; i++){
+			const key = changesKeys[i];
+			const value = await changesStore.getItem(key);
+			const parent = value?.service?.name;
+			if(!parent) continue;
+			if(service && parent !== service) continue;
+
+			changes.push({
+				fileName: key,
+				...value,
+				original: await filesStore.getItem(key)
+			});
+		}
+
+		try {
+			return stringify({
+				changes,
+				cwd,
+			});
+		} catch (error) {
+			return stringify({ error });
+		}
+	};
+
 	const handleServiceUpdate = ({ storage, providers, ui, utils }) => async (
 		params,
 		event
@@ -142,7 +198,45 @@
 		try {
 			const { id } = params;
 			const body = await event.request.json();
-			const { name } = body;
+			const { name, operation } = body;
+
+			if(
+				operation?.name?.includes('rename') ||
+				operation?.name?.includes('move')
+			){
+				const service = await servicesStore.getItem(id + "");
+
+				const filesFromService = (await filesStore.keys())
+					.filter(key => key.startsWith(`./${service.name}/`));
+				body.code = [];
+				for(var i=0, len=filesFromService.length; i < len; i++){
+					const key = filesFromService[i];
+					body.code.push({
+						name: key.split('/').pop(),
+						update: await filesStore.getItem(key),
+						path: key
+							.replace(
+								`./${service.name}/${operation.source}`,
+								`./${service.name}/${operation.target}`
+							)
+							.replace(/^\./, '')
+					});
+				}
+				body.tree = service.tree;
+				const getPosInTree = (path, tree) => ({
+					parent: path.split('/')
+						.slice(0, -1)
+						.reduce((all, one) => {
+							all[one] = all[one] || {};
+							return all[one]
+						}, body.tree),
+					param: path.split('/').pop()
+				});
+				const sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree);
+				const targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
+				targetPos.parent[targetPos.param] = sourcePos.parent[sourcePos.param];
+				delete sourcePos.parent[sourcePos.param];
+			}
 
 			const parsedCode =
 				!Array.isArray(body.code) && utils.safe(() => JSON.parse(body.code));
@@ -192,9 +286,15 @@
 			const filesToAdd = filesFromUpdateTree
 				.filter(file => !filesInStore.includes(file));
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
-				const parent = service;
 				const path = filesToAdd[i];
-				const code = '\n'; //TODO: should be default for file type
+				const fileUpdate = body.code.find(x => `.${x.path}` === path);
+				const parent = service;
+				let fileUpdateCode;
+				if(fileUpdate?.update){
+					fileUpdateCode = fileUpdate.update;
+					delete fileUpdate.update;
+				}
+				const code = fileUpdateCode || ''; //TODO: if not in update, default for file
 				await providers.fileChange({ path, code, parent });
 				await filesStore.setItem(path, code);
 			}
@@ -211,7 +311,20 @@
 				await filesStore.setItem(path, code);
 			}
 
-			return stringify({ result: [body] });
+			return stringify({
+				result: [{
+					id: service.id,
+					name: service.name,
+					code: body.code,
+					tree: body.tree,
+					treeState: {
+						expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
+						select: (await changesStore.getItem(`tree-${service.name}-selected`)) || '',
+						changed: [],
+						new: []
+					}
+				}]
+			});
 		} catch (error) {
 			console.error(error);
 			return stringify({ error });
@@ -235,6 +348,7 @@
 			this.handlers = {
 				serviceCreate: handleServiceCreate(this),
 				serviceChange: handleServiceChange(this),
+				serviceGetChanges: handleServiceGetChanges(this),
 				serviceUpdate: handleServiceUpdate(this),
 				serviceDelete: handleServiceDelete(this),
 			};

@@ -42,6 +42,13 @@ const flattenTree = (tree) => {
 };
 
 const guessCurrentFolder = (currentFile, currentService) => {
+	if(currentFile.includes('/')){
+		const parent = currentFile.split('/').slice(0,-1).join('/');
+		return parent.includes(currentService.name)
+			? parent.replace(`${currentService.name}/`, '')
+			: parent;
+	}
+	//return currentService.name;
 	let parent;
 	try {
 		const flat = flattenTree(
@@ -117,7 +124,7 @@ const showCurrentFolderHandler = ({
 		: guessCurrentFolder(currentFile, currentService);
 
 	callback &&
-		callback(!parent ? "trouble finding current path" : false, parent);
+		callback(!parent ? "trouble finding current path" : false, `${currentService.name}/${parent}`);
 };
 
 const changeCurrentFolderHandler = ({
@@ -414,6 +421,7 @@ const operationsHandler = ({
 	externalStateRequest,
 	getCurrentFile,
 	getCurrentService,
+	setCurrentService,
 	getCurrentFolder,
 	setCurrentFolder,
 	getState,
@@ -434,6 +442,29 @@ const operationsHandler = ({
 		const allOperations = getOperations(updateAfter, readAfter);
 		const { detail } = event;
 		const { callback } = detail;
+
+		// NOTE: simple operations handling - tell service worker to do everything
+		if(
+			detail?.operation.includes('rename') ||
+			detail?.operation.includes('move')
+		){
+			const updateOp = allOperations.find((x) => x.name === "update");
+			const currentService = getCurrentService();
+			const body = {
+				name: currentService.name,
+				id: currentService.id,
+				operation: {
+					name: event.detail.operation,
+					source: event.detail.src,
+					target: event.detail.tgt,
+				}
+			};
+			const result = await performOperation(updateOp, { body });
+			const updatedService = result?.detail?.result[0];
+			setCurrentService(updatedService);
+			triggerOperationDone(result);
+			return;
+		}
 
 		if (detail && detail.operation === "showCurrentFolder") {
 			return showCurrentFolderHandler({
@@ -536,6 +567,7 @@ const providerHandler = ({
 	externalStateRequest,
 	getCurrentFile,
 	getCurrentService,
+	setCurrentService,
 	getCurrentFolder,
 	setCurrentFolder,
 	getState,
@@ -578,6 +610,7 @@ const providerHandler = ({
 		externalStateRequest,
 		getCurrentFile,
 		getCurrentService,
+		setCurrentService,
 		getCurrentFolder,
 		setCurrentFolder,
 		getState,
@@ -605,10 +638,10 @@ const operationDoneHandler = ({
 	const wasAllServicesRead = !event.detail.id && event.detail.id !== 0;
 
 	const readOneServiceDone =
-		result.length === 1 &&
+		result?.length === 1 &&
 		op === "read" &&
-		(inboundService.id || inboundService.id === 0) &&
-		inboundService.id !== "*" &&
+		(inboundService?.id || inboundService?.id === 0) &&
+		inboundService?.id !== "*" &&
 		!wasAllServicesRead;
 
 	const handledHere = [readOneServiceDone];
@@ -649,23 +682,31 @@ const handlers = {
 const getChainedTrigger = ({ triggers }) => (event) => {
 	const handler = {
 		addFile: async () => {
+			const name = event.detail.parent
+				? `${event.detail.parent}/${event.detail.name}`
+				: event.detail.name;
 			triggers.triggerFileSelect({
-				detail: {
-					name: event.detail.filename,
-				},
+				detail: { name },
 			});
 		},
 		deleteFile: async () => {
-			const opened = getOpenedFiles();
+			const name = event.detail.parent
+				? `${event.detail.parent}/${event.detail.name}`
+				: event.detail.name;
+			const allOpen = getOpenedFiles() || [];
+			const opened = allOpen.filter(x => x.name !== name);
+			if(allOpen?.length === opened?.length) return;
+
 			let next;
 			if (opened.length) {
 				next = opened[opened.length - 1].name;
 			}
+			const alreadySelected = allOpen.find(x => x.selected);
+			if(alreadySelected){
+				next = alreadySelected.name;
+			}
 			triggers.triggerFileClose({
-				detail: {
-					name: event.detail.filename,
-					next,
-				},
+				detail: { name, next },
 			});
 		},
 	}[event.detail.operation];

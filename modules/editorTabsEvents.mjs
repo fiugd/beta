@@ -1,6 +1,17 @@
 import { attach, attachTrigger } from "./Listeners.mjs";
 import { getDefaultFile, getState } from "./state.mjs";
-let tabs = [];
+let tabs, service;
+
+function removeTabByEventDetail(removeTab, eventDetail){
+	const { name, path, parent } = eventDetail;
+	const closedFullName = (path||parent) ? `${(path||parent)}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+	const found = tabs.find((x) => tabFullName(x) === closedFullName);
+	if(!found) return;
+	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	removeTab(found);
+}
 
 function copyPath(data, relative) {
 	const state = getState();
@@ -27,6 +38,7 @@ function copyPath(data, relative) {
 }
 
 function clearLastTab({ tabs, removeTab }) {
+	if(!tabs.length) return;
 	const lastTab = tabs[tabs.length - 1];
 	if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
 		return;
@@ -36,7 +48,7 @@ function clearLastTab({ tabs, removeTab }) {
 }
 
 function getTabsToUpdate(filePath) {
-	const name = filePath.split('/').pop();
+	const name = filePath?.split('/').pop();
 	const tabsToUpdate = [];
 	let foundTab;
 	for (var i = 0, len = tabs.length; i < len; i++) {
@@ -60,9 +72,10 @@ function getTabsToUpdate(filePath) {
 }
 
 function triggerCloseTab(event, fileCloseTrigger) {
-	let name;
+	let name, parent;
 	try {
 		name = event.target.dataset.name.trim();
+		parent = (event.target.dataset.parent||'').trim();
 	} catch (e) {
 		console.log("error trying to handle close tab click");
 		console.log(e);
@@ -70,37 +83,49 @@ function triggerCloseTab(event, fileCloseTrigger) {
 	if (!name) {
 		return;
 	}
-	const closedTab = tabs.find((x) => x.name === name);
-	const nextTabs = tabs.filter((x) => x.name !== name);
-	const next = closedTab.active
-		? (nextTabs[nextTabs.length - 1] || {}).name
-		: (tabs.filter((x) => x.active) || [{}])[0].name;
+	const closedFullName = parent ? `${parent}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+
+	const closedTab = tabs.find((x) => closedFullName === tabFullName(x));
+	const nextTabs = tabs.filter((x) => closedFullName !== tabFullName(x));
+	const nextTab = closedTab.active
+		? (nextTabs[nextTabs.length - 1] || {})
+		: (tabs.filter((x) => x.active) || [{}])[0];
 
 	fileCloseTrigger({
-		detail: { name, next },
+		detail: {
+			name: closedTab.name,
+			path: closedTab.parent,
+			next: nextTab.name,
+			nextPath: nextTab.parent,
+		},
 	});
 }
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
-	const { name, next } = event.detail;
+	let { name, path, next, nextPath } = event.detail;
+	if(!path && name?.includes('/')){
+		path = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
+	}
+	if(!nextPath && next?.includes('/')){
+		nextPath = next.split('/').slice(0,-1).join('/');
+		next = next.split('/').pop();
+	}
 
-	const found = tabs.find((x) => x.name === name);
-	tabs = tabs.filter((x) => x.name !== name);
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
-
-	removeTab(found);
+	removeTabByEventDetail(removeTab, event.detail);
 
 	if (!next) {
 		return;
 	}
 	const nextTab = tabs.find(
-		(x) => x.name === next || x.systemDocsName === next
+		(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
 	);
 	if (!nextTab) {
 		return;
 	}
 	nextTab.active = true;
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
 	updateTab(nextTab);
 };
@@ -142,6 +167,8 @@ const clickHandler = ({ event, container, triggers }) => {
 	triggers["fileSelect"]({
 		detail: {
 			name: foundTab.name,
+			path: foundTab.parent,
+			parent: foundTab.parent,
 		},
 	});
 };
@@ -154,16 +181,17 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const firstLoad = tabs.length < 1;
-	// TODO: need a finer defintion of first load
-	// because all tabs may be exited later in usage
-	// if(firstLoad){
-	// 	return;
-	// }
-
-	const { name, changed } = event.detail;
+	let { name, changed, parent } = event.detail;
+	if(!parent && name?.includes('/')){
+		parent = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
+	}
+	if(name?.includes('system::')){
+		tabs = tabs || [];
+	}
+	if(!tabs) return;
 	let systemDocsName;
-	if (name.includes("system::")) {
+	if (name?.includes("system::")) {
 		systemDocsName = {
 			"add-service-folder": "Open Folder",
 			"connect-service-provider": "Connect to a Provider",
@@ -173,35 +201,40 @@ const fileSelectHandler = ({
 	}
 	let id = "TAB" + Math.random().toString().replace("0.", "");
 
-	let { tabsToUpdate, foundTab } = getTabsToUpdate(name);
+	let { tabsToUpdate, foundTab } = getTabsToUpdate(parent
+		? `${parent}/${name}`
+		: name
+	);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
-		sessionStorage.setItem("tabs", JSON.stringify(tabs));
+		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
 	createTab({
 		name,
+		parent,
 		active: true,
 		id,
 		changed,
 	});
 	const shouldClearTab = !name.includes("Untitled-");
 
-	const { cleared, tabs: newTabs } = firstLoad
-		? {}
-		: (shouldClearTab && clearLastTab({ tabs, removeTab })) || {};
+	const { cleared, tabs: newTabs } = (shouldClearTab && clearLastTab({
+		tabs, removeTab 
+	})) || {};
 	if (newTabs) tabs = newTabs;
 	if (cleared) tabsToUpdate = tabsToUpdate.filter((t) => t.id !== cleared.id);
 	tabsToUpdate.map(updateTab);
 	tabs.push({
 		name,
+		parent,
 		systemDocsName,
 		active: true,
 		id,
 		changed,
 	});
-	sessionStorage.setItem("tabs", JSON.stringify(tabs));
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const fileChangeHandler = ({
@@ -220,6 +253,7 @@ const fileChangeHandler = ({
 	}
 	foundTab.changed = true;
 	[foundTab].map(updateTab);
+	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const operationDoneHandler = ({
@@ -230,39 +264,46 @@ const operationDoneHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	const { op, id, result = [] } = event.detail || "";
+	const { op, id, result = [] } = event.detail || {};
 	if (op === "update") {
 		tabs.forEach((t) => {
 			if (t.changed) t.touched = true;
 			delete t.changed;
 		});
 		tabs.map(updateTab);
+		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
 	if (op !== "read" || !id) {
 		return;
 	}
-	const storedTabs = (() => {
-		try {
-			return JSON.parse(sessionStorage.getItem("tabs"));
-		} catch (e) {}
-	})();
-	if (storedTabs) {
-		tabs = storedTabs;
-	} else {
-		const defaultFile = getDefaultFile(result[0]);
-		tabs = [
-			{
-				name: defaultFile,
-				active: true,
-				id: "TAB" + Math.random().toString().replace("0.", ""),
-			},
-		];
-	}
-
+	service = result[0];
+	const tabsStorageKey = service?.treeState?.select
+		? "tabs/"+(service?.name||'')
+		: "tabs/";
+	const storedTabs = JSON.parse(sessionStorage.getItem(tabsStorageKey) || '[]');
+	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
+
+const operationsHandler = (args) => {
+	const {
+		event,
+		container,
+		initTabs,
+		createTab,
+		updateTab,
+		removeTab,
+	} = args;
+	const { operation } = event.detail || {};
+	if(!operation || !['deleteFile'].includes(operation)) return;
+
+	if(operation === 'deleteFile'){
+		removeTabByEventDetail(removeTab, event.detail);
+		return;
+	}
+}
 
 const contextMenuHandler = ({ event, showMenu }) => {
 	const editorDom = document.querySelector("#editor-tabs-container");
@@ -409,6 +450,7 @@ const handlers = {
 	fileSelect: fileSelectHandler,
 	fileClose: fileCloseHandler,
 	fileChange: fileChangeHandler,
+	operations: operationsHandler,
 	operationDone: operationDoneHandler,
 	contextmenu: contextMenuHandler,
 	"contextmenu-select": contextMenuSelectHandler,

@@ -39,7 +39,11 @@ const require = (url) => {
 	app.get("/service/search/", storage.handlers.serviceSearch); // move handler to services
 	app.get("/service/read/:id?", storage.handlers.serviceRead); // move handler to services
 	app.post("/service/create/:id?", services.handlers.serviceCreate);
+	app.get("/service/change", services.handlers.serviceGetChanges);
 	app.post("/service/change", services.handlers.serviceChange);
+
+	app.post("/service/commit", providers.handlers.createCommit);
+
 	app.post("/service/update/:id?", services.handlers.serviceUpdate);
 	app.post("/service/provider/delete/:id?", services.handlers.serviceDelete);
 
@@ -68,7 +72,7 @@ const require = (url) => {
 			}
 		} catch (e) {}
 
-		const serviceAPIMatch = await app.find(event.request.url);
+		const serviceAPIMatch = await app.find(event.request);
 
 		const res = serviceAPIMatch
 			? await serviceAPIMatch.exec(event)

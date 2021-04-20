@@ -10,19 +10,18 @@
 ### meta
   - [X] !!! storage and backup
   - [X] !!! connect to server UI
-  - [ ] !!! bartok version at bottom left should be connected to real something
   - [X] !!! settings icon (gear) should be connected to something
 
 ### panes
   - nothing
 
 ### explorer
-  - [X] !!! hook up new file icon
-  - [X] !!! hook up new folder action
-  - [ ] rename project/service
+  - [X] hook up new file icon
+  - [X] hook up new folder action
   - [X] open parent folders when file/folder selected
     - selected from tabs
     - selected in terminal
+  - [X] complete rewrite of tree module
 
 ### preview
   - nothing
@@ -34,7 +33,7 @@
   - nothing
 
 ### terminal
-  - [ ] current folder above prompt when applicable (maybe?)
+  - nothing
 
 ### server
   - [X] !!! git persistance

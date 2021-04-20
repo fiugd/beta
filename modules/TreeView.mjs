@@ -1043,13 +1043,16 @@ function _TreeView(op) {
 	};
 
 	const treeMethods = [
-		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context'
+		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
 	].reduce((all, one) => {
 			all['tree'+one] = (...args) => {
 				try {
 					if(!tree) return; //should keep track of this instead of blindly returning
 					if(one === 'Add' && typeof args[2] === 'undefined'){
 						return tree.add(args[0], null, tree.currentFolder || '');
+					}
+					if(one === 'ClearChanged'){
+						return tree.clearChanged();
 					}
 					return tree[one.toLowerCase()](...args);
 				} catch(e){
@@ -1091,9 +1094,14 @@ function _TreeView(op) {
 		});
 		const operationAdapt = {
 			fileAdd: 'addFile',
-			folderAdd: 'addFolder',
 			fileDelete: 'deleteFile',
+			fileRename: 'renameFile',
+			fileMove: 'moveFile',
+
+			folderAdd: 'addFolder',
 			folderDelete: 'deleteFolder',
+			folderRename: 'renameFolder',
+			folderMove: 'moveFolder',
 		};
 		const treeEventHandler = (args) => {
 			const { source, target } = args;
@@ -1102,8 +1110,11 @@ function _TreeView(op) {
 			const handlerMessage = {
 				detail: {
 					name,
+					oldName: source,
+					newName: target,
 					src: source,
-					tgt: target, parent,
+					tgt: target,
+					parent,
 					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,

@@ -49,6 +49,17 @@
 				}),
 			};
 		})(),
+		"/service/commit": (() => {
+			const regex = new RegExp(
+				/^((?:.*))\/service\/commit(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i
+			);
+			return {
+				match: (url) => regex.test(url),
+				params: (url) => ({
+					id: regex.exec(url)[2],
+				}),
+			};
+		})(),
 		"/service/delete/:id?": (() => {
 			const regex = new RegExp(
 				/^((?:.*))\/service\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i
@@ -312,19 +323,37 @@
 		// could run in to problems with this ^^^ because those may be in the process of being added
 	};
 
-	const _find = ({ _handlers, restorePrevious }) => async (url) => {
-		let found = _handlers.find((x) => x.match(url));
+	const _find = ({ _handlers, restorePrevious }) => async (request) => {
+		const { url, method } = request;
+		const query = (() => {
+			try {
+				return Object.fromEntries([ ...(new URL(url)).searchParams ]);
+			} catch(e){
+				return {};
+			}
+		})();
+
+		let found = _handlers.find((x) => {
+			return method.toLowerCase() === x.method && x.match(url.split('?')[0]);
+		});
 		if (!found) {
 			await restorePrevious();
-			found = _handlers.find((x) => x.match(url));
+			found = _handlers.find((x) => {
+				return method.toLowerCase() === x.method && x.match(url.split('?')[0]);
+			});
 
 			if (!found) {
 				return;
 			}
 		}
+
 		return {
 			exec: async (event) => {
-				return await found.handler(found.params(url), event);
+				return await found.handler(
+					found.params(url.split('?')[0]),
+					event,
+					query
+				);
 			},
 		};
 	};

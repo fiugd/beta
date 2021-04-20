@@ -33,6 +33,7 @@
 		}
 	};
 
+	// this flattens tree files, not structure
 	const flattenTree = (tree) => {
 		const results = [];
 		const recurse = (branch, parent = "/") => {
@@ -55,6 +56,28 @@
 		};
 		recurse(tree);
 		return results;
+	};
+
+	// this flattens tree structure
+	// thanks: https://lowrey.me/getting-all-paths-of-an-javascript-object/
+	const flattenObject = (root) =>  {
+		let paths = [];
+		let nodes = [{
+			obj: root,
+			path: []
+		}];
+		while (nodes.length > 0) {
+			const n = nodes.pop();
+			Object.keys(n.obj)
+				.forEach(k => {
+					const obj = n.obj[k];
+					if (typeof obj !== 'object') return;
+					const path = n.path.concat(k);
+					paths.push(path);
+					nodes.unshift({ obj, path });
+				});
+		}
+		return paths.map(x => x.join('/'));
 	};
 
 	const keepHelper = (tree, code) => {
@@ -159,6 +182,7 @@
 	module.exports = {
 		fetchJSON,
 		flattenTree,
+		flattenObject,
 		keepHelper,
 		getCodeAsStorage,
 		getMime,
