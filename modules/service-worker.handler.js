@@ -42,7 +42,7 @@ const require = (url) => {
 	app.get("/service/change", services.handlers.serviceGetChanges);
 	app.post("/service/change", services.handlers.serviceChange);
 
-	app.post("/service/commit", services.handlers.commit);
+	app.post("/service/commit", providers.handlers.createCommit);
 
 	app.post("/service/update/:id?", services.handlers.serviceUpdate);
 	app.post("/service/provider/delete/:id?", services.handlers.serviceDelete);
