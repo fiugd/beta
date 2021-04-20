@@ -306,9 +306,10 @@
 		if(!auth) return stringify({ error: 'auth token is required for commit' });
 		if(!cwd) return stringify({ error: 'current working directory (cwd) is required for commit' });
 
-		const { storage: { stores } } = githubProvider;
+		const { storage: { stores }, utils } = githubProvider;
 		const servicesStore = stores.services;
 		const changesStore = stores.changes;
+		const { flattenObject } = utils;
 		
 		let service;
 		await servicesStore.iterate((value, key) => {
@@ -347,7 +348,7 @@
 	}
 
 	class GithubProvider {
-		constructor ({ storage, fetchContents, app }) {
+		constructor ({ storage, fetchContents, app, utils }) {
 			return new Promise((resolve, reject) => {
 				try {
 					this.handler = githubRequestHandler(this);
@@ -355,6 +356,7 @@
 					this.storage = storage;
 					this.fetchContents = fetchContents;
 					this.app = app;
+					this.utils = utils;
 
 					// the provider  user entered info <-> fiug providersStore
 					// store details about how each service connects to github
