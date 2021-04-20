@@ -33,57 +33,6 @@
 		return debug() || stringify({ message: 'not implemented' })
 	};
 
-	/*
-		files: { path, content, operation }[], operation is one of [create, update, delete]
-		git: { owner, repo, branch }
-		auth: github authorization token,
-		message: commit message
-	*/
-	async function commit({ files, git, auth, message }){
-		if(!auth) return { error: 'auth is required' };
-		if(!message) return { error: 'message is required' };
-		if(!git.owner) return { error: 'repository owner is required' };
-		if(!git.branch) return { error: 'repository branch name is required' };
-		if(!git.repo) return { error: 'repository name is required' };
-		if(!files || !Array.isArray(files) || !files.length) return { error: 'no files were changed'};
-
-		const opts = {
-			headers: {
-				authorization: `token ${auth}`,
-				Accept: "application/vnd.github.v3+json"
-			}
-		};
-
-		const ghFetch = async (templateUrl, params={}, extraOpts={}) => {
-			const filledUrl = fill(templateUrl, { ...git, ...params });
-			return await fetchJSON(filledUrl, {...opts, ...extraOpts });
-		};
-		const ghPost = async (url, params, body) => await ghFetch(url, params, {
-			method: 'POST',
-			body: JSON.stringify(body)
-		});
-
-		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null,
-			{ content: btoa(content), encoding: 'base64' }
-		);
-		const blobs = await Promise.all(files.map(blobCreate));
-		const latest = await ghFetch(urls.branch);
-		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
-		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
-		const fileToTree = ({ path }, index) => ({
-			path, mode: '100644', type: 'blob',	sha: blobs[index].sha
-		});
-		// in case files are deleted, should filter from fullTree here
-		const tree = [ ...files.map(fileToTree), ...fullTree.tree.map(treeToTree)];
-		const createdTree = await ghPost(urls.tree, null, { tree });
-		const newCommit = await ghPost(urls.createCommit, null, {
-			message, tree: createdTree.sha, parents: [ latest.commit.sha ]
-		});
-		const updateRefs = await ghPost(urls.refs, null, { sha: newCommit.sha });
-		return updateRefs?.object?.sha
-	}
-
-
 	const githubRequestHandler = (githubProvider) => async (which, handlerArgs) => {
 		try {
 			const { params, event, service, parent } = handlerArgs;
@@ -255,7 +204,7 @@
 				const tree = githubToServiceTree(githubTree);
 				const thisService = {
 					id, type, name, tree,
-					owner: repo.split('/').slice(0,1),
+					owner: repo.split('/').slice(0,1).join(''),
 					repo: repo.split('/').pop(),
 					branch
 				};
@@ -292,6 +241,56 @@
 	const githubFileRead = (githubProvider) => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
 	const githubFileUpdate = (githubProvider) => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
 	const githubFileDelete = (githubProvider) => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+
+	/*
+		files: { path, content, operation }[], operation is one of [create, update, delete]
+		git: { owner, repo, branch }
+		auth: github authorization token,
+		message: commit message
+	*/
+	async function commit({ files, git, auth, message }){
+		if(!auth) return { error: 'auth is required' };
+		if(!message) return { error: 'message is required' };
+		if(!git.owner) return { error: 'repository owner is required' };
+		if(!git.branch) return { error: 'repository branch name is required' };
+		if(!git.repo) return { error: 'repository name is required' };
+		if(!files || !Array.isArray(files) || !files.length) return { error: 'no files were changed'};
+
+		const opts = {
+			headers: {
+				authorization: `token ${auth}`,
+				Accept: "application/vnd.github.v3+json"
+			}
+		};
+
+		const ghFetch = async (templateUrl, params={}, extraOpts={}) => {
+			const filledUrl = fill(templateUrl, { ...git, ...params });
+			return await fetchJSON(filledUrl, {...opts, ...extraOpts });
+		};
+		const ghPost = async (url, params, body) => await ghFetch(url, params, {
+			method: 'POST',
+			body: JSON.stringify(body)
+		});
+
+		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null,
+			{ content: btoa(content), encoding: 'base64' }
+		);
+		const blobs = await Promise.all(files.map(blobCreate));
+		const latest = await ghFetch(urls.branch);
+		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
+		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
+		const fileToTree = ({ path }, index) => ({
+			path, mode: '100644', type: 'blob',	sha: blobs[index].sha
+		});
+		// in case files are deleted, should filter from fullTree here
+		const tree = [ ...files.map(fileToTree), ...fullTree.tree.map(treeToTree)];
+		const createdTree = await ghPost(urls.tree, null, { tree });
+		const newCommit = await ghPost(urls.createCommit, null, {
+			message, tree: createdTree.sha, parents: [ latest.commit.sha ]
+		});
+		const updateRefs = await ghPost(urls.refs, null, { sha: newCommit.sha });
+		return updateRefs?.object?.sha
+	}
 
 	/*
 	in the future:
@@ -340,12 +339,12 @@
 			changes.push({ ...change, key });
 		}
 
-		//const commitResponse = await commit({ auth, files, git, message })
+		const commitResponse = await commit({ auth, files, git, message })
 
 		// if commit is successful, should remove each change from store
 		// if commit is successful, should update file with contents of change
 
-		return stringify({ auth, files, git, message });
+		return stringify({ commitResponse });
 	}
 
 	class GithubProvider {
