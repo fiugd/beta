@@ -1,7 +1,25 @@
 <!-- no-select -->
 <br>
 
-#### 2021-01-29 | 2021-03-06 - Github, Tree Module, Repo/Name dancing
+#### 2021-03-06 | 2021-04-20 - 0.4.2 Git Commit, Changes, Terminal ++
+	- tighter tree integration
+		- file changes
+	- tons of issues relating to fileName vs fileName+/filePath/blah..
+	- fix issues with express abstraction vs request method
+	- fix move/rename issues
+	- fix tab issues
+	- new terminal
+	- terminal features
+		- git
+		- history
+		- up and down arrows to nav history
+		- watch system events
+	- commiting to github
+	- iframe can listen to and trigger system events
+	- hotkey for move line up
+	- hotkey for toggle comments
+
+#### 2021-01-29 | 2021-03-06 -  - 0.4.1 Github, Tree Module, Repo/Name dancing
 	- add github read integraion (Jan 30 - Feb 1st week end)
 	- move "welcome" into it's own repo "fiug-welcome" (Jan 31)
 	- new tree module ( Feb 14 - March 6++ )
