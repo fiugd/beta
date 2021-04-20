@@ -294,7 +294,7 @@
 		const tree = [
 			...files.map(fileToTree),
 			...fullTree.tree
-				.filter(x => !filePaths.includes(x.path))
+				.filter(x => !filePaths.includes(x.path) && x.type !== 'tree')
 				.map(treeToTree)
 		];
 
