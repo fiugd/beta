@@ -8,11 +8,11 @@ const history = [
 	`watch`,
 	`git branch`,
 	`git pull`,
-	`git commit`,
 	`git push`,
 	`git clone`,
-	`git diff`,
 	`git status`,
+	`git diff terminal.git.mjs`,
+	`git commit -m "commit me"`,
 ];
 
 const usage = (chalk) => {
