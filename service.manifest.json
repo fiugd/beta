@@ -7,12 +7,10 @@
         "./",
         "./index.service.test.html",
         "./index.bootstrap.html",
-        "./index.old.html",
         "./index.html",
         "./service.manifest.json",
 
         "./settings.html",
-        "./bartok-logo.png",
 
         "/shared/vendor/stylus.min.js",
         "/shared/vendor/materialize.min.js",
