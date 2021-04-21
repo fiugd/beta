@@ -42,12 +42,13 @@ const flattenTree = (tree) => {
 };
 
 const guessCurrentFolder = (currentFile, currentService) => {
-	if(currentFile.includes('/')){
+	if((currentFile||'').includes('/')){
 		const parent = currentFile.split('/').slice(0,-1).join('/');
 		return parent.includes(currentService.name)
 			? parent.replace(`${currentService.name}/`, '')
 			: parent;
 	}
+	if(!currentService) return '/';
 	//return currentService.name;
 	let parent;
 	try {
