@@ -14,6 +14,7 @@
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer hook up new folder|file icons + expand|collapse
 
+  - [ ] terminal watch mode for js files (+more maybe)
 
 ### meta
 
