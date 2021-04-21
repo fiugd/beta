@@ -9,7 +9,6 @@ import motd from "./motd.mjs";
 //DEPRECATE
 import { templateJSX, templateSVC3, transform } from "./Templates.mjs";
 
-
 const iframeSandboxPermissions = [
 	"allow-same-origin",
 	"allow-scripts",
@@ -160,23 +159,24 @@ function _Terminal() {
 	const iframeUrl = "";
 	previewContainer.innerHTML = `
 		<style>
-			.preview-contain {
+			.preview-contain, .term-contain {
 				position: absolute;
 				left: 0;
 				right: 0;
 				top: 0px;
 				bottom: 0px;
 				background: #1d1d1d;
-				z-index: 9;
 				overflow: hidden;
 			}
+			#terminal .preview-contain { z-index: 9; }
+			#terminal .term-contain { z-index: 8; }
 			#terminal iframe {
 				position: relative;
 				top: 0;
 				right: -1px;
 				left: -1px;
 				bottom: -1px;
-				width: calc(100% + 2px);
+				width: calc(100% + 5px);
 				height: 100%;
 				z-index: 100;
 				border: 0px;
@@ -383,13 +383,13 @@ function _Terminal() {
 			e.target.parentNode.parentNode.classList.contains("actions-container"),
 		data: (e) => ({ detail: { action: e.target.dataset.type } }),
 	});
-
-	EventTrigger = attachEvents({
-		write: () => {}, //todo: fully remove this
+	
+	attachEvents({
+		write: (x) => term.write(x),
 		viewUpdate,
 		viewReload: reloadIframe,
 		terminalActions,
-	});
+	})
 }
 
 export default _Terminal;

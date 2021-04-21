@@ -271,7 +271,7 @@
 		},
 
 
-		"-- TERMINAL UI /START --",
+		"NOTE: -- TERMINAL UI /START --",
 		{
 			"route": "./_/modules/terminal/index.html",
 			"type": "domComponent",
@@ -332,7 +332,7 @@
 			"type": "domComponent",
 			"source": "terminal/terminal.xterm.js"
 		},
-		"-- TERMINAL UI /END --",
+		"NOTE: -- TERMINAL UI /END --",
 
 		"NOTE: should be a handlers in service worker context",
 		{
