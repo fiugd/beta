@@ -4,12 +4,14 @@
 
 # bartok v0.4.3
 
-  - [ ] when file is selected for preview, use full path of file
+  - [ ] on commit, update file and changes stores
+  - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
+
+  - [ ] when file is selected for preview, use full path of file
   - [ ] editor tabs close others, close all, close to right
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer hook up new folder|file icons + expand|collapse
-  - [ ] 
 
 
 ### meta
