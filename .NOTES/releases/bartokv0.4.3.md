@@ -8,6 +8,7 @@
   - [ ] git commit should offer message on success/fail
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
+  - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
 
   - [ ] when file is selected for preview, use full path of file
   - [ ] editor tabs close others, close all, close to right
