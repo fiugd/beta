@@ -382,6 +382,13 @@ function _Terminal() {
 			e.target.parentNode.parentNode.classList.contains("actions-container"),
 		data: (e) => ({ detail: { action: e.target.dataset.type } }),
 	});
+	
+	attachEvents({
+		write: (x) => term.write(x),
+		viewUpdate,
+		viewReload: reloadIframe,
+		terminalActions,
+	})
 }
 
 export default _Terminal;
