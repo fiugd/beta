@@ -7,12 +7,10 @@
 				"./",
 				"./index.service.test.html",
 				"./index.bootstrap.html",
-				"./index.old.html",
 				"./index.html",
 				"./service.manifest.json",
 
 				"./settings.html",
-				"./bartok-logo.png",
 
 				"/shared/vendor/stylus.min.js",
 				"/shared/vendor/materialize.min.js",
@@ -198,6 +196,57 @@
 				"/shared/vendor/go/pkg/unicode/utf8.a.js"
 			]
 		},
+		"NOTE: -- TERMINAL UI /START --",
+		{
+			"route": "./_/modules/terminal/index.html",
+			"source": "terminal/terminal.html"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.css",
+			"source": "terminal/terminal.css"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.js",
+			"source": "terminal/terminal.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.comm.js",
+			"source": "terminal/terminal.comm.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.git.js",
+			"source": "terminal/terminal.git.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.history.js",
+			"source": "terminal/terminal.history.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.keys.js",
+			"source": "terminal/terminal.keys.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.lib.js",
+			"source": "terminal/terminal.lib.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.ops.js",
+			"source": "terminal/terminal.ops.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.utils.js",
+			"source": "terminal/terminal.utils.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.watch.js",
+			"source": "terminal/terminal.watch.js"
+		},
+		{
+			"route": "./_/modules/terminal/terminal.xterm.js",
+			"source": "terminal/terminal.xterm.js"
+		},
+		"NOTE: -- TERMINAL UI /END --",
+
 		"NOTE: modules",
 		{
 			"route": "./_/modules/Panes.mjs",
@@ -269,70 +318,6 @@
 			"type": "domComponent",
 			"source": "modules/Operations.mjs"
 		},
-
-
-		"NOTE: -- TERMINAL UI /START --",
-		{
-			"route": "./_/modules/terminal/index.html",
-			"type": "domComponent",
-			"source": "terminal/terminal.html"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.css",
-			"type": "domComponent",
-			"source": "terminal/terminal.css"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.comm.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.comm.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.git.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.git.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.history.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.history.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.keys.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.keys.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.lib.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.lib.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.ops.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.ops.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.utils.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.utils.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.watch.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.watch.js"
-		},
-		{
-			"route": "./_/modules/terminal/terminal.xterm.js",
-			"type": "domComponent",
-			"source": "terminal/terminal.xterm.js"
-		},
-		"NOTE: -- TERMINAL UI /END --",
 
 		"NOTE: should be a handlers in service worker context",
 		{
