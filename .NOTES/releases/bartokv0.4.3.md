@@ -5,7 +5,7 @@
 # bartok v0.4.3
 
   - [ ] on commit, update file and changes stores
-  - [ ] git commit should offer message on success/fail
+  - [X] git commit should offer message on success/fail
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
   - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
@@ -15,6 +15,7 @@
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer hook up new folder|file icons + expand|collapse
 
+  - [ ] terminal watch mode for js files (+more maybe)
 
 ### meta
 

@@ -86,7 +86,7 @@ puts fib(46)
 (print (take 10 fib-seq))
 ```
 
-```c-like
+```clike
 #include <iostream>
 
 inline void fibmul(int* f, int* g){

@@ -28,6 +28,9 @@ const lib = Lib({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
 term._attachHandlers({ bubbleHandler, keyHandler });
 
-term.write('\n');
-//term.focus();
-lib.showPrompt();
+// LAME: give the rest of the system time to boot up
+setTimeout(() => {
+	term.write('\n');
+	//term.focus();
+	lib.showPrompt();
+}, 1000);
