@@ -170,7 +170,7 @@ function _Terminal() {
 				overflow: hidden;
 			}
 			#terminal iframe {
-				position: relative;
+				position: absolute;
 				top: 0;
 				right: -1px;
 				left: -1px;
