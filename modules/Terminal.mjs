@@ -176,7 +176,7 @@ function _Terminal() {
 				right: -1px;
 				left: -1px;
 				bottom: -1px;
-				width: calc(100% + 2px);
+				width: calc(100% + 5px);
 				height: 100%;
 				z-index: 100;
 				border: 0px;
