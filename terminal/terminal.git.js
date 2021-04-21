@@ -141,10 +141,10 @@ const commit = async ({ ops }, args) => {
 	const { response: cwd = '' } = await pwdCommand.invokeRaw();
 	const commitUrl = '/service/commit';
 	const auth = getStored('Github Personal Access Token');
-	const commitResponse = await postJSON(commitUrl, null, {
+	const { commitResponse } = await postJSON(commitUrl, null, {
 		cwd, message, auth
 	});
-	return commitResponse;
+	return '\nCommit SHA: ' + commitResponse + '\n';
 };
 
 const clone = async ({}, args) => {
@@ -165,7 +165,6 @@ async function invokeRaw(_this, args){
 	}
 	return await thisCommand(_this, args);
 }
-
 async function invoke(args, done){
 	const { term, invokeRaw } = this;
 	const { command } = args;
