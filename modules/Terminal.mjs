@@ -159,18 +159,19 @@ function _Terminal() {
 	const iframeUrl = "";
 	previewContainer.innerHTML = `
 		<style>
-			.preview-contain {
+			.preview-contain, .term-contain {
 				position: absolute;
 				left: 0;
 				right: 0;
 				top: 0px;
 				bottom: 0px;
 				background: #1d1d1d;
-				z-index: 9;
 				overflow: hidden;
 			}
+			#terminal .preview-contain { z-index: 9; }
+			#terminal .term-contain { z-index: 8; }
 			#terminal iframe {
-				position: absolute;
+				position: relative;
 				top: 0;
 				right: -1px;
 				left: -1px;
