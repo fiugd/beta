@@ -1,6 +1,6 @@
 <!-- no-select -->
 <h1 style="display:none"></h1>
-![Release Image]({{PROXY}}/https://images7.alphacoders.com/905/thumb-1920-905114.png)
+![Release Image]({{PROXY}}https://user-images.githubusercontent.com/1816471/115496237-3caffe80-a237-11eb-8172-8962069c3c69.png)
 
 # bartok v0.4
   - service worker
