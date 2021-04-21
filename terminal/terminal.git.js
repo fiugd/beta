@@ -144,7 +144,7 @@ const commit = async ({ ops }, args) => {
 	const { commitResponse } = await postJSON(commitUrl, null, {
 		cwd, message, auth
 	});
-	return '\nCommit SHA: ' + commitResponse + '\n';
+	return chalk.hex('#ccc')('\nCommit SHA: ') + commitResponse + '\n';
 };
 
 const clone = async ({}, args) => {
