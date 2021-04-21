@@ -9,7 +9,6 @@ import motd from "./motd.mjs";
 //DEPRECATE
 import { templateJSX, templateSVC3, transform } from "./Templates.mjs";
 
-
 const iframeSandboxPermissions = [
 	"allow-same-origin",
 	"allow-scripts",
@@ -382,13 +381,6 @@ function _Terminal() {
 			e.target.tagName === "A" &&
 			e.target.parentNode.parentNode.classList.contains("actions-container"),
 		data: (e) => ({ detail: { action: e.target.dataset.type } }),
-	});
-
-	EventTrigger = attachEvents({
-		write: () => {}, //todo: fully remove this
-		viewUpdate,
-		viewReload: reloadIframe,
-		terminalActions,
 	});
 }
 
