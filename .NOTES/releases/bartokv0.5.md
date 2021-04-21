@@ -1,6 +1,6 @@
 <!-- no-select -->
 <h1 style="display:none"></h1>
-![image]({{PROXY}}https://user-images.githubusercontent.com/1816471/80345445-1c717d80-8837-11ea-859b-7320083275dc.png)
+![image](https://bit.ly/fiugLandscape1)
 
 Summary
 =======
@@ -49,11 +49,11 @@ Current State
 ##### serviceMap
   - https://www.weave.works/oss/scope/
 
-![image]({{PROXY}}/https://user-images.githubusercontent.com/1816471/80345923-f7c9d580-8837-11ea-8075-eac69e0c758f.png)
+![image](https://bit.ly/fiugLanscape2)
 
-![image]({{PROXY}}/https://user-images.githubusercontent.com/1816471/80346127-3eb7cb00-8838-11ea-909b-03a2d5666769.png)
+![image](http://bit.ly/fiugLandscape3)
 
-![image]({{PROXY}}/https://user-images.githubusercontent.com/1816471/80346256-76267780-8838-11ea-9d82-b20fc303944a.png)
+![image](http://bit.ly/fiugLandscape4)
 
 <style>
   #container p:first-child img {
