@@ -5,6 +5,7 @@
 # bartok v0.4.3
 
   - [ ] on commit, update file and changes stores
+  - [ ] git commit should offer message on success/fail
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
 
