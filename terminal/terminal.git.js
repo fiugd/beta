@@ -15,7 +15,6 @@ const getStored = (varName) => {
 	sessionStorage.setItem(varName, prompted);
 	return prompted;
 };
-
 const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
 const postJSON = (url, opts={}, body) => fetchJSON(url, {
 	method: 'POST',
@@ -29,8 +28,7 @@ const [ bold, hex, italic ] = [
 	chalk.hex.bind(chalk),
 	chalk.italic.bind(chalk),
 ];
-
-const commandHelp = (command) => `
+const commandHelp = (command) => { return `
 
 ${bold('Usage:')} ${command.keyword} ${hex('#BBB')(command.usage||'')}
 
@@ -55,8 +53,27 @@ ${italic(`
 Online help: ${link('https://github.com/crosshj/fiug/wiki')}
 Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 `)}
-`;
+`; };
+const diffPretty = (diff) => {
+	const colors = {
+		invisible: '#555',
+		deleted: '#c96d71',
+		added: '#b1e26d',
+		special: '#38b8bf',
+		normal: '#ddd',
+	};
+	return diff.split('\n').map((x,i,all) => {
+		const invisibles = (str) => str
+			.replace(/ /g, chalk.hex(colors.invisible)('·'))
+			.replace(/\t/g, chalk.hex(colors.invisible)(' → '));
+		const fmtLine = (str) => `${str[0]}  ${invisibles(str).slice(1)}`
 
+		if(x[0] === '-') return chalk.hex(colors.deleted)(fmtLine(x).trim()+'\n');
+		if(x[0] === '+') return chalk.hex(colors.added)(fmtLine(x).trim()+'\n');
+		if(x.slice(0,2) === '@@') return chalk.hex(colors.special)('...\n');
+		return `${chalk.hex(colors.normal)(x)}\n`;
+	}).join('');
+};
 const config = {
 	keyword: "git",
 	description: "git is version control.",
@@ -79,13 +96,8 @@ const _getChanges = async ({ ops }) => {
 };
 
 const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not implemented\n`);
-
 const unrecognizedCommand = (command) => `\n${command}: command not found\n`
 
-const clone = async ({}, args) => {
-	// do what settings does when it clones a github repo
-	return notImplemented('clone');
-}
 const diff = async ({ ops }, args) => {
 	const { _unknown: files } = args;
 	const { changes } = await _getChanges({ ops });
@@ -109,28 +121,6 @@ const diff = async ({ ops }, args) => {
 		})
 		.join('\n');
 };
-
-const diffPretty = (diff) => {
-	const colors = {
-		invisible: '#555',
-		deleted: '#c96d71',
-		added: '#b1e26d',
-		special: '#38b8bf',
-		normal: '#ddd',
-	};
-	return diff.split('\n').map((x,i,all) => {
-		const invisibles = (str) => str
-			.replace(/ /g, chalk.hex(colors.invisible)('·'))
-			.replace(/\t/g, chalk.hex(colors.invisible)(' → '));
-		const fmtLine = (str) => `${str[0]}  ${invisibles(str).slice(1)}`
-
-		if(x[0] === '-') return chalk.hex(colors.deleted)(fmtLine(x).trim()+'\n');
-		if(x[0] === '+') return chalk.hex(colors.added)(fmtLine(x).trim()+'\n');
-		if(x.slice(0,2) === '@@') return chalk.hex(colors.special)('...\n');
-		return `${chalk.hex(colors.normal)(x)}\n`;
-	}).join('');
-};
-
 const status = async ({ ops }) => {
 	const changesResponse = await _getChanges({ ops });
 	if(!changesResponse.changes.length){
@@ -154,9 +144,13 @@ const commit = async ({ ops }, args) => {
 	const commitResponse = await postJSON(commitUrl, null, {
 		cwd, message, auth
 	});
-	console.log({ commitResponse, args, cwd, message })
-	return notImplemented('commit');
+	return commitResponse;
 };
+
+const clone = async ({}, args) => {
+	// do what settings does when it clones a github repo
+	return notImplemented('clone');
+}
 const branch = async ({ term }) => notImplemented('branch');
 const push = async ({ term }) => notImplemented('push');
 const pull = async ({ term }) => notImplemented('pull');
