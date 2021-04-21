@@ -1,9 +1,8 @@
 <!-- no-select -->
 <h1 style="display:none"></h1>
-![Release Image]({{PROXY}}https://user-images.githubusercontent.com/1816471/115496237-3caffe80-a237-11eb-8172-8962069c3c69.png)
+![Release Image](https://bit.ly/fiugLotusPic)
 
 # bartok v0.4.1
-  - planning
 
 ## Current State
 
