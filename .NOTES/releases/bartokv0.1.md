@@ -1,5 +1,5 @@
 <h1 style="display:none"></h1>
-![Test Image]({{PROXY}}/https://img.youtube.com/vi/nFXOxs-oDMA/maxresdefault.jpg)
+![Test Image]({{PROXY}}https://img.youtube.com/vi/nFXOxs-oDMA/maxresdefault.jpg)
 
 Summary
 =======

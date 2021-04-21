@@ -11,10 +11,6 @@
 		<script src="/shared/vendor/xterm.min.js"></script>
 		<script src="/shared/vendor/xterm-addon-fit.js"></script>
 		<link rel="stylesheet" href="/index.css" />
-
-		<base target="_blank" href="../../">
-		<script src="./terminal.js" type="module"></script>
-		<link rel="stylesheet" href="./terminal.css" />
 	</head>
 	<body>
 		<div id="terminal">
@@ -22,4 +18,30 @@
 			<div class="term-contain"></div>
 		</div>
 	</body>
+	<script>
+		const isRunningAsModule = document.location.href.includes("_/modules");
+
+		//<base target="_blank" href="../../">
+		if(!isRunningAsModule){
+			const base = document.createElement('base');
+			base.href = '../../';
+			document.getElementsByTagName('head')[0].appendChild(base);
+		}
+
+		const head=document.getElementsByTagName("head")[0];
+
+		//<link rel="stylesheet" href="./terminal.css" />
+		const cssnode = document.createElement('link');
+		cssnode.type = 'text/css';
+		cssnode.rel = 'stylesheet';
+		cssnode.href = './terminal.css';
+		head.appendChild(cssnode);
+
+		//<script src="./terminal.mjs" type="module">...
+		const scriptnode=document.createElement('script');
+		scriptnode.type="module";
+		scriptnode.src='./terminal.mjs';
+		head.appendChild(scriptnode);
+
+	</script>
 </html>

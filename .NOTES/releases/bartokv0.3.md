@@ -1,5 +1,5 @@
 <h1 style="display:none"></h1>
-![Release Image]({{PROXY}}/https://i.ytimg.com/vi/LAKMr2ARd34/maxresdefault.jpg)
+![Release Image]({{PROXY}}https://i.ytimg.com/vi/LAKMr2ARd34/maxresdefault.jpg)
 
 Summary
 =======

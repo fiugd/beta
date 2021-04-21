@@ -1,5 +1,5 @@
 <h1 style="display:none"></h1>
-![Test Image]({{PROXY}}/https://images8.alphacoders.com/774/thumb-1920-774078.jpg)
+![Test Image]({{PROXY}}https://user-images.githubusercontent.com/1816471/115496397-88fb3e80-a237-11eb-984d-d3e804e2db93.png)
 
 ## bartok v0.3.1
   - [NEW] preview
