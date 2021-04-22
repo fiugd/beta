@@ -160,7 +160,7 @@ const changeCurrentFolderHandler = ({
 	if(folderPath === '..'){
 		const currentFolder = getCurrentFolder() ||
 			guessCurrentFolder(currentFile, currentService);
-		currentPath = (currentFolder||'').split('/').slice(0,-1).join('/');
+		currentPath = (currentFolder||'').split('/').slice(0,-1).join('/') || '/';
 	}
 
 	setCurrentFolder(currentPath);
