@@ -359,7 +359,7 @@
 
 			for(let i=0, len=files.length; i<len; i++){
 				const change = changes[i];
-				await fileStore.setItem(change.key, change.value);
+				await filesStore.setItem(change.key, change.value);
 				await changesStore.removeItem(change.key);
 			}
 
