@@ -1,6 +1,6 @@
 <!-- no-select -->
 <h1 style="display:none"></h1>
-![Release Image](https://bit.ly/fiugLotusPic)
+![Release Image](https://bit.ly/fiugGearsWorld)
 
 # bartok v0.4.2
 

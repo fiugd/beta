@@ -124,8 +124,14 @@ const showCurrentFolderHandler = ({
 		? currentFolder
 		: guessCurrentFolder(currentFile, currentService);
 
-	callback &&
-		callback(!parent ? "trouble finding current path" : false, `${currentService.name}/${parent}`);
+	const currentFolderResponse = parent === '/'
+		? currentService.name + '/'
+		: `${currentService.name}/${parent}`;
+	
+	callback && callback(
+		!parent ? "trouble finding current path" : false,
+		currentFolderResponse
+	);
 };
 
 const changeCurrentFolderHandler = ({
@@ -143,31 +149,27 @@ const changeCurrentFolderHandler = ({
 
 	const currentFile = getCurrentFile();
 	const currentService = getCurrentService();
-	//const currentFolder = getCurrentFolder();
 	const parent = guessCurrentFolder(folderPath, currentService);
 
 	const firsChar = folderPath[0];
-	const currentPath = (firsChar === "/"
+	let currentPath = (firsChar === "/"
 		? folderPath
 		: (parent || "") + "/" + folderPath
 	).replace(/\/\//g, "/");
 
-	if (parent !== "/") {
-		console.error(
-			`Should be looking for folder in current parent! : ${parent}`
-		);
+	if(folderPath === '..'){
+		const currentFolder = getCurrentFolder();
+		currentPath = currentFolder.split('/').slice(0,-1).join('/');
 	}
-	//TODO: look for folder in current folder
-	//debugger;
+
 	setCurrentFolder(currentPath);
 
-	const fileSelectEvent = new CustomEvent("folderSelect", {
+	const folderSelectEvent = new CustomEvent("folderSelect", {
 		bubbles: true,
 		detail: { name: currentPath },
 	});
-	document.body.dispatchEvent(fileSelectEvent);
+	document.body.dispatchEvent(folderSelectEvent);
 
-	//console.log({ detail });
 	callback && callback(null, " ");
 };
 
