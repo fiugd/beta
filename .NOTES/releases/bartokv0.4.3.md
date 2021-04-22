@@ -15,6 +15,8 @@
   - [ ] cd into parent/child results in going parent/parent/child
   - [ ] cd to / (root) then git commit/diff mess up
   - [ ] switch services and come back, tabs don't trigger editor properly
+    - this specifically occurs with bartokv0.4.3.md
+    - also occurs in other situations
   - [ ] when file is selected for preview, use full path of file
 
   - [ ] editor tabs close others, close all, close to right
