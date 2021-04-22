@@ -322,6 +322,7 @@
 			const { storage: { stores }, utils } = githubProvider;
 			const servicesStore = stores.services;
 			const changesStore = stores.changes;
+			const filesStore = stores.files;
 			const { flattenObject } = utils;
 			
 			let service;
@@ -354,9 +355,13 @@
 			}
 
 			const commitResponse = await commit({ auth, files, git, message })
+			if(!commitResponse) return stringify({ error: 'commit failed' })
 
-			// if commit is successful, should remove each change from store
-			// if commit is successful, should update file with contents of change
+			for(let i=0, len=files.length; i<len; i++){
+				const change = changes[i];
+				await fileStore.setItem(change.key, change.value);
+				await changesStore.removeItem(change.key);
+			}
 
 			return stringify({ commitResponse });
 		} catch(e){
