@@ -1,13 +1,15 @@
 <!-- no-select -->
 <h1 style="display:none"></h1>
-![Release Image](https://bit.ly/fiugLotusPic)
+![Release Image](https://bit.ly/fiugHexagons)
 
 # bartok v0.4.3
 
-  - [ ] on commit, update file and changes stores
+  - [X] on commit, update file and changes stores
   - [X] git commit should offer message on success/fail
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
+  - [ ] something is messed up about cwd from app (esp for files at root)
+  - [ ] terminal has its own cwd not dependant on app cwd
   - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
 
   - [ ] when file is selected for preview, use full path of file
