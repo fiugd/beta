@@ -6,7 +6,7 @@
 			"resources": [
 				"./",
 				"./index.service.test.html",
-				"./index.bootstrap.html",
+				"./bootstrap.html",
 				"./index.html",
 				"./service.manifest.json",
 

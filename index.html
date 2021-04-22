@@ -377,7 +377,7 @@
 	function bootIframe(callback){
 		const bootframe = document.createElement('iframe');
 		bootframe.id = "boot-iframe";
-		bootframe.src = "index.bootstrap.html";
+		bootframe.src = "bootstrap.html";
 		document.body.appendChild(bootframe);
 
 		//TODO: should listen for message from iframe before deleting it
@@ -412,6 +412,6 @@
 	}
 </script>
 
-<script src="../shared/vendor/materialize.min.js"></script>
+<script src="./shared/vendor/materialize.min.js"></script>
 
 </html>
