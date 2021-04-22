@@ -8,7 +8,10 @@
   - [X] git commit should offer message on success/fail
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal should get cwd and service name from query params
-  - [ ] something is messed up about cwd from app (esp for files at root)
+  - [X] something is messed up about cwd from app (esp for files at root)
+  - [ ] cd into parent/child results in going parent/parent/child
+  - [ ] cd to / (root) then git commit/diff mess up
+  - [ ] switch services and come back, tabs don't trigger editor properly
   - [ ] terminal has its own cwd not dependant on app cwd
   - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
 
