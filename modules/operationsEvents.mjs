@@ -104,7 +104,7 @@ async function performOp(
 	await performOperation(foundOpClone, { body }, externalStateRequest);
 }
 
-// -----------------------------------------------------------------------------
+// -----------------------------------------------------
 
 const showCurrentFolderHandler = ({
 	managementOp,
@@ -158,8 +158,9 @@ const changeCurrentFolderHandler = ({
 	).replace(/\/\//g, "/");
 
 	if(folderPath === '..'){
-		const currentFolder = getCurrentFolder();
-		currentPath = currentFolder.split('/').slice(0,-1).join('/');
+		const currentFolder = getCurrentFolder() ||
+			guessCurrentFolder(currentFile, currentService);
+		currentPath = (currentFolder||'').split('/').slice(0,-1).join('/');
 	}
 
 	setCurrentFolder(currentPath);
