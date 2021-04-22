@@ -4,23 +4,27 @@
 
 # bartok v0.4.3
 
-  - [X] on commit, update file and changes stores
-  - [X] git commit should offer message on success/fail
+
   - [ ] handle rename, delete, move files for commit
+  - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
+  - [ ] terminal has its own cwd not dependant on app cwd
   - [ ] terminal should get cwd and service name from query params
-  - [X] something is messed up about cwd from app (esp for files at root)
+  - [ ] terminal watch mode for js files (+more maybe)
+  - [ ] preview as a terminal command vs a menu item
+
   - [ ] cd into parent/child results in going parent/parent/child
   - [ ] cd to / (root) then git commit/diff mess up
   - [ ] switch services and come back, tabs don't trigger editor properly
-  - [ ] terminal has its own cwd not dependant on app cwd
-  - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
-
   - [ ] when file is selected for preview, use full path of file
+
   - [ ] editor tabs close others, close all, close to right
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer hook up new folder|file icons + expand|collapse
 
-  - [ ] terminal watch mode for js files (+more maybe)
+
+  - [X] on commit, update file and changes stores
+  - [X] git commit should offer message on success/fail
+  - [X] something is messed up about cwd from app (esp for files at root)
 
 ### meta
 
