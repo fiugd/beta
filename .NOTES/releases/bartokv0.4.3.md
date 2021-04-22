@@ -11,6 +11,8 @@
   - [ ] terminal should get cwd and service name from query params
   - [ ] terminal watch mode for js files (+more maybe)
   - [ ] preview as a terminal command vs a menu item
+  - [ ] editor detect tabs vs spaces per file
+  - [ ] terminal left/right arrows for editing buffer
 
   - [ ] cd into parent/child results in going parent/parent/child
   - [ ] cd to / (root) then git commit/diff mess up
