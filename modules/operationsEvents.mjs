@@ -123,11 +123,13 @@ const showCurrentFolderHandler = ({
 	const parent = currentFolder
 		? currentFolder
 		: guessCurrentFolder(currentFile, currentService);
-
+	const stripLeadSlash = (path="") => path[0] === '/'
+		? path.slice(1)
+		: path;
 	const currentFolderResponse = parent === '/'
 		? currentService.name + '/'
-		: `${currentService.name}/${parent}`;
-	
+		: `${currentService.name}/${stripLeadSlash(parent)}`;
+
 	callback && callback(
 		!parent ? "trouble finding current path" : false,
 		currentFolderResponse
