@@ -857,7 +857,11 @@ function attachEvents({ write, viewUpdate, viewReload, terminalActions }) {
 		let url;
 		try {
 			url = state.paths
-				.find((x) => x.name === docName || x.path === `/${service.name}/${docName}`)
+				.find((x) => {
+					return x.name === docName ||
+						x.path === `/${service.name}/${docName}`;
+				})
+				.path
 				.replace(/^\//, "./") + "/::preview::/";
 		} catch (e) {}
 
