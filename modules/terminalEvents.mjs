@@ -10,7 +10,9 @@ const clone = x => {
 	try{ return JSON.parse(JSON.stringify(x)); }
 	catch(e){ return x; }
 }
-
+const stripLeadSlash = (path="") => path[0] === '/'
+	? path.slice(1)
+	: path;
 const withFullPaths = (detail) => {
 	const newDetail = clone(detail);
 	const { name, path, parent, next, nextPath } = newDetail;
@@ -28,6 +30,8 @@ const withFullPaths = (detail) => {
 	})();
 	if(fullName) newDetail.name = fullName;
 	if(fullNext) newDetail.next = fullNext;
+	newDetail.name && (newDetail.name = stripLeadSlash(newDetail.name));
+	newDetail.next && (newDetail.next = stripLeadSlash(newDetail.next));
 	return newDetail;
 };
 

@@ -24,7 +24,9 @@ const tryFn = (fn, _default) => {
 		return _default;
 	}
 };
-
+const stripLeadSlash = (path="") => path[0] === '/'
+	? path.slice(1)
+	: path;
 const flattenTree = (tree) => {
 	const results = [];
 	const recurse = (branch, parent = "/") => {
@@ -123,9 +125,6 @@ const showCurrentFolderHandler = ({
 	const parent = currentFolder
 		? currentFolder
 		: guessCurrentFolder(currentFile, currentService);
-	const stripLeadSlash = (path="") => path[0] === '/'
-		? path.slice(1)
-		: path;
 	const currentFolderResponse = parent === '/'
 		? currentService.name + '/'
 		: `${currentService.name}/${stripLeadSlash(parent)}`;
