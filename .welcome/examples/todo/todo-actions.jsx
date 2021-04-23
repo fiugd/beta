@@ -60,7 +60,7 @@ const DownloadButton = ({ useStore }) => {
 			title="Download all"
 			onClick={clickHandler}
 		>
-			⭳
+			↧
 		</div>
 	);
 };
@@ -121,7 +121,7 @@ const UploadButton = ({ replace }) => {
 		<div className="icon" title="Upload Todo's"
 			onClick={upload}
 		>
-			⭱
+			↥
 		</div>
 	);
 };
