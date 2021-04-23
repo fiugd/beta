@@ -1,6 +1,10 @@
 <!-- no-select -->
 <br>
 
+#### [bartok|fiug 2021-04-18 video](https://www.youtube.com/watch?v=ODoJo1G39Kw)
+
+#### [bartok|fiug 2021-04-14 video](https://www.youtube.com/watch?v=jxTI9ICtAj8)
+
 #### 2021-03-06 | 2021-04-20 - 0.4.2 Git Commit, Changes, Terminal ++
 	- tighter tree integration
 		- file changes
@@ -49,7 +53,7 @@
 		- ascii to svg (markdown)
 	- experiments
 		- texture packer
-		- 2-way messaging (template)
+		- 2-way messaging (template - which template?? )
 		- zip a project
 		- editor linting
 		- file drop (to upload)
