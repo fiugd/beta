@@ -7,7 +7,7 @@
 
   - [ ] handle rename, delete, move files for commit
   - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
-  - [ ] terminal has its own cwd not dependant on app cwd
+  - [ ] terminal has its own cwd not dependent on app cwd
   - [ ] terminal should get cwd and service name from query params
   - [ ] terminal watch mode for js files (+more maybe)
   - [ ] preview as a terminal command vs a menu item
