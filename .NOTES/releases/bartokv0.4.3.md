@@ -19,13 +19,12 @@
   - [ ] switch services and come back, tabs don't trigger editor properly
     - this specifically occurs with bartokv0.4.3.md
     - also occurs in other situations
-  - [ ] when file is selected for preview, use full path of file
 
   - [ ] editor tabs close others, close all, close to right
   - [ ] editor tabs order of next tab closing should make sense
-  - [ ] explorer hook up new folder|file icons + expand|collapse
+  - [ ] explorer: hook up new folder|file icons + expand|collapse
 
-
+  - [X] when file is selected for preview, use full path of file
   - [X] on commit, update file and changes stores
   - [X] git commit should offer message on success/fail
   - [X] something is messed up about cwd from app (esp for files at root)
