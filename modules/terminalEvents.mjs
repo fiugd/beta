@@ -6,6 +6,21 @@ import { getState, getCurrentFile, getCurrentService } from "./state.mjs";
 import { getDefaultFile } from "./state.mjs";
 import { getCurrentFolder } from "./state.mjs";
 
+const clone = x => {
+	try{ return JSON.parse(JSON.stringify(x)); }
+	catch(e){ return x; }
+}
+
+const withFullPaths = (detail) => {
+	const newDetail = clone(detail);
+	const { name, path, parent, next, nextPath } = newDetail;
+	const fullName = (path||parent) ? `${path||parent}/${name}` : name;
+	const fullNext = (nextPath) ? `${nextPath}/${next}` : next;
+	if(fullName) newDetail.name = fullName;
+	if(fullNext) newDetail.next = fullNext;
+	return newDetail;
+};
+
 let locked;
 let lsLocked = localStorage.getItem("previewLocked");
 if (lsLocked === null) {
@@ -316,7 +331,7 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 		return;
 	}
 	const { type, detail } = event;
-	const { op, id, name, next } = detail;
+	const { op, id, name, next } = withFullPaths(detail);
 	if (
 		(type === "fileClose" && next && next.includes("system::")) ||
 		(type === "fileSelect" && name && name.includes("system::"))
@@ -340,7 +355,9 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 	let code;
 	try {
 		const service = getCurrentService();
-		const selectedFile = service.code.find((x) => x.name === (next || name));
+		const selectedFile = service.code.find((x) => {
+			return x.path === `/${service.name}/${next || name}`
+		});
 		({ code } = selectedFile);
 	} catch (e) {
 		console.error("could not find the file!");

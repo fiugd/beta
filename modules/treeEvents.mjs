@@ -353,10 +353,9 @@ const contextMenuSelectHandler = ({
 	}
 
 	if (which === "Open in Preview") {
-		const { name } = data;
 		const event = new CustomEvent("previewSelect", {
 			bubbles: true,
-			detail: { name },
+			detail: data,
 		});
 		document.body.dispatchEvent(event);
 	}
