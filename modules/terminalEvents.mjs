@@ -853,13 +853,12 @@ function attachEvents({ write, viewUpdate, viewReload, terminalActions }) {
 		locked,
 	}) => {
 		const state = getState();
+		const service = getCurrentService();
 		let url;
 		try {
-			url =
-				state.paths
-					.find((x) => x.name === docName)
-					.path.replace("/welcome/", "/.welcome/")
-					.replace(/^\//, "./") + "/::preview::/";
+			url = state.paths
+				.find((x) => x.name === docName || x.path === `/${service.name}/${name}`)
+				.replace(/^\//, "./") + "/::preview::/";
 		} catch (e) {}
 
 		const viewArgs = { supported, view, type, doc, docName, locked, url };
