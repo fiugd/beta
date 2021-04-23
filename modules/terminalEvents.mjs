@@ -14,8 +14,18 @@ const clone = x => {
 const withFullPaths = (detail) => {
 	const newDetail = clone(detail);
 	const { name, path, parent, next, nextPath } = newDetail;
-	const fullName = (path||parent) ? `${path||parent}/${name}` : name;
-	const fullNext = (nextPath) ? `${nextPath}/${next}` : next;
+	const fullName = (() => {
+		if(!(path||parent)) return name;
+		if((path||parent).includes(name)) return path || parent;
+		if(name.includes(path || parent)) return name;
+		return `${path||parent}/${name}`;
+	})();
+	const fullNext = (() => {
+		if(!(nextPath)) return next;
+		if((nextPath).includes(next)) return nextPath;
+		if(next.includes(nextPath)) return next;
+		return `${nextPath}/${next}`;
+	})();
 	if(fullName) newDetail.name = fullName;
 	if(fullNext) newDetail.next = fullNext;
 	return newDetail;
