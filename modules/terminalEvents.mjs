@@ -17,13 +17,13 @@ const withFullPaths = (detail) => {
 	const fullName = (() => {
 		if(!(path||parent)) return name;
 		if((path||parent).includes(name)) return path || parent;
-		if(name.includes(path || parent)) return name;
+		if(name.includes((path || parent)+'/')) return name;
 		return `${path||parent}/${name}`;
 	})();
 	const fullNext = (() => {
 		if(!(nextPath)) return next;
 		if((nextPath).includes(next)) return nextPath;
-		if(next.includes(nextPath)) return next;
+		if(next.includes(nextPath+'/')) return next;
 		return `${nextPath}/${next}`;
 	})();
 	if(fullName) newDetail.name = fullName;
