@@ -322,12 +322,12 @@ const viewSelectHandler = ({ viewUpdate }) => (event) => {
 	`;
 	const supported = hasTemplate || isHTML || isJSX || isSVC3 || isSVG;
 	viewUpdate({
+		...event.detail,
 		supported,
 		type,
 		doc,
 		docName: currentFileName,
 		locked,
-		...event.detail,
 	});
 	return;
 };
