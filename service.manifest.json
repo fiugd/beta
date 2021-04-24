@@ -1,5 +1,5 @@
 {
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"main": "service.manifest.json",
 	"modules": [
 		{
@@ -46,44 +46,10 @@
 
 				"https://d3js.org/d3.v5.min.js",
 
-				"https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/css/vendor/prism.css",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@mathjax-support/css/vendor/notebook.css",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/css/nbpreview.css",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/js/vendor/marked.min.js",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/js/vendor/ansi_up.min.js",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/js/vendor/prism.min.js",
-				"https://cdn.jsdelivr.net/gh/jsvine/nbpreview@master/js/vendor/notebook.min.js",
-				"https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js",
-				"https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js",
-
-				"https://cdn.jsdelivr.net/npm/binaryen@95.0.0-nightly.20200723/index.js",
-				"https://cdn.jsdelivr.net/npm/binaryen@94.0.0/index.js",
-
-				"https://cdn.jsdelivr.net/npm/long@4.0.0/dist/long.js",
-				"https://cdn.jsdelivr.net/npm/assemblyscript@0.14.6/dist/assemblyscript.js",
-				"https://cdn.jsdelivr.net/npm/assemblyscript@0.14.6/dist/asc.js",
-
-				"https://cdn.jsdelivr.net/npm/prismjs@1.20.0/components/prism-core.min.js",
-				"https://cdn.jsdelivr.net/npm/prismjs@1.20.0/plugins/autoloader/prism-autoloader.min.js",
-				"https://cdn.jsdelivr.net/npm/prismjs@1.20.0/components/prism-brainfuck.min.js",
-
 				"https://felixhao28.github.io/JSCPP/dist/JSCPP.es5.min.js",
 				"https://jscl-project.github.io/jscl.js",
 				"https://asmblah.github.io/uniter/dist/uniter.js",
 
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/core.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/js.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/dom.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/lists.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/format.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/charsio.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/os.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/random.min.js",
-				"https://cdn.jsdelivr.net/npm/tau-prolog@0.3.0/modules/statistics.min.js",
-
-				"https://cdn.jsdelivr.net/npm/skulpt@1.0.0/dist/skulpt.min.js",
-				"https://cdn.jsdelivr.net/npm/skulpt@1.0.0/dist/skulpt-stdlib.js",
 				"https://cdn.opalrb.com/opal/current/opal.js",
 				"https://cdn.opalrb.com/opal/current/opal-parser.js",
 
@@ -128,22 +94,8 @@
 				"/shared/vendor/julia/hello-no-bysyncify.data",
 				"/shared/vendor/julia/hello-no-bysyncify.wasm",
 
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.bin",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/Default_albedo.jpg",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/Default_metalRoughness.jpg",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/Default_normal.jpg",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/Default_AO.jpg",
-				"https://rawgit.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/Default_emissive.jpg",
-
 				"/shared/vendor/klipse_plugin-7.9.6.min.js",
 
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/css/reveal.min.css",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/css/theme/black.css",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/js/reveal.min.js",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/plugin/markdown/marked.js",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/plugin/markdown/markdown.min.js",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro.css",
 				"/shared/images/wp5199724.jpg",
 				"https://s3.amazonaws.com/ganbreederpublic/imgs/65d75503c6d4ed375d336261.jpeg",
 				"https://media0.giphy.com/media/3oEduR8JONr03Z8TuM/source.gif",
@@ -156,13 +108,6 @@
 				"/shared/images/forest_fog_dark_127172_1920x1080.jpg",
 				"/shared/images/9cfbf2a3ef56089624822bedbea2da64.gif",
 				"/shared/images/8f0b34aa3fed21ec78784a3f52f1728c.gif",
-
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-italic.woff",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-semibold.woff",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-regular.woff",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-italic.ttf",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-semibold.ttf",
-				"https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/lib/font/source-sans-pro/source-sans-pro-regular.ttf",
 
 				"/shared/images/thumb-1920-774078.jpg",
 

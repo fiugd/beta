@@ -136,6 +136,8 @@ function asyncFetchHandler(event) {
 
 	if (
 		event.request.url.includes("unpkg") ||
+		event.request.url.includes("cdn.jsdelivr") ||
+		event.request.url.includes("rawgit.com") ||
 		event.request.url.includes("cdn.skypack.dev")
 	) {
 		const response = async () => {
