@@ -3,12 +3,12 @@
 why I keep vscode open
 ----------------------
 
+- [X] (I don't actually keep VS Code open any more)
 - [X] service worker flow is not merged to main flow
 - [X] no search in project / folder
 
 - [ ] awkward integration with file system
 - [ ] buggy file management
-
 
 - [X] doesn't recall scroll position
 - [X] doesn't recall code collapse
@@ -28,7 +28,7 @@ why I keep vscode open
 - [ ] https://github.com/marketplace/actions/gh-pages-deploy
 - [ ] https://dev.to/pierresaid/deploy-node-projects-to-github-pages-with-github-actions-4jco
 
-- [ ] load file withut service being open
+- [ ] load file without service being open
 - [ ] better "first view" for people that are new
 - [ ] better loading view
 - [ ] favicon
@@ -276,7 +276,7 @@ TIME AS MONEY
 - [X] command palette
 - [X] default view for no service selected
 - [ ] download ZIP
-- [ ] edit bartok in bartok
+- [X] edit bartok in bartok
 - [X] editor code folding
 	- https://codemirror.net/doc/manual.html#addon_foldcode
 - [ ] editor collaborative
