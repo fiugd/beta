@@ -327,7 +327,11 @@
 			
 			let service;
 			await servicesStore.iterate((value, key) => {
-				const { tree } = value;
+				const { tree, name } = value;
+				if(cwd === `${name}/`){
+					service = value;
+					return true;
+				}
 				const flattened = flattenObject(tree);
 				if(flattened.includes(cwd)){
 					service = value;
