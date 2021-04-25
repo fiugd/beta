@@ -2,6 +2,8 @@ import { attach, attachTrigger } from "./Listeners.mjs";
 import { getDefaultFile, getState } from "./state.mjs";
 let tabs, service;
 
+const clone = x => JSON.parse(JSON.stringify(x));
+
 function removeTabByEventDetail(removeTab, eventDetail){
 	const { name, path, parent } = eventDetail;
 	const closedFullName = (path||parent) ? `${(path||parent)}/${name}` : name;
@@ -401,8 +403,24 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 	handler && handler(data);
 };
 
-const closeMultiple = (removeTab, which) => ({ tab }) => {
-	console.log(`removeTabs: ${which}`);
+const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
+	let tabsToRemove = [];
+	let tabToSelect;
+	if(which === 'all'){
+		tabsToRemove = clone(tabs);
+		tabs = [];
+	}
+	if(which === "others" && tab){
+		tabsToRemove = tabs.filter((t) => t.id !== tab.id);
+		tabs = tabs.filter((t) => t.id === tab.id);
+		if(!tab.active) tabToSelect = tab;
+	}
+	sessionStorage.setItem(
+		"tabs/"+(service?.name||''),
+		JSON.stringify(tabs)
+	);
+	tabsToRemove.forEach(removeTab);
+	if(tabToSelect) triggers.fileSelect({ detail: tabToSelect });
 };
 
 const systemDocsHandler = ({
@@ -488,8 +506,8 @@ function attachListener(
 				untracked: true,
 			},
 		}),
-		closeAll: closeMultiple(removeTab, 'all'),
-		closeOthers: closeMultiple(removeTab, 'others'),
+		closeAll: closeMultiple(removeTab, triggers, 'all'),
+		closeOthers: closeMultiple(removeTab, triggers, 'others'),
 	};
 
 	const listener = async function (event) {
