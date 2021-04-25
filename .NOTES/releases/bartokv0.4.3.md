@@ -20,7 +20,7 @@
     - this specifically occurs with bartokv0.4.3.md
     - also occurs in other situations
 
-  - [ ] editor tabs close others, close all, close to right
+  - [X] editor tabs close others, close all
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer: add expand|collapse
 

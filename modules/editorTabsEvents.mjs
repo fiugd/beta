@@ -413,7 +413,10 @@ const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 	if(which === "others" && tab){
 		tabsToRemove = tabs.filter((t) => t.id !== tab.id);
 		tabs = tabs.filter((t) => t.id === tab.id);
-		if(!tab.active) tabToSelect = tab;
+		if(!tab.active){
+			tabToSelect = clone(tab);
+			tabToSelect.path = tabToSelect.parent;
+		}
 	}
 	sessionStorage.setItem(
 		"tabs/"+(service?.name||''),
@@ -506,9 +509,9 @@ function attachListener(
 				untracked: true,
 			},
 		}),
-	};	
-	triggers.closeAll = closeMultiple(removeTab, triggers, 'all');
-	triggers.closeOthers = closeMultiple(removeTab, triggers, 'others');
+		closeAll: closeMultiple(removeTab, triggers, 'all'),
+		closeOthers: closeMultiple(removeTab, triggers, 'others'),
+	};
 
 	const listener = async function (event) {
 		const showMenu = () => window.showMenu;
