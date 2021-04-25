@@ -183,7 +183,9 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	let { name, changed, parent } = event.detail;
+	let { name, changed, parent, path } = event.detail;
+	if(path) parent = path;
+
 	if(!parent && name?.includes('/')){
 		parent = name.split('/').slice(0,-1).join('/');
 		name = name.split('/').pop();

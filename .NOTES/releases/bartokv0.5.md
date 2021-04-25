@@ -11,6 +11,14 @@ Summary
 Current State
 =============
 
+  - [ ] on repo "clone", don't pull all files (instead wait for pull or pull as needed)
+  - [ ] preview as a terminal command vs a menu item
+  - [ ] terminal should get cwd and service name from query params
+  - [ ] terminal left/right arrows for editing buffer
+
+  - [ ] editor tabs order of next tab closing should make sense
+  - [ ] explorer: add expand|collapse
+
 ##### meta
   - [ ] themes fixed
   - [ ] cleaner loading view
@@ -31,9 +39,6 @@ Current State
   - [ ] scrolled shadow at top to indicate file is scrolled down
 
 ##### terminal
-  - [ ] current folder above prompt when applicable (maybe?)
-  - [ ] cleanup commands (like unix)
-  - [X] some resize issues remain (scrollbars)?
   - [ ] mouse clicks on terminal to select menu items (?)
   - [ ] loading spinner & done checkmark
     - https://stackoverflow.com/questions/2685435/cooler-ascii-spinners

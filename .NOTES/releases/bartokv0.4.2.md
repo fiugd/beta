@@ -4,6 +4,10 @@
 
 # bartok v0.4.2
 
+  - [X] current folder above prompt when applicable (maybe?)
+  - [X] cleanup commands (like unix)
+  - [X] some resize issues remain (scrollbars)?
+
 ### meta
 
 ### panes
