@@ -20,10 +20,10 @@
     - this specifically occurs with bartokv0.4.3.md
     - also occurs in other situations
 
-  - [X] editor tabs close others, close all
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer: add expand|collapse
 
+  - [X] editor tabs close others, close all
   - [X] explorer: fix new folder|file icons
   - [X] when file is selected for preview, use full path of file
   - [X] on commit, update file and changes stores
