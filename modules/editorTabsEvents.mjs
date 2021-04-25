@@ -406,7 +406,10 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 	let tabsToRemove = [];
 	let tabToSelect;
+	let fileToClose;
 	if(which === 'all'){
+		fileToClose = tabs.find(x => x.active);
+		fileToClose.path = fileToClose.parent;
 		tabsToRemove = clone(tabs);
 		tabs = [];
 	}
@@ -424,6 +427,7 @@ const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 	);
 	tabsToRemove.forEach(removeTab);
 	if(tabToSelect) triggers.fileSelect({ detail: tabToSelect });
+	if(fileToClose) triggers.fileClose({ detail: fileToClose });
 };
 
 const systemDocsHandler = ({
