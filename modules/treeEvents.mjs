@@ -281,7 +281,6 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 	return false;
 };
 
-
 const contextMenuSelectHandler = ({
 	treeAdd, treeRename, treeDelete
 }) => (e) => {

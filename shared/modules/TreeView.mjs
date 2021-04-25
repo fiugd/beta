@@ -899,10 +899,11 @@ class ServiceTree {
 				domNode.remove()
 				return;
 			}
-			this.insertDomNode(targetChildLeaves || targetNode, domNode);
+			this.insertDomNode(targetNode, domNode);
 			nodeAddDone();
 		};
 		const siblings = ['TODOErrorPopup'];
+		this.select(target, null, 'noEmit');
 		newTreeNode.focus(siblings, doneCreating);
 	}
 

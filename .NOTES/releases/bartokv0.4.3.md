@@ -22,8 +22,9 @@
 
   - [ ] editor tabs close others, close all, close to right
   - [ ] editor tabs order of next tab closing should make sense
-  - [ ] explorer: hook up new folder|file icons + expand|collapse
+  - [ ] explorer: add expand|collapse
 
+  - [X] explorer: fix new folder|file icons
   - [X] when file is selected for preview, use full path of file
   - [X] on commit, update file and changes stores
   - [X] git commit should offer message on success/fail
