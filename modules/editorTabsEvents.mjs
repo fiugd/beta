@@ -401,7 +401,7 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 	handler && handler(data);
 };
 
-const closeMultiple = (removeTab, which) => () => {
+const closeMultiple = (removeTab, which) => ({ tab }) => {
 	console.log(`removeTabs: ${which}`);
 };
 
