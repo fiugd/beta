@@ -321,11 +321,11 @@ const contextMenuHandler = ({ event, showMenu }) => {
 	const tab = theTab && tabs.find((x) => x.id === theTabId);
 	// TODO: maybe these should be defined in UI Module
 	// filter actions based on whether tab was found or not
-	const barClickItems = [{ name: "Close All", disabled: true }];
+	const barClickItems = [{ name: "Close All" }];
 	const multiTabsItems = [
 		"Close",
-		{ name: "Close Others", disabled: true },
-		{ name: "Close All", disabled: true },
+		{ name: "Close Others" },
+		{ name: "Close All" },
 		"-------------------",
 		"Copy Path",
 		"Copy Relative Path",
@@ -386,8 +386,8 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 		setTimeout(() => alert(fn + ": not implemented"), 0);
 	const handler = {
 		close: ({ tab }) => triggers.fileClose({ detail: tab }),
-		closeothers: NOT_IMPLEMENTED("closeothers"),
-		closeall: NOT_IMPLEMENTED("closeall"),
+		closeothers: triggers.closeOthers,
+		closeall: triggers.closeAll,
 		copypath: ({ tab }) => copyPath(tab),
 		copyrelativepath: ({ tab }) => copyPath(tab, "relative"),
 		revealinsidebar: ({ tab }) => {
@@ -399,6 +399,10 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 	}[which.toLowerCase().replace(/ /g, "")];
 
 	handler && handler(data);
+};
+
+const closeMultiple = (removeTab, which) => () => {
+	console.log(`removeTabs: ${which}`);
 };
 
 const systemDocsHandler = ({
@@ -484,6 +488,8 @@ function attachListener(
 				untracked: true,
 			},
 		}),
+		closeAll: closeMultiple(removeTab, 'all'),
+		closeOthers: closeMultiple(removeTab, 'others'),
 	};
 
 	const listener = async function (event) {
