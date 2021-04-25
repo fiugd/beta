@@ -6,7 +6,7 @@
 
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal has its own cwd not dependent on app cwd
-  - [ ] terminal watch mode for js files (+more maybe)
+  - [ ] terminal watch mode for js files
   - [ ] cd into parent/child results in going parent/parent/child
 
   - [X] cd to / (root) then git commit/diff mess up
