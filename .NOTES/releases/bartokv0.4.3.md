@@ -4,9 +4,8 @@
 
 # bartok v0.4.3
 
-
   - [ ] handle rename, delete, move files for commit
-  - [ ] when "cloning" repo, don't pull all files (instead wait for pull or pull as needed)
+  - [ ] on repo "clone", don't pull all files (instead wait for pull or pull as needed)
   - [ ] terminal has its own cwd not dependent on app cwd
   - [ ] terminal should get cwd and service name from query params
   - [ ] terminal watch mode for js files (+more maybe)
@@ -49,5 +48,3 @@
 ### status bar
 
 ### service map
-
-
