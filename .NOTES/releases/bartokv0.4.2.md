@@ -8,24 +8,5 @@
   - [X] cleanup commands (like unix)
   - [X] some resize issues remain (scrollbars)?
 
-### meta
-
-### panes
-
-### explorer
-
-### editor
-
-### templates
-
-### preview
-
-### terminal
-
-### server
-
-### status bar
-
-### service map
 
 

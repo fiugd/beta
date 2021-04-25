@@ -8,9 +8,6 @@
   - [ ] terminal has its own cwd not dependent on app cwd
   - [ ] terminal watch mode for js files (+more maybe)
   - [ ] cd into parent/child results in going parent/parent/child
-  - [ ] switch services and come back, tabs don't trigger editor properly
-    - this specifically occurs with bartokv0.4.3.md
-    - also occurs in other situations
 
   - [X] cd to / (root) then git commit/diff mess up
   - [X] editor tabs close others, close all
@@ -19,23 +16,7 @@
   - [X] on commit, update file and changes stores
   - [X] git commit should offer message on success/fail
   - [X] something is messed up about cwd from app (esp for files at root)
-
-### meta
-
-### panes
-
-### explorer
-
-### editor
-
-### templates
-
-### preview
-
-### terminal
-
-### server
-
-### status bar
-
-### service map
+  - [X] tabs don't trigger editor properly
+    - this specifically occurs with bartokv0.4.3.md
+    - also occurs in other situations
+    - switch services and come back (seems to trigger this)
