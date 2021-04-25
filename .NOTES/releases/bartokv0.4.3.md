@@ -14,7 +14,6 @@
   - [ ] terminal left/right arrows for editing buffer
 
   - [ ] cd into parent/child results in going parent/parent/child
-  - [ ] cd to / (root) then git commit/diff mess up
   - [ ] switch services and come back, tabs don't trigger editor properly
     - this specifically occurs with bartokv0.4.3.md
     - also occurs in other situations
@@ -22,6 +21,7 @@
   - [ ] editor tabs order of next tab closing should make sense
   - [ ] explorer: add expand|collapse
 
+  - [X] cd to / (root) then git commit/diff mess up
   - [X] editor tabs close others, close all
   - [X] explorer: fix new folder|file icons
   - [X] when file is selected for preview, use full path of file
