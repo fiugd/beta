@@ -509,9 +509,9 @@ function attachListener(
 				untracked: true,
 			},
 		}),
-		closeAll: closeMultiple(removeTab, triggers, 'all'),
-		closeOthers: closeMultiple(removeTab, triggers, 'others'),
-	};
+	};	
+	triggers.closeAll = closeMultiple(removeTab, triggers, 'all');
+	triggers.closeOthers = closeMultiple(removeTab, triggers, 'others');
 
 	const listener = async function (event) {
 		const showMenu = () => window.showMenu;
