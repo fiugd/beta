@@ -126,18 +126,25 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
-async function invokeRaw(args={}){
-	const cwd = this.event[0] !== 'showCurrentFolder'
-		? await this.invokeRaw.bind({ event: 'showCurrentFolder' })()
+async function invokeRaw(args={}, thisCommand){
+	const { event, invokeRaw, map: argMapper, comm } = thisCommand;
+	const cwd = event[0] !== 'showCurrentFolder'
+		? await invokeRaw.bind({
+				event: 'showCurrentFolder',
+				map: argMapper,
+				comm
+			})()
 		: undefined;
 	const argsPlusExtra = { ...args, cwd };
-	const mappedArgs = this.map ? this.map(argsPlusExtra) : argsPlusExtra;
-	const { error, response } = await this.comm.execute({
+	const mappedArgs = argMapper
+		? argMapper(argsPlusExtra)
+		: argsPlusExtra;
+	const { error, response } = await comm.execute({
 		triggerEvent: {
 			type: 'operations',
 			detail: {
 				source: 'TerminalWIP',
-				operation: this.event[0], //TODO: duh
+				operation: thisCommand.event[0], //TODO: duh
 				...mappedArgs
 			},
 		}
@@ -147,7 +154,7 @@ async function invokeRaw(args={}){
 
 async function invoke(args, done){
 	this.term.write('\n');
-	const { error, response } = await this.invokeRaw(args);
+	const { error, response } = await this.invokeRaw(args, this);
 	if(error){
 		this.term.write(jsonColors({ error })+'\n');
 		return done();
