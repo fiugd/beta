@@ -127,7 +127,7 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
 async function invokeRaw(args={}, thisCommand){
-	const { event, invokeRaw, map: argMapper, comm } = thisCommand;
+	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
 	const cwd = event[0] !== 'showCurrentFolder'
 		? await invokeRaw.bind({
 				event: 'showCurrentFolder',
