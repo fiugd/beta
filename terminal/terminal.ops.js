@@ -128,7 +128,7 @@ const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not imp
 
 async function invokeRaw(args={}, thisCommand){
 	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
-	const cwd = event[0] !== 'showCurrentFolder'
+	const { response: cwd } = event[0] !== 'showCurrentFolder'
 		? await invokeRaw.bind({
 				event: ['showCurrentFolder'],
 				map: argMapper,
