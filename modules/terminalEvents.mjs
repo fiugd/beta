@@ -369,7 +369,7 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 	let code;
 	try {
 		const service = getCurrentService();
-		const codePath = filename.includes(service.name)
+		const codePath = (next || name).includes(service.name)
 			? `/${next || name}`
 			: `/${service.name}/${next || name}`;
 		const selectedFile = service.code.find((x) => x.path === codePath);
