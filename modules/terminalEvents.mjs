@@ -369,9 +369,10 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 	let code;
 	try {
 		const service = getCurrentService();
-		const selectedFile = service.code.find((x) => {
-			return x.path === `/${service.name}/${next || name}`
-		});
+		const codePath = filename.includes(service.name)
+			? `/${next || name}`
+			: `/${service.name}/${next || name}`;
+		const selectedFile = service.code.find((x) => x.path === codePath);
 		({ code } = selectedFile);
 	} catch (e) {
 		console.error("could not find the file!");
