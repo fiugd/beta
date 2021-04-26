@@ -29,7 +29,7 @@ const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 		? nameWithPathIfPresent(nextPath, next)
 		: nameWithPathIfPresent(parent || path, name);
 	const service = getCurrentService({ pure: true });
-	return pathNoServiceName = (service, fileNameWithPath);
+	return pathNoServiceName(service, fileNameWithPath);
 };
 
 const ChangeHandler = (doc) => {
