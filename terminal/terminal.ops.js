@@ -130,7 +130,7 @@ async function invokeRaw(args={}, thisCommand){
 	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
 	const cwd = event[0] !== 'showCurrentFolder'
 		? await invokeRaw.bind({
-				event: 'showCurrentFolder',
+				event: ['showCurrentFolder'],
 				map: argMapper,
 				comm
 			})()
