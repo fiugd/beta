@@ -91,7 +91,8 @@ const commands = [
 			filename: file,
 			name: file,
 			parent: cwd || ''
-		})
+		}),
+		mapResponse: (res) => ''
 	},
 	{
 		name: 'Concat',
