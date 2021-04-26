@@ -89,6 +89,7 @@ const commands = [
 		],
 		map: ({ file, cwd }) => ({
 			filename: file,
+			name: file,
 			parent: cwd || ''
 		})
 	},
