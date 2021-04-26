@@ -144,7 +144,7 @@ async function invokeRaw(args={}, thisCommand){
 			type: 'operations',
 			detail: {
 				source: 'TerminalWIP',
-				operation: thisCommand.event[0], //TODO: duh
+				operation: event[0], //TODO: what if event has more than one item?
 				...mappedArgs
 			},
 		}
