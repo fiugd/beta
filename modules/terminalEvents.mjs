@@ -372,9 +372,10 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 	if (type === "fileClose" && next === currentFileName) {
 		return;
 	}
+
+	const service = getCurrentService();
 	let code;
 	try {
-		const service = getCurrentService();
 		const codePath = (next || name).includes(service.name)
 			? `/${next || name}`
 			: `/${service.name}/${next || name}`;
