@@ -148,20 +148,25 @@ const changeCurrentFolderHandler = ({
 	const { detail } = event;
 	const { callback, folderPath } = detail;
 
-	const currentFile = getCurrentFile();
 	const currentService = getCurrentService();
-	const parent = guessCurrentFolder(folderPath, currentService);
+	const currentFile = getCurrentFile();
+	const currentFolder = getCurrentFolder() ||
+		guessCurrentFolder(currentFile, currentService);
 
 	const firsChar = folderPath[0];
 	let currentPath = (firsChar === "/"
 		? folderPath
-		: (parent || "") + "/" + folderPath
+		: (currentFolder || "") + "/" + folderPath
 	).replace(/\/\//g, "/");
 
-	if(folderPath === '..'){
-		const currentFolder = getCurrentFolder() ||
-			guessCurrentFolder(currentFile, currentService);
-		currentPath = (currentFolder||'').split('/').slice(0,-1).join('/') || '/';
+	if(folderPath.includes('..')){
+		currentPath = (currentFolder||'').split('/')
+			.slice(0,-1)
+			.join('/') || '/';
+		const restOfPath = folderPath.replace('..', '')
+		if(restOfPath){
+			currentPath += restOfPath;
+		}
 	}
 
 	setCurrentFolder(currentPath);
