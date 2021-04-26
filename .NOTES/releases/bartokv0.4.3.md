@@ -5,10 +5,10 @@
 # bartok v0.4.3
 
   - [ ] handle rename, delete, move files for commit
-  - [ ] terminal has its own cwd not dependent on app cwd
   - [ ] terminal watch mode for js files
-  - [ ] cd into parent/child results in going parent/parent/child
+  - [ ] terminal has its own cwd not dependent on app cwd
 
+  - [X] cd into parent/child results in going parent/parent/child
   - [X] cd to / (root) then git commit/diff mess up
   - [X] editor tabs close others, close all
   - [X] explorer: fix new folder|file icons
