@@ -13,6 +13,14 @@ const noFrontSlash = (path) => {
 	return path;
 };
 
+const pathNoServiceName = (service, path) => {
+	if(!path.includes('/')) return path;
+	if(!path.includes(service.name)) return stripLeadSlash(path);
+	return stripLeadSlash(
+		stripLeadSlash(path).replace(service.name, '')
+	);
+};
+
 const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 	const nameWithPathIfPresent = (_path, _name) => _path
 		? noFrontSlash(`${_path}/${_name}`)
@@ -20,7 +28,8 @@ const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 	const fileNameWithPath = next
 		? nameWithPathIfPresent(nextPath, next)
 		: nameWithPathIfPresent(parent || path, name);
-	return fileNameWithPath;
+	const service = getCurrentService({ pure: true });
+	return pathNoServiceName = (service, fileNameWithPath);
 };
 
 const ChangeHandler = (doc) => {
