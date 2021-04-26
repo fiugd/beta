@@ -145,12 +145,12 @@ async function invoke(args, done){
 		this.term.write(jsonColors({ error })+'\n');
 		return done();
 	}
-	if(response && this.mapResponse){
+	if(response?.trim() && this.mapResponse){
 		this.term.write(this.mapResponse(response)+'\n');
 		return done();
 	}
-	if(response){
-		this.term.write(response+'\n');
+	if(response?.trim()){
+		this.term.write(response.trim() + '\n');
 	}
 	//this.term.write(notImplemented(this));
 	done();
