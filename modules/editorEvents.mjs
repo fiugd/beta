@@ -15,7 +15,7 @@ const noFrontSlash = (path) => {
 
 const pathNoServiceName = (service, path) => {
 	if(!path.includes('/')) return path;
-	if(!path.includes(service.name)) return stripLeadSlash(path);
+	if(!path.includes(service.name)) return noFrontSlash(path);
 	return noFrontSlash(
 		noFrontSlash(path).replace(service.name, '')
 	);
