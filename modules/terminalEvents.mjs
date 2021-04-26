@@ -34,7 +34,13 @@ const withFullPaths = (detail) => {
 	newDetail.next && (newDetail.next = stripLeadSlash(newDetail.next));
 	return newDetail;
 };
-
+const pathNoServiceName = (service, path) => {
+	if(!path.includes('/')) return path;
+	if(!path.includes(service.name)) return stripLeadSlash(path);
+	return stripLeadSlash(
+		stripLeadSlash(path).replace(service.name, '')
+	);
+};
 let locked;
 let lsLocked = localStorage.getItem("previewLocked");
 if (lsLocked === null) {
@@ -446,7 +452,7 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 		type,
 		locked,
 		doc,
-		docName: next || name,
+		docName: pathNoServiceName(service, next || name),
 	};
 	viewUpdate(viewArgs);
 	return;
