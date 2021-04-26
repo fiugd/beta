@@ -18,6 +18,13 @@
   - [ ] explorer: overscroll seems to not be working
   - [ ] explorer: scroll bar hide/show causes status circle to dance
 
+  - [ ] context menu for terminal
+  - [ ] terminal passes hotkey events to parent
+    - control-s: save
+    - control-p: open file
+    - control-shift-p: command window
+  - [ ] editor tabs: keep open and pin
+
 Summary
 =======
 

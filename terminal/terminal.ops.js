@@ -87,7 +87,10 @@ const commands = [
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true }
 		],
-		map: ({ file }) => ({ filename: file })
+		map: ({ file, cwd }) => ({
+			filename: file,
+			parent: cwd || '/'
+		})
 	},
 	{
 		name: 'Concat',
@@ -124,7 +127,11 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
 async function invokeRaw(args={}){
-	const mappedArgs = this.map ? this.map(args) : args;
+	const cwd = this.event[0] !== 'showCurrentFolder'
+		? await this.invokeRaw.bind({ event: 'showCurrentFolder' })()
+		: undefined;
+	const argsPlusExtra = { ...args, cwd };
+	const mappedArgs = this.map ? this.map(argsPlusExtra) : argsPlusExtra;
 	const { error, response } = await this.comm.execute({
 		triggerEvent: {
 			type: 'operations',
