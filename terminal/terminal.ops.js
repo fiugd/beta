@@ -139,7 +139,7 @@ async function invokeRaw(args={}, thisCommand){
 	const mappedArgs = argMapper
 		? argMapper(argsPlusExtra)
 		: argsPlusExtra;
-	const { error, response } = await comm.execute({
+	let { error, response } = await comm.execute({
 		triggerEvent: {
 			type: 'operations',
 			detail: {
@@ -149,6 +149,9 @@ async function invokeRaw(args={}, thisCommand){
 			},
 		}
 	});
+	if(response && response.trim){
+		response = response.trim();
+	}
 	return { error, response };
 }
 
@@ -159,12 +162,12 @@ async function invoke(args, done){
 		this.term.write(jsonColors({ error })+'\n');
 		return done();
 	}
-	if(response?.trim() && this.mapResponse){
+	if(response && this.mapResponse){
 		this.term.write(this.mapResponse(response)+'\n');
 		return done();
 	}
-	if(response?.trim()){
-		this.term.write(response.trim() + '\n');
+	if(response){
+		this.term.write(response + '\n');
 	}
 	//this.term.write(notImplemented(this));
 	done();
