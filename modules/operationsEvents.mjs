@@ -530,8 +530,9 @@ const operationsHandler = ({
 
 			//if this is a deleteFile or deleteFolder, provider needs to know (and shouldn't have to guess)
 			//this probably is the only thing that needs to be done (and not what is above!)
+			let deleteResult;
 			if (["deleteFile", "deleteFolder"].includes(event.detail.operation)) {
-				const result = await serviceOperation({
+				deleteResult = await serviceOperation({
 					service: currentService,
 					...event.detail,
 				});
@@ -543,6 +544,7 @@ const operationsHandler = ({
 			if (chainedTrigger) {
 				await chainedTrigger();
 			}
+			callback && callback(undefined, deleteResult || result);
 			return;
 		}
 
