@@ -380,9 +380,6 @@ span.CodeMirror-selectedtext { background: none; }
   transition: transform 0.2s;
 }
 .CodeMirror-foldgutter-open {
-  color: #555;
-}
-.CodeMirror-foldgutter-open:hover {
   color: inherit;
 }
 .CodeMirror-foldgutter-open:after,
@@ -394,15 +391,15 @@ span.CodeMirror-selectedtext { background: none; }
 }
 .CodeMirror-foldgutter-open:after {
   content: "\eab4";
-  transform: translateX(3.5px) translateY(1.5px);
+  transform: translateX(0px) translateY(1.5px);
 }
 .CodeMirror-foldgutter-folded:after {
   content: "\eab4";
-  transform: translateX(5px) translateY(3px) rotateZ(-90deg);
+  transform: translateX(2.25px) translateY(3px) rotateZ(-90deg);
 }
 .CodeMirror-foldgutter-open {
   visibility: hidden;
-  transition: visibility 0.3s;
+  transition: visibility 1s;
 }
 .gutter-hovered .CodeMirror-foldgutter-open {
   visibility: visible;
