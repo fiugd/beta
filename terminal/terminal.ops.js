@@ -135,7 +135,9 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
 const readFile = async (args) => {
-	return JSON.stringify(args, null, 2);
+	return {
+		response: JSON.stringify(args, null, 2),
+	};
 };
 
 const manualCommands = { readFile };

@@ -13,6 +13,7 @@ const history = [
 	`git status`,
 	`git diff terminal.git.mjs`,
 	`git commit -m "commit me"`,
+	`cat terminal.comm.js`
 ];
 
 const usage = (chalk) => {
