@@ -14,7 +14,6 @@
 ---
 
 - [ ] cd ../sibling results in parent//sibling
-- [ ] cat command works properly
 - [ ] mv command works properly
 - [ ] md/mkdir command works properly
 - [ ] rm command works properly for folder
@@ -26,6 +25,7 @@
 
 ---
 
+- [X] cat command works properly
 - [X] better code fold behavior (gutter hover)
 - [X] rm command works properly for file
 - [X] touch command works properly
