@@ -20,6 +20,7 @@
   - [X] touch command works properly
   - [X] cd into parent/child results in going parent/parent/child
   - [X] cd to / (root) then git commit/diff mess up
+
   - [X] editor tabs close others, close all
   - [X] explorer: fix new folder|file icons
   - [X] when file is selected for preview, use full path of file
