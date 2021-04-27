@@ -1227,7 +1227,7 @@ function _Editor(callback) {
 		nothingOpenDom && nothingOpenDom.classList.add("hidden");
 		systemDocsView && systemDocsView.classList.add("hidden");
 
-		editorGutter = editorDom.querySelector('.CodeMirror-gutters');
+		editorDom && (editorGutter = editorDom.querySelector('.CodeMirror-gutters'));
 	};
 
 	attachListener({
