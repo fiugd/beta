@@ -1239,23 +1239,25 @@ function _Editor(callback) {
 
 function attachGutterHelper (){
 	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const gutterEnter = (e) => {
-		if(!e.target.classList.contains('CodeMirror-gutters')) return;
+	const removeGutterHovered = x => x.classList.remove('gutter-hovered');
+	const addGutterHovered = x => x.classList.add('gutter-hovered');
+
+	let inGutter;
+	const gutterHandler = (e) => {
+		if(e.target.classList.contains('CodeMirror-gutters')){
+			inGutter = e.target;
+			const cmSizers = getSizers();
+			if(!cmSizers.length) return;
+			cmSizers.forEach(addGutterHovered);
+		}
+		if(!inGutter || inGutter.contains(e.target)) return;
+		inGutter = undefined;
 		const cmSizers = getSizers();
 		if(!cmSizers.length) return;
-		const addGutterHovered = x => x.classList.add('gutter-hovered');
-		cmSizers.forEach(addGutterHovered);
-	};
-	const gutterLeave = (e) => {
-		if(!e.target.classList.contains('CodeMirror-gutters')) return;
-		const cmSizers = getSizers();
-		if(!cmSizers.length) return;
-		const removeGutterHovered = x => x.classList.remove('gutter-hovered');
 		cmSizers.forEach(removeGutterHovered);
 	};
 	const listenOpts = { passive: true, capture: false };
-	document.body.addEventListener("mouseover", gutterEnter, listenOpts);
-	document.body.addEventListener("mouseout", gutterLeave, listenOpts);
+	document.body.addEventListener("mouseover", gutterHandler, listenOpts);
 }
 attachGutterHelper();
 
