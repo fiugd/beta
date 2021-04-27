@@ -1250,7 +1250,7 @@ function attachGutterHelper (){
 		if(!e.target.classList.contains('CodeMirror-gutters')) return;
 		const cmSizers = getSizers();
 		if(!cmSizers.length) return;
-		const addGutterHovered = x => x.classList.remove('gutter-hovered');
+		const removeGutterHovered = x => x.classList.remove('gutter-hovered');
 		cmSizers.forEach(removeGutterHovered);
 	};
 	const listenOpts = { passive: true, capture: false };
