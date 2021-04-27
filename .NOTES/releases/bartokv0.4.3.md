@@ -13,7 +13,7 @@
 
 ---
 
-- [ ] cd ../sibling results in parent//sibling
+- [ ] cd ../sibling results in parent//sibling (at 1 up from root)
 - [ ] mv command works properly
 - [ ] md/mkdir command works properly
 - [ ] rm command works properly for folder
