@@ -1238,25 +1238,38 @@ function _Editor(callback) {
 }
 
 function attachGutterHelper (){
-	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const removeGutterHovered = x => x.classList.remove('gutter-hovered');
-	const addGutterHovered = x => x.classList.add('gutter-hovered');
-
+	let gutter = getGutter();
+	let cmSizers = getSizers();
 	let inGutter;
-	const gutterHandler = (e) => {
-		if(inGutter && inGutter.contains(e.target)) return;
-		if(!inGutter && e.target.classList.contains('CodeMirror-gutters')){
-			inGutter = e.target;
-			const cmSizers = getSizers();
-			if(!cmSizers.length) return;
-			cmSizers.forEach(addGutterHovered);
-			return;
-		}
-		inGutter = undefined;
-		const cmSizers = getSizers();
+	let gutterNoted;
+
+	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
+	const getGutter = () => document.querySelector('.CodeMirror-gutters');
+
+	const removeGutterHovered = () => {
+		cmSizers = cmSizers || getSizers();
 		if(!cmSizers.length) return;
-		cmSizers.forEach(removeGutterHovered);
+		cmSizers.forEach(x => x.classList.remove('gutter-hovered'));
+		gutterNoted = false;
 	};
+	const addGutterHovered = () => {
+		cmSizers = cmSizers || getSizers();
+		if(!cmSizers.length) return;
+		cmSizers.forEach(x => x.classList.add('gutter-hovered'));
+		gutterNoted = true;
+	};
+
+	const gutterHandler = (e) => {
+		gutter = gutter || getGutter();
+		if(!gutter) return removeGutterHovered();
+
+		inGutter = gutter.contains(e.target) ||
+			e.target.classList.contains('CodeMirror-gutters');
+
+		if(inGutter && !gutterNoted) return addGutterHovered();
+		if(!inGutter && gutterNoted) return removeGutterHovered();
+	};
+
 	const listenOpts = { passive: true, capture: false };
 	document.body.addEventListener("mouseover", gutterHandler, listenOpts);
 }
