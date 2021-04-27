@@ -12,10 +12,25 @@ there are two different ways of handling a Management Operation
 THIS IS CONFUSING - going to kill #2
 
 */
-import { getOpenedFiles } from "./state.mjs";
+import { getOpenedFiles, getCurrentService } from "./state.mjs";
 
 import { attach, attachTrigger } from "./Listeners.mjs";
 import { debounce } from "/shared/modules/utilities.mjs";
+
+const noFrontSlash = (path) => {
+	if(!path) return path;
+	if(!path.includes('/')) return path;
+	if(path[0] === '/') return path.slice(1);
+	return path;
+};
+
+const pathNoServiceName = (service, path) => {
+	if(!path.includes('/')) return path;
+	if(!path.includes(service.name)) return stripLeadSlash(path);
+	return stripLeadSlash(
+		stripLeadSlash(path).replace(service.name, '')
+	);
+};
 
 const tryFn = (fn, _default) => {
 	try {
@@ -536,7 +551,7 @@ const operationsHandler = ({
 					service: currentService,
 					...event.detail,
 				});
-				console.log(JSON.stringify(result, null, 2));
+				console.log(JSON.stringify(deleteResult, null, 2));
 			}
 
 			triggerOperationDone(result);
@@ -694,11 +709,12 @@ const handlers = {
 const getChainedTrigger = ({ triggers }) => (event) => {
 	const handler = {
 		addFile: async () => {
+			const service = getCurrentService();
 			const name = event.detail.parent
 				? `${event.detail.parent}/${event.detail.name}`
 				: event.detail.name;
 			triggers.triggerFileSelect({
-				detail: { name },
+				detail: { name: pathNoServiceName(service, name) },
 			});
 		},
 		deleteFile: async () => {
