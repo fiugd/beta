@@ -5,26 +5,26 @@
 
 # bartok v0.5.0
 
-  - [ ] open file from file search
-  - [ ] click to select file from command palette opener
-  - [ ] on repo "clone", don't pull all files
-    - instead wait for pull or pull as needed)
-  - [ ] preview as a terminal command vs a menu item
-  - [ ] terminal should get cwd and service name from query params
-  - [ ] terminal left/right arrows for editing buffer
+- [ ] open file from file search
+- [ ] click to select file from command palette opener
+- [ ] on repo "clone", don't pull all files
+  - instead wait for pull or pull as needed)
+- [ ] preview as a terminal command vs a menu item
+- [ ] terminal should get cwd and service name from query params
+- [ ] terminal left/right arrows for editing buffer
 
-  - [ ] editor tabs order of next tab closing should make sense
-  - [ ] explorer: add expand|collapse
-  - [ ] explorer: overscroll seems to not be working
-  - [ ] explorer: scroll bar hide/show causes status circle to dance
+- [ ] editor tabs order of next tab closing should make sense
+- [ ] explorer: add expand|collapse
+- [ ] explorer: overscroll seems to not be working
+- [ ] explorer: scroll bar hide/show causes status circle to dance
 
-  - [ ] context menu for editor
-  - [ ] context menu for terminal
-  - [ ] terminal passes hotkey events to parent
-    - control-s: save
-    - control-p: open file
-    - control-shift-p: command window
-  - [ ] editor tabs: keep open and pin
+- [ ] context menu for editor
+- [ ] context menu for terminal
+- [ ] terminal passes hotkey events to parent
+  - control-s: save
+  - control-p: open file
+  - control-shift-p: command window
+- [ ] editor tabs: keep open and pin
 
 Summary
 =======
