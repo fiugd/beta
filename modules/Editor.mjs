@@ -1238,12 +1238,12 @@ function _Editor(callback) {
 }
 
 function attachGutterHelper (){
+	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
+	const getGutter = () => document.querySelector('.CodeMirror-gutters');
+
 	let gutter = getGutter();
 	let inGutter;
 	let gutterNoted;
-
-	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const getGutter = () => document.querySelector('.CodeMirror-gutters');
 
 	const removeGutterHovered = () => {
 		const cmSizers = getSizers();
