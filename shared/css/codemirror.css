@@ -390,6 +390,7 @@ span.CodeMirror-selectedtext { background: none; }
   margin-left: 2px;
   font-family: codicon;
   transform-origin: center;
+  display: block;
 }
 .CodeMirror-foldgutter-open:after {
   content: "\eab4";
