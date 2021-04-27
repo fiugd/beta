@@ -67,6 +67,7 @@ const commands = [
 		],
 		map: (...args) => ({
 			...args,
+			filename: args.file,
 			parent: args.cwd || ''
 		}),
 		mapResponse: (res) => '',
