@@ -1244,13 +1244,14 @@ function attachGutterHelper (){
 
 	let inGutter;
 	const gutterHandler = (e) => {
-		if(e.target.classList.contains('CodeMirror-gutters')){
+		if(inGutter && inGutter.contains(e.target)) return;)
+		if(!inGutter && e.target.classList.contains('CodeMirror-gutters')){
 			inGutter = e.target;
 			const cmSizers = getSizers();
 			if(!cmSizers.length) return;
 			cmSizers.forEach(addGutterHovered);
+			return;
 		}
-		if(!inGutter || inGutter.contains(e.target)) return;
 		inGutter = undefined;
 		const cmSizers = getSizers();
 		if(!cmSizers.length) return;
