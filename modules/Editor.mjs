@@ -1238,12 +1238,12 @@ function _Editor(callback) {
 }
 
 function attachGutterHelper (){
-	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const getGutter = () => document.querySelector('.CodeMirror-gutters');
-
 	let gutter = getGutter();
 	let inGutter;
 	let gutterNoted;
+
+	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
+	const getGutter = () => document.querySelector('.CodeMirror-gutters');
 
 	const removeGutterHovered = () => {
 		const cmSizers = getSizers();
@@ -1263,7 +1263,9 @@ function attachGutterHelper (){
 		if(!gutter) return removeGutterHovered();
 
 		inGutter = gutter.contains(e.target) ||
-			e.target.classList.contains('CodeMirror-gutters');
+			e.target.classList.contains('CodeMirror-gutters') ||
+			e.target.className.includes('gutter-elt') ||
+			e.target.className.includes('guttermarker');
 
 		if(inGutter && !gutterNoted) return addGutterHovered();
 		if(!inGutter && gutterNoted) return removeGutterHovered();
