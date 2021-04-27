@@ -26,6 +26,7 @@
 
 ---
 
+- [X] better code fold behavior (gutter hover)
 - [X] rm command works properly for file
 - [X] touch command works properly
 - [X] cd into parent/child results in going parent/parent/child
