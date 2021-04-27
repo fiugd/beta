@@ -7,6 +7,7 @@
   - [ ] handle rename, delete, move files for commit
   - [ ] terminal watch mode for js files
   - [ ] terminal has its own cwd not dependent on app cwd
+  - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 
   - [ ] cd ../sibling results in parent//sibling
   - [ ] cat command works properly
