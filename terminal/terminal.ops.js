@@ -65,6 +65,11 @@ const commands = [
 			{ name: 'recursive', type: Boolean, alias: 'r' },
 			{ name: 'force', type: Boolean, alias: 'f' },
 		],
+		map: (...args) => ({
+			...args,
+			parent: args.cwd || ''
+		}),
+		mapResponse: (res) => '',
 	},
 	{
 		name: 'Move',

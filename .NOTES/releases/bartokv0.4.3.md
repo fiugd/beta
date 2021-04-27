@@ -8,6 +8,7 @@
   - [ ] terminal watch mode for js files
   - [ ] terminal has its own cwd not dependent on app cwd
 
+  - [X] touch command works properly
   - [X] cd into parent/child results in going parent/parent/child
   - [X] cd to / (root) then git commit/diff mess up
   - [X] editor tabs close others, close all
