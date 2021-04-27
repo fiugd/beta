@@ -1243,7 +1243,7 @@ function _Editor(callback) {
 
 function attachGutterHelper (){
 	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const getGutter = () => editorGutter;
+	const getGutter = () => editorGutter || document.body.querySelector('.CodeMirror-gutters');
 
 	let gutter = getGutter();
 	let inGutter;
