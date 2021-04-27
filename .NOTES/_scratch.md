@@ -838,5 +838,5 @@ graphs on the fly
 
 
 # keyboard shortcuts | hotkeys
-- https://code.visualstudio.com/docs/getstarted/keybindings
+- http://aka.ms/vscodekeybindings
 

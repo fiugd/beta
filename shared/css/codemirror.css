@@ -385,17 +385,18 @@ span.CodeMirror-selectedtext { background: none; }
 .CodeMirror-foldgutter-open:hover {
   color: inherit;
 }
-.CodeMirror-foldgutter-open:after {
-  content: "\25BE";
+.CodeMirror-foldgutter-open:after,
+.CodeMirror-foldgutter-open:before {
   margin-left: 2px;
-  content: '>';
-  transform-origin: 5px 8.5px;
-  transform: rotateZ(90deg);
-  display: block;;
+  font-family: codicon;
+  transform-origin: center;
+}
+.CodeMirror-foldgutter-open:after {
+  content: "\eab4";
+  transform: translateX(3.5px) translateY(3px) rotateZ(-90deg);
 }
 .CodeMirror-foldgutter-folded:after {
-  content: "\25B8";
-  margin-left: 2px;
-  content: '>';
+  content: "\eab4";
+  transform: translateX(3.5px) translateY(1.5px);
 }
 /* END code folding */
