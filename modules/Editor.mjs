@@ -1238,22 +1238,21 @@ function _Editor(callback) {
 }
 
 function attachGutterHelper (){
-	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const getGutter = () => document.querySelector('.CodeMirror-gutters');
-
 	let gutter = getGutter();
-	let cmSizers = getSizers();
 	let inGutter;
 	let gutterNoted;
 
+	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
+	const getGutter = () => document.querySelector('.CodeMirror-gutters');
+
 	const removeGutterHovered = () => {
-		cmSizers = cmSizers || getSizers();
+		const cmSizers = getSizers();
 		if(!cmSizers.length) return;
 		cmSizers.forEach(x => x.classList.remove('gutter-hovered'));
 		gutterNoted = false;
 	};
 	const addGutterHovered = () => {
-		cmSizers = cmSizers || getSizers();
+		const cmSizers = getSizers();
 		if(!cmSizers.length) return;
 		cmSizers.forEach(x => x.classList.add('gutter-hovered'));
 		gutterNoted = true;
