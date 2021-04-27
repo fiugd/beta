@@ -809,6 +809,8 @@ const inlineEditor = (ChangeHandler) => ({
 	}
 
 	Editor(editorOptions, editorCallback);
+
+	editorGutter = document.body.querySelector('.CodeMirror-gutters');
 };
 
 let nothingOpen;
@@ -1226,8 +1228,6 @@ function _Editor(callback) {
 		editorPreview && editorPreview.classList.add("hidden");
 		nothingOpenDom && nothingOpenDom.classList.add("hidden");
 		systemDocsView && systemDocsView.classList.add("hidden");
-
-		editorDom && (editorGutter = editorDom.querySelector('.CodeMirror-gutters'));
 	};
 
 	attachListener({
