@@ -138,7 +138,7 @@ const readFile = async (args) => {
 	const { file, cwd } = args;
 	let response, error;
 	try {
-		response = await (await fetch(`${cwd}/${file}`)).text();
+		response = await (await fetch(`/${cwd}/${file}`)).text();
 	} catch(e) {
 		error = JSON.stringify(e, null, 2);
 	}
