@@ -14,6 +14,8 @@ import {
 import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import "/shared/vendor/localforage.min.js";
 
+let editorGutter;
+
 // call editor tabs once early so event handlers are attached
 EditorTabs()
 
@@ -1224,6 +1226,8 @@ function _Editor(callback) {
 		editorPreview && editorPreview.classList.add("hidden");
 		nothingOpenDom && nothingOpenDom.classList.add("hidden");
 		systemDocsView && systemDocsView.classList.add("hidden");
+
+		editorGutter = editorDom.querySelector('.CodeMirror-gutters');
 	};
 
 	attachListener({
@@ -1239,7 +1243,7 @@ function _Editor(callback) {
 
 function attachGutterHelper (){
 	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-	const getGutter = () => document.querySelector('.CodeMirror-gutters');
+	const getGutter = () => editorGutter;
 
 	let gutter = getGutter();
 	let inGutter;
@@ -1259,7 +1263,7 @@ function attachGutterHelper (){
 	};
 
 	const gutterHandler = (e) => {
-		gutter = gutter || getGutter();
+		gutter = getGutter();
 		if(!gutter) return removeGutterHovered();
 
 		inGutter = gutter.contains(e.target) ||
