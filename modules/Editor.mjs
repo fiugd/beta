@@ -1237,4 +1237,26 @@ function _Editor(callback) {
 	};
 }
 
+function attachGutterHelper (){
+	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
+	const gutterEnter = (e) => {
+		if(!e.target.classList.contains('CodeMirror-gutters')) return;
+		const cmSizers = getSizers();
+		if(cmSizers.length) return;
+		const addGutterHovered = x => x.classList.add('gutter-hovered');
+		cmSizers.forEach(addGutterHovered);
+	};
+	const gutterLeave = (e) => {
+		if(!e.target.classList.contains('CodeMirror-gutters')) return;
+		const cmSizers = getSizers();
+		if(cmSizers.length) return;
+		const addGutterHovered = x => x.classList.remove('gutter-hovered');
+		cmSizers.forEach(removeGutterHovered);
+	};
+	const listenOpts = { passive: true, capture: false };
+	document.body.addEventListener("mouseover", gutterEnter, listenOpts);
+	document.body.addEventListener("mouseout", gutterLeave, listenOpts);
+}
+attachGutterHelper();
+
 export default _Editor;
