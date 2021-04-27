@@ -65,7 +65,7 @@ const commands = [
 			{ name: 'recursive', type: Boolean, alias: 'r' },
 			{ name: 'force', type: Boolean, alias: 'f' },
 		],
-		map: (...args) => ({
+		map: (args) => ({
 			...args,
 			filename: args.file,
 			parent: args.cwd || ''
