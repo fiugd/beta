@@ -1242,14 +1242,14 @@ function attachGutterHelper (){
 	const gutterEnter = (e) => {
 		if(!e.target.classList.contains('CodeMirror-gutters')) return;
 		const cmSizers = getSizers();
-		if(cmSizers.length) return;
+		if(!cmSizers.length) return;
 		const addGutterHovered = x => x.classList.add('gutter-hovered');
 		cmSizers.forEach(addGutterHovered);
 	};
 	const gutterLeave = (e) => {
 		if(!e.target.classList.contains('CodeMirror-gutters')) return;
 		const cmSizers = getSizers();
-		if(cmSizers.length) return;
+		if(!cmSizers.length) return;
 		const addGutterHovered = x => x.classList.remove('gutter-hovered');
 		cmSizers.forEach(removeGutterHovered);
 	};
