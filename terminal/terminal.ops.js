@@ -104,7 +104,7 @@ const commands = [
 		name: 'Concat',
 		keyword: "cat",
 		description: 'Concatenate(print) FILE contents to standard output.',
-		event: "",
+		event: "readFile",
 		usage: '[FILE]',
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true }
@@ -134,6 +134,12 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 
 const notImplemented = ({ keyword }) => chalk.hex('#ccc')(`\n${keyword}: not implemented\n`);
 
+const readFile = async (args) => {
+	return JSON.stringify(args, null, 2);
+};
+
+const manualCommands = { readFile };
+
 async function invokeRaw(args={}, thisCommand){
 	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
 	const { response: cwd } = event[0] !== 'showCurrentFolder'
@@ -147,6 +153,12 @@ async function invokeRaw(args={}, thisCommand){
 	const mappedArgs = argMapper
 		? argMapper(argsPlusExtra)
 		: argsPlusExtra;
+
+	if(Object.keys(manualCommands).includes(event[0])){
+		let { error, response } = await manualCommands[event[0]](mappedArgs);
+		return { error, response };
+	}
+
 	let { error, response } = await comm.execute({
 		triggerEvent: {
 			type: 'operations',

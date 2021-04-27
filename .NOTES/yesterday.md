@@ -1,6 +1,13 @@
 <!-- no-select -->
 <br>
 
+#### 2021-04-20 | present
+	- fix issue with tree icons
+	- editor tabs close all
+	- git commit ++
+	- editor code collapse caret hiding
+	- terminal commands
+
 #### [bartok|fiug 2021-04-18 video](https://www.youtube.com/watch?v=ODoJo1G39Kw)
 
 #### [bartok|fiug 2021-04-14 video](https://www.youtube.com/watch?v=jxTI9ICtAj8)
