@@ -14,10 +14,11 @@
 ---
 
 - [ ] cd ../sibling results in parent//sibling (at 1 up from root)
-- [ ] mv command works properly
-- [ ] md/mkdir command works properly
 - [ ] rm command works properly for folder
+- [ ] md/mkdir command works properly
 - [ ] editor tabs: on file delete, close tab
+- [ ] mv command works properly
+- [ ] cp command works properly
 
 ---
 
