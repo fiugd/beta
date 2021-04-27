@@ -400,4 +400,10 @@ span.CodeMirror-selectedtext { background: none; }
   content: "\eab4";
   transform: translateX(5px) translateY(3px) rotateZ(-90deg);
 }
+.CodeMirror-foldgutter-open {
+  visibility: hidden;
+}
+.gutter-hover .CodeMirror-foldgutter-open {
+  visibility: visible;
+}
 /* END code folding */
