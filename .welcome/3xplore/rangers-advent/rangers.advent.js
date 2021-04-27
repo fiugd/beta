@@ -477,11 +477,11 @@ function showLoader(){
 }
 
 function clone(o){
-		return JSON.parse(JSON.stringify(o));
+	return JSON.parse(JSON.stringify(o));
 }
 
 function logJSON(obj){
-		console.log(JSON.stringify(obj, null, '\t'));
+	console.log(JSON.stringify(obj, null, '\t'));
 }
 
 function updatePageModel(event){

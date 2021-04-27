@@ -1,3 +1,8 @@
+//show-preview
+import { appendUrls, addUrls, consoleHelper, htmlToElement, importCSS, prism } from '../.tools/misc.mjs';
+import '../shared.styl';
+consoleHelper();
+
 const notes = `
 ### Simulations
 	- N-copter
