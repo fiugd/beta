@@ -402,8 +402,9 @@ span.CodeMirror-selectedtext { background: none; }
 }
 .CodeMirror-foldgutter-open {
   visibility: hidden;
+  transition: visibility 0.3s;
 }
-.gutter-hover .CodeMirror-foldgutter-open {
+.gutter-hovered .CodeMirror-foldgutter-open {
   visibility: visible;
 }
 /* END code folding */
