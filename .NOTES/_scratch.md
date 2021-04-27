@@ -835,3 +835,8 @@ graphs on the fly
 ### boxes and wires
 - https://reactflow.dev/
 - https://crosshj.com/experiments/svg/
+
+
+# keyboard shortcuts | hotkeys
+- https://code.visualstudio.com/docs/getstarted/keybindings
+
