@@ -202,6 +202,7 @@ image processing
 DEPLOY | VERSION CONTROL
 ========================
 - https://app.diagrams.net/#G18h5403wK012mFwEuMETVVnQiyZmXPJOy
+![image](https://user-images.githubusercontent.com/1816471/116312252-31e6f380-a77a-11eb-946d-2eedc07ab5b5.png)
 
 
 
@@ -393,7 +394,7 @@ I want to be able to do little experiments
 ---------------
 Examples of little experiments:
 	- [ ] broken clock right twice a day
-	- [ ] simluate a collection of people as faulty mirrors
+	- [ ] simulate a collection of people as faulty mirrors
 	- [ ] architect stage of some project
 	- [ ] emulate kubernetes, explore kubernetes pattern
 	- [ ] services with central config service pattern
@@ -681,9 +682,6 @@ components:
 - listeners: process event, call some update function that dom has passed
 - triggers/actions: user interacting with dom causes system event to be fired
 - state?
-
-
-
 
 web assembly
 ============
