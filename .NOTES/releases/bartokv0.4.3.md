@@ -39,6 +39,6 @@
 - [X] git commit should offer message on success/fail
 - [X] something is messed up about cwd from app (esp for files at root)
 - [X] tabs don't trigger editor properly
-	- this specifically occurs with bartokv0.4.3.md
-	- also occurs in other situations
-	- switch services and come back (seems to trigger this)
+  - this specifically occurs with bartokv0.4.3.md
+  - also occurs in other situations
+  - switch services and come back (seems to trigger this)
