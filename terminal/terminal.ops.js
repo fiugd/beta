@@ -189,7 +189,7 @@ const withState = (() => {
 		cwd: undefined
 	};
 
-	const stateFnWrapper = (func) => async func(args) => {
+	const stateFnWrapper = (func) => async (args) => {
 		let handler;
 		try {
 			const handlers = getStatefulHandlers(state);
