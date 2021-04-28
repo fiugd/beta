@@ -112,6 +112,18 @@ const commands = [
 	},
 ];
 
+const getStatefulHandlers = (state) => {
+	showCurrentFolder: {
+		response: () => state.cwd,
+		update: (res) => {
+			state.cwd = res;
+		}
+	},
+	changeCurrentFolder: {
+		response: ({ folderPath }) => changeFolder(state, folderPath)
+	}
+};
+
 const link = url => chalk.hex('#9cdcfe')(url)
 
 const commandHelp = (command) => `
@@ -147,6 +159,57 @@ const readFile = async (args) => {
 
 const manualCommands = { readFile };
 
+const changeFolder = (state, folderPath) => {
+	if(!state.cwd) return;
+
+	if(folderPath.slice(0,2) === '..'){
+		//TODO: handle multiple, eg.  '../../'
+		//TODO: should not eat serviceName, need serviceName to do this right
+		state.cwd += folderPath.slice(2);
+		return state.cwd;
+	}
+
+	if(folderPath[0] === '/'){
+		//TODO: return serviceName+folderPath, need service name to do this right
+		state.cwd = folderPath;
+		return state.cwd;
+	}
+
+	if(folderPath.slice(0,2) === './'){
+		state.cwd += folderPath.slice(1);
+		return state.cwd;
+	}
+
+	state.cwd +=folderPath;
+	return state.cwd;
+};
+
+const withState = (() => {
+	const state = {
+		cwd: undefined
+	};
+
+	const stateFnWrapper = (func) => async func(args) => {
+		let handler;
+		try {
+			const handlers = getStatefulHandlers(state);
+			handler = handlers[args.triggerEvent.detail.operation];
+			const response = handler.response(args);
+			if(response) return { response };
+		} catch(e){}
+
+		const { error, response } = await fun(args)
+
+		try {
+			response.trim() && handler.update(response.trim());
+		} catch(e){}
+
+		return { error, response };
+	};
+
+	return stateFnWrapper;
+};
+
 async function invokeRaw(args={}, thisCommand){
 	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
 	const { response: cwd } = event[0] !== 'showCurrentFolder'
@@ -166,7 +229,7 @@ async function invokeRaw(args={}, thisCommand){
 		return { error, response };
 	}
 
-	let { error, response } = await comm.execute({
+	let { error, response } = await withState(comm.execute)({
 		triggerEvent: {
 			type: 'operations',
 			detail: {
