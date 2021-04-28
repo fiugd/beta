@@ -112,7 +112,7 @@ const commands = [
 	},
 ];
 
-const getStatefulHandlers = (state) => {
+const getStatefulHandlers = (state) => ({
 	showCurrentFolder: {
 		response: () => state.cwd,
 		update: (res) => {
@@ -122,7 +122,7 @@ const getStatefulHandlers = (state) => {
 	changeCurrentFolder: {
 		response: ({ folderPath }) => changeFolder(state, folderPath)
 	}
-};
+});
 
 const link = url => chalk.hex('#9cdcfe')(url)
 
