@@ -43,6 +43,7 @@ const commands = [
 		],
 		mapResponse: (res) => {
 			return res
+				.filter(x => x)
 				.sort((a,b) => {
 					const bothFolders = a.includes('/') && b.includes('/');
 					const bothFiles = !a.includes('/') && !b.includes('/');
@@ -52,7 +53,7 @@ const commands = [
 					if(a.includes('/') && !b.includes('/')) return -1;
 					if(!a.includes('/') && b.includes('/')) return 1;
 				})
-				.join('\n')
+				.join('\n') + '\n'
 		}
 	},
 	{
@@ -266,7 +267,7 @@ async function invoke(args, done){
 		return done();
 	}
 	if(response && this.mapResponse){
-		this.term.write(this.mapResponse(response)+'\n');
+		this.term.write(this.mapResponse(response));
 		return done();
 	}
 	if(response){
