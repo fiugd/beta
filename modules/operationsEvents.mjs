@@ -135,7 +135,7 @@ const showCurrentFolderHandler = ({
 	const { detail } = event;
 	const { callback } = detail;
 	const currentFile = getCurrentFile();
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFolder = getCurrentFolder();
 	if(!currentService){
 		callback && callback('unable to read current service');
@@ -167,7 +167,7 @@ const changeCurrentFolderHandler = ({
 	const { detail } = event;
 	const { callback, folderPath } = detail;
 
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	const currentFolder = getCurrentFolder() ||
 		guessCurrentFolder(currentFile, currentService);
@@ -210,7 +210,7 @@ const addFolderHandler = ({
 }) => async (event) => {
 	const { detail } = event;
 	const { callback } = detail;
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	operations =
 		operations ||
@@ -242,7 +242,7 @@ const renameFolderHandler = ({
 	// console.log('OPERATIONS: renameFolder');
 	const { detail } = event;
 	const { callback } = detail;
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	event.detail.operation = event.detail.operation || event.type;
 	const manageOp = managementOp(event, currentService, currentFile);
@@ -266,7 +266,7 @@ const deleteFolderHandler = ({
 }) => async (event) => {
 	const { detail } = event;
 	const { callback } = detail;
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	event.detail.operation = event.detail.operation || event.type;
 	const manageOp = managementOp(event, currentService, currentFile);
@@ -291,7 +291,7 @@ const moveFolderHandler = ({
 	//console.log('OPERATIONS: move');
 	const { detail } = event;
 	const { callback } = detail;
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	event.detail.operation = event.detail.operation || event.type;
 	const manageOp = managementOp(event, currentService, currentFile);
@@ -316,7 +316,7 @@ const moveFileHandler = ({
 	//console.log('OPERATIONS: move');
 	const { detail } = event;
 	const { callback } = detail;
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFile = getCurrentFile();
 	event.detail.operation = event.detail.operation || event.type;
 	const manageOp = managementOp(event, currentService, currentFile);
@@ -342,7 +342,7 @@ const readFolderHandler = ({
 	const { detail } = event;
 	const { callback } = detail;
 	const currentFile = getCurrentFile();
-	const currentService = getCurrentService();
+	const currentService = getCurrentService({ pure: true });
 	const currentFolder = getCurrentFolder();
 	const parent = currentFolder
 		? currentFolder
@@ -713,7 +713,7 @@ const handlers = {
 const getChainedTrigger = ({ triggers }) => (event) => {
 	const handler = {
 		addFile: async () => {
-			const service = getCurrentService();
+			const service = getCurrentService({ pure: true });
 			const name = event.detail.parent
 				? `${event.detail.parent}/${event.detail.name}`
 				: event.detail.name;
