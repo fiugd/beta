@@ -198,7 +198,7 @@ const withState = (() => {
 			if(response) return { response };
 		} catch(e){}
 
-		const { error, response } = await fun(args)
+		const { error, response } = await func(args)
 
 		try {
 			response.trim() && handler.update(response.trim());
