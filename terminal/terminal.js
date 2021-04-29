@@ -46,7 +46,7 @@ const getCwd = async () => {
 	if(!cwd) throw new Error('cwd not found');
 };
 
-(async () => {
+setTimeout(async () => {
 	try {
 		await callWithRetry(getCwd);
 		term.write('\n');
@@ -55,4 +55,4 @@ const getCwd = async () => {
 	} catch(e){
 		term.write('\n$ ');
 	}
-})();
+}, 1500);
