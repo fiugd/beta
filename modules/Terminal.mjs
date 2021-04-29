@@ -3,7 +3,6 @@ import {
 	connectTrigger,
 	execCommand,
 } from "./terminalEvents.mjs";
-import { getCurrentService } from './state.mjs';
 import { debounce } from "/shared/modules/utilities.mjs";
 import motd from "./motd.mjs";
 
@@ -27,7 +26,7 @@ function _Terminal() {
 	termContainer.innerHTML = `
 <iframe
 	sandbox="${iframeSandboxPermissions}"
-	src="/_/modules/terminal/index.html?service='${(getCurrentService()||{}).name}'"
+	src="/_/modules/terminal/index.html"
 ></iframe>
 `.trim();
 
