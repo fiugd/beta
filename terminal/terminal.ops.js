@@ -194,7 +194,7 @@ const withState = (() => {
 		try {
 			const handlers = getStatefulHandlers(state);
 			handler = handlers[args.triggerEvent.detail.operation];
-			const response = handler.response(args);
+			const response = handler.response(args.triggerEvent.detail);
 			if(response) return { response };
 		} catch(e){}
 
