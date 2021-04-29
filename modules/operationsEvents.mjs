@@ -137,6 +137,10 @@ const showCurrentFolderHandler = ({
 	const currentFile = getCurrentFile();
 	const currentService = getCurrentService();
 	const currentFolder = getCurrentFolder();
+	if(!currentService){
+		callback && callback('unable to read current service');
+		return;
+	}
 	const parent = currentFolder
 		? currentFolder
 		: guessCurrentFolder(currentFile, currentService);
