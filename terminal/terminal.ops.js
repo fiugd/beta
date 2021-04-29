@@ -180,7 +180,7 @@ const changeFolder = (state, folderPath) => {
 		return state.cwd;
 	}
 
-	state.cwd +=folderPath;
+	state.cwd += '/' + folderPath;
 	return state.cwd;
 };
 
