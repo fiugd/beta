@@ -16,7 +16,8 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, defaultValue: '~' }
 		],
-		map: ({ directory }) => ({ folderPath: directory })
+		map: ({ directory }) => ({ folderPath: directory }),
+		mapResponse: () => '',
 	},
 	{
 		name: 'MakeDir',
