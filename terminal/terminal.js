@@ -28,9 +28,31 @@ const lib = Lib({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
 term._attachHandlers({ bubbleHandler, keyHandler });
 
-// LAME: give the rest of the system time to boot up
-setTimeout(() => {
-	term.write('\n');
-	//term.focus();
-	lib.showPrompt();
-}, 1000);
+
+const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
+const callWithRetry = async (fn, depth = 0, max) => {
+	try {
+		return await fn();
+	} catch(e) {
+		if (depth > 7) throw e;
+		await delay(1.3 ** depth * 1000);
+		return callWithRetry(fn, depth + 1);
+	}
+}
+
+const { invokeRaw: getCurrentDir } = ops.find(x => x.keyword === 'pwd') || {};
+const getCwd = async () => {
+	const { response: cwd } = await getCurrentDir();
+	if(!cwd) throw new Error('cwd not found');
+};
+
+(async () => {
+	try {
+		await callWithRetry(getCwd);
+		term.write('\n');
+		//term.focus();
+		lib.showPrompt();
+	} catch(e){
+		term.write('\n$ ');
+	}
+})();
