@@ -208,7 +208,7 @@ const withState = (() => {
 	};
 
 	return stateFnWrapper;
-};
+})();
 
 async function invokeRaw(args={}, thisCommand){
 	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
