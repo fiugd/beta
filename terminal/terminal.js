@@ -40,9 +40,9 @@ const callWithRetry = async (fn, depth = 0, max) => {
 	}
 }
 
-const { invokeRaw: getCurrentDir } = ops.find(x => x.keyword === 'pwd') || {};
+const pwdCommand = ops.find(x => x.keyword === 'pwd') || {};
 const getCwd = async () => {
-	const { response: cwd } = await getCurrentDir();
+	const { response: cwd } = await pwdCommand.invokeRaw();
 	if(!cwd) throw new Error('cwd not found');
 };
 
