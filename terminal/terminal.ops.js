@@ -112,11 +112,12 @@ const commands = [
 	},
 ];
 
-const getStatefulHandlers = (state) => ({
+const getStatefulHandlers = (state, { changeFolder }) => ({
 	showCurrentFolder: {
 		response: () => state.cwd,
-		update: (res) => {
+		update: (res, service) => {
 			state.cwd = res;
+			state.service = service;
 		}
 	},
 	changeCurrentFolder: {
@@ -160,18 +161,28 @@ const readFile = async (args) => {
 const manualCommands = { readFile };
 
 const changeFolder = (state, folderPath) => {
-	if(!state.cwd) return;
+	if(!state.cwd || !state.service) return;
 
 	if(folderPath.slice(0,2) === '..'){
 		//TODO: handle multiple, eg.  '../../'
-		//TODO: should not eat serviceName, need serviceName to do this right
-		state.cwd = state.cwd.split('/').slice(0,-1).join('/') + folderPath.slice(2);
+		let newCwd = state.cwd.split('/').slice(0,-1).join('/') + folderPath.slice(2);
+		try {
+			if(!newCwd.includes(state.service.trim())) return state.cwd;
+			state.cwd = newCwd;
+		} catch(e){}
+
 		return state.cwd;
 	}
 
 	if(folderPath[0] === '/'){
-		//TODO: return serviceName+folderPath, need service name to do this right
-		state.cwd = folderPath;
+		try{
+			if(folderPath.length === 1){
+				state.cwd = state.service.trim();
+				return state.cwd;
+			}
+			state.cwd = state.service.trim() + folderPath;
+		} catch(e) {}
+
 		return state.cwd;
 	}
 
@@ -186,22 +197,23 @@ const changeFolder = (state, folderPath) => {
 
 const withState = (() => {
 	const state = {
-		cwd: undefined
+		cwd: undefined,
+		service: undefined
 	};
 
 	const stateFnWrapper = (func) => async (args) => {
 		let handler;
 		try {
-			const handlers = getStatefulHandlers(state);
+			const handlers = getStatefulHandlers(state, changeFolder);
 			handler = handlers[args.triggerEvent.detail.operation];
 			const response = handler.response(args.triggerEvent.detail);
 			if(response) return { response };
 		} catch(e){}
 
-		const { error, response } = await func(args)
+		const { error, response, service } = await func(args)
 
 		try {
-			response.trim() && handler.update(response.trim());
+			response.trim() && handler.update(response.trim(), service);
 		} catch(e){}
 
 		return { error, response };
