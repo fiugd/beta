@@ -8,7 +8,6 @@
 
 - [ ] handle rename, delete, move files for commit
 - [ ] terminal watch mode for js files
-- [ ] terminal has its own cwd not dependent on app cwd
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 
 ---
@@ -26,6 +25,7 @@
 
 ---
 
+- [X] terminal has its own cwd not dependent on app cwd
 - [X] cat command works properly
 - [X] better code fold behavior (gutter hover)
 - [X] rm command works properly for file
