@@ -204,7 +204,7 @@ const withState = (() => {
 	const stateFnWrapper = (func) => async (args) => {
 		let handler;
 		try {
-			const handlers = getStatefulHandlers(state, changeFolder);
+			const handlers = getStatefulHandlers(state, { changeFolder });
 			handler = handlers[args.triggerEvent.detail.operation];
 			const response = handler.response(args.triggerEvent.detail);
 			if(response) return { response };
