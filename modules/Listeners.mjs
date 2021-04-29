@@ -162,8 +162,10 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		triggerEvent.detail.callback = (error, response) => {
-			source.postMessage({ response, error, key }, messageEvent.origin);
+		triggerEvent.detail.callback = (error, response, service) => {
+			source.postMessage({
+				error, response, error, service, key
+			}, messageEvent.origin);
 		}
 		trigger(triggerEvent)
 		return;

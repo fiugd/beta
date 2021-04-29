@@ -150,7 +150,8 @@ const showCurrentFolderHandler = ({
 
 	callback && callback(
 		!parent ? "trouble finding current path" : false,
-		currentFolderResponse
+		currentFolderResponse,
+		currentService?.name
 	);
 };
 
