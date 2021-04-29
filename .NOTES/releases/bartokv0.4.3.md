@@ -9,10 +9,12 @@
 - [ ] handle rename, delete, move files for commit
 - [ ] terminal watch mode for js files
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
+- [ ] service name issues with path in terminal
+  - should not be able to cd lower than serviceName when service is loaded
+  - cd /path should translate into serviceName/path
 
 ---
 
-- [ ] cd ../sibling results in parent//sibling (at 1 up from root)
 - [ ] rm command works properly for folder
 - [ ] md/mkdir command works properly
 - [ ] editor tabs: on file delete, close tab
@@ -25,6 +27,7 @@
 
 ---
 
+- [X] cd ../sibling results in parent//sibling (at 1 up from root)
 - [X] terminal has its own cwd not dependent on app cwd
 - [X] cat command works properly
 - [X] better code fold behavior (gutter hover)
