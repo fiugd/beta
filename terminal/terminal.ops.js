@@ -165,7 +165,7 @@ const changeFolder = (state, folderPath) => {
 	if(folderPath.slice(0,2) === '..'){
 		//TODO: handle multiple, eg.  '../../'
 		//TODO: should not eat serviceName, need serviceName to do this right
-		state.cwd += folderPath.slice(2);
+		state.cwd = state.cwd.split('/').slice(0,-1).join('/') + folderPath.slice(2);
 		return state.cwd;
 	}
 
