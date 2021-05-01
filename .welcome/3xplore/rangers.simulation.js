@@ -40,12 +40,16 @@ const state = {
 	},
 	towers: [{
 		type: 'attacker',
+		dims: [30, 90],
 		x: 25,
+		color: '#67b',
 		hp: 2000,
 		deployed: [ basicChar ]
 	}, {
 		type: 'defender',
+		dims: [30, 90],
 		x: 25,
+		color: '#b76',
 		hp: 2000,
 		deployed: [ basicChar ]
 	}],
@@ -73,19 +77,20 @@ const render = () => {
 	};
 	state.towers.forEach(tower => {
 		const isAttack = tower.type === "attacker";
-		const towerDims = [30,90];
-		const flipX = (x) => isAttack ? x : state.field.width - x;
-		ctx.fillStyle = '#555';
+		const flipX = (x) => isAttack
+			? x
+			: state.field.width - x;
+		ctx.fillStyle = tower.color;
 		ctx.fillRect(
-			flipX( tower.x)-(towerDims[0]/2),
-			state.field.height-towerDims[1],
-			towerDims[0], towerDims[1]
+			flipX( tower.x)-(tower.dims[0]/2),
+			state.field.height-tower.dims[1],
+			tower.dims[0], tower.dims[1]
 		);
 		tower.deployed.forEach(char => {
 			const charWidth = 30;
 			renderCharacter({
 				x: flipX(char.x) - (charWidth/2),
-				color: isAttack ? '#67b' : '#b76'
+				color: tower.color
 			});
 		});
 		
@@ -106,8 +111,8 @@ const moveDeployed = ({ tick, towers }) => {
 };
 
 const gameOn = () => {
-	// game as long as all towers have health
 	moveDeployed(state);
+	//TODO: game as long as all towers have health
 	return state.tick < 50;
 };
 
@@ -121,7 +126,7 @@ const throttle = (MIN_TIME) => () => {
 
 const gameSteps = [
 	repeat(),
-	filter(throttle(200)),
+	filter(throttle(150)),
 	takeWhile(gameOn),
 	tap(gameLoop),
 ];
