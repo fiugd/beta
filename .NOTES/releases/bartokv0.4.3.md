@@ -6,6 +6,7 @@
 
 ---
 
+- [ ] ls command needs to use the folder it was passed versus current state
 - [ ] handle rename, delete, move files for commit
 - [ ] terminal watch mode for js files
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)

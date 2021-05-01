@@ -42,7 +42,7 @@
 		- old experiments: quadcopter, rangersAdvent, encrytWebWorker
 		- UI frameworks exploration: vue, angular, ember, svelte
 		- asciidoc, systemjs
-		- move bartok out of experiments & call it fiug (Jan 27)
+		- move bartok out of experiments and call it fiug (Jan 27)
 	- service worker refactor ( Jan 29 )
 
 #### 2020-10-15 | 2020-11-15 - Stylus, Search, languages, experiments
