@@ -1268,8 +1268,8 @@ function attachGutterHelper (){
 
 		inGutter = gutter.contains(e.target) ||
 			e.target.classList.contains('CodeMirror-gutters') ||
-			e.target.className.includes('gutter-elt') ||
-			e.target.className.includes('guttermarker');
+			e.target.classList.includes('gutter-elt') ||
+			e.target.classList.includes('guttermarker');
 
 		if(inGutter && !gutterNoted) return addGutterHovered();
 		if(!inGutter && gutterNoted) return removeGutterHovered();
