@@ -21,7 +21,7 @@ import '../shared.styl';
 import * as rxjs from 'https://cdn.skypack.dev/rxjs';
 import * as operators from 'https://cdn.skypack.dev/rxjs/operators';
 const { animationFrameScheduler, of, Subject } = rxjs;;
-const { takeWhile, filter, tap, repeat } = operators;
+const { catchError, takeWhile, filter, tap, repeat } = operators;
 
 consoleHelper();
 
@@ -67,41 +67,73 @@ canvas.width = state.field.width;
 canvas.height = state.field.height;
 const ctx = canvas.getContext('2d');
 
-const render = () => {
-	ctx.fillStyle = '#111';
-	ctx.fillRect(0, 0, state.field.width, state.field.height);
-	
-	const renderCharacter = ({ x, color }) => {
-		ctx.fillStyle = color;
-		ctx.fillRect(x, state.field.height-25, 30, 30);
-	};
-	state.towers.forEach(tower => {
-		const isAttack = tower.type === "attacker";
-		const flipX = (x) => isAttack
-			? x
-			: state.field.width - x;
-		ctx.fillStyle = tower.color;
-		ctx.fillRect(
-			flipX( tower.x)-(tower.dims[0]/2),
-			state.field.height-tower.dims[1],
-			tower.dims[0], tower.dims[1]
-		);
-		tower.deployed.forEach(char => {
-			const charWidth = 30;
-			renderCharacter({
-				x: flipX(char.x) - (charWidth/2),
-				color: tower.color
+const clone = x => JSON.parse(JSON.stringify(x))
+
+const toggleCoords = (state, coordMode) => {
+	const stateClone = clone(state);
+	stateClone.towers
+		.forEach(tower => {
+			const isAttack = tower.type === "attacker";
+			const flipX = (x) => isAttack
+				? x
+				: coordMode === 'global'
+					? state.field.width - x
+					: Math.abs(x - state.field.width);
+			tower.x = flipX(tower.x);
+			tower.coordMode = coordMode;
+			tower.deployed.forEach(char => {
+				char.x = flipX(char.x)
 			});
 		});
-		
-	});
+	return stateClone;
 };
 
-// towers spawn characters (use spawn timer)
-// characters move or attack
+const render = () => {
+	const { width: fieldWidth, height: fieldHeight} = state.field;
+	ctx.fillStyle = '#111';
+	ctx.fillRect(0, 0, fieldWidth, fieldHeight);
+	
+	const bottom = (height) => fieldHeight-height;
+	const center = (x, width) => x - (width/2);
+	
+	const renderTower = ({ x, color, dims }) => {
+		const [width, height] = dims;
+		ctx.fillStyle = color;
+		ctx.fillRect(
+			center(x, width), bottom(height),
+			width, height
+		);
+	};
 
-const gameLoop = (...args) => {
-	state.tick++;
+	const renderCharacter = ({ x }) => {
+		const width = 30;
+		ctx.fillRect(
+			center(x, width), bottom(width),
+			width, width
+		);
+	};
+
+	const globalModeState = toggleCoords(state, 'global');
+	globalModeState.towers.forEach(tower => {
+		renderTower({ ...tower });
+		tower.deployed.forEach(renderCharacter);
+	});
+};
+const cleanError = (e) => {
+	e.stack = e.stack
+		.split('\n')
+		.filter(x => !x.includes('rxjs'))
+		.join('\n');
+	return e;
+}
+const tryRender = () => {
+	try {
+		render();
+		return true;
+	} catch(e) {
+		console.error(cleanError(e));
+		return false;
+	}
 };
 
 const moveDeployed = ({ tick, towers }) => {
@@ -110,10 +142,19 @@ const moveDeployed = ({ tick, towers }) => {
 	});
 };
 
+// towers spawn characters (use spawn timer)
+// characters move or attack
 const gameOn = () => {
-	moveDeployed(state);
-	//TODO: game as long as all towers have health
-	return state.tick < 50;
+	try {
+		moveDeployed(state);
+		//TODO: game as long as all towers have health
+		const continueGame = state.tick < 50;
+		state.tick++;
+		return continueGame;
+	} catch(e) {
+		console.error(e);
+		return false;
+	}
 };
 
 const throttle = (MIN_TIME) => () => {
@@ -124,13 +165,18 @@ const throttle = (MIN_TIME) => () => {
 	return true;
 };
 
+const highPriority = () => {
+	//animation events?
+};
+
 const gameSteps = [
 	repeat(),
+	tap(highPriority),
 	filter(throttle(150)),
 	takeWhile(gameOn),
-	tap(gameLoop),
+	takeWhile(tryRender)
 ];
 
 of(null, animationFrameScheduler)
 	.pipe(...gameSteps)
-	.subscribe(render);
+	.subscribe();
