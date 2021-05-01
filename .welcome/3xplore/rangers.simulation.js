@@ -144,7 +144,7 @@ const moveDeployed = ({ tick, towers }) => {
 
 // towers spawn characters (use spawn timer)
 // characters move or attack
-const gameOn = () => {
+const gameLoop = () => {
 	try {
 		moveDeployed(state);
 		//TODO: game as long as all towers have health
@@ -173,7 +173,7 @@ const gameSteps = [
 	repeat(),
 	tap(highPriority),
 	filter(throttle(150)),
-	takeWhile(gameOn),
+	takeWhile(gameLoop),
 	takeWhile(tryRender)
 ];
 
