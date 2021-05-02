@@ -26,11 +26,12 @@ const { catchError, takeWhile, filter, tap, repeat } = operators;
 consoleHelper();
 
 const basicChar = {
+	hp: 2000,
 	respawn: 200,
-	range: 100,
+	range: 150,
 	attack: 30,
 	x: 60,
-	move: 4
+	move: 10
 };
 const state = {
 	field: {
@@ -42,15 +43,19 @@ const state = {
 		dims: [30, 90],
 		x: 25,
 		color: '#67b',
-		hp: 2000,
+		hp: 500,
 		deployed: [ basicChar ]
 	}, {
 		type: 'defender',
 		dims: [30, 90],
 		x: 25,
 		color: '#b76',
-		hp: 2000,
-		deployed: [ basicChar ]
+		hp: 500,
+		// attack: <=68(blue), 69-71.4(tie), >=71.5 (red)
+		deployed: [{
+			...basicChar,
+			hp:100, range: 400, attack: 68
+		}]
 	}],
 	tick: 0,
 };
@@ -94,7 +99,7 @@ const toggleCoords = (state, coordMode) => {
 			tower.x = flipX(tower.x);
 			tower.coordMode = coordMode;
 			tower.deployed.forEach(char => {
-				char.x = flipX(char.x)
+				char.x = flipX(char.x);
 			});
 		});
 	return stateClone;
@@ -106,7 +111,13 @@ const cleanError = (e) => {
 		.join('\n');
 	return e;
 }
-
+const assignId = (x) => x.id = Math.random().toString().slice(2);
+const getById = (id) => [
+	...state.towers,
+	...state.towers[0].deployed,
+	...state.towers[1].deployed
+]
+	.find(x => x.id === id);
 const render = () => {
 	const { width: fieldWidth, height: fieldHeight} = state.field;
 	ctx.fillStyle = '#111';
@@ -115,9 +126,9 @@ const render = () => {
 	const bottom = (height) => fieldHeight-height;
 	const center = (x, width) => x - (width/2);
 	
-	const renderTower = ({ x, color, dims }) => {
+	const renderTower = ({ x, color, dims, status }) => {
 		const [width, height] = dims;
-		ctx.fillStyle = color;
+		ctx.fillStyle = status === 'dead' ? '#333' : color;
 		ctx.fillRect(
 			center(x, width), bottom(height),
 			width, height
@@ -137,6 +148,13 @@ const render = () => {
 		renderTower({ ...tower });
 		tower.deployed.forEach(renderCharacter);
 	});
+	
+	if(state.towers[0].status === 'dead'){
+		console.log('Red wins!');
+	}
+	if(state.towers[1].status === 'dead'){
+		console.log('Blue wins!');
+	}
 };
 const tryRender = () => {
 	try {
@@ -149,8 +167,47 @@ const tryRender = () => {
 };
 
 const moveDeployed = ({ tick, towers }) => {
+	towers.forEach((tower, i) => {
+		tower.deployed.forEach(char => {
+			if(char.target) return;
+			char.x += char.move;
+		})
+	});
+};
+const targetOpponents = (state) => {
+	const { towers } = toggleCoords(state, 'global');
+	towers.forEach((tower, i) => {
+		const isAttack = tower.type === "attacker";
+		const opponent = towers[isAttack ? 1 : 0];
+		const withinRange = (char, opp) => isAttack
+			? (char.x + char.range) >= opp.x
+			: (char.x - char.range) <= opp.x;
+		tower.deployed.forEach((char, j) => {
+			if(char.target) return;
+			const nearby = [opponent, ...opponent.deployed]
+				.filter((opp) => withinRange(char, opp));
+			if(!nearby.length) return;
+			state.towers[i].deployed[j].target = isAttack
+				? nearby.sort((a, b) => b -a)[0].id
+				: nearby.sort((a, b) => a - b)[0].id;
+		})
+	});
+};
+const attackOpponents = ({ towers }) => {
+	const attacking = [...towers[0].deployed, ...towers[1].deployed]
+		.filter(x => x.target);
+	attacking.forEach(attacker => {
+		const target = getById(attacker.target);
+		target.hp -= attacker.attack;
+		if(target.hp < 0){
+			target.status = 'dead';
+			attacker.target = undefined;
+		}
+	});
 	towers.forEach(tower => {
-		tower.deployed.forEach(char => char.x += char.move)
+		if(tower.hp <= 0) tower.status = 'dead';
+		tower.deployed = tower.deployed
+			.filter(x => x.status !== 'dead')
 	});
 };
 
@@ -158,15 +215,19 @@ const moveDeployed = ({ tick, towers }) => {
 // characters move or attack
 const gameLoop = () => {
 	try {
+		targetOpponents(state);
+		attackOpponents(state);
 		moveDeployed(state);
-		//TODO: game as long as all towers have health
-		const continueGame = state.tick < 50;
+		const gameOver = !(state.towers[0].hp > 0 &&
+			state.towers[1].hp > 0);
+		const continueGame = !state.gameOver
+		state.gameOver = gameOver;
 		state.tick++;
 		return continueGame;
 	} catch(e) {
 		console.error(e);
 		return false;
-	}
+	} 
 };
 
 const throttle = (MIN_TIME) => () => {
@@ -181,12 +242,14 @@ const highPriority = () => {}; //animation events?
 const gameSteps = [
 	repeat(),
 	tap(highPriority),
-	filter(throttle(150)),
+	filter(throttle(50)),
 	takeWhile(gameLoop),
-	takeWhile(tryRender)
+	takeWhile(tryRender),
 ];
 
 setTimeout(() => {
+	[...state.towers, ...state.towers[0].deployed, ...state.towers[1].deployed]
+		.forEach(assignId)
 	of(null, animationFrameScheduler)
 		.pipe(...gameSteps)
 		.subscribe();
