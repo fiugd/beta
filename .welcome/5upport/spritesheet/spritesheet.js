@@ -1,7 +1,7 @@
 //show-preview
 import GIF from 'https://cdn.skypack.dev/gif.js';
-import { consoleHelper, htmlToElement, importCSS } from '../.tools/misc.mjs';
-import '../shared.styl';
+import { consoleHelper, htmlToElement, importCSS } from '../../.tools/misc.mjs';
+import '../../shared.styl';
 consoleHelper();
 
 /*
