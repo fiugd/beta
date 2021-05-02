@@ -32,7 +32,6 @@ const basicChar = {
 	x: 60,
 	move: 4
 };
-
 const state = {
 	field: {
 		height: 200,
@@ -56,19 +55,32 @@ const state = {
 	tick: 0,
 };
 
-const dom = htmlToElement(`
-	<div>
-		<canvas style="width:100%"></canvas>
-	</div>
-`);
-document.body.append(dom);
-const canvas = dom.querySelector('canvas');
-canvas.width = state.field.width;
-canvas.height = state.field.height;
-const ctx = canvas.getContext('2d');
+const initDom = (state) => {
+	const dom = htmlToElement(`
+		<div>
+			<style>
+				body {
+					height: 100vh;
+					box-sizing: border-box;
+					margin-top: 0;
+					margin-bottom: 0;
+					padding-bottom: 5em;
+					overflow: hidden;
+				}
+			</style>
+			<canvas style="width:100%"></canvas>
+		</div>
+	`);
+	document.body.append(dom);
+	const canvas = dom.querySelector('canvas');
+	canvas.width = state.field.width;
+	canvas.height = state.field.height;
+	const ctx = canvas.getContext('2d');
+	return ctx;
+};
+const ctx = initDom(state);
 
 const clone = x => JSON.parse(JSON.stringify(x))
-
 const toggleCoords = (state, coordMode) => {
 	const stateClone = clone(state);
 	stateClone.towers
@@ -87,6 +99,13 @@ const toggleCoords = (state, coordMode) => {
 		});
 	return stateClone;
 };
+const cleanError = (e) => {
+	e.stack = e.stack
+		.split('\n')
+		.filter(x => !x.includes('rxjs'))
+		.join('\n');
+	return e;
+}
 
 const render = () => {
 	const { width: fieldWidth, height: fieldHeight} = state.field;
@@ -119,13 +138,6 @@ const render = () => {
 		tower.deployed.forEach(renderCharacter);
 	});
 };
-const cleanError = (e) => {
-	e.stack = e.stack
-		.split('\n')
-		.filter(x => !x.includes('rxjs'))
-		.join('\n');
-	return e;
-}
 const tryRender = () => {
 	try {
 		render();
@@ -164,10 +176,7 @@ const throttle = (MIN_TIME) => () => {
 	state.time = curr;
 	return true;
 };
-
-const highPriority = () => {
-	//animation events?
-};
+const highPriority = () => {}; //animation events?
 
 const gameSteps = [
 	repeat(),
@@ -177,6 +186,8 @@ const gameSteps = [
 	takeWhile(tryRender)
 ];
 
-of(null, animationFrameScheduler)
-	.pipe(...gameSteps)
-	.subscribe();
+setTimeout(() => {
+	of(null, animationFrameScheduler)
+		.pipe(...gameSteps)
+		.subscribe();
+}, 50);
