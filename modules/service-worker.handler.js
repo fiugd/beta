@@ -6,8 +6,6 @@ const require = (url) => {
 	return exports;
 };
 
-target="${target}" 
-
 (async () => {
 	const swHandlers = self.handlers;
 
