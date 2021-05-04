@@ -1,6 +1,4 @@
 (() => {
-
-
 	const NO_PREVIEW = () => {
 		return `
 		<!DOCTYPE html>
@@ -113,7 +111,9 @@
 		convert(filename, contents) {
 			const ext = filename.split(".").pop();
 			const isJS = ['js', 'ts', 'mjs', 'jsx', 'tsx'].includes(ext);
-			const previewJS = isJS && contents.toLowerCase().includes('//show-preview');
+
+			// next line uses '+' so it doesn't trigger preview when editing this file
+			const previewJS = isJS && contents.toLowerCase().includes('//'+'show-preview');
 			if(isJS && !previewJS) return;
 
 			if (filename.includes(".htm")) {
