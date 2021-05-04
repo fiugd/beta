@@ -179,7 +179,27 @@
 		return JSON.stringify({ params, event, error: "not implemented" }, null, 2);
 	};
 
+	function addBase(html, href="../../", target="_blank"){
+		try {
+			const baseHref = html.includes('<base')
+				? ''
+				: `\n<base href="${href}" target="${target}">\n`;
+			if(!html.includes('<html>')){
+				html = '<html>\n' + html + '\n</html>'
+			}
+			html = html.replace('<html>', html.includes('<head>')
+				? '<html>'
+				: '<html>\n\n<head></head>\n'
+			);
+			html = html.replace('<head>', `<head>${baseHref}`)
+			return html;
+		} catch(e){
+			return html;
+		}
+	}
+
 	module.exports = {
+		addBase,
 		fetchJSON,
 		flattenTree,
 		flattenObject,

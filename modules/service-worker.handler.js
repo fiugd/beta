@@ -6,6 +6,8 @@ const require = (url) => {
 	return exports;
 };
 
+target="${target}" 
+
 (async () => {
 	const swHandlers = self.handlers;
 
@@ -85,7 +87,7 @@ const require = (url) => {
 		// }
 
 		if (event.request.url.includes("/::preview::/")) {
-			response = new Response(res, {
+			response = new Response(utils.addBase(res), {
 				headers: { "Content-Type": "text/html" },
 			});
 			return response;

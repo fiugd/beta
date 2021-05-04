@@ -153,6 +153,8 @@ const logJSON = (obj, replacer, space=2) => console.log(
 	JSON.stringify(obj, replacer, space)
 );
 const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
+const fetchTEXT = (url, opts) => fetch(url, opts).then(x => x.text());
+
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
 	if(stored) return stored;
@@ -171,6 +173,7 @@ export {
 	stringify,
 	logJSON,
 	fetchJSON,
+	fetchTEXT,
 	getStored,
 
 	//DEPRECATE exporting these?
