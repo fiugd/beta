@@ -1,5 +1,43 @@
 <!-- no-select -->
 
+
+why I open Chrome Dev Tools
+---------------------------
+- [ ] troubleshoot/fix fiug code itself
+- [ ] see console output of previewed file
+- [ ] color picking
+- [ ] dom troubleshooting
+
+
+why I open github.com
+---------------------
+- [ ] impossible to upload a binary through fiug.dev
+- [ ] impossible to delete a file and persist to github
+- [ ] impossible to delete a folder and persist to github
+
+
+why I open VS Code
+------------------
+- [X] (I don't actually keep VS Code open any more)
+- [X] service worker flow is not merged to main flow
+- [X] no search in project / folder
+
+- [ ] moving around a bunch of files doesn't work
+- [ ] awkward integration with file system
+- [ ] buggy file management
+
+- [X] doesn't recall scroll position
+- [X] doesn't recall code collapse
+
+- [X] can't dev/edit bartok in bartok
+- [X] cant CRUD/save a file with service worker
+- [X] highlight is weird (themeing and color issues)
+- [X] no search in file
+
+
+-----
+
+
 basic functionality in place
   - hosted node services
   - CRUD for services

@@ -1,22 +1,12 @@
 <!-- no-select -->
 
-why I keep vscode open
-----------------------
-
-- [X] (I don't actually keep VS Code open any more)
-- [X] service worker flow is not merged to main flow
-- [X] no search in project / folder
-
-- [ ] awkward integration with file system
-- [ ] buggy file management
-
-- [X] doesn't recall scroll position
-- [X] doesn't recall code collapse
-
-- [X] can't dev/edit bartok in bartok
-- [X] cant CRUD/save a file with service worker
-- [X] highlight is weird (themeing and color issues)
-- [X] no search in file
+personal information store
+--------------------------
+- I have information all over the place: bookmarks(favorites), likes, notes, email, recordings, gists
+- I'd like to have a way to search and organize all of that
+- as an extension, I consider a web search and the resulting threads a matter of personal information
+	- make it easy to search and follow threads and come back later to it
+	- see MARKETING.md/Mindmap | Knowledge Management Tool
 
 2021-02-26 todo
 ---------------
@@ -65,7 +55,7 @@ why I keep vscode open
 - [ ] automatic add vendor deps to service manifest (cached offline)
 - [ ] package storage (like package.json/node_modules)
 - [ ] all terminal commands working well (like unix)
-- [ ] git support integrated
+- [X] git support integrated
 - [ ] share project (zip/torrent)
 - [ ] one template/multiple file extensions supported
 - [ ] connect action bar things
