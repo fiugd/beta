@@ -126,7 +126,13 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		let newDoc = (allDocs[name] || {}).editor || CodeMirror.Doc('', mode || storedDoc.mode);
 		newDoc.name = name;
 		if(storedDoc){
-			newDoc = rehydrateDoc(newDoc, { ...storedDoc, ...{ text, mode, scrollTop, scrollLeft }});
+			newDoc = rehydrateDoc(newDoc, {
+				...storedDoc,
+				text: text || storedDoc.text,
+				mode: mode || storedDoc.mode,
+				scrollTop: scrollTop || storedDoc.scrollTop,
+				scrollLeft: scrollLeft || storedDoc.scrollLeft,
+			}});
 		} else {
 			newDoc = rehydrateDoc(newDoc, { text, mode, scrollTop, scrollLeft });
 		}
