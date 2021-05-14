@@ -743,11 +743,11 @@ const inlineEditor = (ChangeHandler) => ({
 				cursor++;
 			});
 
-		editorState.unfolded.forEach((line) =>
+		editorState.unfolded.forEach((line) => {
 			try {
 				editor.foldCode({ line, ch: 0 }, null, "unfold");
 			} catch(e){}
-		);
+		});
 	};
 
 	const editorOptions = {
