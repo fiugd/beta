@@ -777,6 +777,7 @@ const inlineEditor = (ChangeHandler) => ({
 	if(!useEditorLoadDoc){
 		Editor(editorOptions, editorCallback);
 		editorGutter = document.body.querySelector('.CodeMirror-gutters');
+		return;
 	}
 
 	const { text } = editorOptions;
