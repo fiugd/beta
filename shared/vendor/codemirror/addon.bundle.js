@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/14/2021, 2:49:35 PM
+5/14/2021, 3:01:25 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -171,12 +171,12 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
 		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
-		CodeMirror.on(this, "scroll", debouncedPersist());
+		CodeMirror.on(this, "scroll", debouncedPersist);
 
 		currentDoc.cleanup = () => {
 			CodeMirror.off(currentDoc.editor, "change", debouncedPersist);
 			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
-			CodeMirror.off(this, "scroll", debouncedPersist());
+			CodeMirror.off(this, "scroll", debouncedPersist);
 		};
 	});
 });

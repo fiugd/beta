@@ -159,12 +159,12 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
 		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
-		CodeMirror.on(this, "scroll", debouncedPersist());
+		CodeMirror.on(this, "scroll", debouncedPersist);
 
 		currentDoc.cleanup = () => {
 			CodeMirror.off(currentDoc.editor, "change", debouncedPersist);
 			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
-			CodeMirror.off(this, "scroll", debouncedPersist());
+			CodeMirror.off(this, "scroll", debouncedPersist);
 		};
 	});
 });
