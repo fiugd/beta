@@ -37,7 +37,9 @@
 	- create a beta environment for fiug (Feb 22)
 
 #### 2020-11-15 | 2021-01-29 - Angular+, Service Worker, misc exploring
-	- Editor Recall; was reverted (Nov 15)
+	- Editor Recall
+		- create: Nov 15 - https://github.com/crosshj/experiments/commit/3bdf280b3da21bde316dc56df7fc852fe5f94ffb
+		- disable: Nov 15 - https://github.com/crosshj/experiments/commit/007377b93d178e7ae023377c23b508eeacb35518 
 	- misc exploration (Nov 15 - Jan 27)
 		- old experiments: quadcopter, rangersAdvent, encrytWebWorker
 		- UI frameworks exploration: vue, angular, ember, svelte

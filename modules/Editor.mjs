@@ -661,6 +661,10 @@ const inlineEditor = (ChangeHandler) => ({
 		callback && callback();
 		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
 		window.Editor = editor;
+
+		['change', 'cursorActivity', 'scrollCursorIntoView']
+			.forEach(x => window.Editor.off(x));
+
 		editor.on("change", handlerBoundToDoc);
 		editor.on("cursorActivity", onCursorActivity);
 		editor.on("scrollCursorIntoView", onScrollCursor);
@@ -767,50 +771,48 @@ const inlineEditor = (ChangeHandler) => ({
 			minFoldSize: 3,
 		},
 	};
+	
+	const useEditorLoadDoc = window.Editor;
 
-	if (false && window.Editor) {
-		const { text } = editorOptions;
-		/*
-			This (loadDoc) is good in the sense that it reduces some dependency on shared/editor, but it is confusing and error-prone
-				- too many listeners get attached and not removed
-				- state is spread out and difficult to manage
-				- too many lines of code to comprehend; not straightforward
-				- too much is done in "ui"
-				- addon is too complicated
-
-			CLEAN THIS UP
-			0. name should include full path of file
-			1. all document attributes should save/restore to/from service request handler (unless they are default?)
-				- document text
-				- mode
-				- selections
-				- cursor position
-				- history
-				- scroll position
-				- folded vs unfolded
-				- indentation preference: tabs, spaces, size
-				- line wrap preference
-			2. addon should expose/attach/detach ONE event for all of these when they change (instead of three)
-				- this should be an event unique to addon so it's not confused with CodeMirror events
-			3. when file is restored from outside browser UI, service request handler should delete/overwrite some/all these?
-			4. editorCallback sucks; can it be removed?
-
-		*/
-		window.Editor.loadDoc({
-			name: filename,
-			text,
-			mode,
-		});
-		window.Editor.on("change", handlerBoundToDoc);
-		window.Editor.on("cursorActivity", onCursorActivity);
-		window.Editor.on("scrollCursorIntoView", onScrollCursor);
-		editorCallback(null, window.Editor);
-		return;
+	if(!useEditorLoadDoc){
+		Editor(editorOptions, editorCallback);
+		editorGutter = document.body.querySelector('.CodeMirror-gutters');
 	}
 
-	Editor(editorOptions, editorCallback);
+	const { text } = editorOptions;
+	/*
+		This (loadDoc) is good in the sense that it reduces some dependency on shared/editor, but it is confusing and error-prone
+			- [ ] too many listeners get attached and not removed
+			- [ ] state is spread out and difficult to manage
+			- [ ] too many lines of code to comprehend; not straightforward
+			- [ ] too much is done in "ui"
+			- [ ] addon is too complicated
 
-	editorGutter = document.body.querySelector('.CodeMirror-gutters');
+		CLEAN THIS UP
+		0. [ ] name should include full path of file
+		1. [ ] all document attributes should save/restore to/from service request handler (unless default?)
+			- document text
+			- mode
+			- selections
+			- cursor position
+			- history
+			- scroll position
+			- folded vs unfolded
+			- indentation preference: tabs, spaces, size
+			- line wrap preference
+		2. [ ] addon should expose/attach/detach ONE event for all of these when they change (instead of three)
+			- this should be an event unique to addon so it's not confused with CodeMirror events
+		3. [ ] when file is restored from outside browser UI, service request handler should delete/overwrite some/all these?
+		4. [ ] editorCallback sucks; can it be removed?
+	*/
+
+	window.Editor.loadDoc({
+		name: filename,
+		text,
+		mode,
+	});
+
+	editorCallback(null, window.Editor);
 };
 
 let nothingOpen;
