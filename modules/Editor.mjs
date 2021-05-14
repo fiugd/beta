@@ -775,16 +775,6 @@ const inlineEditor = (ChangeHandler) => ({
 			minFoldSize: 3,
 		},
 	};
-	
-	const useEditorLoadDoc = window.Editor;
-
-	if(!useEditorLoadDoc){
-		Editor(editorOptions, editorCallback);
-		editorGutter = document.body.querySelector('.CodeMirror-gutters');
-		return;
-	}
-
-	const { text } = editorOptions;
 	/*
 		This (loadDoc) is good in the sense that it reduces some dependency on shared/editor, but it is confusing and error-prone
 			- [ ] too many listeners get attached and not removed
@@ -810,14 +800,25 @@ const inlineEditor = (ChangeHandler) => ({
 		3. [ ] when file is restored from outside browser UI, service request handler should delete/overwrite some/all these?
 		4. [ ] editorCallback sucks; can it be removed?
 	*/
-
-	window.Editor._cleanup();
+	if(!window.Editor){
+		Editor({ ...editorOptions, text: '' }, (error, editor) => {
+			if (error) {
+				console.error(error);
+				callback && callback(error);
+				return;
+			}
+			window.Editor = editor;
+		});
+	}
+	const { text } = editorOptions;
+	window.Editor._cleanup && window.Editor._cleanup();
 	window.Editor.loadDoc({
 		name: filename,
 		text,
 		mode,
 	});
 	editorCallback(null, window.Editor);
+	editorGutter = document.body.querySelector('.CodeMirror-gutters');
 };
 
 let nothingOpen;
