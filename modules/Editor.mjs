@@ -659,15 +659,9 @@ const inlineEditor = (ChangeHandler) => ({
 			return;
 		}
 		callback && callback();
-		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
 		window.Editor = editor;
 
-		['change', 'cursorActivity', 'scrollCursorIntoView']
-			.forEach(x => window.Editor.off(x));
-
-		editor.on("change", handlerBoundToDoc);
-		editor.on("cursorActivity", onCursorActivity);
-		editor.on("scrollCursorIntoView", onScrollCursor);
+		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
 		editor.setOption("styleActiveLine", { nonEmpty: true });
 		editor.setOption("extraKeys", extraKeys);
 
@@ -683,12 +677,35 @@ const inlineEditor = (ChangeHandler) => ({
 			}
 		} catch (e) {}
 
-		editor.on("fold", (cm, from, to) => {
+		const foldHandler = (cm, from, to) => {
 			cm.addLineClass(from.line, "wrap", "folded");
-		});
-		editor.on("unfold", (cm, from, to) => {
+			editorState.unfolded = editorState.unfolded.filter(
+				(x) => x !== from.line
+			);
+			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
+		};
+		const unfoldHandler = (cm, from, to) => {
+			if (editorState.unfolded.includes(from.line)) {
+				return;
+			}
 			cm.removeLineClass(from.line, "wrap", "folded");
-		});
+			editorState.unfolded.push(from.line);
+			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
+		};
+
+		editor.on("fold", foldHandler);
+		editor.on("unfold", unfoldHandler);
+		editor.on("change", handlerBoundToDoc);
+		editor.on("cursorActivity", onCursorActivity);
+		editor.on("scrollCursorIntoView", onScrollCursor);
+
+		editor._cleanup = () => {
+			editor.off("change", handlerBoundToDoc);
+			editor.off("cursorActivity", onCursorActivity);
+			editor.off("scrollCursorIntoView", onScrollCursor);
+			editor.off("fold", foldHandler);
+			editor.off("unfold", unfoldHandler);
+		};
 
 		const MIN_DOC_FOLD_LENGTH = 150;
 		let cursor = 0;
@@ -726,26 +743,11 @@ const inlineEditor = (ChangeHandler) => ({
 				cursor++;
 			});
 
-		editorState.unfolded.forEach((line) => {
+		editorState.unfolded.forEach((line) =>
 			try {
 				editor.foldCode({ line, ch: 0 }, null, "unfold");
 			} catch(e){}
-		});
-
-		editor.on("fold", (cm, from, to) => {
-			editorState.unfolded = editorState.unfolded.filter(
-				(x) => x !== from.line
-			);
-			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
-		});
-
-		editor.on("unfold", (cm, from, to) => {
-			if (editorState.unfolded.includes(from.line)) {
-				return;
-			}
-			editorState.unfolded.push(from.line);
-			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
-		});
+		);
 	};
 
 	const editorOptions = {
@@ -809,12 +811,12 @@ const inlineEditor = (ChangeHandler) => ({
 		4. [ ] editorCallback sucks; can it be removed?
 	*/
 
+	window.Editor._cleanup();
 	window.Editor.loadDoc({
 		name: filename,
 		text,
 		mode,
 	});
-
 	editorCallback(null, window.Editor);
 };
 
