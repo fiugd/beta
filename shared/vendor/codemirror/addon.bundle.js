@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-4/10/2021, 8:04:58 PM
+5/14/2021, 2:49:35 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -131,7 +131,8 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	}){
 		if(currentDoc && name === currentDoc.name) return;
 
-		const initialized = !!allDocs[name];
+		if(currentDoc && currentDoc.cleanup) currentDoc.cleanup();
+
 		const storedDoc = await this.options.docStore.getItem(name);
 
 		let newDoc = (allDocs[name] || {}).editor || CodeMirror.Doc('', mode || storedDoc.mode);
@@ -143,13 +144,9 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		currentDoc = {
 			name,
-			editor: newDoc,
-			swapping: true
+			editor: newDoc
 		};
-		allDocs[name] = currentDoc;
-
 		this.swapDoc(newDoc);
-		if(initialized) return;
 
 		const thisOptions = this.options;
 		async function persistDoc(){
@@ -170,17 +167,17 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			this.scrollTo(0, scrollTop);
 		}
 
-		if(!storedDoc)  debouncedPersist();
+		if(!storedDoc) debouncedPersist();
+
 		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
 		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
-		CodeMirror.on(this, "scroll", () => {
-			if(name !== currentDoc.name) return;
-			if(currentDoc.swapping){
-				currentDoc.swapping = false;
-				return;
-			}
-			debouncedPersist();
-		});
+		CodeMirror.on(this, "scroll", debouncedPersist());
+
+		currentDoc.cleanup = () => {
+			CodeMirror.off(currentDoc.editor, "change", debouncedPersist);
+			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
+			CodeMirror.off(this, "scroll", debouncedPersist());
+		};
 	});
 });
 
