@@ -800,25 +800,30 @@ const inlineEditor = (ChangeHandler) => ({
 		3. [ ] when file is restored from outside browser UI, service request handler should delete/overwrite some/all these?
 		4. [ ] editorCallback sucks; can it be removed?
 	*/
-	if(!window.Editor){
-		Editor({ ...editorOptions, text: '' }, (error, editor) => {
-			if (error) {
-				console.error(error);
-				callback && callback(error);
-				return;
-			}
-			window.Editor = editor;
+	const loadDocument = () => {
+		const { text } = editorOptions;
+		window.Editor._cleanup && window.Editor._cleanup();
+		window.Editor.loadDoc({
+			name: filename,
+			text,
+			mode,
 		});
-	}
-	const { text } = editorOptions;
-	window.Editor._cleanup && window.Editor._cleanup();
-	window.Editor.loadDoc({
-		name: filename,
-		text,
-		mode,
+		editorCallback(null, window.Editor);
+		editorGutter = document.body.querySelector('.CodeMirror-gutters');
+	};
+
+	if(window.Editor) return loadDocument();
+
+	Editor({ ...editorOptions, text: '' }, (error, editor) => {
+		if (error) {
+			console.error(error);
+			callback && callback(error);
+			return;
+		}
+		window.Editor = editor;
+		loadDocument();
 	});
-	editorCallback(null, window.Editor);
-	editorGutter = document.body.querySelector('.CodeMirror-gutters');
+
 };
 
 let nothingOpen;
