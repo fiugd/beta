@@ -727,7 +727,9 @@ const inlineEditor = (ChangeHandler) => ({
 			});
 
 		editorState.unfolded.forEach((line) =>
-			editor.foldCode({ line, ch: 0 }, null, "unfold")
+			try {
+				editor.foldCode({ line, ch: 0 }, null, "unfold");
+			} catch(e){}
 		);
 
 		editor.on("fold", (cm, from, to) => {
