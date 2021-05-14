@@ -132,7 +132,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 				mode: mode || storedDoc.mode,
 				scrollTop: scrollTop || storedDoc.scrollTop,
 				scrollLeft: scrollLeft || storedDoc.scrollLeft,
-			}});
+			});
 		} else {
 			newDoc = rehydrateDoc(newDoc, { text, mode, scrollTop, scrollLeft });
 		}
