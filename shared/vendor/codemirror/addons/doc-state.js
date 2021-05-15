@@ -185,15 +185,15 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
 		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
 		CodeMirror.on(this, "scroll", debouncedPersist);
-		CodeMirror.on(currentDoc.editor, "fold", debouncedPersist);
-		CodeMirror.on(currentDoc.editor,"unfold", debouncedPersist);
+		CodeMirror.on(this, "fold", persistDoc);
+		CodeMirror.on(this, "unfold", persistDoc);
 
 		currentDoc.cleanup = () => {
 			CodeMirror.off(currentDoc.editor, "change", debouncedPersist);
 			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
 			CodeMirror.off(this, "scroll", debouncedPersist);
-			CodeMirror.off(currentDoc.editor, "fold", debouncedPersist);
-			CodeMirror.off(currentDoc.editor, "unfold", debouncedPersist);
+			CodeMirror.off(this, "fold", persistDoc);
+			CodeMirror.off(this, "unfold", persistDoc);
 		};
 	});
 });
