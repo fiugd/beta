@@ -785,14 +785,14 @@ const inlineEditor = (ChangeHandler) => ({
 			- [ ] addon is too complicated
 
 		CLEAN THIS UP
-		0. [ ] name should include full path of file
+		0. [X] name should include full path of file
 		1. [ ] all document attributes should save/restore to/from service request handler (unless default?)
-			- document text
-			- mode
-			- selections
-			- cursor position
-			- history
-			- scroll position
+			- X - document text
+			- X - mode
+			- X - selections
+			- X - cursor position
+			- X - history
+			- X - scroll position
 			- folded vs unfolded
 			- indentation preference: tabs, spaces, size
 			- line wrap preference
@@ -1288,10 +1288,12 @@ function attachGutterHelper (){
 		gutter = getGutter();
 		if(!gutter) return removeGutterHovered();
 
+		const { className="", classList } = e.target;
 		inGutter = gutter.contains(e.target) ||
-			e.target.classList.contains('CodeMirror-gutters') ||
-			e.target.classList.contains('gutter-elt') ||
-			e.target.classList.contains('guttermarker');
+			classList.contains('CodeMirror-gutters') ||
+			classList.contains('gutter-elt') ||
+			classList.contains('guttermarker') ||
+			className.includes('CodeMirror-guttermarker');
 
 		if(inGutter && !gutterNoted) return addGutterHovered();
 		if(!inGutter && gutterNoted) return removeGutterHovered();
