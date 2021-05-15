@@ -77,7 +77,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		try {
 			other.folded = cmDoc.getAllMarks()
 				.filter(m => m.__isFold)
-				.map(m => m.lines[0].lineNo());
+				.map(m => m.lines[0].lineNo() + 1);
 		} catch(e){}
 		return other;
 	}
@@ -192,7 +192,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
 			CodeMirror.off(this, "scroll", debouncedPersist);
 			CodeMirror.off(currentDoc.editor, "fold", debouncedPersist);
-			CodeMirror.off(currentDoc.editor,"unfold", debouncedPersist);
+			CodeMirror.off(currentDoc.editor, "unfold", debouncedPersist);
 		};
 	});
 });
