@@ -108,10 +108,6 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		if(stored.sel){
 			newDoc.setSelections(stored.sel.ranges);
 		}
-		if(stored.folded && newDoc.foldCode){
-			const foldDocLine = (line) => foldLine(newDoc, line);
-			stored.folded.forEach(foldDocLine);
-		}
 		return newDoc;
 	}
 
@@ -158,6 +154,11 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			editor: newDoc
 		};
 		this.swapDoc(newDoc);
+		
+		if(stored.folded && this.foldCode){
+			const foldDocLine = (line) => foldLine(this, line);
+			stored.folded.forEach(foldDocLine);
+		}
 
 		const thisOptions = this.options;
 		async function persistDoc(){
