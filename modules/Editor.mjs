@@ -820,7 +820,9 @@ const inlineEditor = (ChangeHandler) => ({
 			mode,
 		});
 		editorCallback(null, window.Editor);
-		cmDom.style.opacity = 1;
+		setTimeout(() => {
+			cmDom.style.opacity = 1;
+		}, 300);
 	};
 
 	if(window.Editor) return loadDocument();
