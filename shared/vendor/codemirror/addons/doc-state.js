@@ -155,9 +155,9 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		};
 		this.swapDoc(newDoc);
 		
-		if(stored.folded && this.foldCode){
+		if(newDoc.folded && this.foldCode){
 			const foldDocLine = (line) => foldLine(this, line);
-			stored.folded.forEach(foldDocLine);
+			newDoc.folded.forEach(foldDocLine);
 		}
 
 		const thisOptions = this.options;
