@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/15/2021, 5:25:01 PM
+5/15/2021, 5:39:16 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -120,10 +120,6 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		if(stored.sel){
 			newDoc.setSelections(stored.sel.ranges);
 		}
-		if(stored.folded && newDoc.foldCode){
-			const foldDocLine = (line) => foldLine(newDoc, line);
-			stored.folded.forEach(foldDocLine);
-		}
 		return newDoc;
 	}
 
@@ -170,6 +166,11 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			editor: newDoc
 		};
 		this.swapDoc(newDoc);
+		
+		if(stored.folded && this.foldCode){
+			const foldDocLine = (line) => foldLine(this, line);
+			stored.folded.forEach(foldDocLine);
+		}
 
 		const thisOptions = this.options;
 		async function persistDoc(){
