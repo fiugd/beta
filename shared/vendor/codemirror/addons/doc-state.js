@@ -118,6 +118,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	CodeMirror.defineExtension('loadDoc', async function ({
 		name, text, mode, scrollTop, scrollLeft, line, ch
 	}){
+		if(!name) return;
 		if(currentDoc && name === currentDoc.name) return;
 
 		if(currentDoc && currentDoc.cleanup) currentDoc.cleanup();
@@ -145,6 +146,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 		const thisOptions = this.options;
 		async function persistDoc(){
+			if(!name) return;
 			await thisOptions.docStore.setItem(
 				name,
 				prepareStorageDoc(currentDoc.editor)
