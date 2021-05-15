@@ -74,7 +74,18 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		other.scrollLeft = cmDoc.scrollLeft;
 		other.mode = cmDoc.mode.name;
 		other.history = cmDoc.getHistory();
+		try {
+			other.folded = cmDoc.getAllMarks()
+				.filter(m => m.__isFold)
+				.map(m => m.lines[0].lineNo());
+		} catch(e){}
 		return other;
+	}
+	
+	function foldLine(doc, line){
+		try {
+			doc.foldCode({ line, ch: 0 }, null, "fold");
+		} catch(e){}
 	}
 
 	function rehydrateDoc(newDoc, stored){
@@ -96,6 +107,10 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		if(stored.sel){
 			newDoc.setSelections(stored.sel.ranges);
+		}
+		if(stored.folded && newDoc.foldCode){
+			const foldDocLine = (line) => foldLine(newDoc, line);
+			stored.folded.forEach(foldDocLine);
 		}
 		return newDoc;
 	}
