@@ -77,7 +77,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		try {
 			other.folded = cmDoc.getAllMarks()
 				.filter(m => m.__isFold)
-				.map(m => m.lines[0].lineNo() + 1);
+				.map(m => m.lines[0].lineNo());
 		} catch(e){}
 		return other;
 	}
