@@ -15,6 +15,7 @@ import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import "/shared/vendor/localforage.min.js";
 
 let editorGutter;
+let cmDom;
 
 // call editor tabs once early so event handlers are attached
 EditorTabs()
@@ -95,6 +96,11 @@ const Container = () => {
 	}
 	const containerDiv = document.createElement("div");
 	containerDiv.innerHTML = `
+		<style>
+			.CodeMirror {
+				transition: opacity .3s;
+			}
+		</style>
 		<div class="editor-space hide-on-med-and-down"></div>
 		<div class="contain"></div>
 	`;
@@ -800,7 +806,12 @@ const inlineEditor = (ChangeHandler) => ({
 		3. [ ] when file is restored from outside browser UI, service request handler should delete/overwrite some/all these?
 		4. [ ] editorCallback sucks; can it be removed?
 	*/
+
 	const loadDocument = () => {
+		cmDom = cmDom || document.querySelector('.CodeMirror');
+		editorGutter = editorGutter || document.body.querySelector('.CodeMirror-gutters');
+
+		cmDom.style.opacity = 0;
 		const { text } = editorOptions;
 		window.Editor._cleanup && window.Editor._cleanup();
 		window.Editor.loadDoc({
@@ -809,7 +820,7 @@ const inlineEditor = (ChangeHandler) => ({
 			mode,
 		});
 		editorCallback(null, window.Editor);
-		editorGutter = document.body.querySelector('.CodeMirror-gutters');
+		cmDom.style.opacity = 1;
 	};
 
 	if(window.Editor) return loadDocument();
