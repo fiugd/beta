@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/14/2021, 3:52:35 PM
+5/15/2021, 8:49:45 AM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -85,6 +85,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		other.scrollTop = cmDoc.scrollTop;
 		other.scrollLeft = cmDoc.scrollLeft;
 		other.mode = cmDoc.mode.name;
+		other.history = cmDoc.getHistory();
 		return other;
 	}
 
@@ -98,8 +99,8 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		if(stored.scrollLeft){
 			newDoc.scrollLeft = stored.scrollLeft;
 		}
+		newDoc.clearHistory();
 		if(stored.history){
-			newDoc.clearHistory()
 			newDoc.setHistory(stored.history);
 		}
 		if(stored.cursor){
