@@ -96,11 +96,6 @@ const Container = () => {
 	}
 	const containerDiv = document.createElement("div");
 	containerDiv.innerHTML = `
-		<style>
-			.CodeMirror {
-				transition: opacity .3s;
-			}
-		</style>
 		<div class="editor-space hide-on-med-and-down"></div>
 		<div class="contain"></div>
 	`;
@@ -820,14 +815,15 @@ const inlineEditor = (ChangeHandler) => ({
 			mode,
 		});
 		editorCallback(null, window.Editor);
+		editor.refresh();
 		setTimeout(() => {
 			cmDom.style.opacity = 1;
-		}, 300);
+		}, 200);
 	};
 
 	if(window.Editor) return loadDocument();
 
-	Editor({ ...editorOptions, text: '' }, (error, editor) => {
+	Editor({ ...editorOptions, text: '\n\n\n' }, (error, editor) => {
 		if (error) {
 			console.error(error);
 			callback && callback(error);
