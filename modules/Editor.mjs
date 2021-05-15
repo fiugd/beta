@@ -710,7 +710,7 @@ const inlineEditor = (ChangeHandler) => ({
 
 		const MIN_DOC_FOLD_LENGTH = 150;
 		let cursor = 0;
-		editor.lastLine() > MIN_DOC_FOLD_LENGTH &&
+		false && editor.lastLine() > MIN_DOC_FOLD_LENGTH &&
 			editor.eachLine(editor.firstLine(), editor.lastLine(), function (line) {
 				// todo: store these exceptions in user config?
 				const shouldNotFold = [
