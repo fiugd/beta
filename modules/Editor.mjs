@@ -818,7 +818,7 @@ const inlineEditor = (ChangeHandler) => ({
 		window.Editor.refresh();
 		setTimeout(() => {
 			cmDom.style.opacity = 1;
-		}, 200);
+		}, 100);
 	};
 
 	if(window.Editor) return loadDocument();
