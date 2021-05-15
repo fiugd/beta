@@ -815,7 +815,7 @@ const inlineEditor = (ChangeHandler) => ({
 			mode,
 		});
 		editorCallback(null, window.Editor);
-		editor.refresh();
+		window.Editor.refresh();
 		setTimeout(() => {
 			cmDom.style.opacity = 1;
 		}, 200);
