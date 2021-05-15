@@ -793,7 +793,7 @@ const inlineEditor = (ChangeHandler) => ({
 			- X - cursor position
 			- X - history
 			- X - scroll position
-			- folded vs unfolded
+			- X - folded vs unfolded
 			- indentation preference: tabs, spaces, size
 			- line wrap preference
 		2. [ ] addon should expose/attach/detach ONE event for all of these when they change (instead of three)
