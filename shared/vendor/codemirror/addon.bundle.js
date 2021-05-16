@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/16/2021, 7:22:36 PM
+5/16/2021, 7:32:38 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -139,9 +139,9 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		};
 
 	const selectLine = (doc, line, ch) => {
-		const pos = { line, ch };
-		doc.setCursor(ch ? pos : line);
-		const t = doc.charCoords({line, ch}, "local").top;
+		const newLine = ch ? { line, ch } : line;
+		doc.setCursor(newLine);
+		const t = doc.charCoords(newLine, "local").top;
 		doc.scrollTo(0, t - SCROLL_MARGIN);
 	}
 	
@@ -150,7 +150,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	}){
 		if(!name) return;
 		if(currentDoc && name === currentDoc.name){
-			if(line) selectLine(this, line, ch);
+			if(line) selectLine(currentDoc.editor, line, ch);
 			return;
 		}
 
@@ -192,10 +192,10 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		const debouncedPersist = debounce(persistDoc, 1000, false);
 
-		if(line) selectLine(this, line, ch);
 		if(scrollTop){
 			this.scrollTo(0, scrollTop);
 		}
+		if(line) selectLine(currentDoc.editor, line, ch);
 
 		if(!storedDoc) debouncedPersist();
 
