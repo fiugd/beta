@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/16/2021, 7:44:40 PM
+5/16/2021, 7:54:41 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -140,6 +140,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 	const selectLine = (cm, doc, line, ch) => {
 		const newLine = ch ? { line, ch } : line;
+		doc.focus();
 		doc.setCursor(newLine);
 		const t = doc.cm.charCoords(newLine, "local").top;
 		cm.scrollTo(0, t - SCROLL_MARGIN);
