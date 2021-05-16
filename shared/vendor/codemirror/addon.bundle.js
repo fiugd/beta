@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/15/2021, 6:11:57 PM
+5/16/2021, 7:22:36 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -138,11 +138,21 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			};
 		};
 
+	const selectLine = (doc, line, ch) => {
+		const pos = { line, ch };
+		doc.setCursor(ch ? pos : line);
+		const t = doc.charCoords({line, ch}, "local").top;
+		doc.scrollTo(0, t - SCROLL_MARGIN);
+	}
+	
 	CodeMirror.defineExtension('loadDoc', async function ({
 		name, text, mode, scrollTop, scrollLeft, line, ch
 	}){
 		if(!name) return;
-		if(currentDoc && name === currentDoc.name) return;
+		if(currentDoc && name === currentDoc.name){
+			if(line) selectLine(this, line, ch);
+			return;
+		}
 
 		if(currentDoc && currentDoc.cleanup) currentDoc.cleanup();
 
@@ -182,12 +192,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		const debouncedPersist = debounce(persistDoc, 1000, false);
 
-		if(line) {
-			const pos = { line, ch };
-			this.setCursor(pos);
-			const t = this.charCoords({line, ch}, "local").top;
-			this.scrollTo(0, t - SCROLL_MARGIN);
-		}
+		if(line) selectLine(this, line, ch);
 		if(scrollTop){
 			this.scrollTo(0, scrollTop);
 		}
@@ -259,14 +264,14 @@ this file is a bundle of many search addons
     var dialog;
     dialog = wrap.appendChild(document.createElement("div"));
     if (bottom)
-dialog.className = "CodeMirror-dialog CodeMirror-dialog-bottom";
+      dialog.className = "CodeMirror-dialog CodeMirror-dialog-bottom";
     else
-dialog.className = "CodeMirror-dialog CodeMirror-dialog-top";
+      dialog.className = "CodeMirror-dialog CodeMirror-dialog-top";
 
     if (typeof template == "string") {
-dialog.innerHTML = template;
+      dialog.innerHTML = template;
     } else { // Assuming it's a detached DOM element.
-dialog.appendChild(template);
+      dialog.appendChild(template);
     }
     CodeMirror.addClass(wrap, 'dialog-opened');
     return dialog;
@@ -274,32 +279,32 @@ dialog.appendChild(template);
 
   function closeNotification(cm, newVal) {
     if (cm.state.currentNotificationClose)
-cm.state.currentNotificationClose();
+      cm.state.currentNotificationClose();
     cm.state.currentNotificationClose = newVal;
   }
 
   function searchDetails(cm) {
     try {
-const current = {
-  from: cm.state.search.posFrom,
-  to: cm.state.search.posTo
-};
-const matches = cm.state.search.annotate.matches
-  .sort((a, b) => a.from.line - b.from.line)
-  .map(x => `${x.from.line}-${x.from.ch}-${x.to.line}-${x.to.ch}`);
-let currentResult;
-const currentMatch = `${current.from.line}-${current.from.ch}-${current.to.line}-${current.to.ch}`;
-for (let i = 1, len = matches.length; i <= len; i++) {
-  if (matches[i-1] === currentMatch) {
-    currentResult = i;
-  }
-}
-return {
-  current: currentResult,
-  total: matches.length,
-  currentResult, matches };
+      const current = {
+        from: cm.state.search.posFrom,
+        to: cm.state.search.posTo
+      };
+      const matches = cm.state.search.annotate.matches
+        .sort((a, b) => a.from.line - b.from.line)
+        .map(x => `${x.from.line}-${x.from.ch}-${x.to.line}-${x.to.ch}`);
+      let currentResult;
+      const currentMatch = `${current.from.line}-${current.from.ch}-${current.to.line}-${current.to.ch}`;
+      for (let i = 1, len = matches.length; i <= len; i++) {
+        if (matches[i-1] === currentMatch) {
+          currentResult = i;
+        }
+      }
+      return {
+        current: currentResult,
+        total: matches.length,
+        currentResult, matches };
     } catch(e) {
-return {};
+      return {};
     }
   }
 
@@ -308,7 +313,7 @@ return {};
     options.closeOnEnter = false;
 
     const close = (newVal) => {
-document.getElementById('file-search').style.visibility = "";
+      document.getElementById('file-search').style.visibility = "";
     };
 
     document.getElementById('file-search').style.visibility = "visible";
@@ -322,19 +327,19 @@ document.getElementById('file-search').style.visibility = "";
     const searchUp = document.querySelector('.search-up');
     const searchDown = document.querySelector('.search-down');
     searchClose.onclick = (e) => {
-searchInput.blur();
-close();
-cm.focus();
+      searchInput.blur();
+      close();
+      cm.focus();
     };
     searchUp.onclick = () => {
-CodeMirror.commands.findPersistentPrev(cm);
-const { current } = searchDetails(cm);
-searchCurrent.innerText = current;
+      CodeMirror.commands.findPersistentPrev(cm);
+      const { current } = searchDetails(cm);
+      searchCurrent.innerText = current;
     }
     searchDown.onclick = () => {
-CodeMirror.commands.findPersistentNext(cm);
-const { current } = searchDetails(cm);
-searchCurrent.innerText = current;
+      CodeMirror.commands.findPersistentNext(cm);
+      const { current } = searchDetails(cm);
+      searchCurrent.innerText = current;
     }
 
     searchInput.focus();
@@ -342,55 +347,55 @@ searchCurrent.innerText = current;
 
     let currentSearchTerm = '';
     if(searchInput.value){
-currentSearchTerm = searchInput.value;
-callback(searchInput.value);
-const { current, total } = searchDetails(cm);
-if(total && total > 0){
-  searchCount.classList.remove('hidden');
-  searchNoResults.classList.add('hidden');
-} else {
-  searchCount.classList.add('hidden');
-  searchNoResults.classList.remove('hidden');
-}
-searchTotal.innerText = total;
-searchCurrent.innerText = current;
+      currentSearchTerm = searchInput.value;
+      callback(searchInput.value);
+      const { current, total } = searchDetails(cm);
+      if(total && total > 0){
+        searchCount.classList.remove('hidden');
+        searchNoResults.classList.add('hidden');
+      } else {
+        searchCount.classList.add('hidden');
+        searchNoResults.classList.remove('hidden');
+      }
+      searchTotal.innerText = total;
+      searchCurrent.innerText = current;
     }
 
     CodeMirror.on(searchInput, "keydown", function(e) {
-if (options && options.onKeyDown && options.onKeyDown(e, searchInput.value, close)) {
-  return;
-}
-if (e.keyCode == 27 || (options.closeOnEnter !== false && e.keyCode == 13)) {
-  callback('', e);
-  searchInput.blur();
-  CodeMirror.e_stop(e);
-  searchCount.classList.add('hidden');
-  searchNoResults.classList.remove('hidden');
-  CodeMirror.commands.clearSearch(cm);
-  close();
-  cm.focus();
-}
-if (e.keyCode == 13) {
-  if(currentSearchTerm === searchInput.value){
-    CodeMirror.commands.findPersistentNext(cm);
-    var { current } = searchDetails(cm);
-    searchCurrent.innerText = current;
-  } else {
-    CodeMirror.commands.clearSearch(cm);
-    currentSearchTerm = searchInput.value;
-    callback(searchInput.value, e);
-    var { current, total } = searchDetails(cm);
-    if(total && total > 0){
-searchCount.classList.remove('hidden');
-searchNoResults.classList.add('hidden');
-    } else {
-searchCount.classList.add('hidden');
-searchNoResults.classList.remove('hidden');
-    }
-    searchTotal.innerText = total;
-    searchCurrent.innerText = current;
-  }
-}
+      if (options && options.onKeyDown && options.onKeyDown(e, searchInput.value, close)) {
+        return;
+      }
+      if (e.keyCode == 27 || (options.closeOnEnter !== false && e.keyCode == 13)) {
+        callback('', e);
+        searchInput.blur();
+        CodeMirror.e_stop(e);
+        searchCount.classList.add('hidden');
+        searchNoResults.classList.remove('hidden');
+        CodeMirror.commands.clearSearch(cm);
+        close();
+        cm.focus();
+      }
+      if (e.keyCode == 13) {
+        if(currentSearchTerm === searchInput.value){
+          CodeMirror.commands.findPersistentNext(cm);
+          var { current } = searchDetails(cm);
+          searchCurrent.innerText = current;
+        } else {
+          CodeMirror.commands.clearSearch(cm);
+          currentSearchTerm = searchInput.value;
+          callback(searchInput.value, e);
+          var { current, total } = searchDetails(cm);
+          if(total && total > 0){
+            searchCount.classList.remove('hidden');
+            searchNoResults.classList.add('hidden');
+          } else {
+            searchCount.classList.add('hidden');
+            searchNoResults.classList.remove('hidden');
+          }
+          searchTotal.innerText = total;
+          searchCurrent.innerText = current;
+        }
+      }
     });
 
     return close;
@@ -417,42 +422,42 @@ searchNoResults.classList.remove('hidden');
 
     var inp = dialog.getElementsByTagName("input")[0], button;
     if (inp) {
-inp.focus();
+      inp.focus();
 
-if (options.value) {
-  inp.value = options.value;
-  if (options.selectValueOnOpen !== false) {
-    inp.select();
-  }
-}
+      if (options.value) {
+        inp.value = options.value;
+        if (options.selectValueOnOpen !== false) {
+          inp.select();
+        }
+      }
 
-if (options.onInput)
-  CodeMirror.on(inp, "input", function(e) { options.onInput(e, inp.value, close);});
-if (options.onKeyUp)
-  CodeMirror.on(inp, "keyup", function(e) {options.onKeyUp(e, inp.value, close);});
+      if (options.onInput)
+        CodeMirror.on(inp, "input", function(e) { options.onInput(e, inp.value, close);});
+      if (options.onKeyUp)
+        CodeMirror.on(inp, "keyup", function(e) {options.onKeyUp(e, inp.value, close);});
 
-CodeMirror.on(inp, "keydown", function(e) {
-  if (options && options.onKeyDown && options.onKeyDown(e, inp.value, close)) { return; }
-  if (e.keyCode == 27 || (options.closeOnEnter !== false && e.keyCode == 13)) {
-    inp.blur();
-    CodeMirror.e_stop(e);
-    close();
-  }
-  if (e.keyCode == 13) callback(inp.value, e);
-});
+      CodeMirror.on(inp, "keydown", function(e) {
+        if (options && options.onKeyDown && options.onKeyDown(e, inp.value, close)) { return; }
+        if (e.keyCode == 27 || (options.closeOnEnter !== false && e.keyCode == 13)) {
+          inp.blur();
+          CodeMirror.e_stop(e);
+          close();
+        }
+        if (e.keyCode == 13) callback(inp.value, e);
+      });
 
-if (options.closeOnBlur !== false) CodeMirror.on(dialog, "focusout", function (evt) {
-  if (evt.relatedTarget !== null) close();
-});
+      if (options.closeOnBlur !== false) CodeMirror.on(dialog, "focusout", function (evt) {
+        if (evt.relatedTarget !== null) close();
+      });
     } else if (button = dialog.getElementsByTagName("button")[0]) {
-CodeMirror.on(button, "click", function() {
-  close();
-  me.focus();
-});
+      CodeMirror.on(button, "click", function() {
+        close();
+        me.focus();
+      });
 
-if (options.closeOnBlur !== false) CodeMirror.on(button, "blur", close);
+      if (options.closeOnBlur !== false) CodeMirror.on(button, "blur", close);
 
-button.focus();
+      button.focus();
     }
     return close;
   });
@@ -463,27 +468,27 @@ button.focus();
     var buttons = dialog.getElementsByTagName("button");
     var closed = false, me = this, blurring = 1;
     function close() {
-if (closed) return;
-closed = true;
-CodeMirror.rmClass(dialog.parentNode, 'dialog-opened');
-dialog.parentNode.removeChild(dialog);
-me.focus();
+      if (closed) return;
+      closed = true;
+      CodeMirror.rmClass(dialog.parentNode, 'dialog-opened');
+      dialog.parentNode.removeChild(dialog);
+      me.focus();
     }
     buttons[0].focus();
     for (var i = 0; i < buttons.length; ++i) {
-var b = buttons[i];
-(function(callback) {
-  CodeMirror.on(b, "click", function(e) {
-    CodeMirror.e_preventDefault(e);
-    close();
-    if (callback) callback(me);
-  });
-})(callbacks[i]);
-CodeMirror.on(b, "blur", function() {
-  --blurring;
-  setTimeout(function() { if (blurring <= 0) close(); }, 200);
-});
-CodeMirror.on(b, "focus", function() { ++blurring; });
+      var b = buttons[i];
+      (function(callback) {
+        CodeMirror.on(b, "click", function(e) {
+          CodeMirror.e_preventDefault(e);
+          close();
+          if (callback) callback(me);
+        });
+      })(callbacks[i]);
+      CodeMirror.on(b, "blur", function() {
+        --blurring;
+        setTimeout(function() { if (blurring <= 0) close(); }, 200);
+      });
+      CodeMirror.on(b, "focus", function() { ++blurring; });
     }
   });
 
@@ -502,20 +507,20 @@ CodeMirror.on(b, "focus", function() { ++blurring; });
     var duration = options && typeof options.duration !== "undefined" ? options.duration : 5000;
 
     function close() {
-if (closed) return;
-closed = true;
-clearTimeout(doneTimer);
-CodeMirror.rmClass(dialog.parentNode, 'dialog-opened');
-dialog.parentNode.removeChild(dialog);
+      if (closed) return;
+      closed = true;
+      clearTimeout(doneTimer);
+      CodeMirror.rmClass(dialog.parentNode, 'dialog-opened');
+      dialog.parentNode.removeChild(dialog);
     }
 
     CodeMirror.on(dialog, 'click', function(e) {
-CodeMirror.e_preventDefault(e);
-close();
+      CodeMirror.e_preventDefault(e);
+      close();
     });
 
     if (duration)
-doneTimer = setTimeout(close, duration);
+      doneTimer = setTimeout(close, duration);
 
     return close;
   });
@@ -542,14 +547,14 @@ doneTimer = setTimeout(close, duration);
   function regexpFlags(regexp) {
     var flags = regexp.flags
     return flags != null ? flags : (regexp.ignoreCase ? "i" : "")
-+ (regexp.global ? "g" : "")
-+ (regexp.multiline ? "m" : "")
+      + (regexp.global ? "g" : "")
+      + (regexp.multiline ? "m" : "")
   }
 
   function ensureFlags(regexp, flags) {
     var current = regexpFlags(regexp), target = current
     for (var i = 0; i < flags.length; i++) if (target.indexOf(flags.charAt(i)) == -1)
-target += flags.charAt(i)
+      target += flags.charAt(i)
     return current == target ? regexp : new RegExp(regexp.source, target)
   }
 
@@ -560,12 +565,12 @@ target += flags.charAt(i)
   function searchRegexpForward(doc, regexp, start) {
     regexp = ensureFlags(regexp, "g")
     for (var line = start.line, ch = start.ch, last = doc.lastLine(); line <= last; line++, ch = 0) {
-regexp.lastIndex = ch
-var string = doc.getLine(line), match = regexp.exec(string)
-if (match)
-  return {from: Pos(line, match.index),
-    to: Pos(line, match.index + match[0].length),
-    match: match}
+      regexp.lastIndex = ch
+      var string = doc.getLine(line), match = regexp.exec(string)
+      if (match)
+        return {from: Pos(line, match.index),
+                to: Pos(line, match.index + match[0].length),
+                match: match}
     }
   }
 
@@ -575,41 +580,41 @@ if (match)
     regexp = ensureFlags(regexp, "gm")
     var string, chunk = 1
     for (var line = start.line, last = doc.lastLine(); line <= last;) {
-// This grows the search buffer in exponentially-sized chunks
-// between matches, so that nearby matches are fast and don't
-// require concatenating the whole document (in case we're
-// searching for something that has tons of matches), but at the
-// same time, the amount of retries is limited.
-for (var i = 0; i < chunk; i++) {
-  if (line > last) break
-  var curLine = doc.getLine(line++)
-  string = string == null ? curLine : string + "\n" + curLine
-}
-chunk = chunk * 2
-regexp.lastIndex = start.ch
-var match = regexp.exec(string)
-if (match) {
-  var before = string.slice(0, match.index).split("\n"), inside = match[0].split("\n")
-  var startLine = start.line + before.length - 1, startCh = before[before.length - 1].length
-  return {from: Pos(startLine, startCh),
-    to: Pos(startLine + inside.length - 1,
-inside.length == 1 ? startCh + inside[0].length : inside[inside.length - 1].length),
-    match: match}
-}
+      // This grows the search buffer in exponentially-sized chunks
+      // between matches, so that nearby matches are fast and don't
+      // require concatenating the whole document (in case we're
+      // searching for something that has tons of matches), but at the
+      // same time, the amount of retries is limited.
+      for (var i = 0; i < chunk; i++) {
+        if (line > last) break
+        var curLine = doc.getLine(line++)
+        string = string == null ? curLine : string + "\n" + curLine
+      }
+      chunk = chunk * 2
+      regexp.lastIndex = start.ch
+      var match = regexp.exec(string)
+      if (match) {
+        var before = string.slice(0, match.index).split("\n"), inside = match[0].split("\n")
+        var startLine = start.line + before.length - 1, startCh = before[before.length - 1].length
+        return {from: Pos(startLine, startCh),
+                to: Pos(startLine + inside.length - 1,
+                        inside.length == 1 ? startCh + inside[0].length : inside[inside.length - 1].length),
+                match: match}
+      }
     }
   }
 
   function lastMatchIn(string, regexp, endMargin) {
     var match, from = 0
     while (from <= string.length) {
-regexp.lastIndex = from
-var newMatch = regexp.exec(string)
-if (!newMatch) break
-var end = newMatch.index + newMatch[0].length
-if (end > string.length - endMargin) break
-if (!match || end > match.index + match[0].length)
-  match = newMatch
-from = newMatch.index + 1
+      regexp.lastIndex = from
+      var newMatch = regexp.exec(string)
+      if (!newMatch) break
+      var end = newMatch.index + newMatch[0].length
+      if (end > string.length - endMargin) break
+      if (!match || end > match.index + match[0].length)
+        match = newMatch
+      from = newMatch.index + 1
     }
     return match
   }
@@ -617,12 +622,12 @@ from = newMatch.index + 1
   function searchRegexpBackward(doc, regexp, start) {
     regexp = ensureFlags(regexp, "g")
     for (var line = start.line, ch = start.ch, first = doc.firstLine(); line >= first; line--, ch = -1) {
-var string = doc.getLine(line)
-var match = lastMatchIn(string, regexp, ch < 0 ? 0 : string.length - ch)
-if (match)
-  return {from: Pos(line, match.index),
-    to: Pos(line, match.index + match[0].length),
-    match: match}
+      var string = doc.getLine(line)
+      var match = lastMatchIn(string, regexp, ch < 0 ? 0 : string.length - ch)
+      if (match)
+        return {from: Pos(line, match.index),
+                to: Pos(line, match.index + match[0].length),
+                match: match}
     }
   }
 
@@ -631,21 +636,21 @@ if (match)
     regexp = ensureFlags(regexp, "gm")
     var string, chunkSize = 1, endMargin = doc.getLine(start.line).length - start.ch
     for (var line = start.line, first = doc.firstLine(); line >= first;) {
-for (var i = 0; i < chunkSize && line >= first; i++) {
-  var curLine = doc.getLine(line--)
-  string = string == null ? curLine : curLine + "\n" + string
-}
-chunkSize *= 2
+      for (var i = 0; i < chunkSize && line >= first; i++) {
+        var curLine = doc.getLine(line--)
+        string = string == null ? curLine : curLine + "\n" + string
+      }
+      chunkSize *= 2
 
-var match = lastMatchIn(string, regexp, endMargin)
-if (match) {
-  var before = string.slice(0, match.index).split("\n"), inside = match[0].split("\n")
-  var startLine = line + before.length, startCh = before[before.length - 1].length
-  return {from: Pos(startLine, startCh),
-    to: Pos(startLine + inside.length - 1,
-inside.length == 1 ? startCh + inside[0].length : inside[inside.length - 1].length),
-    match: match}
-}
+      var match = lastMatchIn(string, regexp, endMargin)
+      if (match) {
+        var before = string.slice(0, match.index).split("\n"), inside = match[0].split("\n")
+        var startLine = line + before.length, startCh = before[before.length - 1].length
+        return {from: Pos(startLine, startCh),
+                to: Pos(startLine + inside.length - 1,
+                        inside.length == 1 ? startCh + inside[0].length : inside[inside.length - 1].length),
+                match: match}
+      }
     }
   }
 
@@ -663,12 +668,12 @@ inside.length == 1 ? startCh + inside[0].length : inside[inside.length - 1].leng
   function adjustPos(orig, folded, pos, foldFunc) {
     if (orig.length == folded.length) return pos
     for (var min = 0, max = pos + Math.max(0, orig.length - folded.length);;) {
-if (min == max) return min
-var mid = (min + max) >> 1
-var len = foldFunc(orig.slice(0, mid)).length
-if (len == pos) return mid
-else if (len > pos) max = mid
-else min = mid + 1
+      if (min == max) return min
+      var mid = (min + max) >> 1
+      var len = foldFunc(orig.slice(0, mid)).length
+      if (len == pos) return mid
+      else if (len > pos) max = mid
+      else min = mid + 1
     }
   }
 
@@ -680,23 +685,23 @@ else min = mid + 1
     var lines = fold(query).split(/\r|\n\r?/)
 
     search: for (var line = start.line, ch = start.ch, last = doc.lastLine() + 1 - lines.length; line <= last; line++, ch = 0) {
-var orig = doc.getLine(line).slice(ch), string = fold(orig)
-if (lines.length == 1) {
-  var found = string.indexOf(lines[0])
-  if (found == -1) continue search
-  var start = adjustPos(orig, string, found, fold) + ch
-  return {from: Pos(line, adjustPos(orig, string, found, fold) + ch),
-    to: Pos(line, adjustPos(orig, string, found + lines[0].length, fold) + ch)}
-} else {
-  var cutFrom = string.length - lines[0].length
-  if (string.slice(cutFrom) != lines[0]) continue search
-  for (var i = 1; i < lines.length - 1; i++)
-    if (fold(doc.getLine(line + i)) != lines[i]) continue search
-  var end = doc.getLine(line + lines.length - 1), endString = fold(end), lastLine = lines[lines.length - 1]
-  if (endString.slice(0, lastLine.length) != lastLine) continue search
-  return {from: Pos(line, adjustPos(orig, string, cutFrom, fold) + ch),
-    to: Pos(line + lines.length - 1, adjustPos(end, endString, lastLine.length, fold))}
-}
+      var orig = doc.getLine(line).slice(ch), string = fold(orig)
+      if (lines.length == 1) {
+        var found = string.indexOf(lines[0])
+        if (found == -1) continue search
+        var start = adjustPos(orig, string, found, fold) + ch
+        return {from: Pos(line, adjustPos(orig, string, found, fold) + ch),
+                to: Pos(line, adjustPos(orig, string, found + lines[0].length, fold) + ch)}
+      } else {
+        var cutFrom = string.length - lines[0].length
+        if (string.slice(cutFrom) != lines[0]) continue search
+        for (var i = 1; i < lines.length - 1; i++)
+          if (fold(doc.getLine(line + i)) != lines[i]) continue search
+        var end = doc.getLine(line + lines.length - 1), endString = fold(end), lastLine = lines[lines.length - 1]
+        if (endString.slice(0, lastLine.length) != lastLine) continue search
+        return {from: Pos(line, adjustPos(orig, string, cutFrom, fold) + ch),
+                to: Pos(line + lines.length - 1, adjustPos(end, endString, lastLine.length, fold))}
+      }
     }
   }
 
@@ -706,24 +711,24 @@ if (lines.length == 1) {
     var lines = fold(query).split(/\r|\n\r?/)
 
     search: for (var line = start.line, ch = start.ch, first = doc.firstLine() - 1 + lines.length; line >= first; line--, ch = -1) {
-var orig = doc.getLine(line)
-if (ch > -1) orig = orig.slice(0, ch)
-var string = fold(orig)
-if (lines.length == 1) {
-  var found = string.lastIndexOf(lines[0])
-  if (found == -1) continue search
-  return {from: Pos(line, adjustPos(orig, string, found, fold)),
-    to: Pos(line, adjustPos(orig, string, found + lines[0].length, fold))}
-} else {
-  var lastLine = lines[lines.length - 1]
-  if (string.slice(0, lastLine.length) != lastLine) continue search
-  for (var i = 1, start = line - lines.length + 1; i < lines.length - 1; i++)
-    if (fold(doc.getLine(start + i)) != lines[i]) continue search
-  var top = doc.getLine(line + 1 - lines.length), topString = fold(top)
-  if (topString.slice(topString.length - lines[0].length) != lines[0]) continue search
-  return {from: Pos(line + 1 - lines.length, adjustPos(top, topString, top.length - lines[0].length, fold)),
-    to: Pos(line, adjustPos(orig, string, lastLine.length, fold))}
-}
+      var orig = doc.getLine(line)
+      if (ch > -1) orig = orig.slice(0, ch)
+      var string = fold(orig)
+      if (lines.length == 1) {
+        var found = string.lastIndexOf(lines[0])
+        if (found == -1) continue search
+        return {from: Pos(line, adjustPos(orig, string, found, fold)),
+                to: Pos(line, adjustPos(orig, string, found + lines[0].length, fold))}
+      } else {
+        var lastLine = lines[lines.length - 1]
+        if (string.slice(0, lastLine.length) != lastLine) continue search
+        for (var i = 1, start = line - lines.length + 1; i < lines.length - 1; i++)
+          if (fold(doc.getLine(start + i)) != lines[i]) continue search
+        var top = doc.getLine(line + 1 - lines.length), topString = fold(top)
+        if (topString.slice(topString.length - lines[0].length) != lines[0]) continue search
+        return {from: Pos(line + 1 - lines.length, adjustPos(top, topString, top.length - lines[0].length, fold)),
+                to: Pos(line, adjustPos(orig, string, lastLine.length, fold))}
+      }
     }
   }
 
@@ -735,27 +740,27 @@ if (lines.length == 1) {
 
     var caseFold
     if (typeof options == "object") {
-caseFold = options.caseFold
+      caseFold = options.caseFold
     } else { // Backwards compat for when caseFold was the 4th argument
-caseFold = options
-options = null
+      caseFold = options
+      options = null
     }
 
     if (typeof query == "string") {
-if (caseFold == null) caseFold = false
-this.matches = function(reverse, pos) {
-  return (reverse ? searchStringBackward : searchStringForward)(doc, query, pos, caseFold)
-}
+      if (caseFold == null) caseFold = false
+      this.matches = function(reverse, pos) {
+        return (reverse ? searchStringBackward : searchStringForward)(doc, query, pos, caseFold)
+      }
     } else {
-query = ensureFlags(query, "gm")
-if (!options || options.multiline !== false)
-  this.matches = function(reverse, pos) {
-    return (reverse ? searchRegexpBackwardMultiline : searchRegexpForwardMultiline)(doc, query, pos)
-  }
-else
-  this.matches = function(reverse, pos) {
-    return (reverse ? searchRegexpBackward : searchRegexpForward)(doc, query, pos)
-  }
+      query = ensureFlags(query, "gm")
+      if (!options || options.multiline !== false)
+        this.matches = function(reverse, pos) {
+          return (reverse ? searchRegexpBackwardMultiline : searchRegexpForwardMultiline)(doc, query, pos)
+        }
+      else
+        this.matches = function(reverse, pos) {
+          return (reverse ? searchRegexpBackward : searchRegexpForward)(doc, query, pos)
+        }
     }
   }
 
@@ -764,42 +769,42 @@ else
     findPrevious: function() {return this.find(true)},
 
     find: function(reverse) {
-var result = this.matches(reverse, this.doc.clipPos(reverse ? this.pos.from : this.pos.to))
+      var result = this.matches(reverse, this.doc.clipPos(reverse ? this.pos.from : this.pos.to))
 
-// Implements weird auto-growing behavior on null-matches for
-// backwards-compatiblity with the vim code (unfortunately)
-while (result && CodeMirror.cmpPos(result.from, result.to) == 0) {
-  if (reverse) {
-    if (result.from.ch) result.from = Pos(result.from.line, result.from.ch - 1)
-    else if (result.from.line == this.doc.firstLine()) result = null
-    else result = this.matches(reverse, this.doc.clipPos(Pos(result.from.line - 1)))
-  } else {
-    if (result.to.ch < this.doc.getLine(result.to.line).length) result.to = Pos(result.to.line, result.to.ch + 1)
-    else if (result.to.line == this.doc.lastLine()) result = null
-    else result = this.matches(reverse, Pos(result.to.line + 1, 0))
-  }
-}
+      // Implements weird auto-growing behavior on null-matches for
+      // backwards-compatiblity with the vim code (unfortunately)
+      while (result && CodeMirror.cmpPos(result.from, result.to) == 0) {
+        if (reverse) {
+          if (result.from.ch) result.from = Pos(result.from.line, result.from.ch - 1)
+          else if (result.from.line == this.doc.firstLine()) result = null
+          else result = this.matches(reverse, this.doc.clipPos(Pos(result.from.line - 1)))
+        } else {
+          if (result.to.ch < this.doc.getLine(result.to.line).length) result.to = Pos(result.to.line, result.to.ch + 1)
+          else if (result.to.line == this.doc.lastLine()) result = null
+          else result = this.matches(reverse, Pos(result.to.line + 1, 0))
+        }
+      }
 
-if (result) {
-  this.pos = result
-  this.atOccurrence = true
-  return this.pos.match || true
-} else {
-  var end = Pos(reverse ? this.doc.firstLine() : this.doc.lastLine() + 1, 0)
-  this.pos = {from: end, to: end}
-  return this.atOccurrence = false
-}
+      if (result) {
+        this.pos = result
+        this.atOccurrence = true
+        return this.pos.match || true
+      } else {
+        var end = Pos(reverse ? this.doc.firstLine() : this.doc.lastLine() + 1, 0)
+        this.pos = {from: end, to: end}
+        return this.atOccurrence = false
+      }
     },
 
     from: function() {if (this.atOccurrence) return this.pos.from},
     to: function() {if (this.atOccurrence) return this.pos.to},
 
     replace: function(newText, origin) {
-if (!this.atOccurrence) return
-var lines = CodeMirror.splitLines(newText)
-this.doc.replaceRange(lines, this.pos.from, this.pos.to, origin)
-this.pos.to = Pos(this.pos.from.line + lines.length - 1,
-lines[lines.length - 1].length + (lines.length == 1 ? this.pos.from.ch : 0))
+      if (!this.atOccurrence) return
+      var lines = CodeMirror.splitLines(newText)
+      this.doc.replaceRange(lines, this.pos.from, this.pos.to, origin)
+      this.pos.to = Pos(this.pos.from.line + lines.length - 1,
+                        lines[lines.length - 1].length + (lines.length == 1 ? this.pos.from.ch : 0))
     }
   }
 
@@ -814,11 +819,11 @@ lines[lines.length - 1].length + (lines.length == 1 ? this.pos.from.ch : 0))
     var ranges = []
     var cur = this.getSearchCursor(query, this.getCursor("from"), caseFold)
     while (cur.findNext()) {
-if (CodeMirror.cmpPos(cur.to(), this.getCursor("to")) > 0) break
-ranges.push({anchor: cur.from(), head: cur.to()})
+      if (CodeMirror.cmpPos(cur.to(), this.getCursor("to")) > 0) break
+      ranges.push({anchor: cur.from(), head: cur.to()})
     }
     if (ranges.length)
-this.setSelections(ranges, 0)
+      this.setSelections(ranges, 0)
   })
 });
 
@@ -849,21 +854,21 @@ this.setSelections(ranges, 0)
 
   function searchOverlay(query, caseInsensitive) {
     if (typeof query == "string")
-query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), caseInsensitive ? "gi" : "g");
+      query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), caseInsensitive ? "gi" : "g");
     else if (!query.global)
-query = new RegExp(query.source, query.ignoreCase ? "gi" : "g");
+      query = new RegExp(query.source, query.ignoreCase ? "gi" : "g");
 
     return {token: function(stream) {
-query.lastIndex = stream.pos;
-var match = query.exec(stream.string);
-if (match && match.index == stream.pos) {
-  stream.pos += match[0].length || 1;
-  return "searching";
-} else if (match) {
-  stream.pos = match.index;
-} else {
-  stream.skipToEnd();
-}
+      query.lastIndex = stream.pos;
+      var match = query.exec(stream.string);
+      if (match && match.index == stream.pos) {
+        stream.pos += match[0].length || 1;
+        return "searching";
+      } else if (match) {
+        stream.pos = match.index;
+      } else {
+        stream.skipToEnd();
+      }
     }};
   }
 
@@ -887,11 +892,11 @@ if (match && match.index == stream.pos) {
 
   function persistentDialog(cm, text, deflt, onEnter, onKeyDown) {
     cm.openDialog(text, onEnter, {
-value: deflt,
-selectValueOnOpen: true,
-closeOnEnter: false,
-onClose: function() { clearSearch(cm); },
-onKeyDown: onKeyDown
+      value: deflt,
+      selectValueOnOpen: true,
+      closeOnEnter: false,
+      onClose: function() { clearSearch(cm); },
+      onKeyDown: onKeyDown
     });
   }
 
@@ -907,24 +912,24 @@ onKeyDown: onKeyDown
 
   function parseString(string) {
     return string.replace(/\\([nrt\\])/g, function(match, ch) {
-if (ch == "n") return "\n"
-if (ch == "r") return "\r"
-if (ch == "t") return "\t"
-if (ch == "\\") return "\\"
-return match
+      if (ch == "n") return "\n"
+      if (ch == "r") return "\r"
+      if (ch == "t") return "\t"
+      if (ch == "\\") return "\\"
+      return match
     })
   }
 
   function parseQuery(query) {
     var isRE = query.match(/^\/(.*)\/([a-z]*)$/);
     if (isRE) {
-try { query = new RegExp(isRE[1], isRE[2].indexOf("i") == -1 ? "" : "i"); }
-catch(e) {} // Not a regular expression after all, do a string search
+      try { query = new RegExp(isRE[1], isRE[2].indexOf("i") == -1 ? "" : "i"); }
+      catch(e) {} // Not a regular expression after all, do a string search
     } else {
-query = parseString(query)
+      query = parseString(query)
     }
     if (typeof query == "string" ? query == "" : query.test(""))
-query = /x^/;
+      query = /x^/;
     return query;
   }
 
@@ -935,8 +940,8 @@ query = /x^/;
     state.overlay = searchOverlay(state.query, queryCaseInsensitive(state.query));
     cm.addOverlay(state.overlay);
     if (cm.showMatchesOnScrollbar) {
-if (state.annotate) { state.annotate.clear(); state.annotate = null; }
-state.annotate = cm.showMatchesOnScrollbar(state.query, queryCaseInsensitive(state.query));
+      if (state.annotate) { state.annotate.clear(); state.annotate = null; }
+      state.annotate = cm.showMatchesOnScrollbar(state.query, queryCaseInsensitive(state.query));
     }
   }
 
@@ -946,48 +951,48 @@ state.annotate = cm.showMatchesOnScrollbar(state.query, queryCaseInsensitive(sta
     var q = cm.getSelection() || state.lastQuery;
     if (q instanceof RegExp && q.source == "x^") q = null
     if (persistent && cm.openDialog) {
-var hiding = null
-var searchNext = function(query, event) {
-  CodeMirror.e_stop(event);
-  if (!query) return;
-  if (query != state.queryText) {
-    startSearch(cm, state, query);
-    state.posFrom = state.posTo = cm.getCursor();
-  }
-  if (hiding) hiding.style.opacity = 1
-  findNext(cm, event.shiftKey, function(_, to) {
-    var dialog
-    if (to.line < 3 && document.querySelector &&
-  (dialog = cm.display.wrapper.querySelector(".CodeMirror-dialog")) &&
-  dialog.getBoundingClientRect().bottom - 4 > cm.cursorCoords(to, "window").top)
-(hiding = dialog).style.opacity = .4
-  })
-};
-persistentDialog(cm, getQueryDialog(cm), q, searchNext, function(event, query) {
-  var keyName = CodeMirror.keyName(event)
-  var extra = cm.getOption('extraKeys'), cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption("keyMap")][keyName]
-  if (cmd == "findNext" || cmd == "findPrev" ||
-    cmd == "findPersistentNext" || cmd == "findPersistentPrev") {
-    CodeMirror.e_stop(event);
-    startSearch(cm, getSearchState(cm), query);
-    cm.execCommand(cmd);
-  } else if (cmd == "find" || cmd == "findPersistent") {
-    CodeMirror.e_stop(event);
-    searchNext(query, event);
-  }
-});
-if (immediate && q) {
-  startSearch(cm, state, q);
-  findNext(cm, rev);
-}
+      var hiding = null
+      var searchNext = function(query, event) {
+        CodeMirror.e_stop(event);
+        if (!query) return;
+        if (query != state.queryText) {
+          startSearch(cm, state, query);
+          state.posFrom = state.posTo = cm.getCursor();
+        }
+        if (hiding) hiding.style.opacity = 1
+        findNext(cm, event.shiftKey, function(_, to) {
+          var dialog
+          if (to.line < 3 && document.querySelector &&
+              (dialog = cm.display.wrapper.querySelector(".CodeMirror-dialog")) &&
+              dialog.getBoundingClientRect().bottom - 4 > cm.cursorCoords(to, "window").top)
+            (hiding = dialog).style.opacity = .4
+        })
+      };
+      persistentDialog(cm, getQueryDialog(cm), q, searchNext, function(event, query) {
+        var keyName = CodeMirror.keyName(event)
+        var extra = cm.getOption('extraKeys'), cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption("keyMap")][keyName]
+        if (cmd == "findNext" || cmd == "findPrev" ||
+          cmd == "findPersistentNext" || cmd == "findPersistentPrev") {
+          CodeMirror.e_stop(event);
+          startSearch(cm, getSearchState(cm), query);
+          cm.execCommand(cmd);
+        } else if (cmd == "find" || cmd == "findPersistent") {
+          CodeMirror.e_stop(event);
+          searchNext(query, event);
+        }
+      });
+      if (immediate && q) {
+        startSearch(cm, state, q);
+        findNext(cm, rev);
+      }
     } else {
-dialog(cm, getQueryDialog(cm), "Search for:", q, function(query) {
-  if (query && !state.query) cm.operation(function() {
-    startSearch(cm, state, query);
-    state.posFrom = state.posTo = cm.getCursor();
-    findNext(cm, rev);
-  });
-});
+      dialog(cm, getQueryDialog(cm), "Search for:", q, function(query) {
+        if (query && !state.query) cm.operation(function() {
+          startSearch(cm, state, query);
+          state.posFrom = state.posTo = cm.getCursor();
+          findNext(cm, rev);
+        });
+      });
     }
   }
 
@@ -995,8 +1000,8 @@ dialog(cm, getQueryDialog(cm), "Search for:", q, function(query) {
     var state = getSearchState(cm);
     var cursor = getSearchCursor(cm, state.query, rev ? state.posFrom : state.posTo);
     if (!cursor.find(rev)) {
-cursor = getSearchCursor(cm, state.query, rev ? CodeMirror.Pos(cm.lastLine()) : CodeMirror.Pos(cm.firstLine(), 0));
-if (!cursor.find(rev)) return;
+      cursor = getSearchCursor(cm, state.query, rev ? CodeMirror.Pos(cm.lastLine()) : CodeMirror.Pos(cm.firstLine(), 0));
+      if (!cursor.find(rev)) return;
     }
     cm.setSelection(cursor.from(), cursor.to());
     const { clientHeight } = cm.getScrollInfo()
@@ -1030,12 +1035,12 @@ if (!cursor.find(rev)) return;
 
   function replaceAll(cm, query, text) {
     cm.operation(function() {
-for (var cursor = getSearchCursor(cm, query); cursor.findNext();) {
-  if (typeof query != "string") {
-    var match = cm.getRange(cursor.from(), cursor.to()).match(query);
-    cursor.replace(text.replace(/\$(\d)/g, function(_, i) {return match[i];}));
-  } else cursor.replace(text);
-}
+      for (var cursor = getSearchCursor(cm, query); cursor.findNext();) {
+        if (typeof query != "string") {
+          var match = cm.getRange(cursor.from(), cursor.to()).match(query);
+          cursor.replace(text.replace(/\$(\d)/g, function(_, i) {return match[i];}));
+        } else cursor.replace(text);
+      }
     });
   }
 
@@ -1044,36 +1049,36 @@ for (var cursor = getSearchCursor(cm, query); cursor.findNext();) {
     var query = cm.getSelection() || getSearchState(cm).lastQuery;
     var dialogText = '<span class="CodeMirror-search-label">' + (all ? cm.phrase("Replace all:") : cm.phrase("Replace:")) + '</span>';
     dialog(cm, dialogText + getReplaceQueryDialog(cm), dialogText, query, function(query) {
-if (!query) return;
-query = parseQuery(query);
-dialog(cm, getReplacementQueryDialog(cm), cm.phrase("Replace with:"), "", function(text) {
-  text = parseString(text)
-  if (all) {
-    replaceAll(cm, query, text)
-  } else {
-    clearSearch(cm);
-    var cursor = getSearchCursor(cm, query, cm.getCursor("from"));
-    var advance = function() {
-var start = cursor.from(), match;
-if (!(match = cursor.findNext())) {
-  cursor = getSearchCursor(cm, query);
-  if (!(match = cursor.findNext()) ||
-(start && cursor.from().line == start.line && cursor.from().ch == start.ch)) return;
-}
-cm.setSelection(cursor.from(), cursor.to());
-cm.scrollIntoView({from: cursor.from(), to: cursor.to()});
-confirmDialog(cm, getDoReplaceConfirm(cm), cm.phrase("Replace?"),
-  [function() {doReplace(match);}, advance,
-   function() {replaceAll(cm, query, text)}]);
-    };
-    var doReplace = function(match) {
-cursor.replace(typeof query == "string" ? text :
-   text.replace(/\$(\d)/g, function(_, i) {return match[i];}));
-advance();
-    };
-    advance();
-  }
-});
+      if (!query) return;
+      query = parseQuery(query);
+      dialog(cm, getReplacementQueryDialog(cm), cm.phrase("Replace with:"), "", function(text) {
+        text = parseString(text)
+        if (all) {
+          replaceAll(cm, query, text)
+        } else {
+          clearSearch(cm);
+          var cursor = getSearchCursor(cm, query, cm.getCursor("from"));
+          var advance = function() {
+            var start = cursor.from(), match;
+            if (!(match = cursor.findNext())) {
+              cursor = getSearchCursor(cm, query);
+              if (!(match = cursor.findNext()) ||
+                  (start && cursor.from().line == start.line && cursor.from().ch == start.ch)) return;
+            }
+            cm.setSelection(cursor.from(), cursor.to());
+            cm.scrollIntoView({from: cursor.from(), to: cursor.to()});
+            confirmDialog(cm, getDoReplaceConfirm(cm), cm.phrase("Replace?"),
+                          [function() {doReplace(match);}, advance,
+                           function() {replaceAll(cm, query, text)}]);
+          };
+          var doReplace = function(match) {
+            cursor.replace(typeof query == "string" ? text :
+                           text.replace(/\$(\d)/g, function(_, i) {return match[i];}));
+            advance();
+          };
+          advance();
+        }
+      });
     });
   }
 
@@ -1123,32 +1128,32 @@ advance();
     this.computeScale();
 
     function scheduleRedraw(delay) {
-clearTimeout(self.doRedraw);
-self.doRedraw = setTimeout(function() { self.redraw(); }, delay);
+      clearTimeout(self.doRedraw);
+      self.doRedraw = setTimeout(function() { self.redraw(); }, delay);
     }
 
     var self = this;
     cm.on("refresh", this.resizeHandler = function() {
-clearTimeout(self.doUpdate);
-self.doUpdate = setTimeout(function() {
-  if (self.computeScale()) scheduleRedraw(20);
-}, 100);
+      clearTimeout(self.doUpdate);
+      self.doUpdate = setTimeout(function() {
+        if (self.computeScale()) scheduleRedraw(20);
+      }, 100);
     });
     cm.on("markerAdded", this.resizeHandler);
     cm.on("markerCleared", this.resizeHandler);
     if (options.listenForChanges !== false)
-cm.on("changes", this.changeHandler = function() {
-  scheduleRedraw(250);
-});
+      cm.on("changes", this.changeHandler = function() {
+        scheduleRedraw(250);
+      });
   }
 
   Annotation.prototype.computeScale = function() {
     var cm = this.cm;
     var hScale = (cm.getWrapperElement().clientHeight - cm.display.barHeight - this.buttonHeight * 2) /
-cm.getScrollerElement().scrollHeight
+      cm.getScrollerElement().scrollHeight
     if (hScale != this.hScale) {
-this.hScale = hScale;
-return true;
+      this.hScale = hScale;
+      return true;
     }
   };
 
@@ -1167,40 +1172,40 @@ return true;
     var singleLineH = wrapping && cm.defaultTextHeight() * 1.5;
     var curLine = null, curLineObj = null;
     function getY(pos, top) {
-if (curLine != pos.line) {
-  curLine = pos.line;
-  curLineObj = cm.getLineHandle(curLine);
-}
-if ((curLineObj.widgets && curLineObj.widgets.length) ||
-    (wrapping && curLineObj.height > singleLineH))
-  return cm.charCoords(pos, "local")[top ? "top" : "bottom"];
-var topY = cm.heightAtLine(curLineObj, "local");
-return topY + (top ? 0 : curLineObj.height);
+      if (curLine != pos.line) {
+        curLine = pos.line;
+        curLineObj = cm.getLineHandle(curLine);
+      }
+      if ((curLineObj.widgets && curLineObj.widgets.length) ||
+          (wrapping && curLineObj.height > singleLineH))
+        return cm.charCoords(pos, "local")[top ? "top" : "bottom"];
+      var topY = cm.heightAtLine(curLineObj, "local");
+      return topY + (top ? 0 : curLineObj.height);
     }
 
     var lastLine = cm.lastLine()
     if (cm.display.barWidth) for (var i = 0, nextTop; i < anns.length; i++) {
-var ann = anns[i];
-if (ann.to.line > lastLine) continue;
-var top = nextTop || getY(ann.from, true) * hScale;
-var bottom = getY(ann.to, false) * hScale;
-while (i < anns.length - 1) {
-  if (anns[i + 1].to.line > lastLine) break;
-  nextTop = getY(anns[i + 1].from, true) * hScale;
-  if (nextTop > bottom + .9) break;
-  ann = anns[++i];
-  bottom = getY(ann.to, false) * hScale;
-}
-if (bottom == top) continue;
-var height = Math.max(bottom - top, 3);
+      var ann = anns[i];
+      if (ann.to.line > lastLine) continue;
+      var top = nextTop || getY(ann.from, true) * hScale;
+      var bottom = getY(ann.to, false) * hScale;
+      while (i < anns.length - 1) {
+        if (anns[i + 1].to.line > lastLine) break;
+        nextTop = getY(anns[i + 1].from, true) * hScale;
+        if (nextTop > bottom + .9) break;
+        ann = anns[++i];
+        bottom = getY(ann.to, false) * hScale;
+      }
+      if (bottom == top) continue;
+      var height = Math.max(bottom - top, 3);
 
-var elt = frag.appendChild(document.createElement("div"));
-elt.style.cssText = "position: absolute; right: 0px; width: " + Math.max(cm.display.barWidth - 1, 2) + "px; top: "
-  + (top + this.buttonHeight) + "px; height: " + height + "px";
-elt.className = this.options.className;
-if (ann.id) {
-  elt.setAttribute("annotation-id", ann.id);
-}
+      var elt = frag.appendChild(document.createElement("div"));
+      elt.style.cssText = "position: absolute; right: 0px; width: " + Math.max(cm.display.barWidth - 1, 2) + "px; top: "
+        + (top + this.buttonHeight) + "px; height: " + height + "px";
+      elt.className = this.options.className;
+      if (ann.id) {
+        elt.setAttribute("annotation-id", ann.id);
+      }
     }
     this.div.textContent = "";
     this.div.appendChild(frag);
@@ -1263,17 +1268,17 @@ if (ann.id) {
   SearchAnnotation.prototype.findMatches = function() {
     if (!this.gap) return;
     for (var i = 0; i < this.matches.length; i++) {
-var match = this.matches[i];
-if (match.from.line >= this.gap.to) break;
-if (match.to.line >= this.gap.from) this.matches.splice(i--, 1);
+      var match = this.matches[i];
+      if (match.from.line >= this.gap.to) break;
+      if (match.to.line >= this.gap.from) this.matches.splice(i--, 1);
     }
     var cursor = this.cm.getSearchCursor(this.query, CodeMirror.Pos(this.gap.from, 0), {caseFold: this.caseFold, multiline: this.options.multiline});
     var maxMatches = this.options && this.options.maxMatches || MAX_MATCHES;
     while (cursor.findNext()) {
-var match = {from: cursor.from(), to: cursor.to()};
-if (match.from.line >= this.gap.to) break;
-this.matches.splice(i++, 0, match);
-if (this.matches.length > maxMatches) break;
+      var match = {from: cursor.from(), to: cursor.to()};
+      if (match.from.line >= this.gap.to) break;
+      this.matches.splice(i++, 0, match);
+      if (this.matches.length > maxMatches) break;
     }
     this.gap = null;
   };
@@ -1288,18 +1293,18 @@ if (this.matches.length > maxMatches) break;
     var endLine = CodeMirror.changeEnd(change).line;
     var sizeChange = endLine - change.to.line;
     if (this.gap) {
-this.gap.from = Math.min(offsetLine(this.gap.from, startLine, sizeChange), change.from.line);
-this.gap.to = Math.max(offsetLine(this.gap.to, startLine, sizeChange), change.from.line);
+      this.gap.from = Math.min(offsetLine(this.gap.from, startLine, sizeChange), change.from.line);
+      this.gap.to = Math.max(offsetLine(this.gap.to, startLine, sizeChange), change.from.line);
     } else {
-this.gap = {from: change.from.line, to: endLine + 1};
+      this.gap = {from: change.from.line, to: endLine + 1};
     }
 
     if (sizeChange) for (var i = 0; i < this.matches.length; i++) {
-var match = this.matches[i];
-var newFrom = offsetLine(match.from.line, startLine, sizeChange);
-if (newFrom != match.from.line) match.from = CodeMirror.Pos(newFrom, match.from.ch);
-var newTo = offsetLine(match.to.line, startLine, sizeChange);
-if (newTo != match.to.line) match.to = CodeMirror.Pos(newTo, match.to.ch);
+      var match = this.matches[i];
+      var newFrom = offsetLine(match.from.line, startLine, sizeChange);
+      if (newFrom != match.from.line) match.from = CodeMirror.Pos(newFrom, match.from.ch);
+      var newTo = offsetLine(match.to.line, startLine, sizeChange);
+      if (newTo != match.to.line) match.to = CodeMirror.Pos(newTo, match.to.ch);
     }
     clearTimeout(this.update);
     var self = this;
@@ -1354,18 +1359,18 @@ if (newTo != match.to.line) match.to = CodeMirror.Pos(newTo, match.to.ch);
   CodeMirror.commands.jumpToLine = function(cm) {
     var cur = cm.getCursor();
     dialog(cm, getJumpDialog(cm), cm.phrase("Jump to line:"), (cur.line + 1) + ":" + cur.ch, function(posStr) {
-if (!posStr) return;
+      if (!posStr) return;
 
-var match;
-if (match = /^\s*([\+\-]?\d+)\s*\:\s*(\d+)\s*$/.exec(posStr)) {
-  cm.setCursor(interpretLine(cm, match[1]), Number(match[2]))
-} else if (match = /^\s*([\+\-]?\d+(\.\d+)?)\%\s*/.exec(posStr)) {
-  var line = Math.round(cm.lineCount() * Number(match[1]) / 100);
-  if (/^[-+]/.test(match[1])) line = cur.line + line + 1;
-  cm.setCursor(line - 1, cur.ch);
-} else if (match = /^\s*\:?\s*([\+\-]?\d+)\s*/.exec(posStr)) {
-  cm.setCursor(interpretLine(cm, match[1]), cur.ch);
-}
+      var match;
+      if (match = /^\s*([\+\-]?\d+)\s*\:\s*(\d+)\s*$/.exec(posStr)) {
+        cm.setCursor(interpretLine(cm, match[1]), Number(match[2]))
+      } else if (match = /^\s*([\+\-]?\d+(\.\d+)?)\%\s*/.exec(posStr)) {
+        var line = Math.round(cm.lineCount() * Number(match[1]) / 100);
+        if (/^[-+]/.test(match[1])) line = cur.line + line + 1;
+        cm.setCursor(line - 1, cur.ch);
+      } else if (match = /^\s*\:?\s*([\+\-]?\d+)\s*/.exec(posStr)) {
+        cm.setCursor(interpretLine(cm, match[1]), cur.ch);
+      }
     });
   };
 
@@ -1388,128 +1393,128 @@ if (match = /^\s*([\+\-]?\d+)\s*\:\s*(\d+)\s*$/.exec(posStr)) {
 
 ((mod) => {
     if (typeof exports === 'object' && typeof module === 'object') // CommonJS
-  return mod(require('codemirror/lib/codemirror'));
+        return mod(require('codemirror/lib/codemirror'));
 
     if (typeof define === 'function' && define.amd) // AMD
-  return define(['codemirror/lib/codemirror'], mod);
+        return define(['codemirror/lib/codemirror'], mod);
 
     mod(CodeMirror);
 })((CodeMirror) => {
     CodeMirror.defineOption('showInvisibles', false, (cm, val, prev) => {
-  let Count = 0;
-  const Maximum = cm.getOption('maxInvisibles') || 16;
+        let Count = 0;
+        const Maximum = cm.getOption('maxInvisibles') || 16;
 
-  if (prev === CodeMirror.Init)
-prev = false;
+        if (prev === CodeMirror.Init)
+            prev = false;
 
-  if (prev && !val) {
-cm.removeOverlay('invisibles');
-return rm();
-  }
+        if (prev && !val) {
+            cm.removeOverlay('invisibles');
+            return rm();
+        }
 
-  if (!prev && val) {
-add(Maximum);
+        if (!prev && val) {
+            add(Maximum);
 
-cm.addOverlay({
-    name: 'invisibles',
-    token: function nextToken(stream) {
-  let spaces = 0;
-  let peek = stream.peek() === ' ';
+            cm.addOverlay({
+                name: 'invisibles',
+                token: function nextToken(stream) {
+                    let spaces = 0;
+                    let peek = stream.peek() === ' ';
 
-  if (peek) {
-while (peek && spaces < Maximum) {
-    ++spaces;
+                    if (peek) {
+                        while (peek && spaces < Maximum) {
+                            ++spaces;
 
-    stream.next();
-    peek = stream.peek() === ' ';
-}
+                            stream.next();
+                            peek = stream.peek() === ' ';
+                        }
 
-let ret = 'whitespace whitespace-' + spaces;
+                        let ret = 'whitespace whitespace-' + spaces;
 
-/*
- * styles should be different
- * could not be two same styles
- * beside because of this check in runmode
- * function in `codemirror.js`:
- *
- * 6624: if (!flattenSpans || curStyle != style) {}
- */
-if (spaces === Maximum)
-    ret += ' whitespace-rand-' + Count++;
+                        /*
+                         * styles should be different
+                         * could not be two same styles
+                         * beside because of this check in runmode
+                         * function in `codemirror.js`:
+                         *
+                         * 6624: if (!flattenSpans || curStyle != style) {}
+                         */
+                        if (spaces === Maximum)
+                            ret += ' whitespace-rand-' + Count++;
 
-return ret;
-  }
+                        return ret;
+                    }
 
-  while (!stream.eol() && !peek) {
-stream.next();
+                    while (!stream.eol() && !peek) {
+                        stream.next();
 
-peek = stream.peek() === ' ';
-  }
+                        peek = stream.peek() === ' ';
+                    }
 
-  return 'cm-eol';
-    },
-});
-  }
+                    return 'cm-eol';
+                },
+            });
+        }
     });
 
     function add(max) {
-  const classBase = '.CodeMirror .cm-whitespace-';
-  const spaceChar = '·';
-  const style = document.createElement('style');
+        const classBase = '.CodeMirror .cm-whitespace-';
+        const spaceChar = '·';
+        const style = document.createElement('style');
 
-  style.setAttribute('data-name', 'js-show-invisibles');
+        style.setAttribute('data-name', 'js-show-invisibles');
 
-  let rules = '';
-  let spaceChars = '';
+        let rules = '';
+        let spaceChars = '';
 
-  for (let i = 1; i <= max; ++i) {
-spaceChars += spaceChar;
-rules += classBase + i + `:not([class*="cm-trailing-space-"])::before { content: "${spaceChars}";}\n`;
-  }
+        for (let i = 1; i <= max; ++i) {
+            spaceChars += spaceChar;
+            rules += classBase + i + `:not([class*="cm-trailing-space-"])::before { content: "${spaceChars}";}\n`;
+        }
 
-  const gfmRules = '[class*=cm-trailing-space]::before{content: "·";}';
+        const gfmRules = '[class*=cm-trailing-space]::before{content: "·";}';
 
-  style.textContent = [
-getStyle(),
-getEOL(),
-rules,
-gfmRules,
-  ].join('\n');
+        style.textContent = [
+            getStyle(),
+            getEOL(),
+            rules,
+            gfmRules,
+        ].join('\n');
 
-  document.head.appendChild(style);
+        document.head.appendChild(style);
     }
 
     function rm() {
-  const style = document.querySelector('[data-name="js-show-invisibles"]');
-  document.head.removeChild(style);
+        const style = document.querySelector('[data-name="js-show-invisibles"]');
+        document.head.removeChild(style);
     }
 
     function getStyle() {
-  const style = [
-'.cm-whitespace::before {',
-    'position: absolute;',
-    'pointer-events: none;',
-    //'color: #404F7D;',
-    'color: rgba(var( --main-theme-highlight-color),0.4);',
-    'filter: brightness(5);',
-'}',
-  ].join('');
+        const style = [
+            '.cm-whitespace::before {',
+                'position: absolute;',
+                'pointer-events: none;',
+                //'color: #404F7D;',
+                'color: rgba(var( --main-theme-highlight-color),0.4);',
+                'filter: brightness(5);',
+            '}',
+        ].join('');
 
-  return style;
+        return style;
     }
 
     function getEOL() {
-  const style = [
-// NOTE: I don't really like seeing EOL characters...
-// TODO: should append style for tabs, though (right now it's in CSS)
-// '.CodeMirror-code > div > pre > span::after, .CodeMirror-line > span::after {',
-// 'pointer-events: none;',
-// 'color: #404F7D;',
-// 'content: "¬"',
-// '}',
-  ].join('');
+        const style = [
+            // NOTE: I don't really like seeing EOL characters...
+            // TODO: should append style for tabs, though (right now it's in CSS)
+            // '.CodeMirror-code > div > pre > span::after, .CodeMirror-line > span::after {',
+            // 'pointer-events: none;',
+            // 'color: #404F7D;',
+            // 'content: "¬"',
+            // '}',
+        ].join('');
 
-  return style;
+        return style;
     }
 });
 
