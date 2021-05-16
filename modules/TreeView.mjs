@@ -935,12 +935,15 @@ const updateTreeMenu = ({ title, project }) => {
 const showSearch = (treeView) => {
 	const treeSearch = treeView.parentNode.querySelector(".tree-search");
 	const searchInput = document.querySelector(".project-search-input");
-	return ({ show }) => {
+
+	return ({ show, include }) => {
 		if (show) {
 			treeView.style.visibility = "hidden";
 			treeSearch.style.visibility = "visible";
 			treeSearch.style.height = "";
 			updateTreeMenu({ title: "search" });
+			include && searchBox.updateInclude(include);
+
 			setTimeout(() => {
 				searchInput.focus();
 				searchInput.select();

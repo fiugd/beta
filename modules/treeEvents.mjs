@@ -362,8 +362,8 @@ const contextMenuSelectHandler = ({
 
 const searchProject = ({ showSearch, hideSearch }) => {
 	//TODO: keep track of search state
-
-	showSearch({ show: !hideSearch });
+	const include = `./${currentServiceName}/`;
+	showSearch({ show: !hideSearch, include });
 };
 
 //TODO: code that creates a tree should live in ../TreeView and be passed here!!
