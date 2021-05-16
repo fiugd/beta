@@ -529,9 +529,12 @@ class SearchBox {
 			false
 		);
 		const openFileHandler = (e) = {
-			const {target: {dataset}} = e;
-			const { file, line, column } = dataset;
-			console.warn(`fileSelect: ${file}[${line}:${column}]`);
+			try {
+				const { file, line, column } = e.target.dataset;
+				console.warn(`fileSelect: ${file}[${line}:${column}]`);
+			} catch(e){
+				console.error(e);
+			}
 		};
 		this.dom.term.addEventListener("input", (e) => {
 			const term = this.dom.term.value;
