@@ -18,6 +18,7 @@ why I open github.com
 
 why I open VS Code
 ------------------
+- [ ] some build systems are not adapted to web: CM addon bundle, CM modes bundle
 - [X] (I don't actually keep VS Code open any more)
 - [X] service worker flow is not merged to main flow
 - [X] no search in project / folder
