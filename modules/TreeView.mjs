@@ -126,6 +126,15 @@ const utils = (() => {
 	};
 })();
 
+const openFileHandler = (event) => {
+	try {
+		const { file, line, column } = event.target.dataset;
+		console.warn(`fileSelect: ${file}[${line}:${column}]`);
+		//triggers.fileSelect
+	} catch(error) {
+		console.error(error);
+	}
+};
 
 const ProjectOpener = () => {
 	let _opener = htmlToElement(`
@@ -416,6 +425,10 @@ const SearchBoxHTML = () => {
 			position: relative;
 			white-space: nowrap;
 		}
+		.search-results ul.line-results > li > span,
+		.search-results ul.line-results > li > div {
+			user-select: none;
+		}
 		.search-results > li > div .hover-highlight,
 		.search-results > li ul > li .hover-highlight {
 			position: absolute;
@@ -528,14 +541,6 @@ class SearchBox {
 			250,
 			false
 		);
-		const openFileHandler = (e) => {
-			try {
-				const { file, line, column } = e.target.dataset;
-				console.warn(`fileSelect: ${file}[${line}:${column}]`);
-			} catch(e){
-				console.error(e);
-			}
-		};
 		this.dom.term.addEventListener("input", (e) => {
 			const term = this.dom.term.value;
 			if (!term) {
