@@ -528,7 +528,7 @@ class SearchBox {
 			250,
 			false
 		);
-		const openFileHandler = (e) = {
+		const openFileHandler = (e) => {
 			try {
 				const { file, line, column } = e.target.dataset;
 				console.warn(`fileSelect: ${file}[${line}:${column}]`);
