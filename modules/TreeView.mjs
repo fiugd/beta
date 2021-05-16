@@ -128,9 +128,9 @@ const utils = (() => {
 
 const openFileHandler = (event) => {
 	try {
-		const { file, line, column } = event.target.dataset;
+		const { file: source, line, column } = event.target.dataset;
 		console.warn(`fileSelect: ${file}[${line}:${column}]`);
-		//triggers.fileSelect
+		triggers.fileSelect({ source, line, column });
 	} catch(error) {
 		console.error(error);
 	}
@@ -1124,7 +1124,7 @@ function _TreeView(op) {
 			folderMove: 'moveFolder',
 		};
 		const treeEventHandler = (args) => {
-			const { source, target } = args;
+			const { source, target, line, column } = args;
 			const name = (target || source).split('/').pop();
 			const parent = (target || source).split('/').slice(0,-1).join('/');
 			const handlerMessage = {
@@ -1138,6 +1138,7 @@ function _TreeView(op) {
 					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,
+					line, column,
 					body: {}
 				}
 			};
