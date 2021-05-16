@@ -185,7 +185,9 @@
 			};
 			const cache = {};
 			await fileStore.iterate((value, key) => {
-				if (!key.startsWith(include)) return;
+				const isIncluded = key.startsWith(include) ||
+					`./${key}`.startsWith(include);
+				if (!isIncluded) return;
 				cache[key] = value;
 			});
 			const fileStoreCache = {

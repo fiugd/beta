@@ -175,9 +175,9 @@
 			const regex = new RegExp(/^((?:.*))\/service\/search\/.*$/i);
 			return {
 				match: (url) => regex.test(safeUrl(url)),
-				params: (url) =>
+				params: (url, urlFull) =>
 					Object.fromEntries(
-						url
+						urlFull
 							.split("?")
 							.pop()
 							.split("&")
@@ -350,7 +350,7 @@
 		return {
 			exec: async (event) => {
 				return await found.handler(
-					found.params(url),
+					found.params(url.split('?')[0], url),
 					event,
 					query
 				);
