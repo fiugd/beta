@@ -126,11 +126,21 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			};
 		};
 
+	const selectLine = (doc, line, ch) => {
+		const pos = { line, ch };
+		doc.setCursor(ch ? pos : line);
+		const t = doc.charCoords({line, ch}, "local").top;
+		doc.scrollTo(0, t - SCROLL_MARGIN);
+	}
+	
 	CodeMirror.defineExtension('loadDoc', async function ({
 		name, text, mode, scrollTop, scrollLeft, line, ch
 	}){
 		if(!name) return;
-		if(currentDoc && name === currentDoc.name) return;
+		if(currentDoc && name === currentDoc.name){
+			if(line) selectLine(this, line, ch);
+			return;
+		}
 
 		if(currentDoc && currentDoc.cleanup) currentDoc.cleanup();
 
@@ -170,12 +180,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		const debouncedPersist = debounce(persistDoc, 1000, false);
 
-		if(line) {
-			const pos = { line, ch };
-			this.setCursor(pos);
-			const t = this.charCoords({line, ch}, "local").top;
-			this.scrollTo(0, t - SCROLL_MARGIN);
-		}
+		if(line) selectLine(this, line, ch);
 		if(scrollTop){
 			this.scrollTo(0, scrollTop);
 		}
