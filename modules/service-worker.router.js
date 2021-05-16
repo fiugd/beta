@@ -350,7 +350,7 @@
 		return {
 			exec: async (event) => {
 				return await found.handler(
-					found.params(url.split('?')[0]),
+					found.params(url),
 					event,
 					query
 				);
