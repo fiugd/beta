@@ -813,8 +813,8 @@ const inlineEditor = (ChangeHandler) => ({
 		window.Editor._cleanup && window.Editor._cleanup();
 		window.Editor.loadDoc({
 			name: filename,
-			line: loadLine,
-			ch: loadColumn,
+			line: loadLine ? Number(loadLine) : 0,
+			ch: loadColumn ? Number(loadColumn) : 0,
 			text,
 			mode,
 		});
