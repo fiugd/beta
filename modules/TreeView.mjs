@@ -126,16 +126,6 @@ const utils = (() => {
 	};
 })();
 
-const openFileHandler = (event) => {
-	try {
-		const { file: source, line, column } = event.target.dataset;
-		console.warn(`fileSelect: ${file}[${line}:${column}]`);
-		triggers.fileSelect({ source, line, column });
-	} catch(error) {
-		console.error(error);
-	}
-};
-
 const ProjectOpener = () => {
 	let _opener = htmlToElement(`
 		<div class="service-opener">
@@ -569,7 +559,7 @@ class SearchBox {
 			const handler = {
 				"DIV foldable": () => e.target.parentNode.classList.add("open"),
 				"DIV foldable open": () => e.target.parentNode.classList.remove("open"),
-				"LI line-results": openFileHandler,
+				"LI line-results": (e) => triggers.fileSelect(e.target.dataset),
 			}[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
 
 			if (handler) return handler(e);
@@ -634,7 +624,7 @@ class SearchBox {
 			const limit = 1; //only highlight one occurence
 			const listItemEl = (Array.isArray(result) ? result : [result]).map(
 				(r, i) => `
-					<li data-file="${r.file}" data-line="${r.line}" data-column="${r.column}">
+					<li data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">
 						<div class="hover-highlight"></div>
 						${utils.highlight(term, utils.htmlEscape(r.text.trim()), limit)}
 					</li>
