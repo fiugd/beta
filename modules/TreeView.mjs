@@ -428,6 +428,7 @@ const SearchBoxHTML = () => {
 		.search-results ul.line-results > li > span,
 		.search-results ul.line-results > li > div {
 			user-select: none;
+			pointer-events: none;
 		}
 		.search-results > li > div .hover-highlight,
 		.search-results > li ul > li .hover-highlight {

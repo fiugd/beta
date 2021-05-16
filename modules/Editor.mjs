@@ -1293,7 +1293,7 @@ function attachGutterHelper (){
 			classList.contains('CodeMirror-gutters') ||
 			classList.contains('gutter-elt') ||
 			classList.contains('guttermarker') ||
-			className.includes('CodeMirror-guttermarker');
+			(className.includes && className.includes('CodeMirror-guttermarker'));
 
 		if(inGutter && !gutterNoted) return addGutterHovered();
 		if(!inGutter && gutterNoted) return removeGutterHovered();
