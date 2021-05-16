@@ -471,6 +471,8 @@ const SystemDocs = (section, errors) => {
 const BLANK_CODE_PAGE = "";
 const inlineEditor = (ChangeHandler) => ({
 	code = BLANK_CODE_PAGE,
+	line: loadLine,
+	column: loadColumn,
 	name,
 	id,
 	filename,
@@ -811,6 +813,8 @@ const inlineEditor = (ChangeHandler) => ({
 		window.Editor._cleanup && window.Editor._cleanup();
 		window.Editor.loadDoc({
 			name: filename,
+			line: loadLine,
+			ch: loadColumn,
 			text,
 			mode,
 		});
@@ -1164,7 +1168,7 @@ function _Editor(callback) {
 			e.target.classList.contains("provider-add-service"),
 	});
 
-	const switchEditor = async (filename, mode) => {
+	const switchEditor = async (filename, mode, {line, column}={}) => {
 		if (mode === "systemDoc") {
 			const editorCallback = () => {
 				editorDom = document.querySelector(".CodeMirror");
@@ -1243,7 +1247,10 @@ function _Editor(callback) {
 			return;
 		}
 
-		editor({ code, name, id, filename: filename || defaultFile });
+		editor({
+			code, line, column, name, id,
+			filename: filename || defaultFile
+		});
 		editorDom = document.querySelector(".CodeMirror");
 		editorDom && editorDom.classList.remove("hidden");
 

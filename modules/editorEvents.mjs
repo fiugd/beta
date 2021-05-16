@@ -132,6 +132,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	const { name, path, next, nextPath, parent } = event.detail;
+	const { line, column } = event.detail;
 	let savedFileName;
 
 	if (firstLoad) {
@@ -168,7 +169,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		return;
 	}
 
-	switchEditor(filePath);
+	switchEditor(filePath, null, { line, column });
 };
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {
