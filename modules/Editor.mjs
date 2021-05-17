@@ -16,6 +16,7 @@ import "/shared/vendor/localforage.min.js";
 
 let editorGutter;
 let cmDom;
+let prevDoc;
 
 // call editor tabs once early so event handlers are attached
 EditorTabs()
@@ -805,10 +806,12 @@ const inlineEditor = (ChangeHandler) => ({
 	*/
 
 	const loadDocument = () => {
+		const docHasChanged = prevDoc !== filename;
+
 		cmDom = cmDom || document.querySelector('.CodeMirror');
 		editorGutter = editorGutter || document.body.querySelector('.CodeMirror-gutters');
 
-		cmDom.style.opacity = 0;
+		if(docHasChanged) cmDom.style.opacity = 0;
 		const { text } = editorOptions;
 		window.Editor._cleanup && window.Editor._cleanup();
 		window.Editor.loadDoc({
@@ -819,10 +822,11 @@ const inlineEditor = (ChangeHandler) => ({
 			mode,
 		});
 		editorCallback(null, window.Editor);
-		window.Editor.refresh();
-		setTimeout(() => {
+		if(docHasChanged) window.Editor.refresh();
+		if(docHasChanged) setTimeout(() => {
 			cmDom.style.opacity = 1;
 		}, 100);
+		prevDoc = filename;
 	};
 
 	if(window.Editor) return loadDocument();
