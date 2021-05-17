@@ -132,10 +132,11 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		const t = doc.cm.charCoords(newLine, "local").top;
 		cm.scrollTo(0, t - SCROLL_MARGIN);
 
-		setTimeout(() => {
-			const active = Array.from(document.querySelectorAll('.activeline'));
-			active.forEach(l => l.classList.remove('activeline'));
+		doc.setSelections([])
+		const active = Array.from(document.querySelectorAll('.activeline'));
+		active.forEach(l => l.classList.remove('activeline'));
 
+		setTimeout(() => {
 			cm.focus();
 			doc.setCursor(newLine);
 		}, 100);
