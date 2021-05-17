@@ -1,5 +1,10 @@
 <!-- no-select -->
 
+https://gist.github.com/xavierfoucrier/c156027fcc6ae23bcee1204199f177da
+
+https://phiresky.github.io/blog/2021/hosting-sqlite-databases-on-github-pages/
+
+
 personal information store
 --------------------------
 - I have information all over the place: bookmarks(favorites), likes, notes, email, recordings, gists
@@ -827,4 +832,10 @@ graphs on the fly
 
 # keyboard shortcuts | hotkeys
 - http://aka.ms/vscodekeybindings
+
+# data transformation | tools
+- https://jsonata.org/
+- jsonpath (and others?) - https://news.ycombinator.com/item?id=19949240
+- https://github.com/antonmedv/fx
+- https://github.com/stedolan/jq
 
