@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/16/2021, 23:58:00 PM
+5/16/2021, 00:19:00 PM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -151,7 +151,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		setTimeout(() => {
 			cm.focus();
 			doc.setCursor(newLine);
-		}, 100);
+		}, 300);
 	};
 
 	CodeMirror.defineExtension('loadDoc', async function ({

@@ -139,7 +139,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		setTimeout(() => {
 			cm.focus();
 			doc.setCursor(newLine);
-		}, 100);
+		}, 300);
 	};
 
 	CodeMirror.defineExtension('loadDoc', async function ({
