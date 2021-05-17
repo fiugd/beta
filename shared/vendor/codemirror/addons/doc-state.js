@@ -128,12 +128,16 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 	const selectLine = (cm, doc, line, ch) => {
 		const newLine = ch ? { line, ch } : line;
-		cm.focus();
-		doc.setCursor(newLine);
+
 		const t = doc.cm.charCoords(newLine, "local").top;
 		cm.scrollTo(0, t - SCROLL_MARGIN);
-	}
-	
+
+		setTimeout(() => {
+			cm.focus();
+			doc.setCursor(newLine);
+		}, 50);
+	};
+
 	CodeMirror.defineExtension('loadDoc', async function ({
 		name, text, mode, scrollTop, scrollLeft, line, ch
 	}){
