@@ -44,7 +44,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	"use strict";
 
 	let currentDoc;
-	const SCROLL_MARGIN = 50;
+	const SCROLL_MARGIN = 100;
 	const allDocs = {};
 
 	CodeMirror.defineOption('docStore', () => {}, (cm, localforage) => {

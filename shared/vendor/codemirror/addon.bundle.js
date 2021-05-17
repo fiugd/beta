@@ -1,6 +1,6 @@
 /*
 Codemirror Addon Bundle
-5/17/2021, 00:29:00 PM
+5/17/2021, 01:06:00 AM
 
 ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-invisibles, foldcode, foldgutter, brace-fold, xml-fold, indent-fold, markdown-fold, comment-fold, panel, comment
 */
@@ -56,7 +56,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	"use strict";
 
 	let currentDoc;
-	const SCROLL_MARGIN = 50;
+	const SCROLL_MARGIN = 100;
 	const allDocs = {};
 
 	CodeMirror.defineOption('docStore', () => {}, (cm, localforage) => {
