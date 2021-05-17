@@ -133,9 +133,12 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		cm.scrollTo(0, t - SCROLL_MARGIN);
 
 		setTimeout(() => {
+			const active = Array.from(document.querySelectorAll('.activeline'));
+			active.forEach(l => l.classList.remove('activeline'));
+
 			cm.focus();
 			doc.setCursor(newLine);
-		}, 50);
+		}, 100);
 	};
 
 	CodeMirror.defineExtension('loadDoc', async function ({
