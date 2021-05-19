@@ -1,4 +1,3 @@
-<!-- no-select -->
 <br>
 
 # mirrors thought/code experiment

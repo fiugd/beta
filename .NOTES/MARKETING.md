@@ -1,5 +1,3 @@
-<!-- no-select -->
-
 *The cloud service you don't have to register for.*
 *The editor / IDE you didn't have to install.*
 *The tool that will change the way you work.*

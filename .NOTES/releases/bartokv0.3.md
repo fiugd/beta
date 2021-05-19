@@ -1,3 +1,4 @@
+<!-- highlighter -->
 <h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/bartokLogo)
 

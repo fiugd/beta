@@ -1,7 +1,4 @@
-<!-- no-select -->
-<h1 style="display:none"></h1>
 ![image](https://bit.ly/fiugLandscape1)
-
 
 # bartok v0.5.0
 

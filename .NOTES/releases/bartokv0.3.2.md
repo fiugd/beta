@@ -1,3 +1,4 @@
+<!-- highlighter -->
 <h1 style="display:none"></h1>
 ![Test Image](https://bit.ly/fiugCovidPic)
 

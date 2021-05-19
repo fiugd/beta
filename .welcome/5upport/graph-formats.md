@@ -1,5 +1,3 @@
-<!-- no-select -->
-
 
 # graph file formats
 

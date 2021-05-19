@@ -1,4 +1,3 @@
-<!-- no-select -->
 
 ### 2020-12-03 - the road less traveled | painting yourself into a corner | hidden costs
 

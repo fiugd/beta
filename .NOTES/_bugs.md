@@ -1,5 +1,3 @@
-<!-- no-select -->
-
 
 - [X] files that have same name across tree will show bugs!
 

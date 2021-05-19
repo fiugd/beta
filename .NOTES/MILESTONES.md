@@ -1,5 +1,3 @@
-<!-- no-select -->
-
 
 why I open Chrome Dev Tools
 ---------------------------

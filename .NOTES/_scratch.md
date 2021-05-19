@@ -1,4 +1,3 @@
-<!-- no-select -->
 
 https://gist.github.com/xavierfoucrier/c156027fcc6ae23bcee1204199f177da
 

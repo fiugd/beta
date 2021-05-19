@@ -1,5 +1,3 @@
-<!-- no-select -->
-<h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/fiugLotusPic)
 
 # bartok v0.4

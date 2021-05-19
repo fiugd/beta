@@ -1,5 +1,3 @@
-<!-- no-select -->
-
 
 "All models are wrong, some models are useful" -- E.P. Box
 
