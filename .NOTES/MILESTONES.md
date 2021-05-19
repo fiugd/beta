@@ -1,6 +1,6 @@
 
-why I open Chrome Dev Tools | why I open Chrome Dev Tools
----------------------------------------------------------
+why I open Chrome Dev Tools | why I keep Chrome Dev Tools open
+--------------------------------------------------------------
 - [ ] troubleshoot/fix fiug code itself (Sources)
 - [ ] see console output of previewed file (Console)
 - [ ] color picking (Elements)
