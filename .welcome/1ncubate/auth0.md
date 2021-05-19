@@ -1,13 +1,20 @@
 <!-- wish this would work right now -->
 <!-- link rel="stylesheet" href="../shared.styl/::preview::/" -->
 <style>
+	.hidden { display: none !important; }
+
 	::-webkit-scrollbar { width: 5px; height: 5px; }
 	::-webkit-scrollbar-corner,
 	::-webkit-scrollbar-track { background: transparent; }
-	::-webkit-scrollbar-thumb { background: #888; }
-	::-webkit-scrollbar-thumb:hover { background: #555; }
+	::-webkit-scrollbar-thumb { background: #7773;}
 
-	.hidden { display: none !important; }
+	body .markdown-body pre:hover::-webkit-scrollbar-thumb {
+		background: #777;
+	}
+	body .markdown-body pre {
+		word-wrap: unset;
+	}
+
 	#container {
 		display: flex;
 		flex-direction: column;

@@ -1,29 +1,34 @@
 
-why I open Chrome Dev Tools
----------------------------
-- [ ] troubleshoot/fix fiug code itself
-- [ ] see console output of previewed file
-- [ ] color picking
-- [ ] dom troubleshooting
+why I open Chrome Dev Tools | why I open Chrome Dev Tools
+---------------------------------------------------------
+- [ ] troubleshoot/fix fiug code itself (Sources)
+- [ ] see console output of previewed file (Console)
+- [ ] color picking (Elements)
+- [ ] dom troubleshooting (Elements)
+- [ ] it fills a screen/pane space which is not filled by something else
+- [ ] verify network calls (Network)
+- [ ] clear application state (Application)
 
 
-why I open github.com
----------------------
+why I open github.com | why I keep github.com open
+--------------------------------------------------
 - [ ] impossible to upload a binary through fiug.dev
 - [ ] impossible to delete a file and persist to github
 - [ ] impossible to delete a folder and persist to github
+- [ ] check if gh-pages has built
 
 
-why I open VS Code
-------------------
+why I open VS Code | why I keep VS Code open
+--------------------------------------------
 - [ ] some build systems are not adapted to web: CM addon bundle, CM modes bundle
-- [X] (I don't actually keep VS Code open any more)
-- [X] service worker flow is not merged to main flow
-- [X] no search in project / folder
 
 - [ ] moving around a bunch of files doesn't work
 - [ ] awkward integration with file system
 - [ ] buggy file management
+
+- [X] (I don't actually keep VS Code open any more)
+- [X] service worker flow is not merged to main flow
+- [X] no search in project / folder
 
 - [X] doesn't recall scroll position
 - [X] doesn't recall code collapse
@@ -37,7 +42,7 @@ why I open VS Code
 -----
 
 
-basic functionality in place
+basic server functionality in place
   - hosted node services
   - CRUD for services
   - persistance for services
@@ -57,7 +62,7 @@ preview
 
 
 ----------------------------------------
-^^^ DONE ^^^
+^^^ DONE or mostly in place ^^^
 
 
 USE CASE: plain old editor with no backend
