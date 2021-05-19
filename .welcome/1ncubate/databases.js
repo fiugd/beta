@@ -1,48 +1,63 @@
 //show-preview
+const fetchJSON = async (url, opts) => await(await fetch(url, opts)).json();
+const proxy = 'https://api.allorigins.win/post?url=';
 
 /*
 
 the whole point of this is that (easy) databases become a pain point
-
 I am searching for an alternative that is really just API calls and VERY LOW friction
 
+ISSUES:
+- client story is not all that great
+	- CORS is not handled properly
+	- keys to the kingdom API keys vs granular permissions
 
-alternative to kvdb.io:
-	https://docs.thisdb.com/#introduction
-	https://github.com/orbitdb/orbit-db
-*/
-import localforage from 'https://cdn.skypack.dev/localforage';
-import KVdb from 'https://cdn.skypack.dev/kvdb.io';
 
-import { importCSS, consoleHelper } from '../.tools/misc.mjs'
-import '../shared.styl';
-consoleHelper();
-
-const store_bucket_id = 'Kvtwv91ETDbX8W8gSNNH1W';
-
-const getStore = async (bucketId) => {
-	KVdb.installLocalForageDriver(localforage)
-	const store = localforage.createInstance();
-	store.config({ bucket: KVdb.bucket(bucketId)})
-	await store.setDriver([KVdb.LOCALFORAGE_DRIVER])
-	return store;
-};
-
-const myapp = async (bucketId) => {
-	const store = await getStore(bucketId);
-
-	await store.setItem('foo', { testing: 'object' });
-	const val = await store.getItem('foo');
-
-	console.log(JSON.stringify(val,null,2));
-};
-
-myapp(store_bucket_id)
-
-/*
-
-cheap reads from static hosting:
-
+github as database:
+https://github.com/DavidBruant/github-as-a-database
 https://phiresky.github.io/blog/2021/hosting-sqlite-databases-on-github-pages/
 
+I HAVE TRIED FROM HERE: https://free-for.dev/#/?id=dbaas
+- [X] airtable.com
+- [ ] Astra
+- [ ] cloudamqp.com
+- [ ] elephantsql.com
+- [X] FaunaDB - this works, but bleh graphQL and no per-user auth
+- [ ] graphenedb.com
+- [ ] heroku.com
+- [ ] Upstash
+- [ ] MongoDB Atlas
+- [ ] redsmin.com
+- [ ] redislabs
+- [ ] MemCachier
+- [ ] scalingo.com
+- [ ] SeaTable
+- [ ] skyvia.com
+- [ ] StackBy
+- [ ] InfluxDB
+- [X] Quickmetrics - CORS issues
+- [X] restdb.io - CORS issues
+
 */
+
+
+/*
+import faunadb from 'https://cdn.skypack.dev/faunadb';
+
+(async () => {
+
+	var q = faunadb.query
+	const secret = 'fnAEJdDnBeACBuyrLXjl_v9Hs9CN-XuJRa0rp98X';
+	var client = new faunadb.Client({
+		secret,
+		domain: 'db.fauna.com',
+		scheme: 'https',
+	})
+	const res = await client.query(
+		q.Paginate(q.Collections())
+	)
+	console.log(res)
+
+})();
+*/
+

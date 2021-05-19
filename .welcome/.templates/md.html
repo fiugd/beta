@@ -293,6 +293,9 @@ useDefault: false
 </script>
 <script id="svgbob-wasm">
 (async () => {
+	const mdInputEl = document.getElementById('markdown-input');
+	if(!mdInputEl.textContent.includes('ascii-diagram')) return;
+
 	let wasm;
 	window.svgbob_convert = async function convert_string(data) {
 		while(!wasm){ await delay(1000); }
@@ -457,7 +460,7 @@ useDefault: false
 			})()
 			
 
-			if (templateInput.includes('<!-- no-select -->')) {
+			if (!templateInput.includes('<!-- highlighter -->')) {
 				return;
 			}
 
