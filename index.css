@@ -1,3 +1,8 @@
+@font-face {
+	font-family: apl385;
+	src: url(/shared/fonts/Apl385.ttf) format("truetype");
+}
+
 html.ns-draggable-cursor {
 	cursor: ns-resize;
 }
@@ -455,6 +460,10 @@ nav a.sidenav-trigger i,
 	color: #0e0e0e !important;
 }
 
+.CodeMirror-line .cm-m-apl {
+	font-family: apl385;
+}
+
 .CodeMirror {
 	/* height: 100%; */
 	/* font-size: 12px; */
@@ -731,8 +740,8 @@ notes-section.loading:after {
 	display: none !important;
 }
 
-/* ------ DARK SCROLLBAR ----------------------------------------------------------------------- */
-/* https://userstyles.org/styles/169873/global-dark-scrollbar                                    */
+/* ------ DARK SCROLLBAR ------------------------------------ */
+/* https://userstyles.org/styles/169873/global-dark-scrollbar */
 /*
 .dark-enabled ::-webkit-scrollbar
 {
