@@ -109,21 +109,19 @@ function StatusBar(){
 		if(type.name && type.name.includes('html')){
 			docType = 'html';
 		}
-		if(type === 'wat'){
-			docType = 'WebAssembly'
+		const extMap = {
+			'default': 'Plain Text',
+			'text/x-csrc': 'C',
+			'text/x-c++src': 'C++',
+			'wat': 'WebAssembly',
+			'piskel': 'Piskel',
+			'javascript': 'JavaScript',
+			'text/apl': 'APL',
+		};
+		if(extMap[type]){
+			docType = extMap[type];
 		}
-		if(type === 'piskel'){
-			docType = 'Piskel'
-		}
-		if(type === 'default'){
-			docType = 'Plain Text'
-		}
-		if(type === 'javascript'){
-			docType = 'JavaScript'
-		}
-		if(type === 'apl'){
-			docType = 'APL'
-		}
+		if(type ==)
 		while(docType.toString().includes('object')){
 			if(docType.name){
 				docType = docType.name;
