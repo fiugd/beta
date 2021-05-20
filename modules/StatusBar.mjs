@@ -121,6 +121,9 @@ function StatusBar(){
 		if(type === 'javascript'){
 			docType = 'JavaScript'
 		}
+		if(type === 'apl'){
+			docType = 'APL'
+		}
 		while(docType.toString().includes('object')){
 			if(docType.name){
 				docType = docType.name;
