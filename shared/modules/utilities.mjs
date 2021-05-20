@@ -1,26 +1,28 @@
 function codemirrorModeFromFileType(fileType){
 	const conversions = {
 		assemblyscript: { name: 'javascript', typescript: true, assemblyscript: true },
-		apl: { name: 'apl', mimeType: 'text/apl' },
+		apl: 'text/apl',
 		typescript: { name: 'javascript', typescript: true },
 		react: 'jsx',
 		svg: 'xml',
 		html: {
 			name: 'htmlmixed',
 			tags: {
-				style: [["type", /^text\/(x-)?scss$/, "text/x-scss"],
-								[null, null, "css"]],
+				style: [
+					["type", /^text\/(x-)?scss$/, "text/x-scss"],
+					[null, null, "css"]
+				],
 				custom: [[null, null, "customMode"]]
 			}
 		},
-		sass: { name: 'css', mimeType: 'text/x-scss' },
-		less: { name: 'css', mimeType: 'text/x-less' },
+		sass: 'text/x-scss',
+		less: 'text/x-less',
 		image: { name  : 'default' },
 		bat: { name: 'default' },
 		mjs: { name: 'javascript' },
 		json: { name: 'javascript', json: true },
-		c: { name: 'c', mimeType: 'text/x-csrc' },
-		cpp: { name: 'cpp', mimeType: 'text/x-c++src' }
+		c: 'text/x-csrc',
+		cpp: 'text/x-c++src'
 	};
 	//console.log({ fileType, conversions: conversions[fileType] });
 	return conversions[fileType] || fileType;
