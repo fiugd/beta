@@ -447,7 +447,7 @@ nav a.sidenav-trigger i,
 
 .cm-m-apl.cm-comment,
 .cm-m-brainfuck.cm-comment {
-	color: #8b9c77 !important;
+/* 	color: #8b9c77 !important; */
 }
 
 .cm-m-apl.cm-atom,
