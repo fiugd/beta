@@ -8,6 +8,7 @@
 .icon-base-pseudo,
 .icon-r:before,
 .icon-apple:before,
+.icon-apl:before,
 .icon-argdown:before,
 .icon-asm:before,
 .icon-audio:before,
@@ -198,6 +199,10 @@
 .icon-apple:before {
   content: '\E002';
   color: white;
+}
+.icon-apl:before {
+  content: "\E013";
+  color: #a074c4
 }
 .icon-argdown:before {
   content: '\E003';
