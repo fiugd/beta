@@ -16,11 +16,14 @@ h
 ⍝Typing h causes h's value to be printed to be printed.
 
 
-⍝ fibonacci
-fib ← {
-	⍵<2:⍵ ⋄ (∇⍵-1)+∇⍵-2
+⍝ fibo from replit examples 7
+
+fib←{
+	⍵∊0 1:⍵
+	+/∇¨⍵-1 2
 }
 fib ¨ ⍳ 10
+
 
 ⍝ all APL chars in unicode
 ⍝ ¯ × ÷ ∘ ∣ ∼ ≠ ≤ ≥ ≬ ⌶ ⋆ ⌾ ⍟ ⌽ ⍉ ⍝ ⍦ ⍧ ⍪ ⍫ ⍬ ⍭ ← ↑ → ↓ ∆ ∇ ∧ ∨ ∩ ∪ ⌈ ⌊ ⊤ ⊥ ⊂ ⊃ ⌿ ⍀ ⍅ ⍆ ⍏ ⍖ ⍊ ⍑ ⍋ ⍒ ⍎ ⍕ ⍱ ⍲ ○ ⍳ ⍴ ⍵ ⍺ ⍶ ⍷ ⍸ ⍹ ⍘ ⍙ ⍚ ⍛ ⍜ ⍮ ¨ ⍡ ⍢ ⍣ ⍤ ⍥ ⍨ ⍩
