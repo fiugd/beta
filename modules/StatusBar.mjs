@@ -121,7 +121,6 @@ function StatusBar(){
 		if(extMap[type]){
 			docType = extMap[type];
 		}
-		if(type ==)
 		while(docType.toString().includes('object')){
 			if(docType.name){
 				docType = docType.name;
