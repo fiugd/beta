@@ -762,15 +762,16 @@ fast growth:
 	- [ ] Assembly     149%
 	- [X] Go           147%
 
-#### web workers
-	- this is a pattern I would like to be able to take for granted
-	- https://github.com/crosshj/experiments/commit/3a782bfe4e6b2184b5c5fbac204068f24f33aece
-	- https://github.com/crosshj/experiments/blob/gh-pages/svg/engine-src/expressionEngine.js#L211
-	- https://github.com/crosshj/experiments/blob/gh-pages/rangers.advent/rangers.advent.js#L507
-	- https://github.com/crosshj/experiments/blob/gh-pages/encryt-web-worker/index.html#L63
+web workers
+===========
+- this is a pattern I would like to be able to take for granted
+- https://github.com/crosshj/experiments/commit/3a782bfe4e6b2184b5c5fbac204068f24f33aece
+- https://github.com/crosshj/experiments/blob/gh-pages/svg/engine-src/expressionEngine.js#L211
+- https://github.com/crosshj/experiments/blob/gh-pages/rangers.advent/rangers.advent.js#L507
+- https://github.com/crosshj/experiments/blob/gh-pages/encryt-web-worker/index.html#L63
 
-	- paint worklet: https://developers.google.com/web/updates/2018/01/paintapi
-	- https://bitsofco.de/web-workers-vs-service-workers-vs-worklets/
+- paint worklet: https://developers.google.com/web/updates/2018/01/paintapi
+- https://bitsofco.de/web-workers-vs-service-workers-vs-worklets/
 
 
 webgpu
