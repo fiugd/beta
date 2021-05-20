@@ -700,8 +700,10 @@ web assembly
 	- https://github.com/appcypher/awesome-wasm-runtimes - seems very server bound
 
 
-syntax highlighting, etc
-========================
+languages, syntax highlighting, etc
+===================================
+
+- http://rigaux.org/language-study/diagram.html <<< COOL LANGUAGE MAP!
 
 - https://highlightjs.org/static/demo/
 - https://highlightjs.org/usage/
