@@ -74,19 +74,15 @@
 
 	async function getCodeFromStorageUsingTree(tree, fileStore, serviceName) {
 		const flattenTree = this.utils.flattenTree;
-		// flatten the tree (include path)
-		// pass back array of  { name: filename, code: path, path }
+		// returns array of  { name: filename, code: path, path }
 		const files = flattenTree(tree);
 
 		const allFilesFromService = {};
-		await fileStore.iterate((value, key) => {
-			if (key.startsWith(`./${serviceName}/`)) {
-				allFilesFromService[key] = {
-					key,
-					untracked: true,
-				};
-			}
-		});
+		const fileStoreKeys = await fileStore.keys();
+		for(const key of fileStoreKeys){
+			if (!key.startsWith(`./${serviceName}/`)) continue;
+			allFilesFromService[key] = { key, untracked: true};
+		}
 
 		for (let index = 0; index < files.length; index++) {
 			const file = files[index];
