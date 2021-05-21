@@ -299,7 +299,7 @@
 					console.log(`
 					Storage: using ${formatBytes(estimate.usage)} out of ${formatBytes(estimate.quota)}.
 					Memory: using ${formatBytes(performance.memory.usedJSHeapSize)}
-					`);
+					`.replace(/^[\t]+/gm, ''));
 				}
 				memoryStats();
 			});
