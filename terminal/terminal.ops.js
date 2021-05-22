@@ -1,5 +1,26 @@
 import { chalk, jsonColors } from './terminal.utils.js';
 
+const cacheName = 'terminal-cache'
+
+export const readSourceDir = async (dir) => {
+	const site = document.location.origin;
+	const root = site.includes('beta')
+		? `https://api.github.com/repos/crosshj/fiug-beta`
+		: `https://api.github.com/repos/crosshj/fiug`;
+	const githubContentsUrl = `${root}/contents${dir||''}?ref=gh-pages`;
+	let response, error;
+	try {
+		const cache = await caches.open(cacheName);
+		const match = await cache.match(githubContentsUrl)
+			|| await cache.add(githubContentsUrl)
+			|| await cache.match(githubContentsUrl);
+		response = await match.json();
+	} catch(e) {
+		error = e.message;
+	}
+	return { response, error };
+};
+
 const commands = [
 	{
 		name: 'PrintWorkingDir',
@@ -160,7 +181,7 @@ const readFile = async (args) => {
 	return { response, error };
 };
 
-const manualCommands = { readFile };
+const manualCommands = { readFile, readSourceDir };
 
 const changeFolder = (state, folderPath) => {
 	if(!state.cwd || !state.service) return;
@@ -300,3 +321,5 @@ const GetOps = (term, comm) => {
 };
 
 export default GetOps;
+
+
