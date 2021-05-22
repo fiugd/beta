@@ -512,6 +512,7 @@ PREVIEW
 
 UNSORTED
 ========
+- https://thiscouldbebetter.github.io/ - lots of cool stuff here; I like this approach of trying everything
 - https://gist.cafe/ - run code snippets on your server, embed in web
 - how to implement a programming language
 	- http://lisperator.net/pltut/
