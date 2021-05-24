@@ -19,6 +19,13 @@ export const readSourceDir = async (dir) => {
 	return { response, error };
 };
 
+const updateSWCache = (bins) => {
+	console.warn(`
+		TODO: add files to SW cache under /_/modules/terminal/bin
+		this avoids having to add these to service.manifest.json
+	`.replace(/^\t+/gm, '').trim();
+}
+
 class ProcessWorker {
 	header = `
 		console.log = (...log) => postMessage({
@@ -65,9 +72,17 @@ class ProcessWorker {
 		const promise = new Promise(async (resolve) => {
 			const worker = await this.worker;
 			worker.onmessage = (e) => {
-				const { result, log, exit } = e.data;
+				const { result, log, exit, error } = e.data;
 				log && logger(log);
 				result && logger(result);
+				if(error){
+					logger(error);//should be red?
+					worker.onmessage = undefined;
+					logger('\n')
+					done();
+					resolve();
+					return;
+				}
 				if(exit){
 					worker.onmessage = undefined;
 					logger('\n')
@@ -114,6 +129,7 @@ class DynamicOp {
 
 const GetDynamicOps = async (term, comm, getCwd) => {
 	const bins = await readSourceDir('/terminal/bin');
+	updateSWCache(bins);
 	const ops = [];
 	for(let i=0, len=bins.response.length; i<len; i++){
 		const {name} = bins.response[i];
