@@ -32,8 +32,6 @@ const callWithRetry = async (fn, depth = 0, max) => {
 	}
 }
 
-
-
 setTimeout(async () => {
 	try {
 		const history = new History({ chalk, setBuffer, getBuffer });
