@@ -36,7 +36,7 @@ setTimeout(async () => {
 	try {
 		const history = new History({ chalk, setBuffer, getBuffer });
 		const coreOps = GetOps(term, comm);
-		const pwdCommand = ops.find(x => x.keyword === 'pwd') || {};
+		const pwdCommand = coreOps.find(x => x.keyword === 'pwd') || {};
 		const getCwd = async () => {
 			const { response: cwd } = await pwdCommand.invokeRaw();
 			if(!cwd) throw new Error('cwd not found');
