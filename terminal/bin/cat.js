@@ -5,9 +5,8 @@ const args = [{
 
 const operation = async (args) => {
 	const { file, cwd } = args;
-	return await (await fetch(`${cwd}/${file}`)).text();
+	return await (await fetch(`${location.origin}/${cwd}/${file}`)).text();
 };
-
 
 export default class Node {
 	name = 'Concat';
