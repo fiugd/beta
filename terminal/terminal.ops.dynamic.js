@@ -77,19 +77,22 @@ class ProcessWorker {
 }
 
 async function invoke(args, done){
+	const cwd = await getCwd();
 	const logger = (msg) => this.term.write(msg);
 	logger('\n');
-	await this.process.run(args, logger, done);
+	await this.process.run({ cwd, ...args }, logger, done);
 }
 
 function exit(){}
 
 class DynamicOp {
-	constructor(url, term, comm){
+	constructor(url, term, comm, getCwd){
 		this.term = term;
 		this.comm = comm;
 		this.invoke = invoke.bind(this);
 		this.exit = exit.bind(this);
+		this.getCwd = getCwd;
+
 		const process = new ProcessWorker(url);
 		this.process = process;
 		this.worker = process.worker;
@@ -104,14 +107,14 @@ class DynamicOp {
 	}
 }
 
-const GetDynamicOps = async (term, comm) => {
+const GetDynamicOps = async (term, comm, getCwd) => {
 	const bins = await readSourceDir('/terminal/bin');
 	const ops = [];
 	for(let i=0, len=bins.response.length; i<len; i++){
 		const {name} = bins.response[i];
 		const op = await new DynamicOp(
 			`./bin/${name}`,
-			term, comm
+			term, comm, getCwd
 		);
 		ops.push(op);
 	}

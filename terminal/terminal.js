@@ -35,21 +35,24 @@ const callWithRetry = async (fn, depth = 0, max) => {
 setTimeout(async () => {
 	try {
 		const history = new History({ chalk, setBuffer, getBuffer });
-		const dynamic = await GetDynamicOps(term, comm);
-		ops = [
-			...GetOps(term, comm),
-			history, new Watch(term, comm), Git(term, comm),
-			...dynamic,
-		];
-		const lib = Lib({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm });
-		const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
-		term._attachHandlers({ bubbleHandler, keyHandler });
-		
+		const coreOps = GetOps(term, comm);
 		const pwdCommand = ops.find(x => x.keyword === 'pwd') || {};
 		const getCwd = async () => {
 			const { response: cwd } = await pwdCommand.invokeRaw();
 			if(!cwd) throw new Error('cwd not found');
 		};
+		const dynamic = await GetDynamicOps(term, comm, getCwd);
+		ops = [
+			...coreOps,
+			history, new Watch(term, comm), Git(term, comm),
+			...dynamic,
+		];
+		const lib = Lib({
+			term, ops, setBuffer, getBuffer, setRunning, getRunning, comm
+		});
+		const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
+		term._attachHandlers({ bubbleHandler, keyHandler });
+
 		await callWithRetry(getCwd);
 
 		term.write('\n');
