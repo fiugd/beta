@@ -160,7 +160,7 @@ const readFile = async (args) => {
 	return { response, error };
 };
 
-const manualCommands = { readFile, readSourceDir };
+const manualCommands = { readFile };
 
 const changeFolder = (state, folderPath) => {
 	if(!state.cwd || !state.service) return;
