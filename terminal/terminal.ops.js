@@ -28,7 +28,8 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, required: true }
 		],
-		map: ({ directory }) => ({ folderName: directory })
+		map: ({ directory }) => ({ folderName: directory, parent: cwd }),
+		mapResponse: () => '',
 	},
 	{
 		name: 'List',
