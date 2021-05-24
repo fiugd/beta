@@ -1,7 +1,7 @@
 const cacheName = 'terminal-cache'
 
 export const readSourceDir = async (dir) => {
-	const site = document.location.origin;
+	const site = location.origin;
 	const root = site.includes('beta')
 		? `https://api.github.com/repos/crosshj/fiug-beta`
 		: `https://api.github.com/repos/crosshj/fiug`;
@@ -61,7 +61,7 @@ class ProcessWorker {
 				{ type: "text/javascript" }
 			);
 			const worker = new Worker(
-				window.URL.createObjectURL(blob),
+				URL.createObjectURL(blob),
 				{ name: this.url.split('/').pop() }
 			);
 			resolve(worker);
