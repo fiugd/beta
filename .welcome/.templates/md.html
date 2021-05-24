@@ -203,7 +203,7 @@ useDefault: false
 </style>
 
 <body>
-	<div id="container">
+	<div id="container" style="display:none;">
 		<div class="no-preview">No preview available.</div>
 	</div>
 </body>
@@ -514,12 +514,14 @@ useDefault: false
 	const doc = document.location.pathname.replace('/::preview::/', '');
 	const storageName = 'scrollpos-'+doc;
 	let container;
-	document.addEventListener("DOMContentLoaded", function (event) {
-		container = document.querySelector('#container')
+
+	window.onload = (event) => {
+		container = document.querySelector('#container');
+		container.style.display = '';
 		const scrollpos = sessionStorage.getItem(storageName);
 		if (!scrollpos) return;
 		container.scrollTo(0, scrollpos);
-	});
+	};
 
 	window.addEventListener("beforeunload", function (e) {
 		sessionStorage.setItem(storageName, container.scrollTop);
