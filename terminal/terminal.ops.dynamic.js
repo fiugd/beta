@@ -23,7 +23,7 @@ const updateSWCache = (bins) => {
 	console.warn(`
 		TODO: add files to SW cache under /_/modules/terminal/bin
 		this avoids having to add these to service.manifest.json
-	`.replace(/^\t+/gm, '').trim();
+	`.replace(/^\t+/gm, '').trim());
 }
 
 class ProcessWorker {
