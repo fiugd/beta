@@ -1,8 +1,9 @@
 const help = () => {};
 
 const operation = async (...args) => {
-	console.log(args);
-	return 'TODO: node - should run a file'
+	const { file, cwd } = args;
+	const scriptText = await (await fetch(`${location.origin}/${cwd}/${file}`)).text();
+	return eval(scriptText);
 };
 
 export default class Node {
