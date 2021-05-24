@@ -1,1 +1,4 @@
-console.log('test test');
+(() => {
+	console.log('log test')
+	return 'test test';
+})();
