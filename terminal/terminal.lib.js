@@ -25,7 +25,7 @@ ${op}: missing argument${missing.length?'s':''}: ${missing.join(', ')}
 Try '${op} --help' for more information.
 `;
 
-const parseArgs = (model, argString) => {
+export const parseArgs = (model, argString) => {
 	if(!model?.args) return argString;
 	if(argString.includes('-h') || argString.includes('-h')) return { help: true };
 	const options = {
