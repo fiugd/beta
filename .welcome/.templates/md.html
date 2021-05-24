@@ -509,18 +509,20 @@ useDefault: false
 
 		})();
 </script>
-	
+
 <script>
 	const doc = document.location.pathname.replace('/::preview::/', '');
 	const storageName = 'scrollpos-'+doc;
+	let container;
 	document.addEventListener("DOMContentLoaded", function (event) {
+		container = document.querySelector('#container')
 		const scrollpos = sessionStorage.getItem(storageName);
 		if (!scrollpos) return;
-		window.scrollTo(0, scrollpos);
+		container.scrollTo(0, scrollpos);
 	});
 
 	window.addEventListener("beforeunload", function (e) {
-		sessionStorage.setItem(storageName, window.scrollY);
+		sessionStorage.setItem(storageName, container.scrollTop);
 	});
 </script>
 
