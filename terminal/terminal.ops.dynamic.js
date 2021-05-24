@@ -78,6 +78,7 @@ class ProcessWorker {
 
 async function invoke(args, done){
 	const logger = (msg) => this.term.write(msg);
+	logger('\n');
 	await this.process.run(args, logger, done);
 }
 
