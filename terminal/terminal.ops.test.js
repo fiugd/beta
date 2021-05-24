@@ -9,16 +9,12 @@ import {parseArgs} from './terminal.lib.js'
 	const comm = () => {};
 	const ops = await GetDynamicOps(term, comm);
 	
-	// const args = {
-	// 	"_unknown":["-w"],
-	// 	file: "foo.js"
-	// };
 	const logger = console.log;
 	const done = () => console.log('finished');
 	
 	const thisOp = ops[1];
-	console.log({ argModel: (await thisOp.module).args, thisOp })
-	const args = parseArgs(thisOp, 'foo.js')
-	console.log({ args })
-	console.log(await thisOp.invoke(args, logger, done));
+	const args = parseArgs(thisOp, '-w foo.js')
+	thisOp.invoke(args, done);
+	thisOp.invoke(args, done)
 })();
+

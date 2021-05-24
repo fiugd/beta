@@ -1,23 +1,24 @@
-// const operation = async (args) => {
-// 	const { file, cwd } = args;
-// 	return await (await fetch(`${cwd}/${file}`)).text();
-// };
-
-const help = () => {};
+const description = 'Concatenate(print) FILE contents to standard output.';
+const args = [{
+	name: 'file', type: String, defaultOption: true, required: true
+}];
 
 const operation = async (args) => {
 	const { file, cwd } = args;
 	return await (await fetch(`${cwd}/${file}`)).text();
-}
+};
+
 
 export default class Node {
+	name = 'Concat';
 	keyword = 'cat2';
 	listenerKeys = [];
-
-	args = []
+	description,
+	usage: '[FILE]',
+	args,
 
 	constructor(){
 		this.operation = operation;
-		//this.help = () => help;
+		this.help = () => usage;
 	}
 }

@@ -1,7 +1,8 @@
 const help = () => {};
 
 const operation = async (...args) => {
-	return 'TODO: node'
+	console.log(args);
+	return 'TODO: node - should run a file'
 };
 
 export default class Node {
@@ -9,9 +10,9 @@ export default class Node {
 	listenerKeys = [];
 
 	args = [{
-		name: 'file', alias: 'f', type: String, default: true, required: true
+		name: 'file', alias: 'f', type: String, defaultOption: true, required: true
 	}, { 
-		name: 'watch', alias: 'w', type: String, required: false 
+		name: 'watch', alias: 'w', type: Boolean, required: false 
 	}]
 
 	constructor(){

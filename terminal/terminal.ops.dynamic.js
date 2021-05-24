@@ -32,8 +32,8 @@ class ProcessWorker {
 			} catch(e){
 				error = e.message;
 			}
-			postMessage({ result, error });
-			self.close()
+			const exit = !e.data.watch;
+			postMessage({ result, error, exit });
 		}
 	`.replace(/^		/gm, '').trim()
 
@@ -77,7 +77,6 @@ class ProcessWorker {
 }
 
 async function invoke(args, done){
-	const worker = await this.worker;
 	const logger = this.term.write;
 	await this.process.run(args, logger, done);
 }
@@ -93,21 +92,31 @@ class DynamicOp {
 		const process = new ProcessWorker(url);
 		this.process = process;
 		this.worker = process.worker;
-		(async () => {
+		const thisOp = this;
+		return new Promise(async (resolve) => {
 			const module = await process.module;
-			this.args = module.args
-			this.keyword = module.keyword;
-			this.help = () => module.usage;
-		})();
+			thisOp.args = module.args
+			thisOp.keyword = module.keyword;
+			thisOp.help = () => module.usage;
+			resolve(thisOp);
+		});
 	}
 }
 
 const GetDynamicOps = async (term, comm) => {
 	const bins = await readSourceDir('/terminal/bin');
-	const workers = bins?.response?.map(x => {
-		const op = new DynamicOp('./bin/'+x.name, term, comm);
-		return op;
-	});
-	return workers;
+	const ops = [];
+	for(let i=0, len=bins.response.length; i<len; i++){
+		const {name} = bins.response[i];
+		const op = await new DynamicOp(
+			`./bin/${name}`,
+			term, comm
+		);
+		ops.push(op);
+	}
+	//TODO: should attach a listener which watches for file changes
+	//when invoke is called with watch arg, should register with this listener
+	//then when file changes, will refresh
+	return ops;
 }
 export default GetDynamicOps
