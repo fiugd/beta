@@ -91,7 +91,7 @@ const commands = [
 	{
 		name: 'Touch',
 		keyword: "touch",
-		description: `Officially, updates access time of FILE. Here, creates FILE.`,
+		description: `Official usage: updates timestamp of FILE. Used here: creates a FILE; does not affect timestamp of FILE.`,
 		event: "addFile",
 		usage: '[FILE]',
 		args: [
