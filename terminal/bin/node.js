@@ -3,9 +3,8 @@ const help = () => {};
 const operation = async (args) => {
 	const { file, cwd } = args;
 	const scriptText = await (await fetch(`${location.origin}/${cwd}/${file}`)).text();
-	const header = 'console.log = (...log) => postMessage({ log });';
 	//TODO: should run script in worker that immediately exits versus eval
-	return eval(header+scriptText);
+	return eval(scriptText);
 };
 
 export default class Node {
