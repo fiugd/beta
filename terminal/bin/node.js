@@ -1,6 +1,6 @@
 const help = () => {};
 
-const operation = async (...args) => {
+const operation = async (args) => {
 	const { file, cwd } = args;
 	const scriptText = await (await fetch(`${location.origin}/${cwd}/${file}`)).text();
 	return eval(scriptText);
