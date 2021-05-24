@@ -13,9 +13,9 @@ export default class Node {
 	name = 'Concat';
 	keyword = 'cat2';
 	listenerKeys = [];
-	description,
-	usage: '[FILE]',
-	args,
+	description = description;
+	usage = '[FILE]';
+	args = args;
 
 	constructor(){
 		this.operation = operation;
