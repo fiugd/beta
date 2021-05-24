@@ -28,7 +28,7 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, required: true }
 		],
-		map: ({ directory }) => ({ folderName: directory, parent: cwd }),
+		map: ({ directory, cwd }) => ({ folderName: directory, parent: cwd }),
 		mapResponse: () => '',
 	},
 	{
@@ -42,6 +42,7 @@ const commands = [
 			{ name: 'all', type: Boolean, alias: 'a' },
 			{ name: 'long', type: Boolean, alias: 'l' },
 		],
+		map: ({ directory, cwd }) => ({ directory: directory || cwd }),
 		mapResponse: (res) => {
 			return res
 				.filter(x => x)
