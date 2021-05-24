@@ -68,27 +68,20 @@ class ProcessWorker {
 		});
 	}
 	run(args, logger, done){
-
 		const promise = new Promise(async (resolve) => {
 			const worker = await this.worker;
+			const exitWorker = () => {
+				worker.onmessage = undefined;
+				logger('\n')
+				done();
+				resolve();
+			};
 			worker.onmessage = (e) => {
 				const { result, log, exit, error } = e.data;
 				log && logger(log);
 				result && logger(result);
-				if(error){
-					logger(error);//should be red?
-					worker.onmessage = undefined;
-					logger('\n')
-					done();
-					resolve();
-					return;
-				}
-				if(exit){
-					worker.onmessage = undefined;
-					logger('\n')
-					done();
-					resolve();
-				}
+				error && logger('ERROR: ' + error);//should be red?
+				if(exit || error) exitWorker();
 			};
 			worker.postMessage(args);
 		});
