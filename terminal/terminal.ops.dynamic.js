@@ -51,7 +51,10 @@ class ProcessWorker {
 				[ this.header, '\n\n', body, '\n\n',this.footer ],
 				{ type: "text/javascript" }
 			);
-			const worker = new Worker(window.URL.createObjectURL(blob));
+			const worker = new Worker(
+				window.URL.createObjectURL(blob),
+				{ name: this.url.split('/').pop() }
+			);
 			resolve(worker);
 		});
 	}
