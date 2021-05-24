@@ -509,5 +509,19 @@ useDefault: false
 
 		})();
 </script>
+	
+<script>
+	const doc = document.location.pathname.replace('/::preview::/', '');
+	const storageName = 'scrollpos-'+doc;
+	document.addEventListener("DOMContentLoaded", function (event) {
+		const scrollpos = sessionStorage.getItem(storageName);
+		if (!scrollpos) return;
+		window.scrollTo(0, scrollpos);
+	});
+
+	window.addEventListener("beforeunload", function (e) {
+		sessionStorage.setItem(storageName, window.scrollY);
+	});
+</script>
 
 </html>

@@ -3,6 +3,20 @@
 
 ### bartok v0.4.3
 
+- [ ] uploading images + binary files
+- [ ] hook up editor context menu
+- [ ] tab doesn't appear sometimes even though editor loads
+	- need details about when this occurs
+- [ ] clean up for editor document state
+- [ ] make sure editor undo history works properly
+- [ ] reveal in sidebar is broken
+- [ ] delay occurs before editor loads sometimes
+	- need details about when this occurs
+- [ ] search has performance issues
+- [ ] preview should honor selected file when service switched
+- [ ] recall scroll position when markdown preview (for example) updates
+
+
 ---
 
 - [ ] ls command needs to use the folder it was passed versus current state
@@ -16,7 +30,6 @@
 ---
 
 - [ ] rm command works properly for folder
-- [ ] md/mkdir command works properly
 - [ ] editor tabs: on file delete, close tab
 - [ ] mv command works properly
 - [ ] cp command works properly
@@ -26,7 +39,12 @@
 - [ ] paths which include ".." or "." work for all commands
 
 ---
-
+- [X] clicking on a search result opens file at that line
+- [X] base href in html, added in service worker
+- [X] md/mkdir command works properly
+- [X] syntax highlight broken with editor updates/revert
+- [X] re-enable/fix editor updates from past
+	- [X] editor document state
 - [X] cd ../sibling results in parent//sibling (at 1 up from root)
 - [X] terminal has its own cwd not dependent on app cwd
 - [X] cat command works properly

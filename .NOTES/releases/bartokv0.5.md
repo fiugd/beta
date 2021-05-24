@@ -2,7 +2,6 @@
 
 # bartok v0.5.0
 
-- [ ] open file from file search
 - [ ] click to select file from command palette opener
 - [ ] on repo "clone", don't pull all files
   - instead wait for pull or pull as needed)

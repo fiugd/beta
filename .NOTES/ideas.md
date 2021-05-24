@@ -74,3 +74,22 @@ _a running list of all the explorations I would like to dig deeper into_
 - can be globbed together
 - can be shared
 - will remind me to come back to it
+
+### wish
+- have a team or multiple teams
+- have assistants or managers
+
+
+### themes of ideas I get
+- isolation chamber
+- computing without senses (or limited senses)
+- visuals
+- audio
+- games
+- money | investment | markets | economics
+- parallel computation
+- machine learning
+- lifestyle | workflow
+- analysis: data and systems
+- robotics
+- think tank | crowd source
