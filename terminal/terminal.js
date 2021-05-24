@@ -37,7 +37,7 @@ const callWithRetry = async (fn, depth = 0, max) => {
 setTimeout(async () => {
 	try {
 		const history = new History({ chalk, setBuffer, getBuffer });
-		const dynamic = await getDynamicOps(term, comm);
+		const dynamic = await GetDynamicOps(term, comm);
 		ops = [
 			...GetOps(term, comm),
 			history, new Watch(term, comm), Git(term, comm),
