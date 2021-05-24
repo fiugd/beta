@@ -19,4 +19,4 @@
 	console.log(thisOp)
 	await thisOp.invoke(args, done);
 	await thisOp.invoke(args, done)
-})(); 
+})();

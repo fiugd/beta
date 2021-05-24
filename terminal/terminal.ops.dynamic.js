@@ -50,30 +50,33 @@ class ProcessWorker {
 		this.url = url;
 		let moduleResolver;
 		this.module = new Promise((resolve) => { moduleResolver = resolve; });
-		this.worker = new Promise(async (resolve) => {
+		let blobResolver;
+		this.blob = new Promise((resolve) => { blobResolver = resolve; });
+		(async (resolve) => {
 			const module = new (await import(url)).default;
 			moduleResolver(module);
 			const body = `
-			const operation = ${module.operation.toString()};
-			`.replace(/^			/gm, '');
+				const operation = ${module.operation.toString()};
+			`.replace(/^				/gm, '');
 			const blob = new Blob(
 				[ this.header, '\n\n', body, '\n\n',this.footer ],
 				{ type: "text/javascript" }
 			);
+			blobResolver(blob);
+		})();
+	}
+	run(args, logger, done){
+		const promise = new Promise(async (resolve) => {
+			const blob = await this.blob;
 			const worker = new Worker(
 				URL.createObjectURL(blob),
 				{ name: this.url.split('/').pop() }
 			);
-			resolve(worker);
-		});
-	}
-	run(args, logger, done){
-		const promise = new Promise(async (resolve) => {
-			const worker = await this.worker;
 			const exitWorker = () => {
 				worker.onmessage = undefined;
 				logger('\n')
 				done();
+				worker.terminate();
 				resolve();
 			};
 			worker.onmessage = (e) => {
