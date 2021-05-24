@@ -21,7 +21,9 @@ export const readSourceDir = async (dir) => {
 
 class ProcessWorker {
 	header = `
-		console.log = (...log) => postMessage({ log: log.join('')+'\n' });
+		console.log = (...log) => postMessage({
+			log: log.join('')+'\\n'
+		});
 	`.replace(/^		/gm, '').trim()
 	
 	footer = `
