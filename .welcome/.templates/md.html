@@ -520,7 +520,13 @@ useDefault: false
 		container.style.display = '';
 		const scrollpos = sessionStorage.getItem(storageName);
 		if (!scrollpos) return;
-		container.scrollTo(0, scrollpos);
+
+		Promise.all(Array.from(document.images)
+			.filter(img => !img.complete)
+			.map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+			.then(() => {
+				container.scrollTo(0, scrollpos);
+			});
 	};
 
 	window.addEventListener("beforeunload", function (e) {
