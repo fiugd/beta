@@ -40,6 +40,7 @@ setTimeout(async () => {
 		const getCwd = async () => {
 			const { response: cwd } = await pwdCommand.invokeRaw();
 			if(!cwd) throw new Error('cwd not found');
+			return cwd;
 		};
 		const dynamic = await GetDynamicOps(term, comm, getCwd);
 		ops = [
