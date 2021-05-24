@@ -195,6 +195,14 @@
 			"route": "./_/modules/terminal/terminal.xterm.js",
 			"source": "terminal/terminal.xterm.js"
 		},
+		{
+			"route": "./_/modules/terminal/bin/cat.js",
+			"source": "terminal/bin/cat.js"
+		},
+		{
+			"route": "./_/modules/terminal/bin/node.js",
+			"source": "terminal/bin/node.js"
+		},
 		"NOTE: -- TERMINAL UI /END --",
 
 		"NOTE: modules",
