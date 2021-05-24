@@ -5,7 +5,11 @@ const args = [{
 
 const operation = async (args) => {
 	const { file, cwd } = args;
-	return await (await fetch(`${location.origin}/${cwd}/${file}`)).text();
+	const fileContents = await (await fetch(`${location.origin}/${cwd}/${file}`)).text()
+	const lastChar = fileContents[fileContents.length-1]
+	return lastChar === '\n'
+		? fileContents.slice(0, -1)
+		: fileContents;
 };
 
 export default class Node {
