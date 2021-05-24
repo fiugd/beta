@@ -180,6 +180,10 @@
 			"source": "terminal/terminal.ops.js"
 		},
 		{
+			"route": "./_/modules/terminal/terminal.ops.dynamic.js",
+			"source": "terminal/terminal.ops.dynamic.js"
+		},
+		{
 			"route": "./_/modules/terminal/terminal.utils.js",
 			"source": "terminal/terminal.utils.js"
 		},
