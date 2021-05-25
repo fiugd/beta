@@ -115,10 +115,10 @@ image processing
 ----------------
 - demo driven development, versus ticket or changelog driven
 - delivery versus debt (false dichotomy?)
-- *.todo, *.slides, *.graph - all services should come with "native" support for these
+- [ ] *.todo, *.slides, *.graph - all services should come with "native" support for these
 	- graphs - https://en.wikipedia.org/wiki/Category:Infographics
-- *.settings - treat settings as templated files with a common UI?
-- connect git
+- [ ] *.settings - treat settings as templated files with a common UI?
+- [X] connect git
 	- https://github.com/isomorphic-git/isomorphic-git
 	- real/beefy FS abstraction layer
 
@@ -230,25 +230,25 @@ can currupt previously saved data.
 ====================
 
 recall all things
-	- [X] editor tabs (remember open, selected, and scroll position)
-	- [X] editor (load last loaded file)
-	- [X] preview (load last loaded preview)
-	- [X] panes (window width same as previous, recall positions)
+- [X] editor tabs (remember open, selected, and scroll position)
+- [X] editor (load last loaded file)
+- [X] preview (load last loaded preview)
+- [X] panes (window width same as previous, recall positions)
 
 connect all context menu items
-	- huge list...
+- huge list...
 
 create|update|delete for service API in serviceHandler
-	- need this before service worker fork can be merged
+- need this before service worker fork can be merged
 
 reset page for ui
-	- [X] kill tree cache (sessionStorage)
-	- [X] kill all the recalled things (above)
-	- [ ] kill service worker cache (or maybe don't use this)
-	- [X] kill service worker (which will be reloaded with boot())
-	- [X] kill moduleCache (localStorage) (maybe should be sessionStorage)
-	- [X] reloadServices true versus false
-	- [ ] kill/reload serviceHandler
+- [ ] kill service worker cache (or maybe don't use this)
+- [ ] kill/reload serviceHandler
+- [X] kill tree cache (sessionStorage)
+- [X] kill all the recalled things (above)
+- [X] kill service worker (which will be reloaded with boot())
+- [X] kill moduleCache (localStorage) (maybe should be sessionStorage)
+- [X] reloadServices true versus false
 
 BUG: loading page shows loading bar multiple times
 
@@ -266,41 +266,41 @@ TIME AS MONEY
 2020-07-14_1902 TODO
 ====================
 
-- [X] ability to close last file
-- [X] bypass "let's go" button on repeat usage
-- [X] command palette
-- [X] default view for no service selected
-- [ ] download ZIP
-- [X] edit bartok in bartok
-- [X] editor code folding
-	- https://codemirror.net/doc/manual.html#addon_foldcode
 - [ ] editor collaborative
-- [X] fix: closing (and opening?) a folder should not save that folder as selected
-- [X] folders open when contained file is selected
-- [X] full screen for preview
 - [ ] mini map
-- [X] preview binary files: image, font, audio, video
-- [X] preview uses service worker
+- [ ] download ZIP
 - [ ] react template loading spinner
-- [X] recall open files
-- [X] recall pane sizes
-- [X] recall pinned preview
-- [ ] recall scroll position per file
-- [X] recall selected file
-- [X] search in file
 - [ ] search in folder
 - [ ] share service
 - [ ] shared libs should load in offline mode
 - [ ] smoother development flow on file change
 - [ ] storage usage indicators: memory & file system
-- [X] switch indent between tabs and spaces
-- [ ] todo export to bartok file system
-- [ ] todo groups
-- [ ] todo item edit
-- [X] todo priority
-- [X] todos import
+- [ ] todo app: export to bartok file system
+- [ ] todo app: groups
+- [ ] todo app: item edit
 - [ ] upload a folder
 - [ ] upload binary files
+- [X] ability to close last file
+- [X] bypass "let's go" button on repeat usage
+- [X] command palette
+- [X] default view for no service selected
+- [X] edit bartok in bartok
+- [X] editor code folding
+	- https://codemirror.net/doc/manual.html#addon_foldcode
+- [X] fix: closing (and opening?) a folder should not save that folder as selected
+- [X] folders open when contained file is selected
+- [X] full screen for preview
+- [X] preview binary files: image, font, audio, video
+- [X] preview uses service worker
+- [X] recall open files
+- [X] recall pane sizes
+- [X] recall pinned preview
+- [X] recall scroll position per file
+- [X] recall selected file
+- [X] search in file
+- [X] switch indent between tabs and spaces
+- [X] todo priority
+- [X] todos import
 - [X] export todo's: JSON
 - [X] export todo's: markdown
 - [X] fix issue with explorer pane resizing
@@ -313,56 +313,39 @@ TIME AS MONEY
 Service Worker
 ==============
 
-chrome://serviceworker-internals/
+- chrome://serviceworker-internals/
+- https://developers.google.com/web/fundamentals/primers/service-workers/high-performance-loading
+- https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook
+- cache - https://hasura.io/blog/strategies-for-service-worker-caching-d66f3c828433/
+- https://blog.codecentric.de/en/2019/09/service-workers-tricks-traps/
+- events - https://w3c.github.io/ServiceWorker/#execution-context-events
 
-https://developers.google.com/web/fundamentals/primers/service-workers/high-performance-loading
-https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook
-cache - https://hasura.io/blog/strategies-for-service-worker-caching-d66f3c828433/
-https://blog.codecentric.de/en/2019/09/service-workers-tricks-traps/
+- lifecycle picture - https://www.digitalocean.com/community/tutorials/demystifying-the-service-worker-lifecycle
+- lifecycle picture - https://hasura.io/blog/strategies-for-service-worker-caching-d66f3c828433/
 
-events - https://w3c.github.io/ServiceWorker/#execution-context-events
+- https://www.oreilly.com/library/view/building-progressive-web/9781491961643/ch04.html#note_sw_controlling_after_load
 
-lifecycle picture - https://www.digitalocean.com/community/tutorials/demystifying-the-service-worker-lifecycle
-lifecycle picture - https://hasura.io/blog/strategies-for-service-worker-caching-d66f3c828433/
+- stream from service worker - https://developers.google.com/web/updates/2016/06/sw-readablestreams
 
-https://www.oreilly.com/library/view/building-progressive-web/9781491961643/ch04.html#note_sw_controlling_after_load
-
-stream from service worker - https://developers.google.com/web/updates/2016/06/sw-readablestreams
-
-websocket from service worker?
+- websocket from service worker?
 
 
 2020-07-01 TODO
 ===============
-- bitcoin/blockchain in browser (and why?)
-- [x] indent using tabs
-- [X] code folding
-
-- inline font: https://www.webucator.com/blog/2016/11/inline-web-font-avoid-fout/
-
-- open a folder from local hard drive
+- [ ] bitcoin/blockchain in browser (and why?)
+- [ ] inline font: https://www.webucator.com/blog/2016/11/inline-web-font-avoid-fout/
+- [ ] open a folder from local hard drive
 	- https://www.html5rocks.com/en/tutorials/file/filesystem/#toc-dir-reading
 	- https://www.html5rocks.com/en/tutorials/file/filesystem-sync/
-
-- webtorrent
+- [ ] webtorrent
 	- in a worker: https://github.com/webtorrent/webtorrent/issues/1248
 	- see browser-server and aether-torrent from ^^^
-
-
-- finish tree context menu
-- web loading time
-- web persistence layer
-	- [X] localforage in serviceworker
-	- browserFS?
+- [ ] web loading time
 - [ ] share
 - [ ] export zip
 - [ ] import zip
-- [X] images/binary files
-- [X] open preview in new window / share
 - [ ] web build system / service layer
 - [ ] services graph / service selection
-- [X] codemirror elegance & bug where editor shows blank
-- [X] non editor tabs
 - [ ] template creation flow & overall template design
 	- allow preview to interact with other bartok web components
 - [ ] settings
@@ -373,12 +356,23 @@ websocket from service worker?
 	- https://github.com/lesmana/webrtc-without-signaling-server
 	- https://github.com/cjb/serverless-webrtc
 	- https://peerjs.com/
-- [X] read bartok web in bartok web
-- [ ] write bartok web in bartok web
-- [ ] require an npm package (and use it)
 - [ ] open a page that is just the file in editor or preview mode; options editor + preview (or other mashup)
+- [ ] web persistence layer
+	- [X] localforage in serviceworker
+	- browserFS?
+- [x] indent using tabs
+- [X] code folding
+- [X] finish tree context menu
+- [X] images/binary files
+- [X] open preview in new window / share
+- [X] codemirror elegance & bug where editor shows blank
+- [X] non editor tabs
+- [X] read bartok web in bartok web
+- [X] write bartok web in bartok web
+- [X] require an npm package (and use it)
 
----------------
+Little Experiments
+==================
 I want to be able to do little experiments
  - and easily share them
  - and not have to deal with build system
@@ -387,20 +381,20 @@ I want to be able to do little experiments
 
 ---------------
 Examples of little experiments:
-	- [ ] broken clock right twice a day
-	- [ ] simulate a collection of people as faulty mirrors
-	- [ ] architect stage of some project
-	- [ ] emulate kubernetes, explore kubernetes pattern
-	- [ ] services with central config service pattern
-	- [ ] scrape a bunch of sites and do wizardry (data composition & representation)
-	- [ ] write a bunch of ideas then visually group and connect them
-	- [ ] write a bunch of little modules then visually group and connect them
-	- [ ] collect a ton of stuff and have something make me come back to them or recall them
-	- [ ] search for unicode icons without leaving text editor
-	- [ ] view fonts in editor
-	- [ ] view/change/convert colors and color palettes in editor
-	- [ ] write web code the way I want to, use files the way I want to
-		- ^^^ might be useful to expand on this
+- [ ] broken clock right twice a day
+- [ ] simulate a collection of people as faulty mirrors
+- [ ] architect stage of some project
+- [ ] emulate kubernetes, explore kubernetes pattern
+- [ ] services with central config service pattern
+- [ ] scrape a bunch of sites and do wizardry (data composition & representation)
+- [ ] write a bunch of ideas then visually group and connect them
+- [ ] write a bunch of little modules then visually group and connect them
+- [ ] collect a ton of stuff and have something make me come back to them or recall them
+- [ ] search for unicode icons without leaving text editor
+- [ ] view fonts in editor
+- [ ] view/change/convert colors and color palettes in editor
+- [ ] write web code the way I want to, use files the way I want to
+	- ^^^ might be useful to expand on this
 
 
 
@@ -454,21 +448,20 @@ Potential Sinkhole Hard Examples:
 	- this depends on screens that have not been built
 
 What are currently the biggest "   "win"   " items?
-	- [X] service map showing real services
-	- [X] file templates (UI services)
-	- [X] file preview (htm, svg, react)
 
-	- files need id's for uniqueness <<< HUGE!!!
-	- service save in chunks (because some files are huge)
+- service save in chunks (because some files are huge)
 
-	- [ ] service templates
-	- [ ] logs streaming from server
-	- [ ] metrics streaming from server
-	- [ ] service map showing real stats
-	- [X] direct file system based service (to enable next two wins)
-
-	- [ ] UI ran from within bartok ecosystem (soft exploration into first-class services)
-	- [ ] server ran from within bartok ecosystem (more serious foray into first-class services)
+- [ ] service templates
+- [ ] logs streaming from server
+- [ ] metrics streaming from server
+- [ ] service map showing real stats
+- [ ] UI ran from within bartok ecosystem (soft exploration into first-class services)
+- [ ] server ran from within bartok ecosystem (more serious foray into first-class services)
+- [X] files need id's for uniqueness <<< HUGE!!!
+- [X] service map showing real services
+- [X] file templates (UI services)
+- [X] file preview (htm, svg, react)
+- [X] direct file system based service (to enable next two wins)
 
 
 
@@ -484,10 +477,10 @@ FILE CHANGES
 
 PACKAGE.JSON / CONFIG
 ---------------------
- - [X] service should get its name from package.json
  - [ ] package.json should be ideal and not strict?
 	 - (comments, unquoted, single quotes, trailing commas, etc)
  - [ ] package.json should be service.json? .bartok.yml ?
+ - [X] service should get its name from package.json
 
 TEMPLATES
 ---------
@@ -512,11 +505,12 @@ PREVIEW
 
 UNSORTED
 ========
+
 - https://thiscouldbebetter.github.io/ - lots of cool stuff here; I like this approach of trying everything
 - https://gist.cafe/ - run code snippets on your server, embed in web
 - how to implement a programming language
-	- http://lisperator.net/pltut/
-	- http://angg.twu.net/miniforth-article.html - bootstraping a forth in 40 lines of Lua
+	- [http://lisperator.net/pltut/](http://lisperator.net/pltut/)
+	- [http://angg.twu.net/miniforth-article.html](http://angg.twu.net/miniforth-article.html) - bootstraping a forth in 40 lines of Lua
 
 - bundling in browser
 	- http://webpack.github.io/playground/
@@ -525,9 +519,9 @@ UNSORTED
 - inline controls for codemirror - https://github.com/enjalot/Inlet
 
 - [IP] show binary files as HEX
-- [x] show preview in side (instead)
+- [X] show preview in side (instead)
 
-- node in the browser (and for that matter, the other language runtimes or emulators)
+- [ ] node in the browser (and for that matter, the other language runtimes or emulators)
 	https://blog.cloudboost.io/how-to-run-node-js-apps-in-the-browser-3f077f34f8a5
 
 - https://www.x3dom.org/
@@ -547,7 +541,7 @@ UNSORTED
 	- https://bl.ocks.org/mbostock/11357811 - Wilson's algorithm (maze generation)
 - http://www.biofabric.org/gallery/pages/SuperQuickBioFabric.html
 
-- diff - http://cemerick.github.io/jsdifflib/demo.html
+- [X] diff - http://cemerick.github.io/jsdifflib/demo.html
 
 - https://stackoverflow.com/questions/51549390/how-to-disable-third-party-cookie-for-img-tags
 
@@ -556,8 +550,8 @@ UNSORTED
 - http://unikernel.org/projects/ - would be cool if services were compiled to unikernels
 
 - [x] import/require/ read files from within preview
-	- eg. <img src="someServicePath/file.png" />
-	- eg. import { foo } from 'someServicePath/file.mjs'
+	- eg. `<img src="crosshj/fiug-beta/.NOTES/images/process.png" />`
+	- eg. `import { foo } from 'someServicePath/file.mjs'`
 
 - import and export services
 - backup and restore
@@ -566,7 +560,7 @@ UNSORTED
 
 - [x] panes remember position
 - [ ] pane splitting (as with a framework that allows open-ended pane manipulation)
-- [ ] code diff
+- [X] code diff
 
 - [X] page resize doesn't respect min width for explorer
 - [ ] explorer can be hidden more beautifully, will auto-show and dismiss
@@ -841,4 +835,3 @@ graphs on the fly
 - jsonpath (and others?) - https://news.ycombinator.com/item?id=19949240
 - https://github.com/antonmedv/fx
 - https://github.com/stedolan/jq
-

@@ -1,18 +1,17 @@
-<h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/fiugHexagons)
 
 ### bartok v0.4.3
 
-- [ ] uploading images + binary files
 - [ ] hook up editor context menu
+- [ ] reveal in sidebar is broken
+- [ ] uploading images + binary files
+- [ ] search has performance issues
+- [ ] delay occurs before editor loads sometimes
+	- need details about when this occurs
 - [ ] tab doesn't appear sometimes even though editor loads
 	- need details about when this occurs
 - [ ] clean up for editor document state
 - [ ] make sure editor undo history works properly
-- [ ] reveal in sidebar is broken
-- [ ] delay occurs before editor loads sometimes
-	- need details about when this occurs
-- [ ] search has performance issues
 - [ ] preview should honor selected file when service switched
 - [ ] recall scroll position when markdown preview (for example) updates
 
@@ -38,7 +37,9 @@
 
 - [ ] paths which include ".." or "." work for all commands
 
----
+----
+
+- [X] markdown preview recall scroll position
 - [X] clicking on a search result opens file at that line
 - [X] base href in html, added in service worker
 - [X] md/mkdir command works properly

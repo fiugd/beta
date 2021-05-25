@@ -203,7 +203,7 @@ useDefault: false
 </style>
 
 <body>
-	<div id="container" style="display:none;">
+	<div id="container" style="visibility:hidden;">
 		<div class="no-preview">No preview available.</div>
 	</div>
 </body>
@@ -416,7 +416,9 @@ useDefault: false
 			//console.log({templateInput});
 
 			if (templateInput === ('{{' + 'markdown' + '}}')) {
-				templateInput = `hello world`.split('\n').map(x => x.replace(/        /, '')).join('\n').trim()
+				templateInput = (new Array(300)).fill()
+					.map((x, i) => `${i.toString().padStart(3, '0')} - hello world`)
+					.join('\n')
 			}
 			if (templateInput.includes('</html>')) {
 				console.log(templateInput)
@@ -515,23 +517,31 @@ useDefault: false
 	const storageName = 'scrollpos-'+doc;
 	let container;
 
-	window.onload = (event) => {
-		container = document.querySelector('#container');
-		container.style.display = '';
-		const scrollpos = sessionStorage.getItem(storageName);
-		if (!scrollpos) return;
+	const allImagesLoaded = () => Promise.all(Array.from(document.images)
+		.filter(img => !img.complete)
+		.map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
 
-		Promise.all(Array.from(document.images)
-			.filter(img => !img.complete)
-			.map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
-			.then(() => {
-				container.scrollTo(0, scrollpos);
-			});
+	const scrollToPrevious = () => {
+		const scrollpos = sessionStorage.getItem(storageName);
+		if(!scrollpos) return;
+		container.scrollTo(0, scrollpos);
+	};
+	
+	const saveScrollPos = () => {
+		container && sessionStorage.setItem(storageName, container.scrollTop);
 	};
 
-	window.addEventListener("beforeunload", function (e) {
-		sessionStorage.setItem(storageName, container.scrollTop);
-	});
+	const onLoadHandler = async () => {
+		container = document.querySelector('#container');
+		if(!container) return;
+		container.addEventListener('scroll', saveScrollPos)
+		await allImagesLoaded();
+		scrollToPrevious();
+		container.style.visibility = '';
+	};
+
+	window.onload = onLoadHandler;
+	window.addEventListener("beforeunload", saveScrollPos);
 </script>
 
 </html>
