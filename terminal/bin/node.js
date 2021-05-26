@@ -14,7 +14,9 @@ const operation = async (args) => {
 
 			${src}
 
-			postMessage({ exit: true });
+			queueMicrotask(() => {
+				postMessage({ exit: true });
+			});
 		`.replace(/^			/gm, '')
 		.replace(/from \'\./gm, `from '${location.origin}/${cwd}`)
 		.replace(/from \"\./gm, `from "${location.origin}/${cwd}`)
