@@ -11,7 +11,7 @@ function removeTabByEventDetail(removeTab, eventDetail){
 	const found = tabs.find((x) => tabFullName(x) === closedFullName);
 	if(!found) return;
 	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 	removeTab(found);
 }
 
@@ -127,7 +127,7 @@ const fileCloseHandler = ({ event, updateTab, removeTab }) => {
 		return;
 	}
 	nextTab.active = true;
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 
 	updateTab(nextTab);
 };
@@ -211,7 +211,7 @@ const fileSelectHandler = ({
 	);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
-		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
@@ -238,7 +238,7 @@ const fileSelectHandler = ({
 		id,
 		changed,
 	});
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const fileChangeHandler = ({
@@ -257,7 +257,7 @@ const fileChangeHandler = ({
 	}
 	foundTab.changed = true;
 	[foundTab].map(updateTab);
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const operationDoneHandler = ({
@@ -275,7 +275,7 @@ const operationDoneHandler = ({
 			delete t.changed;
 		});
 		tabs.map(updateTab);
-		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
@@ -286,7 +286,7 @@ const operationDoneHandler = ({
 	const tabsStorageKey = service?.treeState?.select
 		? "tabs/"+(service?.name||'')
 		: "tabs/";
-	const storedTabs = JSON.parse(sessionStorage.getItem(tabsStorageKey) || '[]');
+	const storedTabs = JSON.parse(localStorage.getItem(tabsStorageKey) || '[]');
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
 };
@@ -423,7 +423,7 @@ const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 			tabToSelect.path = tabToSelect.parent;
 		}
 	}
-	sessionStorage.setItem(
+	localStorage.setItem(
 		"tabs/"+(service?.name||''),
 		JSON.stringify(tabs)
 	);
