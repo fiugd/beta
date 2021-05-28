@@ -15,13 +15,14 @@ const AsyncTask = async (item) => {
 	//sleep(time); //<< will block other threads from starting
 	await delay(time); //will allow worker to exit since it's a microtask... sigh
 	console.log(`end execution ${name}`);
+	await delay(1);
 }
 
 const mapTasks = () => these.map(async (item) => await AsyncTask(item));
 
 console.log('start');
 (async () => {
-	//await Promise.all(mapTasks());
-	await AsyncTask(these[0]);
+	await Promise.allSettled(mapTasks());
+	//await AsyncTask(these[0]);
 	console.log('done');
 })();
