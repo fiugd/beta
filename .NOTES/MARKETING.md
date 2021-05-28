@@ -114,3 +114,9 @@
 - presentation giver, conference speaker
 - cloud dev ops
 - teams or team builders that want it to be easy for any/all of the above
+
+
+models for marketing similar software
+=====================================
+- https://promlens.com/ - I enjoy both the look-and-feel of marketing AND the product itself
+

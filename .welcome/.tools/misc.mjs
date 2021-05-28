@@ -2,43 +2,41 @@ import '/shared/vendor/stylus.min.js';
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-
-
 const alreadyAppended = {};
 const appendScript = (url) => {
-		if(alreadyAppended[url]){ return; }
-		return new Promise((resolve, reject) => {
-				alreadyAppended[url] = true;
-				const script = document.createElement('script');
-				script.crossOrigin = "anonymous";
-				script.onload = resolve;
-				script.src = url;
-				document.head.appendChild(script);
-		});
+	if(alreadyAppended[url]){ return; }
+	return new Promise((resolve, reject) => {
+		alreadyAppended[url] = true;
+		const script = document.createElement('script');
+		script.crossOrigin = "anonymous";
+		script.onload = resolve;
+		script.src = url;
+		document.head.appendChild(script);
+	});
 };
 const appendStyleSheet = (url) => {
-		if(alreadyAppended[url]){ return; }
-		return new Promise((resolve, reject) => {
-				alreadyAppended[url] = true;
-				const style = document.createElement('link');
-				style.rel = "stylesheet";
-				style.crossOrigin = "anonymous";
-				style.onload = resolve;
-				style.href = url;
-				document.head.appendChild(style);
-		});
+	if(alreadyAppended[url]){ return; }
+	return new Promise((resolve, reject) => {
+		alreadyAppended[url] = true;
+		const style = document.createElement('link');
+		style.rel = "stylesheet";
+		style.crossOrigin = "anonymous";
+		style.onload = resolve;
+		style.href = url;
+		document.head.appendChild(style);
+	});
 };
 const appendCompiledStyleSheet = (url) => {
-		if(alreadyAppended[url]) return;
-		return new Promise(async (resolve, reject) => {
-				alreadyAppended[url] = true;
-				const cssBody = await (await fetch(url)).text();
-				const style = document.createElement('style');
-				style.id = 'foo-'+Math.random().toString().replace('0.','')
-				style.textContent = stylus.render(cssBody);
-				document.head.appendChild(style);
-				resolve();
-		});
+	if(alreadyAppended[url]) return;
+	return new Promise(async (resolve, reject) => {
+		alreadyAppended[url] = true;
+		const cssBody = await (await fetch(url)).text();
+		const style = document.createElement('style');
+		style.id = 'foo-'+Math.random().toString().replace('0.','')
+		style.textContent = stylus.render(cssBody);
+		document.head.appendChild(style);
+		resolve();
+	});
 };
 const appendUrls = async (urls=[]) => {
 	const queue = Array.isArray(urls)
@@ -146,7 +144,6 @@ function consoleHelper(){
 		console.bakError(...args);
 	};
 }
-
 
 const stringify = o => JSON.stringify(o,null,2);
 const logJSON = (obj, replacer, space=2) => console.log(

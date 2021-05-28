@@ -14,7 +14,7 @@ personal information store
 
 2021-02-26 todo
 ---------------
-- [ ] straighten the way that files are stored in service worker (full path for id)
+- [X] straighten the way that files are stored in service worker (full path for id)
 - [ ] templates that work across services
 - [ ] fix preview/lock
 
@@ -34,8 +34,8 @@ personal information store
 
 2020-10-11 todo
 ---------------
-- [ ] minimap
 - [ ] split editor (mutliple editor panes)
+- [ ] editor: diff view
 - [ ] preview performance issues
 - [ ] javascript/modular templates (vs html-only)
 - [ ] terminal watch file
@@ -43,26 +43,27 @@ personal information store
 - [ ] dynamic/virtual files (to feed into preview)
 - [ ] settings integration with service worker
 - [ ] delay loading all services
-- [ ] delay loading service on initial load (loading all code-BAD)
-- [ ] diff view
 - [ ] improved/cleaner service map
 - [ ] system services connected to each other
 - [ ] service details in service map
 - [ ] command palette commands
-- [ ] go to line number
-- [ ] working directory in terminal prompt
-- [ ] connect context menu commands
 - [ ] arrange images on single image (use spritemap techniques/code)
 - [ ] clean up and connect listeners/triggers
-- [ ] hover highlighting expand/collapse indicators (??? not sure what this is about)
 - [ ] themes: font/colors
 - [ ] automatic add vendor deps to service manifest (cached offline)
 - [ ] package storage (like package.json/node_modules)
-- [ ] all terminal commands working well (like unix)
-- [X] git support integrated
 - [ ] share project (zip/torrent)
 - [ ] one template/multiple file extensions supported
+- [ ] connect context menu commands
 - [ ] connect action bar things
+
+- [ ] minimap
+- [ ] go to line number
+- [ ] all terminal commands working well (like unix)
+- [X] working directory in terminal prompt
+- [X] delay loading service on initial load (loading all code-BAD)
+- [X] editor: hover highlights expand/collapse indicators
+- [X] git support integrated
 - [X] messaging between template and editor
 - [X] file search connected
 - [X] import css in jsx files
@@ -553,10 +554,10 @@ UNSORTED
 	- eg. `<img src="crosshj/fiug-beta/.NOTES/images/process.png" />`
 	- eg. `import { foo } from 'someServicePath/file.mjs'`
 
-- import and export services
-- backup and restore
-- recycle bin / trash can
-- backup sqllite file ?
+- [ ] import and export services
+- [ ] backup and restore
+- [ ] recycle bin / trash can
+- [ ] backup sqllite file ?
 
 - [x] panes remember position
 - [ ] pane splitting (as with a framework that allows open-ended pane manipulation)
@@ -614,8 +615,8 @@ UNSORTED
 
 - https://www.html5rocks.com/en/tutorials/file/filesystem-sync/
 
-- [ ] connect codemirror to a language server
-	- http://www.blog.wylie.su/codemirror-lsp
+- [ ] connect codemirror to a language server ( LSP )
+	- see crosshj/fiug-beta/.welcome/1ncubate/editor/editor.language.server.js
 	- code completion, etc
 
 - [ ] stream contents of big files to codemirror (possible?)
