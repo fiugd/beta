@@ -45,7 +45,7 @@ const operation = async (args) => {
 		})
 		.join('\n');
 
-		console.log(workerSrc)
+		//console.log(workerSrc)
 
 		const blob = new Blob([ workerSrc ], { type: "text/javascript" });
 		const type = 'module';
