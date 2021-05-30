@@ -105,11 +105,11 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 	canvas.width  = canvas.offsetWidth+1;
 	canvas.height = (lines.length+50) * fontSize;
 	// canvas.style.height='100%';
-	const viewportHeight = sidebarDiv.clientHeight*.103;
+	const viewportHeight = sidebarDiv.clientHeight*.1025;
 
 	scrollHandle.style.height = viewportHeight + 'px';
 
-	const scrollPercent = (percent) => {
+	const scrollPercent = (percent, updateEditor=true) => {
 		{
 			const maxScroll = sidebarDiv.clientHeight - viewportHeight;
 			const mod = 0.01 * maxScroll;
@@ -120,13 +120,18 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 			const mod = -.01 * maxScroll;
 			canvas.style.top = Math.floor(percent*mod) + 'px';
 		}
-		{
+		if(updateEditor){
 			const maxScroll = editor.doc.height;
 			const mod = 0.01 * maxScroll;
 			const top = percent*mod;
 			editor.scrollTo(0,top>maxScroll ? maxScroll : top)
 		}
 	};
+
+	editor.getScrollerElement().addEventListener('scroll', function(e) {
+		const percent = 100*e.target.scrollTop/editor.doc.height;
+		scrollPercent(percent, false);
+	});
 
 	let scrolled = 0;
 	side.onwheel = (e) => {
