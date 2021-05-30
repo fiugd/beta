@@ -76,37 +76,78 @@ const SyntaxColors = (parent) => {
 }
 
 const SideBar = ({text, tabWidth=5}, editor) => {
+	const lines = text.split('\n');
+
 	const container = document.querySelector('.simulation');
 	const codeMirrorDom = document.querySelector('.simulation .CodeMirror');
+	const colors = SyntaxColors(codeMirrorDom);
+
 	const sidebarDiv = htmlToElement(`
 		<div class="cm-sidebar">
 			<div class="side overflow">
-				<canvas width="100%" height="100%"></canvas>
+				<canvas></canvas>
+				<div class="scroll-handle"></div>
 			</div>
 		</div>
 	`);
 	container.append(sidebarDiv);
-	const colors = SyntaxColors(codeMirrorDom);
-	console.log(colors)
 
 	const canvas = sidebarDiv.querySelector('canvas');
 	const ctx = canvas.getContext('2d');
-	canvas.style.width ='100%';
-	canvas.style.height='100%';
-	//canvas.style.imageRendering ='pixelated';
-	canvas.style.filter= 'saturate(1.3) brightness(1)';
-	canvas.width  = canvas.offsetWidth+1;
-	canvas.height = canvas.offsetHeight+1;
-	ctx.fillStyle = "#1f1f1f";
-	//ctx.fillRect(0, 0, canvas.width, canvas.height);
+	const side = sidebarDiv.querySelector('.side')
+	const scrollHandle = sidebarDiv.querySelector('.scroll-handle');
+
+	canvas.style.imageRendering ='pixelated';
 	const fontSize = 1.85;
 	const fontWidth = fontSize * .55;
 	const leftMargin = 10;
-	ctx.font = fontSize + 'px monospace';
+	canvas.style.width ='100%';
+	// canvas.style.height='100%';
+	canvas.width  = canvas.offsetWidth+1;
+	//canvas.height = canvas.offsetHeight+1;
+	canvas.height = (lines.length+50) * fontSize;
+	const viewportHeight = sidebarDiv.clientHeight*.103;
 
-	const lines = text.split('\n');
+	scrollHandle.style.height = viewportHeight + 'px';
+
+	const scrollPercent = (percent) => {
+		{
+			const maxScroll = sidebarDiv.clientHeight - viewportHeight;
+			const mod = 0.01 * maxScroll;
+			scrollHandle.style.top = Math.floor(percent*mod) + 'px';
+		}
+		{
+			const maxScroll = canvas.height-side.clientHeight;
+			const mod = -.01 * maxScroll;
+			canvas.style.top = Math.floor(percent*mod) + 'px';
+		}
+	};
+	let scrolled = 0;
+	side.onwheel = (e) => {
+		const speedModifier = 1/-60
+		let delta = e.wheelDelta * speedModifier;
+		if(scrolled >= 100 && delta > 0) return;
+		if(scrolled === 0 && delta <= 0) return;
+
+		let change = scrolled+delta;
+		if(change <= 0) change = 0;
+		if(change > 100) change = 100;
+		scrolled = change;
+
+		scrollPercent(scrolled);
+	};
+	scrollPercent(scrolled);
+
+	canvas.onclick = (e) => {
+		const rect = e.target.getBoundingClientRect();
+		const y = e.clientY - rect.top;
+		scrolled = 100*y/canvas.clientHeight;
+		scrollPercent(scrolled);
+	};
+
+	ctx.font = fontSize + 'px system-ui';
+
 	lines
-		//.filter((x,i) => i<230)
 		.forEach((line, i) => {
 		const tokenized = getLineTokens(line, i, editor);
 		const tabsAtFront = (
@@ -116,7 +157,7 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 		for(const t in tokenized){
 			const toke = tokenized[t];
 			ctx.fillStyle = colors[toke.token];
-			ctx.fillText(toke.text, leadTabWidth+leftMargin+(toke.offset*fontWidth), 10+(fontSize*i));
+			ctx.fillText(toke.text, leadTabWidth+leftMargin+(toke.offset*fontWidth), 2+(fontSize*i));
 		}
 	})
 }
@@ -125,7 +166,6 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 
 const Editor = (opts) => new Promise((resolve, reject) => {
 	EditorModule(opts, (err, data) => {
-		console.log(window.CodeMirror)
 		SideBar(opts, window.Editor)
 		if(err) return reject(err);
 		resolve(data);
@@ -145,7 +185,7 @@ const baseDom = () => {
 	return `
 <style>
 	body .simulation {
-		height: auto; position: absolute; left: 0; right: 0; top: 3em; bottom: 0em;
+		height: auto; position: absolute; left: 0; right: 0; top: 2.2em; bottom: 0em;
 		overflow: scroll; display: flex; flex-direction: row;
 	}
 	body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
@@ -175,6 +215,24 @@ const baseDom = () => {
 	.cm-sidebar .overflow {
 		box-shadow: -2px 0px 3px 0px #0000004d;
 	}
+	.side {
+		overflow-y: hidden;
+		position: relative;
+	}
+	.side canvas {
+		position: absolute;
+	}
+	.side .scroll-handle {
+		position: absolute;
+		top: 0;
+		width: 100%;
+		background: #fff;
+		opacity: 0;
+		transition: opacity .2s;
+	}
+	.side:hover .scroll-handle {
+		opacity: 0.07;
+	}
 </style>
 
 <div class="simulation">
@@ -190,6 +248,14 @@ const baseDom = () => {
 	await importCSS('/index.css')
 	document.documentElement.className = 'dark-enabled';
 	document.body.innerHTML += baseDom();
-	opts.text = await fetchTEXT('/crosshj/fiug-beta/.welcome/.tools/misc.mjs');
+	const sampleText = await fetchTEXT('/crosshj/fiug-beta/.welcome/.tools/misc.mjs');
+	opts.text=''
+	opts.text+=sampleText
+	opts.text+=sampleText;
+	opts.text+=`
+\n\n\n\n\n//======================================================\n\n\n\n\n
+`;
+	opts.text+=sampleText;
+	opts.text+=sampleText;
 	const editor = await Editor(opts);
 })()
