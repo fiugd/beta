@@ -28,7 +28,10 @@
 
 	//const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-	const debug = () => { debugger; };
+	const debug = () => {
+		console.warn('Someone wants to be debugging...')
+		//debugger;
+	};
 	const NOT_IMPLEMENTED_RESPONSE = () => {
 		return debug() || stringify({ message: 'not implemented' })
 	};
