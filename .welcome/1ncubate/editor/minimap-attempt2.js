@@ -76,6 +76,8 @@ const SyntaxColors = (parent) => {
 }
 
 const SideBar = ({text, tabWidth=5}, editor) => {
+	const ALMOST_ZERO_TRUTHY = 1e-20;
+	const overScroll = 50;
 	const lines = text.split('\n');
 
 	const container = document.querySelector('.simulation');
@@ -103,7 +105,7 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 	const leftMargin = 10;
 	canvas.style.width ='100%';
 	canvas.width  = canvas.offsetWidth+1;
-	canvas.height = (lines.length+50) * fontSize;
+	canvas.height = (lines.length+overScroll) * fontSize;
 	// canvas.style.height='100%';
 	const viewportHeight = sidebarDiv.clientHeight*.1025;
 
@@ -128,25 +130,60 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 		}
 	};
 
+	let scrolled = ALMOST_ZERO_TRUTHY;
+
 	editor.getScrollerElement().addEventListener('scroll', function(e) {
 		const percent = 100*e.target.scrollTop/editor.doc.height;
+		scrolled = percent;
 		scrollPercent(percent, false);
 	});
 
-	let scrolled = 0;
+	scrollHandle.onmousedown = (() => {
+		let previous;
+		let startScroll;
+		scrollHandle.ondragstart = () => false;
+		const onMouseMove = (mouseMoveEvent) => {
+			if(!previous || !startScroll) return;
+
+			const { pageY } = mouseMoveEvent;
+			const scrollChange = 100*(pageY-previous)/sidebarDiv.clientHeight;
+			const newScroll = startScroll + scrollChange;
+			if(newScroll >= 0 && newScroll <= 100) scrolled = newScroll;
+			if(newScroll < 0) scrolled = ALMOST_ZERO_TRUTHY;
+			if(newScroll > 100) scrolled = 100;
+			
+			scrollPercent(scrolled);
+		};
+		const onMouseUp = () => {
+			scrollHandle.classList.remove('dragging');
+			previous = startScroll = undefined;
+			document.removeEventListener('mousemove', onMouseMove);
+			document.removeEventListener('mouseup', onMouseUp);
+		};
+		return (mouseDownEvent) => {
+			mouseDownEvent.preventDefault();
+			scrollHandle.classList.add('dragging');
+			startScroll = scrolled;
+			previous = mouseDownEvent.pageY;
+			document.addEventListener('mousemove', onMouseMove);
+			document.addEventListener('mouseup', onMouseUp);
+		};
+	})();
+
 	side.onwheel = (e) => {
 		const speedModifier = 1/-60
 		let delta = e.wheelDelta * speedModifier;
 		if(scrolled >= 100 && delta > 0) return;
-		if(scrolled === 0 && delta <= 0) return;
+		if(Math.floor(scrolled) === 0 && delta <= 0) return;
 
 		let change = scrolled+delta;
-		if(change <= 0) change = 0;
+		if(change <= 0) change = ALMOST_ZERO_TRUTHY;
 		if(change > 100) change = 100;
 		scrolled = change;
 
 		scrollPercent(scrolled);
 	};
+
 	scrollPercent(scrolled);
 
 	canvas.onclick = (e) => {
@@ -154,6 +191,7 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 		const y = e.clientY - rect.top;
 		scrolled = 100*y/canvas.clientHeight;
 		scrollPercent(scrolled);
+		e.preventDefault();
 	};
 
 	ctx.font = fontSize + 'px system-ui';
@@ -241,7 +279,8 @@ const baseDom = () => {
 		opacity: 0;
 		transition: opacity .2s;
 	}
-	.side:hover .scroll-handle {
+	.side:hover .scroll-handle,
+	.scroll-handle.dragging {
 		opacity: 0.07;
 	}
 </style>
