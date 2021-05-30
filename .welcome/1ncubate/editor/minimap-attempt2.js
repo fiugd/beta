@@ -102,10 +102,9 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 	const fontWidth = fontSize * .55;
 	const leftMargin = 10;
 	canvas.style.width ='100%';
-	// canvas.style.height='100%';
 	canvas.width  = canvas.offsetWidth+1;
-	//canvas.height = canvas.offsetHeight+1;
 	canvas.height = (lines.length+50) * fontSize;
+	// canvas.style.height='100%';
 	const viewportHeight = sidebarDiv.clientHeight*.103;
 
 	scrollHandle.style.height = viewportHeight + 'px';
@@ -121,7 +120,14 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 			const mod = -.01 * maxScroll;
 			canvas.style.top = Math.floor(percent*mod) + 'px';
 		}
+		{
+			const maxScroll = editor.doc.height;
+			const mod = 0.01 * maxScroll;
+			const top = percent*mod;
+			editor.scrollTo(0,top>maxScroll ? maxScroll : top)
+		}
 	};
+
 	let scrolled = 0;
 	side.onwheel = (e) => {
 		const speedModifier = 1/-60
