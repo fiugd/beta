@@ -201,8 +201,10 @@
   color: white;
 }
 .icon-apl:before {
-  content: "\E013";
-  color: #a074c4
+  content: "⍝";
+  font-family: 'apl385';
+  transform: translateX(5.5px);
+  color: #fd00dc;
 }
 .icon-argdown:before {
   content: '\E003';
@@ -880,9 +882,9 @@
 .icon-lisp:before,
 .icon-scheme:before {
   content: 'λ';
-  font-family: monospace;
-  margin-left: 5.5px;
-  margin-right: -5.5px;
+  font-family: 'apl385';
+  transform: translate(5px, 1px);
+  font-size: 20px;
 }
 .icon-lisp:before {
   color: #93d493;
