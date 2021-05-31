@@ -9,21 +9,27 @@ const fetchTEXT = (url, opts) => fetch(url, opts).then(x => x.text());
 /*
 TODO:
 
-"viewport" overlay
-scrolling
 selections
 current line
 code folding
 tab width
+line wrapping
 
-events hooked up; not just page load
+turn into plugin
+
+events hooked up
+	- [X] document load
+	- [ ] text change
+	- [ ] window resize
+	- [ ] select text
+	- [ ] code fold open/close
 horizontal scroll shadow
 horizontal scroll
 
 minor: fontlegibility
 unsure: seems to be flickering on scroll
+sometimes minimap loads blank, not sure when
 
-turn into plugin
 
 NOTES:
 https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
@@ -77,12 +83,18 @@ const SyntaxColors = (parent) => {
 
 const SideBar = ({text, tabWidth=5}, editor) => {
 	const ALMOST_ZERO_TRUTHY = 1e-20;
-	const overScroll = 50;
+	const { scrollPastEndPadding } = editor.state;
+	const scrollEndPad = Number(
+		scrollPastEndPadding.replace('px', '')
+	);
+	const overScroll = Math.floor(scrollEndPad/21);
 	const lines = text.split('\n');
 
 	const container = document.querySelector('.simulation');
 	const codeMirrorDom = document.querySelector('.simulation .CodeMirror');
 	const colors = SyntaxColors(codeMirrorDom);
+
+	// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
 
 	const sidebarDiv = htmlToElement(`
 		<div class="cm-sidebar">
@@ -180,15 +192,11 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 
 	side.onwheel = (e) => {
 		const speedModifier = 1/-60
-		let delta = e.wheelDelta * speedModifier;
-		if(scrolled >= 100 && delta > 0) return;
-		if(Math.floor(scrolled) === 0 && delta <= 0) return;
-
+		const delta = e.wheelDelta * speedModifier;
 		let change = scrolled+delta;
 		if(change <= 0) change = ALMOST_ZERO_TRUTHY;
 		if(change > 100) change = 100;
 		scrolled = change;
-
 		scrollPercent(scrolled);
 	};
 
@@ -235,7 +243,23 @@ const text = JSON.stringify(JSON.parse(localStorage.getItem('react-todo')||''), 
 const opts = {
 	text,
 	mode: 'javascript',
-	lineWrapping: false
+	lineWrapping: false,
+	lineNumbers: true,
+	addModeClass: true,
+	autocorrect: true,
+	showInvisibles: true,
+	styleActiveLine: true,
+	styleActiveSelected: true,
+	matchBrackets: true,
+	scrollPastEnd: true,
+	foldGutter: true,
+	gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+	foldOptions: {
+		widget: (from, to) => {
+			return "...";
+		},
+		minFoldSize: 3,
+	},
 };
 
 const baseDom = () => {
@@ -248,13 +272,22 @@ const baseDom = () => {
 	body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
 		overflow: auto !important;
 	}
+	body .CodeMirror-scrollbar-filler {
+		height: 0px !important;
+	}
 	body .CodeMirror-scrollbar-filler,
 	body .CodeMirror .CodeMirror-vscrollbar {
 		background:#1e1e1e !important;
-		width:7px
+		width:7px;
+	}
+	body .CodeMirror .CodeMirror-vscrollbar {
+		bottom: 0px !important;
 	}
 	body .CodeMirror .CodeMirror-vscrollbar > div::-webkit-scrollbar-thumb {
 		width: 20px !important;
+	}
+	.CodeMirror-scroll {
+		margin-right: 2px;
 	}
 	.functionInput{ visibility: hidden; }
 	.CodeMirror { height: 100%;  flex: 1; }
@@ -307,8 +340,8 @@ const baseDom = () => {
 	document.documentElement.className = 'dark-enabled';
 	document.body.innerHTML += baseDom();
 	const sampleText = await fetchTEXT('/crosshj/fiug-beta/.welcome/.tools/misc.mjs');
-	opts.text=''
-	opts.text+=sampleText
+	opts.text='';
+	opts.text+=sampleText;
 	opts.text+=sampleText;
 	opts.text += `\n\n\n\n\n/*======================================================*/\n\n\n\n\n`;
 	opts.text+=sampleText;
