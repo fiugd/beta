@@ -309,9 +309,9 @@ const baseDom = () => {
 	const sampleText = await fetchTEXT('/crosshj/fiug-beta/.welcome/.tools/misc.mjs');
 	opts.text=''
 	opts.text+=sampleText
-	//opts.text+=sampleText;
-	//opts.text += `\n\n\n\n\n/*======================================================*/\n\n\n\n\n`;
-	//opts.text+=sampleText;
-	//opts.text+=sampleText;
+	opts.text+=sampleText;
+	opts.text += `\n\n\n\n\n/*======================================================*/\n\n\n\n\n`;
+	opts.text+=sampleText;
+	opts.text+=sampleText;
 	const editor = await Editor(opts);
 })()

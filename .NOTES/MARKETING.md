@@ -120,3 +120,23 @@ models for marketing similar software
 =====================================
 - https://promlens.com/ - I enjoy both the look-and-feel of marketing AND the product itself
 
+
+strategy
+========
+
+### prior art
+
+Projects like VS Code or Eclipse Theia are already big, well-funded and bound to the use-case which they were designed for.
+
+For example, I looked for easy ways to pull a tree view from many currently existing editors.  The difficulty I faced, I think, was due more to what I mentioned above than my own lack of understanding and capability (I am admittedly biased in this).  These projects are bound to the their paycheck and to the org structure of the teams that create them.
+
+To be clear, Microsoft is not in the business of offering VS Code's components to developers; they are in the business of being the defacto editor that developers use.  Of course, Monaco, but not the rest of VS Code, afaict.
+
+
+### user adoption
+
+Editors and editor preference are bound to a scarcity model which inspires commitment from their users.  An editor has to be purchased, installed, and/or learned.
+
+My goal is to create a system that has a very low cost to adopt; in fact, one that subverts adoption.  One of the reasons I turn to Chrome Developer tools and/or an index.html on my hard drive is that I prefer no-adopt where possible, even if I have already adopted.
+
+Low barrier-to-entry, low adoption pressure and tight feedback loop are very important to me.  This tool is an extension of that workflow and philosophy, and not an app that is meant to be installed or adopted, per se.
