@@ -1,9 +1,12 @@
 //show-preview
-var theBase = document.getElementsByTagName("base"); 
-theBase[0].href = '/';
+import EditorModule from "/crosshj/fiug-beta/shared/modules/editor.mjs";
 
 import { importCSS, htmlToElement } from '/crosshj/fiug-beta/.welcome/.tools/misc.mjs';
-import EditorModule from "/shared/modules/editor.mjs";
+
+var theBase = document.getElementsByTagName("base"); 
+theBase[0].href = '/crosshj/fiug-beta/shared/modules';
+
+
 const fetchTEXT = (url, opts) => fetch(url, opts).then(x => x.text());
 
 /*
@@ -42,7 +45,7 @@ const tokenlist = [
 	"#text", "#space", "comment", "string", "string-2", "number", "variable", "variable-2",
 	"def", "operator", "keyword", "atom", "meta", "tag", "tag bracket", "attribute", "qualifier",
 	"property", "builtin", "variable-3", "type", "string property", "tab"
-];
+]; 
 
 const getLineTokens = (line, i, editor) => {
 	const lineTokens = editor.getLineTokens(i, true);
@@ -260,6 +263,9 @@ const opts = {
 		},
 		minFoldSize: 3,
 	},
+	miniMap: true,
+	miniMapSide: "right",
+	miniMapWidth: 64,
 };
 
 const baseDom = () => {
