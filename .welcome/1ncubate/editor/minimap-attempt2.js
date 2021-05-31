@@ -112,12 +112,19 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 	scrollHandle.style.height = viewportHeight + 'px';
 
 	const scrollPercent = (percent, updateEditor=true) => {
-		{
-			const maxScroll = sidebarDiv.clientHeight - viewportHeight;
+		if(canvas.height > side.clientHeight){
+			const maxScroll = side.clientHeight - viewportHeight;
 			const mod = 0.01 * maxScroll;
 			scrollHandle.style.top = Math.floor(percent*mod) + 'px';
 		}
-		{
+		if(canvas.height <= side.clientHeight){
+			const maxScroll = canvas.height > viewportHeight
+				? canvas.height - viewportHeight
+				: 0;
+			const mod = 0.01 * maxScroll;
+			scrollHandle.style.top = Math.floor(percent*mod) + 'px';
+		}
+		if(canvas.height > side.clientHeight){
 			const maxScroll = canvas.height-side.clientHeight;
 			const mod = -.01 * maxScroll;
 			canvas.style.top = Math.floor(percent*mod) + 'px';
@@ -146,7 +153,8 @@ const SideBar = ({text, tabWidth=5}, editor) => {
 			if(!previous || !startScroll) return;
 
 			const { pageY } = mouseMoveEvent;
-			const scrollChange = 100*(pageY-previous)/sidebarDiv.clientHeight;
+			const percentageMod = 115; //should be 100, but fudging a little for better usability
+			const scrollChange = percentageMod*(pageY-previous)/Math.min(side.clientHeight, canvas.height);
 			const newScroll = startScroll + scrollChange;
 			if(newScroll >= 0 && newScroll <= 100) scrolled = newScroll;
 			if(newScroll < 0) scrolled = ALMOST_ZERO_TRUTHY;
@@ -301,11 +309,9 @@ const baseDom = () => {
 	const sampleText = await fetchTEXT('/crosshj/fiug-beta/.welcome/.tools/misc.mjs');
 	opts.text=''
 	opts.text+=sampleText
-	opts.text+=sampleText;
-	opts.text+=`
-\n\n\n\n\n//======================================================\n\n\n\n\n
-`;
-	opts.text+=sampleText;
-	opts.text+=sampleText;
+	//opts.text+=sampleText;
+	//opts.text += `\n\n\n\n\n/*======================================================*/\n\n\n\n\n`;
+	//opts.text+=sampleText;
+	//opts.text+=sampleText;
 	const editor = await Editor(opts);
 })()
