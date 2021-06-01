@@ -8,7 +8,6 @@ ADDONS: doc-state, codemirror-scrollpastend, codemirror-search, codemirror-show-
 
 
 
-
 // -----  doc-state.js
 /*
 
@@ -1755,6 +1754,7 @@ this file is a bundle of many search addons
 			`);
 			container.append(sidebarDiv);
 		}
+		
 
 		const canvas = sidebarDiv.querySelector('canvas');
 		const ctx = canvas.getContext('2d');
