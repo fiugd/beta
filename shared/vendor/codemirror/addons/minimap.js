@@ -41,7 +41,44 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		const template = document.createElement('template');
 		template.innerHTML = (html||'').trim();
 		return template.content.firstChild;
-	}
+	};
+
+	document.body.append(htmlToElement(`
+	<style>
+		.cm-sidebar { flex:0; position: relative; }
+		.cm-sidebar .side {
+			width: 100px;
+			background: #1e1e1e;
+			position: absolute;
+			height: 100%;
+			right: 7px;
+			border-right: 1px solid #333;
+			z-index: 9;
+		}
+		.cm-sidebar .overflow {
+			box-shadow: -2px 0px 3px 0px #0000004d;
+		}
+		.cm-sidebar .side {
+			overflow-y: hidden;
+			position: relative;
+		}
+		.cm-sidebar .side canvas {
+			position: absolute;
+		}
+		.cm-sidebar .side .scroll-handle {
+			position: absolute;
+			top: 0;
+			width: 100%;
+			background: #fff;
+			opacity: 0;
+			transition: opacity .2s;
+		}
+		.cm-sidebar .side:hover .scroll-handle,
+		.cm-sidebar .scroll-handle.dragging {
+			opacity: 0.07;
+		}
+	</style>
+	`));
 
 	const getLineTokens = (line, i, editor) => {
 		const lineTokens = editor.getLineTokens(i, true);

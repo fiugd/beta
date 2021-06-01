@@ -46,73 +46,10 @@ const opts = {
 
 const baseDom = () => {
 	return `
-<style>
-	body .simulation {
-		height: auto; position: absolute; left: 0; right: 0; top: 2.2em; bottom: 0em;
-		overflow: scroll; display: flex; flex-direction: row;
-	}
-	body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
-		overflow: auto !important;
-	}
-	body .CodeMirror-scrollbar-filler {
-		height: 0px !important;
-	}
-	body .CodeMirror-scrollbar-filler,
-	body .CodeMirror .CodeMirror-vscrollbar {
-		background:#1e1e1e !important;
-		width:7px;
-	}
-	body .CodeMirror .CodeMirror-vscrollbar {
-		bottom: 0px !important;
-	}
-	body .CodeMirror .CodeMirror-vscrollbar > div::-webkit-scrollbar-thumb {
-		width: 20px !important;
-	}
-	.CodeMirror-scroll {
-		margin-right: 2px;
-	}
-	.functionInput{ visibility: hidden; }
-	.CodeMirror { height: 100%;  flex: 1; }
-	.CodeMirror-sizer { margin-right: 110px; }
-	.cm-sidebar { flex:0; position: relative; }
-	.cm-sidebar .side {
-		width: 100px;
-		background: #1e1e1e;
-		position: absolute;
-		height: 100%;
-		right: 7px;
-		border-right: 1px solid #333;
-		z-index: 9;
-	}
-	.cm-sidebar .overflow {
-		box-shadow: -2px 0px 3px 0px #0000004d;
-	}
-	.side {
-		overflow-y: hidden;
-		position: relative;
-	}
-	.side canvas {
-		position: absolute;
-	}
-	.side .scroll-handle {
-		position: absolute;
-		top: 0;
-		width: 100%;
-		background: #fff;
-		opacity: 0;
-		transition: opacity .2s;
-	}
-	.side:hover .scroll-handle,
-	.scroll-handle.dragging {
-		opacity: 0.07;
-	}
-</style>
-
 <div class="simulation">
 	<textarea class="functionInput">
 	</textarea>
 </div>
-
 `.trim();
 };
 
