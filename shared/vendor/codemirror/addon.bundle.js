@@ -1710,7 +1710,7 @@ this file is a bundle of many search addons
 			div.remove();
 		}
 		return syntaxColorsTokens;
-	}
+	};
 
 	let colors;
 	const fontSize = 1.85;
