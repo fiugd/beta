@@ -1633,13 +1633,18 @@ this file is a bundle of many search addons
 
 	document.body.append(htmlToElement(`
 	<style>
-		.cm-sidebar { flex:0; position: relative; }
-		.cm-sidebar .side {
-			width: 100px;
-			background: #1e1e1e;
+		.cm-sidebar {
 			position: absolute;
-			height: 100%;
 			right: 7px;
+			top: 0;
+			bottom: 0;
+			width: 100px;
+		}
+		.cm-sidebar .side {
+			width: 100%;
+			background: #1e1e1e;
+			position: relative;
+			height: 100%;
 			border-right: 1px solid #333;
 			z-index: 9;
 		}
