@@ -1737,7 +1737,7 @@ this file is a bundle of many search addons
 		const lines = text.split('\n');
 
 		const codeMirrorDom = document.querySelector('.CodeMirror');
-		const container = codeMirrorDom.parentNode;
+		const container = codeMirrorDom;
 		colors = colors || SyntaxColors(codeMirrorDom);
 
 		// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
