@@ -778,7 +778,7 @@ const inlineEditor = (ChangeHandler) => ({
 			},
 			minFoldSize: 3,
 		},
-		miniMap: false,
+		miniMap: localStorage.getItem('minimap'),
 		miniMapSide: "right",
 		miniMapWidth: 64,
 	};
