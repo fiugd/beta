@@ -498,10 +498,7 @@ nav a.sidenav-trigger i,
 	height: 100%;
 }
 
-body .simulation {
-	height: auto; position: absolute; left: 0; right: 0; top: 2.2em; bottom: 0em;
-	overflow: scroll; display: flex; flex-direction: row;
-}
+
 body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
 	overflow: auto !important;
 }
