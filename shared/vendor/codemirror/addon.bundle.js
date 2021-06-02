@@ -1929,7 +1929,7 @@ this file is a bundle of many search addons
 		listener('init')();
 
 		cm.on("change", listener('change'));
-		cm.on("loadDoc", listener('change'));
+		cm.on("swapDoc", listener('change'));
 		cm.on("cursorActivity", listener('cursor'));
 
 		cm.on("scroll", listener('scroll'));
