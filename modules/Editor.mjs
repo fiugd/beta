@@ -768,7 +768,7 @@ const inlineEditor = (ChangeHandler) => ({
 		styleActiveLine: true,
 		styleActiveSelected: true,
 		matchBrackets: true,
-		lineWrapping: true,
+		lineWrapping: false,
 		scrollPastEnd: true,
 		foldGutter: true,
 		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
