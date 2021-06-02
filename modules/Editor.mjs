@@ -1277,6 +1277,7 @@ function _Editor(callback) {
 	};
 }
 
+
 function attachGutterHelper (){
 	const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
 	const getGutter = () => editorGutter || document.body.querySelector('.CodeMirror-gutters');

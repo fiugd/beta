@@ -36,7 +36,7 @@ const opts = {
 	foldOptions: {
 		widget: (from, to) => {
 			return "...";
-		},
+		}, 
 		minFoldSize: 3,
 	},
 	miniMap: true,
@@ -46,6 +46,13 @@ const opts = {
 
 const baseDom = () => {
 	return `
+<style>
+	body .simulation {
+		height: auto; position: absolute; left: 0; right: 0; top: 2.2em; bottom: 0em;
+		overflow: scroll; display: flex; flex-direction: row;
+	}
+	body .simulation .CodeMirror { height: 100%; }
+</style>
 <div class="simulation">
 	<textarea class="functionInput">
 	</textarea>
@@ -66,4 +73,4 @@ const baseDom = () => {
 	opts.text+=sampleText;
 	opts.text+=sampleText;
 	const editor = await Editor(opts);
-})()
+})();
