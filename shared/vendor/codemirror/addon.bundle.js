@@ -1928,7 +1928,7 @@ this file is a bundle of many search addons
 
 		listener('init')();
 
-		cm.on("change", listener('change'));
+		cm.on("changes", listener('change'));
 		cm.on("swapDoc", listener('change'));
 		cm.on("cursorActivity", listener('cursor'));
 
