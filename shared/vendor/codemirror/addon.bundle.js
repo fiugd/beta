@@ -1768,6 +1768,11 @@ this file is a bundle of many search addons
 
 		textCanvas = textCanvas || new OffscreenCanvas(canvas.width, canvas.height);
 		selectCanvas = selectCanvas || new OffscreenCanvas(canvas.width, canvas.height);
+		if(textCanvas.height !== canvas.height)
+			textCanvas.height = (lines.length+overScroll) * fontSize;
+		if(selectCanvas.height !== canvas.height)
+			selectCanvas.height = (lines.length+overScroll) * fontSize;
+
 		textCtx = textCtx || textCanvas.getContext('2d');
 		selectCtx = selectCtx || selectCanvas.getContext('2d');
 		selectCtx.globalAlpha = 0.5;

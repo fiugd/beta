@@ -19,7 +19,7 @@ let cmDom;
 let prevDoc;
 
 // call editor tabs once early so event handlers are attached
-EditorTabs()
+EditorTabs(); 
 
 const { indentWithTabs, tabSize } = getSettings();
 
