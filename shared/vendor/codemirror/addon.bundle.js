@@ -1919,7 +1919,7 @@ this file is a bundle of many search addons
 	};
 
 	listener('load')();
-	listener('change')();
+	listener('change')(CodeMirror);
 
 	const minimapExt = function(cm, val, old) {
 		if (old && old != CodeMirror.Init) return;
