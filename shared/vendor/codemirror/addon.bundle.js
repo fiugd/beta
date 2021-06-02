@@ -1919,7 +1919,6 @@ this file is a bundle of many search addons
 	};
 
 	listener('load')();
-	listener('change')(CodeMirror);
 
 	const minimapExt = function(cm, val, old) {
 		if (old && old != CodeMirror.Init) return;
@@ -1929,7 +1928,9 @@ this file is a bundle of many search addons
 
 		listener('init')();
 
-		cm.on("changes", listener('change'));
+		cm.on("change", listener('change'));
+		//batched
+		//cm.on("changes", listener('change'));
 		cm.on("swapDoc", listener('change'));
 		cm.on("cursorActivity", listener('cursor'));
 
