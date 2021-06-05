@@ -296,7 +296,6 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			textCtx.fillStyle = colors[toke.token];
 			const x = line.x+(toke.offset*fontWidth);
 			const y = line.y;
-			console.log(`drawing ${toke.text} at ${x} ${y} using color ${colors[toke.token]}`)
 			textCtx.fillText(toke.text,x,y);
 		};
 		const drawLine = (line, i) => {
@@ -342,8 +341,10 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	};
 
 	const listener = (which) => (...args) => {
-		const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
-		thisListener(...args);
+		setTimeout(() => {
+			const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
+			thisListener(...args);
+		}, 1);
 	};
 
 	listener('load')();
