@@ -1,13 +1,8 @@
 /*
 TODO:
-styles from minimap-attempt2.js (hopefully nothing big)
 code folding
-tab width
 line wrapping
-horizontal scroll shadow
-horizontal scroll
 events hooked up
-	- [ ] window resize
 	- [ ] code fold open/close
 	- [X] select text
 	- [X] document load
@@ -333,7 +328,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			});
 		updateCanvas();
 	};
-	
+
 	const listenMap = {
 		change: (cm) => updateSidebarText({ text: cm.getValue() }, cm),
 		cursor: (cm) => Selections(cm),
@@ -372,5 +367,5 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	CodeMirror.defineOption("miniMapWidth", 64);
 	CodeMirror.defineOption("miniMapSide", "left");
 	CodeMirror.defineOption("miniMap", false, minimapExt);
-
 });
+
