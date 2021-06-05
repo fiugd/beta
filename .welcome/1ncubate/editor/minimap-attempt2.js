@@ -10,7 +10,6 @@ const fetchTEXT = (url, opts) => fetch(url, opts).then(x => x.text());
 
 const Editor = (opts) => new Promise((resolve, reject) => {
 	EditorModule(opts, (err, data) => {
-		//SideBar(opts, window.Editor);
 		if(err) return reject(err);
 		resolve(data);
 	})
@@ -42,7 +41,7 @@ const opts = {
 	miniMap: true,
 	miniMapSide: "right",
 	miniMapWidth: 64,
-};
+}; 
 
 const baseDom = () => {
 	return `

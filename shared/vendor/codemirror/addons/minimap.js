@@ -30,7 +30,18 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		mod(CodeMirror);
 })(function(CodeMirror) {
 	"use strict";
-	
+
+	let SidebarInstance;
+	const ALMOST_ZERO_TRUTHY = 1e-20;
+	const syntaxColorsTokens = {
+		'#text': 'rgba(255,255,255,1)',
+		'#space': 'transparent',
+	};
+	let colors;
+	const fontSize = 1.85;
+	const fontWidth = fontSize * .55;
+	const leftMargin = 10;
+
 	const tokenlist = [
 		"#text", "#space", "comment", "string", "string-2", "number", "variable", "variable-2",
 		"def", "operator", "keyword", "atom", "meta", "tag", "tag bracket", "attribute", "qualifier",
@@ -102,13 +113,9 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 				text: string
 			};
 		})
-	}
+	};
 
 	const SyntaxColors = (parent) => {
-		const syntaxColorsTokens = {
-			'#text': 'rgba(255,255,255,1)',
-			'#space': 'transparent',
-		};
 		for (var i = 0, len = tokenlist.length; i < len; i++) {
 				var key = tokenlist[i];
 				if(['#text', '#space'].includes(key)) continue;
@@ -129,35 +136,14 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		return syntaxColorsTokens;
 	};
 
-	let colors;
-	const fontSize = 1.85;
-	const fontWidth = fontSize * .55;
-	const leftMargin = 10;
-	
-	let textCanvas;
-	let selectCanvas;
-	let textCtx;
-	let selectCtx;
-
-	const SideBar = ({text, tabWidth=5}, editor) => {
-		const ALMOST_ZERO_TRUTHY = 1e-20;
-		const { scrollPastEndPadding } = editor.state;
-		const scrollEndPad = Number(
-			scrollPastEndPadding.replace('px', '')
-		);
-		const overScroll = Math.floor(scrollEndPad/19.5);
-		const lines = text.split('\n');
-
+	const getSidebar = (editor) => {
+		if(SidebarInstance) return SidebarInstance;
 		const codeMirrorDom = document.querySelector('.CodeMirror');
+		const colors = SyntaxColors(codeMirrorDom);
 		const container = codeMirrorDom;
-		colors = colors || SyntaxColors(codeMirrorDom);
-
-		// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
-
-		let sidebarDiv = document.querySelector('.cm-sidebar');
-		let firstLoad;
-		if(!sidebarDiv){
-			sidebarDiv = htmlToElement(`
+		let dom = document.querySelector('.cm-sidebar');
+		if(!dom){
+			dom = htmlToElement(`
 				<div class="cm-sidebar">
 					<div class="side overflow">
 						<canvas></canvas>
@@ -165,37 +151,22 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 					</div>
 				</div>
 			`);
-			container.append(sidebarDiv);
+			container.append(dom);
 		}
-		
-
-		const canvas = sidebarDiv.querySelector('canvas');
+		const canvas = dom.querySelector('canvas');
 		const ctx = canvas.getContext('2d');
-		const side = sidebarDiv.querySelector('.side')
-		const scrollHandle = sidebarDiv.querySelector('.scroll-handle');
+		const side = dom.querySelector('.side')
+		const scrollHandle = dom.querySelector('.scroll-handle');
 
 		canvas.style.imageRendering ='pixelated';
 		canvas.style.width ='100%';
-		canvas.width  = canvas.offsetWidth+1;
-		canvas.height = (lines.length+overScroll) * fontSize;
-
-		textCanvas = textCanvas || new OffscreenCanvas(canvas.width, canvas.height);
-		selectCanvas = selectCanvas || new OffscreenCanvas(canvas.width, canvas.height);
-		if(textCanvas.height !== canvas.height)
-			textCanvas.height = (lines.length+overScroll) * fontSize;
-		if(selectCanvas.height !== canvas.height)
-			selectCanvas.height = (lines.length+overScroll) * fontSize;
-
-		textCtx = textCtx || textCanvas.getContext('2d');
-		selectCtx = selectCtx || selectCanvas.getContext('2d');
-		selectCtx.globalAlpha = 0.5;
-		
 		// canvas.style.height='100%';
-		const viewportHeight = sidebarDiv.clientHeight*.1025;
 
+		const textCanvas = new OffscreenCanvas(100,100);
+		const selectCanvas = new OffscreenCanvas(100,100);
+
+		const viewportHeight = dom.clientHeight*.1025;
 		scrollHandle.style.height = viewportHeight + 'px';
-
-
 
 		const scrollPercent = (percent, updateEditor=true) => {
 			if(canvas.height > side.clientHeight){
@@ -278,50 +249,94 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			e.preventDefault();
 		};
 
+		const updateCanvas = () => {
+			ctx.clearRect(0,0,canvas.width, canvas.height);
+			ctx.drawImage(selectCanvas,0,0);
+			ctx.drawImage(textCanvas,0,0);
+		};
+
+		const setCanvasDims = (width, height) => {
+			if(canvas.height === height && canvas.width === width) return;
+			canvas.width  = width;
+			canvas.height = height;
+			textCanvas.width  = width;
+			textCanvas.height = height;
+			selectCanvas.width  = width;
+			selectCanvas.height = height;
+		};
+
+		SidebarInstance = {
+			dom, canvas, colors, textCanvas, selectCanvas, updateCanvas, setCanvasDims
+		}
+		return SidebarInstance;
+	};
+
+	const updateSidebarDoc = ({text}, editor) => {
+	
+	};
+
+	const updateSidebarText = ({text, tabWidth=5}, editor) => {
+		const { scrollPastEndPadding } = editor.state;
+		const scrollEndPad = Number(scrollPastEndPadding.replace('px', ''));
+		const overScroll = Math.floor(scrollEndPad/19.5);
+		const lines = text.split('\n');
+		const { colors, textCanvas, updateCanvas, setCanvasDims } = getSidebar(editor);
+
+		// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
+
+		setCanvasDims(
+			100,
+			Math.ceil((lines.length+overScroll) * fontSize)
+		);
+
+		const textCtx = textCanvas.getContext('2d');
 		textCtx.font = fontSize + 'px system-ui';
-		textCtx.clearRect(0,0,canvas.width, canvas.height);
-		lines
-			.forEach((line, i) => {
-			const tokenized = getLineTokens(line, i, editor);
+		textCtx.clearRect(0,0,textCanvas.width, textCanvas.height);
+		const drawTokens = (line) => (toke) => {
+			textCtx.fillStyle = colors[toke.token];
+			const x = line.x+(toke.offset*fontWidth);
+			const y = line.y;
+			console.log(`drawing ${toke.text} at ${x} ${y} using color ${colors[toke.token]}`)
+			textCtx.fillText(toke.text,x,y);
+		};
+		const drawLine = (line, i) => {
+			if(!line.trim()) return;
+			let tokenized = getLineTokens(line, i, editor);
+			if(!Array.isArray(tokenized)) tokenized = [tokenized];
 			const tabsAtFront = (
 				line.match(/^\t+/g) || []
 			)[0]?.length || 0;
 			const leadTabWidth = tabsAtFront * fontWidth * tabWidth
-			for(const t in tokenized){
-				const toke = tokenized[t];
-				textCtx.fillStyle = colors[toke.token];
-				textCtx.fillText(toke.text, leadTabWidth+leftMargin+(toke.offset*fontWidth), 2+(fontSize*i));
-			}
-		});
-
-		ctx.clearRect(0,0,canvas.width, canvas.height);
-		ctx.drawImage(selectCanvas,0,0);
-		ctx.drawImage(textCanvas,0,0);
+			const x = leadTabWidth+leftMargin;
+			const y = 2+(fontSize*i);
+			const drawTokensWithTabs = drawTokens({ x, y });
+			tokenized.forEach(drawTokensWithTabs);
+		};
+		lines.forEach(drawLine);
+		updateCanvas();
 	}
 
 	const Selections = (editor) => {
-		let sidebarDiv = document.querySelector('.cm-sidebar');
-		const canvas = sidebarDiv.querySelector('canvas');
-		const ctx = canvas.getContext('2d');
-
+		const { colors, selectCanvas, updateCanvas } = getSidebar(editor);
+		const selectCtx = selectCanvas.getContext('2d');
 		const selections = editor.listSelections();
-
-		selectCtx.clearRect(0,0,canvas.width, canvas.height);
+		selectCtx.clearRect(0,0,selectCanvas.width, selectCanvas.height);
+		selectCtx.globalAlpha = 0.5;
 		selections
 			.forEach((range) => {
 				const { anchor, head } = range;
 				//if(head.line === anchor.line) return;
 				selectCtx.fillStyle = colors.selection;
-				selectCtx.fillRect(0, head.line*fontSize, canvas.width, (anchor.line-head.line+1)*fontSize);
+				selectCtx.fillRect(
+					0, head.line*fontSize,
+					selectCanvas.width, (anchor.line-head.line+1)*fontSize
+				);
 			});
-
-		ctx.clearRect(0,0,canvas.width, canvas.height);
-		ctx.drawImage(selectCanvas,0,0);
-		ctx.drawImage(textCanvas,0,0);
+		updateCanvas();
 	};
 	
 	const listenMap = {
-		change: (cm) => SideBar({ text: cm.getValue() }, cm),
+		change: (cm) => updateSidebarText({ text: cm.getValue() }, cm),
 		cursor: (cm) => Selections(cm),
 		scroll: () => {},
 	};
