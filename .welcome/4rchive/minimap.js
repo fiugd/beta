@@ -823,17 +823,12 @@ function minimapPlugin(){
 
 }
 
-
-
 (async () => {
-
 	await appendUrls(deps);
-
 	const editorDiv = setupEditor();
 	//basicElement();
 	//await delay(3000);
 	//captureHTML();
-
 })();
 
 
