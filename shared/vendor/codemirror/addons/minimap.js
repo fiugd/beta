@@ -45,13 +45,18 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 
 	document.body.append(htmlToElement(`
 	<style>
-		.cm-sidebar { flex:0; position: relative; }
-		.cm-sidebar .side {
-			width: 100px;
-			background: #1e1e1e;
+		.cm-sidebar {
 			position: absolute;
-			height: 100%;
 			right: 7px;
+			top: 0;
+			bottom: 0;
+			width: 100px;
+		}
+		.cm-sidebar .side {
+			width: 100%;
+			background: #1e1e1e;
+			position: relative;
+			height: 100%;
 			border-right: 1px solid #333;
 			z-index: 9;
 		}
@@ -122,7 +127,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			div.remove();
 		}
 		return syntaxColorsTokens;
-	}
+	};
 
 	let colors;
 	const fontSize = 1.85;
@@ -143,8 +148,8 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		const overScroll = Math.floor(scrollEndPad/19.5);
 		const lines = text.split('\n');
 
-		const container = document.querySelector('.simulation');
-		const codeMirrorDom = document.querySelector('.simulation .CodeMirror');
+		const codeMirrorDom = document.querySelector('.CodeMirror');
+		const container = codeMirrorDom;
 		colors = colors || SyntaxColors(codeMirrorDom);
 
 		// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
@@ -162,6 +167,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			`);
 			container.append(sidebarDiv);
 		}
+		
 
 		const canvas = sidebarDiv.querySelector('canvas');
 		const ctx = canvas.getContext('2d');
@@ -175,13 +181,21 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 
 		textCanvas = textCanvas || new OffscreenCanvas(canvas.width, canvas.height);
 		selectCanvas = selectCanvas || new OffscreenCanvas(canvas.width, canvas.height);
+		if(textCanvas.height !== canvas.height)
+			textCanvas.height = (lines.length+overScroll) * fontSize;
+		if(selectCanvas.height !== canvas.height)
+			selectCanvas.height = (lines.length+overScroll) * fontSize;
+
 		textCtx = textCtx || textCanvas.getContext('2d');
 		selectCtx = selectCtx || selectCanvas.getContext('2d');
 		selectCtx.globalAlpha = 0.5;
+		
 		// canvas.style.height='100%';
 		const viewportHeight = sidebarDiv.clientHeight*.1025;
 
 		scrollHandle.style.height = viewportHeight + 'px';
+
+
 
 		const scrollPercent = (percent, updateEditor=true) => {
 			if(canvas.height > side.clientHeight){
@@ -328,7 +342,11 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		listener('init')();
 
 		cm.on("change", listener('change'));
+		//batched
+		//cm.on("changes", listener('change'));
+		cm.on("swapDoc", listener('change'));
 		cm.on("cursorActivity", listener('cursor'));
+
 		cm.on("scroll", listener('scroll'));
 		cm.on("fold", listener('fold'));
 		cm.on("unfold", listener('unfold'));
@@ -338,4 +356,5 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	CodeMirror.defineOption("miniMapWidth", 64);
 	CodeMirror.defineOption("miniMapSide", "left");
 	CodeMirror.defineOption("miniMap", false, minimapExt);
+
 });
