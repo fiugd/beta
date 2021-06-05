@@ -820,7 +820,6 @@ function minimapPlugin(){
 					}
 			});
 	})()
-
 }
 
 (async () => {
@@ -830,5 +829,3 @@ function minimapPlugin(){
 	//await delay(3000);
 	//captureHTML();
 })();
-
-
