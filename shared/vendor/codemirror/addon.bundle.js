@@ -1752,7 +1752,7 @@ this file is a bundle of many search addons
 		const textCanvas = new OffscreenCanvas(100,100);
 		const selectCanvas = new OffscreenCanvas(100,100);
 
-		const viewportHeight = dom.clientHeight*.1025;
+		let viewportHeight = dom.clientHeight*.1025;
 		scrollHandle.style.height = viewportHeight + 'px';
 
 		const scrollPercent = (percent, updateEditor=true) => {
@@ -1850,6 +1850,8 @@ this file is a bundle of many search addons
 			textCanvas.height = height;
 			selectCanvas.width  = width;
 			selectCanvas.height = height;
+			viewportHeight = dom.clientHeight*.1025;
+			scrollHandle.style.height = viewportHeight + 'px';
 		};
 
 		SidebarInstance = {

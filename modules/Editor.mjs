@@ -664,6 +664,11 @@ const inlineEditor = (ChangeHandler) => ({
 		}
 		callback && callback();
 		window.Editor = editor;
+		
+		if(editor.options.minimap){
+			const searchDiv = editorDiv.querySelector('#file-search');
+			searchDiv && (searchDiv.style.right = '100px');
+		}
 
 		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
 		editor.setOption("styleActiveLine", { nonEmpty: true });

@@ -43,6 +43,10 @@ body {
 	outline: none;
 }
 
+.CodeMirror-search-match {
+	background: rgb(var(--main-theme-highlight-color));
+}
+
 /* #explorer:hover,
 .CodeMirror:hover .CodeMirror-hscrollbar {
 	overflow-x: auto !important;
@@ -498,7 +502,9 @@ nav a.sidenav-trigger i,
 	height: 100%;
 }
 
-
+body .simulation .CodeMirror .CodeMirror-vscrollbar {
+	display: block;
+}
 body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
 	overflow: auto !important;
 }
