@@ -160,7 +160,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		const textCanvas = new OffscreenCanvas(100,100);
 		const selectCanvas = new OffscreenCanvas(100,100);
 
-		const viewportHeight = dom.clientHeight*.1025;
+		let viewportHeight = dom.clientHeight*.1025;
 		scrollHandle.style.height = viewportHeight + 'px';
 
 		const scrollPercent = (percent, updateEditor=true) => {
@@ -258,6 +258,8 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			textCanvas.height = height;
 			selectCanvas.width  = width;
 			selectCanvas.height = height;
+			viewportHeight = dom.clientHeight*.1025;
+			scrollHandle.style.height = viewportHeight + 'px';
 		};
 
 		SidebarInstance = {
@@ -328,7 +330,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			});
 		updateCanvas();
 	};
-
+	
 	const listenMap = {
 		change: (cm) => updateSidebarText({ text: cm.getValue() }, cm),
 		cursor: (cm) => Selections(cm),
@@ -368,4 +370,3 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	CodeMirror.defineOption("miniMapSide", "left");
 	CodeMirror.defineOption("miniMap", false, minimapExt);
 });
-
