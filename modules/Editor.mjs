@@ -665,7 +665,7 @@ const inlineEditor = (ChangeHandler) => ({
 		callback && callback();
 		window.Editor = editor;
 		
-		if(editor.options.minimap){
+		if(editor.options.miniMap){
 			const searchDiv = document.querySelector('#file-search');
 			searchDiv && (searchDiv.style.right = '100px');
 		}
