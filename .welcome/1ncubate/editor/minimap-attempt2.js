@@ -72,4 +72,6 @@ const baseDom = () => {
 	opts.text+=sampleText;
 	opts.text+=sampleText;
 	const editor = await Editor(opts);
+
+	CodeMirror.commands.foldAll(editor)
 })();

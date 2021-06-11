@@ -1,15 +1,8 @@
 /*
 TODO:
-code folding
 line wrapping
-events hooked up
-	- [ ] code fold open/close
-	- [X] select text
-	- [X] document load
-	- [X] text change
-minor: fontlegibility
-unsure: seems to be flickering on scroll
 sometimes minimap loads blank, not sure when
+minor issues with code folding (doesn't quite match editor)
 
 NOTES:
 https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
@@ -262,8 +255,57 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			scrollHandle.style.height = viewportHeight + 'px';
 		};
 
+		let linesCache;
+		const getLines = ({ cached }={}) => {
+			if(cached && linesCache) return linesCache;
+
+			const lines = editor.getValue().split('\n');
+			const foldedLines = editor.getAllMarks()
+				.filter(x => x.__isFold)
+				.map(x => x.find());
+				//.map(m => m.lines[0].lineNo()); (used elsewhere)
+			let offset=0;
+			let currentFoldIndex=0;
+			let currentFold=foldedLines[currentFoldIndex];
+			const logFold = () => console.log(currentFold?`Current Fold: ${currentFold.from.line} to ${currentFold.to.line}`:'NO MORE FOLDS');
+
+			const lineTransform = ((text, lineNo) => {
+				const lineY = lineNo-offset;
+				if(!currentFold) return { text, lineNo, lineY, visible: true };
+
+				const isFirstLine = lineNo === currentFold.from.line;
+				const withinFold = !isFirstLine && lineNo > currentFold.from.line;
+				const lineYWithinFold = currentFold.from.line-offset
+
+				const isFoldEnd = !isFirstLine && lineNo > currentFold.to.line;
+				if(isFoldEnd){
+					const diff = currentFold.to.line - currentFold.from.line + 1;
+					offset+=diff;
+					currentFoldIndex++;
+					let newFold = foldedLines[currentFoldIndex]
+					while(newFold && newFold.from.line < currentFold.to.line){
+						currentFoldIndex++;
+						newFold=foldedLines[currentFoldIndex];
+					}
+					currentFold=newFold;
+				}
+
+				return {
+					text, lineNo,
+					lineY: withinFold ? lineYWithinFold : lineY,
+					visible: !withinFold
+				};
+			});
+			const transformedLines=[];
+			for(var i=0, len=lines.length; i<len; i++ ){
+				transformedLines.push(lineTransform(lines[i], i));
+			}
+			linesCache = transformedLines;
+			return transformedLines;
+		};
+
 		SidebarInstance = {
-			dom, canvas, colors, textCanvas, selectCanvas, updateCanvas, setCanvasDims
+			dom, canvas, colors, getLines, textCanvas, selectCanvas, updateCanvas, setCanvasDims
 		}
 		return SidebarInstance;
 	};
@@ -272,18 +314,19 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	
 	};
 
-	const updateSidebarText = ({text, tabWidth=5}, editor) => {
+	const updateSidebarText = (editor) => {
+		const tabWidth = 5;
 		const { scrollPastEndPadding } = editor.state;
 		const scrollEndPad = Number(scrollPastEndPadding.replace('px', ''));
 		const overScroll = Math.floor(scrollEndPad/19.5);
-		const lines = text.split('\n');
-		const { colors, textCanvas, updateCanvas, setCanvasDims } = getSidebar(editor);
+		const { colors, textCanvas, updateCanvas, setCanvasDims, getLines } = getSidebar(editor);
+		const lines = getLines();
 
 		// TODO: this should be used for horizontal overflow: https://www.geeksforgeeks.org/check-whether-html-element-has-scrollbars-using-javascript/
 
 		setCanvasDims(
 			100,
-			Math.ceil((lines.length+overScroll) * fontSize)
+			Math.ceil((lines.filter(x=>x.visible).length+overScroll) * fontSize)
 		);
 
 		const textCtx = textCanvas.getContext('2d');
@@ -295,16 +338,18 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 			const y = line.y;
 			textCtx.fillText(toke.text,x,y);
 		};
-		const drawLine = (line, i) => {
-			if(!line.trim()) return;
-			let tokenized = getLineTokens(line, i, editor);
+		const drawLine = (line) => {
+			const { text, lineNo, lineY, visible } = line;
+			if(!visible) return;
+			if(!text.trim()) return;
+			let tokenized = getLineTokens(text, lineNo, editor);
 			if(!Array.isArray(tokenized)) tokenized = [tokenized];
 			const tabsAtFront = (
-				line.match(/^\t+/g) || []
+				text.match(/^\t+/g) || []
 			)[0]?.length || 0;
 			const leadTabWidth = tabsAtFront * fontWidth * tabWidth
 			const x = leadTabWidth+leftMargin;
-			const y = 2+(fontSize*i);
+			const y = 2+(fontSize*lineY);
 			const drawTokensWithTabs = drawTokens({ x, y });
 			tokenized.forEach(drawTokensWithTabs);
 		};
@@ -313,28 +358,52 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 	}
 
 	const Selections = (editor) => {
-		const { colors, selectCanvas, updateCanvas } = getSidebar(editor);
+		const { colors, getLines, selectCanvas, updateCanvas } = getSidebar(editor);
+		const lines = getLines({ cached: true });
+		const xfrm = (lineNumber) => lines[lineNumber].lineY;
 		const selectCtx = selectCanvas.getContext('2d');
 		const selections = editor.listSelections();
 		selectCtx.clearRect(0,0,selectCanvas.width, selectCanvas.height);
 		selectCtx.globalAlpha = 0.5;
 		selections
 			.forEach((range) => {
-				const { anchor, head } = range;
-				//if(head.line === anchor.line) return;
+				const { anchor: anchorLine, head: headLine } = range;
+				let head = xfrm(headLine.line);
+				const anchor = xfrm(anchorLine.line) || head;
+				if(!head) head = anchor;
+
+				//if(head === anchor) return;
 				selectCtx.fillStyle = colors.selection;
 				selectCtx.fillRect(
-					0, head.line*fontSize,
-					selectCanvas.width, (anchor.line-head.line+1)*fontSize
+					0, head*fontSize,
+					selectCanvas.width, (anchor-head+1)*fontSize
 				);
 			});
 		updateCanvas();
 	};
-	
+
+	const debounce = (func, wait, immediate) => {
+		var timeout;
+		return async function() {
+			var context = this, args = arguments;
+			var later = function() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
+		};
+	};
+
+	const debouncedUpdateText = debounce(updateSidebarText, 500, true);
+
 	const listenMap = {
-		change: (cm) => updateSidebarText({ text: cm.getValue() }, cm),
+		change: (cm) => updateSidebarText(cm),
 		cursor: (cm) => Selections(cm),
 		scroll: () => {},
+		fold: (cm) => debouncedUpdateText(cm),
 	};
 
 	const listener = (which) => (...args) => {
@@ -362,7 +431,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 
 		cm.on("scroll", listener('scroll'));
 		cm.on("fold", listener('fold'));
-		cm.on("unfold", listener('unfold'));
+		cm.on("unfold", listener('fold'));
 		window.onresize = listener('resize');
 	};
 
