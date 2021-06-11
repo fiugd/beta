@@ -27,6 +27,10 @@ GetDynamicOps(term, comm, getCwd)
 	});
 */
 
+document.body.innerHTML += `
+	<style>#f{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
+	<div id="f">see dev tools terminal output...</div>
+`;
 
 (async () => {
 	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';

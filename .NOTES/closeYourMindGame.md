@@ -12,8 +12,8 @@
 
 ### Closed Mind, The Game: Software Dev Edition
 
-```Let's play the game and never think about the game.``` - John Wayne
-```Let's think about the game and never play the game.``` - Socrates
+```Let's play the game and never think about the game. OMG Cancer!``` - John Wayne
+```Let's think about the game and never play the game. WTF Hemlock!``` - Socrates
 
 ##### PREMISE:
 soul of the mind: _topics | policies | discussions | theory | debates | decisions_
@@ -29,10 +29,10 @@ when is it safe/best to have a closed vs open mind?
 
 ##### TOPICS:
 - testing, test patterns, test practices, test coverage, unit vs integration tests, etc
-- how to if or else and/or/maybe/but switch - https://blog.cleancoder.com/uncle-bob/2021/03/06/ifElseSwitch.html
+- how to [if or else and or maybe but switch except when](https://blog.cleancoder.com/uncle-bob/2021/03/06/ifElseSwitch.html)
 - OOP, functional, procedural
 - type systems (and personal/group preference for types)
-- code readbility and maintenance (and how to do it)
+- code readbility, style, and maintenance (and how to do it)
 - process and workflow (how to track and manage changes in a system and people doing those changes)
 - add your own topics!
 
