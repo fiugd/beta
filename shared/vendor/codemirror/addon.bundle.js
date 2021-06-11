@@ -79,7 +79,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	function prepareStorageDoc(cmDoc){
 		const other = {};
 		other.sel = cmDoc.sel;
-		other.text = cmDoc.getValue();
+		//other.text = cmDoc.getValue();
 		other.cursor = cmDoc.getCursor();
 		other.scrollTop = cmDoc.scrollTop;
 		other.scrollLeft = cmDoc.scrollLeft;
@@ -186,11 +186,15 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			editor: newDoc
 		};
 		this.swapDoc(newDoc);
-		
+
 		if(storedDoc && storedDoc.folded && this.foldCode){
 			const foldDocLine = (line) => foldLine(this, line);
 			storedDoc.folded.forEach(foldDocLine);
 		}
+		if(scrollTop){
+			this.scrollTo(0, scrollTop);
+		}
+		if(line) selectLine(this, currentDoc.editor, line, ch);
 
 		const thisOptions = this.options;
 		async function persistDoc(){
@@ -202,12 +206,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		const debouncedPersist = debounce(persistDoc, 1000, false);
 
-		if(scrollTop){
-			this.scrollTo(0, scrollTop);
-		}
-		if(line) selectLine(this, currentDoc.editor, line, ch);
-
-		if(!storedDoc) debouncedPersist();
+		if(!storedDoc) setTimeout(debouncedPersist, 1);
 
 		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
 		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
