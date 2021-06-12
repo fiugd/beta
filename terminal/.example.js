@@ -10,7 +10,7 @@ if(typeof document !== "undefined"){
 }
 
 const these = [
-	['BRO', 5000],
+	['one', 5000],
 	['two', 1000],
 	['three', 300],
 ];
@@ -29,9 +29,14 @@ const AsyncTask = async (item) => {
 
 const mapTasks = () => these.map(async (item) => await AsyncTask(item));
 
-console.log('start');
+//console.log('start');
 (async () => {
-	await Promise.allSettled(mapTasks());
+	//await Promise.allSettled(mapTasks());
 	//await AsyncTask(these[0]);
-	console.log('done');
+	//console.log('done\n');
+	
+	for(var i=0, len=10; i<len; i++){
+		//await delay(600);
+		console.log(`${i} - test this`);
+	}
 })();

@@ -145,7 +145,9 @@ async function invoke(args, done){
 	await this.process.run({ cwd, ...args }, logger, done);
 }
 
-function exit(){}
+function exit(){
+	console.log('exit got called for dynamic op!!!')
+}
 
 class DynamicOp {
 	constructor(url, term, comm, getCwd){
