@@ -62,7 +62,7 @@ class ProcessWorker {
 			} catch(e){
 				error = e.message;
 			}
-			const exit = !e.data.watch;
+			const exit = !(script || e.data).watch;
 			postMessage({ result, error, exit });
 		}
 	`.replace(/^		/gm, '').trim()

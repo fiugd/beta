@@ -10,7 +10,7 @@ if(typeof document !== "undefined"){
 }
 
 const these = [
-	['woo', 5000],
+	['one', 5000],
 	['two', 1000],
 	['three', 300],
 ];
