@@ -122,7 +122,7 @@ class ProcessWorker {
 				const messagePost = (args) => {
 					worker.postMessage({ type: "events", ...args });
 				};
-				const listener = debounce(messagePost, 1000, true);
+				const listener = debounce(messagePost, 1000, false);
 				const response = await attach({
 					name: 'node',
 					listener,
