@@ -108,14 +108,14 @@ class ProcessWorker {
 				const response = await attach({
 					name: 'node',
 					listener,
-					eventName: 'Operations',
+					eventName: 'fileChange',
 				});
 				worker.postMessage({ type: "events", ...response });
 			}
 		});
 		return promise;
 	}
-}
+} 
 
 async function invoke(args, done){
 	const cwd = await this.getCwd();
