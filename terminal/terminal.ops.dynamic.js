@@ -34,16 +34,16 @@ class ProcessWorker {
 	`.replace(/^		/gm, '').trim()
 	
 	footer = `
+		let script;
 		onmessage = async (e) => {
 			let result, error;
 
-			if(e.data?.type === "events"){
-				postMessage({ log: 'GOT YOUR EVENT MESSAGE, TODO WITH IT' });
-				return;
-			}
+			// TODO: maybe in future be more fancy with events
+			if(e.data?.type === "events"){}
 
 			try {
-				result = await operation(e.data);
+				script = script || e.data;
+				result = await operation(script || e.data);
 			} catch(e){
 				error = e.message;
 			}
@@ -75,7 +75,8 @@ class ProcessWorker {
 		})();
 	}
 	run(args, logger, done){
-		const { execute, list, attach, detach } = this.comm;
+		const { attach, detach } = this.comm;
+		let listenerKey;
 
 		const promise = new Promise(async (resolve) => {
 			const blob = await this.blob;
@@ -84,13 +85,14 @@ class ProcessWorker {
 				{ name: this.url.split('/').pop() }
 			);
 			const exitWorker = () => {
+				listenerKey && detach(listenerKey);
 				worker.onmessage = undefined;
 				logger('\n')
 				done();
 				worker.terminate();
 				resolve();
 			};
-			worker.onmessage = (e) => {
+			worker.onmessage = a(e) => {
 				const { result, log, exit, error } = e.data;
 				log && logger(log);
 				result && logger(result);
@@ -110,12 +112,13 @@ class ProcessWorker {
 					listener,
 					eventName: 'fileChange',
 				});
-				worker.postMessage({ type: "events", ...response });
+				listnerKey = response.key;
+				//worker.postMessage({ type: "events", ...response });
 			}
 		});
 		return promise;
-	}
-} 
+	} 
+}
 
 async function invoke(args, done){
 	const cwd = await this.getCwd();
