@@ -36,6 +36,12 @@ class ProcessWorker {
 	footer = `
 		onmessage = async (e) => {
 			let result, error;
+
+			if(e.data?.type === "events"){
+				postMessage({ log: 'GOT YOUR EVENT MESSAGE, TODO WITH IT' });
+				return;
+			}
+
 			try {
 				result = await operation(e.data);
 			} catch(e){
@@ -46,16 +52,19 @@ class ProcessWorker {
 		}
 	`.replace(/^		/gm, '').trim()
 
-	constructor(url){
+	constructor(url, {comm}){
+		this.comm = comm;
 		this.url = url;
 		let moduleResolver;
 		this.module = new Promise((resolve) => { moduleResolver = resolve; });
 		let blobResolver;
 		this.blob = new Promise((resolve) => { blobResolver = resolve; });
+		const baseUrl = (new URL('./', location)).href.split('terminal')[0] + 'terminal';
 		(async (resolve) => {
 			const module = new (await import(url)).default;
 			moduleResolver(module);
 			const body = `
+				const baseUrl = "${baseUrl}";
 				const operation = ${module.operation.toString()};
 			`.replace(/^				/gm, '');
 			const blob = new Blob(
@@ -66,6 +75,8 @@ class ProcessWorker {
 		})();
 	}
 	run(args, logger, done){
+		const { execute, list, attach, detach } = this.comm;
+
 		const promise = new Promise(async (resolve) => {
 			const blob = await this.blob;
 			const worker = new Worker(
@@ -87,6 +98,20 @@ class ProcessWorker {
 				if(exit || error) exitWorker();
 			};
 			worker.postMessage(args);
+
+			//NOTE: this is a very rough version of watch mode
+			// eventName 'Operations' is hard coded and maybe should change
+			if(args.watch){
+				const listener = (args) => {
+					worker.postMessage({ type: "events", ...args });
+				};
+				const response = await attach({
+					name: 'node',
+					listener,
+					eventName: 'Operations',
+				});
+				worker.postMessage({ type: "events", ...response });
+			}
 		});
 		return promise;
 	}
@@ -111,7 +136,7 @@ class DynamicOp {
 		this.exit = exit.bind(this);
 		this.getCwd = getCwd;
 
-		const process = new ProcessWorker(url);
+		const process = new ProcessWorker(url, this);
 		this.process = process;
 		this.worker = process.worker;
 		const thisOp = this;

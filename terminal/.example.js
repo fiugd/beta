@@ -1,5 +1,14 @@
 //show-preview
 //import { sleep } from './.example_import.js';
+
+if(typeof document !== "undefined"){
+	document.body.innerHTML += `
+		<style>body{ margin: 4em 2em;color: #777; font: 20px sans-serif; }</style>
+		<div>This file is used for testing with "node" keyword.</div>
+		<div>See console out.</div>
+	`;
+}
+
 const these = [
 	['one', 5000],
 	['two', 1000],
@@ -19,11 +28,6 @@ const AsyncTask = async (item) => {
 }
 
 const mapTasks = () => these.map(async (item) => await AsyncTask(item));
-
-document.body.innerHTML += `
-	<style>#f{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
-	<div id="f">see dev tools terminal output...</div>
-`;
 
 console.log('start');
 (async () => {

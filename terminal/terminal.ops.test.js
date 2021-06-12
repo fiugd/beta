@@ -26,6 +26,7 @@ GetDynamicOps(term, comm, getCwd)
 		thisOp.invoke(args, done);
 	});
 */
+import comm from './terminal.comm.js';
 
 document.body.innerHTML += `
 	<style>#f{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
@@ -40,16 +41,15 @@ document.body.innerHTML += `
 	const term = {
 		write: console.log
 	};
-	const comm = () => {};
+
 	const getCwd = () => 'crosshj/fiug-beta/terminal';
 	const ops = await GetDynamicOps(term, comm, getCwd);
 	
 	const logger = console.log;
 	const done = () => console.log('finished');
 	
-	const thisOp = ops[1];
-	const args = parseArgs(thisOp, '.example.js');
-	console.log(thisOp)
-	await thisOp.invoke(args, done);
-	//await thisOp.invoke(args, done);
+	const thisOp = ops.find(x=>x.keyword==="node");
+	const args = parseArgs(thisOp, '--watch .example.js'); 
+
+	await thisOp.invoke(args, done); 
 })();
