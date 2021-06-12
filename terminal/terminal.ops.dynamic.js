@@ -24,7 +24,22 @@ const updateSWCache = (bins) => {
 		TODO: add files to SW cache under /_/modules/terminal/bin
 		this avoids having to add these to service.manifest.json
 	`.replace(/^\t+/gm, '').trim());
-}
+};
+
+const debounce = (func, wait, immediate) => {
+		var timeout;
+		return async function() {
+			var context = this, args = arguments;
+			var later = function() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
+		};
+	};
 
 class ProcessWorker {
 	header = `
@@ -92,7 +107,7 @@ class ProcessWorker {
 				worker.terminate();
 				resolve();
 			};
-			worker.onmessage = a(e) => {
+			worker.onmessage = (e) => {
 				const { result, log, exit, error } = e.data;
 				log && logger(log);
 				result && logger(result);
@@ -104,9 +119,10 @@ class ProcessWorker {
 			//NOTE: this is a very rough version of watch mode
 			// eventName 'Operations' is hard coded and maybe should change
 			if(args.watch){
-				const listener = (args) => {
+				const messagePost = (args) => {
 					worker.postMessage({ type: "events", ...args });
 				};
+				const listener = debounce(messagePost, 1000, true);
 				const response = await attach({
 					name: 'node',
 					listener,
