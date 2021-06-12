@@ -128,7 +128,7 @@ class ProcessWorker {
 					listener,
 					eventName: 'fileChange',
 				});
-				listnerKey = response.key;
+				listenerKey = response.key;
 				//worker.postMessage({ type: "events", ...response });
 			}
 		});
