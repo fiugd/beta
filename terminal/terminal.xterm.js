@@ -11,7 +11,7 @@ export default () => {
 		fontFamily: 'Ubuntu Mono, courier-new, courier, monospace',
 		//fontWeight: 100,
 		convertEol: true,
-		//rendererType: 'dom',
+		rendererType: 'dom',
 	};
 	const term = new Terminal(options);
 	term.open(document.querySelector('#terminal .term-contain'));
