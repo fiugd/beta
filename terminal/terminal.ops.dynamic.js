@@ -67,9 +67,11 @@ class ProcessWorker {
 		}
 	`.replace(/^		/gm, '').trim()
 
-	constructor(url, {comm}){
+	constructor(url, {comm, setListenerKey}){
 		this.comm = comm;
+		this.setListenerKey = setListenerKey;
 		this.url = url;
+
 		let moduleResolver;
 		this.module = new Promise((resolve) => { moduleResolver = resolve; });
 		let blobResolver;
@@ -90,8 +92,8 @@ class ProcessWorker {
 		})();
 	}
 	run(args, logger, done){
-		const { attach } = this.comm;
-		const setListener = (key) => this.listenerKey = key;
+		const { comm, setListenerKey } = this;
+		const { attach } = comm;
 
 		const promise = new Promise(async (resolve) => {
 			const blob = await this.blob;
@@ -128,7 +130,7 @@ class ProcessWorker {
 					listener,
 					eventName: 'fileChange',
 				});
-				setListener(response.key);
+				setListenerKey(response.key);
 				//worker.postMessage({ type: "events", ...response });
 			}
 		});
@@ -159,11 +161,13 @@ class DynamicOp {
 		this.invoke = invoke.bind(this);
 		this.exit = exit.bind(this);
 		this.getCwd = getCwd;
+		this.setListenerKey = (key) => this.listenerKey = key;
 
 		const process = new ProcessWorker(url, this);
 		this.process = process;
 		this.worker = process.worker;
 		const thisOp = this;
+
 		return new Promise(async (resolve) => {
 			const module = await process.module;
 			thisOp.args = module.args
