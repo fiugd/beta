@@ -150,7 +150,7 @@ async function invoke(args, done){
 function exit(){
 	if(this.listenerKey){
 		const { detach } = this.comm;
-		detach({ key: this.listenerKey });
+		detach(this.listenerKey);
 	}
 }
 
