@@ -15,7 +15,7 @@ const operation = async (args) => {
 
 	const runScript = (name, src, logger) => new Promise((resolve, reject) => {
 		const upParent = (root, base) => {
-			const oneUp = `${root}/${base}`.split('/').slice(0,-2).join('/') + '/';
+			const oneUp = `${root}/${base}`.split('/').slice(0,-1).join('/');
 			return oneUp;
 		};
 		const workerSrc = `
