@@ -16,13 +16,13 @@ const rainbow = (() => {
 	};
 })();
 
-const aplChars = '⍝¯×÷∘∣∼ ≠ ≤ ≥ ≬ ⌶ ⋆⌾ ⍟ ⌽ ⍉ ⍦ ⍧ ⍪ ⍫⍬⍭←↑→↓∆∇∧∨∩∪ ⌈⌊ ⊤⊥⊂⊃⌿⍀⍅⍆⍏⍖⍊⍑⍋⍒⍎⍕⍱⍲○⍳⍴⍵⍺⍶⍷⍸⍹⍘⍙⍚⍛⍜⍮¨⍡⍢⍣⍤⍥⍨⍩';
+const aplChars = '⍝ ¯ × ÷ ∘ ∣ ∼ ≠ ≤ ≥ ≬ ⌶ ⋆ ⌾ ⍟ ⌽ ⍉ ⍦ ⍧ ⍪ ⍫ ⍬ ⍭ ← ↑ → ↓ ∆ ∇ ∧ ∨ ∩ ∪ ⌈ ⌊ ⊤ ⊥ ⊂ ⊃ ⌿ ⍀ ⍅ ⍆ ⍏ ⍖ ⍊ ⍑ ⍋ ⍒ ⍎ ⍕ ⍱ ⍲ ○ ⍳ ⍴ ⍵ ⍺ ⍶ ⍷ ⍸ ⍹ ⍘ ⍙ ⍚ ⍛ ⍜ ⍮ ¨ ⍡ ⍢ ⍣ ⍤ ⍥ ⍨ ⍩';
 const asciiArtChars = '█▓▒░▀▄║▌║│▌ •·º✦»ᏗᏒᏖ«';
 const iching = '☰ ☱ ☲ ☳ ☴ ☵ ☶ ☷';
 
 for(var i=1, len=SAMPLE_LEN; i<=len; i++){
 	console.log(
-		rainbow(`${iching} - ${asciiArtChars} - ${aplChars}`)
+		rainbow(`${iching} - ${asciiArtChars} - ${aplChars.slice(0,26)}`)
 	);
 }
 
