@@ -1,4 +1,4 @@
-import { chalk, jsonColors } from '../../.tools/utils.js';
+import { chalk, jsonColors } from '../.tools/utils.js';
 
 const SAMPLE_LEN = 60;
 

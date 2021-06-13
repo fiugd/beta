@@ -14,6 +14,10 @@ const operation = async (args) => {
 	}
 
 	const runScript = (name, src, logger) => new Promise((resolve, reject) => {
+		const upParent = (root, base) => {
+			const oneUp = `${root}/${base}`.split('/').slice(0,-2).join('/') + '/';
+			return oneUp;
+		};
 		const workerSrc = `
 			console.log = (...args) => postMessage({ log: args });
 			console.warn = console.info = console.log;
@@ -35,6 +39,8 @@ const operation = async (args) => {
 				});
 			}, 1);
 		`.replace(/^			/gm, '')
+		.replace(/from \'\.\./gm, `from '${upParent(location.origin, cwd)}`)
+		.replace(/from \"\.\./gm, `from "${upParent(location.origin, cwd)}`)
 		.replace(/from \'\./gm, `from '${location.origin}/${cwd}`)
 		.replace(/from \"\./gm, `from "${location.origin}/${cwd}`)
 		.trim()
