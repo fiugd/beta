@@ -23,7 +23,7 @@ Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 `;
 
 async function invoke(args, done){
-	const { execute, list, attach, detach } = this.comm;
+	const { attach } = this.comm;
 
 	if(!args?.events?.length){
 		this.term.write(usage);
@@ -49,6 +49,7 @@ async function invoke(args, done){
 }
 
 async function exit(){
+	const { detach } = this.comm;
 	try {
 		for(var i=0, len=this.listenerKeys.length; i<len; i++){
 			await detach(this.listenerKeys[i]);
