@@ -2,6 +2,10 @@ const help = () => {};
 
 const operation = async (args) => {
 	const { file, cwd } = args;
+	let fileParent='';
+	if(file.includes('/')){
+		filePath = file.split('/').slice(0,-1).join('/');
+	}
 
 	const scriptUrl = `${location.origin}/${cwd}/${file}`;
 	const scriptText = await (await fetch(scriptUrl)).text();
@@ -39,10 +43,10 @@ const operation = async (args) => {
 				});
 			}, 1);
 		`.replace(/^			/gm, '')
-		.replace(/from \'\.\./gm, `from '${upParent(location.origin, cwd)}`)
-		.replace(/from \"\.\./gm, `from "${upParent(location.origin, cwd)}`)
-		.replace(/from \'\./gm, `from '${location.origin}/${cwd}`)
-		.replace(/from \"\./gm, `from "${location.origin}/${cwd}`)
+		.replace(/from \'\.\./gm, `from '${upParent(location.origin, cwd+filePath)}`)
+		.replace(/from \"\.\./gm, `from "${upParent(location.origin, cwd+filePath)}`)
+		.replace(/from \'\./gm, `from '${location.origin}/${cwd+filePath}`)
+		.replace(/from \"\./gm, `from "${location.origin}/${cwd+filePath}`)
 		.trim()
 		.split('\n')
 		.map(line => {
