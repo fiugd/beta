@@ -55,7 +55,6 @@ class ProcessWorker {
 
 			// TODO: maybe in future be more fancy with events
 			if(e.data?.type === "events"){}
-
 			try {
 				script = script || e.data;
 				result = await operation(script || e.data);
@@ -102,7 +101,6 @@ class ProcessWorker {
 				{ name: this.url.split('/').pop() }
 			);
 			const exitWorker = () => {
-				listenerKey && detach(listenerKey);
 				worker.onmessage = undefined;
 				logger('\n')
 				done();
