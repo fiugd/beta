@@ -8,6 +8,7 @@ export default () => {
 		},
 		allowTransparency: true,
 		fontSize: 13,
+		fontFamily: 'Ubuntu Mono, courier-new, courier, monospace',
 		//fontWeight: 100,
 		convertEol: true,
 		//rendererType: 'dom',
