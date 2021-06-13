@@ -90,8 +90,8 @@ class ProcessWorker {
 		})();
 	}
 	run(args, logger, done){
-		const { attach, detach } = this.comm;
-		let listenerKey;
+		const { attach } = this.comm;
+		const setListener = (key) => this.listenerKey = key;
 
 		const promise = new Promise(async (resolve) => {
 			const blob = await this.blob;
@@ -128,7 +128,7 @@ class ProcessWorker {
 					listener,
 					eventName: 'fileChange',
 				});
-				listenerKey = response.key;
+				setListener(response.key);
 				//worker.postMessage({ type: "events", ...response });
 			}
 		});
@@ -146,7 +146,10 @@ async function invoke(args, done){
 }
 
 function exit(){
-	console.log('exit got called for dynamic op!!!')
+	if(this.listenerKey){
+		const { detach } = this.comm;
+		detach({ key: this.listenerKey });
+	}
 }
 
 class DynamicOp {
