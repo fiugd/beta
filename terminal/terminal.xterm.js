@@ -8,10 +8,10 @@ export default () => {
 		},
 		allowTransparency: true,
 		fontSize: 13,
-		fontFamily: 'Ubuntu Mono, courier-new, courier, monospace',
+		//fontFamily: 'Ubuntu Mono, courier-new, courier, monospace',
 		//fontWeight: 100,
 		convertEol: true,
-		rendererType: 'dom',
+		//rendererType: 'dom',
 	};
 	const term = new Terminal(options);
 	term.open(document.querySelector('#terminal .term-contain'));
