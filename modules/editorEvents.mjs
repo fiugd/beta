@@ -108,12 +108,21 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 	return false;
 };
 
-const contextMenuSelectHandler = ({ newFile } = {}) => (e) => {
+const contextMenuSelectHandler = ({ paste, cutSelected } = {}) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "Editor") {
 		//console.log('Editor ignored a context-select event');
 		return;
 	}
+	const contextCommands = {
+		"Cut": cutSelected,
+		"Copy": copySelected,
+		"Paste": paste,
+		"Command Palette": () => {}
+	};
+	const handler = contextCommands[which];
+	if(!handler) return console.error(`Unrecognized context menu command: ${which}`);
+	handler({ parent, data });
 };
 
 const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
@@ -187,7 +196,7 @@ const serviceSwitchListener = ({ switchEditor }) => async (event) => {
 	switchEditor(fileName, null, fileBody.code);
 };
 
-function attachListener({ switchEditor, messageEditor }) {
+function attachListener({ switchEditor, messageEditor, paste, cutSelected, copySelected }) {
 	const listener = async function (e) {
 		if (
 			[
@@ -291,7 +300,7 @@ function attachListener({ switchEditor, messageEditor }) {
 	attach({
 		name: "Editor",
 		eventName: "contextmenu-select",
-		listener: contextMenuSelectHandler(),
+		listener: contextMenuSelectHandler({ paste, cutSelected, copySelected }),
 	});
 }
 

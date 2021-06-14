@@ -1271,9 +1271,27 @@ function _Editor(callback) {
 		systemDocsView && systemDocsView.classList.add("hidden");
 	};
 
+	const paste = async () => {
+		const cursor = editor.getCursor();
+		const toPaste = await navigator.clipboard.readText();
+		editor.replaceRange(toPaste, cursor);
+	};
+	const cutSelected = () => {
+		const copied = editor.getSelection();
+		navigator.clipboard.writeText(copied);
+		editor.replaceSelection('');
+	};
+	const copySelected = () => {
+		const copied = editor.getSelection();
+		navigator.clipboard.writeText(copied);
+	};
+	
 	attachListener({
 		switchEditor,
 		messageEditor,
+		paste,
+		cutSelected,
+		copySelected
 	});
 
 	//deprecate
