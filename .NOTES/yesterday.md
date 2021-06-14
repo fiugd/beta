@@ -1,11 +1,17 @@
 <br>
 
-#### 2021-04-20 | present
+#### [fiug.dev 2021-06-14 video](https://www.youtube.com/watch?v=zDPFYCLt_rE)
+
+#### 2021-04-20 | 2021-06-14
 	- fix issue with tree icons
 	- editor tabs close all
 	- git commit ++
-	- editor code collapse caret hiding
-	- terminal commands
+	- editor code collapse caret hiding / code folding
+	- terminal commands: node + cat
+	- APL lang support ++
+	- improved loading logo
+	- markdown preview scroll recall
+	- editor minimap + editor doc state + context menus
 
 #### [bartok|fiug 2021-04-18 video](https://www.youtube.com/watch?v=ODoJo1G39Kw)
 
