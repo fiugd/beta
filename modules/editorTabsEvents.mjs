@@ -334,10 +334,10 @@ const contextMenuHandler = ({ event, showMenu }) => {
 		"Copy Path",
 		"Copy Relative Path",
 		"-------------------",
-		"Reveal in Side Bar",
-		"-------------------",
-		{ name: "Keep Open", disabled: true },
-		{ name: "Pin", disabled: true },
+		//"Reveal in Side Bar",
+		//"-------------------",
+		//{ name: "Keep Open", disabled: true },
+		//{ name: "Pin", disabled: true },
 	];
 	const tabClickItems = [
 		"Close",
