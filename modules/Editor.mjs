@@ -1272,22 +1272,20 @@ function _Editor(callback) {
 	};
 
 	const paste = async () => {
-		const cursor = Editor.getCursor();
+		const cursor = window.Editor.getCursor();
 		const toPaste = await navigator.clipboard.readText();
 		Editor.replaceRange(toPaste, cursor);
 	};
 	const cutSelected = () => {
-		const copied = Editor.getSelection();
+		const copied = window.Editor.getSelection();
 		navigator.clipboard.writeText(copied);
 		Editor.replaceSelection('');
 	};
 	const copySelected = () => {
-		const copied = Editor.getSelection();
+		const copied = window.Editor.getSelection();
 		navigator.clipboard.writeText(copied);
 	};
-	
-	
-	
+
 	attachListener({
 		switchEditor,
 		messageEditor,
