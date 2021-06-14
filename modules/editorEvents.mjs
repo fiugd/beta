@@ -78,16 +78,16 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 	e.preventDefault();
 
 	const listItems = [
-		"Change All Occurences",
-		"Format Selection",
-		"Format Document",
-		"seperator",
+		//"Change All Occurences",
+		//"Format Selection",
+		//"Format Document",
+		//"seperator",
 		"Cut",
 		"Copy",
 		"Paste",
 		"seperator",
 		"Command Palette...",
-	].map((x) => (x === "seperator" ? "seperator" : { name: x, disabled: true }));
+	].map((x) => (x === "seperator" ? "seperator" : { name: x, disabled: false }));
 	let data;
 	try {
 		data = {};

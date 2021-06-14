@@ -27,4 +27,3 @@ for(var i=1, len=SAMPLE_LEN; i<=len; i++){
 }
 
 //console.log(jsonColors({ test: '' }))
-
