@@ -1288,10 +1288,6 @@ function _Editor(callback) {
 		const copied = window.Editor.getSelection();
 		navigator.clipboard.writeText(copied);
 	};
-	const copySelected = () => {
-		const copied = window.Editor.getSelection();
-		navigator.clipboard.writeText(copied);
-	};
 
 	attachListener({
 		switchEditor,
