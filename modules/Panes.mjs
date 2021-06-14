@@ -280,14 +280,13 @@ function onResize(){
 				: Number(seperator.style.left.replace('px', ''))
 		);
 
-		const editorLeftPercent = (handleLeft / windowWidth) + '%';
-		seperator.style.left = editorLeftPercent;
-		editorPane.style.left = editorLeftPercent;
-		editorCover.style.left = editorLeftPercent;
+		seperator.style.left = handleLeft + 'px';
+		editorPane.style.left = handleLeft + 'px';
+		editorCover.style.left = handleLeft + 'px';
 
-		const explorerRightPercent = (windowWidth - handleLeft) / windowWidth + '%';
-		explorerPane.style.right = explorerRightPercent;
-		explorerCover.style.right = explorerRightPercent;
+		const rightOffset = windowWidth - handleLeft;
+		explorerPane.style.right = rightOffset + 'px';
+		explorerCover.style.right = rightOffset + 'px';
 
 		saveAllPositions('resize');
 	} catch(e){
