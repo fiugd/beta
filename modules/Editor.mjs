@@ -1279,7 +1279,8 @@ function _Editor(callback) {
 	const cutSelected = () => {
 		const copied = window.Editor.getSelection();
 		navigator.clipboard.writeText(copied);
-		Editor.replaceSelection('');
+		const cursor = window.Editor.getCursor();
+		Editor.replaceRange('', cursor);
 	};
 	const copySelected = () => {
 		const copied = window.Editor.getSelection();
