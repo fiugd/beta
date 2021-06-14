@@ -1275,14 +1275,14 @@ function _Editor(callback) {
 		const cursor = window.Editor.getCursor();
 		const toPaste = await navigator.clipboard.readText();
 		window.Editor.focus();
-		Editor.replaceRange(toPaste, cursor);
+		window.Editor.replaceRange(toPaste, cursor);
 	};
 	const cutSelected = () => {
 		const copied = window.Editor.getSelection();
 		navigator.clipboard.writeText(copied);
 		const cursor = window.Editor.getCursor();
 		window.Editor.focus();
-		Editor.replaceRange('', cursor);
+		window.Editor.replaceRange('', cursor);
 	};
 	const copySelected = () => {
 		const copied = window.Editor.getSelection();
