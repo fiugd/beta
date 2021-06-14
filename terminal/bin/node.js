@@ -2,9 +2,9 @@ const help = () => {};
 
 const operation = async (args) => {
 	const { file, cwd } = args;
-	let fileParent='';
+	let filePath='';
 	if(file.includes('/')){
-		filePath = file.split('/').slice(0,-1).join('/');
+		filePath = '/' + file.split('/').slice(0,-1).join('/');
 	}
 
 	const scriptUrl = `${location.origin}/${cwd}/${file}`;
