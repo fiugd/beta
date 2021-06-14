@@ -6,6 +6,24 @@ import {
 	getCurrentService,
 } from "./state.mjs";
 
+const triggers = {
+	ui: attachTrigger({
+		name: "Editor",
+		eventName: "ui",
+		type: "raw",
+	}),
+};
+
+function triggerEvent(type, operation) {
+	triggers[type]({
+		detail: {
+			operation,
+			done: () => {},
+			body: {},
+		},
+	});
+}
+
 const noFrontSlash = (path) => {
 	if(!path) return path;
 	if(!path.includes('/')) return path;
@@ -86,7 +104,7 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 		"Copy",
 		"Paste",
 		"seperator",
-		"Command Palette...",
+		"Command Palette",
 	].map((x) => (x === "seperator" ? "seperator" : { name: x, disabled: false }));
 	let data;
 	try {
@@ -118,7 +136,7 @@ const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => 
 		"Cut": cutSelected,
 		"Copy": copySelected,
 		"Paste": paste,
-		"Command Palette": () => {}
+		"Command Palette": () => triggerEvent("ui", "commandPalette")
 	};
 	const handler = contextCommands[which];
 	if(!handler) return console.error(`Unrecognized context menu command: ${which}`);
