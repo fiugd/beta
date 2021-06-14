@@ -2,7 +2,6 @@
 
 ### bartok v0.4.3
 
-- [ ] hook up editor context menu
 - [ ] reveal in sidebar is broken
 - [ ] uploading images + binary files
 - [ ] search has performance issues
@@ -13,14 +12,11 @@
 - [ ] clean up for editor document state
 - [ ] make sure editor undo history works properly
 - [ ] preview should honor selected file when service switched
-- [ ] recall scroll position when markdown preview (for example) updates
-
 
 ---
 
 - [ ] ls command needs to use the folder it was passed versus current state
 - [ ] handle rename, delete, move files for commit
-- [ ] terminal watch mode for js files
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 - [ ] service name issues with path in terminal
   - should not be able to cd lower than serviceName when service is loaded
@@ -39,6 +35,9 @@
 
 ----
 
+- [X] terminal watch mode for js files
+- [X] recall scroll position when markdown preview (for example) updates
+- [X] hook up editor context menu
 - [X] markdown preview recall scroll position
 - [X] clicking on a search result opens file at that line
 - [X] base href in html, added in service worker

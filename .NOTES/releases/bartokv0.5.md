@@ -14,7 +14,7 @@
 - [ ] explorer: overscroll seems to not be working
 - [ ] explorer: scroll bar hide/show causes status circle to dance
 
-- [ ] context menu for editor
+- [X] context menu for editor
 - [ ] context menu for terminal
 - [ ] terminal passes hotkey events to parent
   - control-s: save
