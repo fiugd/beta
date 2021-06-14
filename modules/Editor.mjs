@@ -1286,6 +1286,8 @@ function _Editor(callback) {
 		navigator.clipboard.writeText(copied);
 	};
 	
+	
+	
 	attachListener({
 		switchEditor,
 		messageEditor,

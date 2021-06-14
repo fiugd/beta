@@ -108,7 +108,7 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 	return false;
 };
 
-const contextMenuSelectHandler = ({ paste, cutSelected } = {}) => (e) => {
+const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "Editor") {
 		//console.log('Editor ignored a context-select event');
