@@ -68,6 +68,15 @@ const operation = async (args, done) => {
 
 	// TODO: here also, could be compiling/transpiling code or setting up a worker
 
+	// TODO: reload iframe if it's the same doc => iframe.contentWindow.location.reload();
+	// or message frame with new content - each template should listen for update
+	// similarly: let page decide when it wants to refresh (and how) just tell it something changed
+	// THIS: https://github.com/GoogleChromeLabs/comlink/tree/main/docs/examples/99-nonworker-examples/iframes
+	// OR (maybe more worker focused): https://github.com/developit/workerize
+	// OR (maybe more worker focused): https://github.com/developit/greenlet
+
+	// TODO: preview for non-html files. ${url}/::preview::/
+
 	let useSrcDoc;
 	try {
 		useSrcDoc = event?.detail?.code && url.includes(event.detail.filePath)
@@ -95,11 +104,12 @@ const operation = async (args, done) => {
 		}, 500); 
 	}
 
+	
 	const dismissPreview = () => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
 		previewIframe.remove();
-		done();
+		done('\n');
 	};
 
 	// CTRL-C ???
