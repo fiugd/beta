@@ -35,6 +35,17 @@ export const parseArgs = (model, argString) => {
 	const result = typeof model.argsGet === 'function'
 		? model.argsGet(options.argv)
 		: commandLineArgs(model.args, options);
+
+	if(model.args && typeof model.argsGet !== 'function'){
+		model.args
+			.filter(x => x.default)
+			.forEach(x => {
+				result[x.name] = typeof result[x.name] !== 'undefined'
+					? result[x.name]
+					: x.default
+			});
+	}
+
 	const resultProps = Object.keys(result).sort();
 	(model?.args || []).forEach(x => {
 		if(!x.defaultValue || result[x.name]) return;
