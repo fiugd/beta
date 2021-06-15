@@ -1,4 +1,5 @@
 const description = 'View and interact with the output of a file as it changes using an HTML view';
+
 const args = [{
 	name: 'file', alias: 'f', type: String, defaultOption: true, required: true
 }, { 
@@ -7,6 +8,8 @@ const args = [{
 
 let previewDom;
 let quitButton;
+let currentFile;
+
 const operation = async (args, done) => {
 	const {cwd, file, event} = args;
 
@@ -91,7 +94,9 @@ const operation = async (args, done) => {
 	}
 
 	const dismissPreview = () => {
+		currentFile = undefined;
 		previewDom.classList.add('hidden');
+		previewIframe.remove();
 		done('preview end!!!');
 	};
 
@@ -100,7 +105,13 @@ const operation = async (args, done) => {
 		setTimeout(dismissPreview, 1);
 	};
 
-	return "preview start!!!\n";
+	const filePath = url.split(document.location.origin)[1];
+	const isNew = filePath !== currentFile;
+	currentFile = filePath;
+
+	return isNew
+		? `refresh: ${url}\n`
+		: `preview: ${url}\n`;
 };
 
 export default class Preview {
