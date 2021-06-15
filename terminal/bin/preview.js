@@ -111,10 +111,11 @@ const operation = async (args, done) => {
 	const isNew = filePath !== currentFile;
 	currentFile = filePath;
 
-	const link = url => chalk.hex('#9cdcfe')(url);
+	const link = url => chalk.hex('#569CD6')(url);
+	const label = url => chalk.hex('#999')(url);
 	return isNew
-		? `${chalk.hex('#aaa')("preview: ")}${link(url)}\n${chalk.hex('#aaa')("refresh: ")}`
-		: `|`;
+		? `${label("preview: ")}${link(url)}\n${label("update: ")}`
+		: label(`|`);
 };
 
 export default class Preview {
