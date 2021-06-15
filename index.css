@@ -2521,8 +2521,9 @@ notes-section.loading:after {
 
 .term-contain {
 	/* padding-top: 15px; */
+	/* height: calc(100vh - 30px); */
+	height: calc(100vh - 21px);
 	flex: 1;
-	height: calc(100vh - 30px);
 }
 
 .terminal.xterm {

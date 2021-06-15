@@ -203,6 +203,10 @@
 			"route": "./_/modules/terminal/bin/node.js",
 			"source": "terminal/bin/node.js"
 		},
+		{
+			"route": "./_/modules/terminal/bin/preview.js",
+			"source": "terminal/bin/preview.js"
+		},
 		"NOTE: -- TERMINAL UI /END --",
 
 		"NOTE: modules",

@@ -1,6 +1,27 @@
 const cacheName = 'terminal-cache'
 
+const fetchJSON = url => fetch(url).then(x => x.json());
+
+export const readDir = async (serviceName, dir) => {
+	let response, error;
+	try {
+		const { result: allServices } = await fetchJSON('/service/read')
+		const { id: serviceId } = allServices.find(x => x.name === serviceName );
+		const { result: [service] } = await fetchJSON(`/service/read/${serviceId}`)
+		const tree = service.tree[serviceName];
+		const response = Object.keys(
+			dir.split('/').filter(x=>x).reduce((all,one) => all[one], tree)
+		).map(name => ({ name }));
+		return { response };
+	} catch({ message: error }) {
+		return { error };
+	}
+};
+
 export const readSourceDir = async (dir) => {
+	if(location.href.includes('/::preview::/')){
+		return readDir('crosshj/fiug-beta', dir)
+	}
 	const site = location.origin;
 	const root = site.includes('beta')
 		? `https://api.github.com/repos/crosshj/fiug-beta`
@@ -26,18 +47,33 @@ const updateSWCache = (bins) => {
 	`.replace(/^\t+/gm, '').trim());
 };
 
-const debounce = (func, wait, immediate) => {
+const debounce = (func, wait) => {
 		var timeout;
+		var callCount=0;
+		var timePassed;
+
 		return async function() {
-			var context = this, args = arguments;
+			callCount++;
+			var context = this;
+			var args = arguments;
 			var later = function() {
+				if(callCount > 1){
+					console.log('--- TRAILING EDGE');
+					func.apply(context, args);
+				}
 				timeout = null;
-				if (!immediate) func.apply(context, args);
+				callCount = 0;
 			};
-			var callNow = immediate && !timeout;
+			if(!timePassed){
+			
+			}
+			var callNow = !timeout;
 			clearTimeout(timeout);
 			timeout = setTimeout(later, wait);
-			if (callNow) func.apply(context, args);
+			if (callNow){
+				console.log('--- LEADING EDGE');
+				func.apply(context, args);
+			}
 		};
 	};
 
@@ -55,6 +91,7 @@ class ProcessWorker {
 
 			// TODO: maybe in future be more fancy with events
 			if(e.data?.type === "events"){}
+
 			try {
 				script = script || e.data;
 				result = await operation(script || e.data);
@@ -79,6 +116,8 @@ class ProcessWorker {
 		(async (resolve) => {
 			const module = new (await import(url)).default;
 			moduleResolver(module);
+			if(module.type === 'plain') return blobResolver();
+
 			const body = `
 				const baseUrl = "${baseUrl}";
 				const operation = ${module.operation.toString()};
@@ -93,8 +132,37 @@ class ProcessWorker {
 	run(args, logger, done){
 		const { comm, setListenerKey } = this;
 		const { attach } = comm;
+		const finish = (resolve) => {
+			logger('\n')
+			done();
+			resolve();
+		};
 
 		const promise = new Promise(async (resolve) => {
+			const module = await this.module;
+			if(module.type === 'plain'){
+				const runOperation = async (event) => {
+					console.log('preview heard a file change');
+					const result = await module.operation({...args, event}, (msg)=>{
+						msg && logger(msg);
+						finish(resolve);
+					});
+					result && logger(result);
+					if(!args.watch){
+						return finish(resolve);
+					}
+				};
+				const listener = debounce(runOperation, 500);
+				await listener(args);
+				if(!args.watch) return;
+
+				const response = await attach({
+					name: module.name,
+					listener,
+					eventName: 'fileChange', 
+				});
+				return;
+			}
 			const blob = await this.blob;
 			const worker = new Worker(
 				URL.createObjectURL(blob),
@@ -102,10 +170,8 @@ class ProcessWorker {
 			);
 			const exitWorker = () => {
 				worker.onmessage = undefined;
-				logger('\n')
-				done();
 				worker.terminate();
-				resolve();
+				finish(resolve);
 			};
 			worker.onmessage = (e) => {
 				const { result, log, exit, error } = e.data;
@@ -122,7 +188,7 @@ class ProcessWorker {
 				const messagePost = (args) => {
 					worker.postMessage({ type: "events", ...args });
 				};
-				const listener = debounce(messagePost, 1000, false);
+				const listener = debounce(messagePost, 500);
 				const response = await attach({
 					name: 'node',
 					listener,
@@ -133,7 +199,7 @@ class ProcessWorker {
 			}
 		});
 		return promise;
-	} 
+	}
 }
 
 async function invoke(args, done){
@@ -159,13 +225,13 @@ class DynamicOp {
 		this.invoke = invoke.bind(this);
 		this.exit = exit.bind(this);
 		this.getCwd = getCwd;
-		this.setListenerKey = (key) => this.listenerKey = key;
 
+		this.setListenerKey = (key) => this.listenerKey = key;
+		
 		const process = new ProcessWorker(url, this);
 		this.process = process;
 		this.worker = process.worker;
 		const thisOp = this;
-
 		return new Promise(async (resolve) => {
 			const module = await process.module;
 			thisOp.args = module.args

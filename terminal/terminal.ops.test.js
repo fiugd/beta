@@ -26,30 +26,37 @@ GetDynamicOps(term, comm, getCwd)
 		thisOp.invoke(args, done);
 	});
 */
+
 import comm from './terminal.comm.js';
 
 document.body.innerHTML += `
-	<style>#f{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
-	<div id="f">see dev tools terminal output...</div>
+	<style>body{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
 `;
+
+const write = (text) => {
+	if(!text.trim()) return;
+	const logEl = document.createElement('div');
+	logEl.innerHTML = text;
+	logEl.className = 'log';
+	document.body.append(logEl);
+}
 
 (async () => {
 	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
-	const { default: GetDynamicOps } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
+	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
+
 	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
 
-	const term = {
-		write: console.log
-	};
+	const term = { write };
 
 	const getCwd = () => 'crosshj/fiug-beta/terminal';
 	const ops = await GetDynamicOps(term, comm, getCwd);
-	
-	const logger = console.log;
-	const done = () => console.log('finished');
-	
-	const thisOp = ops.find(x=>x.keyword==="node");
-	const args = parseArgs(thisOp, '--watch .example.js'); 
 
-	await thisOp.invoke(args, done); 
+	const logger = console.log;
+	const done = () => console.log('finished'); 
+
+	const thisOp = ops.find(x=>x.keyword==="preview");
+	const args = parseArgs(thisOp, '../.welcome/1ncubate/zip_project.html');
+
+	await thisOp.invoke(args, done);
 })();
