@@ -5,7 +5,7 @@
 - [ ] click to select file from command palette opener
 - [ ] on repo "clone", don't pull all files
   - instead wait for pull or pull as needed)
-- [ ] preview as a terminal command vs a menu item
+- [X] preview as a terminal command vs a menu item
 - [ ] terminal should get cwd and service name from query params
 - [ ] terminal left/right arrows for editing buffer
 
