@@ -14,7 +14,8 @@ const history = [
 	`git diff terminal.git.mjs`,
 	`git commit -m "commit me"`,
 	`cat terminal.comm.js`,
-	`node --watch .example.js`
+	`node --watch .example.js`,
+	`preview zip_project.html`
 ];
 
 const usage = (chalk) => {

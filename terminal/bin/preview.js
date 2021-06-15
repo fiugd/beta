@@ -1,3 +1,5 @@
+import { chalk } from '../terminal.utils.js';
+
 const description = 'View and interact with the output of a file as it changes using an HTML view';
 
 const args = [{
@@ -97,7 +99,7 @@ const operation = async (args, done) => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
 		previewIframe.remove();
-		done('preview end!!!');
+		done(chalk.gray('preview end'));
 	};
 
 	// CTRL-C ???
@@ -109,9 +111,10 @@ const operation = async (args, done) => {
 	const isNew = filePath !== currentFile;
 	currentFile = filePath;
 
+	const link = url => chalk.hex('#9cdcfe')(url);
 	return isNew
-		? `refresh: ${url}\n`
-		: `preview: ${url}\n`;
+		? `${chalk.gray(preview+": ")} ${link(url)}\n${chalk.gray(refresh+": ")}`
+		: `|`;
 };
 
 export default class Preview {
