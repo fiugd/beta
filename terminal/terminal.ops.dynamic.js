@@ -136,6 +136,7 @@ class ProcessWorker {
 			logger('\n')
 			done();
 			resolve();
+			this.exit();
 		};
 
 		const promise = new Promise(async (resolve) => {
@@ -215,6 +216,7 @@ function exit(){
 	if(this.listenerKey){
 		const { detach } = this.comm;
 		detach(this.listenerKey);
+		this.listenerKey = undefined;
 	}
 }
 

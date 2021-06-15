@@ -21,7 +21,7 @@ const operation = async (args, done) => {
 					z-index: 999;
 				}
 				#preview-container iframe {
-					position: absolute; left:0; top:0; width: 100%; height: 100%
+					position: absolute; left:0; top:0; width: 100%; height: 100%;
 					border: 0;
 				}
 				.hidden { display: none; }
@@ -43,10 +43,9 @@ const operation = async (args, done) => {
 		quitButton = document.createElement('div');
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
-		document.body.append(quitButton);
-
+		previewDom.append(quitButton);
 	}
-	quitButton.classList.remove('hidden');
+	previewDom.classList.remove('hidden');
 	const previewIframe = previewDom.querySelector('iframe');
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
 	const newIframe = document.createElement('iframe');
@@ -98,7 +97,6 @@ const operation = async (args, done) => {
 
 	// CTRL-C ???
 	quitButton.onclick = () => {
-		quitButton.classList.add('hidden');
 		setTimeout(dismissPreview, 1);
 	};
 
