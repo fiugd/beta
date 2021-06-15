@@ -86,8 +86,6 @@
 			// var img = zip.folder("images");
 			// img.file("smile.gif", imgData, {base64: true});
 			const content = await zip.generateAsync({type:"blob"})
-
-			console.log(content)
 			return content;
 		}
 		document.querySelector('button#downloadZip').onclick = async (e) => {
