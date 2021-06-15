@@ -99,7 +99,7 @@ const operation = async (args, done) => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
 		previewIframe.remove();
-		done('\n💥');
+		done();
 	};
 
 	// CTRL-C ???
@@ -112,9 +112,9 @@ const operation = async (args, done) => {
 	currentFile = filePath;
 
 	const link = url => chalk.hex('#569CD6')(url);
-	const progress = url => chalk.hex('#aaa')(url);
+	const progress = url => chalk.yellow(url);
 	return isNew
-		? `🔗  ${link(url)}\n🔄  `
+		? `\n🔗  ${link(url)}\n🔆  `
 		: progress(`|`);
 };
 
