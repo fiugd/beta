@@ -99,7 +99,7 @@ const operation = async (args, done) => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
 		previewIframe.remove();
-		done(chalk.gray('preview end'));
+		done(chalk.hex('#ccc')('\npreview end'));
 	};
 
 	// CTRL-C ???
@@ -113,7 +113,7 @@ const operation = async (args, done) => {
 
 	const link = url => chalk.hex('#9cdcfe')(url);
 	return isNew
-		? `${chalk.gray(preview+": ")} ${link(url)}\n${chalk.gray(refresh+": ")}`
+		? `${chalk.hex('#ccc')("preview: ")} ${link(url)}\n${chalk.hex('#ccc')("refresh: ")}`
 		: `|`;
 };
 
