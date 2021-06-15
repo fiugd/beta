@@ -113,7 +113,7 @@ const operation = async (args, done) => {
 
 	const link = url => chalk.hex('#9cdcfe')(url);
 	return isNew
-		? `${chalk.hex('#ccc')("preview: ")}${link(url)}\n${chalk.hex('#ccc')("refresh: ")}`
+		? `${chalk.hex('#aaa')("preview: ")}${link(url)}\n${chalk.hex('#aaa')("refresh: ")}`
 		: `|`;
 };
 
