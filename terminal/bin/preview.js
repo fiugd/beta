@@ -87,7 +87,7 @@ const operation = async (args, done) => {
 			setTimeout(() => {
 				previewIframe.remove();
 			},100);
-		}, 500);
+		}, 500); 
 	}
 
 	const dismissPreview = () => {
@@ -100,7 +100,7 @@ const operation = async (args, done) => {
 		setTimeout(dismissPreview, 1);
 	};
 
-	return "preview start!!!";
+	return "preview start!!!\n";
 };
 
 export default class Preview {

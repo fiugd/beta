@@ -163,6 +163,7 @@ class ProcessWorker {
 					listener,
 					eventName: 'fileChange', 
 				});
+				setListenerKey(response.key);
 				return;
 			}
 			const blob = await this.blob;
