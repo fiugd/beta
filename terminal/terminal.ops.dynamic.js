@@ -103,8 +103,9 @@ class ProcessWorker {
 		}
 	`.replace(/^		/gm, '').trim()
 
-	constructor(url, {comm, setListenerKey}){
+	constructor(url, {comm, exit, setListenerKey}){
 		this.comm = comm;
+		this.exit = exit;
 		this.setListenerKey = setListenerKey;
 		this.url = url;
 
