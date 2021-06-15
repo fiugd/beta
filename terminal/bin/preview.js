@@ -112,7 +112,7 @@ const operation = async (args, done) => {
 	currentFile = filePath;
 
 	const link = url => chalk.hex('#569CD6')(url);
-	const label = url => chalk.hex('#999')(url);
+	const label = url => chalk.hex('#aaa')(url);
 	return isNew
 		? `${label("preview: ")}${link(url)}\n${label("update: ")}`
 		: label(`|`);
