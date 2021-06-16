@@ -1,5 +1,7 @@
 import { chalk } from '../terminal.utils.js';
 
+const help = () => {};
+
 const description = 'View and interact with the output of a file as it changes using an HTML view';
 
 const args = [{
@@ -139,6 +141,6 @@ export default class Preview {
 
 	constructor(){
 		this.operation = operation;
-		this.help = () => usage;
+		this.help = () => help;
 	}
 };
