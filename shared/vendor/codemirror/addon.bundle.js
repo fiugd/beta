@@ -227,7 +227,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			CodeMirror.off(this, "unfold", persistDoc);
 		};
 
-		if(!storedDoc) debouncedPersist();
+		if(!storedDoc) persistDoc();
 
 	});
 });
