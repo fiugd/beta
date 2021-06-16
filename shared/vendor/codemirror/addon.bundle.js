@@ -56,7 +56,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 	let currentDoc;
 	const SCROLL_MARGIN = 100;
-	const docsInStore;
+	let docsInStore = [];
 
 	CodeMirror.defineOption('docStore', () => {}, (cm, localforage) => {
 		if(!localforage || !localforage.createInstance) return;
