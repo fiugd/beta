@@ -3,7 +3,7 @@
 
 if(typeof document !== "undefined"){
 	document.body.innerHTML += `
-		<style>body{ margin: 4em 2em;color: #777; font: 20px sans-serif; }</style>
+		<style>body{ margin: 2em;color: #777; font: 20px sans-serif; }</style>
 		<div>This file is used for testing with "node" keyword.</div>
 		<div>See console out.</div>
 	`;
