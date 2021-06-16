@@ -2493,7 +2493,7 @@ notes-section.loading:after {
 }
 
 #terminal {
-	background-color: var(--main-theme-color);
+/* 	background-color: var(--main-theme-color); */
 	border-left: 1px solid var(--main-theme-background-color);
 	/* width: 50%; */
 	right: 0 !important;

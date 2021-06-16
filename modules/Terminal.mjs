@@ -93,7 +93,9 @@ function _Terminal() {
 					 </li>
 					 <li class="action-item ${
 						 selected === "preview" ? "checked" : ""
-					 }" role="tab" draggable="true">
+					 }" role="tab" draggable="true"
+						style="display: none;"
+					>
 							<a class="action-label preview" data-type="preview">Preview</a>
 						</li>
 						<li class="action-item hidden ${
@@ -127,6 +129,7 @@ function _Terminal() {
 							<li class="action-item full-screen"
 								role="presentation"
 								data-type="full-screen"
+								style="display: none;"
 							>
 								<a class="action-label icon full-screen-panel-action" data-type="full-screen" role="button" title="Preview Full Screen"></a>
 							</li>
@@ -134,11 +137,14 @@ function _Terminal() {
 							<li class="action-item ${pvControlsClass("lock")}"
 								role="presentation"
 								data-type="lock"
+								style="display: none;"
 							>
 								<a class="action-label icon lock-panel-action" data-type="lock" role="button" title="Lock Preview"></a>
 							</li>
 
-							<li class="action-item" role="presentation">
+							<li class="action-item" role="presentation"
+								style="display: none;"
+							>
 								<a class="disabled action-label icon hide-panel-action" role="button" title="Close Panel">
 								</a>
 							</li>
@@ -165,11 +171,10 @@ function _Terminal() {
 				right: 0;
 				top: 0px;
 				bottom: 0px;
-				background: #1d1d1d;
 				overflow: hidden;
 			}
-			#terminal .preview-contain { z-index: 9; }
-			#terminal .term-contain { z-index: 8; }
+			#terminal .preview-contain { z-index: 9999; }
+			#terminal .term-contain { z-index: 999; }
 			#terminal iframe {
 				position: relative;
 				top: 0;
@@ -386,8 +391,10 @@ function _Terminal() {
 	
 	attachEvents({
 		write: (x) => term.write(x),
-		viewUpdate,
-		viewReload: reloadIframe,
+		//viewUpdate,
+		//viewReload: reloadIframe,
+		viewUpdate: () => {},
+		viewReload: () => {},
 		terminalActions,
 	})
 }
