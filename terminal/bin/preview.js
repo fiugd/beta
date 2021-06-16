@@ -59,6 +59,10 @@ const operation = async (args, done) => {
 	newIframe.classList.add('hidden');
 	previewDom.prepend(newIframe);
 
+	const filePath = url.split(document.location.origin)[1];
+	const isNew = filePath !== currentFile;
+	currentFile = filePath;
+
 	// TODO: should check to see if a page refresh is required
 	// file that changed may not relate to file previewed
 
@@ -83,6 +87,14 @@ const operation = async (args, done) => {
 	try {
 		useSrcDoc = event?.detail?.code && url.includes(event.detail.filePath)
 	} catch(e){}
+	
+	const previewUrl = (url) => {
+		const filename = url.split('/').pop().split('?')[0];
+		const extension = filename.split('.').pop();
+		const rawPreview = ['html', 'htm'];
+		if(rawPreview.includes(extension)) return url;
+		return url + '/::preview::/';
+	};
 
 	// NOTE: iframe with srcdoc still doesn't want to respect base href
 	// disabled this until working better
@@ -98,15 +110,14 @@ const operation = async (args, done) => {
 		},100);
 	} else {
 		setTimeout(() => {
-			newIframe.src = url;
+			newIframe.src = previewUrl(url);
 			newIframe.classList.remove('hidden');
 			setTimeout(() => {
 				previewIframe.remove();
 			},100);
-		}, 500); 
+		}, isNew ? 0 : 500);
 	}
 
-	
 	const dismissPreview = () => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
@@ -118,10 +129,6 @@ const operation = async (args, done) => {
 	quitButton.onclick = () => {
 		setTimeout(dismissPreview, 1);
 	};
-
-	const filePath = url.split(document.location.origin)[1];
-	const isNew = filePath !== currentFile;
-	currentFile = filePath;
 
 	const link = url => chalk.hex('#569CD6')(url);
 	const progress = url => chalk.yellow(url);
