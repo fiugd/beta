@@ -68,17 +68,43 @@ _a running list of all the explorations I would like to dig deeper into_
 - fourier transform
 
 
-### Bookmarks | Read Later | Wish List | Todo
-- all of this in one place
+### Knowledge Graph
+- all the notes/threads/connections in one place
+	- google bookmarks
+	- pocket (Read It Later)
+	- old bookmarks from Firefox, Chrome, delicious
+	- notes from email
+	- Amazon Wishlist
+	- goodreads
+	- youtube likes / watch later
+	- old notes in text files (or elsewhere?)
+- can be visualized
 - can be searched easily
-- can be globbed together
+- can be globbed together, tagged, sorted
 - can be shared
 - will remind me to come back to it
+- also see: [HN comments thread about Dendron,a ROAM alternative](https://news.ycombinator.com/item?id=23890035)
+
+
+### Code, Languages, Computing
+- *use case: create a dependency graph (visualize code connections)*
+- *use case: change the location of required/imported dependencies*
+- *use case: transform code from one format to another*
+- abstract syntax tree
+	- [Manipulating AST with javascript](https://lihautan.com/manipulating-ast-with-javascript/)
+	- [AST Explorer](https://github.com/fkling/astexplorer/blob/master/README.md)
+	- [babel AST Explorer](https://lihautan.com/babel-ast-explorer/)
+- parser generator
+	- [ohm editor](https://ohmlang.github.io/editor/)
+
+
+---
 
 ### wish
 - have a team or multiple teams
 - have assistants or managers
 
+---
 
 ### themes of ideas I get
 - isolation chamber

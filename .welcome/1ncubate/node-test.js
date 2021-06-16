@@ -1,4 +1,5 @@
 import { chalk, jsonColors } from '../.tools/utils.js';
+import foo from "jimmy"
 
 const SAMPLE_LEN = 60;
 
@@ -27,4 +28,3 @@ for(var i=1, len=SAMPLE_LEN; i<=len; i++){
 }
 
 console.log(jsonColors({ test: '' }));
-

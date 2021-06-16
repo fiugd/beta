@@ -16,6 +16,14 @@
 - [ ] cp command works properly
 - [ ] paths which include ".." or "." work for all commands
 
+- [ ] service worker should provide endpoint for directory contents list
+- [ ] tree > right-click > Open In Preview should work with new terminal preview command
+- [ ] preview should support wildcards, ie. \*.md
+- [ ] preview with no arguments should preview current file (like old preview)
+- [ ] preview help documentation
+
+- [ ] path resolution needs to be a module or endpoint; this needs to be a solved issue
+
 ----
 
 - [X] tab doesn't appear sometimes even though editor loads

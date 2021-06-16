@@ -5,7 +5,6 @@
 	- https://github.com/codesandbox/codesandbox-client/tree/master/standalone-packages/sandpack
 - https://browsix.org/ - Run C, C++, Go and Node.js programs as processes
 - https://github.com/jvilk/BrowserFS -  in-browser filesystem, NodeJS filesystem API, various backends
--
 
 # random
 - waiting is not a problem; waiting with desire to move forward is a problem
