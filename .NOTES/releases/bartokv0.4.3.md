@@ -2,39 +2,23 @@
 
 ### bartok v0.4.3
 
-- [ ] reveal in sidebar is broken
-- [ ] uploading images + binary files
-- [ ] search has performance issues
 - [ ] delay occurs before editor loads sometimes
 	- need details about when this occurs
-- [ ] tab doesn't appear sometimes even though editor loads
-	- need details about when this occurs
-- [ ] clean up for editor document state
-- [ ] make sure editor undo history works properly
-- [ ] preview should honor selected file when service switched
-
----
-
 - [ ] ls command needs to use the folder it was passed versus current state
 - [ ] handle rename, delete, move files for commit
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 - [ ] service name issues with path in terminal
   - should not be able to cd lower than serviceName when service is loaded
   - cd /path should translate into serviceName/path
-
----
-
 - [ ] rm command works properly for folder
 - [ ] editor tabs: on file delete, close tab
 - [ ] mv command works properly
 - [ ] cp command works properly
-
----
-
 - [ ] paths which include ".." or "." work for all commands
 
 ----
 
+- [X] tab doesn't appear sometimes even though editor loads
 - [X] terminal watch mode for js files
 - [X] recall scroll position when markdown preview (for example) updates
 - [X] hook up editor context menu

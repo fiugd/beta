@@ -56,7 +56,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 	let currentDoc;
 	const SCROLL_MARGIN = 100;
-	const allDocs = {};
+	const docsInStore;
 
 	CodeMirror.defineOption('docStore', () => {}, (cm, localforage) => {
 		if(!localforage || !localforage.createInstance) return;
@@ -66,7 +66,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			localforage.WEBSQL,
 			localforage.LOCALSTORAGE,
 		];
-		cm.options.docStore = localforage
+		const docStore = localforage
 			.createInstance({
 					driver: driverOrder,
 					name: 'editorState',
@@ -74,6 +74,10 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 					storeName: 'editor',
 					description: 'scroll and cursor position, history, selection'
 			});
+		cm.options.docStore = docStore;
+		(async () => {
+			docsInStore = await docStore.keys();
+		})();
 	});
 
 	function prepareStorageDoc(cmDoc){
@@ -164,11 +168,13 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			return;
 		}
 
-		if(currentDoc && currentDoc.cleanup) currentDoc.cleanup();
+		if(currentDoc && currentDoc.cleanup) setTimeout(currentDoc.cleanup, 1);
 
-		const storedDoc = await this.options.docStore.getItem(name);
-
-		let newDoc = (allDocs[name] || {}).editor || CodeMirror.Doc('', mode || storedDoc.mode);
+		let storedDoc;
+		if(docsInStore.find(x => x === name)){
+			storedDoc = await this.options.docStore.getItem(name);
+		}
+		let newDoc = CodeMirror.Doc('', mode || storedDoc.mode);
 		newDoc.name = name;
 		if(storedDoc){
 			newDoc = rehydrateDoc(newDoc, {
@@ -196,31 +202,33 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		}
 		if(line) selectLine(this, currentDoc.editor, line, ch);
 
-		const thisOptions = this.options;
-		async function persistDoc(){
+		const persistDoc = () => {
 			if(!name) return;
-			await thisOptions.docStore.setItem(
+			this.options.docStore.setItem(
 				name,
 				prepareStorageDoc(currentDoc.editor)
 			);
+			if(!docsInStore.find(x => x === name)){
+				docsInStore.push(name);
+			}
 		}
-		const debouncedPersist = debounce(persistDoc, 1000, false);
 
-		if(!storedDoc) setTimeout(debouncedPersist, 1);
-
-		CodeMirror.on(currentDoc.editor, "change", debouncedPersist);
-		CodeMirror.on(currentDoc.editor, "cursorActivity", debouncedPersist);
-		CodeMirror.on(this, "scroll", debouncedPersist);
+		CodeMirror.on(currentDoc.editor, "change", persistDoc);
+		CodeMirror.on(currentDoc.editor, "cursorActivity", persistDoc);
+		CodeMirror.on(this, "scroll", persistDoc);
 		CodeMirror.on(this, "fold", persistDoc);
 		CodeMirror.on(this, "unfold", persistDoc);
 
 		currentDoc.cleanup = () => {
-			CodeMirror.off(currentDoc.editor, "change", debouncedPersist);
-			CodeMirror.off(currentDoc.editor, "cursorActivity", debouncedPersist);
-			CodeMirror.off(this, "scroll", debouncedPersist);
+			CodeMirror.off(currentDoc.editor, "change", persistDoc);
+			CodeMirror.off(currentDoc.editor, "cursorActivity", persistDoc);
+			CodeMirror.off(this, "scroll", persistDoc);
 			CodeMirror.off(this, "fold", persistDoc);
 			CodeMirror.off(this, "unfold", persistDoc);
 		};
+
+		if(!storedDoc) debouncedPersist();
+
 	});
 });
 

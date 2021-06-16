@@ -1,11 +1,16 @@
 ![image](https://bit.ly/fiugLandscape1)
 
 # bartok v0.5.0
-
+- [ ] focus on / zoom to a folder (in explorer)
+- [ ] preview as a terminal command vs a menu item
+	- preview should honor selected file when service switched (may not do this)
+- [ ] search has performance issues
+- [ ] uploading images + binary files
 - [ ] click to select file from command palette opener
+
+- [ ] git clone + git pull + status (in terminal)
 - [ ] on repo "clone", don't pull all files
   - instead wait for pull or pull as needed)
-- [X] preview as a terminal command vs a menu item
 - [ ] terminal should get cwd and service name from query params
 - [ ] terminal left/right arrows for editing buffer
 
@@ -20,7 +25,11 @@
   - control-s: save
   - control-p: open file
   - control-shift-p: command window
-- [ ] editor tabs: keep open and pin
+- [ ] reveal in sidebar is broken
+- [ ] editor tabs: keep open, pin, reveal in sidebar
+
+- [ ] clean up for editor document state
+- [ ] make sure editor undo history works properly
 
 Summary
 =======

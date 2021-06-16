@@ -7,8 +7,11 @@
 		<meta name="author" content="">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="mobile-web-app-capable" content="yes">
-		<link rel="stylesheet" href="../shared.styl/::preview::/">
+		<base target="_blank" href="../../">
 	</head>
+
+	<!-- wish this would work right now -->
+	<link rel="stylesheet" href=".../shared.styl/::preview::/">
 
 	<style>
 		::-webkit-scrollbar { width: 5px; }
@@ -47,13 +50,13 @@
 		}
 		button:focus { outline: none; }
 	</style>
- 
+
 	<body>
 		<p>
-			Also see: <a href="/crosshj/fiug-welcome/.templates/zip.html/::preview::/">fiug-welcome/.templates/zip.html</a>
+			Also see. <a href="/crosshj/fiug-welcome/.templates/zip.html/::preview::/">fiug-welcome/.templates/zip.html</a>
 		</p>
 		<p>
-			Also see: <a href="downloadZip.js/::preview::/">1ncubate/downloadZip.js</a>
+			Also see. <a href="downloadZip.js/::preview::/">1ncubate/downloadZip.js</a>
 		</p>
 		<button id="downloadZip">Download ZIP</button>
 		<button id="uploadZip" onclick="alert('not implemented!')">Upload ZIP</button>
@@ -86,6 +89,8 @@
 			// var img = zip.folder("images");
 			// img.file("smile.gif", imgData, {base64: true});
 			const content = await zip.generateAsync({type:"blob"})
+
+			console.log(content)
 			return content;
 		}
 		document.querySelector('button#downloadZip').onclick = async (e) => {
