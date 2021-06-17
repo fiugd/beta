@@ -243,6 +243,11 @@
 				let xformedFile;
 
 				// if headers.event-requestor is 'editor-state': let getFile know so it can track
+				try {
+					console.log(event.request.headers['x-requestor'])
+				} catch(e){
+					console.error(e);
+				}
 				const file = await getFile(`${base}/${cleanPath}`)
 					|| await getFile(`./${base}/${cleanPath}`);
 
