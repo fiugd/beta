@@ -22,7 +22,7 @@ function triggerEvent(type, operation) {
 			body: {},
 		},
 	});
-}
+};
 
 const noFrontSlash = (path) => {
 	if(!path) return path;
