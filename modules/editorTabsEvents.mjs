@@ -28,7 +28,7 @@ function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
 	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
 
 	if(next || !tabs.find(x => x.active)){
-		const nextTab = tabs.find(
+		const nextTab = next && tabs.find(
 			(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
 		);
 		const tabToActivate = nextTab || tabs[tabs.length-1];

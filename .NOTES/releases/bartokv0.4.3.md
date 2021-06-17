@@ -1,21 +1,30 @@
 ![Release Image](https://bit.ly/fiugHexagons)
 
 ### bartok v0.4.3
-- [ ] editor tabs: on file delete, close tab
-- [ ] handle delete files for commit
+- delete
+	- [ ] editor tabs: on file delete, close tab
+	- [ ] rm command works properly for folder
+	- [ ] handle delete files for commit
+	- [ ] handle delete folders for commit
+
+- copy
+	- [ ] cp command works properly for files
+	- [ ] cp command works properly for folders
+	- [ ] copy works with commit
+
+- move
+	- [ ] mv command works properly for files
+	- [ ] mv command works properly for folders
+	- [ ] move works with commit
 
 - [ ] preview should support wildcards, ie. \*.md
 - [ ] preview with no arguments should preview current file (like old preview)
 - [ ] preview help documentation
 
-- [ ] handle rename, move files for commit
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 - [ ] service name issues with path in terminal
   - should not be able to cd lower than serviceName when service is loaded
   - cd /path should translate into serviceName/path
-- [ ] rm command works properly for folder
-- [ ] mv command works properly
-- [ ] cp command works properly
 
 - [ ] paths which include ".." or "." work for all commands
 - [ ] delay occurs before editor loads sometimes
