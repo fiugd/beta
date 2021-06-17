@@ -2,9 +2,9 @@
 
 ### bartok v0.4.3
 
-- [ ] delay occurs before editor loads sometimes
-	- need details about when this occurs
 - [ ] ls command needs to use the folder it was passed versus current state
+- [ ] service worker should provide endpoint for directory contents list
+
 - [ ] handle rename, delete, move files for commit
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 - [ ] service name issues with path in terminal
@@ -16,14 +16,16 @@
 - [ ] cp command works properly
 - [ ] paths which include ".." or "." work for all commands
 
-- [ ] service worker should provide endpoint for directory contents list
-- [ ] tree > right-click > Open In Preview should work with new terminal preview command
+
 - [ ] preview should support wildcards, ie. \*.md
 - [ ] preview with no arguments should preview current file (like old preview)
 - [ ] preview help documentation
 
 - [ ] path resolution needs to be a module or endpoint; this needs to be a solved issue
 
+- [ ] delay occurs before editor loads sometimes
+	- need details about when this occurs
+	
 ----
 
 - [X] tab doesn't appear sometimes even though editor loads

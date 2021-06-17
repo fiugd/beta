@@ -24,4 +24,4 @@ export default class Node {
 		this.operation = operation;
 		this.help = () => usage;
 	}
-}
+};

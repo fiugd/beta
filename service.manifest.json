@@ -207,6 +207,10 @@
 			"route": "./_/modules/terminal/bin/preview.js",
 			"source": "terminal/bin/preview.js"
 		},
+		{
+			"route": "./_/modules/terminal/bin/ls.js",
+			"source": "terminal/bin/ls.js"
+		},
 		"NOTE: -- TERMINAL UI /END --",
 
 		"NOTE: modules",

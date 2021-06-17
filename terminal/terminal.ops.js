@@ -31,33 +31,33 @@ const commands = [
 		map: ({ directory, cwd }) => ({ folderName: directory, parent: '/'+cwd }),
 		mapResponse: () => '',
 	},
-	{
-		name: 'List',
-		keyword: "ls",
-		description: "List contents of a DIRECTORY (current by default).",
-		event: "readFolder",
-		usage: '[-al] [DIRECTORY]',
-		args: [
-			{ name: 'directory', type: String, defaultOption: true, defaultValue: '.' },
-			{ name: 'all', type: Boolean, alias: 'a' },
-			{ name: 'long', type: Boolean, alias: 'l' },
-		],
-		map: ({ directory, cwd }) => ({ directory: directory || cwd }),
-		mapResponse: (res) => {
-			return res
-				.filter(x => x)
-				.sort((a,b) => {
-					const bothFolders = a.includes('/') && b.includes('/');
-					const bothFiles = !a.includes('/') && !b.includes('/');
-					if(bothFolders || bothFiles){
-						return a.toLowerCase().localeCompare(b.toLowerCase());
-					}
-					if(a.includes('/') && !b.includes('/')) return -1;
-					if(!a.includes('/') && b.includes('/')) return 1;
-				})
-				.join('\n') + '\n'
-		}
-	},
+	// {
+	// 	name: 'List',
+	// 	keyword: "ls",
+	// 	description: "List contents of a DIRECTORY (current by default).",
+	// 	event: "readFolder",
+	// 	usage: '[-al] [DIRECTORY]',
+	// 	args: [
+	// 		{ name: 'directory', type: String, defaultOption: true, defaultValue: '.' },
+	// 		{ name: 'all', type: Boolean, alias: 'a' },
+	// 		{ name: 'long', type: Boolean, alias: 'l' },
+	// 	],
+	// 	map: ({ directory, cwd }) => ({ directory: directory || cwd }),
+	// 	mapResponse: (res) => {
+	// 		return res
+	// 			.filter(x => x)
+	// 			.sort((a,b) => {
+	// 				const bothFolders = a.includes('/') && b.includes('/');
+	// 				const bothFiles = !a.includes('/') && !b.includes('/');
+	// 				if(bothFolders || bothFiles){
+	// 					return a.toLowerCase().localeCompare(b.toLowerCase());
+	// 				}
+	// 				if(a.includes('/') && !b.includes('/')) return -1;
+	// 				if(!a.includes('/') && b.includes('/')) return 1;
+	// 			})
+	// 			.join('\n') + '\n'
+	// 	}
+	// },
 	{
 		name: 'Remove',
 		keyword: "rm",

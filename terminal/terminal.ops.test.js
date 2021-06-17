@@ -34,13 +34,13 @@ document.body.innerHTML += `
 `;
 
 const write = (text) => {
-	if(!text.trim()) return;
+	if(!text || !text.trim()) return;
 	const logEl = document.createElement('div');
 	logEl.innerHTML = text;
 	logEl.className = 'log';
 	document.body.append(logEl);
 }
-
+/*
 (async () => {
 	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
 	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
@@ -59,4 +59,25 @@ const write = (text) => {
 	const args = parseArgs(thisOp, '../.welcome/1ncubate/zip_project.html');
 
 	await thisOp.invoke(args, done);
+})();
+*/
+
+(async () => {
+	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
+	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
+
+	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
+
+	const term = { write };
+
+	const getCwd = () => 'crosshj/fiug-beta/terminal';
+	const ops = await GetDynamicOps(term, comm, getCwd);
+
+	const logger = console.log;
+	const done = () => console.log('finished'); 
+
+	const thisOp = ops.find(x=>x.keyword==="ls");
+	const args = parseArgs(thisOp, '-l -a ../.NOTES/releases');
+
+	await thisOp.invoke(args, done); 
 })();

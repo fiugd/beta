@@ -31,3 +31,38 @@ const chalk = chalk2;
 
 export { chalk, jsonColors };
 
+export const fetchJSON = url => fetch(url).then(x => x.json());
+
+export const readDir = async (serviceName, dir, cwd) => {
+	let response, error;
+	try {
+		const { result: allServices } = await fetchJSON('/service/read');
+		if(!serviceName && !cwd) return { repsonse: allServices.map(x => x.name) };
+		const { id: serviceId } = serviceName
+			? allServices.find(x => x.name === serviceName )
+			: allServices.reduce((all, one) => {
+				const svcMatches = new RegExp("^"+one.name).test(cwd) ||
+					new RegExp("^/"+one.name).test(cwd);
+				if(!svcMatches) return all;
+				if(!all || !all.name) return one;
+				if(one.name.length > all.name.length) return one;
+				return all;
+			}, '');
+		const { result: [service] } = await fetchJSON(`/service/read/${serviceId}`)
+		const tree = service.tree[serviceName || service.name];
+		const theDir = dir.includes(service.name)
+			? dir.split(service.name)[1]
+			: dir;
+		if(theDir === '/'){
+			return { response: Object.keys(tree).map(name => ({ name })) };
+		}
+		const response = Object.keys(
+			theDir.split('/')
+				.filter(x=>x)
+				.reduce((all,one) => all[one], tree)
+		).map(name => ({ name }));
+		return { response };
+	} catch(error) {
+		return { error };
+	}
+};

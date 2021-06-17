@@ -20,7 +20,7 @@ export const readDir = async (serviceName, dir) => {
 
 export const readSourceDir = async (dir) => {
 	if(location.href.includes('/::preview::/')){
-		return readDir('crosshj/fiug-beta', dir)
+		return readDir('crosshj/fiug-beta', dir);
 	}
 	const site = location.origin;
 	const root = site.includes('beta')
@@ -144,7 +144,6 @@ class ProcessWorker {
 			const module = await this.module;
 			if(module.type === 'plain'){
 				const runOperation = async (event) => {
-					console.log('preview heard a file change');
 					const result = await module.operation({...args, event}, (msg)=>{
 						msg && logger(msg);
 						finish(resolve);

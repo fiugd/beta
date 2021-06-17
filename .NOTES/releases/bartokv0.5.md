@@ -18,6 +18,8 @@
 - [ ] explorer: add expand|collapse
 - [ ] explorer: overscroll seems to not be working
 - [ ] explorer: scroll bar hide/show causes status circle to dance
+- [ ] explorer > right-click > Open In Preview should work with new terminal preview command
+
 
 - [X] context menu for editor
 - [ ] context menu for terminal
@@ -30,6 +32,10 @@
 
 - [ ] clean up for editor document state
 - [ ] make sure editor undo history works properly
+
+- [ ] terminal tab completion
+
+
 
 Summary
 =======
