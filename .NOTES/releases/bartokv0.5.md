@@ -35,6 +35,8 @@
 
 - [ ] terminal tab completion
 
+- [ ] service worker should provide endpoint for directory contents list
+- [ ] path resolution needs to be a module or endpoint; this needs to be a solved issue
 
 
 Summary

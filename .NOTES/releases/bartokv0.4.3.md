@@ -2,8 +2,9 @@
 
 ### bartok v0.4.3
 
-- [ ] ls command needs to use the folder it was passed versus current state
-- [ ] service worker should provide endpoint for directory contents list
+- [ ] preview should support wildcards, ie. \*.md
+- [ ] preview with no arguments should preview current file (like old preview)
+- [ ] preview help documentation
 
 - [ ] handle rename, delete, move files for commit
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
@@ -14,20 +15,14 @@
 - [ ] editor tabs: on file delete, close tab
 - [ ] mv command works properly
 - [ ] cp command works properly
+
 - [ ] paths which include ".." or "." work for all commands
-
-
-- [ ] preview should support wildcards, ie. \*.md
-- [ ] preview with no arguments should preview current file (like old preview)
-- [ ] preview help documentation
-
-- [ ] path resolution needs to be a module or endpoint; this needs to be a solved issue
-
 - [ ] delay occurs before editor loads sometimes
 	- need details about when this occurs
 	
 ----
 
+- [X] ls command needs to use the folder it was passed versus current state
 - [X] tab doesn't appear sometimes even though editor loads
 - [X] terminal watch mode for js files
 - [X] recall scroll position when markdown preview (for example) updates

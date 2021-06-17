@@ -480,6 +480,7 @@ const handlers = {
 	click: clickHandler,
 	fileSelect: fileSelectHandler,
 	fileClose: fileCloseHandler,
+	fileDelete: fileCloseHandler,
 	fileChange: fileChangeHandler,
 	operations: operationsHandler,
 	operationDone: operationDoneHandler,
@@ -577,6 +578,12 @@ function attachListener(
 	attach({
 		name: "Tab Bar",
 		eventName: "fileClose",
+		listener,
+	});
+
+	attach({
+		name: "Tab Bar",
+		eventName: "fileDelete",
 		listener,
 	});
 
