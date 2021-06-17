@@ -5,8 +5,13 @@ let tabs, service;
 const clone = x => JSON.parse(JSON.stringify(x));
 
 function removeTabByEventDetail(removeTab, eventDetail){
-	const { name, path, parent } = eventDetail;
-	const closedFullName = (path||parent) ? `${(path||parent)}/${name}` : name;
+	const { name, filename, path, parent } = eventDetail;
+	let closedFullName = (path||parent)
+		? `${(path||parent)}/${name||filename}`
+		: name || filename;
+	if(service?.name && new RegExp("^" + service.name).test(closedFullName)){
+		closedFullName = closedFullName.replace(service.name+'/', '');
+	}
 	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
 	const found = tabs.find((x) => tabFullName(x) === closedFullName);
 	if(!found) return;
