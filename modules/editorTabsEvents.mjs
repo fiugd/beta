@@ -278,7 +278,6 @@ const operationDoneHandler = ({
 		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
-
 	if (op !== "read" || !id) {
 		return;
 	}
@@ -571,6 +570,12 @@ function attachListener(
 
 	attach({
 		name: "Tab Bar",
+		eventName: "operations",
+		listener,
+	});
+
+	attach({
+		name: "Tab Bar",
 		eventName: "fileSelect",
 		listener,
 	});
@@ -578,12 +583,6 @@ function attachListener(
 	attach({
 		name: "Tab Bar",
 		eventName: "fileClose",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "fileDelete",
 		listener,
 	});
 

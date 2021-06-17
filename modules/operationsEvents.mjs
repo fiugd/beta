@@ -428,21 +428,22 @@ const updateServiceHandler = async ({
 };
 
 const serviceOperation = async ({
-	service,
-	operation,
+	service: { name: service },
+	operation: command,
 	filename,
 	folderName,
-	parent,
+	parent='',
 }) => {
+	const base = parent.includes(service)
+		? parent
+		: `${service}/${parent}`;
+	const path = `/${base}/${filename || folderName}`;
+
 	const options = {
 		method: "POST",
-		body: JSON.stringify({
-			path: `/${service.name}${parent || "/"}/${filename || folderName}`,
-			command: operation,
-			service: service.name,
-		}),
+		body: JSON.stringify({ path, command, service }),
 	};
-	const result = await (await fetch("service/change", options)).json();
+	const result = await fetch("service/change", options).then(x => x.json());
 	return result;
 };
 
