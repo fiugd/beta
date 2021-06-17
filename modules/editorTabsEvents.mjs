@@ -4,18 +4,38 @@ let tabs, service;
 
 const clone = x => JSON.parse(JSON.stringify(x));
 
-function removeTabByEventDetail(removeTab, eventDetail){
-	const { name, filename, path, parent } = eventDetail;
-	let closedFullName = (path||parent)
-		? `${(path||parent)}/${name||filename}`
-		: name || filename;
+function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
+	let { name, filename, path, parent, next, nextPath } = eventDetail;
+	name = name || filename;
+	path = path || parent;
+
+	if(!path && name?.includes('/')){
+		path = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
+	}
+	if(!nextPath && next?.includes('/')){
+		nextPath = next.split('/').slice(0,-1).join('/');
+		next = next.split('/').pop();
+	}
+	let closedFullName = path ? `${path}/${name}` : name;
 	if(service?.name && new RegExp("^" + service.name).test(closedFullName)){
 		closedFullName = closedFullName.replace(service.name+'/', '');
 	}
+
 	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
 	const found = tabs.find((x) => tabFullName(x) === closedFullName);
 	if(!found) return;
 	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
+
+	if(next || !tabs.find(x => x.active)){
+		const nextTab = tabs.find(
+			(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
+		);
+		const tabToActivate = nextTab || tabs[tabs.length-1];
+		tabToActivate.active = true;
+		updateTab(tabToActivate);
+	}
+
 	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 	removeTab(found);
 }
@@ -110,31 +130,7 @@ function triggerCloseTab(event, fileCloseTrigger) {
 }
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
-	let { name, path, next, nextPath } = event.detail;
-	if(!path && name?.includes('/')){
-		path = name.split('/').slice(0,-1).join('/');
-		name = name.split('/').pop();
-	}
-	if(!nextPath && next?.includes('/')){
-		nextPath = next.split('/').slice(0,-1).join('/');
-		next = next.split('/').pop();
-	}
-
-	removeTabByEventDetail(removeTab, event.detail);
-
-	if (!next) {
-		return;
-	}
-	const nextTab = tabs.find(
-		(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
-	);
-	if (!nextTab) {
-		return;
-	}
-	nextTab.active = true;
-	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-
-	updateTab(nextTab);
+	removeTabByEventDetail({ removeTab, updateTab }, event.detail);
 };
 
 //TODO: move this to the UI
@@ -308,7 +304,7 @@ const operationsHandler = (args) => {
 	if(!operation || !['deleteFile'].includes(operation)) return;
 
 	if(operation === 'deleteFile'){
-		removeTabByEventDetail(removeTab, event.detail);
+		removeTabByEventDetail({ removeTab, updateTab }, event.detail);
 		return;
 	}
 }
@@ -484,7 +480,6 @@ const handlers = {
 	click: clickHandler,
 	fileSelect: fileSelectHandler,
 	fileClose: fileCloseHandler,
-	fileDelete: fileCloseHandler,
 	fileChange: fileChangeHandler,
 	operations: operationsHandler,
 	operationDone: operationDoneHandler,
