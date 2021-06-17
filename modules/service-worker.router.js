@@ -242,6 +242,7 @@
 					: path.split("/").pop();
 				let xformedFile;
 
+				// if headers.event-requestor is 'editor-state': let getFile know so it can track
 				const file = await getFile(`${base}/${cleanPath}`)
 					|| await getFile(`./${base}/${cleanPath}`);
 

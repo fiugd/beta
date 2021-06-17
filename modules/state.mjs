@@ -193,7 +193,11 @@ async function getCurrentFileFull(){
 		: currentService.code.find((x) => x.name === currentFile);
 
 	if(fileBody && fileBody.path){
-		fileBody.code = await (await fetch(fileBody.path)).text();
+		fileBody.code = await (await fetch(fileBody.path), {
+			headers: {
+				'x-requestor': 'editor-state'
+			}
+		}).text();
 	}
 
 	return fileBody;
