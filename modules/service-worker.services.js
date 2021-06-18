@@ -296,6 +296,9 @@
 				}
 				const code = fileUpdateCode || ''; //TODO: if not in update, default for file
 				await providers.fileChange({ path, code, parent });
+
+				//TODO: I think this is a problem, not sure...
+				//files get written with blank string and dot in front of name
 				await filesStore.setItem(path, code);
 			}
 

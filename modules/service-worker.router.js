@@ -245,7 +245,10 @@
 				// if headers.event-requestor is 'editor-state': let getFile know so it can track
 				try {
 					const xRequestor = event.request.headers.get('x-requestor');
-					console.log(xRequestor);
+					console.log(xRequestor === 'editor-state'
+						? 'TODO: keep track of files when they are got by editor!'
+						: ''
+					 );
 				} catch(e){
 					console.error(e);
 				}
