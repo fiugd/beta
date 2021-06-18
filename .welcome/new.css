@@ -1,0 +1,9 @@
+body {
+	background: var(--theme-subdued-color);
+	color: var(--main-theme-text-color);
+	font-family: sans-serif;
+}
+
+a {
+	color: rgb(var(--main-theme-highlight-color))
+}

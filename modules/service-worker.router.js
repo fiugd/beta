@@ -244,7 +244,8 @@
 
 				// if headers.event-requestor is 'editor-state': let getFile know so it can track
 				try {
-					console.log(event.request.headers['x-requestor'])
+					const xRequestor = event.request.headers.get('x-requestor');
+					console.log(xRequestor);
 				} catch(e){
 					console.error(e);
 				}

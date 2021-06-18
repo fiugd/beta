@@ -32,8 +32,10 @@ function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
 			(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
 		);
 		const tabToActivate = nextTab || tabs[tabs.length-1];
-		tabToActivate.active = true;
-		updateTab(tabToActivate);
+		if(tabToActivate){
+			tabToActivate.active = true;
+			updateTab(tabToActivate);
+		}
 	}
 
 	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
