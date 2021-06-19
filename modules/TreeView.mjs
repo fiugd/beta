@@ -38,7 +38,7 @@ const treeMemory = (service, tree, action) => (...args) => {
 		},
 		select: async (args) => {
 			const selected = tree.context(args[0].target).path;
-			await changesStore.setItem(`tree-${service.name}-selected`, selected);
+			//await changesStore.setItem(`tree-${service.name}-selected`, selected);
 		}
 	};
 	if(!handlers[action]) return;

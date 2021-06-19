@@ -4,6 +4,8 @@ import { isString } from "./Types.mjs";
 import { attach, attachTrigger } from "./Listeners.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
+import "/shared/vendor/localforage.min.js";
+
 const SYSTEM_NAME = `fiug.dev v0.4`;
 
 const execTrigger = attachTrigger({
@@ -25,6 +27,109 @@ const state = {
 	changedFiles: {},
 	openedFiles: {},
 };
+
+/*
+steps to opened/closed/selected files state sanity:
+- [x] when a file is loaded from service worker (selected)
+	- [x] it is considered selected
+	- [x] it is pushed to opened array
+	- [x] if a file was selected previously
+		- and was changed: keep it in opened array
+		- and was not changed: pop it from opened array
+- [x] when a previously selected file is selected again
+	- it is considered selected
+	- it gets order:0 and other files get order:+1
+- [x] when a file is deleted
+	- if selected: next file in order is selected & file is removed from opened array
+	- if opened: it is removed from opened, following files get bumped up in order
+- [ ] when a file is moved or renamed
+	- it stays in order and selected state, it's details are updated
+- [x] what if file is loaded from service worker, but not used by editor?
+	- handle this by doing tracking in app state module versus in SW
+
+Currently, storage writes for this state are here:
+modules/TreeView#L23
+- https://github.com/crosshj/fiug-beta/blob/694dcfbe73e2c29c8c6c6e7f86cfe23010841612/modules/TreeView.mjs#L23
+*/
+
+class StateTracker {
+	constructor(){
+		const driver = [
+			localforage.INDEXEDDB,
+			localforage.WEBSQL,
+			localforage.LOCALSTORAGE,
+		];
+		this.store = localforage.createInstance({
+			driver,
+			name: "service-worker",
+			version: 1.0,
+			storeName: "changes",
+			description: "keep track of changes not pushed to provider",
+		});
+		this.closeFile = this.withState(['opened'], this.closeFile),
+		this.openFile = this.withState(['changed', 'opened'], this.openFile),
+	}
+
+	async setState({ opened, selected }={}){
+		const { store } = this;
+		opened && await store.setItem(`state-${service.name}-opened`, opened);
+		selected && await store.setItem(`tree-${service.name}-selected`, selected.name);
+	}
+	
+	async getState(which=[]){
+		const { store } = this;
+		const state = {
+			selected: () => store.getItem(`tree-${service.name}-selected`),
+			opened: () => store.getItem(`state-${service.name}-opened`),
+			changed: async () => (await store.keys())
+				.filter(key => new RegExp('^'+service.name).test(key))
+				.map(key => key.replace(service.name+'/', ''))
+		};
+		const results = {};
+		for(let i=0, len=which.length; i<len; i++){
+			const whichProp = which[i];
+			results[whichProp] = await state[whichProp]();
+		}
+		return results;
+	}
+
+	async withState(depends, fn){
+		const { setState, getState } = this;
+		const current = await getState(depends);
+		const result = await fn(current, arg);
+		setState(result);
+	}
+
+	closeFile({ opened }, { filename }){
+		opened = opened.filter(x => x.name !== filename);
+		[...opened]
+			.sort((a,b)=>a.order - b.order)
+			.forEach((x,i)=>x.order=i);
+		const selected = opened.find(x => x.order === 0);
+		return { opened, selected };
+	}
+	
+	openFile({ changed, opened }, { filename }){
+		const lastFile = opened[opened.length-1];
+		const lastFileIsChanged = changed.includes(lastFile.name);
+		const selected = opened.find(x => x.name === filename);
+
+		opened.forEach(x => x.order += 1);
+		if(!selected && !lastFileIsChanged){
+			opened = opened.filter(x => x.name !== lastFile.name);
+		}
+		if(!selected){
+			selected = { name: selected };
+			opened.push(selected);
+		}
+		selected.order = -Number.MAX_VALUE;
+		[...opened]
+			.sort((a,b)=>a.order - b.order)
+			.forEach((x,i)=>x.order=i);
+		return { opened, selected };
+	}
+}
+const stateTracker = new StateTracker();
 
 const sortAlg = (propFn = (x) => x, alg = "alpha") => {
 	if (alg === "alpha") {
@@ -193,6 +298,7 @@ async function getCurrentFileFull(){
 		: currentService.code.find((x) => x.name === currentFile);
 
 	if(fileBody && fileBody.path){
+
 		fileBody.code = await (await fetch(fileBody.path, {
 			headers: {
 				'x-requestor': 'editor-state'
@@ -324,6 +430,9 @@ function openFile({ name, parent, ...other }) {
 	const fullName = parent
 		? `${parent}/${name}`
 		: name;
+	//purposefully not awaiting this, should listen not block
+	stateTracker.openFile(fullName);
+
 	const SOME_BIG_NUMBER = Math.floor(Number.MAX_SAFE_INTEGER/1.1);
 	Object.entries(state.openedFiles)
 		.forEach(([k,v]) => {
@@ -351,6 +460,10 @@ function closeFile({ name, path, next, nextPath }) {
 	const nextFullName = nextPath
 		? `${nextPath}/${next}`
 		: next;
+
+	//purposefully not awaiting this, should listen not block
+	stateTracker.closeFile(fullName);
+
 	const objEntries = Object.entries(state.openedFiles)
 		.map(([key, value]) => value)
 		.filter((x) => x.name !== fullName)
@@ -409,9 +522,23 @@ const operationDoneHandler = (event) => {
 	foundQueueItem.after && foundQueueItem.after({ result: { result } });
 	return true;
 };
+
+const operationsHandler = (event) => {
+	const { operation } = event.detail || {};
+	if(!operation || !['deleteFile'].includes(operation)) return;
+
+	if(operation === 'deleteFile'){
+		closeFile(event.detail);
+		return;
+	}
+};
+
 const events = [{
 	eventName: "operationDone",
 	listener: operationDoneHandler,
+}, {
+	eventName: "operations",
+	listener: operationsHandler,
 }, {
 	eventName: "fileClose",
 	listener: (event) => closeFile(event.detail),

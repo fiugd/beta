@@ -2,30 +2,6 @@
 
 ### bartok v0.4.3
 
-steps to sanity:
-- when a file is loaded from service worker (selected)
-	- it is considered selected
-	- it is pushed to opened array
-	- if a file was selected previously
-	- and was changed: keep it in opened array
-	- and was not changed: pop it from opened array
-- when a previously selected file is selected again
-	- it is considered selected
-	- it gets order:0 and other files get order:+1
-- when a file is deleted
-	- if selected: next file in order is selected & file is removed from opened array
-	- if opened: it is removed from opened, following files get bumped up in order
-- when a file is moved or renamed
-	- it stays in order and selected state, it's details are updated
-
-what if file is loaded from service worker, but not used by editor?
-
-
-Currently, storage writes for this state are here:
-modules/TreeView#L23
-- https://github.com/crosshj/fiug-beta/blob/694dcfbe73e2c29c8c6c6e7f86cfe23010841612/modules/TreeView.mjs#L23
-
-
 - delete
 	- [ ] editor tabs: on file delete, close tab
 	- [ ] rm command works properly for folder
