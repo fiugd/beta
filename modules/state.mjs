@@ -91,7 +91,7 @@ class StateTracker {
 		const results = {};
 		for(let i=0, len=which.length; i<len; i++){
 			const whichProp = which[i];
-			results[whichProp] = await state[whichProp]();
+			results[whichProp] = (await state[whichProp]()) || undefined;
 		}
 		return results;
 	}
