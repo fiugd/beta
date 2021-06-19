@@ -107,7 +107,7 @@ class StateTracker {
 	}
 
 	closeFile({ opened=[] }, filename){
-		opened = opened.filter(x => x.name !== filename);
+		opened = opened.filter(x => ![x.name, '/'+x.name].includes(filename));
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
 			.forEach((x,i)=>x.order=i);
