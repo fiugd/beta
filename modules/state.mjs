@@ -434,9 +434,10 @@ async function getAllServices() {
 	return await queueListener();
 }
 
-function openFile({ name, parent, ...other }) {
-	const fullName = parent
-		? `${parent}/${name}`
+function openFile({ name, parent, path, ...other }) {
+	path = path || parent;
+	const fullName = path
+		? `${path}/${name}`
 		: name;
 	if(!state.openedFiles[fullName] || !state.openedFiles[fullName].selected){
 		//purposefully not awaiting this, should listen not block
@@ -463,9 +464,10 @@ function openFile({ name, parent, ...other }) {
 		});
 }
 
-function closeFile({ name, path, next, nextPath }) {
-	const fullName = parent
-		? `${parent}/${name}`
+function closeFile({ name, parent, path, next, nextPath }) {
+	path = path || parent;
+	const fullName = path
+		? `${path}/${name}`
 		: name;
 	const nextFullName = nextPath
 		? `${nextPath}/${next}`
