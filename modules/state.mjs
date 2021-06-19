@@ -78,7 +78,7 @@ class StateTracker {
 		opened && await store.setItem(`state-${currentService.name}-opened`, opened);
 		selected && await store.setItem(`tree-${currentService.name}-selected`, selected.name);
 	}
-	
+
 	async getState(which=[]){
 		const { store } = this;
 		const state = {
@@ -106,7 +106,7 @@ class StateTracker {
 		};
 	}
 
-	closeFile({ opened=[] }, { filename }){
+	closeFile({ opened=[] }, filename){
 		opened = opened.filter(x => x.name !== filename);
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
@@ -114,8 +114,8 @@ class StateTracker {
 		const selected = opened.find(x => x.order === 0);
 		return { opened, selected };
 	}
-	
-	openFile({ changed=[], opened=[] }, { filename }){
+
+	openFile({ changed=[], opened=[] }, filename){
 		const lastFile = opened[opened.length-1];
 		const lastFileIsChanged = lastFile
 			? changed.includes(lastFile.name)
@@ -438,8 +438,10 @@ function openFile({ name, parent, ...other }) {
 	const fullName = parent
 		? `${parent}/${name}`
 		: name;
-	//purposefully not awaiting this, should listen not block
-	stateTracker.openFile(fullName);
+	if(!state.openedFiles[fullName] || !state.openedFiles[fullName].selected){
+		//purposefully not awaiting this, should listen not block
+		stateTracker.openFile(fullName);
+	}
 
 	const SOME_BIG_NUMBER = Math.floor(Number.MAX_SAFE_INTEGER/1.1);
 	Object.entries(state.openedFiles)
