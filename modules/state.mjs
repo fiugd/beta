@@ -66,8 +66,8 @@ class StateTracker {
 			storeName: "changes",
 			description: "keep track of changes not pushed to provider",
 		});
-		this.closeFile = this.withState(['opened'], this.closeFile),
-		this.openFile = this.withState(['changed', 'opened'], this.openFile),
+		this.closeFile = this.withState(['opened'], this.closeFile);
+		this.openFile = this.withState(['changed', 'opened'], this.openFile);
 	}
 
 	async setState({ opened, selected }={}){
