@@ -106,7 +106,7 @@ class StateTracker {
 		};
 	}
 
-	closeFile({ opened }, { filename }){
+	closeFile({ opened=[] }, { filename }){
 		opened = opened.filter(x => x.name !== filename);
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
@@ -115,7 +115,7 @@ class StateTracker {
 		return { opened, selected };
 	}
 	
-	openFile({ changed, opened }, { filename }){
+	openFile({ changed=[], opened=[] }, { filename }){
 		const lastFile = opened[opened.length-1];
 		const lastFileIsChanged = changed.includes(lastFile.name);
 		const selected = opened.find(x => x.name === filename);
