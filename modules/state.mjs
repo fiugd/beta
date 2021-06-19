@@ -75,18 +75,18 @@ class StateTracker {
 
 	async setState({ opened, selected }={}){
 		const { store } = this;
-		opened && await store.setItem(`state-${service.name}-opened`, opened);
-		selected && await store.setItem(`tree-${service.name}-selected`, selected.name);
+		opened && await store.setItem(`state-${currentService.name}-opened`, opened);
+		selected && await store.setItem(`tree-${currentService.name}-selected`, selected.name);
 	}
 	
 	async getState(which=[]){
 		const { store } = this;
 		const state = {
-			selected: () => store.getItem(`tree-${service.name}-selected`),
-			opened: () => store.getItem(`state-${service.name}-opened`),
+			selected: () => store.getItem(`tree-${currentService.name}-selected`),
+			opened: () => store.getItem(`state-${currentService.name}-opened`),
 			changed: async () => (await store.keys())
-				.filter(key => new RegExp('^'+service.name).test(key))
-				.map(key => key.replace(service.name+'/', ''))
+				.filter(key => new RegExp('^'+currentService.name).test(key))
+				.map(key => key.replace(currentService.name+'/', ''))
 		};
 		const results = {};
 		for(let i=0, len=which.length; i<len; i++){
