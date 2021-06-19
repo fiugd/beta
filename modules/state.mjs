@@ -73,7 +73,7 @@ class StateTracker {
 		this.openFile = this.withState(['changed', 'opened'], this.openFile);
 	}
 
-	async setState({ opened, selected }={}){
+	async setState({ opened=[], selected={} }={}){
 		const { store } = this;
 		opened && await store.setItem(`state-${currentService.name}-opened`, opened);
 		selected && await store.setItem(`tree-${currentService.name}-selected`, selected.name);
@@ -127,7 +127,7 @@ class StateTracker {
 			opened = opened.filter(x => x.name !== lastFile.name);
 		}
 		if(!selected){
-			selected = { name: selected };
+			selected = { name: filename };
 			opened.push(selected);
 		}
 		selected.order = -Number.MAX_VALUE;
