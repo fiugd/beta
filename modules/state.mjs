@@ -1,4 +1,4 @@
-//2021-02-26 14:59
+//2021-06-19 01:54
 
 import { isString } from "./Types.mjs";
 import { attach, attachTrigger } from "./Listeners.mjs";
@@ -66,6 +66,9 @@ class StateTracker {
 			storeName: "changes",
 			description: "keep track of changes not pushed to provider",
 		});
+		this.getState = this.getState.bind(this);
+		this.setState = this.setState.bind(this);
+		this.withState = this.withState.bind(this);
 		this.closeFile = this.withState(['opened'], this.closeFile);
 		this.openFile = this.withState(['changed', 'opened'], this.openFile);
 	}
