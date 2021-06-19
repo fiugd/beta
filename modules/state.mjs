@@ -97,6 +97,7 @@ class StateTracker {
 	}
 
 	async withState(depends, fn){
+		if(!currentService) return;
 		const { setState, getState } = this;
 		const current = await getState(depends);
 		const result = await fn(current, arg);
