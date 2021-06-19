@@ -120,7 +120,7 @@ class StateTracker {
 		const lastFileIsChanged = lastFile
 			? changed.includes(lastFile.name)
 			: true;
-		const selected = opened.find(x => x.name === filename);
+		let selected = opened.find(x => x.name === filename);
 
 		opened.forEach(x => x.order += 1);
 		if(!selected && !lastFileIsChanged){
