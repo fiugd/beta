@@ -243,15 +243,15 @@
 				let xformedFile;
 
 				// if headers.event-requestor is 'editor-state': let getFile know so it can track
-				try {
-					const xRequestor = event.request.headers.get('x-requestor');
-					console.log(xRequestor === 'editor-state'
-						? 'TODO: keep track of files when they are got by editor!'
-						: ''
-					 );
-				} catch(e){
-					console.error(e);
-				}
+				// try {
+				// 	const xRequestor = event.request.headers.get('x-requestor');
+				// 	console.log(xRequestor === 'editor-state'
+				// 		? 'TODO: keep track of files when they are got by editor!'
+				// 		: ''
+				// 	 );
+				// } catch(e){
+				// 	console.error(e);
+				// }
 				const file = await getFile(`${base}/${cleanPath}`)
 					|| await getFile(`./${base}/${cleanPath}`);
 

@@ -8,7 +8,6 @@ NOTES:
 https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 
 */
-
 (function(mod) {
 	if (typeof exports == "object" && typeof module == "object") // CommonJS
 		mod(require("../../lib/codemirror"));
@@ -408,7 +407,8 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 
 	const listener = (which) => (...args) => {
 		setTimeout(() => {
-			const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
+			// const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
+			const thisListener = listenMap[which] || (() => {});
 			thisListener(...args);
 		}, 1);
 	};

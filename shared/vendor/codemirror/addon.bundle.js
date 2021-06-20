@@ -2014,7 +2014,8 @@ this file is a bundle of many search addons
 
 	const listener = (which) => (...args) => {
 		setTimeout(() => {
-			const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
+			// const thisListener = listenMap[which] || (() => console.log(`minimap: ${which}`));
+			const thisListener = listenMap[which] || (() => {});
 			thisListener(...args);
 		}, 1);
 	};
