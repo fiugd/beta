@@ -423,11 +423,10 @@
 					result: this.utils.unique(allServices, (x) => Number(x.id)),
 				}, null, 2);
 			}
-			
-			
+
 			const addTreeState = async (service) => {
 				const changed = (await changesStore.keys())
-					.filter(x => x.startsWith(`./${service.name}`))
+					.filter(x => x.startsWith(`${service.name}`))
 					.map(x => x.split(service.name+'/')[1]);
 				const opened = (await changesStore.getItem(`state-${service.name}-opened`)) || [];
 				const selected = (opened.find(x => x.order === 0)||{}).name || '';
