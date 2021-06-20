@@ -424,14 +424,15 @@
 				}, null, 2);
 			}
 			
-			const changed = (await changesStore.keys())
+			
+			const addTreeState = async (service) => {
+				const changed = (await changesStore.keys())
 					.filter(x => x.startsWith(`./${service.name}`))
 					.map(x => x.split(service.name+'/')[1]);
-			const opened = (await changesStore.getItem(`state-${service.name}-opened`)) || [];
-			const selected = (opened.find(x => x.order === 0)||{}).name || '';
-
-			const addTreeState = async (service) => {
+				const opened = (await changesStore.getItem(`state-${service.name}-opened`)) || [];
+				const selected = (opened.find(x => x.order === 0)||{}).name || '';
 				service.state = { opened, selected, changed };
+			
 				service.treeState = {
 					expand: (await changesStore.getItem(`tree-${service.name}-expanded`)) || [],
 					select: selected,
