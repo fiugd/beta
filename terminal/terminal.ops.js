@@ -234,7 +234,8 @@ const withState = (() => {
 })();
 
 async function invokeRaw(args={}, thisCommand){
-	const { event, invokeRaw, map: argMapper, comm } = thisCommand || this;
+	thisCommand = thisCommand || this;
+	const { event, invokeRaw, map: argMapper, comm, mapResponse } = thisCommand;
 	const { response: cwd } = event[0] !== 'showCurrentFolder'
 		? (await invokeRaw.bind({
 				event: ['showCurrentFolder'],
@@ -265,8 +266,8 @@ async function invokeRaw(args={}, thisCommand){
 	if(response && response.trim){
 		response = response.trim();
 	}
-	if(response && thisCommand.mapResponse){
-		response = thisCommand.mapResponse(response);
+	if(response && mapResponse){
+		response = mapResponse(response);
 	}
 	return { error, response };
 }
