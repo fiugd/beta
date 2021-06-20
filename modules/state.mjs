@@ -82,10 +82,9 @@ class StateTracker {
 	async getState(which=[]){
 		const { store } = this;
 		const state = {
-			selected: () => store.getItem(`tree-${currentService.name}-selected`),
 			opened: () => store.getItem(`state-${currentService.name}-opened`),
 			changed: async () => (await store.keys())
-				.filter(key => new RegExp('^'+currentService.name).test(key))
+				.filter(key => key.startsWith(currentService.name))
 				.map(key => key.replace(currentService.name+'/', ''))
 		};
 		const results = {};
@@ -108,6 +107,7 @@ class StateTracker {
 
 	closeFile({ opened=[] }, filename){
 		if(!filename) return {};
+		if(filename.startsWith('/')) filename = filename.slice(1);
 		opened = opened.filter(x => ![x.name, '/'+x.name].includes(filename));
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
@@ -118,6 +118,7 @@ class StateTracker {
 
 	openFile({ changed=[], opened=[] }, filename){
 		if(!filename) return {};
+		if(filename.startsWith('/')) filename = filename.slice(1);
 		const lastFile = opened[opened.length-1];
 		const lastFileIsChanged = lastFile
 			? changed.includes(lastFile.name)
