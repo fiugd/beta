@@ -467,8 +467,9 @@ function openFile({ name, parent, path, ...other }) {
 		});
 }
 
-function closeFile({ name, parent, path, next, nextPath }) {
+function closeFile({ name, filename, parent, path, next, nextPath }) {
 	path = path || parent;
+	name = name || filename;
 	const fullName = path
 		? `${path}/${name}`
 		: name;

@@ -146,14 +146,22 @@ const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => 
 const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 	const { detail } = e;
 	const { op, result } = (detail || {});
-	if (![
-		"provider-test", "provider-save", "provider-add-service"
-	].includes(op)) return;
 
-	messageEditor({
-		op: op + "-done",
-		result,
-	});
+	const providerOps = ["provider-test", "provider-save", "provider-add-service"];
+	if (providerOps.includes(op)) {
+		messageEditor({
+			op: op + "-done",
+			result,
+		});
+		return;
+	}
+
+	if (op === 'update') {
+		console.log(result);
+		console.log('file loaded in editor should be the selected file from result');
+		return;
+	}
+
 };
 
 let firstLoad = true;
