@@ -108,6 +108,7 @@ class StateTracker {
 	closeFile({ opened=[] }, filename){
 		if(!filename) return {};
 		if(filename.startsWith('/')) filename = filename.slice(1);
+		filename = filename.replace(currentService.name+'/', '');
 		opened = opened.filter(x => ![x.name, '/'+x.name].includes(filename));
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
@@ -119,6 +120,7 @@ class StateTracker {
 	openFile({ changed=[], opened=[] }, filename){
 		if(!filename) return {};
 		if(filename.startsWith('/')) filename = filename.slice(1);
+		filename = filename.replace(currentService.name+'/', '');
 		const lastFile = opened[opened.length-1];
 		const lastFileIsChanged = lastFile
 			? changed.includes(lastFile.name)
