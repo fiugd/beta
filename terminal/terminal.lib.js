@@ -71,7 +71,7 @@ const writeSysName = async (term, ops) => {
 
 const writeCurrentFolder = async (term, ops) => {
 	const pwd = ops.find(x => x.keyword === 'pwd');
-	const { response: cwd } = await pwd.invokeRaw();
+	const { response: cwd } = await pwd.invokeRaw({}, pwd);
 	return term.write(chalk.hex('#00FF00')(cwd));
 };
 
