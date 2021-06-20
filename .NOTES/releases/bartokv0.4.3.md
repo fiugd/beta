@@ -23,9 +23,6 @@
 - [ ] preview help documentation
 
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
-- [ ] service name issues with path in terminal
-  - should not be able to cd lower than serviceName when service is loaded
-  - cd /path should translate into serviceName/path
 
 - [ ] paths which include ".." or "." work for all commands
 - [ ] delay occurs before editor loads sometimes
@@ -33,6 +30,10 @@
 	
 ----
 
+- [X] service name issues with path in terminal
+  - should not be able to cd lower than serviceName when service is loaded
+  - cd /path should translate into serviceName/path
+- [X] git diff at root is messed up
 - [X] ls command needs to use the folder it was passed versus current state
 - [X] tab doesn't appear sometimes even though editor loads
 - [X] terminal watch mode for js files

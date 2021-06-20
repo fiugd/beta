@@ -6,6 +6,13 @@ const commands = [
 		keyword: "pwd",
 		description: "Print current working directory.",
 		event: "showCurrentFolder",
+		mapResponse: (folder) => {
+			if(folder.endsWith('/')) return folder.slice(0,-1);
+			if(folder.endsWith('/~')) return folder.slice(0,-2);
+			if(folder.endsWith('/.')) return folder.slice(0,-2);
+			if(folder.endsWith('/..')) return folder.slice(0,-3);
+			return folder;
+		},
 	},
 	{
 		name: 'ChangeDir',
@@ -258,6 +265,9 @@ async function invokeRaw(args={}, thisCommand){
 	if(response && response.trim){
 		response = response.trim();
 	}
+	if(response && thisCommand.mapResponse){
+		response = thisCommand.mapResponse(response);
+	}
 	return { error, response };
 }
 
@@ -266,10 +276,6 @@ async function invoke(args, done){
 	const { error, response } = await this.invokeRaw(args, this);
 	if(error){
 		this.term.write(jsonColors({ error })+'\n');
-		return done();
-	}
-	if(response && this.mapResponse){
-		this.term.write(this.mapResponse(response));
 		return done();
 	}
 	if(response){
