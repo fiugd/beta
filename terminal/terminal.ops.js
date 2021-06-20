@@ -6,13 +6,12 @@ const commands = [
 		keyword: "pwd",
 		description: "Print current working directory.",
 		event: "showCurrentFolder",
-		mapResponse: ({ cwd }) => {
-			let folder = cwd;
-			if(folder.endsWith('/')) folder = folder.slice(0,-1);
-			if(folder.endsWith('/~')) folder = folder.slice(0,-2);
-			if(folder.endsWith('/.')) folder = folder.slice(0,-2);
-			if(folder.endsWith('/..')) folder = folder.slice(0,-3);
-			return { cwd: folder };
+		mapResponse: (folder) => {
+			if(folder.endsWith('/')) return folder.slice(0,-1);
+			if(folder.endsWith('/~')) return folder.slice(0,-2);
+			if(folder.endsWith('/.')) return folder.slice(0,-2);
+			if(folder.endsWith('/..')) return folder.slice(0,-3);
+			return folder;
 		},
 	},
 	{
