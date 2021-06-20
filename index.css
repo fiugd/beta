@@ -60,11 +60,16 @@ body {
 	overflow-y: auto !important; */
 	overflow: hidden;
 }
+
+
 #explorer #tree-view::-webkit-scrollbar {
 	display: none;
 }
 #explorer:hover #tree-view::-webkit-scrollbar {
 	display: block;
+}
+#explorer:hover .tree-leaf-content.changed:after {
+	right: 4px;
 }
 
 #explorer #tree-view::-webkit-scrollbar,
