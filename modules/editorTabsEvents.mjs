@@ -273,6 +273,7 @@ const operationDoneHandler = ({
 }) => {
 	const { op, id, result = [] } = event.detail || {};
 	if (op === "update") {
+		console.log('TODO: should just redo tree based on update response');
 		tabs.forEach((t) => {
 			if (t.changed) t.touched = true;
 			delete t.changed;
