@@ -207,9 +207,9 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 	}
 
 	if (op === 'update') {
-		const name = result.state.selected;
+		const name = result[0]?.state?.selected;
 		const fileSelect = fileSelectHandler({ switchEditor });
-		fileSelect({ name });
+		fileSelect({ detail: { name } });
 		return;
 	}
 };
