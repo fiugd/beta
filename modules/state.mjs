@@ -110,14 +110,7 @@ class StateTracker {
 		if(!filename) return {};
 		if(filename.startsWith('/')) filename = filename.slice(1);
 		filename = filename.replace(currentService.name+'/', '');
-		opened = opened.filter(x => {
-			let safeFilename = filename.startsWith('/')
-				? filename
-				: '/'+filename;
-			const nameMatch = safeFilename !== '/'+x.name;
-			const startsWithMatch = filename.startsWith('/'+x.name)
-			return !nameMatch && !startsWithMatch;
-		});
+		opened = opened.filter(x => !x.name.startsWith(filename));
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
 			.forEach((x,i)=>x.order=i);
