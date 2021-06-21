@@ -23,7 +23,7 @@ const operation = async (args) => {
 			return oneUp;
 		};
 		const workerSrc = `
-			const cwd = '${location.origin}/${cwd}`;
+			const cwd = '${location.origin}/${cwd}';
 			console.log = (...args) => postMessage({ log: args });
 			console.warn = console.info = console.log;
 			console.error = (error) => postMessage({ error });
