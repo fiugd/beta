@@ -277,7 +277,7 @@ const operationDoneHandler = ({
 	if (op === "update") {
 		const { opened=[], changed=[] } = result[0]?.state;
 		tabs = opened.map(({ name, order }) => ({
-			id: name,
+			id: "TAB" + Math.random().toString().replace("0.", ""),
 			name: name.split('/').pop(),
 			parent: name.split('/').slice(0,-1).join('/'),
 			touched: changed.includes(name),
