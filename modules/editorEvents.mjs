@@ -149,6 +149,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	const { line, column } = event.detail;
 	let savedFileName;
 
+
 	if (firstLoad) {
 		firstLoad = false;
 		savedFileName = sessionStorage.getItem("editorFile");
@@ -164,6 +165,12 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 			switchEditor(savedFileName.replace("system::", ""), "systemDoc");
 			return;
 		}
+	}
+
+	if(!name){
+		sessionStorage.setItem("editorFile", '');
+		switchEditor(null, "nothingOpen");
+		return;
 	}
 
 	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
@@ -200,9 +207,9 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 	}
 
 	if (op === 'update') {
-		const name = result[0]?.state?.selected || "noFileSelected";
+		const name = result.state.selected;
 		const fileSelect = fileSelectHandler({ switchEditor });
-		fileSelect({ detail: { name } });
+		fileSelect({ name });
 		return;
 	}
 };
