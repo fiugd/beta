@@ -274,9 +274,8 @@ const operationDoneHandler = ({
 	removeTab,
 }) => {
 	const { op, id, result = [] } = event.detail || {};
-	if (op !== "read" || !id) {
-		return;
-	}
+	if (!["read", "update"].includes(op) || !id) return;
+
 	service = result[0];
 
 	const { opened=[], changed=[] } = result[0]?.state;
