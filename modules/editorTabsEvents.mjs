@@ -274,24 +274,25 @@ const operationDoneHandler = ({
 	removeTab,
 }) => {
 	const { op, id, result = [] } = event.detail || {};
-	if (op === "update") {
-		const { opened=[], changed=[] } = result[0]?.state;
-		tabs = opened.map(({ name, order }) => ({
-			id: "TAB" + Math.random().toString().replace("0.", ""),
-			name: name.split('/').pop(),
-			parent: name.split('/').slice(0,-1).join('/'),
-			touched: changed.includes(name),
-			changed: changed.includes(name),
-			active: order === 0,
-			systemDocsName: sysDocNames[name.replace("system::", "")]
-		}));
-		initTabs(tabs);
-		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-		return;
-	}
 	if (op !== "read" || !id) {
 		return;
 	}
+	service = result[0];
+
+	const { opened=[], changed=[] } = result[0]?.state;
+	tabs = opened.map(({ name, order }) => ({
+		id: "TAB" + Math.random().toString().replace("0.", ""),
+		name: name.split('/').pop(),
+		parent: name.split('/').slice(0,-1).join('/'),
+		touched: changed.includes(name),
+		changed: changed.includes(name),
+		active: order === 0,
+		systemDocsName: sysDocNames[name.replace("system::", "")]
+	}));
+	initTabs(tabs);
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+
+	/*
 	service = result[0];
 	const tabsStorageKey = service?.treeState?.select
 		? "tabs/"+(service?.name||'')
@@ -299,6 +300,7 @@ const operationDoneHandler = ({
 	const storedTabs = JSON.parse(localStorage.getItem(tabsStorageKey) || '[]');
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
+	*/
 };
 
 const operationsHandler = (args) => {
@@ -314,7 +316,7 @@ const operationsHandler = (args) => {
 	if(!operation || !['deleteFile'].includes(operation)) return;
 
 	if(operation === 'deleteFile'){
-		removeTabByEventDetail({ removeTab, updateTab }, event.detail);
+		//removeTabByEventDetail({ removeTab, updateTab }, event.detail);
 		return;
 	}
 }
