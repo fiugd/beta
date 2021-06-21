@@ -143,27 +143,6 @@ const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => 
 	handler({ parent, data });
 };
 
-const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
-	const { detail } = e;
-	const { op, result } = (detail || {});
-
-	const providerOps = ["provider-test", "provider-save", "provider-add-service"];
-	if (providerOps.includes(op)) {
-		messageEditor({
-			op: op + "-done",
-			result,
-		});
-		return;
-	}
-
-	if (op === 'update') {
-		console.log(result);
-		console.log('file loaded in editor should be the selected file from result');
-		return;
-	}
-
-};
-
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	const { name, path, next, nextPath, parent } = event.detail;
@@ -205,6 +184,27 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	}
 
 	switchEditor(filePath, null, { line, column });
+};
+
+const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
+	const { detail } = e;
+	const { op, result } = (detail || {});
+
+	const providerOps = ["provider-test", "provider-save", "provider-add-service"];
+	if (providerOps.includes(op)) {
+		messageEditor({
+			op: op + "-done",
+			result,
+		});
+		return;
+	}
+
+	if (op === 'update') {
+		const name = result.state.selected || "noFileSelected";
+		const fileSelect = fileSelectHandler({ switchEditor });
+		fileSelect({ name });
+		return;
+	}
 };
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {
