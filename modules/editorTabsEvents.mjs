@@ -4,6 +4,13 @@ let tabs, service;
 
 const clone = x => JSON.parse(JSON.stringify(x));
 
+const sysDocNames = {
+	"add-service-folder": "Open Folder",
+	"connect-service-provider": "Connect to a Provider",
+	"open-previous-service": "Open Previous Service",
+	"open-settings-view": "Settings",
+};
+
 function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
 	let { name, filename, path, parent, next, nextPath } = eventDetail;
 	name = name || filename;
@@ -199,12 +206,7 @@ const fileSelectHandler = ({
 	if(!tabs) return;
 	let systemDocsName;
 	if (name?.includes("system::")) {
-		systemDocsName = {
-			"add-service-folder": "Open Folder",
-			"connect-service-provider": "Connect to a Provider",
-			"open-previous-service": "Open Previous Service",
-			"open-settings-view": "Settings",
-		}[name.replace("system::", "")];
+		systemDocsName = sysDocNames[name.replace("system::", "")];
 	}
 	let id = "TAB" + Math.random().toString().replace("0.", "");
 
@@ -273,12 +275,20 @@ const operationDoneHandler = ({
 }) => {
 	const { op, id, result = [] } = event.detail || {};
 	if (op === "update") {
-		console.log('TODO: should just redo tree based on update response');
-		tabs.forEach((t) => {
-			if (t.changed) t.touched = true;
-			delete t.changed;
+		const { open, changed, selected } = result[0]?.state
+		tabs = open.map(t => {
+			const { name, order } = t;
+			return {
+				id: name,
+				name: name.split('/').pop(),
+				parent: name.split('/').slice(0,-1).join('/'),
+				touched: changed.includes(name),
+				changed: changed.includes(name),
+				active: order === 0,
+				systemDocsName: sysDocNames[name.replace("system::", "")]
+			};
 		});
-		tabs.map(updateTab);
+		initTabs(tabs);
 		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}

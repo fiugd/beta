@@ -28,6 +28,11 @@ const state = {
 	openedFiles: {},
 };
 
+// TODO: fix the following fails for extensionless files
+const isFolder = filename => {
+	return filename.split('/').pop().split('.').length === 1;
+};
+
 /*
 steps to opened/closed/selected files state sanity:
 - [x] when a file is loaded from service worker (selected)
@@ -110,7 +115,10 @@ class StateTracker {
 		if(!filename) return {};
 		if(filename.startsWith('/')) filename = filename.slice(1);
 		filename = filename.replace(currentService.name+'/', '');
-		opened = opened.filter(x => !x.name.startsWith(filename));
+		const filterOpened = isFolder(filename)
+			? x => !x.name.startsWith(filename)
+			: x => x.name !== filename;
+		opened = opened.filter(filterOpened);
 		[...opened]
 			.sort((a,b)=>a.order - b.order)
 			.forEach((x,i)=>x.order=i);
