@@ -3,7 +3,6 @@
 ### bartok v0.4.3
 
 - delete
-	- [ ] editor tabs: on file delete, close tab
 	- [ ] rm command works properly for folder
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit
@@ -27,9 +26,10 @@
 - [ ] paths which include ".." or "." work for all commands
 - [ ] delay occurs before editor loads sometimes
 	- need details about when this occurs
-	
+
 ----
 
+- [X] editor tabs: on file delete, close tab (and switch editor)
 - [X] service name issues with path in terminal
   - should not be able to cd lower than serviceName when service is loaded
   - cd /path should translate into serviceName/path
