@@ -275,19 +275,16 @@ const operationDoneHandler = ({
 }) => {
 	const { op, id, result = [] } = event.detail || {};
 	if (op === "update") {
-		const { open, changed, selected } = result[0]?.state
-		tabs = open.map(t => {
-			const { name, order } = t;
-			return {
-				id: name,
-				name: name.split('/').pop(),
-				parent: name.split('/').slice(0,-1).join('/'),
-				touched: changed.includes(name),
-				changed: changed.includes(name),
-				active: order === 0,
-				systemDocsName: sysDocNames[name.replace("system::", "")]
-			};
-		});
+		const { opened=[], changed=[] } = result[0]?.state;
+		tabs = opened.map(({ name, order }) => ({
+			id: name,
+			name: name.split('/').pop(),
+			parent: name.split('/').slice(0,-1).join('/'),
+			touched: changed.includes(name),
+			changed: changed.includes(name),
+			active: order === 0,
+			systemDocsName: sysDocNames[name.replace("system::", "")]
+		}));
 		initTabs(tabs);
 		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
