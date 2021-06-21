@@ -200,7 +200,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 	}
 
 	if (op === 'update') {
-		const name = result.state.selected || "noFileSelected";
+		const name = result[0]?.state?.selected || "noFileSelected";
 		const fileSelect = fileSelectHandler({ switchEditor });
 		fileSelect({ name });
 		return;
