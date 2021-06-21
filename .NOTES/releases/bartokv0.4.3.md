@@ -3,7 +3,6 @@
 ### bartok v0.4.3
 
 - delete
-	- [ ] rm command works properly for folder
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit
 
@@ -29,6 +28,7 @@
 
 ----
 
+- [X] rm command works properly for folder
 - [X] editor tabs: on file delete, close tab (and switch editor)
 - [X] service name issues with path in terminal
   - should not be able to cd lower than serviceName when service is loaded

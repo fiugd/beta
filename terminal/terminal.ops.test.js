@@ -29,9 +29,11 @@ GetDynamicOps(term, comm, getCwd)
 
 import comm from './terminal.comm.js';
 
+/*
 document.body.innerHTML += `
 	<style>body{ margin: 4em 2em; color: #777; font: 20px sans-serif;}</style>
 `;
+
 
 const write = (text) => {
 	if(!text || !text.trim()) return;
@@ -40,6 +42,7 @@ const write = (text) => {
 	logEl.className = 'log';
 	document.body.append(logEl);
 }
+*/
 /*
 (async () => {
 	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
@@ -62,6 +65,7 @@ const write = (text) => {
 })();
 */
 
+/*
 (async () => {
 	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
 	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
@@ -80,4 +84,26 @@ const write = (text) => {
 	const args = parseArgs(thisOp, '-l -a ../.NOTES/releases');
 
 	await thisOp.invoke(args, done); 
+})();
+*/ 
+
+(async () => {
+	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
+	const { default: GetOps, readDir } = await import(`${baseUrl}/terminal.ops.js`);
+
+	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
+
+	const term = { write: console.log };
+
+	const getCwd = () => 'crosshj/fiug-beta/terminal';
+	const ops = await GetOps(term, comm, getCwd); 
+
+	const logger = console.log;
+	const done = () => console.log('finished'); 
+
+	const thisOp = ops.find(x=>x.keyword==="mv");
+
+	const args = parseArgs(thisOp, '.NOTES/foo/foo.wow .NOTES');
+
+	await thisOp.invoke(args, done);
 })();

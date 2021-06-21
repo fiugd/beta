@@ -93,7 +93,12 @@ const commands = [
 			{ name: 'source', type: String, required: true },
 			{ name: 'dest', type: Boolean, required: true },
 		],
-		argsGet: ([ target, destination ]) => ({ target, destination }),
+		argsGet: ([ source, dest ]) => ({ source, dest }),
+		map: (args) => ({
+			...args,
+			src: args.source,
+			tgt: args.dest
+		}),
 	},
 	{
 		name: 'Touch',
