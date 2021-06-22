@@ -208,6 +208,9 @@
 
 				const filesFromService = (await filesStore.keys())
 					.filter(key => key.startsWith(`./${service.name}/`));
+
+				// test seemds to stop about here
+
 				body.code = [];
 				for(var i=0, len=filesFromService.length; i < len; i++){
 					const key = filesFromService[i];
@@ -336,7 +339,7 @@
 			});
 		} catch (error) {
 			console.error(error);
-			return stringify({ error });
+			return stringify({ error: error.message });
 		}
 	};
 
