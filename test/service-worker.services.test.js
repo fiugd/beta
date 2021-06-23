@@ -1,3 +1,6 @@
+import testlib from `https://beta.fiug.dev/crosshj/fiug-beta/test/testlib.js`;
+const { describe, it, start: TestStart } = testlib;
+
 self.module = { exports: {} };
 
 await import(cwd+'/../modules/service-worker.services.js');
@@ -14,9 +17,7 @@ const deps = {
 			changes: {},
 		}
 	},
-	providers: {
-		fileChange: () => {}
-	},
+	providers: {},
 	templates: {},
 	ui: {
 		id: 999,
@@ -27,14 +28,16 @@ const deps = {
 const manager = new ServicesManager(deps);
 const { serviceUpdate } = manager.handlers;
 
+const calls = [];
+
 const params = {
 	id: 3002
 };
 const body = {
 	name: 'fake',
-	operation: {
+	operation: {node
 		name: 'moveFile',
-		target: 'target/moved.xxx',
+		target: 'target/', 
 		source: 'source/toMove.xxx'
 	},
 };
@@ -42,6 +45,12 @@ const event = {
 	request: {
 		json: () => body
 	}
+};
+
+deps.providers.fileChange = async ({ path, code, deleteFile }) => {
+	calls.push({
+		'provider file change': JSON.stringify({ path, code, deleteFile }, null, 2)
+	});
 };
 
 deps.storage.stores.services.getItem = async () => ({
@@ -58,7 +67,11 @@ deps.storage.stores.services.getItem = async () => ({
 		}
 	}
 });
-deps.storage.stores.services.setItem = async (key) => {};
+deps.storage.stores.services.setItem = async (key, value) => {
+	calls.push({
+		'service Set': { key, value }
+	});
+};
 deps.storage.stores.files.keys = async (key) => {
 	return [
 		'fake/source/toMove.xxx',
@@ -67,11 +80,20 @@ deps.storage.stores.files.keys = async (key) => {
 	];
 };
 deps.storage.stores.files.setItem = async (key, value) => {
-	console.log('file Set: '+key)
+	calls.push({
+		'file Set': { key, value }
+	});
 };
 deps.storage.stores.files.getItem = async (key) => {
-	console.log('file Get: '+key)
-	return 'file content'
+	calls.push({
+		'file Get': { key }
+	});
+	return 'file content: ' + key
+};
+deps.storage.stores.files.removeItem = async (key) => {
+	calls.push({
+		'file Remove': { key }
+	});
 };
 deps.storage.stores.changes.keys = async () => {
 	return [
@@ -81,6 +103,9 @@ deps.storage.stores.changes.keys = async () => {
 	];
 };
 deps.storage.stores.changes.getItem = async (key) => {
+	calls.push({
+		'changes Get': { key }
+	});
 	if(key.includes('-expanded')) return [
 		'expanded/1', 'expanded/2'
 	];
@@ -91,8 +116,60 @@ deps.storage.stores.changes.getItem = async (key) => {
 	return ['woo'];
 };
 
+
 const result = await serviceUpdate(params, event);
 const { result: [{ tree, code }] } = JSON.parse(result);
+calls.push({
+	'results': { tree, code }
+});
 
-console.log(JSON.stringify({ tree, code }, null, 2));
+console.log('\x1bc'); // clear screen
 
+describe('create service', () => {
+	it.skip('should use provider when indicated', (assert) => {});
+	it.skip('should register service handler', (assert) => {});
+	it.skip('should deliver default service', (assert) => {});
+});
+
+describe('change service', () => {
+	it.skip('should save changes to files within service', (assert) => {});
+	it.skip('should use provider when applicable', (assert) => {});
+	it.skip('should trigger template update when necessary', (assert) => {});
+	it.skip('should indicate type of change', (assert) => {});
+
+	it.skip('should be doing things that update service is doing?', (assert) => {});
+});
+
+describe('get service changes', () => {
+	it.skip('should return a list of current changes', (assert) => {});
+});
+
+describe('update service', () => {
+	it.skip('should move file to target path', (assert) => {});
+	it.skip('should move file to target path with file name', (assert) => {});
+	it.skip('should move folder to target path', (assert) => {});
+	it.skip('should rename file to target path', (assert) => {});
+	it.skip('should add files from update', (assert) => {});
+	it.skip('should delete files from update', (assert) => {});
+});
+
+describe('delete service', () => {
+	it.skip('should remove a service', (assert) => {});
+});
+
+describe('test examples', () => {
+	it('example of passing test', (assert) => {
+		const add = (one,two) => one+two;
+		assert.equal(add(1, 1), 2);
+	});
+	it.skip('example of skipped test', (assert) => {
+		const add = (one,two) => one+two;
+		assert.equal(add(1, 1), 2);
+	});
+	it('example of failing test', (assert) => {
+		const add = (one,two) => one+two;
+		assert.equal(add(1, 1), 4);
+	});
+});
+
+TestStart();
