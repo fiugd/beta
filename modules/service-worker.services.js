@@ -207,7 +207,8 @@
 				const service = await servicesStore.getItem(id + "");
 
 				const filesFromService = (await filesStore.keys())
-					.filter(key => key.startsWith(`${service.name}/`));
+					//.filter(key => key.startsWith(`${service.name}/`));
+					.filter(key => key.startsWith(`./${service.name}/`));	
 
 				body.code = [];
 				for(var i=0, len=filesFromService.length; i < len; i++){
@@ -217,8 +218,11 @@
 						update: await filesStore.getItem(key),
 						path: key
 							.replace(
-								`${service.name}/${operation.source}`,
-								`${service.name}/${operation.target}`
+								//`${service.name}/${operation.source}`,
+								//`${service.name}/${operation.target}`
+								`./${service.name}/${operation.source}`,
+								`./${service.name}/${operation.target}`
+
 							)
 							.replace(/^\./, '')
 					});
@@ -267,7 +271,9 @@
 			await servicesStore.setItem(id + "", service);
 			const filesFromUpdateTree = utils
 				.keepHelper(body.tree, body.code)
-				.map(x => x.startsWith('/') ? x.slice(1) : x);
+				//.map(x => x.startsWith('/') ? x.slice(1) : x);
+				.map(x => `.${x}`);
+
 			
 			const filesInStore = (await filesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
@@ -304,7 +310,8 @@
 			}
 
 			const changedFiles = (await changesStore.keys())
-				.filter(key => key.startsWith(`${service.name}/`));
+				//.filter(key => key.startsWith(`${service.name}/`));
+				.filter(key => key.startsWith(`./${service.name}/`));
 			for(let i = 0, len=changedFiles.length; i < len; i++){
 				const parent = service;
 				const path = changedFiles[i];
