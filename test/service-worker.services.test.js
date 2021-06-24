@@ -1,6 +1,6 @@
 import testlib from "./testlib.js";
 import { ServiceMock } from "./mocks/services.js";
-const { describe, it, start: TestStart } = testlib;
+const { describe, it, start: TestStart, expect } = testlib;
 
 // tricking ugly module pattern into an import
 self.module = { exports: {} };
@@ -26,7 +26,6 @@ describe('change service', () => {
 	it.todo('should return a list of current changes', (assert) => {});
 });
 
-
 describe('update service', ({ beforeEach }) => {
 	let mock;
 	let manager;
@@ -36,7 +35,7 @@ describe('update service', ({ beforeEach }) => {
 		manager = new ServicesManager(mock.deps);
 	});
 
-	it('should move file to target path', async (assert) => {
+	it('should move file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
 			name: 'fake',
@@ -57,12 +56,16 @@ describe('update service', ({ beforeEach }) => {
 			const { message, stack } = e;
 			errors.push({ message, stack: stack.split('\n') });
 		}
-		//errors.length && console.log(JSON.stringify(errors, null, 2));
 		//console.log(JSON.stringify({ tree, code },null,2));
-		//console.log(JSON.stringify(mock.changes, null, 2));
-		//console.log(JSON.stringify(mock.calls, null, 2));
-		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toMove.xxx");
-		assert.ok(!!sourceFileRemoved);
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileRemove={} }) => fileRemove.key === "./fake/source/toMove.xxx");
+		expect(sourceFileRemoved).toBeTruthy();
+
+		const deleteFileChange = mock.changes['fake/source/toMove.xxx'];
+		expect(deleteFileChange.deleteFile).toBeTruthy();
+
 		assert.deepEqual([
 			'fake/source/toMove.xxx',
 			'fake/target/toMove.xxx',
@@ -71,7 +74,6 @@ describe('update service', ({ beforeEach }) => {
 			].sort(),
 			Object.keys(mock.changes).sort()
 		);
-		assert.ok(mock.changes['fake/source/toMove.xxx']?.deleteFile)
 	});
 	it('should rename file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -94,6 +96,7 @@ describe('update service', ({ beforeEach }) => {
 			const { message, stack } = e;
 			errors.push({ message, stack: stack.split('\n') });
 		}
+		errors.length && assert.custom(errors);
 		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toMove.xxx");
 		assert.ok(!!sourceFileRemoved);
 		assert.deepEqual([
@@ -107,18 +110,21 @@ describe('update service', ({ beforeEach }) => {
 		assert.ok(mock.changes['fake/source/toMove.xxx']?.deleteFile)
 	});
 	it.todo('should copy file', (assert) => {});
+	it.todo('should add new file', (assert) => {});
+	it.todo('should delete file', (assert) => {});
 
-	it.todo('should move folder to target path', (assert) => {});
-	it.todo('should rename file to target path', (assert) => {});
-	it.todo('should add files from update', (assert) => {});
-	it.todo('should delete files from update', (assert) => {});
+	it.todo('should move folder', (assert) => {});
+	it.todo('should rename folder', (assert) => {});
+	it.todo('should copy folder', (assert) => {});
+	it.todo('should add new folder', (assert) => {});
+	it.todo('should delete folder', (assert) => {});
 });
 
 describe('delete service', () => {
 	it.todo('should remove a service', (assert) => {});
 });
 
-
+/*
 describe('test examples', () => {
 	it('example of passing test', (assert) => {
 		const add = (one,two) => one+two;
@@ -128,17 +134,16 @@ describe('test examples', () => {
 	});
 	it('example of failing test', (assert) => {
 		const add = (one,two) => one+two;
-		assert.equal(add(1, 1), 4);
+		assert.equal(add(1, 1), 4, `expected ${add(1,1)} to equal 4`);
 	});
 	it.todo('example of todo test', (assert) => {
 	});
-	it.todo('example of async test', (assert) => {
-		const done = assert.async();
-		setTimeout(done, 1000);
-	});
 });
+*/
 
-let finish;
-const donePromise = new Promise((resolve) => { finish = resolve; });
-TestStart(finish);
-await donePromise;
+TestStart();
+
+//let finish;
+//const donePromise = new Promise((resolve) => { finish = resolve; });
+//TestStart(finish);
+//await donePromise;

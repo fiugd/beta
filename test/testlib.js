@@ -16,7 +16,7 @@ chalk.enabled = true;
 chalk.level = levels.trueColor;
 
 const { test: it, module: describe } = QUnit;
-QUnit.config.autostart = false;
+//QUnit.config.autostart = false;
 
 let allErrors = [];
 const writeTest = (log, c) => test => {
@@ -58,18 +58,37 @@ const renderTest = (args) => {
 		yellow: '#ff0',
 		dullyellow: '#997',
 		purple: '#f5f',
-		dullpurple: '#a9a'
+		dullpurple: '#a9a',
+		orange: '#ff8867',
+		dullorange: '#ce9178'
 	});
 
 	childSuites.forEach(
 		writeSuite(console.log, colors)
 	);
-	allErrors.length && console.log(JSON.stringify(allErrors, null, 2));
+
+	allErrors.length && allErrors.forEach((e, i) => {
+		console.log();
+		console.log(colors.orange(`ERROR ${i+1}:\n  ${e.name}`));
+		e.message && console.log(colors.orange(`  ${e.message}`));
+		console.log(colors.dullorange(`${
+			e.stack
+				.replace(/https:\/\/(.*)fiug.dev/, '')
+				.replace(/Object.<anonymous> /, '')
+		}`));
+		
+	});
+
+	//TODO: summary
 };
 QUnit.on("runEnd", (args) => {
 	renderTest(args);
 	if(finish) finish();
 });
+
+QUnit.assert.custom = function(errors) {
+	errors.forEach(this.pushResult);
+};
 
 const start = (done) => {
 	console.log('\x1bc'); // clear screen
@@ -77,6 +96,20 @@ const start = (done) => {
 	QUnit.start.bind(QUnit)();
 };
 
+const expect = (actual) => {
+	//https://github.com/sapegin/jest-cheat-sheet
+	return {
+		toEqual: (expected) => {
+			const msg = `expected ${actual} to equal ${expected}`;
+			QUnit.assert.true(actual === expected, msg)
+		},
+		toBeTruthy: () => {
+			const msg = `expected ${actual} to be truthy`;
+			QUnit.assert.true(!!actual, msg)
+		}
+	}
+}
+
 export default {
-	describe, it, start
+	describe, it, start, expect
 };
