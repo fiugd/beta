@@ -3,7 +3,7 @@ const help = () => {};
 // NOTE: this is not a function that is ran in this context
 // instead it's source is dumped into a worker
 // be mindful of this!!!
-const operation = async (args) => {
+const operation = async (args, state={}) => {
 	const { file, cwd } = args;
 	let filePath='';
 	if(file.includes('/')){
@@ -79,13 +79,14 @@ const operation = async (args) => {
 		//let worker = new Worker(url.toString());
 		
 		// NOTE/TODO: local storage and session storage not available in worker scope!!!
-		// let previousUrl = sessionStorage.getItem('previousUrl');
-		// if(previousUrl) URL.revokeObjectURL(previousUrl);
+		if(state.previousUrl) URL.revokeObjectURL(state.previousUrl);
 		const url = URL.createObjectURL(blob);
-		//sessionStorage.setItem('previousUrl', url);
+		state.previousUrl = url;
 
+		if(state.worker) state.worker.terminate();
 		const worker = new Worker(url, { name, type });
-		const exitWorker = () => { /*worker.terminate();*/ resolve(); };
+		state.worker = worker;
+		const exitWorker = () => { resolve(); };
 		worker.onerror = (error) => {
 			console.error(error?.message
 				? error.message

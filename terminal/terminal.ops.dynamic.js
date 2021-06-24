@@ -86,19 +86,20 @@ class ProcessWorker {
 	
 	footer = (url) => `
 		let script;
+		let state = {};
 		onmessage = async (e) => {
-			let result, error;
+			let result, error, exit;
 
 			// TODO: maybe in future be more fancy with events
 			if(e.data?.type === "events"){}
 
 			try {
 				script = script || e.data;
-				result = await operation(script || e.data);
+				result = await operation(script || e.data, state);
 			} catch(e){
 				error = e.message;
 			}
-			const exit = !(script || e.data).watch;
+			exit = !(script || e.data).watch;
 			postMessage({ result, error, exit });
 		}
 
