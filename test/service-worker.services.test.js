@@ -121,7 +121,8 @@ describe('update service', ({ beforeEach }) => {
 });
 
 describe('delete service', () => {
-	it.todo('should remove a service', (assert) => {});
+	it.todo('should delete a service', (assert) => {});
+	it.todo('should remove files when service is deleted', (assert) => {});
 });
 
 /*
@@ -141,9 +142,9 @@ describe('test examples', () => {
 });
 */
 
-TestStart();
+//TestStart();
 
-//let finish;
-//const donePromise = new Promise((resolve) => { finish = resolve; });
-//TestStart(finish);
-//await donePromise;
+let finish;
+const donePromise = new Promise((resolve) => { finish = resolve; });
+TestStart(finish);
+await donePromise;

@@ -52,7 +52,7 @@ const renderTest = (args) => {
 		.reduce((a, [k,v]) => ({ ...a, [k]:colorize(v) }), {});
 	const colors = mapToColorizer({
 		green: '#00ff00',
-		dull: '#a6a6a6',
+		dull: '#aabbbb',
 		red: '#ff0000',
 		dullred: '#f44',
 		yellow: '#ff0',
