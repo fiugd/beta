@@ -84,7 +84,7 @@ const operation = async (args) => {
 		//sessionStorage.setItem('previousUrl', url);
 
 		const worker = new Worker(url, { name, type });
-		const exitWorker = () => { worker.terminate(); resolve(); };
+		const exitWorker = () => { /*worker.terminate();*/ resolve(); };
 		worker.onerror = (error) => {
 			console.error(error?.message
 				? error.message
