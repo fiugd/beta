@@ -35,7 +35,7 @@ const params = {
 };
 const body = {
 	name: 'fake',
-	operation: {node
+	operation: {
 		name: 'moveFile',
 		target: 'target/', 
 		source: 'source/toMove.xxx'
