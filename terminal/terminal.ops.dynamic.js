@@ -84,7 +84,7 @@ class ProcessWorker {
 		});
 	`.replace(/^		/gm, '').trim()
 	
-	footer = `
+	footer = (url) => `
 		let script;
 		onmessage = async (e) => {
 			let result, error;
@@ -101,6 +101,8 @@ class ProcessWorker {
 			const exit = !(script || e.data).watch;
 			postMessage({ result, error, exit });
 		}
+
+		//# sourceURL=${url}
 	`.replace(/^		/gm, '').trim()
 
 	constructor(url, {comm, exit, setListenerKey}){
@@ -124,7 +126,7 @@ class ProcessWorker {
 				const operation = ${module.operation.toString()};
 			`.replace(/^				/gm, '');
 			const blob = new Blob(
-				[ this.header, '\n\n', body, '\n\n',this.footer ],
+				[ this.header, '\n\n', body, '\n\n',this.footer(url) ],
 				{ type: "text/javascript" }
 			);
 			blobResolver(blob);
