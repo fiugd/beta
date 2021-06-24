@@ -25,7 +25,7 @@
 		console.log("/service/create/:id? triggered");
 		//return stringify({ params, event });
 
-		// create the service in store
+		// create the service in store 
 		await servicesStore.setItem(id + "", {
 			name,
 			id,
@@ -213,6 +213,9 @@
 				body.code = [];
 				for(var i=0, len=filesFromService.length; i < len; i++){
 					const key = filesFromService[i];
+					const filename = operation.target.endsWith('/')
+						? operation.source.split('/').pop()
+						: '';
 					body.code.push({
 						name: key.split('/').pop(),
 						update: await filesStore.getItem(key),
@@ -221,8 +224,7 @@
 								//`${service.name}/${operation.source}`,
 								//`${service.name}/${operation.target}`
 								`./${service.name}/${operation.source}`,
-								`./${service.name}/${operation.target}`
-
+								`./${service.name}/${operation.target}${filename}`
 							)
 							.replace(/^\./, '')
 					});
@@ -239,7 +241,7 @@
 				});
 				const sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree);
 				const targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
-				targetPos.parent[targetPos.param] = sourcePos.parent[sourcePos.param];
+				targetPos.parent[targetPos.param || sourcePos.param] = sourcePos.parent[sourcePos.param];
 				delete sourcePos.parent[sourcePos.param];
 			}
 

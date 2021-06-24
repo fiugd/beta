@@ -1,5 +1,7 @@
 const help = () => {};
 
+let previousUrl;
+
 const operation = async (args) => {
 	const { file, cwd } = args;
 	let filePath='';
@@ -26,7 +28,11 @@ const operation = async (args) => {
 			const cwd = '${location.origin}/${cwd}';
 			console.log = (...args) => postMessage({ log: args });
 			console.warn = console.info = console.log;
-			console.error = (error) => postMessage({ error });
+			console.error = (error) => {
+				const cleanerError = error?.message
+					? { message: error.message, stack: error.stack }
+					: error;
+				postMessage({ error: cleanerError });
 			self.asyncHooks = [];
 			self.hookCount = 0;
 
@@ -54,19 +60,27 @@ const operation = async (args) => {
 			if(!line.includes('self.asyncHooks[self.hookCount++] =')) return line;
 			return line+`\nawait self.asyncHooks[self.hookCount-1];`
 		})
-		.join('\n');
+		.join('\n') + `
+//# sourceURL=https://beta.fiug.dev/node-${file}
+`;
 
 		//console.log(workerSrc)
 
 		const blob = new Blob([ workerSrc ], { type: "text/javascript" });
 		const type = 'module';
+		//TODO: give option in node to choose type
+		//TODO: give option in node to run script outside worker
 
 		//TODO: consider using SW to help add stuff to files loaded as workers
 		// for the time being, the above approach works (replace)
 		//let url = new URL(scriptUrl+/::WORKER::/, window.location.origin);
 		//let worker = new Worker(url.toString());
+		if(previousUrl) URL.revokeObjectURL(previousUrl);
 
-		const worker = new Worker(URL.createObjectURL(blob), { name, type });
+		const url = URL.createObjectURL(blob);
+		previousUrl = url;
+
+		const worker = new Worker(url, { name, type });
 		const exitWorker = () => { worker.terminate(); resolve(); };
 		worker.onerror = (error) => {
 			console.error(error.message || 'unknown error');
