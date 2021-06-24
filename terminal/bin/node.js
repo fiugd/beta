@@ -34,6 +34,7 @@ const operation = async (args) => {
 					? { message: error.message, stack: error.stack }
 					: error;
 				postMessage({ error: cleanerError });
+			};
 			self.asyncHooks = [];
 			self.hookCount = 0;
 
