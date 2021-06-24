@@ -15,7 +15,8 @@ const history = [
 	`git commit -m "commit me"`,
 	`cat terminal.comm.js`,
 	`node --watch .example.js`,
-	`preview zip_project.html`
+	`preview zip_project.html`,
+	`node --watch service-worker.services.test.js`,
 ];
 
 const usage = (chalk) => {

@@ -1,4 +1,4 @@
-import testlib from `https://beta.fiug.dev/crosshj/fiug-beta/test/testlib.js`;
+import testlib from "./testlib.js";
 const { describe, it, start: TestStart } = testlib;
 
 self.module = { exports: {} };
