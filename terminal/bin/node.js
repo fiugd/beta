@@ -1,5 +1,8 @@
 const help = () => {};
 
+// NOTE: this is not a function that is ran in this context
+// instead it's source is dumped into a worker
+// be mindful of this!!!
 const operation = async (args) => {
 	const { file, cwd } = args;
 	let filePath='';
@@ -73,10 +76,12 @@ const operation = async (args) => {
 		// for the time being, the above approach works (replace)
 		//let url = new URL(scriptUrl+/::WORKER::/, window.location.origin);
 		//let worker = new Worker(url.toString());
-		if(this.previousUrl) URL.revokeObjectURL(this.previousUrl);
-
+		
+		// NOTE/TODO: local storage and session storage not available in worker scope!!!
+		// let previousUrl = sessionStorage.getItem('previousUrl');
+		// if(previousUrl) URL.revokeObjectURL(previousUrl);
 		const url = URL.createObjectURL(blob);
-		this.previousUrl = url;
+		//sessionStorage.setItem('previousUrl', url);
 
 		const worker = new Worker(url, { name, type });
 		const exitWorker = () => { worker.terminate(); resolve(); };
@@ -109,7 +114,7 @@ export default class Node {
 	}]
 
 	constructor(){
-		this.operation = operation.bind(this);
+		this.operation = operation;
 		this.help = () => help;
 	}
 }
