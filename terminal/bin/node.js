@@ -1,7 +1,5 @@
 const help = () => {};
 
-let previousUrl;
-
 const operation = async (args) => {
 	const { file, cwd } = args;
 	let filePath='';
@@ -75,15 +73,18 @@ const operation = async (args) => {
 		// for the time being, the above approach works (replace)
 		//let url = new URL(scriptUrl+/::WORKER::/, window.location.origin);
 		//let worker = new Worker(url.toString());
-		if(previousUrl) URL.revokeObjectURL(previousUrl);
+		if(this.previousUrl) URL.revokeObjectURL(this.previousUrl);
 
 		const url = URL.createObjectURL(blob);
-		previousUrl = url;
+		this.previousUrl = url;
 
 		const worker = new Worker(url, { name, type });
 		const exitWorker = () => { worker.terminate(); resolve(); };
 		worker.onerror = (error) => {
-			console.error(error.message || 'unknown error');
+			console.error(error?.message
+				? error.message
+				: error || 'unknown error'
+			);
 			exitWorker();
 		};
 		worker.onmessage = (e) => {
@@ -99,6 +100,8 @@ export default class Node {
 	keyword = 'node';
 	listenerKeys = [];
 
+	previousUrl;
+
 	args = [{
 		name: 'file', alias: 'f', type: String, defaultOption: true, required: true
 	}, { 
@@ -106,7 +109,7 @@ export default class Node {
 	}]
 
 	constructor(){
-		this.operation = operation;
+		this.operation = operation.bind(this);
 		this.help = () => help;
 	}
 }
