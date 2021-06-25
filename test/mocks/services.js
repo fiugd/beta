@@ -20,18 +20,12 @@ export const ServiceMock = ({ utils }) => {
 	const params = {
 		id: 3002
 	};
-	let body = {
-		name: 'fake',
-		operation: {
-			name: 'moveFile',
-			target: 'target/', 
-			source: 'source/toMove.xxx'
-		},
-	};
-	const setBody = (b) => body = b;
+	let body = {};
+	const setBody = (b) => { body = b; };
+	const getBody =() => body;
 	const event = {
 		request: {
-			json: () => body
+			json: getBody
 		}
 	};
 	const serviceFiles = {
@@ -71,31 +65,31 @@ export const ServiceMock = ({ utils }) => {
 			value: code, deleteFile, service: parent
 		}; 
 		calls.push({
-			'provider file change': { ...changes[path], path },
+			'providerFileChange': { ...changes[path], path },
 		});
 	};
 	deps.storage.stores.services.getItem = async (key) => {
 		calls.push({
-			'services get': { key }
+			'servicesGet': { key }
 		});
 		return allServices[key]
 	};
 	deps.storage.stores.services.setItem = async (key, value) => {
 		allServices[key] = value;
 		calls.push({
-			'service Set': { key, value }
+			'serviceSet': { key, value }
 		});
 	};
 	deps.storage.stores.files.keys = async () => {
 		calls.push({
-			'files keys': {}
+			'filesKeys': Object.keys(serviceFiles)
 		});
 		return Object.keys(serviceFiles);
 	};
 	deps.storage.stores.files.setItem = async (key, value) => {
 		serviceFiles[key] = value;
 		calls.push({
-			'file Set': { key, value }
+			'fileSet': { key, value }
 		});
 	};
 	deps.storage.stores.files.getItem = async (key) => {

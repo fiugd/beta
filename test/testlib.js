@@ -70,13 +70,17 @@ const renderTest = (args) => {
 	allErrors.length && allErrors.forEach((e, i) => {
 		console.log();
 		console.log(colors.orange(`ERROR ${i+1}:\n  ${e.name}`));
-		e.message && console.log(colors.orange(`  ${e.message}`));
+		const { stack, message } = e.message.startsWith('{')
+			? JSON.parse(e.message) : {};
+		e.message && console.log(colors.orange(`  ${message || e.message}`));
 		console.log(colors.dullorange(`${
-			e.stack
-				.replace(/https:\/\/(.*)fiug.dev/, '')
-				.replace(/Object.<anonymous> /, '')
+			(stack || e.stack)
+				.split('\n')
+				.map(x => x
+					.replace(/https:\/\/(.*)fiug.dev/, '')
+				).join('\n')
+				//.replace(/Object.<anonymous> /, '')
 		}`));
-		
 	});
 
 	//TODO: summary
@@ -87,7 +91,18 @@ QUnit.on("runEnd", (args) => {
 });
 
 QUnit.assert.custom = function(errors) {
-	errors.forEach(this.pushResult);
+	if(!(errors||[]).length) return;
+	errors
+		.map((x) => {
+			const splitStack = x.stack && x.stack.split('\n');
+			if(splitStack){
+				x.message = splitStack.slice(0,1);
+				x.stack = splitStack.slice(1).join('\n')
+			}
+			if(x.message && x.stack) return { message: JSON.stringify(x) };
+			return x;
+		})
+		.forEach(this.pushResult);
 };
 
 const start = (done) => {

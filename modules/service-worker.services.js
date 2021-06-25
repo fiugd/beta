@@ -200,10 +200,9 @@
 			const body = await event.request.json();
 			const { name, operation } = body;
 
-			if(
-				operation?.name?.includes('rename') ||
-				operation?.name?.includes('move')
-			){
+			const isMoveOrRename = operation?.name?.includes('rename') || operation?.name?.includes('move');
+			const isCopy = operation?.name?.includes('copy')
+			if( isMoveOrRename || isCopy ){
 				const service = await servicesStore.getItem(id + "");
 
 				const filesFromService = (await filesStore.keys())
@@ -216,19 +215,36 @@
 					const filename = operation.target.endsWith('/')
 						? operation.source.split('/').pop()
 						: '';
-					body.code.push({
-						name: key.split('/').pop(),
-						update: await filesStore.getItem(key),
-						path: key
+					const update = await filesStore.getItem(key);
+					const renameKey = (key, force) => {
+						if(!isMoveOrRename && !force) return key;
+						return key
 							.replace(
 								//`${service.name}/${operation.source}`,
 								//`${service.name}/${operation.target}`
 								`./${service.name}/${operation.source}`,
 								`./${service.name}/${operation.target}${filename}`
-							)
+							);
+					};
+					const copyFile = () => {
+						if(!key.includes(`./${service.name}/${operation.source}`)) return;
+						const copiedFile = {
+							name: operation.target.split('/').pop(),
+							update,
+							path: renameKey(key, 'force')
+								.replace(/^\./, '')
+						};
+						body.code.push(copiedFile);
+					};
+					body.code.push({
+						name: key.split('/').pop(),
+						update,
+						path: renameKey(key)
 							.replace(/^\./, '')
 					});
+					isCopy && copyFile();
 				}
+
 				body.tree = service.tree;
 				const getPosInTree = (path, tree) => ({
 					parent: path.split('/')
@@ -242,7 +258,10 @@
 				const sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree);
 				const targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
 				targetPos.parent[targetPos.param || sourcePos.param] = sourcePos.parent[sourcePos.param];
-				delete sourcePos.parent[sourcePos.param];
+
+				if(isMoveOrRename){
+					delete sourcePos.parent[sourcePos.param];
+				}
 			}
 
 			const parsedCode =
@@ -271,12 +290,12 @@
 				return;
 			}
 			await servicesStore.setItem(id + "", service);
+
 			const filesFromUpdateTree = utils
 				.keepHelper(body.tree, body.code)
 				//.map(x => x.startsWith('/') ? x.slice(1) : x);
 				.map(x => `.${x}`);
 
-			
 			const filesInStore = (await filesStore.keys())
 				.filter(key => key.startsWith(`./${service.name}/`));
 
@@ -346,7 +365,8 @@
 			});
 		} catch (error) {
 			console.error(error);
-			return stringify({ error: error.message });
+			const { stack, message } = error;
+			return stringify({ error: { message, stack } });
 		}
 	};
 

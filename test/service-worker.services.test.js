@@ -50,11 +50,15 @@ describe('update service', ({ beforeEach }) => {
 		try {
 			result = await serviceUpdate(mock.params, mock.event);
 			result = JSON.parse(result);
-			if(result.error) throw new Error(result.error);
-			const { result: [{ tree, code }] } = result;
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
 		} catch(e){
 			const { message, stack } = e;
-			errors.push({ message, stack: stack.split('\n') });
+			errors.push({ message, stack });
 		}
 		//console.log(JSON.stringify({ tree, code },null,2));
 		errors.length && assert.custom(errors);
@@ -90,11 +94,16 @@ describe('update service', ({ beforeEach }) => {
 		try {
 			result = await serviceUpdate(mock.params, mock.event);
 			result = JSON.parse(result);
-			if(result.error) throw new Error(result.error);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
 			const { result: [{ tree, code }] } = result;
 		} catch(e){
 			const { message, stack } = e;
-			errors.push({ message, stack: stack.split('\n') });
+			errors.push({ message, stack });
 		}
 		errors.length && assert.custom(errors);
 		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toMove.xxx");
@@ -109,7 +118,40 @@ describe('update service', ({ beforeEach }) => {
 		);
 		assert.ok(mock.changes['fake/source/toMove.xxx']?.deleteFile)
 	});
-	it.todo('should copy file', (assert) => {});
+	it('should copy file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFile',
+				target: 'target/toStayCopied.xxx',
+				source: 'source/toStay.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+		errors.length && assert.custom(errors);
+
+		const sourceFileAdded = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === "./fake/target/toStayCopied.xxx");
+		expect(sourceFileAdded).toBeTruthy();
+
+		const addFileChange = mock.changes['fake/target/toStayCopied.xxx'];
+		expect(addFileChange && !addFileChange.deleteFile).toBeTruthy();
+	});
 	it.todo('should add new file', (assert) => {});
 	it.todo('should delete file', (assert) => {});
 
