@@ -1,5 +1,33 @@
 (() => {
 	const stringify = o => JSON.stringify(o,null,2);
+	
+	const clone = o => {
+		if(!o) return;
+		try {
+			return JSON.parse(stringify(o));
+		} catch(e){
+			return;
+		}
+	};
+	
+	function objectPath(obj, path) {
+		var result = obj;
+		try{
+			var props = path.split('/');
+			props.every(function propsEveryCb(prop) {
+				if(prop === '.') return true;
+				if (typeof result[prop] === 'undefined') {
+					result = undefined;
+					return false;
+				}
+				result = result[prop];
+				return true;
+			});
+			return result;
+		} catch(e) {
+			return;
+		}
+	}
 
 	const handleServiceCreate = ({ app, storage, providers }) => async (
 		params,
@@ -186,6 +214,140 @@
 			return stringify({ error });
 		}
 	};
+	
+	//smoking this right now
+	//https://medium.com/javascript-scene/reduce-composing-software-fe22f0c39a1d
+	//https://medium.com/javascript-scene/functors-categories-61e031bac53f#.4hqndcx22
+	const _operationsUpdater = (() => {
+
+		const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
+
+		const getBody = (operation) => ({
+			...operation,
+			service: operation.service.name,
+			tree: clone(operation.service.tree) || {},
+			code: operation.code || {},
+			filesToAdd: [],
+			filesToDelete: []
+		});
+		const adjustMoveTarget = (operation) => {
+			const isMove = operation.name.includes('move') || operation.name.includes('copy');
+			if(!isMove) return operation;
+			let { target, source } = operation;
+			if(target.endsWith('/')) target += source.split('/').pop();
+			return { ...operation, target };
+		};
+		const adjustRenameTarget = (operation) => {
+			const isRename = operation.name.includes('rename');
+			if(!isRename) return operation;
+			// TODO: if no target path, use source path with target name
+			// eg /srcPath/sourceName -> /srcPath/targetName
+			let target = operation.target;
+			return { ...operation, target };
+		};
+		const addChildrenToTarget = (operation) => {
+			const isFile = operation.name.includes('File');
+			if(isFile) return operation;
+			const filesToAdd = [
+				...operation.filesToAdd,
+				//TODO: get children from file store source, mark added at target
+			];
+			return { ...operation, filesToAdd };
+		};
+		const addTargetToTree = (operation) => {
+			const {service,source,target,tree} = operation;
+			const sourceValue = objectPath(tree, `${service}/${source}`);
+
+			const targetKey = target.split('/').slice(-1).join('');
+			const targetParentPath = target.split('/').slice(0,-1).join('');
+			const targetParent = objectPath(tree, `${service}/${targetParentPath}`);
+
+			targetParent[targetKey] = sourceValue;
+
+			return operation;
+		};
+		const addTargetToFiles = (operation) => {
+			const isFile = operation.name.includes('File');
+			if(!isFile) return operation;
+			const filesToAdd = [
+				...operation.filesToAdd,
+				{
+					path: `./${operation.service}/${operation.target}`,
+					update: operation.code[`./${operation.service}/${operation.source}`]
+				}
+			];
+			return { ...operation, filesToAdd };
+		};
+		const deleteChildrenFromSource = (operation) => {
+			const isFile = operation.name.includes('File');
+			if(isFile) return operation;
+			const filesToDelete = [
+				...operation.filesToDelete,
+				//TODO: get children from file store source, mark for delete
+			];
+			return { ...operation, filesToDelete };
+		};
+		const deleteSourceFromTree = (operation) => {
+			const {service,source,tree} = operation;
+			const sourceKey = source.split('/').slice(-1).join('');
+			const sourceParentPath = source.split('/').slice(0,-1).join('');
+			const sourceParent = objectPath(tree, `${service}/${sourceParentPath}`);
+			delete sourceParent[sourceKey];
+			return operation;
+		};
+		const deleteSourceFromFiles = (operation) => {
+			const isFile = operation.name.includes('File');
+			if(!isFile) return operation;
+			const filesToDelete = [
+				...operation.filesToDelete,
+				{
+					path: `./${operation.service}/${operation.source}`,
+				}
+			];
+			return { ...operation, filesToDelete };
+		};
+
+		const addSourceToTarget = pipe(
+			addChildrenToTarget,
+			addTargetToTree,
+			addTargetToFiles
+		);
+		const deleteSource = pipe(
+			deleteChildrenFromSource,
+			deleteSourceFromTree,
+			deleteSourceFromFiles
+		);
+		const init = (...fns) => pipe(
+			getBody,
+			adjustMoveTarget,
+			adjustRenameTarget,
+			...fns
+		);
+		const add    = init( addSourceToTarget );
+		const copy   = init( addSourceToTarget );
+		const move   = init( addSourceToTarget, deleteSource );
+		const rename = init( addSourceToTarget, deleteSource );
+		const remove = init( deleteSource );
+
+		const operations = {
+			addFile: add,
+			addFolder: add,
+			moveFile: move,
+			moveFolder: move,
+			copyFile: copy,
+			copyFolder: copy,
+			renameFile: rename,
+			renameFolder: rename,
+			deleteFile: remove,
+			deleteFolder: remove
+		};
+
+		return operation => (service, code) =>
+			operations[operation.name]({
+				...operation, service, code
+			});
+
+	})();
 
 	const handleServiceUpdate = ({ storage, providers, ui, utils }) => async (
 		params,
@@ -202,6 +364,25 @@
 
 			const isMoveOrRename = operation?.name?.includes('rename') || operation?.name?.includes('move');
 			const isCopy = operation?.name?.includes('copy')
+			
+			const operationsUpdater = false && _operationsUpdater(operation);
+			if(operationsUpdater){
+				const _service = await servicesStore.getItem(id + "");
+				const fileKeys = (await filesStore.keys())
+					.filter(key => key.startsWith(`./${_service.name}/`));
+				const _code = {};
+				for(let i=0, len=fileKeys.length; i<len; i++){
+					const file = await filesStore.getItem(fileKeys[i]);
+					_code[fileKeys[i]] = file;
+				}
+
+				const { tree, code, service, filesToAdd, filesToDelete, ...op } = operationsUpdater(_service, _code);
+
+				console.log('[[[ INPUT  ]]]:\n'+JSON.stringify({ ...op, tree: _service.tree, code }, null, 2));
+				console.log('[[[ OUTPUT ]]]:\n'+JSON.stringify({ tree, filesToAdd, filesToDelete }, null, 2));
+				console.log('\n\n');
+			}
+			
 			if( isMoveOrRename || isCopy ){
 				const service = await servicesStore.getItem(id + "");
 
