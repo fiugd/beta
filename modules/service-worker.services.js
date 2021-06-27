@@ -281,17 +281,29 @@ const useNew = false;
 		const deleteChildrenFromSource = (operation) => {
 			const isFile = operation.name.includes('File');
 			if(isFile) return operation;
+			const children = Object.keys(operation.code)
+					.filter(x => x.startsWith(`./${operation.service}/${operation.source}`));
 			const filesToDelete = [
 				...operation.filesToDelete,
-				//TODO: get children from file store source, mark for delete
+				...children
 			];
+			children.forEach(c => {
+				delete operation.code[c]
+			})
 			return { ...operation, filesToDelete };
 		};
 		const deleteSourceFromTree = (operation) => {
 			const {service,source,tree} = operation;
-			const sourceKey = source.split('/').slice(-1).join('');
-			const sourceParentPath = source.split('/').slice(0,-1).join('');
-			const sourceParent = objectPath(tree, `${service}/${sourceParentPath}`);
+			const sourceSplit = source.split('/');
+			const sourceKey = sourceSplit.length === 1
+				? sourceSplit[0]
+				: sourceSplit.slice(-1).join('');
+			const sourceParentPath = sourceSplit.length === 1
+				? ''
+				: sourceSplit.slice(0,-1).join('');
+			const sourceParent = sourceSplit.length === 1
+				? tree[service]
+				: objectPath(tree, `${service}/${sourceParentPath}`);
 			delete sourceParent[sourceKey];
 			return operation;
 		};

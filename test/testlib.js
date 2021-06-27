@@ -169,15 +169,15 @@ const start = (done) => {
 	QUnit.start.bind(QUnit)();
 };
 
-const expect = (actual) => {
+const expect = (actual, which) => {
 	//https://github.com/sapegin/jest-cheat-sheet
 	return {
 		toEqual: (expected) => {
-			const msg = `expected ${actual} to equal ${expected}`;
+			const msg = `expected ${which ? which+' : ' : ''}${actual} to equal ${expected}`;
 			QUnit.assert.true(actual === expected, msg)
 		},
 		toBeTruthy: () => {
-			const msg = `expected ${actual} to be truthy`;
+			const msg = `expected ${which ? which+' : ' : ''}${actual} to be truthy`;
 			QUnit.assert.true(!!actual, msg)
 		}
 	}

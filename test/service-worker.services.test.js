@@ -221,27 +221,62 @@ describe('update service', ({ beforeEach }) => {
 		try {
 			result = await serviceUpdate(mock.params, mock.event);
 			result = JSON.parse(result);
-			if(result.error){
-				errors.push({
-					message: result.error.message,
-					stack: result.error.stack
-				});
-			}
-		} catch(e){
-			const { message, stack } = e;
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
 			errors.push({ message, stack });
 		}
-
-		errors.length && assert.custom(errors);
+		assert.custom(errors);
 
 		const tree = safe(() => result.result[0].tree.fake);
-
 		expect(tree.target.newFolder).toBeTruthy();
 	});
-	it.todo('should delete folder', async (assert) => {});
+	it('should delete folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFolder',
+				source: 'target',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+		const deletedChildren = files.filter(x => x.path.startsWith('/fake/target/'));
+
+		const deleteFileChange = mock.changes['fake/target/sibling.xxx'] || {};
+		expect(deleteFileChange.deleteFile).toBeTruthy();
+
+		expect(!tree.target, 'deleted target in tree').toBeTruthy();
+		expect(deletedChildren.length, 'deleted children files length').toEqual(0);
+	});
 	it.todo('should copy folder', async (assert) => {});
 	it.todo('should move folder', async (assert) => {});
 	it.todo('should rename folder', async (assert) => {});
+
+	it.todo('should create .keep file for empty folder', async (assert) => {
+		// when last file is removed from folder
+		// when last file is moved from folder
+		// when last child folder is moved from folder
+		// when last child folder is deleted from folder
+		// when folder is created
+	});
+	it.todo('should remove .keep file for filled folder', async (assert) => {
+		// when folder is created inside parent
+		// when folder is moved inside parent
+		// when file is created in parent
+		// when file is moved to parent
+	});
 });
 
 describe('create service', ({ beforeEach }) => {
