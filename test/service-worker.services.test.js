@@ -1,6 +1,6 @@
 import testlib from "./testlib.js";
 import { ServiceMock } from "./mocks/services.js";
-const { describe, it, start: TestStart, expect } = testlib;
+const { describe, it, start: TestStart, expect, logJSON, safe } = testlib;
 
 // tricking ugly module pattern into an import
 self.module = { exports: {} };
@@ -57,10 +57,8 @@ describe('update service', ({ beforeEach }) => {
 				});
 			}
 		} catch(e){
-			const { message, stack } = e;
-			errors.push({ message, stack });
+			errors.push(e);
 		}
-		//console.log(JSON.stringify({ tree, code },null,2));
 		errors.length && assert.custom(errors);
 
 		const sourceFileRemoved = mock.calls
@@ -152,7 +150,44 @@ describe('update service', ({ beforeEach }) => {
 		const addFileChange = mock.changes['fake/target/toStayCopied.xxx'];
 		expect(addFileChange && !addFileChange.deleteFile).toBeTruthy();
 	});
-	it.todo('should add new file', (assert) => {});
+	it('should add new file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'addFile',
+				target: 'target/addedFile.xxx',
+				source: 'this file was added'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const sourceFileAdded = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === "./fake/target/addedFile.xxx");
+		expect(sourceFileAdded).toBeTruthy();
+
+		const addFileChange = mock.changes['fake/target/addedFile.xxx'];
+		expect(addFileChange && !addFileChange.deleteFile).toBeTruthy();
+
+		const resultShowsFileAdded = safe(() => result.result[0].tree.fake.target['addedFile.xxx']);
+		expect(result.result[0].tree.fake.target['addedFile.xxx']).toBeTruthy();
+	});
 	it.todo('should delete file', (assert) => {});
 
 	it.todo('should move folder', (assert) => {});

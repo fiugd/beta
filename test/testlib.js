@@ -2,7 +2,10 @@
 
 //https://api.qunitjs.com/QUnit/test/
 import QUnit from 'https://cdn.skypack.dev/qunit';
-import chalk from "https://cdn.skypack.dev/chalk";
+
+//NOTE: sucks that I am stuck with this instance of chalk (due to json colorizer)
+import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
+import colorize from 'https://cdn.skypack.dev/json-colorizer';
 
 let finish;
 
@@ -12,8 +15,30 @@ const levels = {
 	more256: 2,
 	trueColor: 3
 }
-chalk.enabled = true;
-chalk.level = levels.trueColor;
+chalk2.enabled = true;
+chalk2.level = levels.trueColor;
+
+// json colors
+const colors = {
+	BRACE: '#BBBBBB',
+	BRACKET: '#BBBBBB',
+	COLON: '#BBBBBB',
+	COMMA: '#BBBBBB',
+	STRING_KEY: '#dcdcaa',
+	STRING_LITERAL: '#ce9178',
+	NUMBER_LITERAL: '#b5cea8',
+	BOOLEAN_LITERAL: '#569cd6',
+	NULL_LITERAL: '#569cd6',
+};
+
+const jsonColors = (json) => colorize(json, { colors, pretty: true });
+const logJSON = x => console.log(jsonColors(x));
+const safe = (fn) => {
+	try {
+		return fn();
+	} catch(e){
+	}
+};
 
 const { test: it, module: describe } = QUnit;
 //QUnit.config.autostart = false;
@@ -44,10 +69,17 @@ const writeSuite = (log, colors) => suite => {
 	suite.tests.forEach(writeTest(log, colors));
 	log();
 };
+const testsRan = [];
+const onlyShowTestsThatRan = (suite) => {
+	suite.tests = suite.tests.filter(t => {
+		const testWasRan = testsRan.find(x => x.name === t.name && x.suiteName === t.suiteName);
+		return testWasRan;
+	});
+};
 const renderTest = (args) => {
 	const { childSuites } = args;
 
-	const colorize = chalk.hex.bind(chalk);
+	const colorize = chalk2.hex.bind(chalk2);
 	const mapToColorizer = (col) => Object.entries(col)
 		.reduce((a, [k,v]) => ({ ...a, [k]:colorize(v) }), {});
 	const colors = mapToColorizer({
@@ -63,28 +95,33 @@ const renderTest = (args) => {
 		dullorange: '#ce9178'
 	});
 
-	childSuites.forEach(
-		writeSuite(console.log, colors)
-	);
+	childSuites.forEach(suite => {
+		onlyShowTestsThatRan(suite);
+		suite.tests.length && writeSuite(console.log, colors)(suite);
+	});
 
 	allErrors.length && allErrors.forEach((e, i) => {
 		console.log();
 		console.log(colors.orange(`ERROR ${i+1}:\n  ${e.name}`));
-		const { stack, message } = e.message.startsWith('{')
+		const { stack, message } = e.message && e.message.startsWith('{')
 			? JSON.parse(e.message) : {};
 		e.message && console.log(colors.orange(`  ${message || e.message}`));
-		console.log(colors.dullorange(`${
+		console.log(colors.dullorange(
 			(stack || e.stack)
 				.split('\n')
 				.map(x => x
 					.replace(/https:\/\/(.*)fiug.dev/, '')
 				).join('\n')
 				//.replace(/Object.<anonymous> /, '')
-		}`));
+		));
 	});
 
 	//TODO: summary
 };
+
+QUnit.on("testStart", (args) => {
+	testsRan.push(args);
+});
 QUnit.on("runEnd", (args) => {
 	renderTest(args);
 	if(finish) finish();
@@ -125,6 +162,7 @@ const expect = (actual) => {
 	}
 }
 
+
 export default {
-	describe, it, start, expect
+	describe, it, start, expect, logJSON, safe
 };

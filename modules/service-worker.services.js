@@ -9,7 +9,6 @@
 			return;
 		}
 	};
-	
 	function objectPath(obj, path) {
 		var result = obj;
 		try{
@@ -28,6 +27,8 @@
 			return;
 		}
 	}
+	const logJSON = x => console.log(JSON.stringify(x, null, 2));
+	const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 
 	const handleServiceCreate = ({ app, storage, providers }) => async (
 		params,
@@ -220,8 +221,6 @@
 	//https://medium.com/javascript-scene/functors-categories-61e031bac53f#.4hqndcx22
 	const _operationsUpdater = (() => {
 
-		const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
-
 		const getBody = (operation) => ({
 			...operation,
 			service: operation.service.name,
@@ -256,7 +255,7 @@
 		};
 		const addTargetToTree = (operation) => {
 			const {service,source,target,tree} = operation;
-			const sourceValue = objectPath(tree, `${service}/${source}`);
+			const sourceValue = objectPath(tree, `${service}/${source}`) || {};
 
 			const targetKey = target.split('/').slice(-1).join('');
 			const targetParentPath = target.split('/').slice(0,-1).join('');
@@ -264,17 +263,17 @@
 
 			targetParent[targetKey] = sourceValue;
 
-			return operation;
+			return { ...operation, tree };
 		};
 		const addTargetToFiles = (operation) => {
 			const isFile = operation.name.includes('File');
 			if(!isFile) return operation;
+			const path = `./${operation.service}/${operation.target}`;
+			const update = operation.code[`./${operation.service}/${operation.source}`];
+			operation.code[path] = update;
 			const filesToAdd = [
 				...operation.filesToAdd,
-				{
-					path: `./${operation.service}/${operation.target}`,
-					update: operation.code[`./${operation.service}/${operation.source}`]
-				}
+				path
 			];
 			return { ...operation, filesToAdd };
 		};
@@ -298,13 +297,27 @@
 		const deleteSourceFromFiles = (operation) => {
 			const isFile = operation.name.includes('File');
 			if(!isFile) return operation;
+			const path = `./${operation.service}/${operation.source}`;
+			delete operation.code[`./${operation.service}/${operation.source}`];
 			const filesToDelete = [
 				...operation.filesToDelete,
-				{
-					path: `./${operation.service}/${operation.source}`,
-				}
+				path
 			];
 			return { ...operation, filesToDelete };
+		};
+		const keepHelper = (operation) => {
+			/*
+				TODO:
+				should add and remove .keep files as needed
+				.keep files ensure directory structure persists across git commits
+			*/
+			/*
+				const filesFromUpdateTree = utils
+					.keepHelper(body.tree, body.code)
+					//.map(x => x.startsWith('/') ? x.slice(1) : x);
+					.map(x => `.${x}`);
+			*/
+			return operation;
 		};
 
 		const addSourceToTarget = pipe(
@@ -321,7 +334,8 @@
 			getBody,
 			adjustMoveTarget,
 			adjustRenameTarget,
-			...fns
+			...fns,
+			keepHelper
 		);
 		const add    = init( addSourceToTarget );
 		const copy   = init( addSourceToTarget );
@@ -365,8 +379,11 @@
 			const isMoveOrRename = operation?.name?.includes('rename') || operation?.name?.includes('move');
 			const isCopy = operation?.name?.includes('copy')
 			
-			const operationsUpdater = false && _operationsUpdater(operation);
-			if(operationsUpdater){
+			const operationsUpdater = _operationsUpdater(operation);
+			let update;
+			const useNew = false;
+
+			if(useNew && operationsUpdater){
 				const _service = await servicesStore.getItem(id + "");
 				const fileKeys = (await filesStore.keys())
 					.filter(key => key.startsWith(`./${_service.name}/`));
@@ -375,15 +392,18 @@
 					const file = await filesStore.getItem(fileKeys[i]);
 					_code[fileKeys[i]] = file;
 				}
-
-				const { tree, code, service, filesToAdd, filesToDelete, ...op } = operationsUpdater(_service, _code);
-
-				console.log('[[[ INPUT  ]]]:\n'+JSON.stringify({ ...op, tree: _service.tree, code }, null, 2));
-				console.log('[[[ OUTPUT ]]]:\n'+JSON.stringify({ tree, filesToAdd, filesToDelete }, null, 2));
-				console.log('\n\n');
+				update = operationsUpdater(_service, _code);
 			}
-			
-			if( isMoveOrRename || isCopy ){
+			if(update){
+				body.code = Object.entries(update.code)
+					.map(([path,value]) => ({
+						name: path.split('/').pop(),
+						path: path.replace(/^\./, ''),
+						update: value
+					}));
+				body.tree = update.tree;
+			}
+			if(!update && (isMoveOrRename || isCopy) ){
 				const service = await servicesStore.getItem(id + "");
 
 				const filesFromService = (await filesStore.keys())
@@ -425,7 +445,7 @@
 					});
 					isCopy && copyFile();
 				}
-
+				
 				body.tree = service.tree;
 				const getPosInTree = (path, tree) => ({
 					parent: path.split('/')
@@ -444,6 +464,9 @@
 					delete sourcePos.parent[sourcePos.param];
 				}
 			}
+
+			//console.log(JSON.stringify(body.code, null, 2));
+			//console.log(JSON.stringify(body.tree, null, 2));
 
 			const parsedCode =
 				!Array.isArray(body.code) && utils.safe(() => JSON.parse(body.code));
@@ -472,19 +495,31 @@
 			}
 			await servicesStore.setItem(id + "", service);
 
-			const filesFromUpdateTree = utils
-				.keepHelper(body.tree, body.code)
-				//.map(x => x.startsWith('/') ? x.slice(1) : x);
-				.map(x => `.${x}`);
+			const { filesToAdd, filesToDelete } = await (async () => {
+				if(update && update.filesToAdd && update.filesToDelete) return update;
 
-			const filesInStore = (await filesStore.keys())
-				.filter(key => key.startsWith(`./${service.name}/`));
+				const filesFromUpdateTree = utils
+					.keepHelper(body.tree, body.code)
+					//.map(x => x.startsWith('/') ? x.slice(1) : x);
+					.map(x => `.${x}`);
+
+				const filesInStore = (await filesStore.keys())
+					.filter(key => key.startsWith(`./${service.name}/`));
+
+				const filesToDelete = filesInStore
+					.filter(file => !filesFromUpdateTree.includes(file));
+
+				const filesToAdd = filesFromUpdateTree
+					.filter(file => !filesInStore.includes(file));
+
+				console.log(JSON.stringify(filesToAdd, null, 2));
+				console.log(JSON.stringify(update.filesToAdd, null, 2));
+				return { filesToAdd, filesToDelete };
+			})();
 
 			// TODO: binary files
 			const binaryFiles = [];
-
-			const filesToDelete = filesInStore
-				.filter(file => !filesFromUpdateTree.includes(file));
+			
 			for (let i = 0, len = filesToDelete.length; i < len; i++) {
 				const parent = service;
 				const path = filesToDelete[i];
@@ -492,8 +527,6 @@
 				await providers.fileChange({ path, parent, deleteFile: true });
 			}
 
-			const filesToAdd = filesFromUpdateTree
-				.filter(file => !filesInStore.includes(file));
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
 				const path = filesToAdd[i];
 				const fileUpdate = body.code.find(x => `.${x.path}` === path);
