@@ -512,8 +512,6 @@
 				const filesToAdd = filesFromUpdateTree
 					.filter(file => !filesInStore.includes(file));
 
-				console.log(JSON.stringify(filesToAdd, null, 2));
-				console.log(JSON.stringify(update.filesToAdd, null, 2));
 				return { filesToAdd, filesToDelete };
 			})();
 
