@@ -44,8 +44,7 @@ describe('update service', ({ beforeEach }) => {
 			const { message, stack } = e;
 			errors.push({ message, stack });
 		}
-
-		errors.length && assert.custom(errors);
+		assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
 			.find(({ fileSet={} }) => fileSet.key === "./fake/target/addedFile.xxx");
@@ -208,7 +207,37 @@ describe('update service', ({ beforeEach }) => {
 		expect(mock.changes['fake/source/toRename.xxx']?.deleteFile).toBeTruthy();
 	});
 
-	it.todo('should add new folder', async (assert) => {});
+	it('should add new folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'addFolder',
+				target: 'target/newFolder',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+
+		expect(tree.target.newFolder).toBeTruthy();
+	});
 	it.todo('should delete folder', async (assert) => {});
 	it.todo('should copy folder', async (assert) => {});
 	it.todo('should move folder', async (assert) => {});

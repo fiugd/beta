@@ -1,3 +1,6 @@
+import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+
+const showCursor = ansiEscapes.cursorShow;
 const help = () => {};
 
 // NOTE: this is not a function that is ran in this context
@@ -48,7 +51,7 @@ const operation = async (args, state={}) => {
 				await Promise.allSettled(self.asyncHooks);
 				//console.log(self.asyncHooks.length);
 				queueMicrotask(() => {
-					postMessage({ exit: true });
+					postMessage({ exit: true, log: "${showCursor}" });
 				});
 			}, 1);
 		`.replace(/^			/gm, '')

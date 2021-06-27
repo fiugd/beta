@@ -7,6 +7,8 @@ import QUnit from 'https://cdn.skypack.dev/qunit';
 import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
 import colorize from 'https://cdn.skypack.dev/json-colorizer';
 
+import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+
 let finish;
 
 const levels = {
@@ -65,6 +67,7 @@ const writeTest = (log, c) => test => {
 		failed: () => `${tab}${c.red('✗')} ${c.dullred(test.name)}`,
 		skipped: () => `${tab}${c.yellow('○')} ${c.dullyellow(test.name)}`,
 		todo: () => `${tab}${c.purple('»')} ${c.dullpurple(test.name)}`,
+		nothing: () => `${tab}${c.green('○')} ${c.dullyellow(test.name+' [NO ASSERTIONS]')}`,
 	};
 	if(writer[test.status])
 		return log(writer[test.status]());
@@ -79,11 +82,18 @@ const testsRan = [];
 const onlyShowTestsThatRan = (suite) => {
 	suite.tests = suite.tests.filter(t => {
 		const testWasRan = testsRan.find(x => x.name === t.name && x.suiteName === t.suiteName);
+		if(testWasRan &&
+			t.assertions.length === 1 &&
+			t.assertions[0].message === "no expectations"
+		){
+			logJSON(t);
+			t.status = 'nothing-'+t.status;
+		}
 		return testWasRan;
 	});
 };
 const renderTest = (args) => {
-	const { childSuites } = args;
+	const { childSuites, testCounts, ...others } = args;
 
 	const colorize = chalk2.hex.bind(chalk2);
 	const mapToColorizer = (col) => Object.entries(col)
@@ -123,6 +133,7 @@ const renderTest = (args) => {
 	});
 
 	//TODO: summary
+	logJSON(testCounts);
 };
 
 QUnit.on("testStart", (args) => {
@@ -130,6 +141,9 @@ QUnit.on("testStart", (args) => {
 });
 QUnit.on("runEnd", (args) => {
 	renderTest(args);
+	setTimeout(() => {
+		//console.log(ansiEscapes.cursorShow);
+	}, 300);
 	if(finish) finish();
 });
 
@@ -149,7 +163,8 @@ QUnit.assert.custom = function(errors) {
 };
 
 const start = (done) => {
-	console.log('\x1bc'); // clear screen
+	console.log(ansiEscapes.cursorHide);
+	console.log(ansiEscapes.clearScreen);
 	finish = done;
 	QUnit.start.bind(QUnit)();
 };
