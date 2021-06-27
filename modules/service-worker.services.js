@@ -234,33 +234,59 @@ const useNew = false;
 			const isMove = operation.name.includes('move') || operation.name.includes('copy');
 			if(!isMove) return operation;
 			let { target, source } = operation;
-			if(target.endsWith('/')) target += source.split('/').pop();
+			const isFolder = operation.name.includes('Folder');
+			if(isFolder && !target.endsWith('/')) target += '/';
+			if(target.endsWith('/')){
+				target += source.split('/').pop();
+			}
 			return { ...operation, target };
 		};
 		const adjustRenameTarget = (operation) => {
 			const isRename = operation.name.includes('rename');
 			if(!isRename) return operation;
-			// TODO: if no target path, use source path with target name
-			// eg /srcPath/sourceName -> /srcPath/targetName
 			let target = operation.target;
+			if(!operation.target.includes('/') && operation.source.includes('/')){
+				target = [
+					...operation.source.split('/').slice(0,-1),
+					target
+				].join('/');
+			}
 			return { ...operation, target };
 		};
 		const addChildrenToTarget = (operation) => {
 			const isFile = operation.name.includes('File');
 			if(isFile) return operation;
+			const sourcePath = `./${operation.service}/${operation.source}`;
+			const targetPath = `./${operation.service}/${operation.target}`;
+			const children = Object.keys(operation.code)
+				.filter(x => x.startsWith(sourcePath+'/'));
+			const childrenMappedToTarget = children.map(child => {
+				const childRelative = child.split(operation.source).pop();
+				return `${targetPath}${childRelative}`;
+			});
 			const filesToAdd = [
 				...operation.filesToAdd,
-				//TODO: get children from file store source, mark added at target
+				...childrenMappedToTarget
 			];
+			children.forEach((c, i) => {
+				operation.code[childrenMappedToTarget[i]] = operation.code[c];
+			});
 			return { ...operation, filesToAdd };
 		};
 		const addTargetToTree = (operation) => {
 			const {service,source,target,tree} = operation;
 			const sourceValue = objectPath(tree, `${service}/${source}`) || {};
 
-			const targetKey = target.split('/').slice(-1).join('');
-			const targetParentPath = target.split('/').slice(0,-1).join('');
-			const targetParent = objectPath(tree, `${service}/${targetParentPath}`);
+			const targetSplit = target.split('/');
+			const targetKey = targetSplit.length === 1
+				? targetSplit[0]
+				: targetSplit.slice(-1).join('');
+			const targetParentPath = targetSplit.length === 1
+				? ''
+				: targetSplit.slice(0,-1).join('');
+			const targetParent = targetSplit.length === 1
+				? tree[service]
+				: objectPath(tree, `${service}/${targetParentPath}`);
 
 			targetParent[targetKey] = sourceValue;
 
@@ -272,17 +298,15 @@ const useNew = false;
 			const path = `./${operation.service}/${operation.target}`;
 			const update = operation.code[`./${operation.service}/${operation.source}`];
 			operation.code[path] = update;
-			const filesToAdd = [
-				...operation.filesToAdd,
-				path
-			];
+			const filesToAdd = [ ...operation.filesToAdd, path ];
 			return { ...operation, filesToAdd };
 		};
 		const deleteChildrenFromSource = (operation) => {
 			const isFile = operation.name.includes('File');
 			if(isFile) return operation;
+			const sourcePath = `./${operation.service}/${operation.source}`;
 			const children = Object.keys(operation.code)
-					.filter(x => x.startsWith(`./${operation.service}/${operation.source}`));
+					.filter(x => x.startsWith(sourcePath+'/'));
 			const filesToDelete = [
 				...operation.filesToDelete,
 				...children
@@ -319,18 +343,45 @@ const useNew = false;
 			return { ...operation, filesToDelete };
 		};
 		const keepHelper = (operation) => {
-			/*
-				TODO:
-				should add and remove .keep files as needed
-				.keep files ensure directory structure persists across git commits
-			*/
-			/*
-				const filesFromUpdateTree = utils
-					.keepHelper(body.tree, body.code)
-					//.map(x => x.startsWith('/') ? x.slice(1) : x);
-					.map(x => `.${x}`);
-			*/
-			return operation;
+			let { filesToAdd, filesToDelete } = operation;
+			const { tree, code, utils } = operation;
+
+			const mapCodeForHelper = (c) => Object.entries(c)
+				.map(([path,value]) => ({
+					name: path.split('/').pop(),
+					path: path.replace(/^\./, ''),
+					update: value
+				}));
+
+			const keepFilesFromHelper = utils
+				.keepHelper(tree, mapCodeForHelper(code))
+				.map(x => x.slice(1))
+				.filter(x => x.includes('/.keep'));
+			keepFilesFromHelper.forEach(k => {
+				const parentPath = k.split('/').slice(0,-1).join('/');
+				const parentInTree = objectPath(tree, parentPath);
+				parentInTree['.keep'] = {};
+				code['./'+k] = '';
+				filesToAdd.push('./'+k);
+				filesToDelete = filesToDelete.filter(x => x !== './'+k);
+			});
+
+			const keepFilesInCode = Object.keys(operation.code)
+				.filter(x => x.includes('/.keep'))
+				.map(x => x.slice(2));
+			keepFilesInCode.forEach(k => {
+				const parentPath = k.split('/').slice(0,-1).join('/');
+				const parentInTree = objectPath(tree, parentPath);
+				const parentKeys = Object.keys(parentInTree).filter(x => x !== '.keep');
+				if(parentKeys.length === 0) return;
+				delete parentInTree['.keep'];
+				delete code['./'+k];
+				const keepIsAdded = filesToAdd.find(x => x === './'+k);
+				if(!keepIsAdded) filesToDelete.push('./'+k);
+				filesToAdd = filesToAdd.filter(x => x !== './'+k);
+			});
+
+			return { ...operation, filesToAdd, filesToDelete, code, tree };
 		};
 
 		const addSourceToTarget = pipe(
@@ -369,9 +420,9 @@ const useNew = false;
 			deleteFolder: remove
 		};
 
-		return operation => (service, code) =>
+		return operation => (service, code, utils) =>
 			operations[operation.name]({
-				...operation, service, code
+				...operation, service, code, utils
 			});
 
 	})();
@@ -404,7 +455,7 @@ const useNew = false;
 					const file = await filesStore.getItem(fileKeys[i]);
 					_code[fileKeys[i]] = file;
 				}
-				update = operationsUpdater(_service, _code);
+				update = operationsUpdater(_service, _code, utils);
 			}
 			if(update){
 				body.code = Object.entries(update.code)

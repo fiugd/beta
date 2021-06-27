@@ -29,6 +29,7 @@ export const ServiceMock = ({ utils }) => {
 		}
 	};
 	const serviceFiles = {
+		'./fake/source/.keep': 'should be removed',
 		'./fake/source/toMove.xxx': 'file to move from source',
 		'./fake/source/toRename.xxx': 'file to rename in source',
 		'./fake/source/toDelete.xxx': 'file to delete from source',
@@ -47,11 +48,12 @@ export const ServiceMock = ({ utils }) => {
 						'sibling.xxx': {}
 					},
 					source: {
+						".keep": {},
 						"toMove.xxx": {},
 						"toRename.xxx": {},
 						"toDelete.xxx": {},
 						"toCopy.xxx": {},
-					}
+					},
 				}
 			}
 		}
@@ -124,6 +126,7 @@ export const ServiceMock = ({ utils }) => {
 	};
 
 	return {
-		deps, setBody, event, calls, params, changes
+		deps, setBody, event, calls, params, changes,
+		files: serviceFiles
 	};
 }

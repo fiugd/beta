@@ -19,7 +19,7 @@ describe('update service', ({ beforeEach }) => {
 		manager = new ServicesManager(mock.deps);
 	});
 
-	it('should add new file', async (assert) => {
+	it('should add file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
 			name: 'fake',
@@ -85,13 +85,13 @@ describe('update service', ({ beforeEach }) => {
 
 		const sourceFileRemoved = mock.calls
 			.find(({ fileSet={} }) => fileSet.key === "./fake/source/toDelete.xxx");
-		expect(sourceFileRemoved === undefined).toBeTruthy();
+		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes['fake/source/toDelete.xxx'] || {};
-		expect(deleteFileChange.deleteFile).toBeTruthy();
+		expect(deleteFileChange.deleteFile, 'deleted file change').toBeTruthy();
 
 		const resultShowsFileDelete = safe(() => result.result[0].tree.fake.source['toDelete.xxx']) || 'does not exist';
-		expect(resultShowsFileDelete === 'does not exist').toBeTruthy();
+		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
 	});
 	it('should copy file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -158,19 +158,13 @@ describe('update service', ({ beforeEach }) => {
 
 		const sourceFileRemoved = mock.calls
 			.find(({ fileRemove={} }) => fileRemove.key === "./fake/source/toMove.xxx");
-		expect(sourceFileRemoved).toBeTruthy();
+		expect(sourceFileRemoved, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes['fake/source/toMove.xxx'];
-		expect(deleteFileChange.deleteFile).toBeTruthy();
+		expect(deleteFileChange && deleteFileChange.deleteFile, 'delete file change').toBeTruthy();
 
-		assert.deepEqual([
-			'fake/source/toMove.xxx',
-			'fake/target/toMove.xxx',
-			"tree-fake-expanded",
-			"state-fake-opened"
-			].sort(),
-			Object.keys(mock.changes).sort()
-		);
+		const addFileChange = mock.changes['fake/target/toMove.xxx'];
+		expect(addFileChange && !addFileChange.deleteFile, 'add file change').toBeTruthy();
 	});
 	it('should rename file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -196,18 +190,15 @@ describe('update service', ({ beforeEach }) => {
 
 		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toRename.xxx");
 		expect(sourceFileRemoved).toBeTruthy();
-		assert.deepEqual([
-			'fake/source/toRename.xxx',
-			'fake/target/toRename.xxx',
-			"tree-fake-expanded",
-			"state-fake-opened"
-			].sort(),
-			Object.keys(mock.changes).sort()
-		);
-		expect(mock.changes['fake/source/toRename.xxx']?.deleteFile).toBeTruthy();
+
+		const deleteFileChange = mock.changes['fake/source/toRename.xxx'];
+		expect(deleteFileChange && deleteFileChange.deleteFile, 'delete file change').toBeTruthy();
+
+		const addFileChange = mock.changes['fake/target/toRename.xxx'];
+		expect(addFileChange && !addFileChange.deleteFile, 'add file change').toBeTruthy();
 	});
 
-	it('should add new folder', async (assert) => {
+	it('should add folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
 			name: 'fake',
@@ -260,22 +251,174 @@ describe('update service', ({ beforeEach }) => {
 		expect(!tree.target, 'deleted target in tree').toBeTruthy();
 		expect(deletedChildren.length, 'deleted children files length').toEqual(0);
 	});
-	it.todo('should copy folder', async (assert) => {});
-	it.todo('should move folder', async (assert) => {});
-	it.todo('should rename folder', async (assert) => {});
+	it('should copy folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFolder',
+				source: 'source',
+				target: 'target'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
 
-	it.todo('should create .keep file for empty folder', async (assert) => {
-		// when last file is removed from folder
-		// when last file is moved from folder
-		// when last child folder is moved from folder
-		// when last child folder is deleted from folder
-		// when folder is created
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+
+		const copiedSourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
+		const copiedTargetFiles = files.filter(x => x.path.startsWith('/fake/target/source/'));
+		assert.deepEqual(
+			Object.keys(copiedSourceFiles).sort(),
+			Object.keys(copiedTargetFiles).sort()
+		);
+		assert.deepEqual(
+			Object.keys(tree.target.source).sort(),
+			Object.keys(tree.source).sort()
+		);
 	});
-	it.todo('should remove .keep file for filled folder', async (assert) => {
-		// when folder is created inside parent
-		// when folder is moved inside parent
-		// when file is created in parent
-		// when file is moved to parent
+	it('should move folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		const originalSourceFileLength = Object.keys(mock.files)
+			.filter(x => x.startsWith('./fake/source/'))
+			.filter(x => !x.includes('.keep'))
+			.length;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'target'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+		const sourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
+		const movedFiles = files.filter(x => x.path.startsWith('/fake/target/source/'));
+
+		expect(tree.source, 'source folder in tree').toEqual(undefined);
+		expect(tree.target.source, 'source folder in target in tree').toBeTruthy();
+		
+		expect(sourceFiles.length, 'source files length').toEqual(0);
+		expect(movedFiles.length, 'moved files length').toEqual(originalSourceFileLength);
+	});
+	it('should rename folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		const originalSourceFileLength = Object.keys(mock.files)
+			.filter(x => x.startsWith('./fake/source/'))
+			.filter(x => !x.includes('.keep'))
+			.length;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'renameFolder',
+				source: 'source',
+				target: 'sourceRenamed'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+		const sourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
+		const childFiles = files.filter(x => x.path.startsWith('/fake/sourceRenamed/'));
+
+		expect(tree.source, 'source folder in tree').toEqual(undefined);
+		expect(tree.sourceRenamed, 'source renamed folder in tree').toBeTruthy();
+
+		expect(sourceFiles.length, 'source files length').toEqual(0);
+		expect(childFiles.length, 'renamed child files length').toEqual(originalSourceFileLength);
+	});
+
+	it('should create .keep file for empty folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFile',
+				source: 'target/sibling.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+
+		const keepFile = files.find(x => x.path === '/fake/target/.keep');
+		expect(keepFile).toBeTruthy();
+		expect(tree.target['.keep']).toBeTruthy();
+		expect(mock.changes['fake/target/.keep'], "keep file changes").toBeTruthy();
+	});
+	it('should remove .keep file for filled folder', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'addFile',
+				target: 'target/.keep'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error) errors.push(result.error);
+		} catch({ message, stack }){
+			errors.push({ message, stack });
+		}
+		assert.custom(errors);
+
+		const tree = safe(() => result.result[0].tree.fake);
+		const files = safe(() => result.result[0].code);
+
+		const addedKeepFile = files.find(x => x.path === '/fake/target/.keep')
+		expect(addedKeepFile).toEqual(undefined);
+		expect(tree.target['.keep']).toEqual(undefined);
+		expect(mock.changes['fake/target/.keep'], "added keep file changes").toEqual(undefined);
+
+		const preExistingKeepFile = files.find(x => x.path === '/fake/source/.keep');
+		expect(preExistingKeepFile).toEqual(undefined);
+		expect(tree.source['.keep']).toEqual(undefined);
+		expect(mock.changes['fake/source/.keep'].deleteFile, 'delete pre-existing keep file').toBeTruthy();
 	});
 });
 
