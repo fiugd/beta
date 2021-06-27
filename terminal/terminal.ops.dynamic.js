@@ -1,3 +1,6 @@
+import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+const showCursor = ansiEscapes.cursorShow;
+
 const cacheName = 'terminal-cache'
 
 const fetchJSON = url => fetch(url).then(x => x.json());
@@ -222,6 +225,7 @@ function exit(){
 		detach(this.listenerKey);
 		this.listenerKey = undefined;
 	}
+	this.term.write(showCursor);
 }
 
 class DynamicOp {
