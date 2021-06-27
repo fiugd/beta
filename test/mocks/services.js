@@ -29,9 +29,11 @@ export const ServiceMock = ({ utils }) => {
 		}
 	};
 	const serviceFiles = {
-		'./fake/source/toMove.xxx': 'file to move',
+		'./fake/source/toMove.xxx': 'file to move from source',
+		'./fake/source/toRename.xxx': 'file to rename in source',
+		'./fake/source/toDelete.xxx': 'file to delete from source',
+		'./fake/source/toCopy.xxx': "a file to copy from source",
 		'./fake/target/sibling.xxx': "a sibling file",
-		'./fake/source/toStay.xxx': "a file that should stay",
 	};
 	const allServices = {
 		"3002": {
@@ -46,7 +48,9 @@ export const ServiceMock = ({ utils }) => {
 					},
 					source: {
 						"toMove.xxx": {},
-						"toStay.xxx": {},
+						"toRename.xxx": {},
+						"toDelete.xxx": {},
+						"toCopy.xxx": {},
 					}
 				}
 			}

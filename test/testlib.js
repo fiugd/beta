@@ -32,7 +32,13 @@ const colors = {
 };
 
 const jsonColors = (json) => colorize(json, { colors, pretty: true });
-const logJSON = x => console.log(jsonColors(x));
+const logJSON = x => {
+	//TODO: would love to remove quotes from JSON keys
+	// failing to do this because of json-colorizer
+	//https://stackoverflow.com/questions/3651294/remove-quotes-from-keys-in-a-json-string-using-jquery/3651373
+	const colored = jsonColors(x);
+	console.log(colored)
+};
 const safe = (fn) => {
 	try {
 		return fn();

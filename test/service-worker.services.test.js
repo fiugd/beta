@@ -9,27 +9,37 @@ const { ServicesManager } = module.exports;
 await import(cwd+'/../modules/service-worker.utils.js');
 const utils = module.exports;
 
-describe('create service', () => {
-	it.todo('should use provider when indicated', (assert) => {});
-	it.todo('should register service handler', (assert) => {});
-	it.todo('should deliver default service', (assert) => {});
+let mock;
+let manager;
+
+describe('create service', ({ beforeEach }) => {
+	beforeEach(() => {
+		mock = ServiceMock({ utils });
+		manager = new ServicesManager(mock.deps);
+	});
+
+	it.todo('should use provider when indicated', async (assert) => {});
+	it.todo('should register service handler', async (assert) => {});
+	it.todo('should deliver default service', async (assert) => {});
 });
 
-describe('change service', () => {
-	it.todo('should save changes to files within service', (assert) => {});
-	it.todo('should use provider when applicable', (assert) => {});
-	it.todo('should trigger template update when necessary', (assert) => {});
-	it.todo('should indicate type of change', (assert) => {});
+describe('change service', ({ beforeEach }) => {
+	beforeEach(() => {
+		mock = ServiceMock({ utils });
+		manager = new ServicesManager(mock.deps);
+	});
 
-	it.todo('should be doing things that update service is doing?', (assert) => {});
+	it.todo('should save changes to files within service', async (assert) => {});
+	it.todo('should use provider when applicable', async (assert) => {});
+	it.todo('should trigger template update when necessary', async (assert) => {});
+	it.todo('should indicate type of change', async (assert) => {});
 
-	it.todo('should return a list of current changes', (assert) => {});
+	it.todo('should be doing things that update service is doing?', async (assert) => {});
+
+	it.todo('should return a list of current changes', async (assert) => {});
 });
 
 describe('update service', ({ beforeEach }) => {
-	let mock;
-	let manager;
-
 	beforeEach(() => {
 		mock = ServiceMock({ utils });
 		manager = new ServicesManager(mock.deps);
@@ -82,9 +92,9 @@ describe('update service', ({ beforeEach }) => {
 		mock.setBody({
 			name: 'fake',
 			operation: {
-				name: 'moveFile',
+				name: 'renameFile',
 				target: 'target/toRename.xxx',
-				source: 'source/toMove.xxx'
+				source: 'source/toRename.xxx'
 			},
 		});
 		const errors = [];
@@ -92,29 +102,24 @@ describe('update service', ({ beforeEach }) => {
 		try {
 			result = await serviceUpdate(mock.params, mock.event);
 			result = JSON.parse(result);
-			if(result.error){
-				errors.push({
-					message: result.error.message,
-					stack: result.error.stack
-				});
-			}
-			const { result: [{ tree, code }] } = result;
+			if(result.error) errors.push(result.error);
 		} catch(e){
 			const { message, stack } = e;
 			errors.push({ message, stack });
 		}
 		errors.length && assert.custom(errors);
-		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toMove.xxx");
-		assert.ok(!!sourceFileRemoved);
+
+		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toRename.xxx");
+		expect(sourceFileRemoved).toBeTruthy();
 		assert.deepEqual([
-			'fake/source/toMove.xxx',
+			'fake/source/toRename.xxx',
 			'fake/target/toRename.xxx',
 			"tree-fake-expanded",
 			"state-fake-opened"
 			].sort(),
 			Object.keys(mock.changes).sort()
 		);
-		assert.ok(mock.changes['fake/source/toMove.xxx']?.deleteFile)
+		expect(mock.changes['fake/source/toRename.xxx']?.deleteFile).toBeTruthy();
 	});
 	it('should copy file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -122,8 +127,8 @@ describe('update service', ({ beforeEach }) => {
 			name: 'fake',
 			operation: {
 				name: 'copyFile',
-				target: 'target/toStayCopied.xxx',
-				source: 'source/toStay.xxx'
+				target: 'target/toCopyCopied.xxx',
+				source: 'source/toCopy.xxx'
 			},
 		});
 		const errors = [];
@@ -144,11 +149,14 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === "./fake/target/toStayCopied.xxx");
+			.find(({ fileSet={} }) => fileSet.key === "./fake/target/toCopyCopied.xxx");
 		expect(sourceFileAdded).toBeTruthy();
 
-		const addFileChange = mock.changes['fake/target/toStayCopied.xxx'];
-		expect(addFileChange && !addFileChange.deleteFile).toBeTruthy();
+		const copyFileAdd = mock.changes['fake/target/toCopyCopied.xxx'] || {};
+		expect(!copyFileAdd.deleteFile).toBeTruthy();
+		
+		const copyFileRemove = mock.changes['fake/target/toCopy.xxx'];
+		expect(!copyFileRemove).toBeTruthy();
 	});
 	it('should add new file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -182,24 +190,65 @@ describe('update service', ({ beforeEach }) => {
 			.find(({ fileSet={} }) => fileSet.key === "./fake/target/addedFile.xxx");
 		expect(sourceFileAdded).toBeTruthy();
 
-		const addFileChange = mock.changes['fake/target/addedFile.xxx'];
-		expect(addFileChange && !addFileChange.deleteFile).toBeTruthy();
+		const addFileChange = mock.changes['fake/target/addedFile.xxx'] || {};
+		expect(!addFileChange.deleteFile).toBeTruthy();
 
 		const resultShowsFileAdded = safe(() => result.result[0].tree.fake.target['addedFile.xxx']);
-		expect(result.result[0].tree.fake.target['addedFile.xxx']).toBeTruthy();
+		expect(resultShowsFileAdded).toBeTruthy();
 	});
-	it.todo('should delete file', (assert) => {});
+	it('should delete file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFile',
+				source: 'source/toDelete.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
 
-	it.todo('should move folder', (assert) => {});
-	it.todo('should rename folder', (assert) => {});
-	it.todo('should copy folder', (assert) => {});
-	it.todo('should add new folder', (assert) => {});
-	it.todo('should delete folder', (assert) => {});
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === "./fake/source/toDelete.xxx");
+		expect(sourceFileRemoved === undefined).toBeTruthy();
+
+		const deleteFileChange = mock.changes['fake/source/toDelete.xxx'] || {};
+		expect(deleteFileChange.deleteFile).toBeTruthy();
+
+		const resultShowsFileDelete = safe(() => result.result[0].tree.fake.source['toDelete.xxx']) || 'does not exist';
+		expect(resultShowsFileDelete === 'does not exist').toBeTruthy();
+	});
+
+	it.todo('should move folder', async (assert) => {});
+	it.todo('should rename folder', async (assert) => {});
+	it.todo('should copy folder', async (assert) => {});
+	it.todo('should add new folder', async (assert) => {});
+	it.todo('should delete folder', async (assert) => {});
 });
 
-describe('delete service', () => {
-	it.todo('should delete a service', (assert) => {});
-	it.todo('should remove files when service is deleted', (assert) => {});
+describe('delete service', ({ beforeEach }) => {
+	beforeEach(() => {
+		mock = ServiceMock({ utils });
+		manager = new ServicesManager(mock.deps);
+	});
+
+	it.todo('should delete a service', async (assert) => {});
+	it.todo('should remove files when service is deleted', async (assert) => {});
 });
 
 /*

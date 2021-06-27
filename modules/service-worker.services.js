@@ -1,6 +1,7 @@
+const useNew = false;
+
 (() => {
 	const stringify = o => JSON.stringify(o,null,2);
-	
 	const clone = o => {
 		if(!o) return;
 		try {
@@ -381,7 +382,6 @@
 			
 			const operationsUpdater = _operationsUpdater(operation);
 			let update;
-			const useNew = false;
 
 			if(useNew && operationsUpdater){
 				const _service = await servicesStore.getItem(id + "");
