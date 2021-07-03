@@ -1,5 +1,5 @@
 import { attach, attachTrigger } from "./Listeners.mjs";
-import { getDefaultFile, getState } from "./state.mjs";
+import { getDefaultFile, getState, getCurrentService } from "./state.mjs";
 let tabs, service;
 
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -175,12 +175,14 @@ const clickHandler = ({ event, container, triggers }) => {
 
 	// const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	// tabsToUpdate.map(updateTab);
+	const service = getCurrentService({ pure: true });
 
 	triggers["fileSelect"]({
 		detail: {
 			name: foundTab.name,
 			path: foundTab.parent,
 			parent: foundTab.parent,
+			service: service ? service.name : ''
 		},
 	});
 };
