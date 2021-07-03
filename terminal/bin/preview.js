@@ -73,6 +73,7 @@ function updatePreview(args, done) {
 		isNew: true,
 		url: matchedFile
 	};
+	if(matcher && !matchedFile) return;
 
 	const { cwd, file, filename, event={}, serviceUrl } = args;
 	const { detail={} } = event;
