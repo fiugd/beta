@@ -1,12 +1,11 @@
 const listeners = {};
 const triggers = {};
 
-// dynamic import because state imports listeners, ugh... spaghetti
+// dynamic import + setTimeout because state imports listeners, ugh... spaghetti
 // alternative is that SW keeps track of current service... maybe
 // all this because preview command needs to know current service name
 let getCurrentService = () => {};
 setTimeout(async () => {
-	getCurrentService = () => ({});
 	({ getCurrentService } = await import("./state.mjs"));
 }, 1000);
 
