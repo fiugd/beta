@@ -27,7 +27,7 @@ const handleInit = async (args, done) => {
 	const fileIsWildcard = file.includes("*.");
 	let matchedFile;
 	if(fileIsWildcard){
-		matcher = wildcardToRegExp(file);
+		matcher = matcher || wildcardToRegExp(file);
 		return;
 	}
 	previewDom = previewDom || document.querySelector('#preview-container');
@@ -166,7 +166,7 @@ const handleFileSelect = async (args, done) => {
 };
 
 const handleFileChange = async (args, done) => {
-	return await handleInit(args, done);
+	return 'todo: re-factor for file change listener!';
 };
 
 const handlers = {
