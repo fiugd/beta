@@ -66,7 +66,7 @@ const getDom = (() => {
 
 		return previewDom;
 	};
-})(); 
+})();
 
 function updatePreview(args, done) {
 	if(matcher && matchedFile) {
@@ -209,8 +209,9 @@ const handleFileSelect = async (args, done) => {
 		const absPath = `${serviceUrl}/${filePath}`;
 		const isMatch = matcher.test(absPath);
 		if(isMatch && matchedFile !== absPath){
+			const optionalReturn = matchedFile ? '\n': '';
 			matchedFile = absPath;
-			return chalk.green(file + ": " + filePath + '\n');
+			return chalk.green(optionalReturn + file + ": " + filePath + '\n');
 		}
 		if(isMatch) return;
 
