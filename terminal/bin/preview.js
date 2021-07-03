@@ -173,10 +173,12 @@ const handleInit = async (args, done) => {
 };
 
 const handleFileSelect = async (args, done) => {
+	if(!matcher) return;
+
 	/*
 		switch preview url if both are true
 		 - selected file is different from item being preview
-		 - selected file matches
+		 - matcher exists and selected file matches
 
 		otherwise, ignore file select
 	*/
