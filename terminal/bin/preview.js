@@ -166,12 +166,12 @@ const handleFileSelect = async (args, done) => {
 			: `${filePath} does not match ${file}`
 		return `file select match: ${matchedFile}\n`;
 	} catch(e){
-		return e.message + '\n';
+		return chalk.red(e.message + '\n');
 	}
 };
 
 const handleFileChange = async (args, done) => {
-	return 'todo: re-factor for file change listener!\n';
+	return chalk.yellow('todo: re-factor for file change listener!\n');
 };
 
 const handlers = {
