@@ -23,14 +23,7 @@ function wildcardToRegExp(s) {
 	return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
 }
 
-const handleInit = async (args, done) => {
-	const {cwd, file, event, serviceUrl } = args;
-	const fileIsWildcard = file.includes("*.");
-
-	if(fileIsWildcard){
-		matcher = wildcardToRegExp(file);
-		return;
-	}
+function getDom() {
 	previewDom = previewDom || document.querySelector('#preview-container');
 	if(!previewDom){
 		previewDom = document.createElement('div');
@@ -67,27 +60,36 @@ const handleInit = async (args, done) => {
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
 	}
-	previewDom.classList.remove('hidden');
-	const previewIframe = previewDom.querySelector('iframe');
+	return previewDom;
+}
+
+function updatePreview(args, done) {
+	const { cwd, file, filename, event={}, serviceUrl } = args;
+	const { detail={} } = event;
+	const { code='' } = detail;
+
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
+	const filePath = url.split(document.location.origin)[1];
+
+	const isNew = filePath !== currentFile;
+	currentFile = filePath;
+
+	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
 	previewDom.prepend(newIframe);
 
-	const filePath = url.split(document.location.origin)[1];
-	const isNew = filePath !== currentFile;
-	currentFile = filePath;
-
 	// TODO: should check to see if a page refresh is required
 	// file that changed may not relate to file previewed
-
+	
 	// TODO: this is where cool things like HMR could take place
 	// see https://itnext.io/hot-reloading-native-es2015-modules-dc54cd8cca01
 	// that is, a full reload may not be required
-	
-	// TODO: DOM diffing: https://gomakethings.com/dom-diffing-with-vanilla-js/
 
+	// TODO: DOM diffing: https://gomakethings.com/dom-diffing-with-vanilla-js/
 	// TODO: here also, could be compiling/transpiling code or setting up a worker
+	
+
 
 	// TODO: reload iframe if it's the same doc => iframe.contentWindow.location.reload();
 	// or message frame with new content - each template should listen for update
@@ -100,25 +102,26 @@ const handleInit = async (args, done) => {
 
 	let useSrcDoc;
 	try {
-		useSrcDoc = event?.detail?.code && url.includes(event.detail.filePath)
+		useSrcDoc = code && url.includes(filePath)
 	} catch(e){}
 
-	const previewUrl = (url) => {
-		const filename = url.split('/').pop().split('?')[0];
+	const previewUrl = (_url) => {
+		const filename = _url.split('/').pop().split('?')[0];
 		const extension = filename.split('.').pop();
 		const rawPreview = ['html', 'htm'];
-		if(rawPreview.includes(extension)) return url;
-		return url + '/::preview::/';
+		if(rawPreview.includes(extension)) return _url;
+		return _url + '/::preview::/';
 	};
 
 	// NOTE: iframe with srcdoc still doesn't want to respect base href
 	// disabled this until working better
 	useSrcDoc = false;
+
 	if(useSrcDoc){
 		const base = url.split('/').slice(0,-1).join('/')+'/';
-		newIframe.srcdoc = event.detail.code.includes('<head>')
-			? event.detail.code.replace('<head>', `<head>\n<base href="${base}">\n`)
-			: `<html><head><base href="${base}">\n</head>${event.detail.code}</html>`;
+		newIframe.srcdoc = code.includes('<head>')
+			? code.replace('<head>', `<head>\n<base href="${base}">\n`)
+			: `<html><head><base href="${base}">\n</head>${code}</html>`;
 		newIframe.classList.remove('hidden');
 		setTimeout(() => {
 			previewIframe.remove();
@@ -132,7 +135,7 @@ const handleInit = async (args, done) => {
 			},100);
 		}, isNew ? 0 : 500);
 	}
-
+	
 	const dismissPreview = () => {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
@@ -144,6 +147,23 @@ const handleInit = async (args, done) => {
 	quitButton.onclick = () => {
 		setTimeout(dismissPreview, 1);
 	};
+	
+	return { isNew, url };
+}
+
+const handleInit = async (args, done) => {
+	const {cwd, file, event } = args;
+	const fileIsWildcard = file.includes("*.");
+
+	if(fileIsWildcard){
+		matcher = wildcardToRegExp(file);
+		return `will preview selected files matching ${file}`;
+	}
+
+	const element = getDom();
+	element.classList.remove('hidden');
+
+	const { isNew, url } = updatePreview(args, done);
 
 	const link = url => chalk.hex('#569CD6')(url);
 	const progress = url => chalk.yellow(url);
@@ -153,6 +173,13 @@ const handleInit = async (args, done) => {
 };
 
 const handleFileSelect = async (args, done) => {
+	/*
+		switch preview url if both are true
+		 - selected file is different from item being preview
+		 - selected file matches
+
+		otherwise, ignore file select
+	*/
 	const { file, event, serviceUrl } = args;
 	const { name, path } = event.detail;
 	let filePath = path
@@ -171,7 +198,17 @@ const handleFileSelect = async (args, done) => {
 };
 
 const handleFileChange = async (args, done) => {
-	return chalk.yellow('todo: re-factor for file change listener!\n');
+	/*
+		always update preview when any file changes
+		in the future, refine the conditions for preview update
+	*/
+	const { isNew, url } = updatePreview(args, done);
+
+	const link = url => chalk.hex('#569CD6')(url);
+	const progress = url => chalk.yellow(url);
+	return isNew
+		? `\n🔗  ${link(url)}\n🔆  `
+		: progress(`|`);
 };
 
 const handlers = {
