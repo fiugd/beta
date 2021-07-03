@@ -821,9 +821,6 @@ const inlineEditor = (ChangeHandler) => ({
 	*/
 
 	const loadDocument = () => {
-		if(!filename){
-			return;
-		}
 		console.log(
 			`%c${filename}: %ceditor %cloadDoc start`,
 			'color:#CE9178;',
@@ -848,7 +845,9 @@ const inlineEditor = (ChangeHandler) => ({
 			//}, 1);
 			prevDoc = filename;
 		};
-		
+		if(!path || !filename){
+			return callback();
+		}
 		window.Editor.loadDoc({
 			name: filename,
 			path,
