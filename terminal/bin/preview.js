@@ -160,7 +160,7 @@ const handleInit = async (args, done) => {
 
 	if(fileIsWildcard){
 		matcher = wildcardToRegExp(file);
-		return `will preview selected files matching ${file}`;
+		return `will preview selected files matching ${file}\n`;
 	}
 
 	const element = getDom();
@@ -196,7 +196,7 @@ const handleFileSelect = async (args, done) => {
 		matchedFile = matcher.test(absPath)
 			? chalk.green(file + ": " + filePath)
 			: chalk.red(file + ": " + filePath)
-		return matchedFile;
+		return matchedFile + '\n';
 	} catch(e){
 		return chalk.red(e.message + '\n');
 	}
