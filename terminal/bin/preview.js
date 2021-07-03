@@ -15,11 +15,17 @@ let quitButton;
 let currentFile;
 
 const operation = async (args, done) => {
-	const {cwd, file, event} = args;
+	const {cwd, file, event, serviceUrl } = args;
 	const fileIsWildcard = file.includes("*.");
-
-	console.log({ fileIsWildcard });
-	console.log(JSON.stringify(event.detail, null, 2));
+	let matchedFile;
+	if(fileIsWildcard){
+		try {
+			//filePath eg, .NOTES/releases/bartokv0.4.3.md
+			const { filePath }  event.detail;
+			matchedFile = serviceUrl + filePath
+		} catch(e){}
+	}
+	console.log({ matchedFile });
 
 	function wildcardToRegExp (s) {
 		function regExpEscape (s) {

@@ -149,8 +149,9 @@ class ProcessWorker {
 		const promise = new Promise(async (resolve) => {
 			const module = await this.module;
 			if(module.type === 'plain'){
+				const serviceUrl = (new URL('./', location)).href.split('terminal')[0];
 				const runOperation = async (event) => {
-					const result = await module.operation({...args, event}, (msg)=>{
+					const result = await module.operation({...args, event, serviceUrl }, (msg)=>{
 						msg && logger(msg);
 						finish(resolve);
 					});

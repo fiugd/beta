@@ -2,7 +2,7 @@
 
 ### bartok v0.4.3
 started: 2021-04-20
-release: TBD
+release: TBD 
 
 - [ ] preview should support wildcards, ie. \*.md
 - [ ] preview with no arguments should preview current file (like old preview)
@@ -12,7 +12,7 @@ release: TBD
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit
 
-- copy
+- copy 
 	- [ ] cp command works properly for files
 	- [ ] cp command works properly for folders
 	- [ ] copy works with commit
