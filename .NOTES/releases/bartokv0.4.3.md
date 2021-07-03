@@ -4,6 +4,10 @@
 started: 2021-04-20
 release: TBD
 
+- [ ] preview should support wildcards, ie. \*.md
+- [ ] preview with no arguments should preview current file (like old preview)
+- [ ] preview help documentation
+
 - delete
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit
@@ -17,10 +21,6 @@ release: TBD
 	- [ ] mv command works properly for files
 	- [ ] mv command works properly for folders
 	- [ ] move works with commit
-
-- [ ] preview should support wildcards, ie. \*.md
-- [ ] preview with no arguments should preview current file (like old preview)
-- [ ] preview help documentation
 
 - [ ] paths which include ".." or "." work for all commands
 

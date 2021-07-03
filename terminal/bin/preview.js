@@ -16,6 +16,17 @@ let currentFile;
 
 const operation = async (args, done) => {
 	const {cwd, file, event} = args;
+	const fileIsWildcard = file.includes("*.");
+
+	console.log({ fileIsWildcard });
+	console.log(JSON.stringify(event.detail, null, 2));
+
+	function wildcardToRegExp (s) {
+		function regExpEscape (s) {
+			return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+		}
+		return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
+	}
 
 	previewDom = previewDom || document.querySelector('#preview-container');
 	if(!previewDom){
@@ -88,7 +99,7 @@ const operation = async (args, done) => {
 	try {
 		useSrcDoc = event?.detail?.code && url.includes(event.detail.filePath)
 	} catch(e){}
-	
+
 	const previewUrl = (url) => {
 		const filename = url.split('/').pop().split('?')[0];
 		const extension = filename.split('.').pop();
