@@ -202,7 +202,8 @@ class ProcessWorker {
 					worker.postMessage({ type: "events", eventType, ...args });
 				};
 				const listener = (eventType) => debounce(messagePost(eventType), 500);
-				for (const eventName of ['fileChange', 'fileSelect']) {
+				const listenTo = ['fileChange', 'fileSelect'];
+				for (const eventName of listenTo) {
 					const response = await attach({
 						name: module.name,
 						listener: listener(eventName),
