@@ -65,13 +65,15 @@ function trigger({ e, type, params, source, data, detail }){
 		data: _data
 	};
 
-	const detail = detail
+	const service = getCurrentService({ pure: true });
+	const customEventOps = {};
+	customEventOps.bubbles: true 
+	customEventOps.detail = detail
 		? { ...defaultDetail, ...detail, data: _data }
 		: defaultDetail;
-	const service = getCurrentService({ pure: true });
-	detail.service = service.name;
+	customEventOps.detail.service = service.name;
 
-	const event = new CustomEvent(type, { bubbles: true, detail });
+	const event = new CustomEvent(type, customEventOps);
 	window.dispatchEvent(event);
 }
 
