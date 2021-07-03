@@ -10,7 +10,6 @@ const args = [{
 	name: 'watch', alias: 'w', type: Boolean, required: false, default: true
 }];
 
-
 let quitButton;
 let currentFile;
 let matcher;
@@ -164,7 +163,7 @@ function updatePreview(args, done) {
 	quitButton.onclick = () => {
 		setTimeout(dismissPreview, 1);
 	};
-	
+
 	return { isNew, url };
 }
 
@@ -209,9 +208,10 @@ const handleFileSelect = async (args, done) => {
 		const absPath = `${serviceUrl}/${filePath}`;
 		const isMatch = matcher.test(absPath);
 		if(isMatch && matchedFile !== absPath){
-			const optionalReturn = matchedFile ? '\n': '';
+			const optionalReturn = matchedFile ? '\n\n': '';
+			const optionalEndReturn = matchedFile ? '': '\n';
 			matchedFile = absPath;
-			return chalk.green(optionalReturn + file + ": " + filePath + '\n');
+			return chalk.green(optionalReturn + file + ": " + filePath + optionalEndReturn);
 		}
 		if(isMatch) return;
 
