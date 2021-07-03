@@ -155,9 +155,10 @@ const handleInit = async (args, done) => {
 const handleFileSelect = async (args, done) => {
 	const { file, event, serviceUrl } = args;
 	const { name, path } = event.detail;
-	const filePath = path
+	let filePath = path
 		? `${path}/${name}`
 		: name;
+	if(filePath.startsWith('/')) filePath.slice(1);
 	try {
 		const absPath = `${serviceUrl}/${filePath}`;
 		matchedFile = matcher.test(absPath)
