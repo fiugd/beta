@@ -10,7 +10,7 @@ const args = [{
 	name: 'watch', alias: 'w', type: Boolean, required: false, default: true
 }];
 
-let previewDom;
+
 let quitButton;
 let currentFile;
 let matcher;
@@ -23,9 +23,13 @@ function wildcardToRegExp(s) {
 	return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
 }
 
-function getDom() {
-	previewDom = previewDom || document.querySelector('#preview-container');
-	if(!previewDom){
+const getDom = (() => {
+	let previewDom;
+
+	return () => {
+		previewDom = previewDom || document.querySelector('#preview-container');
+		if(previewDom) return previewDom;
+
 		previewDom = document.createElement('div');
 		previewDom.id = 'preview-container';
 		previewDom.innerHTML = `
@@ -59,14 +63,23 @@ function getDom() {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
-	}
-	return previewDom;
-}
+
+		return previewDom;
+	};
+})();
 
 function updatePreview(args, done) {
+	if(matcher && matchedFile) return {
+		isNew: true,
+		url: matchedFile
+	};
+
 	const { cwd, file, filename, event={}, serviceUrl } = args;
 	const { detail={} } = event;
 	const { code='' } = detail;
+	
+	const previewDom = getDom();
+	previewDom.classList.remove('hidden');
 
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
 	const filePath = url.split(document.location.origin)[1];
@@ -163,9 +176,6 @@ const handleInit = async (args, done) => {
 		return `will preview selected files matching ${file}\n`;
 	}
 
-	const element = getDom();
-	element.classList.remove('hidden');
-
 	const { isNew, url } = updatePreview(args, done);
 
 	const link = url => chalk.hex('#569CD6')(url);
@@ -193,10 +203,14 @@ const handleFileSelect = async (args, done) => {
 	if(filePath.startsWith('/')) filePath.slice(1);
 	try {
 		const absPath = `${serviceUrl}/${filePath}`;
-		matchedFile = matcher.test(absPath)
-			? chalk.green(file + ": " + filePath)
-			: chalk.red(file + ": " + filePath)
-		return matchedFile + '\n';
+		const isMatch = matcher.test(absPath);
+		if(isMatch && matchedFile !== absPath){
+			matchedFile = absPath;
+			return chalk.green(file + ": " + filePath);
+		}
+		if(isMatch) return;
+
+		return chalk.red(file + ": " + filePath);
 	} catch(e){
 		return chalk.red(e.message + '\n');
 	}
