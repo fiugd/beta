@@ -1216,7 +1216,7 @@ function _Editor(callback) {
 				code: "",
 				name: "",
 				id: "",
-				filename: "",
+				filename,
 				callback: editorCallback,
 			});
 
