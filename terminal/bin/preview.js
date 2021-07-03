@@ -21,7 +21,7 @@ const operation = async (args, done) => {
 	if(fileIsWildcard){
 		try {
 			//filePath eg, .NOTES/releases/bartokv0.4.3.md
-			const { filePath }  event.detail;
+			const { filePath } = event.detail;
 			matchedFile = serviceUrl + filePath;
 			console.log({ matchedFile });
 		} catch(e){}
