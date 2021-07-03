@@ -1,15 +1,6 @@
 const listeners = {};
 const triggers = {};
 
-// dynamic import + setTimeout because state imports listeners, ugh... spaghetti
-// alternative is that SW keeps track of current service... maybe
-// all this because preview command needs to know current service name
-let getCurrentService = () => {};
-setTimeout(async () => {
-	({ getCurrentService } = await import("./state.mjs"));
-}, 1000);
-
-
 function attach({
 	name, listener, eventName, options, key
 }){
@@ -70,15 +61,11 @@ function trigger({ e, type, params, source, data, detail }){
 		data: _data
 	};
 
-	const service = getCurrentService && getCurrentService({ pure: true });
-	const customEventOps = {};
-	customEventOps.bubbles = true;
-	customEventOps.detail = detail
+	const detail = detail
 		? { ...defaultDetail, ...detail, data: _data }
 		: defaultDetail;
-	customEventOps.detail.service = service && service.name;
 
-	const event = new CustomEvent(type, customEventOps);
+	const event = new CustomEvent(type, { bubbles: true, detail });
 	window.dispatchEvent(event);
 }
 

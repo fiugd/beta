@@ -62,9 +62,13 @@ const ChangeHandler = (doc) => {
 			prevCode: code,
 		});
 
+		//TODO: should be using a trigger for this
 		const event = new CustomEvent("fileChange", {
 			bubbles: true,
-			detail: { name, id, filePath: filename, code: contents },
+			detail: {
+				name, id, filePath: filename, code: contents,
+				service: service ? service.name : undefined
+			},
 		});
 		document.body.dispatchEvent(event);
 	};
