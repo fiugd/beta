@@ -198,16 +198,18 @@ class ProcessWorker {
 			//NOTE: this is a very rough version of watch mode
 			// eventName 'Operations' is hard coded and maybe should change
 			if(args.watch){
-				const messagePost = (args) => {
-					worker.postMessage({ type: "events", ...args });
+				const messagePost = (eventType) => (args) => {
+					worker.postMessage({ type: "events", eventType, ...args });
 				};
-				const listener = debounce(messagePost, 500);
-				const response = await attach({
-					name: 'node',
-					listener,
-					eventName: 'fileChange',
-				});
-				setListenerKey(response.key);
+				const listener = (eventType) => debounce(messagePost(eventType), 500);
+				for (const eventName of ['fileChange', 'fileSelect']) {
+					const response = await attach({
+						name: module.name,
+						listener: listener(eventName),
+						eventName
+					});
+					setListenerKey(response.key);
+				}
 				//worker.postMessage({ type: "events", ...response });
 			}
 		});
@@ -227,7 +229,7 @@ async function invoke(args, done){
 function exit(){
 	if(this.listenerKey){
 		const { detach } = this.comm;
-		detach(this.listenerKey);
+		this.listenerKey.forEach(detach);
 		this.listenerKey = undefined;
 	}
 	this.term.write(showCursor);
@@ -241,7 +243,13 @@ class DynamicOp {
 		this.exit = exit.bind(this);
 		this.getCwd = getCwd;
 
-		this.setListenerKey = (key) => this.listenerKey = key;
+		this.setListenerKey = (key) => {
+			if(this.listenerKey){
+				this.listenerKey = [...this.listenerKey, key];
+				return;
+			}
+			this.listenerKey = [ key ];
+		}
 		
 		const process = new ProcessWorker(url, this);
 		this.process = process;

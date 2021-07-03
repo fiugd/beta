@@ -35,7 +35,7 @@ const operation = async (args, done) => {
 				? absPath
 				: `${filePath} does not match ${file}`
 			console.log({ matchedFile });
-		} catch(e){}
+		} catch(e){} 
 	}
 
 
