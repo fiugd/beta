@@ -154,6 +154,10 @@ const handleInit = async (args, done) => {
 
 const handleFileSelect = async (args, done) => {
 	const { file, event, serviceUrl } = args;
+	const { name, path } = event.detail;
+	const filePath = path
+		? `${path}/${name}`
+		: name;
 	try {
 		const { filePath } = event.detail;
 		const absPath = `${serviceUrl}/${filePath}`;
