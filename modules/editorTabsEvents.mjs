@@ -182,7 +182,7 @@ const clickHandler = ({ event, container, triggers }) => {
 			name: foundTab.name,
 			path: foundTab.parent,
 			parent: foundTab.parent,
-			service: service ? service.name : ''
+			service: service ? service.name : '',
 		},
 	});
 };

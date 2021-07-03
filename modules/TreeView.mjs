@@ -5,7 +5,7 @@ import ext from "/shared/icons/seti/ext.json.mjs";
 import { attachListener, connectTrigger } from "./treeEvents.mjs";
 import "/shared/vendor/localforage.min.js";
 
-let treeView, opener, tree, triggers;
+let treeView, opener, tree, triggers, _service;
 
 const driver = [
 	localforage.INDEXEDDB,
@@ -1028,6 +1028,7 @@ function _TreeView(op) {
 	treeView.parentNode.append(treeViewStyle);
 
 	const newTree = ({ service, treeState }) => {
+		_service = service ? service.name : '';
 		const treeRootId = "tree-view";
 		// TODO: clear old tree if exists?
 		const extensionMapper = (extension) => {
@@ -1129,7 +1130,8 @@ function _TreeView(op) {
 					filename: name,
 					folderName: name,
 					line, column,
-					body: {}
+					body: {},
+					service: _service || '',
 				}
 			};
 			return handler(handlerMessage);
