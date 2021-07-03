@@ -22,7 +22,7 @@ const operation = async (args, done) => {
 		try {
 			//filePath eg, .NOTES/releases/bartokv0.4.3.md
 			const { filePath } = event.detail;
-			matchedFile = serviceUrl + filePath;
+			matchedFile = `${serviceUrl}/${filePath}`;
 			console.log({ matchedFile });
 		} catch(e){}
 	}
