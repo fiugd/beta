@@ -149,13 +149,14 @@ class ProcessWorker {
 		const promise = new Promise(async (resolve) => {
 			const module = await this.module;
 			if(module.type === 'plain'){
-				
-				const runOperation = async (event) => {
+				const runOperation = (eventName) => async (event) => {
 					let serviceUrl;
 					try {
 						serviceUrl = (new URL(`/${event.detail.service}`, location)).href;
 					} catch(e){}
-					const result = await module.operation({...args, event, serviceUrl }, (msg)=>{
+					const result = await module.operation({
+						...args, event, eventName, serviceUrl
+					}, (msg)=>{
 						msg && logger(msg);
 						finish(resolve);
 					});
@@ -164,16 +165,19 @@ class ProcessWorker {
 						return finish(resolve);
 					}
 				};
-				const listener = debounce(runOperation, 500);
-				await listener(args);
+				const listener = (eventName) => debounce(runOperation(eventName), 500);
+				await listener('init')(args);
 				if(!args.watch) return;
 
-				const response = await attach({
-					name: module.name,
-					listener,
-					eventName: 'fileChange', 
-				});
-				setListenerKey(response.key);
+				const listenTo = module.listen || ['fileChange'];
+				for (const eventName of listenTo) {
+					const response = await attach({
+						name: module.name,
+						listener: listener(eventName),
+						eventName
+					});
+					setListenerKey(response.key);
+				}
 				return;
 			}
 			const blob = await this.blob;

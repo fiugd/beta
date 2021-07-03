@@ -165,6 +165,7 @@ export default class Preview {
 	name = 'Terminal Preview';
 	keyword = 'preview';
 	type = 'plain';
+	listen = ['fileChange', 'fileSelect'];
 	listenerKeys = [];
 	description = description;
 	usage = '[FILE]';
