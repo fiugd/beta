@@ -159,7 +159,6 @@ const handleFileSelect = async (args, done) => {
 		? `${path}/${name}`
 		: name;
 	try {
-		const { filePath } = event.detail;
 		const absPath = `${serviceUrl}/${filePath}`;
 		matchedFile = matcher.test(absPath)
 			? absPath
