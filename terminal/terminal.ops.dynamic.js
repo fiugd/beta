@@ -198,10 +198,12 @@ class ProcessWorker {
 			//NOTE: this is a very rough version of watch mode
 			// eventName 'Operations' is hard coded and maybe should change
 			if(args.watch){
-				const messagePost = (eventType) => (args) => {
-					worker.postMessage({ type: "events", eventType, ...args });
+				const messagePost = (eventName) => (args) => {
+					worker.postMessage({
+						type: "events", eventName, ...args
+					});
 				};
-				const listener = (eventType) => debounce(messagePost(eventType), 500);
+				const listener = (eventName) => debounce(messagePost(eventName), 500);
 				const listenTo = ['fileChange', 'fileSelect'];
 				for (const eventName of listenTo) {
 					const response = await attach({
