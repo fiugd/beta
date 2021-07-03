@@ -160,14 +160,14 @@ const handleFileSelect = async (args, done) => {
 		matchedFile = matcher.test(absPath)
 			? absPath
 			: `${filePath} does not match ${file}`
-		return `file select match: ${matchedFile}`;
+		return `file select match: ${matchedFile}\n`;
 	} catch(e){
 		return e.message + '\n';
 	}
 };
 
 const handleFileChange = async (args, done) => {
-	return 'todo: re-factor for file change listener!';
+	return 'todo: re-factor for file change listener!\n';
 };
 
 const handlers = {
