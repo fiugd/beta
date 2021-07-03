@@ -206,11 +206,11 @@ const handleFileSelect = async (args, done) => {
 		const isMatch = matcher.test(absPath);
 		if(isMatch && matchedFile !== absPath){
 			matchedFile = absPath;
-			return chalk.green(file + ": " + filePath);
+			return chalk.green(file + ": " + filePath + '\n');
 		}
 		if(isMatch) return;
 
-		return chalk.red(file + ": " + filePath);
+		return chalk.red(file + ": " + filePath + '\n');
 	} catch(e){
 		return chalk.red(e.message + '\n');
 	}
