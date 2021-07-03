@@ -152,7 +152,10 @@ function updatePreview(args, done) {
 }
 
 const handleInit = async (args, done) => {
-	const {cwd, file, event } = args;
+	const {cwd, event } = args;
+	let { file } = args
+	file = file || '*.*';
+
 	const fileIsWildcard = file.includes("*.");
 
 	if(fileIsWildcard){
