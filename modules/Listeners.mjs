@@ -1,3 +1,7 @@
+import {
+	getCurrentService
+} from "./state.mjs";
+
 const listeners = {};
 const triggers = {};
 
@@ -60,12 +64,14 @@ function trigger({ e, type, params, source, data, detail }){
 		...{ source },
 		data: _data
 	};
-	const event = new CustomEvent(type, {
-		bubbles: true,
-		detail: detail
-			? { ...defaultDetail, ...detail, data: _data }
-			: defaultDetail
-	});
+
+	const detail = detail
+		? { ...defaultDetail, ...detail, data: _data }
+		: defaultDetail;
+	const service = getCurrentService({ pure: true });
+	detail.service = service.name;
+
+	const event = new CustomEvent(type, { bubbles: true, detail });
 	window.dispatchEvent(event);
 }
 
