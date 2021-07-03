@@ -14,6 +14,7 @@ let previewDom;
 let quitButton;
 let currentFile;
 let matcher;
+let matchedFile;
 
 function wildcardToRegExp(s) {
 	function regExpEscape (s) {
@@ -25,7 +26,7 @@ function wildcardToRegExp(s) {
 const handleInit = async (args, done) => {
 	const {cwd, file, event, serviceUrl } = args;
 	const fileIsWildcard = file.includes("*.");
-	let matchedFile;
+
 	if(fileIsWildcard){
 		matcher = matcher || wildcardToRegExp(file);
 		return;
@@ -161,7 +162,7 @@ const handleFileSelect = async (args, done) => {
 			: `${filePath} does not match ${file}`
 		return `file select match: ${matchedFile}`;
 	} catch(e){
-		return e.message;
+		return e.message + '\n';
 	}
 };
 
@@ -181,6 +182,7 @@ const operation = async (args, done) => {
 		return await handlers[eventName](args, done)
 	}
 	done(`unable to handle preview event: ${eventName}\n`);
+	return;
 };
 
 export default class Preview {
