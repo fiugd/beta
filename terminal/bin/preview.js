@@ -66,11 +66,11 @@ const getDom = (() => {
 
 		return previewDom;
 	};
-})();
+})(); 
 
 function updatePreview(args, done) {
 	if(matcher && matchedFile) {
-		const isNew = currentFile === matchedFile;
+		const isNew = currentFile !== matchedFile;
 		currentFile = matchedFile;
 
 		return {
@@ -107,8 +107,6 @@ function updatePreview(args, done) {
 
 	// TODO: DOM diffing: https://gomakethings.com/dom-diffing-with-vanilla-js/
 	// TODO: here also, could be compiling/transpiling code or setting up a worker
-	
-
 
 	// TODO: reload iframe if it's the same doc => iframe.contentWindow.location.reload();
 	// or message frame with new content - each template should listen for update
