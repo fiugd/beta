@@ -69,10 +69,15 @@ const getDom = (() => {
 })();
 
 function updatePreview(args, done) {
-	if(matcher && matchedFile) return {
-		isNew: true,
-		url: matchedFile
-	};
+	if(matcher && matchedFile) {
+		const isNew = currentFile === matchedFile;
+		currentFile = matchedFile;
+
+		return {
+			isNew,
+			url: currentFile
+		};
+	}
 	if(matcher && !matchedFile) return {};
 
 	const { cwd, file, filename, event={}, serviceUrl } = args;
