@@ -73,7 +73,7 @@ function updatePreview(args, done) {
 		isNew: true,
 		url: matchedFile
 	};
-	if(matcher && !matchedFile) return;
+	if(matcher && !matchedFile) return {};
 
 	const { cwd, file, filename, event={}, serviceUrl } = args;
 	const { detail={} } = event;
@@ -223,6 +223,7 @@ const handleFileChange = async (args, done) => {
 		in the future, refine the conditions for preview update
 	*/
 	const { isNew, url } = updatePreview(args, done);
+	if(!url) return;
 
 	const link = url => chalk.hex('#569CD6')(url);
 	const progress = url => chalk.yellow(url);
