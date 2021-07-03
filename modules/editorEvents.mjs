@@ -52,6 +52,8 @@ const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 
 const ChangeHandler = (doc) => {
 	const { code, name, id, filename } = doc;
+	const service = getCurrentService({ pure: true });
+
 	// TODO: if handler already exists, return it
 	const changeThis = (contents, changeObj) => {
 		const file = setState({
