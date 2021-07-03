@@ -52,7 +52,7 @@ future todo:
 // this thing is used too many ways... SIGH
 function trigger({ e, type, params, source, data, detail }){
 	if(!getCurrentService){
-		({ getCurrentService } = await import("./state.mjs"));
+		({ default: { getCurrentService } } = await import("./state.mjs"));
 	}
 	const _data = typeof data === "function"
 		? data(e)
