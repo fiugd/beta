@@ -67,7 +67,7 @@ function trigger({ e, type, params, source, data, detail }){
 
 	const service = getCurrentService({ pure: true });
 	const customEventOps = {};
-	customEventOps.bubbles: true 
+	customEventOps.bubbles = true;
 	customEventOps.detail = detail
 		? { ...defaultDetail, ...detail, data: _data }
 		: defaultDetail;
