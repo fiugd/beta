@@ -13,6 +13,7 @@ const args = [{
 let previewDom;
 let quitButton;
 let currentFile;
+let matcher;
 
 function wildcardToRegExp(s) {
 	function regExpEscape (s) {
@@ -21,25 +22,14 @@ function wildcardToRegExp(s) {
 	return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
 }
 
-const operation = async (args, done) => {
+const handleInit = async (args, done) => {
 	const {cwd, file, event, serviceUrl } = args;
 	const fileIsWildcard = file.includes("*.");
 	let matchedFile;
 	if(fileIsWildcard){
-		const matcher = wildcardToRegExp(file);
-		try {
-			//filePath eg, .NOTES/releases/bartokv0.4.3.md
-			const { filePath } = event.detail;
-			const absPath = `${serviceUrl}/${filePath}`;
-			matchedFile = matcher.test(absPath)
-				? absPath
-				: `${filePath} does not match ${file}`
-			console.log({ matchedFile });
-		} catch(e){} 
+		matcher = wildcardToRegExp(file);
+		return;
 	}
-
-
-
 	previewDom = previewDom || document.querySelector('#preview-container');
 	if(!previewDom){
 		previewDom = document.createElement('div');
@@ -159,6 +149,38 @@ const operation = async (args, done) => {
 	return isNew
 		? `\n🔗  ${link(url)}\n🔆  `
 		: progress(`|`);
+};
+
+const handleFileSelect = async (args, done) => {
+	const { file, event, serviceUrl } = args;
+	try {
+		const { filePath } = event.detail;
+		const absPath = `${serviceUrl}/${filePath}`;
+		matchedFile = matcher.test(absPath)
+			? absPath
+			: `${filePath} does not match ${file}`
+		return `file select match: ${matchedFile}`;
+	} catch(e){
+		return e.message;
+	}
+};
+
+const handleFileChange = async (args, done) => {
+	return await handleInit(args, done);
+};
+
+const handlers = {
+	init: handleInit,
+	fileSelect: handleFileSelect,
+	fileChange: handleFileChange,
+};
+
+const operation = async (args, done) => {
+	const { eventName } = args;
+	if(handlers[eventName]){
+		return await handlers[eventName](args, done)
+	}
+	done(`unable to handle preview event: ${eventName}\n`);
 };
 
 export default class Preview {
