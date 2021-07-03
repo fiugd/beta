@@ -19,7 +19,7 @@ let cmDom;
 let prevDoc;
 
 // call editor tabs once early so event handlers are attached
-EditorTabs(); 
+EditorTabs();
 
 const { indentWithTabs, tabSize } = getSettings();
 
@@ -477,6 +477,7 @@ const inlineEditor = (ChangeHandler) => ({
 	name,
 	id,
 	filename,
+	path,
 	callback,
 } = {}) => {
 	const prevEditor = document.querySelector("#editor-container");
@@ -680,26 +681,32 @@ const inlineEditor = (ChangeHandler) => ({
 		};
 		const stateStorageKey = `state::${name}::${filename}`;
 		try {
+			/*
 			const storedState = JSON.parse(sessionStorage.getItem(stateStorageKey));
 			if (storedState && storedState.unfolded) {
 				editorState = storedState;
 			}
+			*/
 		} catch (e) {}
 
 		const foldHandler = (cm, from, to) => {
 			cm.addLineClass(from.line, "wrap", "folded");
+			/*
 			editorState.unfolded = editorState.unfolded.filter(
 				(x) => x !== from.line
 			);
 			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
+			*/
 		};
 		const unfoldHandler = (cm, from, to) => {
+			cm.removeLineClass(from.line, "wrap", "folded");
+			/*
 			if (editorState.unfolded.includes(from.line)) {
 				return;
 			}
-			cm.removeLineClass(from.line, "wrap", "folded");
 			editorState.unfolded.push(from.line);
 			sessionStorage.setItem(stateStorageKey, JSON.stringify(editorState));
+			*/
 		};
 
 		editor.on("fold", foldHandler);
@@ -754,7 +761,7 @@ const inlineEditor = (ChangeHandler) => ({
 
 		editorState.unfolded.forEach((line) => {
 			try {
-				editor.foldCode({ line, ch: 0 }, null, "unfold");
+				//editor.foldCode({ line, ch: 0 }, null, "unfold");
 			} catch(e){}
 		});
 	};
@@ -814,6 +821,12 @@ const inlineEditor = (ChangeHandler) => ({
 	*/
 
 	const loadDocument = () => {
+		console.log(
+			`%c${filename}: %ceditor %cloadDoc start`,
+			'color:#CE9178;',
+			'color:#9CDCFE;',
+			'color:#DCDCAA;'
+		);
 		const docHasChanged = prevDoc !== filename;
 
 		cmDom = cmDom || document.querySelector('.CodeMirror');
@@ -822,19 +835,27 @@ const inlineEditor = (ChangeHandler) => ({
 		if(docHasChanged) cmDom.style.opacity = 0;
 		const { text } = editorOptions;
 		window.Editor._cleanup && window.Editor._cleanup();
+		
+		const callback = (err) => {
+			if(err) return;
+			editorCallback(null, window.Editor);
+			//if(docHasChanged) window.Editor.refresh();
+			//if(docHasChanged) setTimeout(() => {
+				cmDom.style.opacity = 1;
+			//}, 1);
+			prevDoc = filename;
+		};
+		
 		window.Editor.loadDoc({
 			name: filename,
+			path,
 			line: loadLine ? Number(loadLine) : 0,
 			ch: loadColumn ? Number(loadColumn) : 0,
 			text,
 			mode,
+			callback
 		});
-		editorCallback(null, window.Editor);
-		if(docHasChanged) window.Editor.refresh();
-		if(docHasChanged) setTimeout(() => {
-			cmDom.style.opacity = 1;
-		}, 100);
-		prevDoc = filename;
+
 	};
 
 	if(window.Editor) return loadDocument();
@@ -1181,6 +1202,8 @@ function _Editor(callback) {
 	});
 
 	const switchEditor = async (filename, mode, {line, column}={}) => {
+		//TODO: should go into loading mode first
+
 		if (mode === "systemDoc") {
 			const editorCallback = () => {
 				editorDom = document.querySelector(".CodeMirror");
@@ -1229,9 +1252,11 @@ function _Editor(callback) {
 		}
 
 		setCurrentFile({ filePath: filename });
-		const currentFile = await getCurrentFileFull();
+
+		const currentFile = await getCurrentFileFull({ noFetch: true });
 		const {
 			code = "error",
+			path,
 			name,
 			id,
 			filename: defaultFile,
@@ -1260,7 +1285,7 @@ function _Editor(callback) {
 		}
 
 		editor({
-			code, line, column, name, id,
+			code, line, column, name, id, path,
 			filename: filename || defaultFile
 		});
 		editorDom = document.querySelector(".CodeMirror");

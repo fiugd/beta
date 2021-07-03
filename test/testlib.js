@@ -63,10 +63,10 @@ const writeTest = (log, c) => test => {
 	} 
 	const tab = '  ';
 	const writer = {
-		passed: () => `${tab}${c.green('✓')} ${c.dull(test.name)}`,
-		failed: () => `${tab}${c.red('✗')} ${c.dullred(test.name)}`,
+		passed:  () => `${tab}${c.green('✓')} ${c.dull(test.name)}`,
+		failed:  () => `${tab}${c.red('✗')} ${c.dullred(test.name)}`,
 		skipped: () => `${tab}${c.yellow('○')} ${c.dullyellow(test.name)}`,
-		todo: () => `${tab}${c.purple('»')} ${c.dullpurple(test.name)}`,
+		todo:    () => `${tab}${c.purple('»')} ${c.dullpurple(test.name)}`,
 		nothing: () => `${tab}${c.green('○')} ${c.dullyellow(test.name+' [NO ASSERTIONS]')}`,
 	};
 	if(writer[test.status])
@@ -132,8 +132,22 @@ const renderTest = (args) => {
 		));
 	});
 
-	//TODO: summary
-	logJSON(testCounts);
+	testCounts.xxx = 'ignore';
+	const summary = jsonColors(testCounts)
+		.split('\n')
+		.slice(1,-2)
+		.map(x => x.trim()
+			.replace(/"/g, '')
+			.replace(/,/g, '')
+			.split(':')
+			.map((x,i,a) => i === 0
+					 ? '  ' + x + (new Array(51-x.length).fill().join(' '))
+					 : (new Array(60-x.length).fill().join(' ')) + x
+			)
+			.join('')
+		)
+		.join('\n');
+	console.log('summary\n'+summary);
 };
 
 QUnit.on("testStart", (args) => {

@@ -17,6 +17,7 @@ const history = [
 	`node --watch .example.js`,
 	`preview zip_project.html`,
 	`node --watch service-worker.services.test.js`,
+	`node update.js`
 ];
 
 const usage = (chalk) => {

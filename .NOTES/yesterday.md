@@ -1,5 +1,13 @@
 <br>
 
+#### 2021-06-15 | 2021-06-28
+	- preview command
+	- ls command
+	- all components responding correctly on file delete: mainly editor+tabs
+	- over-arching changes to application state tracking
+	- file operation handling in service worker + tests
+	- testing patterns++ (copied from vermiculate project, adpated to node abstraction)
+
 #### [fiug.dev 2021-06-14 video](https://www.youtube.com/watch?v=zDPFYCLt_rE)
 
 #### 2021-04-20 | 2021-06-14
@@ -35,7 +43,7 @@
 	- hotkey for move line up
 	- hotkey for toggle comments
 
-#### 2021-01-29 | 2021-03-06 -  - 0.4.1 Github, Tree Module, Repo/Name dancing
+#### 2021-01-29 | 2021-03-06 - 0.4.1 Github, Tree Module, Repo/Name dancing
 	- add github read integraion (Jan 30 - Feb 1st week end)
 	- move "welcome" into it's own repo "fiug-welcome" (Jan 31)
 	- new tree module ( Feb 14 - March 6++ )
@@ -125,5 +133,47 @@
 	- no files open view
 	- no service selected view
 
-#### purpose
-	- highlight what changed in hindsight on a roughly day-to-day basis
+
+> 2020-08-12 this file created
+> purpose: highlight what changed in hindsight on a roughly day-to-day basis
+
+
+#### 2020-07-20 [bartokv0.4.0 PREVIEW](https://www.youtube.com/watch?v=_wWBVz9gvSk)
+	- service worker
+	- editor improvements
+	- wasm
+	- open local folder
+	- css 3d
+
+#### 2020-06-07 [bartok v0.3.2](https://www.youtube.com/watch?v=lPs6YQCHlc4)
+	- status bar++
+	- graph template
+	- file system
+
+#### 2020-04-27 [bartokv0.3.1](https://www.youtube.com/watch?v=1pV9gX1ida0)
+	- preview
+	- templates
+
+#### 2020-04-13 [bartokv0.3](https://www.youtube.com/watch?v=LAKMr2ARd34)
+	- editor can use local storage
+	- file types: icons and syntax highlighting
+	- folder operations
+	- file changes and status
+	- new status bar
+	- improved service map
+
+#### 2020-03-30 [bartok v0.2](https://www.youtube.com/watch?v=NJc68mc8Wag)
+	- multi-file system
+	- editor tabs
+	- terminal commands++
+	- service map
+
+#### 2020-03-30 [bartok v0.1](https://www.youtube.com/watch?v=nFXOxs-oDMA)
+	- single-file system
+	- looks a little more like VS Code
+	- basic tree, editor, terminal
+	- back end: persist, update, pm2(early)
+
+#### 2020-03-20 [bartok v0](https://www.youtube.com/watch?v=yKxyX_6NMZQ)
+	- basic front end - bootstrapp-like
+	- basic back end

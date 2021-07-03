@@ -150,6 +150,13 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	let savedFileName;
 
 
+	console.log(
+		`%c${name}: %ceditor %cfileSelect`,
+		'color:#CE9178;',
+		'color:#9CDCFE;',
+		'color:#DCDCAA;'
+	);
+
 	if (firstLoad) {
 		firstLoad = false;
 		savedFileName = sessionStorage.getItem("editorFile");

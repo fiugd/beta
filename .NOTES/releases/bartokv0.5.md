@@ -1,32 +1,30 @@
 ![image](https://bit.ly/fiugLandscape1)
 
 # bartok v0.5.0
+- [ ] import rewrites in SW with something like this: [lexer](https://github.com/guybedford/es-module-lexer)
+OR
+- [ ] [import maps](https://github.com/WICG/import-maps)
+
 - [ ] focus on / zoom to a folder (in explorer)
-- [ ] preview as a terminal command vs a menu item
-	- preview should honor selected file when service switched (may not do this)
 - [ ] search has performance issues
 - [ ] uploading images + binary files
 - [ ] click to select file from command palette opener
 
-- [ ] git clone + git pull + status (in terminal)
-- [ ] on repo "clone", don't pull all files
-  - instead wait for pull or pull as needed)
 - [ ] terminal should get cwd and service name from query params
 - [ ] terminal left/right arrows for editing buffer
 
 - [ ] editor tabs order of next tab closing should make sense
 - [ ] explorer: add expand|collapse
 - [ ] explorer: overscroll seems to not be working
-- [ ] explorer: scroll bar hide/show causes status circle to dance
+- [ ] explorer: scroll bar hide/show causes status circle to dance (on Mac)
 - [ ] explorer > right-click > Open In Preview should work with new terminal preview command
 
-
-- [X] context menu for editor
 - [ ] context menu for terminal
 - [ ] terminal passes hotkey events to parent
   - control-s: save
   - control-p: open file
   - control-shift-p: command window
+
 - [ ] reveal in sidebar is broken
 - [ ] editor tabs: keep open, pin, reveal in sidebar
 
@@ -38,6 +36,11 @@
 - [ ] service worker should provide endpoint for directory contents list
 - [ ] path resolution needs to be a module or endpoint; this needs to be a solved issue
 
+
+- [ ] git clone + git pull + status + push (in terminal)
+- [ ] git pull should bring in new changes (okay to reject if changes exist on local)
+- [ ] on repo "clone", don't pull all files
+  - instead get from github as needed (except for templates)
 
 Summary
 =======

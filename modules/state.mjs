@@ -311,16 +311,17 @@ function setCurrentFile({ filePath, fileName }){
 function getCurrentFile(){
 	return currentFilePath || currentFile;
 }
-async function getCurrentFileFull(){
+async function getCurrentFileFull({ noFetch } = {}){
 	const pathWithServiceName = currentFilePath.includes(currentService.name)
 		? currentFilePath
 		: `/${currentService.name}/${currentFilePath}`;
+	if(noFetch) return { path: pathWithServiceName };
+
 	const fileBody = currentFilePath
 		? currentService.code.find((x) => x.path === pathWithServiceName)
 		: currentService.code.find((x) => x.name === currentFile);
 
 	if(fileBody && fileBody.path){
-
 		fileBody.code = await (await fetch(fileBody.path, {
 			headers: {
 				'x-requestor': 'editor-state'

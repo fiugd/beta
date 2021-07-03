@@ -3,6 +3,13 @@
 ![Release Image](https://bit.ly/fiugLotusPic)
 
 # bartok v0.4.1
+started: 2021-01-29
+release: 2021-03-06
+
+- add github read integraion (Jan 30 - Feb 1st week end)
+- move "welcome" into it's own repo "fiug-welcome" (Jan 31)
+- new tree module ( Feb 14 - March 6++ )
+- create a beta environment for fiug (Feb 22)
 
 ## Current State
 

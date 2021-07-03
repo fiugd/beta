@@ -237,6 +237,7 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		};
 
 		const updateCanvas = () => {
+			//canvas.width = canvas.width << works to clear canvas, I think
 			ctx.clearRect(0,0,canvas.width, canvas.height);
 			ctx.drawImage(selectCanvas,0,0);
 			ctx.drawImage(textCanvas,0,0);

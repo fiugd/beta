@@ -1,6 +1,8 @@
 ![Release Image](https://bit.ly/fiugHexagons)
 
 ### bartok v0.4.3
+started: 2021-04-20
+release: TBD
 
 - delete
 	- [ ] handle delete files for commit
@@ -20,14 +22,15 @@
 - [ ] preview with no arguments should preview current file (like old preview)
 - [ ] preview help documentation
 
-- [ ] git pull should bring in new changes (okay to reject if changes exist on local)
-
 - [ ] paths which include ".." or "." work for all commands
-- [ ] delay occurs before editor loads sometimes
-	- need details about when this occurs
+
 
 ----
 
+- [X] delay occurs before editor loads sometimes
+- [X] context menu for editor
+- [X] preview as a terminal command vs a menu item
+	- preview should honor selected file when service switched (may not do this)
 - [X] rm command works properly for folder
 - [X] editor tabs: on file delete, close tab (and switch editor)
 - [X] service name issues with path in terminal
