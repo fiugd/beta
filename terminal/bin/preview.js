@@ -189,9 +189,9 @@ const handleFileSelect = async (args, done) => {
 	try {
 		const absPath = `${serviceUrl}/${filePath}`;
 		matchedFile = matcher.test(absPath)
-			? absPath
-			: `${filePath} does not match ${file}`
-		return `file select match: ${matchedFile}\n`;
+			? chalk.green(file + ": " + filePath)
+			: chalk.red(file + ": " + filePath)
+		return matchedFile;
 	} catch(e){
 		return chalk.red(e.message + '\n');
 	}
