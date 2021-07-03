@@ -14,25 +14,31 @@ let previewDom;
 let quitButton;
 let currentFile;
 
+function wildcardToRegExp(s) {
+	function regExpEscape (s) {
+		return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+	}
+	return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
+}
+
 const operation = async (args, done) => {
 	const {cwd, file, event, serviceUrl } = args;
 	const fileIsWildcard = file.includes("*.");
 	let matchedFile;
 	if(fileIsWildcard){
+		const matcher = wildcardToRegExp(file);
 		try {
 			//filePath eg, .NOTES/releases/bartokv0.4.3.md
 			const { filePath } = event.detail;
-			matchedFile = `${serviceUrl}/${filePath}`;
+			const absPath = `${serviceUrl}/${filePath}`;
+			matchedFile = matcher.test(absPath)
+				? absPath
+				: `${filePath} does not match ${file}`
 			console.log({ matchedFile });
 		} catch(e){}
 	}
 
-	function wildcardToRegExp (s) {
-		function regExpEscape (s) {
-			return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-		}
-		return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
-	}
+
 
 	previewDom = previewDom || document.querySelector('#preview-container');
 	if(!previewDom){
