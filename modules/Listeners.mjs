@@ -61,11 +61,11 @@ function trigger({ e, type, params, source, data, detail }){
 		data: _data
 	};
 
-	const detail = detail
+	const _detail = detail
 		? { ...defaultDetail, ...detail, data: _data }
 		: defaultDetail;
 
-	const event = new CustomEvent(type, { bubbles: true, detail });
+	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
 }
 
