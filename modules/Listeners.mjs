@@ -1,7 +1,4 @@
-import {
-	getCurrentService
-} from "./state.mjs";
-
+let getCurrentService;
 const listeners = {};
 const triggers = {};
 
@@ -54,6 +51,9 @@ future todo:
 
 // this thing is used too many ways... SIGH
 function trigger({ e, type, params, source, data, detail }){
+	if(!getCurrentService){
+		({ getCurrentService } = await import("./state.mjs"));
+	}
 	const _data = typeof data === "function"
 		? data(e)
 		: data || (detail||{}).data || {};
@@ -65,13 +65,13 @@ function trigger({ e, type, params, source, data, detail }){
 		data: _data
 	};
 
-	const service = getCurrentService({ pure: true });
+	const service = getCurrentService && getCurrentService({ pure: true });
 	const customEventOps = {};
 	customEventOps.bubbles = true;
 	customEventOps.detail = detail
 		? { ...defaultDetail, ...detail, data: _data }
 		: defaultDetail;
-	customEventOps.detail.service = service.name;
+	customEventOps.detail.service = service && service.name;
 
 	const event = new CustomEvent(type, customEventOps);
 	window.dispatchEvent(event);
