@@ -28,7 +28,7 @@ const handleInit = async (args, done) => {
 	const fileIsWildcard = file.includes("*.");
 
 	if(fileIsWildcard){
-		matcher = matcher || wildcardToRegExp(file);
+		matcher = wildcardToRegExp(file);
 		return;
 	}
 	previewDom = previewDom || document.querySelector('#preview-container');
