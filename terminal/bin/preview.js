@@ -118,6 +118,8 @@ function renderPreview(url, isNew, done){
 		// 	previewIframe.remove();
 		// },100);
 	} else {
+		previewIframe.src='';
+		previewIframe.srcdoc='<html></html>';
 		setTimeout(() => {
 			newIframe.src = previewUrl(url);
 			newIframe.classList.remove('hidden');
