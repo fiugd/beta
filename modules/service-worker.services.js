@@ -1,4 +1,4 @@
-const useNew = false;
+const useNew = true;
 
 (() => {
 	const stringify = o => JSON.stringify(o,null,2);
