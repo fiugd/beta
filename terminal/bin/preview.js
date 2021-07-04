@@ -67,8 +67,9 @@ const getDom = (() => {
 	};
 })();
 
-function renderPreview(url){
+function renderPreview(url, isNew){
 	const previewDom = getDom();
+	previewDom.classList.remove('hidden');
 
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
@@ -92,15 +93,6 @@ function renderPreview(url){
 	// OR (maybe more worker focused): https://github.com/developit/workerize
 	// OR (maybe more worker focused): https://github.com/developit/greenlet
 
-	// TODO: preview for non-html files. ${url}/::preview::/
-
-	let useSrcDoc = false;
-	//try {
-	//	useSrcDoc = code && url.includes(filePath)
-	//} catch(e){}
-	// NOTE: iframe with srcdoc still doesn't want to respect base href
-	// disabled this until working better
-
 	const previewUrl = (_url) => {
 		const filename = _url.split('/').pop().split('?')[0];
 		const extension = filename.split('.').pop();
@@ -108,16 +100,23 @@ function renderPreview(url){
 		if(rawPreview.includes(extension)) return _url;
 		return _url + '/::preview::/';
 	};
+	
+	let useSrcDoc = false;
+	//try {
+	//	useSrcDoc = code && url.includes(filePath)
+	//} catch(e){}
+	// NOTE: iframe with srcdoc still doesn't want to respect base href
+	// disabled this until working better
 
 	if(useSrcDoc){
-		const base = url.split('/').slice(0,-1).join('/')+'/';
-		newIframe.srcdoc = code.includes('<head>')
-			? code.replace('<head>', `<head>\n<base href="${base}">\n`)
-			: `<html><head><base href="${base}">\n</head>${code}</html>`;
-		newIframe.classList.remove('hidden');
-		setTimeout(() => {
-			previewIframe.remove();
-		},100);
+		// const base = url.split('/').slice(0,-1).join('/')+'/';
+		// newIframe.srcdoc = code.includes('<head>')
+		// 	? code.replace('<head>', `<head>\n<base href="${base}">\n`)
+		// 	: `<html><head><base href="${base}">\n</head>${code}</html>`;
+		// newIframe.classList.remove('hidden');
+		// setTimeout(() => {
+		// 	previewIframe.remove();
+		// },100);
 	} else {
 		setTimeout(() => {
 			newIframe.src = previewUrl(url);
@@ -125,7 +124,7 @@ function renderPreview(url){
 			setTimeout(() => {
 				previewIframe.remove();
 			},100);
-		}, isNew ? 0 : 500);
+		}, isNew ? 1 : 500);
 	}
 	
 	const dismissPreview = () => {
@@ -142,32 +141,21 @@ function renderPreview(url){
 }
 
 function updatePreview(args, done) {
+	if(matcher && !matchedFile) return {};
+
 	if(matcher && matchedFile) {
 		const isNew = currentFile !== matchedFile;
 		currentFile = matchedFile;
-
-		renderPreview(currentFile);
-		return {
-			isNew,
-			url: currentFile
-		};
+		const url = matchedFile;
+		renderPreview(url, isNew);
+		return { isNew, url };
 	}
-	if(matcher && !matchedFile) return {};
 
-	const { cwd, file, filename, event={}, serviceUrl } = args;
-	const { detail={} } = event;
-	const { code='' } = detail;
-	
-	const previewDom = getDom();
-	previewDom.classList.remove('hidden');
-
+	const { cwd, file } = args;
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
-	const filePath = url.split(document.location.origin)[1];
-
-	const isNew = filePath !== currentFile;
-	currentFile = filePath;
-	renderPreview(currentFile);
-
+	const isNew = url !== currentFile;
+	currentFile = url;
+	renderPreview(url, isNew);
 	return { isNew, url };
 }
 
