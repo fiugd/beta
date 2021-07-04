@@ -240,6 +240,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 				perf.track('editor store get');
 			}
 			if(!storedDoc){
+				//TODO: try getting this directly from doc store instead
 				text = await fetch(path).then(x => x.text());
 				perf.track('file store get');
 			}

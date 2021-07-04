@@ -1,15 +1,5 @@
 import { chalk } from '../terminal.utils.js';
 
-const help = () => {};
-
-const description = 'View and interact with the output of a file as it changes using an HTML view';
-
-const args = [{
-	name: 'file', alias: 'f', type: String, defaultOption: true, required: true
-}, { 
-	name: 'watch', alias: 'w', type: Boolean, required: false, default: true
-}];
-
 let quitButton;
 let currentFile;
 let matcher;
@@ -229,15 +219,21 @@ const operation = async (args, done) => {
 export default class Preview {
 	name = 'Terminal Preview';
 	keyword = 'preview';
+	description = 'View and interact with the output of a file as it changes using an HTML view';
+
 	type = 'plain';
 	listen = ['fileChange', 'fileSelect'];
 	listenerKeys = [];
-	description = description;
-	usage = '[FILE]';
-	args = args;
+
+	usage = '[FILE|WILDCARD]';
+
+	args =  [{
+		name: 'file', alias: 'f', type: String, defaultOption: true, required: true
+	}, { 
+		name: 'watch', alias: 'w', type: Boolean, required: false, default: true
+	}];
 
 	constructor(){
 		this.operation = operation;
-		this.help = () => help;
 	}
 };

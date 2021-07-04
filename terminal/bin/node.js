@@ -1,6 +1,5 @@
-const help = () => {};
 
-// NOTE: this is not a function that is ran in this context
+// NOTE: this is not a function that is ran in main window context
 // instead it's source is dumped into a worker
 // be mindful of this!!!
 const operation = async (args, state={}) => {
@@ -104,9 +103,12 @@ const operation = async (args, state={}) => {
 };
 
 export default class Node {
+	name = 'Node (js runner)';
 	keyword = 'node';
-	listenerKeys = [];
+	description = 'Run javascript files in the terminal, similar to node.js but in a browser and less awesome.  Use watch flag to re-run on file changes.';
+	usage = '[--watch] [FILE]';
 
+	listenerKeys = [];
 	previousUrl;
 
 	args = [{
@@ -117,6 +119,5 @@ export default class Node {
 
 	constructor(){
 		this.operation = operation;
-		this.help = () => help;
 	}
-}
+};
