@@ -1,4 +1,3 @@
-
 "All models are wrong, some models are useful" -- E.P. Box
 
 
@@ -118,3 +117,4 @@ https://en.m.wikipedia.org/wiki/Trilemma
         </marker>
       </defs>
   </svg>
+
