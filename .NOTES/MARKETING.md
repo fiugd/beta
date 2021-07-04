@@ -1,6 +1,6 @@
-*The cloud service you don't have to register for.*
+*A cloud service you don't have to register for.*
 *The editor / IDE you didn't have to install.*
-*The tool that will change the way you work.*
+*A tool that could change the way you work.*
 
 ## Introduction
 * fiug does(will do) things that other things do.
@@ -118,7 +118,7 @@
 
 models for marketing similar software
 =====================================
-- https://promlens.com/ - I enjoy both the look-and-feel of marketing AND the product itself
+- [promlens](https://promlens.com/) - I enjoy both the look-and-feel of marketing AND the product itself
 
 
 strategy
