@@ -4,7 +4,6 @@
 started: 2021-04-20
 release: TBD
 
-
 - delete
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit

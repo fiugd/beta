@@ -1,5 +1,3 @@
-<!-- highlighter -->
-<h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/fiugLotusPic)
 
 # bartok v0.4.1
@@ -52,5 +50,3 @@ release: 2021-03-06
 
 ### service map
   - [X] show registered triggers in map
-
-
