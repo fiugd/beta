@@ -209,7 +209,7 @@ const handleFileSelect = async (args, done) => {
 		const isMatch = matcher.test(absPath);
 		if(isMatch && matchedFile !== absPath){
 			const optionalReturn = matchedFile ? '\n\n': '';
-			const optionalEndReturn = matchedFile ? '': '\n';
+			const optionalEndReturn = matchedFile ? '': '';
 			matchedFile = absPath;
 			return chalk.green(optionalReturn + file + ": " + filePath + optionalEndReturn);
 		}
