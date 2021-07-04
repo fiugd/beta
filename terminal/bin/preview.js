@@ -191,43 +191,21 @@ const handleInit = async (args, done) => {
 const handleFileSelect = async (args, done) => {
 	if(!matcher) return;
 
-	/*
-		switch preview url if both are true
-		 - selected file is different from item being preview
-		 - matcher exists and selected file matches
-
-		otherwise, ignore file select
-	*/
-	const { file, event, serviceUrl } = args;
+	const { event, serviceUrl } = args;
 	const { name, path } = event.detail;
 	let filePath = path
 		? `${path}/${name}`
 		: name;
-	if(filePath.startsWith('/')) filePath.slice(1);
-	try {
-		const optionalReturn = matchedFile ? '\n\n': '';
-		const optionalEndReturn = matchedFile ? '': '';
+	if(filePath.startsWith('/')) filePath = filePath.slice(1);
 
-		const absPath = `${serviceUrl}/${filePath}`;
-		const isMatch = matcher.test(absPath);
-		if(isMatch && matchedFile !== absPath){
-
-			matchedFile = absPath;
-			return chalk.green(optionalReturn + file + ": " + filePath + optionalEndReturn);
-		}
-		if(isMatch) return;
-
-		return chalk.red(optionalReturn + file + ": " + filePath + optionalEndReturn);
-	} catch(e){
-		return chalk.red(e.message + '\n');
-	}
+	const absPath = `${serviceUrl}/${filePath}`;
+	const isMatch = matcher.test(absPath);
+	if(!isMatch || matchedFile === absPath) return;
+	matchedFile = absPath;
+	return handleFileChange(args, done);
 };
 
 const handleFileChange = async (args, done) => {
-	/*
-		always update preview when any file changes
-		in the future, refine the conditions for preview update
-	*/
 	const { isNew, url } = updatePreview(args, done);
 	if(!url) return;
 
