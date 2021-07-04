@@ -67,30 +67,8 @@ const getDom = (() => {
 	};
 })();
 
-function updatePreview(args, done) {
-	if(matcher && matchedFile) {
-		const isNew = currentFile !== matchedFile;
-		currentFile = matchedFile;
-
-		return {
-			isNew,
-			url: currentFile
-		};
-	}
-	if(matcher && !matchedFile) return {};
-
-	const { cwd, file, filename, event={}, serviceUrl } = args;
-	const { detail={} } = event;
-	const { code='' } = detail;
-	
+function renderPreview(url){
 	const previewDom = getDom();
-	previewDom.classList.remove('hidden');
-
-	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
-	const filePath = url.split(document.location.origin)[1];
-//---
-	const isNew = filePath !== currentFile;
-	currentFile = filePath;
 
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
@@ -116,10 +94,12 @@ function updatePreview(args, done) {
 
 	// TODO: preview for non-html files. ${url}/::preview::/
 
-	let useSrcDoc;
-	try {
-		useSrcDoc = code && url.includes(filePath)
-	} catch(e){}
+	let useSrcDoc = false;
+	//try {
+	//	useSrcDoc = code && url.includes(filePath)
+	//} catch(e){}
+	// NOTE: iframe with srcdoc still doesn't want to respect base href
+	// disabled this until working better
 
 	const previewUrl = (_url) => {
 		const filename = _url.split('/').pop().split('?')[0];
@@ -128,10 +108,6 @@ function updatePreview(args, done) {
 		if(rawPreview.includes(extension)) return _url;
 		return _url + '/::preview::/';
 	};
-
-	// NOTE: iframe with srcdoc still doesn't want to respect base href
-	// disabled this until working better
-	useSrcDoc = false;
 
 	if(useSrcDoc){
 		const base = url.split('/').slice(0,-1).join('/')+'/';
@@ -163,6 +139,34 @@ function updatePreview(args, done) {
 	quitButton.onclick = () => {
 		setTimeout(dismissPreview, 1);
 	};
+}
+
+function updatePreview(args, done) {
+	if(matcher && matchedFile) {
+		const isNew = currentFile !== matchedFile;
+		currentFile = matchedFile;
+
+		renderPreview(currentFile);
+		return {
+			isNew,
+			url: currentFile
+		};
+	}
+	if(matcher && !matchedFile) return {};
+
+	const { cwd, file, filename, event={}, serviceUrl } = args;
+	const { detail={} } = event;
+	const { code='' } = detail;
+	
+	const previewDom = getDom();
+	previewDom.classList.remove('hidden');
+
+	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
+	const filePath = url.split(document.location.origin)[1];
+
+	const isNew = filePath !== currentFile;
+	currentFile = filePath;
+	renderPreview(currentFile);
 
 	return { isNew, url };
 }
@@ -176,7 +180,7 @@ const handleInit = async (args, done) => {
 
 	if(fileIsWildcard){
 		matcher = wildcardToRegExp(file);
-		return `will preview selected files matching ${file}\n`;
+		return chalk.hex('#ccc')(`\nselect a file matching ${file}\n`);
 	}
 
 	return handleFileChange(args, done);
@@ -196,6 +200,7 @@ const handleFileSelect = async (args, done) => {
 	const isMatch = matcher.test(absPath);
 	if(!isMatch || matchedFile === absPath) return;
 	matchedFile = absPath;
+
 	return handleFileChange(args, done);
 };
 
@@ -206,13 +211,12 @@ const handleFileChange = async (args, done) => {
 
 	const link = url => chalk.hex('#569CD6')(url);
 	const progress = url => chalk.yellow(url);
-
 	const lineBreaks = isFirst
 		? '\n'
 		: '\n\n';
 
 	return isNew
-		? `lineBreaks🔗  ${link(url)}\n🔆  `
+		? `${lineBreaks}🔗  ${link(url)}\n🔆  `
 		: progress(`|`);
 };
 
