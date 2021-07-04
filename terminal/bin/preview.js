@@ -67,7 +67,7 @@ const getDom = (() => {
 	};
 })();
 
-function renderPreview(url, isNew){
+function renderPreview(url, isNew, done){
 	const previewDom = getDom();
 	previewDom.classList.remove('hidden');
 
@@ -147,7 +147,7 @@ function updatePreview(args, done) {
 		const isNew = currentFile !== matchedFile;
 		currentFile = matchedFile;
 		const url = matchedFile;
-		renderPreview(url, isNew);
+		renderPreview(url, isNew, done);
 		return { isNew, url };
 	}
 
@@ -155,7 +155,7 @@ function updatePreview(args, done) {
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
 	const isNew = url !== currentFile;
 	currentFile = url;
-	renderPreview(url, isNew);
+	renderPreview(url, isNew, done);
 	return { isNew, url };
 }
 
