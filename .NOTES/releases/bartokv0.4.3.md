@@ -4,9 +4,7 @@
 started: 2021-04-20
 release: TBD 
 
-- [ ] preview should support wildcards, ie. \*.md
-- [ ] preview with no arguments should preview current file (like old preview)
-- [ ] preview help documentation
+
 
 - delete
 	- [ ] handle delete files for commit
@@ -26,7 +24,9 @@ release: TBD
 
 
 ----
-
+- [X] preview help documentation
+- [X] preview should support wildcards, ie. \*.md
+- [X] preview with no arguments should preview current file (like old preview)
 - [X] delay occurs before editor loads sometimes
 - [X] context menu for editor
 - [X] preview as a terminal command vs a menu item

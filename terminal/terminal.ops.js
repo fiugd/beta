@@ -141,7 +141,7 @@ const getStatefulHandlers = (state, { changeFolder }) => ({
 	}
 });
 
-const link = url => chalk.hex('#9cdcfe')(url)
+const link = url => chalk.hex('#9cdcfe')(url);
 
 const commandHelp = (command) => `
 
@@ -315,5 +315,3 @@ const GetOps = (term, comm) => {
 };
 
 export default GetOps;
-
-

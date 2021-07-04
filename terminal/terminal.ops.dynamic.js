@@ -1,3 +1,4 @@
+import { chalk, jsonColors } from './terminal.utils.js';
 import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 const showCursor = ansiEscapes.cursorShow;
 
@@ -242,6 +243,25 @@ function exit(){
 	this.term.write(showCursor);
 }
 
+const link = url => chalk.hex('#9cdcfe')(url);
+const commandHelp = (command) => `
+
+${chalk.bold('Usage:')} ${command.keyword} ${chalk.hex('#BBB')(command.usage||'')}
+
+${command.description || 'MISSING DESCRIPTION: bug someone to add a description.'}
+
+  -?, --????   ${chalk.hex('#BBB')('TODO')}        TODO: add args description
+  -h, --help   ${/* SPACER                */''}    Prints this guide
+
+${chalk.bold('Examples:')}
+  TODO: add examples
+
+${chalk.italic(`
+Online help: ${link('https://github.com/crosshj/fiug/wiki')}
+Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+`)}
+`;
+
 class DynamicOp {
 	constructor(url, term, comm, getCwd){
 		this.term = term;
@@ -266,7 +286,7 @@ class DynamicOp {
 			const module = await process.module;
 			thisOp.args = module.args
 			thisOp.keyword = module.keyword;
-			thisOp.help = () => module.usage;
+			thisOp.help = () => commandHelp(module);
 			resolve(thisOp);
 		});
 	}
