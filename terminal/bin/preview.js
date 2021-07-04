@@ -156,7 +156,7 @@ function updatePreview(args, done) {
 		currentFile = undefined;
 		previewDom.classList.add('hidden');
 		previewIframe.remove();
-		done('\n');
+		done('\n\n');
 	};
 
 	// CTRL-C ???
