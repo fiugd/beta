@@ -178,7 +178,8 @@ const handleFileSelect = async (args, done) => {
 	if(!matcher) return;
 
 	const { event, serviceUrl } = args;
-	const { name, path } = event.detail;
+	let { name, path, parent } = event.detail;
+	if(!path && parent) path = parent;
 	let filePath = path
 		? `${path}/${name}`
 		: name;
