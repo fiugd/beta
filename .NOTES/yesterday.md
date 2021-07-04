@@ -1,4 +1,3 @@
-<br>
 
 #### 2021-06-15 | 2021-06-28
 	- preview command
@@ -168,7 +167,7 @@
 	- terminal commands++
 	- service map
 
-#### 2020-03-30 [bartok v0.1](https://www.youtube.com/watch?v=nFXOxs-oDMA)
+#### 2020-03-24 [bartok v0.1](https://www.youtube.com/watch?v=nFXOxs-oDMA)
 	- single-file system
 	- looks a little more like VS Code
 	- basic tree, editor, terminal

@@ -2,6 +2,10 @@
 <h1 style="display:none"></h1>
 ![Test Image](https://bit.ly/bartokLogo)
 
+# bartok v0.1.0
+started: 2020-03-20
+release: 2020-03-24
+
 Summary
 =======
   - now UI looks vaguely like VS Code or Atom

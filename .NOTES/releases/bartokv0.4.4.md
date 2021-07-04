@@ -1,6 +1,6 @@
 ![Release Image](https://bit.ly/fiugHexagons)
 
-### bartok v0.4.4
+# bartok v0.4.4
 started: TBD
 release: TBD
 
@@ -54,4 +54,3 @@ write a custom CM mode that works by wrapping another syntax highlighter:
 http://www.java2s.com/example/javascript/codemirror/codemirror-custom-mode-apply-styles-on-keywords.html
 
 (or dynamically loads any given mode?)
-

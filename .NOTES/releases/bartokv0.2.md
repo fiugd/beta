@@ -2,6 +2,10 @@
 <h1 style="display:none"></h1>
 ![Test Image](https://bit.ly/bartokLogo)
 
+# bartok v0.2.0
+started: 2020-03-24
+release: 2020-03-30
+
 Summary
 =======
   - multi-file!

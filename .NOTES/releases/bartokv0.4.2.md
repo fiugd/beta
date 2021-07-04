@@ -1,4 +1,3 @@
-<h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/fiugGearsWorld)
 
 # bartok v0.4.2
@@ -9,20 +8,19 @@ release: 2021-04-20
 - [X] cleanup commands (like unix)
 - [X] some resize issues remain (scrollbars)?
 
-- tighter tree integration
+- [X] tighter tree integration
 	- file changes
-- tons of issues relating to fileName vs fileName+/filePath/blah..
-- fix issues with express abstraction vs request method
-- fix move/rename issues
-- fix tab issues
-- new terminal
-- terminal features
+- [X] tons of issues relating to fileName vs fileName+/filePath/blah..
+- [X] fix issues with express abstraction vs request method
+- [X] fix move/rename issues
+- [X] fix tab issues
+- [X] new terminal
+- [X] terminal features
 	- git
 	- history
 	- up and down arrows to nav history
 	- watch system events
-- commiting to github
-- iframe can listen to and trigger system events
-- hotkey for move line up
-- hotkey for toggle comments
-
+- [X] commiting to github
+- [X] iframe can listen to and trigger system events
+- [X] hotkey for move line up
+- [X] hotkey for toggle comments

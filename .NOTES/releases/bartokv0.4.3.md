@@ -1,8 +1,8 @@
 ![Release Image](https://bit.ly/fiugHexagons)
 
-### bartok v0.4.3
+# bartok v0.4.3
 started: 2021-04-20
-release: TBD 
+release: TBD
 
 
 - delete

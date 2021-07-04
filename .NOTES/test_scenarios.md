@@ -1,4 +1,3 @@
-<br>
 
 ### service creation and management
 

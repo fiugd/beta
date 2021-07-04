@@ -2,6 +2,10 @@
 <h1 style="display:none"></h1>
 ![Release Image](https://bit.ly/bartokLogo)
 
+# bartok v0.3.0
+started: 2020-03-30
+release:2021-04-13
+
 Summary
 =======
   - editor can use local storage
@@ -78,4 +82,3 @@ Current State
   - [X] pan and zoom
   - [X] data not mocked
   - [X] connections between nodes
-

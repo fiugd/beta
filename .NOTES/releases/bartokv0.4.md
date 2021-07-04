@@ -1,15 +1,18 @@
 ![Release Image](https://bit.ly/fiugLotusPic)
 
-# bartok v0.4
-  - service worker
-    - faster loading
-    - offline
-    - paradigm shift in file handling & UI services
-  - editor improvements
-  - playing around / preparing
-    - wasm
-    - open folder
-    - css 3d versus svg 3d
+# bartok v0.4.0
+started: 2020-06-07
+release: 2021-01-29
+
+- service worker
+	- faster loading
+	- offline
+	- paradigm shift in file handling & UI services
+- editor improvements
+- playing around / preparing
+	- wasm
+	- open folder
+	- css 3d versus svg 3d
 <div style="height: 100%"></div>
 
 ### some thoughts
@@ -84,5 +87,3 @@ src="https://user-images.githubusercontent.com/1816471/119406959-8b770b00-bcb1-1
 
 ### server
   - no updates
-
-

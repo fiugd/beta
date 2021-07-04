@@ -1,6 +1,9 @@
 ![image](https://bit.ly/fiugLandscape1)
 
 # bartok v0.5.0
+started: TBD
+release: TBD
+
 - [ ] import rewrites in SW with something like this: [lexer](https://github.com/guybedford/es-module-lexer)
 OR
 - [ ] [import maps](https://github.com/WICG/import-maps)
