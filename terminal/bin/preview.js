@@ -205,17 +205,19 @@ const handleFileSelect = async (args, done) => {
 		: name;
 	if(filePath.startsWith('/')) filePath.slice(1);
 	try {
+		const optionalReturn = matchedFile ? '\n\n': '';
+		const optionalEndReturn = matchedFile ? '': '';
+
 		const absPath = `${serviceUrl}/${filePath}`;
 		const isMatch = matcher.test(absPath);
 		if(isMatch && matchedFile !== absPath){
-			const optionalReturn = matchedFile ? '\n\n': '';
-			const optionalEndReturn = matchedFile ? '': '';
+
 			matchedFile = absPath;
 			return chalk.green(optionalReturn + file + ": " + filePath + optionalEndReturn);
 		}
 		if(isMatch) return;
 
-		return chalk.red(file + ": " + filePath + '\n');
+		return chalk.red(optionalReturn + file + ": " + filePath + optionalEndReturn);
 	} catch(e){
 		return chalk.red(e.message + '\n');
 	}
