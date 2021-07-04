@@ -87,7 +87,7 @@ function renderPreview(url, isNew, done){
 		const filename = _url.split('/').pop().split('?')[0];
 		const extension = filename.split('.').pop();
 		const rawPreview = ['html', 'htm'];
-		if(rawPreview.includes(extension)) return _url;
+		//if(rawPreview.includes(extension)) return _url;
 		return _url + '/::preview::/';
 	};
 	
