@@ -88,7 +88,7 @@ function updatePreview(args, done) {
 
 	const url = new URL(`${cwd}/${file}`, document.location.origin).href;
 	const filePath = url.split(document.location.origin)[1];
-
+//---
 	const isNew = filePath !== currentFile;
 	currentFile = filePath;
 
@@ -179,13 +179,7 @@ const handleInit = async (args, done) => {
 		return `will preview selected files matching ${file}\n`;
 	}
 
-	const { isNew, url } = updatePreview(args, done);
-
-	const link = url => chalk.hex('#569CD6')(url);
-	const progress = url => chalk.yellow(url);
-	return isNew
-		? `\n🔗  ${link(url)}\n🔆  `
-		: progress(`|`);
+	return handleFileChange(args, done);
 };
 
 const handleFileSelect = async (args, done) => {
@@ -206,13 +200,19 @@ const handleFileSelect = async (args, done) => {
 };
 
 const handleFileChange = async (args, done) => {
+	const isFirst = !currentFile;
 	const { isNew, url } = updatePreview(args, done);
 	if(!url) return;
 
 	const link = url => chalk.hex('#569CD6')(url);
 	const progress = url => chalk.yellow(url);
+
+	const lineBreaks = isFirst
+		? '\n'
+		: '\n\n';
+
 	return isNew
-		? `\n🔗  ${link(url)}\n🔆  `
+		? `lineBreaks🔗  ${link(url)}\n🔆  `
 		: progress(`|`);
 };
 
