@@ -12,7 +12,6 @@ const utils = module.exports;
 let mock;
 let manager;
 
-
 describe('update service', ({ beforeEach }) => {
 	beforeEach(() => {
 		mock = ServiceMock({ utils });

@@ -312,5 +312,3 @@ const operationsListener = async (
 export {
 	getOperations, getReadAfter, getUpdateAfter, performOperation, operationsListener
 };
-
-

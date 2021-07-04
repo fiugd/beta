@@ -446,5 +446,3 @@ function managementOp(e, currentService, currentFile, currentFolder) {
 export {
 	managementOp
 };
-
-

@@ -288,6 +288,7 @@ const useNew = true;
 				? tree[service]
 				: objectPath(tree, `${service}/${targetParentPath}`);
 
+			if(!targetParent) debugger;
 			targetParent[targetKey] = sourceValue;
 
 			return { ...operation, tree };
