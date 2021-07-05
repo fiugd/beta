@@ -450,7 +450,10 @@ const useNew = true;
 			if(useNew && operationsUpdater){
 				const _service = await servicesStore.getItem(id + "");
 				const fileKeys = (await filesStore.keys())
-					.filter(key => key.startsWith(`./${_service.name}/`));
+					.filter(key =>
+						key.startsWith(`./${_service.name}/`) ||
+						key.startsWith(`${_service.name}/`)
+					);
 				const _code = {};
 				for(let i=0, len=fileKeys.length; i<len; i++){
 					const file = await filesStore.getItem(fileKeys[i]);
