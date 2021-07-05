@@ -457,7 +457,10 @@ const useNew = true;
 				const _code = {};
 				for(let i=0, len=fileKeys.length; i<len; i++){
 					const file = await filesStore.getItem(fileKeys[i]);
-					_code[fileKeys[i]] = file;
+					const key = fileKeys[i].startsWith('./')
+						? fileKeys[i]
+						: './' + fileKeys[i]
+					_code[key] = file;
 				}
 				update = operationsUpdater(_service, _code, utils);
 			}
