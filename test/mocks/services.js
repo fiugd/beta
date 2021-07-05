@@ -28,7 +28,7 @@ export const ServiceMock = ({ utils }) => {
 			json: getBody
 		}
 	};
-	const serviceFiles = {
+	let serviceFiles = {
 		'./fake/source/.keep': 'should be removed',
 		'./fake/source/toMove.xxx': 'file to move from source',
 		'./fake/source/toRename.xxx': 'file to rename in source',
@@ -58,6 +58,9 @@ export const ServiceMock = ({ utils }) => {
 			}
 		}
 	};
+	const setService = (id, transform) => allServices[id.toString()] = transform(allServices[id.toString()]);
+	const setFiles = (transform) => transform(serviceFiles);
+
 	const changes = {
 		'tree-fake-expanded': [ 'expanded/1', 'expanded/2' ],
 		'state-fake-opened': [{ name: 'opened.js', order: 0 }]
@@ -126,7 +129,8 @@ export const ServiceMock = ({ utils }) => {
 	};
 
 	return {
-		deps, setBody, event, calls, params, changes,
+		setBody, setService, setFiles,
+		deps, event, calls, params, changes,
 		files: serviceFiles
 	};
 }

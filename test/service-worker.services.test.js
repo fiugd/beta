@@ -13,15 +13,31 @@ let mock;
 let manager;
 
 describe('update service', ({ beforeEach }) => {
+	const newServiceName = 'fake/foo';
+
 	beforeEach(() => {
 		mock = ServiceMock({ utils });
 		manager = new ServicesManager(mock.deps);
+		mock.setService(3002, (svc) => {
+			svc.tree[newServiceName] = svc.tree.fake;
+			delete svc.tree.fake;
+			svc.name = newServiceName;
+			svc.repo = newServiceName;
+			return svc;
+		});
+		mock.setFiles((files) => {
+			Object.entries(files)
+				.forEach(([k,v]) => {
+					delete files[k];
+					files[k.replace('/fake/', `/${newServiceName}/`)] = v;
+				});
+		})
 	});
 
 	it('should add file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'addFile',
 				target: 'target/addedFile.xxx',
@@ -46,19 +62,19 @@ describe('update service', ({ beforeEach }) => {
 		assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === "./fake/target/addedFile.xxx");
+			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/target/addedFile.xxx`);
 		expect(sourceFileAdded).toBeTruthy();
 
-		const addFileChange = mock.changes['fake/target/addedFile.xxx'] || {};
+		const addFileChange = mock.changes[`${newServiceName}/target/addedFile.xxx`] || {};
 		expect(!addFileChange.deleteFile).toBeTruthy();
 
-		const resultShowsFileAdded = safe(() => result.result[0].tree.fake.target['addedFile.xxx']);
+		const resultShowsFileAdded = safe(() => result.result[0].tree[newServiceName].target['addedFile.xxx']);
 		expect(resultShowsFileAdded).toBeTruthy();
 	});
 	it('should delete file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'deleteFile',
 				source: 'source/toDelete.xxx'
@@ -83,19 +99,19 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileRemoved = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === "./fake/source/toDelete.xxx");
+			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/source/toDelete.xxx`);
 		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
 
-		const deleteFileChange = mock.changes['fake/source/toDelete.xxx'] || {};
+		const deleteFileChange = mock.changes[`${newServiceName}/source/toDelete.xxx`] || {};
 		expect(deleteFileChange.deleteFile, 'deleted file change').toBeTruthy();
 
-		const resultShowsFileDelete = safe(() => result.result[0].tree.fake.source['toDelete.xxx']) || 'does not exist';
+		const resultShowsFileDelete = safe(() => result.result[0].tree[newServiceName].source['toDelete.xxx']) || 'does not exist';
 		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
 	});
 	it('should copy file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'copyFile',
 				target: 'target/toCopyCopied.xxx',
@@ -120,19 +136,19 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === "./fake/target/toCopyCopied.xxx");
+			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/target/toCopyCopied.xxx`);
 		expect(sourceFileAdded).toBeTruthy();
 
-		const copyFileAdd = mock.changes['fake/target/toCopyCopied.xxx'] || {};
+		const copyFileAdd = mock.changes[`${newServiceName}/target/toCopyCopied.xxx`] || {};
 		expect(!copyFileAdd.deleteFile).toBeTruthy();
 		
-		const copyFileRemove = mock.changes['fake/target/toCopy.xxx'];
+		const copyFileRemove = mock.changes[`${newServiceName}/target/toCopy.xxx`];
 		expect(!copyFileRemove).toBeTruthy();
 	});
 	it('should move file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'moveFile',
 				target: 'target/', 
@@ -156,19 +172,19 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileRemoved = mock.calls
-			.find(({ fileRemove={} }) => fileRemove.key === "./fake/source/toMove.xxx");
+			.find(({ fileRemove={} }) => fileRemove.key === `./${newServiceName}/source/toMove.xxx`);
 		expect(sourceFileRemoved, 'source file removed').toBeTruthy();
 
-		const deleteFileChange = mock.changes['fake/source/toMove.xxx'];
-		expect(deleteFileChange && deleteFileChange.deleteFile, 'delete file change').toBeTruthy();
+		const deleteFileChange = mock.changes[`${newServiceName}/source/toMove.xxx`];
+		expect(deleteFileChange && deleteFileChange.deleteFile, `delete file change`).toBeTruthy();
 
-		const addFileChange = mock.changes['fake/target/toMove.xxx'];
-		expect(addFileChange && !addFileChange.deleteFile, 'add file change').toBeTruthy();
+		const addFileChange = mock.changes[`${newServiceName}/target/toMove.xxx`];
+		expect(addFileChange && !addFileChange.deleteFile, `add file change`).toBeTruthy();
 	});
 	it('should rename file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'renameFile',
 				target: 'target/toRename.xxx',
@@ -187,20 +203,21 @@ describe('update service', ({ beforeEach }) => {
 		}
 		errors.length && assert.custom(errors);
 
-		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === "./fake/source/toRename.xxx");
+		const renameFilePath = `./${newServiceName}/source/toRename.xxx`;
+		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === renameFilePath);
 		expect(sourceFileRemoved).toBeTruthy();
 
-		const deleteFileChange = mock.changes['fake/source/toRename.xxx'];
-		expect(deleteFileChange && deleteFileChange.deleteFile, 'delete file change').toBeTruthy();
+		const deleteFileChange = mock.changes[`${newServiceName}/source/toRename.xxx`];
+		expect(deleteFileChange && deleteFileChange.deleteFile, `delete file change`).toBeTruthy();
 
-		const addFileChange = mock.changes['fake/target/toRename.xxx'];
-		expect(addFileChange && !addFileChange.deleteFile, 'add file change').toBeTruthy();
+		const addFileChange = mock.changes[`${newServiceName}/target/toRename.xxx`];
+		expect(addFileChange && !addFileChange.deleteFile, `add file change`).toBeTruthy();
 	});
 
 	it('should add folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'addFolder',
 				target: 'target/newFolder',
@@ -217,13 +234,13 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		expect(tree.target.newFolder).toBeTruthy();
 	});
 	it('should delete folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'deleteFolder',
 				source: 'target',
@@ -240,12 +257,13 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
-		const deletedChildren = files.filter(x => x.path.startsWith('/fake/target/'));
+		const deletedChildren = files.filter(x => x.path.startsWith(`/${newServiceName}/target/`));
 
-		const deleteFileChange = mock.changes['fake/target/sibling.xxx'] || {};
-		expect(deleteFileChange.deleteFile).toBeTruthy();
+		const deleteFileChange = mock.changes[newServiceName + '/target/sibling.xxx'] || {};
+		expect(deleteFileChange,'deleteFileChange').toBeTruthy();
+		expect(deleteFileChange.deleteFile,'change.deleteFile').toBeTruthy();
 
 		expect(!tree.target, 'deleted target in tree').toBeTruthy();
 		expect(deletedChildren.length, 'deleted children files length').toEqual(0);
@@ -253,7 +271,7 @@ describe('update service', ({ beforeEach }) => {
 	it('should copy folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'copyFolder',
 				source: 'source',
@@ -271,11 +289,11 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
 
-		const copiedSourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
-		const copiedTargetFiles = files.filter(x => x.path.startsWith('/fake/target/source/'));
+		const copiedSourceFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/source/`));
+		const copiedTargetFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/target/source/`));
 		assert.deepEqual(
 			Object.keys(copiedSourceFiles).sort(),
 			Object.keys(copiedTargetFiles).sort()
@@ -287,12 +305,13 @@ describe('update service', ({ beforeEach }) => {
 	});
 	it('should move folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
+		console.log(`./${newServiceName}/source/`)
 		const originalSourceFileLength = Object.keys(mock.files)
-			.filter(x => x.startsWith('./fake/source/'))
+			.filter(x => x.startsWith(`./${newServiceName}/source/`))
 			.filter(x => !x.includes('.keep'))
 			.length;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'moveFolder',
 				source: 'source',
@@ -310,10 +329,10 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
-		const sourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
-		const movedFiles = files.filter(x => x.path.startsWith('/fake/target/source/'));
+		const sourceFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/source/`));
+		const movedFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/target/source/`));
 
 		expect(tree.source, 'source folder in tree').toEqual(undefined);
 		expect(tree.target.source, 'source folder in target in tree').toBeTruthy();
@@ -324,11 +343,11 @@ describe('update service', ({ beforeEach }) => {
 	it('should rename folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		const originalSourceFileLength = Object.keys(mock.files)
-			.filter(x => x.startsWith('./fake/source/'))
+			.filter(x => x.startsWith(`./${newServiceName}/source/`))
 			.filter(x => !x.includes('.keep'))
 			.length;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'renameFolder',
 				source: 'source',
@@ -346,10 +365,10 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
-		const sourceFiles = files.filter(x => x.path.startsWith('/fake/source/'));
-		const childFiles = files.filter(x => x.path.startsWith('/fake/sourceRenamed/'));
+		const sourceFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/source/`));
+		const childFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/sourceRenamed/`));
 
 		expect(tree.source, 'source folder in tree').toEqual(undefined);
 		expect(tree.sourceRenamed, 'source renamed folder in tree').toBeTruthy();
@@ -361,7 +380,7 @@ describe('update service', ({ beforeEach }) => {
 	it('should create .keep file for empty folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'deleteFile',
 				source: 'target/sibling.xxx'
@@ -378,18 +397,18 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
 
-		const keepFile = files.find(x => x.path === '/fake/target/.keep');
+		const keepFile = files.find(x => x.path === `/${newServiceName}/target/.keep`);
 		expect(keepFile).toBeTruthy();
 		expect(tree.target['.keep']).toBeTruthy();
-		expect(mock.changes['fake/target/.keep'], "keep file changes").toBeTruthy();
+		expect(mock.changes[newServiceName+'/target/.keep'], "keep file changes").toBeTruthy();
 	});
 	it('should remove .keep file for filled folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		mock.setBody({
-			name: 'fake',
+			name: newServiceName,
 			operation: {
 				name: 'addFile',
 				target: 'target/.keep'
@@ -406,19 +425,20 @@ describe('update service', ({ beforeEach }) => {
 		}
 		assert.custom(errors);
 
-		const tree = safe(() => result.result[0].tree.fake);
+		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
 
-		const addedKeepFile = files.find(x => x.path === '/fake/target/.keep')
+		const addedKeepFile = files.find(x => x.path === `/${newServiceName}/target/.keep`)
 		expect(addedKeepFile).toEqual(undefined);
 		expect(tree.target['.keep']).toEqual(undefined);
-		expect(mock.changes['fake/target/.keep'], "added keep file changes").toEqual(undefined);
+		expect(mock.changes[newServiceName+'/target/.keep'], "added keep file changes").toEqual(undefined);
 
-		const preExistingKeepFile = files.find(x => x.path === '/fake/source/.keep');
+		const preExistingKeepFile = files.find(x => x.path === `/${newServiceName}/source/.keep`);
 		expect(preExistingKeepFile).toEqual(undefined);
 		expect(tree.source['.keep']).toEqual(undefined);
-		expect(mock.changes['fake/source/.keep'].deleteFile, 'delete pre-existing keep file').toBeTruthy();
+		expect(mock.changes[newServiceName+'/source/.keep'].deleteFile, 'delete pre-existing keep file').toBeTruthy();
 	});
+
 });
 
 describe('create service', ({ beforeEach }) => {
