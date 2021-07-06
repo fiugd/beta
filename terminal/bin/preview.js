@@ -66,7 +66,7 @@ function renderPreview(url, isNew, done){
 
 	const previewIframe = previewDom.querySelector('iframe');
 	if(currentFrame === url){
-		previewIframe.src += '';
+		setTimeout(() => { previewIframe.src += '' }, 300);
 		//previewIframe.contentWindow.location.reload();
 		return;
 	}
