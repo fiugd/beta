@@ -373,86 +373,10 @@ const fileSelectHandler = ({ viewUpdate, getCurrentService }) => (event) => {
 		return;
 	}
 
-	const service = getCurrentService();
-	let code;
-	try {
-		const codePath = (next || name).includes(service.name)
-			? `/${next || name}`
-			: `/${service.name}/${next || name}`;
-		const selectedFile = service.code.find((x) => x.path === codePath);
-		({ code } = selectedFile);
-	} catch (e) {
-		console.error("could not find the file!");
-		return;
-	}
-
-	code = typeof code === "string" ? code : "";
-
-	// bind and conditionally trigger render
-	// for instance, should not render some files
-	const isHTML =
-		code.includes("</html>") &&
-		["htm", "html"].find((x) => {
-			return (next || name).includes("." + x);
-		});
-	const isSVG =
-		code.includes("</svg>") &&
-		["svg"].find((x) => {
-			return (next || name).includes("." + x);
-		});
-	const isJSX = (next || name).includes("jsx");
-	const isSVC3 = code.includes("/* svcV3 ");
-	const hasTemplate = isSupported({ name: next || name, contents: code });
-
-	if (!isSVG && !isHTML && !isJSX && !isSVC3 && !hasTemplate) {
-		code = `<div class="no-preview">No preview available.</div>`;
-	}
-	const doc =
-		isHTML || isJSX || isSVC3 || hasTemplate
-			? code
-			: `
-		<html>
-			<style>
-				.no-preview {
-					position: absolute;
-					top: 0;
-					left: 0;
-					width: 100%;
-					height: 100%;
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					font-size: 1.5em;
-					color: #666;
-				}
-				body {
-					margin: 0px;
-					margin-top: 40px;
-					height: calc(100vh - 40px);
-					overflow: hidden;
-					color: #ccc;
-					font-family: sans-serif;
-				}
-			</style>
-			<body>
-				<pre>${code}</pre>
-			</body>
-		</html>
-	`;
-	if (!locked) {
-		currentFile = doc;
-		currentFileName = next || name;
-	} else {
-		backupForLock.currentFile = doc;
-		backupForLock.currentFileName = next || name;
-	}
-	const supported = hasTemplate || isHTML || isJSX || isSVC3;
 	const viewArgs = {
 		...event.detail,
-		supported,
 		type,
-		locked,
-		doc,
+		doc: '',
 		docName: pathNoServiceName(service, next || name),
 	};
 	viewUpdate(viewArgs);
