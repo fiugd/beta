@@ -334,7 +334,7 @@ const execTrigger = attachTrigger({
 	type: "raw",
 });
 
-const execCommand = _execCommand(execTrigger);
+const execCommand = () => {};
 
 const connectTrigger = (args) => attachTrigger({ ...args, name: "Terminal" });
 
