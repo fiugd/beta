@@ -463,6 +463,11 @@ const useNew = true;
 					_code[key] = file;
 				}
 				update = operationsUpdater(_service, _code, utils);
+				if(update && _service.type === 'github'){
+					const stripFrontDotSlash = (x) => x.replace(/^\.\//, '');
+					update.filesToDelete = update.filesToDelete.map(stripFrontDotSlash);
+					update.filesToAdd = update.filesToAdd.map(stripFrontDotSlash);
+				}
 			}
 			if(update){
 				body.code = Object.entries(update.code)
