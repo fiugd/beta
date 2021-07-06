@@ -597,15 +597,6 @@ const useNew = true;
 
 			// TODO: binary files
 			const binaryFiles = [];
-			
-			for (let i = 0, len = filesToDelete.length; i < len; i++) {
-				const parent = service;
-				const path = service.type === 'github'
-					? stripFrontDotSlash(filesToDelete[i])
-					: filesToDelete[i];
-				await filesStore.removeItem(path);
-				await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
-			}
 
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
 				const path = service.type === 'github'
@@ -628,6 +619,15 @@ const useNew = true;
 				//TODO: I think this is a problem, not sure...
 				//files get written with blank string and dot in front of name
 				await filesStore.setItem(path, code);
+			}
+
+			for (let i = 0, len = filesToDelete.length; i < len; i++) {
+				const parent = service;
+				const path = service.type === 'github'
+					? stripFrontDotSlash(filesToDelete[i])
+					: filesToDelete[i];
+				await filesStore.removeItem(path);
+				await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
 			}
 
 			const changedFiles = (await changesStore.keys())
