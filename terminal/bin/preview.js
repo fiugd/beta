@@ -141,8 +141,9 @@ function renderPreview(url, isNew, done){
 		matcher = undefined;
 		previewDom.classList.add('hidden');
 		previewDom.classList.remove('show-controls');
-		newIframe.contentWindow.location.replace("about:blank");
+		newIframe.src='';
 		newIframe.srcdoc='';
+		currentFrame=undefined;
 		done('\n\n');
 	};
 
