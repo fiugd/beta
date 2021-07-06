@@ -55,6 +55,9 @@ const getDom = (() => {
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
 
+		document.addEventListener("dblclick", function () {
+			alert("Test 2");
+		});
 		document.addEventListener('keydown', function(event) {
 			if (event.ctrlKey) previewDom.classList.add('show-controls');
 		});
