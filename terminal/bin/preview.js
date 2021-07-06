@@ -89,6 +89,7 @@ function renderPreview(url, isNew, done){
 					previewDom.classList.remove('show-controls');
 					timer = undefined;
 				}, 3000);
+			}
 		});
 	};
 	// TODO: should check to see if a page refresh is required
