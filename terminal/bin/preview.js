@@ -67,7 +67,8 @@ function renderPreview(url, isNew, done){
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
 
-	newIframe.onload=function(e){
+	const iframeLoadHandler=function(e){
+		newIframe.removeEventListener('load', iframeLoadHandler);
 		newIframe.classList.remove('hidden');
 		try {
 			previewDom.removeChild(oldIframe);
@@ -78,9 +79,9 @@ function renderPreview(url, isNew, done){
 		this.contentWindow.document.addEventListener('keyup', function(event) {
 			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
 		});
-	}
+	};
+	newIframe.addEventListener('load', iframeLoadHandler, true);
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
-	previewDom.prepend(newIframe);
 
 	// TODO: should check to see if a page refresh is required
 	// file that changed may not relate to file previewed
@@ -127,6 +128,7 @@ function renderPreview(url, isNew, done){
 		previewIframe.src='about:blank';
 		previewIframe.srcdoc='<html></html>';
 		newIframe.src = previewUrl(url);
+		previewDom.append(newIframe);
 	}
 	
 	const dismissPreview = () => {
