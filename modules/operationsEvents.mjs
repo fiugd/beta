@@ -477,13 +477,19 @@ const operationsHandler = ({
 		// NOTE: simple operations handling - tell service worker to do everything
 		const swOps = {
 			"addFile": (detail, op, service) => {
-				op.target = `${detail.parent}/${detail.name}`
-					.replace(service+'/', '');
+				const { parent, name } = detail;
+				op.target = `${parent}/${name}`.replace(service+'/', '');
 				op.source = "\n";
 			},
 			"addFolder": (detail, op) => {
+				const {folderName, parent } = detail;
+				op.target = `${parent}/${name}`.replace(service+'/', '');
+				delete op.source;
 			},
 			"moveFile": (detail, op) => {
+				const {src, tgt, parent, cwd } = detail;
+				op.target = tgt.replace(service+'/', '');
+				op.source = `${parent||cwd}/${src}`.replace(service+'/', '');
 			},
 			"moveFolder": (detail, op) => {
 			},
@@ -496,6 +502,9 @@ const operationsHandler = ({
 			"renameFolder": (detail, op) => {
 			},
 			"deleteFile": (detail, op) => {
+				const { parent, cwd, filename } = detail;
+				op.source = `${parent||cwd}/${filename}`.replace(service+'/', '');
+				delete op.target;
 			},
 			"deleteFolder": (detail, op) => {
 			},
