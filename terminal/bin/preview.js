@@ -66,7 +66,12 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
+
 	newIframe.onload=function(e){
+		newIframe.classList.remove('hidden');
+		try {
+			previewDom.removeChild(oldIframe);
+		} catch(e){}
 		this.contentWindow.document.addEventListener('keydown', function(event) {
 			if(event.ctrlKey) previewDom.classList.add('show-controls');
 		});
@@ -121,12 +126,7 @@ function renderPreview(url, isNew, done){
 	} else {
 		previewIframe.src='about:blank';
 		previewIframe.srcdoc='<html></html>';
-
 		newIframe.src = previewUrl(url);
-		newIframe.addEventListener('load', () => {
-			newIframe.classList.remove('hidden');
-			previewDom.removeChild(previewIframe);
-		});
 	}
 	
 	const dismissPreview = () => {
