@@ -66,15 +66,15 @@ function renderPreview(url, isNew, done){
 
 	const previewIframe = previewDom.querySelector('iframe');
 	if(currentFrame === url){
-		setTimeout(() => { previewIframe.src += '' }, 300);
-		//previewIframe.contentWindow.location.reload();
+		//setTimeout(() => { previewIframe.src += '' }, 300);
+		previewIframe.contentWindow.location.reload();
 		return;
 	}
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	newIframe.onload=function(){
-		//newIframe.onload=undefined;
+		newIframe.onload=undefined;
 		newIframe.classList.remove('hidden');
 		try {
 			previewDom.removeChild(previewIframe);
@@ -128,7 +128,7 @@ function renderPreview(url, isNew, done){
 		// 	previewIframe.remove();
 		// },100);
 	} else {
-		previewIframe.src ='about:blank';
+		//previewIframe.src ='about:blank';
 		newIframe.src = previewUrl(url);
 		previewDom.prepend(newIframe);
 		currentFrame=url;
