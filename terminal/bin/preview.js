@@ -67,6 +67,7 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	if(currentFrame === url){
 		previewIframe.src += '';
+		//previewIframe.contentWindow.location.reload();
 		return;
 	}
 	const newIframe = document.createElement('iframe');
