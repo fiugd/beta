@@ -121,14 +121,12 @@ function renderPreview(url, isNew, done){
 	} else {
 		previewIframe.src='about:blank';
 		previewIframe.srcdoc='<html></html>';
-		setTimeout(() => {
-			newIframe.src = previewUrl(url);
+
+		newIframe.src = previewUrl(url);
+		newIframe.addEventListener('load', () => {
 			newIframe.classList.remove('hidden');
-			setTimeout(() => {
-				//previewIframe.remove();
-				previewDom.removeChild(previewIframe);
-			},100);
-		}, isNew ? 1 : 500);
+			previewDom.removeChild(previewIframe);
+		});
 	}
 	
 	const dismissPreview = () => {
