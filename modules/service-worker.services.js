@@ -283,7 +283,7 @@ const useNew = true;
 				...childrenMappedToTarget
 			];
 			children.forEach((c, i) => {
-				operation.code[childrenMappedToTarget[i]] = operation.code[c];
+				operation.code[childrenMappedToTarget[i]] = async (store) => await store.getItem(c);
 			});
 			return { ...operation, filesToAdd };
 		};
@@ -310,8 +310,8 @@ const useNew = true;
 			const isFile = operation.name.includes('File');
 			if(!isFile) return operation;
 			const path = `./${operation.service}/${operation.target}`;
-			const update = operation.code[`./${operation.service}/${operation.source}`];
-			operation.code[path] = update;
+			const update = `./${operation.service}/${operation.source}`;
+			operation.code[path] = async (store) => await store.getItem(update);
 			const filesToAdd = [ ...operation.filesToAdd, path ];
 			return { ...operation, filesToAdd };
 		};
@@ -467,12 +467,27 @@ const useNew = true;
 						key.startsWith(`./${_service.name}/`) ||
 						key.startsWith(`${_service.name}/`)
 					);
-				const _code = {};
-				for(let i=0, len=fileKeys.length; i<len; i++){
-					const file = await filesStore.getItem(fileKeys[i]);
-					_code[fileKeys[i]] = file;
-				}
+				const _code = fileKeys.reduce((all, key) => ({
+					...all,
+					[key]: ''
+				}), {});
+
 				update = operationsUpdater(_service, _code, utils);
+
+				const getItem = async (key) => {
+					let formattedKey = key;
+					if(key.slice(0,2) === './' && _service.type === 'github'){
+						formattedKey = key.slice(2);
+					}
+					if(key.slice(0,1) === '/' && _service.type === 'github'){
+						formattedKey = key.slice(1);
+					}
+					return await filesStore.getItem(formattedKey);
+				};
+				for(var key in update.code){
+					if(typeof update.code[key] !== 'function') continue;
+					update.code[key] = await update.code[key]({ getItem });
+				}
 			}
 			if(update){
 				body.code = Object.entries(update.code)
