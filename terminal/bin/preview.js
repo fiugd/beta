@@ -66,22 +66,8 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
-
-	newIframe.load=function(){
-		//newIframe.load=undefined;
-		newIframe.classList.remove('hidden');
-		try {
-			previewDom.removeChild(oldIframe);
-		} catch(e){}
-		this.contentWindow.document.addEventListener('keydown', function(event) {
-			if(event.ctrlKey) previewDom.classList.add('show-controls');
-		});
-		this.contentWindow.document.addEventListener('keyup', function(event) {
-			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
-		});
-	};
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
-
+	previewDom.append(newIframe);
 	// TODO: should check to see if a page refresh is required
 	// file that changed may not relate to file previewed
 	
@@ -106,7 +92,21 @@ function renderPreview(url, isNew, done){
 		//if(rawPreview.includes(extension)) return _url;
 		return _url + '/::preview::/';
 	};
-	
+
+	newIframe.load=function(){
+		newIframe.load=undefined;
+		newIframe.classList.remove('hidden');
+		try {
+			previewDom.removeChild(oldIframe);
+		} catch(e){}
+		this.contentWindow.document.addEventListener('keydown', function(event) {
+			if(event.ctrlKey) previewDom.classList.add('show-controls');
+		});
+		this.contentWindow.document.addEventListener('keyup', function(event) {
+			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
+		});
+	};
+
 	let useSrcDoc = false;
 	//try {
 	//	useSrcDoc = code && url.includes(filePath)
@@ -127,7 +127,6 @@ function renderPreview(url, isNew, done){
 		previewIframe.src='about:blank';
 		previewIframe.srcdoc='<html></html>';
 		newIframe.src = previewUrl(url);
-		previewDom.append(newIframe);
 	}
 	
 	const dismissPreview = () => {
