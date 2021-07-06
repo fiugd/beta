@@ -54,11 +54,11 @@ const getDom = (() => {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
-		
-		previewDom.addEventListener('keydown', function(event) {
+
+		document.addEventListener('keydown', function(event) {
 			if (event.ctrlKey) previewDom.classList.add('show-controls');
 		});
-		previewDom.addEventListener('keyup', function(event) {
+		document.addEventListener('keyup', function(event) {
 			if (!event.ctrlKey) previewDom.classList.remove('show-controls');
 		});
 
