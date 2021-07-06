@@ -39,6 +39,7 @@
 		const queue = [];
 		const recurse = (branch, parent = "/") => {
 			Object.keys(branch)
+				.filter(x => !!x && typeof x === "object" && !Array.isArray(x))
 				.forEach((key) => {
 					const children = Object.keys(branch[key]);
 					if (!children || !children.length) {
