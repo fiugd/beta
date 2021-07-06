@@ -71,7 +71,7 @@ function renderPreview(url, isNew, done){
 		//newIframe.onload=undefined;
 		newIframe.classList.remove('hidden');
 		try {
-			previewDom.removeChild(oldIframe);
+			previewDom.removeChild(previewIframe);
 		} catch(e){}
 		this.contentWindow.document.addEventListener('keydown', function(event) {
 			if(event.ctrlKey) previewDom.classList.add('show-controls');
