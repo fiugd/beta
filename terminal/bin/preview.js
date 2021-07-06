@@ -67,8 +67,8 @@ function renderPreview(url, isNew, done){
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
 
-	const iframeLoadHandler=function(e){
-		newIframe.removeEventListener('load', iframeLoadHandler);
+	const iframeLoadHandler=function(){
+		newIframe.load=undefined;
 		newIframe.classList.remove('hidden');
 		try {
 			previewDom.removeChild(oldIframe);
@@ -80,7 +80,7 @@ function renderPreview(url, isNew, done){
 			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
 		});
 	};
-	newIframe.addEventListener('load', iframeLoadHandler, true);
+	newIframe.load=iframeLoadHandler.bind(newIframe);
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 
 	// TODO: should check to see if a page refresh is required
