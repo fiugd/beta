@@ -493,8 +493,12 @@ const operationsHandler = ({
 			},
 			"moveFile": (detail, op, service) => {
 				const {src, tgt, parent, cwd } = detail;
-				op.target = tgt.replace(service+'/', '');
-				op.source = `${parent||cwd||service}/${src}`.replace(service+'/', '');
+				op.target = stripLeadingSlash(
+					tgt.replace(service+'/', '')
+				);
+				op.source = stripLeadingSlash(
+					`${parent||cwd||service}/${src}`.replace(service+'/', '')
+				);
 			},
 			"moveFolder": (detail, op, service) => {
 			},
