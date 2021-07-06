@@ -602,7 +602,10 @@ const useNew = true;
 
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
 				const path = filesToAdd[i];
-				const fileUpdate = body.code.find(x => `.${x.path}` === path);
+				const fileUpdate = body.code.find(x =>
+					`.${x.path}` === path ||
+					x.path === `/${path}`
+				);
 				const parent = service;
 				let fileUpdateCode;
 				if(fileUpdate?.update){
