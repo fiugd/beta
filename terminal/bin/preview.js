@@ -44,6 +44,8 @@ const getDom = (() => {
 					user-select: none;
 					font-family: sans-serif;
 				}
+				#quit-preview { visibility: hidden; }
+				.show-controls #quit-preview { visibility: visible; }
 			</style>
 			<iframe></iframe>
 		`;
@@ -52,6 +54,13 @@ const getDom = (() => {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
+		
+		previewDom.addEventListener('keydown', function(event) {
+			if (event.ctrlKey) previewDom.classList.add('show-controls');
+		});
+		previewDom.addEventListener('keyup', function(event) {
+			if (!event.ctrlKey) previewDom.classList.remove('show-controls');
+		});
 
 		return previewDom;
 	};
