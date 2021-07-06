@@ -475,21 +475,26 @@ const operationsHandler = ({
 		const { callback } = detail;
 
 		// NOTE: simple operations handling - tell service worker to do everything
+		const stripLeadingSlash = (s='') => s.startsWith('/') ? s.slice(1) : s;
 		const swOps = {
 			"addFile": (detail, op, service) => {
 				const { parent, name } = detail;
-				op.target = `${parent}/${name}`.replace(service+'/', '');
+				op.target = stripLeadingSlash(
+					`${parent||service}/${name}`.replace(service+'/', '')
+				);
 				op.source = "\n";
 			},
 			"addFolder": (detail, op, service) => {
 				const {folderName, parent } = detail;
-				op.target = `${parent}/${folderName}`.replace(service+'/', '');
+				op.target = stripLeadingSlash(
+					`${parent||service}/${folderName}`.replace(service+'/', '')
+				);
 				delete op.source;
 			},
 			"moveFile": (detail, op, service) => {
 				const {src, tgt, parent, cwd } = detail;
 				op.target = tgt.replace(service+'/', '');
-				op.source = `${parent||cwd}/${src}`.replace(service+'/', '');
+				op.source = `${parent||cwd||service}/${src}`.replace(service+'/', '');
 			},
 			"moveFolder": (detail, op, service) => {
 			},
@@ -503,7 +508,9 @@ const operationsHandler = ({
 			},
 			"deleteFile": (detail, op, service) => {
 				const { parent, cwd, filename } = detail;
-				op.source = `${parent||cwd}/${filename}`.replace(service+'/', '');
+				op.source = stripLeadingSlash(
+					`${parent||cwd||service}/${filename}`.replace(service+'/', '')
+				);
 				delete op.target;
 			},
 			"deleteFolder": (detail, op, service) => {
