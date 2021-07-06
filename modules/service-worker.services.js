@@ -289,7 +289,7 @@ const useNew = true;
 		};
 		const addTargetToTree = (operation) => {
 			const {service,source,target,tree} = operation;
-			const sourceValue = objectPath(tree[service], source) || {};
+			const sourceValue = objectPath(tree[service], source) || source;
 
 			const targetSplit = target.split('/');
 			const targetKey = targetSplit.length === 1

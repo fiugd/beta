@@ -476,8 +476,9 @@ const operationsHandler = ({
 
 		// NOTE: simple operations handling - tell service worker to do everything
 		const swOps = {
-			"addFile": (detail, op) => {
-				op.target = `${detail.parent}/${detail.name}`;
+			"addFile": (detail, op, service) => {
+				op.target = `${detail.parent}/${detail.name}`
+					.replace(service+'/', '');
 				op.source = "\n";
 			},
 			"addFolder": (detail, op) => {
@@ -515,7 +516,7 @@ const operationsHandler = ({
 					target: event.detail.tgt,
 				}
 			};
-			swOps[detail.operation](event.detail, body.operation);
+			swOps[detail.operation](event.detail, body.operation, currentService.name);
 			const result = await performOperation(updateOp, { body });
 			const updatedService = result?.detail?.result[0];
 			setCurrentService(updatedService);
