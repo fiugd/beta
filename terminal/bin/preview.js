@@ -125,7 +125,8 @@ function renderPreview(url, isNew, done){
 			newIframe.src = previewUrl(url);
 			newIframe.classList.remove('hidden');
 			setTimeout(() => {
-				previewIframe.remove();
+				//previewIframe.remove();
+				previewDom.removeChild(previewIframe);
 			},100);
 		}, isNew ? 1 : 500);
 	}
@@ -136,9 +137,10 @@ function renderPreview(url, isNew, done){
 		matcher = undefined;
 		previewDom.classList.add('hidden');
 		previewDom.classList.remove('show-controls');
-		previewIframe.src='about:blank';
-		previewIframe.srcdoc='<html></html>';
-		previewIframe.remove();
+		newIframe.src='about:blank';
+		newIframe.srcdoc='<html></html>';
+		//newIframe.remove();
+		previewDom.removeChild(newIframe);
 		done('\n\n');
 	};
 
