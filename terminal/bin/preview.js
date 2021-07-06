@@ -55,18 +55,6 @@ const getDom = (() => {
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
 
-		/*
-		document.addEventListener("dblclick", function(){
-			alert("Test2");
-		});
-		document.addEventListener('keydown', function(event){
-			if(event.ctrlKey)previewDom.classList.add('show-controls');
-		});
-		document.addEventListener('keyup', function(event){
-			if(!event.ctrlKey)previewDom.classList.remove('show-controls');
-		});
-		*/
-
 		return previewDom;
 	};
 })();
@@ -78,9 +66,7 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
-	//newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
 	newIframe.onload=function(e){
-		this.contentWindow.document.ondblclick=function(){alert('it work\'s')};
 		this.contentWindow.document.addEventListener('keydown', function(event) {
 			if(event.ctrlKey) previewDom.classList.add('show-controls');
 		});
@@ -146,7 +132,10 @@ function renderPreview(url, isNew, done){
 	
 	const dismissPreview = () => {
 		currentFile = undefined;
+		matchedFile = undefined;
+		matcher = undefined;
 		previewDom.classList.add('hidden');
+		previewDom.classList.remove('show-controls');
 		previewIframe.remove();
 		done('\n\n');
 	};
