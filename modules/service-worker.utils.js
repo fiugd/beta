@@ -36,25 +36,27 @@
 	// this flattens tree files, not structure
 	const flattenTree = (tree) => {
 		const results = [];
+		const queue = [];
 		const recurse = (branch, parent = "/") => {
-			const leaves = Object.keys(branch);
-			leaves.map((key) => {
-				const children = Object.keys(branch[key]);
-				if (!children || !children.length) {
-					results.push({
-						name: key,
-						code: parent + key,
-						path: parent + key,
-					});
-				} else {
-					if (!branch[key]) {
-						debugger;
+			Object.keys(branch)
+				.forEach((key) => {
+					const children = Object.keys(branch[key]);
+					if (!children || !children.length) {
+						results.push({
+							name: key,
+							code: parent + key,
+							path: parent + key,
+						});
+					} else {
+						if (!branch[key]) {
+							debugger;
+						}
+						queue.push(() => recurse(branch[key], `${parent}${key}/`));
 					}
-					recurse(branch[key], `${parent}${key}/`);
-				}
-			});
+				});
 		};
-		recurse(tree);
+		queue.push(() => recurse(tree));
+		while(queue.length > 0) queue.shift()();
 		return results;
 	};
 
