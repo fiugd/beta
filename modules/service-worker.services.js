@@ -217,7 +217,7 @@ const useNew = true;
 			return stringify({ error });
 		}
 	};
-	
+
 	//smoking this right now
 	//https://medium.com/javascript-scene/reduce-composing-software-fe22f0c39a1d
 	//https://medium.com/javascript-scene/functors-categories-61e031bac53f#.4hqndcx22
@@ -227,7 +227,20 @@ const useNew = true;
 			...operation,
 			service: operation.service.name,
 			tree: clone(operation.service.tree) || {},
-			code: operation.code || {},
+			code: ((code={}) => {
+				const entries = Object.entries(code);
+				entries.forEach(([k,v]) => {
+					if(k.slice(2) === './') return;
+					if(k[0] === '/'){
+						delete code[k];
+						code['.'+k] = v;
+						return;
+					}
+					delete code[k];
+					code['./'+k] = v;
+				});
+				return code;
+			})(operation.code),
 			filesToAdd: [],
 			filesToDelete: []
 		});
@@ -350,39 +363,38 @@ const useNew = true;
 			const mapCodeForHelper = (c) => Object.entries(c)
 				.map(([path,value]) => ({
 					name: path.split('/').pop(),
-					path: path.replace(/^\./, ''),
+					path,
 					update: value
 				}));
 
 			const keepFilesFromHelper = utils
 				.keepHelper(tree, mapCodeForHelper(code))
-				.map(x => x.slice(1))
-				.filter(x => x.includes('/.keep'));
-			keepFilesFromHelper.forEach(k => {
+				.filter(x => x.includes('/.keep'))
+				.map(x => '.'+x);
 
+			keepFilesFromHelper.forEach(k => {
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
+
 				const parentInTree = objectPath(tree[service], parentPath);
 				parentInTree['.keep'] = {};
-				code['./'+k] = '';
-				filesToAdd.push('./'+k);
-				filesToDelete = filesToDelete.filter(x => x !== './'+k);
+				code[k] = '';
+				filesToAdd.push(k);
+				filesToDelete = filesToDelete.filter(x => x !== k);
 			});
-
 			const keepFilesInCode = Object.keys(operation.code)
-				.filter(x => x.includes('/.keep'))
-				.map(x => x.slice(2));
+				.filter(x => x.includes('/.keep'));
+
 			keepFilesInCode.forEach(k => {
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
 				const parentInTree = objectPath(tree[service], parentPath);
 				const parentKeys = Object.keys(parentInTree).filter(x => x !== '.keep');
 				if(parentKeys.length === 0) return;
 				delete parentInTree['.keep'];
-				delete code['./'+k];
-				const keepIsAdded = filesToAdd.find(x => x === './'+k);
-				if(!keepIsAdded) filesToDelete.push('./'+k);
-				filesToAdd = filesToAdd.filter(x => x !== './'+k);
+				delete code[k];
+				const keepIsAdded = filesToAdd.find(x => x === k);
+				if(!keepIsAdded) filesToDelete.push(k);
+				filesToAdd = filesToAdd.filter(x => x !== k);
 			});
-
 			return { ...operation, filesToAdd, filesToDelete, code, tree };
 		};
 
@@ -466,7 +478,7 @@ const useNew = true;
 				body.code = Object.entries(update.code)
 					.map(([path,value]) => ({
 						name: path.split('/').pop(),
-						path: path.replace(/^\./, ''),
+						path: path.replace(/^\.\//, ''),
 						update: value
 					}));
 				body.tree = update.tree;
@@ -601,7 +613,8 @@ const useNew = true;
 					: filesToAdd[i];
 				const fileUpdate = body.code.find(x =>
 					`.${x.path}` === path ||
-					x.path === `/${path}`
+					x.path === `/${path}` ||
+					x.path === path
 				);
 				const parent = service;
 				let fileUpdateCode;

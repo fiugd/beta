@@ -29,7 +29,7 @@ describe('update service', ({ beforeEach }) => {
 			Object.entries(files)
 				.forEach(([k,v]) => {
 					delete files[k];
-					files[k.replace('/fake/', `/${newServiceName}/`)] = v;
+					files[k.replace('./fake/', `${newServiceName}/`)] = v;
 				});
 		})
 	});
@@ -70,6 +70,7 @@ describe('update service', ({ beforeEach }) => {
 
 		const resultShowsFileAdded = safe(() => result.result[0].tree[newServiceName].target['addedFile.xxx']);
 		expect(resultShowsFileAdded).toBeTruthy();
+
 	});
 	it('should delete file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -183,6 +184,7 @@ describe('update service', ({ beforeEach }) => {
 	});
 	it('should rename file', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
+		const sourceFileContents = mock.files[newServiceName+'/source/toRename.xxx'];
 		mock.setBody({
 			name: newServiceName,
 			operation: {
@@ -202,6 +204,9 @@ describe('update service', ({ beforeEach }) => {
 			errors.push({ message, stack });
 		}
 		errors.length && assert.custom(errors);
+
+		const callToSetFile = mock.calls.find(x => x.fileSet).fileSet;
+		expect(callToSetFile.value, "renamed file contents").toEqual(sourceFileContents);
 
 		const renameFilePath = `${newServiceName}/source/toRename.xxx`;
 		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === renameFilePath);
@@ -307,7 +312,7 @@ describe('update service', ({ beforeEach }) => {
 	it('should move folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		const originalSourceFileLength = Object.keys(mock.files)
-			.filter(x => x.startsWith(`./${newServiceName}/source/`))
+			.filter(x => x.startsWith(`${newServiceName}/source/`))
 			.filter(x => !x.includes('.keep'))
 			.length;
 		mock.setBody({
@@ -331,8 +336,8 @@ describe('update service', ({ beforeEach }) => {
 
 		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
-		const sourceFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/source/`));
-		const movedFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/target/source/`));
+		const sourceFiles = files.filter(x => x.path.startsWith(`${newServiceName}/source/`));
+		const movedFiles = files.filter(x => x.path.startsWith(`${newServiceName}/target/source/`));
 
 		expect(tree.source, 'source folder in tree').toEqual(undefined);
 		expect(tree.target.source, 'source folder in target in tree').toBeTruthy();
@@ -343,7 +348,7 @@ describe('update service', ({ beforeEach }) => {
 	it('should rename folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
 		const originalSourceFileLength = Object.keys(mock.files)
-			.filter(x => x.startsWith(`./${newServiceName}/source/`))
+			.filter(x => x.startsWith(`${newServiceName}/source/`))
 			.filter(x => !x.includes('.keep'))
 			.length;
 		mock.setBody({
@@ -367,8 +372,8 @@ describe('update service', ({ beforeEach }) => {
 
 		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
-		const sourceFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/source/`));
-		const childFiles = files.filter(x => x.path.startsWith(`/${newServiceName}/sourceRenamed/`));
+		const sourceFiles = files.filter(x => x.path.startsWith(`${newServiceName}/source/`));
+		const childFiles = files.filter(x => x.path.startsWith(`${newServiceName}/sourceRenamed/`));
 
 		expect(tree.source, 'source folder in tree').toEqual(undefined);
 		expect(tree.sourceRenamed, 'source renamed folder in tree').toBeTruthy();
@@ -400,7 +405,7 @@ describe('update service', ({ beforeEach }) => {
 		const tree = safe(() => result.result[0].tree[newServiceName]);
 		const files = safe(() => result.result[0].code);
 
-		const keepFile = files.find(x => x.path === `/${newServiceName}/target/.keep`);
+		const keepFile = files.find(x => x.path === `${newServiceName}/target/.keep`);
 		expect(keepFile).toBeTruthy();
 		expect(tree.target['.keep']).toBeTruthy();
 		expect(mock.changes[newServiceName+'/target/.keep'], "keep file changes").toBeTruthy();
@@ -429,11 +434,11 @@ describe('update service', ({ beforeEach }) => {
 		const files = safe(() => result.result[0].code);
 
 		const addedKeepFile = files.find(x => x.path === `/${newServiceName}/target/.keep`)
-		expect(addedKeepFile).toEqual(undefined);
+		expect(addedKeepFile, 'added keep file').toEqual(undefined);
 		expect(tree.target['.keep']).toEqual(undefined);
 		expect(mock.changes[newServiceName+'/target/.keep'], "added keep file changes").toEqual(undefined);
 
-		const preExistingKeepFile = files.find(x => x.path === `/${newServiceName}/source/.keep`);
+		const preExistingKeepFile = files.find(x => x.path === `./${newServiceName}/source/.keep`);
 		expect(preExistingKeepFile).toEqual(undefined);
 		expect(tree.source['.keep']).toEqual(undefined);
 		expect(mock.changes[newServiceName+'/source/.keep'].deleteFile, 'delete pre-existing keep file').toBeTruthy();

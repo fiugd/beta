@@ -82,7 +82,15 @@
 
 	const keepHelper = (tree, code) => {
 		const treeFlat = flattenTree(tree).map(x => x.path.replace('/.keep', ''));
-		const treeFiles = code.map(x => x.path).filter(x => !x.includes('/.keep'));
+		const treeFiles = code
+			.map(x => x.path)
+			.filter(x => !x.includes('/.keep'))
+			.map(x => {
+				if(x[0] === '/') return x;
+				if(x.slice(0,2) === './') return x.replace(/^\.\//, '/');
+				return '/' + x;
+			});
+
 		const addKeepFiles = treeFlat.reduce((all, one, i, array) => {
 			const found = array.filter((x) => x !== one && x.startsWith(one));
 			if(found.length === 0 && !treeFiles.includes(one)) all.push(one);
