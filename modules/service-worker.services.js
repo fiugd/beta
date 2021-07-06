@@ -667,7 +667,7 @@ const useNew = true;
 				result: [{
 					id: service.id,
 					name: service.name,
-					code: body.code,
+					code: body.code.map(({ name, path }) => ({ name, path })),
 					tree: body.tree,
 					state: { opened, selected, changed },
 					treeState: {
