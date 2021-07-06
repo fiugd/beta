@@ -128,8 +128,8 @@ function renderPreview(url, isNew, done){
 		// 	previewIframe.remove();
 		// },100);
 	} else {
-		previewIframe.attr('src', 'about:blank');
-		newIframe.attr('src', previewUrl(url));
+		previewIframe.src ='about:blank';
+		newIframe.src = previewUrl(url);
 		previewDom.prepend(newIframe);
 		currentFrame=url;
 	}
@@ -142,7 +142,7 @@ function renderPreview(url, isNew, done){
 		previewDom.classList.remove('show-controls');
 
 		newIframe.remove();
-		newIframe.attr('src', 'about:blank');
+		newIframe.src = 'about:blank';
 		previewDom.append(newIframe);
 
 		currentFrame=undefined;
