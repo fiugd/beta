@@ -483,7 +483,7 @@ const operationsHandler = ({
 			},
 			"addFolder": (detail, op, service) => {
 				const {folderName, parent } = detail;
-				op.target = `${parent}/${name}`.replace(service+'/', '');
+				op.target = `${parent}/${folderName}`.replace(service+'/', '');
 				delete op.source;
 			},
 			"moveFile": (detail, op, service) => {
