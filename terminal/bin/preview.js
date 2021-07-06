@@ -44,8 +44,8 @@ const getDom = (() => {
 					user-select: none;
 					font-family: sans-serif;
 				}
-				#quit-preview { visibility: hidden; }
-				.show-controls #quit-preview { visibility: visible; }
+				/* #quit-preview { visibility: hidden; } */
+				/* .show-controls #quit-preview { visibility: visible; } */
 			</style>
 			<iframe></iframe>
 		`;
@@ -54,16 +54,18 @@ const getDom = (() => {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
-
-		document.addEventListener("dblclick", function () {
-			alert("Test 2");
+		
+		/*
+		document.addEventListener("dblclick",·function·()·{
+			alert("Test·2");
 		});
-		document.addEventListener('keydown', function(event) {
-			if (event.ctrlKey) previewDom.classList.add('show-controls');
+		document.addEventListener('keydown',·function(event)·{
+			if·(event.ctrlKey)·previewDom.classList.add('show-controls');
 		});
-		document.addEventListener('keyup', function(event) {
-			if (!event.ctrlKey) previewDom.classList.remove('show-controls');
+		document.addEventListener('keyup',·function(event)·{
+			if·(!event.ctrlKey)·previewDom.classList.remove('show-controls');
 		});
+		*/
 
 		return previewDom;
 	};
@@ -76,7 +78,10 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
-	newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
+	//newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
+	newIframe.onload=function(e){
+		this.contentWindow.document.ondblclick=function(){alert('it work\'s')};
+	}
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	previewDom.prepend(newIframe);
 
