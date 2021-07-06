@@ -30,6 +30,7 @@ const useNew = true;
 	}
 	const logJSON = x => console.log(JSON.stringify(x, null, 2));
 	const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
+	const stripFrontDotSlash = (x) => x.replace(/^\.\//, '');
 
 	const handleServiceCreate = ({ app, storage, providers }) => async (
 		params,
@@ -457,17 +458,9 @@ const useNew = true;
 				const _code = {};
 				for(let i=0, len=fileKeys.length; i<len; i++){
 					const file = await filesStore.getItem(fileKeys[i]);
-					const key = fileKeys[i].startsWith('./')
-						? fileKeys[i]
-						: './' + fileKeys[i]
-					_code[key] = file;
+					_code[fileKeys[i]] = file;
 				}
 				update = operationsUpdater(_service, _code, utils);
-				if(update && _service.type === 'github'){
-					const stripFrontDotSlash = (x) => x.replace(/^\.\//, '');
-					update.filesToDelete = update.filesToDelete.map(stripFrontDotSlash);
-					update.filesToAdd = update.filesToAdd.map(stripFrontDotSlash);
-				}
 			}
 			if(update){
 				body.code = Object.entries(update.code)
@@ -595,13 +588,17 @@ const useNew = true;
 			
 			for (let i = 0, len = filesToDelete.length; i < len; i++) {
 				const parent = service;
-				const path = filesToDelete[i];
+				const path = service.type === 'github'
+					? stripFrontDotSlash(filesToDelete[i])
+					: filesToDelete[i];
 				await filesStore.removeItem(path);
-				await providers.fileChange({ path, parent, deleteFile: true });
+				await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
 			}
 
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
-				const path = filesToAdd[i];
+				const path = service.type === 'github'
+					? stripFrontDotSlash(filesToAdd[i])
+					: filesToAdd[i];
 				const fileUpdate = body.code.find(x =>
 					`.${x.path}` === path ||
 					x.path === `/${path}`
@@ -613,7 +610,7 @@ const useNew = true;
 					delete fileUpdate.update;
 				}
 				const code = fileUpdateCode || ''; //TODO: if not in update, default for file
-				await providers.fileChange({ path, code, parent });
+				await providers.fileChange({ path: filesToAdd[i], code, parent });
 
 				//TODO: I think this is a problem, not sure...
 				//files get written with blank string and dot in front of name

@@ -62,8 +62,8 @@ describe('update service', ({ beforeEach }) => {
 		assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/target/addedFile.xxx`);
-		expect(sourceFileAdded).toBeTruthy();
+			.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/target/addedFile.xxx`);
+		expect(sourceFileAdded, 'source file added').toBeTruthy();
 
 		const addFileChange = mock.changes[`${newServiceName}/target/addedFile.xxx`] || {};
 		expect(!addFileChange.deleteFile).toBeTruthy();
@@ -99,7 +99,7 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileRemoved = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/source/toDelete.xxx`);
+			.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/source/toDelete.xxx`);
 		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes[`${newServiceName}/source/toDelete.xxx`] || {};
@@ -136,7 +136,7 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === `./${newServiceName}/target/toCopyCopied.xxx`);
+			.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/target/toCopyCopied.xxx`);
 		expect(sourceFileAdded).toBeTruthy();
 
 		const copyFileAdd = mock.changes[`${newServiceName}/target/toCopyCopied.xxx`] || {};
@@ -172,7 +172,7 @@ describe('update service', ({ beforeEach }) => {
 		errors.length && assert.custom(errors);
 
 		const sourceFileRemoved = mock.calls
-			.find(({ fileRemove={} }) => fileRemove.key === `./${newServiceName}/source/toMove.xxx`);
+			.find(({ fileRemove={} }) => fileRemove.key === `${newServiceName}/source/toMove.xxx`);
 		expect(sourceFileRemoved, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes[`${newServiceName}/source/toMove.xxx`];
@@ -203,7 +203,7 @@ describe('update service', ({ beforeEach }) => {
 		}
 		errors.length && assert.custom(errors);
 
-		const renameFilePath = `./${newServiceName}/source/toRename.xxx`;
+		const renameFilePath = `${newServiceName}/source/toRename.xxx`;
 		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === renameFilePath);
 		expect(sourceFileRemoved).toBeTruthy();
 
@@ -212,6 +212,7 @@ describe('update service', ({ beforeEach }) => {
 
 		const addFileChange = mock.changes[`${newServiceName}/target/toRename.xxx`];
 		expect(addFileChange && !addFileChange.deleteFile, `add file change`).toBeTruthy();
+
 	});
 
 	it('should add folder', async (assert) => {
@@ -305,7 +306,6 @@ describe('update service', ({ beforeEach }) => {
 	});
 	it('should move folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
-		console.log(`./${newServiceName}/source/`)
 		const originalSourceFileLength = Object.keys(mock.files)
 			.filter(x => x.startsWith(`./${newServiceName}/source/`))
 			.filter(x => !x.includes('.keep'))
