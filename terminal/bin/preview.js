@@ -136,6 +136,8 @@ function renderPreview(url, isNew, done){
 		matcher = undefined;
 		previewDom.classList.add('hidden');
 		previewDom.classList.remove('show-controls');
+		previewIframe.src='about:blank';
+		previewIframe.srcdoc='<html></html>';
 		previewIframe.remove();
 		done('\n\n');
 	};
