@@ -44,8 +44,8 @@ const getDom = (() => {
 					user-select: none;
 					font-family: sans-serif;
 				}
-				/* #quit-preview { visibility: hidden; } */
-				/* .show-controls #quit-preview { visibility: visible; } */
+				#quit-preview { visibility: hidden; }
+				.show-controls #quit-preview { visibility: visible; }
 			</style>
 			<iframe></iframe>
 		`;
@@ -81,6 +81,12 @@ function renderPreview(url, isNew, done){
 	//newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
 	newIframe.onload=function(e){
 		this.contentWindow.document.ondblclick=function(){alert('it work\'s')};
+		this.contentWindow.document.addEventListener('keydown',·function(event)·{
+			if·(event.ctrlKey)·previewDom.classList.add('show-controls');
+		});
+		this.contentWindow.document.addEventListener('keyup',·function(event)·{
+			if·(!event.ctrlKey)·previewDom.classList.remove('show-controls');
+		});
 	}
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	previewDom.prepend(newIframe);
