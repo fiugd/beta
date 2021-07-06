@@ -475,19 +475,31 @@ const operationsHandler = ({
 		const { callback } = detail;
 
 		// NOTE: simple operations handling - tell service worker to do everything
-		const useServiceWorker = [
-			"addFile",
-			"addFolder",
-			"moveFile",
-			"moveFolder",
-			"copyFile",
-			"copyFolder",
-			"renameFile",
-			"renameFolder",
-			"deleteFile",
-			"deleteFolder",
-		];
-		if( useServiceWorker.includes(detail?.operation) ){
+		const swOps = {
+			"addFile": (detail, op) => {
+				op.target = `${detail.parent}/${detail.name}`;
+				op.source = "\n";
+			},
+			"addFolder": (detail, op) => {
+			},
+			"moveFile": (detail, op) => {
+			},
+			"moveFolder": (detail, op) => {
+			},
+			"copyFile": (detail, op) => {
+			},
+			"copyFolder": (detail, op) => {
+			},
+			"renameFile": (detail, op) => {
+			},
+			"renameFolder": (detail, op) => {
+			},
+			"deleteFile": (detail, op) => {
+			},
+			"deleteFolder": (detail, op) => {
+			},
+		};
+		if( Object.keys(swOps).includes(detail?.operation) ){
 			console.log('%c using service worker for: %c'+ detail.operation,
 				'color: blue;',
 				'color: yellow;'
@@ -503,6 +515,7 @@ const operationsHandler = ({
 					target: event.detail.tgt,
 				}
 			};
+			swOps[detail.operation](event.detail, body.operation);
 			const result = await performOperation(updateOp, { body });
 			const updatedService = result?.detail?.result[0];
 			setCurrentService(updatedService);
