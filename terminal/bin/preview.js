@@ -54,16 +54,16 @@ const getDom = (() => {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
-		
+
 		/*
-		document.addEventListener("dblclick",·function·()·{
-			alert("Test·2");
+		document.addEventListener("dblclick", function(){
+			alert("Test2");
 		});
-		document.addEventListener('keydown',·function(event)·{
-			if·(event.ctrlKey)·previewDom.classList.add('show-controls');
+		document.addEventListener('keydown', function(event){
+			if(event.ctrlKey)previewDom.classList.add('show-controls');
 		});
-		document.addEventListener('keyup',·function(event)·{
-			if·(!event.ctrlKey)·previewDom.classList.remove('show-controls');
+		document.addEventListener('keyup', function(event){
+			if(!event.ctrlKey)previewDom.classList.remove('show-controls');
 		});
 		*/
 
@@ -81,11 +81,11 @@ function renderPreview(url, isNew, done){
 	//newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
 	newIframe.onload=function(e){
 		this.contentWindow.document.ondblclick=function(){alert('it work\'s')};
-		this.contentWindow.document.addEventListener('keydown',·function(event)·{
-			if·(event.ctrlKey)·previewDom.classList.add('show-controls');
+		this.contentWindow.document.addEventListener('keydown', function(event) {
+			if(event.ctrlKey) previewDom.classList.add('show-controls');
 		});
-		this.contentWindow.document.addEventListener('keyup',·function(event)·{
-			if·(!event.ctrlKey)·previewDom.classList.remove('show-controls');
+		this.contentWindow.document.addEventListener('keyup', function(event) {
+			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
 		});
 	}
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
