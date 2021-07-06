@@ -475,10 +475,23 @@ const operationsHandler = ({
 		const { callback } = detail;
 
 		// NOTE: simple operations handling - tell service worker to do everything
-		if(
-			detail?.operation.includes('rename') ||
-			detail?.operation.includes('move')
-		){
+		const useServiceWorker = [
+			"addFile",
+			"addFolder",
+			"moveFile",
+			"moveFolder",
+			"copyFile",
+			"copyFolder",
+			"renameFile",
+			"renameFolder",
+			"deleteFile",
+			"deleteFolder",
+		];
+		if( useServiceWorker.includes(detail?.operation) ){
+			console.log('%c using service worker for: %c'+ detail.operation,
+				'color: blue;',
+				'color: yellow;'
+			);
 			const updateOp = allOperations.find((x) => x.name === "update");
 			const currentService = getCurrentService();
 			const body = {
