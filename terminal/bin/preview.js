@@ -74,7 +74,6 @@ function renderPreview(url, isNew, done){
 	newIframe.classList.add('hidden');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	newIframe.onload=function(){
-		newIframe.onload=undefined;
 		newIframe.classList.remove('hidden');
 		try {
 			previewDom.removeChild(previewIframe);
