@@ -76,6 +76,7 @@ function renderPreview(url, isNew, done){
 	const previewIframe = previewDom.querySelector('iframe');
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
+	newIframe.onload="this.contentWindow.document.ondblclick=function(){alert('it work\'s');}"
 	previewDom.prepend(newIframe);
 
 	// TODO: should check to see if a page refresh is required
