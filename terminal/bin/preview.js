@@ -139,8 +139,6 @@ function renderPreview(url, isNew, done){
 		previewDom.classList.remove('show-controls');
 		newIframe.src='about:blank';
 		newIframe.srcdoc='<html></html>';
-		//newIframe.remove();
-		previewDom.removeChild(newIframe);
 		done('\n\n');
 	};
 
