@@ -78,11 +78,17 @@ function renderPreview(url, isNew, done){
 		try {
 			previewDom.removeChild(previewIframe);
 		} catch(e){}
+		let timer;
 		this.contentWindow.document.addEventListener('keydown', function(event) {
 			if(event.ctrlKey) previewDom.classList.add('show-controls');
 		});
 		this.contentWindow.document.addEventListener('keyup', function(event) {
-			if(!event.ctrlKey) previewDom.classList.remove('show-controls');
+			if(!event.ctrlKey) {
+				if(timer) clearTimeout(timer);
+				timer = setTimeout(() => {
+					previewDom.classList.remove('show-controls');
+					timer = undefined;
+				}, 3000);
 		});
 	};
 	// TODO: should check to see if a page refresh is required
