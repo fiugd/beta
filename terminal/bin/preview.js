@@ -128,8 +128,8 @@ function renderPreview(url, isNew, done){
 		// 	previewIframe.remove();
 		// },100);
 	} else {
-		previewIframe.src='about:blank';
-		previewIframe.srcdoc='<html></html>';
+		previewIframe.contentWindow.location.replace("about:blank");
+		previewIframe.srcdoc='';
 		newIframe.src = previewUrl(url);
 		previewDom.prepend(newIframe);
 		currentFrame=url;
@@ -141,8 +141,8 @@ function renderPreview(url, isNew, done){
 		matcher = undefined;
 		previewDom.classList.add('hidden');
 		previewDom.classList.remove('show-controls');
-		newIframe.src='about:blank';
-		newIframe.srcdoc='<html></html>';
+		newIframe.contentWindow.location.replace("about:blank");
+		newIframe.srcdoc='';
 		done('\n\n');
 	};
 
