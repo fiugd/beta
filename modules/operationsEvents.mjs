@@ -481,32 +481,32 @@ const operationsHandler = ({
 				op.target = `${parent}/${name}`.replace(service+'/', '');
 				op.source = "\n";
 			},
-			"addFolder": (detail, op) => {
+			"addFolder": (detail, op, service) => {
 				const {folderName, parent } = detail;
 				op.target = `${parent}/${name}`.replace(service+'/', '');
 				delete op.source;
 			},
-			"moveFile": (detail, op) => {
+			"moveFile": (detail, op, service) => {
 				const {src, tgt, parent, cwd } = detail;
 				op.target = tgt.replace(service+'/', '');
 				op.source = `${parent||cwd}/${src}`.replace(service+'/', '');
 			},
-			"moveFolder": (detail, op) => {
+			"moveFolder": (detail, op, service) => {
 			},
-			"copyFile": (detail, op) => {
+			"copyFile": (detail, op, service) => {
 			},
-			"copyFolder": (detail, op) => {
+			"copyFolder": (detail, op, service) => {
 			},
-			"renameFile": (detail, op) => {
+			"renameFile": (detail, op, service) => {
 			},
-			"renameFolder": (detail, op) => {
+			"renameFolder": (detail, op, service) => {
 			},
-			"deleteFile": (detail, op) => {
+			"deleteFile": (detail, op, service) => {
 				const { parent, cwd, filename } = detail;
 				op.source = `${parent||cwd}/${filename}`.replace(service+'/', '');
 				delete op.target;
 			},
-			"deleteFolder": (detail, op) => {
+			"deleteFolder": (detail, op, service) => {
 			},
 		};
 		if( Object.keys(swOps).includes(detail?.operation) ){
