@@ -59,7 +59,7 @@ const getDom = (() => {
 		previewDom.append(quitButton);
 
 		const quitClick = (e) => {
-			setTimeout(dismissPreview, 1);
+			dismissPreview();
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
@@ -166,7 +166,9 @@ function renderPreview(url, isNew, done){
 		previewDom.append(newIframe);
 
 		currentFrame=undefined;
-		done('\n\n');
+		setTimeout(() => {
+			done('\n\n');
+		},1);
 	};
 }
 
