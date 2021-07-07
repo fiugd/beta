@@ -397,13 +397,13 @@
 		getChangeCached = getChangeCached || cacheFn(changesStore.getItem.bind(changesStore), 1000);
 		getFileCached = getFileCached || cacheFn(filesStore.getItem.bind(filesStore), 1000);
 
-		const changes = await getChange(path);
+		const changes = await getChangeCached(path);
 		console.log(`changes store: ${performance.now()-t0}ms`);
 		if(changes && changes.type === 'update'){
 			return changes.value;
 		}
 
-		const file = await getFile(path);
+		const file = await getFileCached(path);
 		console.log(`file store: ${performance.now()-t0}ms`);
 		return file;
 	}
