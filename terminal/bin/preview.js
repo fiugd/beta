@@ -80,7 +80,10 @@ function renderPreview(url, isNew, done){
 		} catch(e){}
 		let timer;
 		this.contentWindow.document.addEventListener('keydown', function(event) {
-			if(event.ctrlKey) previewDom.classList.add('show-controls');
+			if(!event.key && event.ctrlKey){
+				previewDom.classList.add('show-controls');
+				event.preventDefault();
+			}
 		});
 		this.contentWindow.document.addEventListener('keyup', function(event) {
 			if(!event.ctrlKey) {
