@@ -35,7 +35,7 @@ const getDom = (() => {
 					position: absolute; left:0; top:0; width: 100%; height: 100%;
 					border: 0;
 				}
-				.hidden { display: none; }
+				.hidden { visibility: hidden; }
 				#quit-preview {
 					position: absolute;
 					bottom: 10px;
@@ -86,6 +86,7 @@ function renderPreview(url, isNew, done){
 	newIframe.classList.add('hidden');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	newIframe.onload=function(){
+
 		newIframe.classList.remove('hidden');
 		try {
 			previewDom.removeChild(previewIframe);
