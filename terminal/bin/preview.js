@@ -99,6 +99,7 @@ function renderPreview(url, isNew, done){
 			previewIframe.classList.add('not-visible');
 			if(previewIframe.parentNode){
 				previewIframe.parentNode.removeChild(previewIframe);
+			}
 		} catch(e){
 			console.error(e);
 		}
