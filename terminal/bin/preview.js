@@ -158,16 +158,14 @@ function renderPreview(url, isNew, done){
 		done('\n\n');
 	};
 
-	// CTRL-C ???
-	quitButton.addEventListener("click", (e) => {
+	const quitClick = (e) => {
 		setTimeout(dismissPreview, 1);
 		e.preventDefault();
 		e.stopPropagation();
 		return false;
-	}, false);
-	quitButton.addEventListener('contextmenu', function(e) {
-		e.preventDefault();
-	}, false);
+	};
+	quitButton.addEventListener("click", quitClick, false);
+	quitButton.addEventListener('contextmenu', quitClick, false);
 }
 
 function updatePreview(args, done) {
