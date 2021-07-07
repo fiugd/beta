@@ -159,8 +159,9 @@ function renderPreview(url, isNew, done){
 	};
 
 	// CTRL-C ???
-	quitButton.onclick = () => {
+	quitButton.onclick = (e) => {
 		setTimeout(dismissPreview, 1);
+		e.preventDefault();
 	};
 }
 
