@@ -29,6 +29,7 @@ function codemirrorModeFromFileType(fileType){
 }
 
 // https://davidwalsh.name/javascript-debounce-function
+/*
 function debounce(func, wait, immediate) {
 	var timeout;
 	return function() {
@@ -41,6 +42,28 @@ function debounce(func, wait, immediate) {
 		clearTimeout(timeout);
 		timeout = setTimeout(later, wait);
 		if (callNow) func.apply(context, args);
+	};
+};
+*/
+const debounce = (func, wait) => {
+	let timeout;
+	let throttleTime;
+	let args;
+	let context;
+	return function() {
+		context = this;
+		args = arguments;
+		const later = function() {
+			func.apply(context, args);
+			timeout = null;
+		};
+		if(!timeout) throttleTime = performance.now();
+		if(timeout && (performance.now() - throttleTime) > wait){
+			func.apply(context, args);
+			throttleTime = performance.now();
+		}
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
 	};
 };
 

@@ -52,27 +52,22 @@ const updateSWCache = (bins) => {
 };
 
 const debounce = (func, wait) => {
-	var timeout;
-	var callCount=0;
-	var throttleTime;
-	var args;
-
+	let timeout;
+	let throttleTime;
+	let args;
+	let context;
 	return function() {
-		var context = this;
+		context = this;
 		args = arguments;
-
-		var later = function() {
+		const later = function() {
 			func.apply(context, args);
 			timeout = null;
 		};
-
 		if(!timeout) throttleTime = performance.now();
-
 		if(timeout && (performance.now() - throttleTime) > wait){
 			func.apply(context, args);
 			throttleTime = performance.now();
 		}
-
 		clearTimeout(timeout);
 		timeout = setTimeout(later, wait);
 	};
