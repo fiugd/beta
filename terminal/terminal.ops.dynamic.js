@@ -51,26 +51,24 @@ const updateSWCache = (bins) => {
 	`.replace(/^\t+/gm, '').trim());
 };
 
-const debounce = (func, wait, throttle) => {
+const debounce = (func, wait) => {
 	var timeout;
 	var callCount=0;
 	var throttleTime;
 	var args;
 
 	return function() {
-		callCount++;
 		var context = this;
 		args = arguments;
 
 		var later = function() {
-			if(callCount > 1) func.apply(context, args);
+			func.apply(context, args);
 			timeout = null;
-			callCount = 0;
 		};
 
 		if(!timeout) throttleTime = performance.now();
 
-		if(throttle && timeout && (performance.now() - throttleTime) > throttle){
+		if(timeout && (performance.now() - throttleTime) > wait){
 			func.apply(context, args);
 			throttleTime = performance.now();
 		}
@@ -165,9 +163,8 @@ class ProcessWorker {
 						return finish(resolve);
 					}
 				};
-				const debounceTime = 1000;
-				const throttleTime = 300;
-				const listener = (eventName) => debounce(runOperation(eventName), debounceTime, throttleTime);
+				const debounceTime = 300;
+				const listener = (eventName) => debounce(runOperation(eventName), debounceTime);
 				await listener('init')(args);
 				if(!args.watch) return;
 
@@ -209,7 +206,7 @@ class ProcessWorker {
 						type: "events", eventName, ...args
 					});
 				};
-				const listener = (eventName) => debounce(messagePost(eventName), debounceTime, throttleTime);
+				const listener = (eventName) => debounce(messagePost(eventName), debounceTime);
 				const listenTo = ['fileChange', 'fileSelect'];
 				for (const eventName of listenTo) {
 					const response = await attach({
