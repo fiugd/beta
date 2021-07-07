@@ -388,23 +388,29 @@
 		return new Proxy(fn, { apply });
 	}
 
-	let getChangeCached, getFileCached;
+	let changeCache, fileCache;
 	async function getFile(path){
-		const t0 = performance.now();
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 
-		getChangeCached = getChangeCached || cacheFn(changesStore.getItem.bind(changesStore), 1000);
-		getFileCached = getFileCached || cacheFn(filesStore.getItem.bind(filesStore), 1000);
+		changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), 1000);
+		fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), 1000);
 
-		const changes = await getChangeCached(path);
-		console.log(`changes store: ${performance.now()-t0}ms`);
+		let t0 = performance.now();
+		const perfNow = () => {
+			const d = performance.now() - t0;
+			t0 = performance.now();
+			return d.toFixed(3);
+		};
+
+		const changes = await changeCache(path);
+		console.log(`changes store: ${perfNow()}ms (${path})`);
 		if(changes && changes.type === 'update'){
 			return changes.value;
 		}
 
-		const file = await getFileCached(path);
-		console.log(`file store: ${performance.now()-t0}ms`);
+		const file = await fileCache(path);
+		console.log(`file store: ${perfNow()}ms (${path})`);
 		return file;
 	}
 
