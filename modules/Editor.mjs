@@ -876,6 +876,10 @@ const inlineEditor = (ChangeHandler) => ({
 
 let nothingOpen;
 const showNothingOpen = () => {
+	try{
+		document.getElementById('file-search').style.visibility = "";
+	}catch(e){}
+
 	if (!nothingOpen) {
 		const editorContainer = document.getElementById("editor-container");
 		nothingOpen = document.createElement("div");
@@ -977,6 +981,10 @@ const showFileInEditor = (filename, contents) => {
 
 let binaryPreview;
 const showBinaryPreview = ({ filename, path = "." } = {}) => {
+	try{
+		document.getElementById('file-search').style.visibility = "";
+	}catch(e){}
+
 	if (!binaryPreview) {
 		const editorContainer = document.getElementById("editor-container");
 		binaryPreview = document.createElement("div");
@@ -1096,6 +1104,10 @@ const showBinaryPreview = ({ filename, path = "." } = {}) => {
 
 let systemDocsDOM;
 const showSystemDocsView = ({ filename='', errors=[], op='' }) => {
+	try{
+		document.getElementById('file-search').style.visibility = "";
+	}catch(e){}
+
 	if (!systemDocsDOM) {
 		const editorContainer = document.getElementById("editor-container");
 		systemDocsDOM = SystemDocs();
