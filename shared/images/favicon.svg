@@ -10,13 +10,22 @@
 		</linearGradient>
 	</defs>
 	<style>
+		circle { fill: white; }
+		path {
+			stroke: black; stroke-width: .2;
+			fill:url(#gradient);
+		}
 		.stop1 { stop-color: #5BF; }
 		.stop2 { stop-color: #E04; }
+
 		@media (prefers-color-scheme: dark)  {
+			circle { fill: black; }
+			path { stroke: black; stroke-width: .2;}
 			.stop1 { stop-color: #0FF; }
 			.stop2 { stop-color: #F0C; }
 		}
 	</style>
+	<circle cx="10" cy="10" r="10" />
 	<path d="
 		M 7 18.6
 		C 5.5 18 5 17 5.25 16.5
@@ -31,6 +40,7 @@
 		C 10.6 3.6 10.8 9 10.8 9.5
 		C 10.8 9.9 11 14.8 10.4 16.6
 		C 10 18.3 9 18.9 7 18.6
+		Z
 		M 0 10
 		C 0 16 4 20 10 20
 		C 16 20 20 16 20 10
@@ -38,10 +48,8 @@
 		C 4 0 0 5 0 10
 		Z
 	"
-		fill="url(#gradient)"
-		stroke-opacity="0"
-		stroke-width="0"
 	/>
+	
 </svg>
 
 <!-- 
