@@ -90,7 +90,9 @@ function renderPreview(url, isNew, done){
 		newIframe.classList.remove('not-visible');
 		try {
 			previewDom.removeChild(previewIframe);
-		} catch(e){}
+		} catch(e){
+			console.error(e);
+		}
 		let timer;
 		this.contentWindow.document.addEventListener('keydown', function(event) {
 			if(event.key === 'Control' && event.ctrlKey){
