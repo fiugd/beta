@@ -879,7 +879,9 @@ function newAttachListener(
 		eventName: "contextmenu-select",
 		listener: contextMenuSelectHandler({
 			treeAdd,
+			treeCopy,
 			treeDelete,
+			treeMove,
 			treeRename,
 		}),
 	});
