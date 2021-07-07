@@ -501,14 +501,22 @@ const operationsHandler = ({
 				);
 			},
 			"moveFolder": (detail, op, service) => {
+				const {src, tgt=".", folderName } = detail;
+				if(tgt === src) return { error: "invalid move operation" };
+				op.target = tgt.replace(new RegExp(`${folderName}$`), '');
+				op.source = src;
 			},
 			"copyFile": (detail, op, service) => {
+				debugger;
 			},
 			"copyFolder": (detail, op, service) => {
+				debugger;
 			},
 			"renameFile": (detail, op, service) => {
+				debugger;
 			},
 			"renameFolder": (detail, op, service) => {
+				debugger;
 			},
 			"deleteFile": (detail, op, service) => {
 				const { parent, cwd, filename } = detail;
@@ -518,6 +526,7 @@ const operationsHandler = ({
 				delete op.target;
 			},
 			"deleteFolder": (detail, op, service) => {
+				delete op.target;
 			},
 		};
 		if( Object.keys(swOps).includes(detail?.operation) ){
@@ -536,7 +545,12 @@ const operationsHandler = ({
 					target: event.detail.tgt,
 				}
 			};
-			swOps[detail.operation](event.detail, body.operation, currentService.name);
+			const { error } = swOps[detail.operation](event.detail, body.operation, currentService.name) || {};
+			if(error){
+				console.error('time to reconsider your life..');
+				debugger;
+				return;
+			}
 			const result = await performOperation(updateOp, { body });
 			const updatedService = result?.detail?.result[0];
 			setCurrentService(updatedService);
