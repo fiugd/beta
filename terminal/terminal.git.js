@@ -12,7 +12,7 @@ const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
 	if(stored) return stored;
 	const prompted = prompt(varName);
-	sessionStorage.setItem(varName, prompted);
+	prompted && sessionStorage.setItem(varName, prompted);
 	return prompted;
 };
 const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
