@@ -76,7 +76,8 @@ function renderPreview(url, isNew, done){
 	const previewDom = getDom();
 	previewDom.classList.remove('hidden');
 
-	const previewIframe = previewDom.querySelector('iframe');
+	const allPreviewIframes = Array.from(previewDom.querySelectorAll('iframe'))
+	const previewIframe = allPreviewIframes.slice(-1)[0];
 	/*
 	if(currentFrame === url){
 		//setTimeout(() => { previewIframe.src += '' }, 300);
