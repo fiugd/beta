@@ -101,6 +101,24 @@ const commands = [
 		}),
 	},
 	{
+		name: 'Copy',
+		keyword: 'cp',
+		listenerKeys: [],
+		description: 'Copy from [SOURCE] to [DESTINATION]',
+		event: ["copyFile", "copyFolder"],
+		usage: '[SOURCE] [DESTINATION]',
+		args: [
+			{ name: 'source', type: String, required: true },
+			{ name: 'dest', type: Boolean, required: true },
+		],
+		argsGet: ([ source, dest ]) => ({ source, dest }),
+		map: (args) => ({
+			...args,
+			src: args.source,
+			tgt: args.dest
+		}),
+	},
+	{
 		name: 'Touch',
 		keyword: "touch",
 		description: `Official usage: updates timestamp of FILE. Used here: creates a FILE; does not affect timestamp of FILE.`,

@@ -4,6 +4,17 @@
 started: 2021-04-20
 release: TBD
 
+1. . and .. needs to work properly (as noted)
+2. .keep files seem to not be created for new folder
+3. terminal commands do not terminate properly
+4. copy is not hooked up in tree
+5. cp is not present in terminal
+6. sw freaks and app doesn't crash well: for example, with dragging a file from one new folder to another
+7. rename file and folder need to be verified
+8. commits!
+
+
+
 - delete
 	- [ ] handle delete files for commit
 	- [ ] handle delete folders for commit
@@ -14,14 +25,14 @@ release: TBD
 	- [ ] copy works with commit
 
 - move
-	- [ ] mv command works properly for files
-	- [ ] mv command works properly for folders
 	- [ ] move works with commit
 
 - [ ] paths which include ".." or "." work for all commands
 
 
 ----
+- [X] mv command works properly for files
+- [X] mv command works properly for folders
 - [X] preview help documentation
 - [X] preview should support wildcards, ie. \*.md
 - [X] preview with no arguments should preview current file (like old preview)
