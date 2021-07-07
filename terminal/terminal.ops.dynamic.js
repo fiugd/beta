@@ -51,35 +51,34 @@ const updateSWCache = (bins) => {
 	`.replace(/^\t+/gm, '').trim());
 };
 
-const debounce = (func, wait) => {
-		var timeout;
-		var callCount=0;
-		var timePassed;
+const debounce = (func, wait, throttle) => {
+	var timeout;
+	var callCount=0;
+	var throttleTime;
+	var args;
 
-		return async function() {
-			callCount++;
-			var context = this;
-			var args = arguments;
-			var later = function() {
-				if(callCount > 1){
-					console.log('--- TRAILING EDGE');
-					func.apply(context, args);
-				}
-				timeout = null;
-				callCount = 0;
-			};
-			if(!timePassed){
-			
-			}
-			var callNow = !timeout;
-			clearTimeout(timeout);
-			timeout = setTimeout(later, wait);
-			if (callNow){
-				console.log('--- LEADING EDGE');
-				func.apply(context, args);
-			}
+	return function() {
+		callCount++;
+		var context = this;
+		args = arguments;
+
+		var later = function() {
+			if(callCount > 1) func.apply(context, args);
+			timeout = null;
+			callCount = 0;
 		};
+
+		if(!timeout) throttleTime = performance.now();
+
+		if(throttle && timeout && (performance.now() - throttleTime) > throttle){
+			func.apply(context, args);
+			throttleTime = performance.now();
+		}
+
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
 	};
+};
 
 class ProcessWorker {
 	header = `
@@ -166,7 +165,9 @@ class ProcessWorker {
 						return finish(resolve);
 					}
 				};
-				const listener = (eventName) => debounce(runOperation(eventName), 500);
+				const debounceTime = 1000;
+				const throttleTime = 300;
+				const listener = (eventName) => debounce(runOperation(eventName), debounceTime, throttleTime);
 				await listener('init')(args);
 				if(!args.watch) return;
 
@@ -208,7 +209,7 @@ class ProcessWorker {
 						type: "events", eventName, ...args
 					});
 				};
-				const listener = (eventName) => debounce(messagePost(eventName), 500);
+				const listener = (eventName) => debounce(messagePost(eventName), debounceTime, throttleTime);
 				const listenTo = ['fileChange', 'fileSelect'];
 				for (const eventName of listenTo) {
 					const response = await attach({
