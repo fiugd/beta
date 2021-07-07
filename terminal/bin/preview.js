@@ -7,6 +7,7 @@ let matchedFile;
 let currentFrame;
 
 let dismissPreview = () => {};
+const previews = [];
 
 function wildcardToRegExp(s) {
 	function regExpEscape (s) {
@@ -68,29 +69,36 @@ const getDom = (() => {
 		quitButton.addEventListener("click", quitClick, false);
 		quitButton.addEventListener('contextmenu', quitClick, false);
 
+		previews.push(previewDom.querySelector('iframe'));
+
 		return previewDom;
 	};
 })();
+
 
 function renderPreview(url, isNew, done){
 	const previewDom = getDom();
 	previewDom.classList.remove('hidden');
 
-	const allPreviewIframes = Array.from(previewDom.querySelectorAll('iframe'))
-	const previewIframe = allPreviewIframes.slice(-1)[0];
-	/*
+	const previewIframe = previews.shift();
+	const newIframe = document.createElement('iframe');
+	previews.push(newIframe);
+
+	/* CAUSES FLASHES
 	if(currentFrame === url){
 		//setTimeout(() => { previewIframe.src += '' }, 300);
 		previewIframe.contentWindow.location.reload();
 		return;
 	}*/
-	const newIframe = document.createElement('iframe');
+
 	newIframe.classList.add('not-visible');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	newIframe.onload=function(){
 		newIframe.classList.remove('not-visible');
 		try {
-			previewDom.removeChild(previewIframe);
+			previewIframe.classList.add('not-visible');
+			if(previewIframe.parentNode){
+				previewIframe.parentNode.removeChild(previewIframe);
 		} catch(e){
 			console.error(e);
 		}
@@ -168,7 +176,7 @@ function renderPreview(url, isNew, done){
 
 		newIframe.remove();
 		newIframe.src = 'about:blank';
-		previewDom.append(newIframe);
+		previewDom.prepend(newIframe);
 
 		currentFrame=undefined;
 		setTimeout(() => {
