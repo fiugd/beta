@@ -167,7 +167,7 @@ function renderPreview(url, isNew, done){
 
 		currentFrame=undefined;
 		setTimeout(() => {
-			done('\n\n');
+			done('\n');
 		},1);
 	};
 }

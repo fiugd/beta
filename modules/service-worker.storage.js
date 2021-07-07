@@ -389,12 +389,13 @@
 	}
 
 	let changeCache, fileCache;
+	let cacheTTL = 250;
 	async function getFile(path){
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 
-		changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), 1000);
-		fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), 1000);
+		changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), cacheTTL);
+		fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
 
 		let t0 = performance.now();
 		const perfNow = () => {
