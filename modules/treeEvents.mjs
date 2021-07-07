@@ -282,7 +282,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 };
 
 const contextMenuSelectHandler = ({
-	treeAdd, treeRename, treeDelete
+	treeAdd, treeRename, treeDelete, treeMove, treeCopy
 }) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
@@ -310,11 +310,23 @@ const contextMenuSelectHandler = ({
 		clipboard = { operation: 'copy', data };
 	}
 	if(which === 'Paste'){
-		clipboard.operation === 'cut'
+		const isMove = clipboard.operation === 'cut';
+		const parent = data.type === 'file'
+			? data.parent.path
+			: data.path;
+		clipboard = undefined;
+
+		isMove
 			? console.log(`paste should be a move`)
 			: console.log(`paste should be an add`)
-		console.log({ clipboard, data })
-		clipboard = undefined;
+		console.log({ clipboard, data });
+
+		if(isMove){
+			treeMove(data.type, data.name, parent);
+		} else {
+			treeCopy(data.type, data.name, parent);
+		}
+		return;
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
@@ -791,7 +803,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 function newAttachListener(
 	UpdateTree,
 	{
-		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext,
+		treeAdd, treeDelete, treeSelect, treeMove, treeCopy, treeRename, treeContext,
 		treeChange, treeClearChanged,
 		showSearch, updateTreeMenu, showServiceChooser
 	}
