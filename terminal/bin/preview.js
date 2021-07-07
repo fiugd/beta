@@ -165,6 +165,9 @@ function renderPreview(url, isNew, done){
 		e.stopPropagation();
 		return false;
 	}, false);
+	quitButton.addEventListener('contextmenu', function(e) {
+		e.preventDefault();
+	}, false);
 }
 
 function updatePreview(args, done) {
