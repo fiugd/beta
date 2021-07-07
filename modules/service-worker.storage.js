@@ -388,14 +388,14 @@
 		return new Proxy(fn, { apply });
 	}
 
-	let getChange, getFile;
+	let getChangeCached, getFileCached;
 	async function getFile(path){
 		const t0 = performance.now();
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 
-		getChange = getChange || cacheFn(changesStore.getItem.bind(changesStore), 1000);
-		getFile = getFile || cacheFn(filesStore.getItem.bind(filesStore), 1000);
+		getChangeCached = getChangeCached || cacheFn(changesStore.getItem.bind(changesStore), 1000);
+		getFileCached = getFileCached || cacheFn(filesStore.getItem.bind(filesStore), 1000);
 
 		const changes = await getChange(path);
 		console.log(`changes store: ${performance.now()-t0}ms`);
