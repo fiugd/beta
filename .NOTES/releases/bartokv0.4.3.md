@@ -30,6 +30,8 @@ release: TBD
 
 - [ ] paths which include ".." or "." work for all commands
 
+- [ ] delay occurs before editor loads sometimes
+	- issue seems to occur because of file store get
 
 ----
 - [X] mv command works properly for files
@@ -37,7 +39,6 @@ release: TBD
 - [X] preview help documentation
 - [X] preview should support wildcards, ie. \*.md
 - [X] preview with no arguments should preview current file (like old preview)
-- [X] delay occurs before editor loads sometimes
 - [X] context menu for editor
 - [X] preview as a terminal command vs a menu item
 	- preview should honor selected file when service switched (may not do this)

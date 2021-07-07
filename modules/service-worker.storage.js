@@ -361,16 +361,26 @@
 		});
 	}
 
+	/* TODO:
+		file get runs slower here versus previous version
+		is this the problem? potential issues
+		local forage has to JSON.parse change store items to get the value
+		changes store has to be queried before file store can be checked
+		file store is huge because of policy of pulling all repo items
+	*/
 	async function getFile(path){
+		const t0 = performance.now();
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 
 		const changes = await changesStore.getItem(path);
+		console.log(`changes store: ${performance.now()-t0}ms`);
 		if(changes && changes.type === 'update'){
 			return changes.value;
 		}
 
 		const file = await filesStore.getItem(path);
+		console.log(`file store: ${performance.now()-t0}ms`);
 		return file;
 	}
 
