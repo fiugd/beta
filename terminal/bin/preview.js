@@ -80,7 +80,7 @@ function renderPreview(url, isNew, done){
 		} catch(e){}
 		let timer;
 		this.contentWindow.document.addEventListener('keydown', function(event) {
-			if(!event.key && event.ctrlKey){
+			if(event.key === 'Control' && event.ctrlKey){
 				previewDom.classList.add('show-controls');
 				event.preventDefault();
 			}
