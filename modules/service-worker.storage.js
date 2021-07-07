@@ -368,18 +368,42 @@
 		changes store has to be queried before file store can be checked
 		file store is huge because of policy of pulling all repo items
 	*/
+	function cacheFn(fn, ttl) {
+		const cache = {}
+
+		const apply = (target, thisArg, args) => {
+			const key = target.name;
+			cache[key] = cache[key] || {}
+			const argsKey = args.toString()
+			const cachedItem = cache[key][argsKey];
+			if (cachedItem) return cachedItem;
+
+			cache[key][argsKey] = target.apply(thisArg, args);
+			setTimeout(() => {
+				delete cache[key][argsKey];
+			}, ttl);
+			return cache[key][argsKey];
+		};
+
+		return new Proxy(fn, { apply });
+	}
+
+	let getChange, getFile;
 	async function getFile(path){
 		const t0 = performance.now();
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 
-		const changes = await changesStore.getItem(path);
+		getChange = getChange || cacheFn(changesStore.getItem.bind(changesStore), 1000);
+		getFile = getFile || cacheFn(filesStore.getItem.bind(filesStore), 1000);
+
+		const changes = await getChange(path);
 		console.log(`changes store: ${performance.now()-t0}ms`);
 		if(changes && changes.type === 'update'){
 			return changes.value;
 		}
 
-		const file = await filesStore.getItem(path);
+		const file = await getFile(path);
 		console.log(`file store: ${performance.now()-t0}ms`);
 		return file;
 	}

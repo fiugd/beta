@@ -6,6 +6,8 @@ let matcher;
 let matchedFile;
 let currentFrame;
 
+let dismissPreview = () => {};
+
 function wildcardToRegExp(s) {
 	function regExpEscape (s) {
 		return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
@@ -55,6 +57,15 @@ const getDom = (() => {
 		quitButton.innerHTML = 'QUIT';
 		quitButton.id = 'quit-preview';
 		previewDom.append(quitButton);
+
+		const quitClick = (e) => {
+			setTimeout(dismissPreview, 1);
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		};
+		quitButton.addEventListener("click", quitClick, false);
+		quitButton.addEventListener('contextmenu', quitClick, false);
 
 		return previewDom;
 	};
@@ -142,8 +153,8 @@ function renderPreview(url, isNew, done){
 		previewDom.prepend(newIframe);
 		currentFrame=url;
 	}
-	
-	const dismissPreview = () => {
+
+	dismissPreview = () => {
 		currentFile = undefined;
 		matchedFile = undefined;
 		matcher = undefined;
@@ -157,15 +168,6 @@ function renderPreview(url, isNew, done){
 		currentFrame=undefined;
 		done('\n\n');
 	};
-
-	const quitClick = (e) => {
-		setTimeout(dismissPreview, 1);
-		e.preventDefault();
-		e.stopPropagation();
-		return false;
-	};
-	quitButton.addEventListener("click", quitClick, false);
-	quitButton.addEventListener('contextmenu', quitClick, false);
 }
 
 function updatePreview(args, done) {
