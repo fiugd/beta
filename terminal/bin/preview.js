@@ -35,7 +35,8 @@ const getDom = (() => {
 					position: absolute; left:0; top:0; width: 100%; height: 100%;
 					border: 0;
 				}
-				.hidden { visibility: hidden; }
+				.hidden { display: none; }
+				.not-visible { visibility: hidden; }
 				#quit-preview {
 					position: absolute;
 					bottom: 10px;
@@ -83,11 +84,10 @@ function renderPreview(url, isNew, done){
 		return;
 	}*/
 	const newIframe = document.createElement('iframe');
-	newIframe.classList.add('hidden');
+	newIframe.classList.add('not-visible');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';
 	newIframe.onload=function(){
-
-		newIframe.classList.remove('hidden');
+		newIframe.classList.remove('not-visible');
 		try {
 			previewDom.removeChild(previewIframe);
 		} catch(e){}
