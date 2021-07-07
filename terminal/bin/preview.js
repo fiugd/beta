@@ -76,11 +76,12 @@ function renderPreview(url, isNew, done){
 	previewDom.classList.remove('hidden');
 
 	const previewIframe = previewDom.querySelector('iframe');
+	/*
 	if(currentFrame === url){
 		//setTimeout(() => { previewIframe.src += '' }, 300);
 		previewIframe.contentWindow.location.reload();
 		return;
-	}
+	}*/
 	const newIframe = document.createElement('iframe');
 	newIframe.classList.add('hidden');
 	newIframe.sandbox = 'allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox';

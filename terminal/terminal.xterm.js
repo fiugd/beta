@@ -24,9 +24,25 @@ export default () => {
 	fit();
 
 	/*
-	term.loadAddon(new WebLinksAddon({
-		handler: (e, uri) => alert(`Attempt to navigate to: ${uri}`)
-	}));
+	const linkHandler = (e, uri) => alert(`Attempt to navigate to: ${uri}`)
+	const linkMatcherOpts = {};
+	//https://xtermjs.org/docs/api/terminal/interfaces/ilinkmatcheroptions/
+
+	term.loadAddon(new WebLinksAddon(linkHandler, linkMatcherOpts));
+	
+	https://github.com/xtermjs/xterm.js/pull/538
+	https://npmdoc.github.io/node-npmdoc-xterm/build/apidoc.html#apidoc.module.xterm.Linkifier
+	https://github.com/xtermjs/xterm-addon-web-links
+
+	https://github.com/xtermjs/xterm-addon-web-links/blob/master/src/WebLinksAddon.ts
+	would love for links back to the main part of app:
+		- git diff could use this, esp.
+		- could be useful for ls command, etc
+
+	import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+	ansiEscapes.link(text, url)
+	- not sure xterm.js supports this yet, though
+
 	*/
 	term.loadAddon(new WebLinksAddon());
 
