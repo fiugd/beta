@@ -159,10 +159,12 @@ function renderPreview(url, isNew, done){
 	};
 
 	// CTRL-C ???
-	quitButton.onclick = (e) => {
+	quitButton.addEventListener("click", (e) => {
 		setTimeout(dismissPreview, 1);
 		e.preventDefault();
-	};
+		e.stopPropagation();
+		return false;
+	}, false);
 }
 
 function updatePreview(args, done) {
