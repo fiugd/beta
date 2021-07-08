@@ -837,7 +837,7 @@ const inlineEditor = (ChangeHandler) => ({
 		if(docHasChanged) cmDom.style.opacity = 0;
 		const { text } = editorOptions;
 		window.Editor._cleanup && window.Editor._cleanup();
-		
+
 		const callback = (err) => {
 			if(err) return;
 			editorCallback(null, window.Editor);

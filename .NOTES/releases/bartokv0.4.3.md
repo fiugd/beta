@@ -12,23 +12,25 @@ release: TBD
 - [ ] sw freaks and app doesn't crash well:
 - [ ] with dragging a file from one new folder to another new folder
 - [ ] rename file and folder need to be verified
+
 - [ ] commits
+	- delete
+		- [ ] handle delete files for commit
+		- [ ] handle delete folders for commit
+	- copy 
+		- [ ] handle copy files for commit
+		- [ ] handle copy folders for commit
+	- move
+		- [ ] handle move files for commit
+		- [ ] handle move folders for commit
 
-
-
-- delete
-	- [ ] handle delete files for commit
-	- [ ] handle delete folders for commit
-
-- copy 
-	- [ ] cp command works properly for files
-	- [ ] cp command works properly for folders
-	- [ ] copy works with commit
-
-- move
-	- [ ] move works with commit
+- [ ] cp command works properly for files
+- [ ] cp command works properly for folders
 
 - [ ] paths which include ".." or "." work for all commands
+
+- [ ] on editor scroll, show page overlay for a moment then disappear
+- [ ] preview: if current doc matches matcher, show it after preview command exec'ed
 
 - [ ] delay occurs before editor loads sometimes
 	- issue seems to occur because of file store get

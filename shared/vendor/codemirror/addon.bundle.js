@@ -1732,7 +1732,7 @@ this file is a bundle of many search addons
 	let colors;
 	const fontSize = 1.85;
 	const fontWidth = fontSize * .55;
-	const leftMargin = 10;
+	const leftMargin = 5;
 
 	const tokenlist = [
 		"#text", "#space", "comment", "string", "string-2", "number", "variable", "variable-2",
