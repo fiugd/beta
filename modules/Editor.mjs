@@ -719,6 +719,9 @@ const inlineEditor = (ChangeHandler) => ({
 			editor.off("scrollCursorIntoView", onScrollCursor);
 			editor.off("fold", foldHandler);
 			editor.off("unfold", unfoldHandler);
+
+			const sidebarCanvas = document.querySelector('.cm-sidebar canvas');
+			sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
 		};
 
 		const MIN_DOC_FOLD_LENGTH = 150;

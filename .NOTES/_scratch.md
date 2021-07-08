@@ -25,6 +25,7 @@ personal information store
 - [ ] better "first view" for people that are new
 - [ ] better loading view
 - [X] favicon
+	- https://austingil.com/svg-favicons/
 
 - [ ] switching between services is awkward
 
