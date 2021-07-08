@@ -777,6 +777,7 @@ const inlineEditor = (ChangeHandler) => ({
 		// scrollbarStyle: 'native',
 		tabSize,
 		indentWithTabs,
+		smartIndent: false,
 		showInvisibles: true,
 		styleActiveLine: true,
 		styleActiveSelected: true,
