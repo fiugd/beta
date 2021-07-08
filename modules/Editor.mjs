@@ -116,25 +116,27 @@ const Search = () => {
 			#file-search {
 				visibility: hidden;
 				position: absolute;
-				background: var(--theme-subdued-color);
-				z-index: 5;
-				right: 0;
-				width: 95%;
-				height: 33px;
-				max-width: 38em;
-				box-shadow: 0 5px 3px 0px #000000;
-				border-left: 3px solid var(--main-theme-background-color);
+				background: var(--main-theme-color);
+				height: 34px;
+				box-shadow: inset 0px -2px 0px 0px var(--theme-subdued-color);
+				/* border: 3px solid var(--main-theme-color); */
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
 				cursor: default;
-				margin-right: 0.65em;
+				border-bottom: 6px solid var(--main-theme-color);
+				box-sizing: content-box;
+				right: 8px;
+				left: 0;
+				width: auto;
+				padding: 0.45em;
+				z-index: 10;
 			}
 			.collapse-handle {
-				width: 1.3em;
+				width: 1.5em;
 				text-align: center;
 				font-stretch: expanded;
-				font-family: monospace;
+				font-family: system-ui, monospace;
 				font-size: 1.2em;
 			}
 			.search-field {
@@ -161,18 +163,19 @@ const Search = () => {
 			}
 			.search-count,
 			.search-no-results {
-				margin-left: 0.5em;
+				margin-left: 1.2em;
 				margin-right: auto;
 				min-width: 5em;
 			}
 			.search-controls {
-				margin-right: 1em;
+				margin-right: 0.5em;
+				margin-left: 1em;
 				font-family: system-ui, monospace;
 				font-size: 1.1em;
 				user-select: none;
 			}
 			.search-controls span {
-				min-width: .8em;
+				min-width: 1.4em;
 				display: inline-block;
 				cursor: pointer;
 				text-align: center;
@@ -665,11 +668,6 @@ const inlineEditor = (ChangeHandler) => ({
 		}
 		callback && callback();
 		window.Editor = editor;
-		
-		if(editor.options.miniMap){
-			const searchDiv = document.querySelector('#file-search');
-			searchDiv && (searchDiv.style.right = '100px');
-		}
 
 		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
 		editor.setOption("styleActiveLine", { nonEmpty: true });

@@ -4,15 +4,15 @@
 started: 2021-04-20
 release: TBD
 
-1. . and .. needs to work properly (as noted)
-2. .keep files seem to not be created for new folder
-3. terminal commands do not terminate properly
-4. [X] copy is not hooked up in tree
-5. [X] cp is not present in terminal
-6. sw freaks and app doesn't crash well:
-	- with dragging a file from one new folder to another new folder
-7. rename file and folder need to be verified
-8. commits!
+- [ ] . and .. needs to work properly (as noted)
+- [ ] .keep files seem to not be created for new folder
+- [ ] terminal commands do not terminate properly
+- [X] copy is not hooked up in tree
+- [X] cp is not present in terminal
+- [ ] sw freaks and app doesn't crash well:
+- [ ] with dragging a file from one new folder to another new folder
+- [ ] rename file and folder need to be verified
+- [ ] commits
 
 
 

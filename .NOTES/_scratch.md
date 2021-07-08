@@ -1,4 +1,3 @@
-
 https://gist.github.com/xavierfoucrier/c156027fcc6ae23bcee1204199f177da
 
 https://phiresky.github.io/blog/2021/hosting-sqlite-databases-on-github-pages/
@@ -16,7 +15,7 @@ personal information store
 ---------------
 - [X] straighten the way that files are stored in service worker (full path for id)
 - [ ] templates that work across services
-- [ ] fix preview/lock
+- [X] fix preview/lock
 
 - [ ] version endpoint in SW - version and commit hash
 - [ ] https://github.com/marketplace/actions/gh-pages-deploy
@@ -25,7 +24,7 @@ personal information store
 - [ ] load file without service being open
 - [ ] better "first view" for people that are new
 - [ ] better loading view
-- [ ] favicon
+- [X] favicon
 
 - [ ] switching between services is awkward
 
@@ -36,9 +35,9 @@ personal information store
 ---------------
 - [ ] split editor (mutliple editor panes)
 - [ ] editor: diff view
-- [ ] preview performance issues
+- [X] preview performance issues
 - [ ] javascript/modular templates (vs html-only)
-- [ ] terminal watch file
+- [X] terminal watch file
 - [ ] preview hot reloading
 - [ ] dynamic/virtual files (to feed into preview)
 - [ ] settings integration with service worker
@@ -54,10 +53,10 @@ personal information store
 - [ ] package storage (like package.json/node_modules)
 - [ ] share project (zip/torrent)
 - [ ] one template/multiple file extensions supported
-- [ ] connect context menu commands
+- [X] connect context menu commands
 - [ ] connect action bar things
 
-- [ ] minimap
+- [X] minimap
 - [ ] go to line number
 - [ ] all terminal commands working well (like unix)
 - [X] working directory in terminal prompt
@@ -187,11 +186,11 @@ image processing
 
 2020-08-01_1829 TODO
 ====================
-- [IP] trying to get service worker fully fleshed out
-- [1/2] make terminal not rely on callback pattern
+- [X] trying to get service worker fully fleshed out
+- [X] make terminal not rely on callback pattern
 	- [X] instead, it should fire an event and only pop that event off pending queue when answer is heard
-	- [ ] should have a timeout with this
-- [ ] seperate template listening and DOM updating from terminal code
+	- [X] should have a timeout with this
+- [X] seperate template listening and DOM updating from terminal code
 
 
 DEPLOY | VERSION CONTROL
@@ -268,7 +267,7 @@ TIME AS MONEY
 ====================
 
 - [ ] editor collaborative
-- [ ] mini map
+- [X] mini map
 - [ ] download ZIP
 - [ ] react template loading spinner
 - [ ] search in folder
@@ -565,12 +564,12 @@ UNSORTED
 
 - [X] page resize doesn't respect min width for explorer
 - [ ] explorer can be hidden more beautifully, will auto-show and dismiss
-- [ ] terminal/preview can be hidden
+- [X] terminal/preview can be hidden
 - [X] terminal can take up full screen
 
 - [ ] link files - files which store links and show them in preview
 
-- [ ] mini-map / preview within files
+- [X] mini-map / preview within files
 
 - https://12factor.net/ - obey???
 
@@ -641,13 +640,13 @@ UNSORTED
 
 - [ ] spritesheet tool? https://www.leshylabs.com/apps/sstool/
 
-- SVG Editor - https://svg-edit.github.io/svgedit/editor/svg-editor.html
+- SVG Editor - https://github.com/SVG-Edit/svgedit
 - SVG Optimize - http://petercollingridge.appspot.com/svg-editor
 - SVG URL Encoder (for CSS) - https://yoksel.github.io/url-encoder/
 - SVG minifier - https://www.svgminify.com/
 - SVG loading spinners - https://loading.io/spinner/
-- VERY COOL TOOL: https://danmarshall.github.io/google-font-to-svg-path/
-- WORKS GREAT WITH: https://svg-edit.github.io/svgedit/editor
+- Font To SVG Path: https://danmarshall.github.io/google-font-to-svg-path/
+- SVG Path Editor: https://yqnn.github.io/svg-path-editor/
 
 - ascii text
 - http://patorjk.com/software/taag/#p=testall&f=Graffiti&t=notes
@@ -724,39 +723,39 @@ languages, syntax highlighting, etc
 - bootstrapping a forth - https://news.ycombinator.com/item?id=24452741
 
 highest paid:
-	- Scala
-	- [X] Clojure
-	- [X] Go
-	- [X] Erlang
-	- [X] WebAssembly
-	- [X] Kotlin
-	- [X] Rust,
-	- [X] F#
-	- [X] Elixir
+- [ ] Scala
+- [X] Clojure
+- [X] Go
+- [X] Erlang
+- [X] WebAssembly
+- [X] Kotlin
+- [X] Rust,
+- [X] F#
+- [X] Elixir
 
 most popular:
-	- [X] Javascript
-	- [X] Python
-	- [X] Java
-	- [X] PHP
-	- [X] C#
-	- [X] C++
-	- [X] TypeScript
-	- [ ] Shell
-	- [ ] C
-	- [X] Ruby
+- [X] Javascript
+- [X] Python
+- [X] Java
+- [X] PHP
+- [X] C#
+- [X] C++
+- [X] TypeScript
+- [ ] Shell
+- [ ] C
+- [X] Ruby
 
 fast growth:
-	- [X] Dart         532%
-	- [X] Rust         235%
-	- [ ] HCL          213% (config)
-	- [X] Kotlin       182%
-	- [X] TypeScript   161%
-	- [ ] PowerShell   154%
-	- [ ] Apex         154% (salesforce)
-	- [X] Python       151%
-	- [ ] Assembly     149%
-	- [X] Go           147%
+- [X] Dart         532%
+- [X] Rust         235%
+- [ ] HCL          213% (config)
+- [X] Kotlin       182%
+- [X] TypeScript   161%
+- [ ] PowerShell   154%
+- [ ] Apex         154% (salesforce)
+- [X] Python       151%
+- [ ] Assembly     149%
+- [X] Go           147%
 
 web workers
 ===========
@@ -814,7 +813,8 @@ graphs on the fly
 - a ton more at this HN discussion - https://news.ycombinator.com/item?id=26303784
 
 
-# toObject for a class with getters -https://www.typescriptlang.org/play?#code/MYGwhgzhAEBCkFNoG8BQBIAZpYYAmCA-AFzQQAuATgJYB2A5gNoC6GoA9rUgLzQAUAB0rsBEEmSp0mzAJTRuAPmgApAMoB5AHIA6AWEoQEfNVu0UaDapgCefcgAtqEADTQhIiDJmoM5dic15fjlFaAcnbWwIXAJCbUoEPABXYCM+diTyYjBaa1d3AWJzKRClNHR0DPJGAuYgu0cYSGgc6xka4QFWCoTyJMpaaCqMAF9XZBHvEZ9QSBgAWXZgAGtoBAAPcgRaPBh4QxQMKJieaEYAcjwwLfPXc8ocvHYAW1voc9p2cgBRdadyc7degIcjQK5bPgycroXr9QZcADu0AAItcjDJtH4AJIaVSSBiQswCEDUch8ABEABVye0AAzdaboYGgh47F6Q6GwgbQebXezxR7s7zoRmfH5-CiQw49EFw96Ydjsc6jVDTVDATgUaCYYQAL22QURPKWy0hAG4fAB6S0a2gQdggBDaEDseh8dQAIwAVghgORtMz1AjaAAFToISjkazIhDRGgCPwGPiLFa6YR+KMCBBeGaah1Ol1ugJmfH0Ky2HXsfW0Vy0JIgECuABMOaAA
+# toObject for a class with getters
+- [example](https://www.typescriptlang.org/play?#code/MYGwhgzhAEBCkFNoG8BQBIAZpYYAmCA-AFzQQAuATgJYB2A5gNoC6GoA9rUgLzQAUAB0rsBEEmSp0mzAJTRuAPmgApAMoB5AHIA6AWEoQEfNVu0UaDapgCefcgAtqEADTQhIiDJmoM5dic15fjlFaAcnbWwIXAJCbUoEPABXYCM+diTyYjBaa1d3AWJzKRClNHR0DPJGAuYgu0cYSGgc6xka4QFWCoTyJMpaaCqMAF9XZBHvEZ9QSBgAWXZgAGtoBAAPcgRaPBh4QxQMKJieaEYAcjwwLfPXc8ocvHYAW1voc9p2cgBRdadyc7degIcjQK5bPgycroXr9QZcADu0AAItcjDJtH4AJIaVSSBiQswCEDUch8ABEABVye0AAzdaboYGgh47F6Q6GwgbQebXezxR7s7zoRmfH5-CiQw49EFw96Ydjsc6jVDTVDATgUaCYYQAL22QURPKWy0hAG4fAB6S0a2gQdggBDaEDseh8dQAIwAVghgORtMz1AjaAAFToISjkazIhDRGgCPwGPiLFa6YR+KMCBBeGaah1Ol1ugJmfH0Ky2HXsfW0Vy0JIgECuABMOaAA)
 
 # langauge features I am curious about
 - specs (clojure) https://clojure.org/guides/spec
