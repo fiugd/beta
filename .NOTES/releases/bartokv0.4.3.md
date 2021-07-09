@@ -6,10 +6,8 @@ release: TBD
 
 - [ ] .keep files seem to not be created for new folder
 - [ ] terminal commands do not terminate properly
-- [X] copy is not hooked up in tree
-- [X] cp is not present in terminal
 - [ ] sw freaks and app doesn't crash well:
-- [ ] with dragging a file from one new folder to another new folder
+	- [ ] with dragging a file from one new folder to another new folder
 - [ ] rename file and folder need to be verified
 - [ ] . and .. needs to work properly (as noted)
 
@@ -36,6 +34,8 @@ release: TBD
 	- issue seems to occur because of file store get
 
 ----
+- [X] copy is not hooked up in tree
+- [X] cp is not present in terminal
 - [X] mv command works properly for files
 - [X] mv command works properly for folders
 - [X] preview help documentation
