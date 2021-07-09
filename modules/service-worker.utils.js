@@ -39,7 +39,10 @@
 		const queue = [];
 		const recurse = (branch, parent = "/") => {
 			Object.keys(branch)
-				.filter(x => !!x && typeof x === "object" && !Array.isArray(x))
+				.filter(x => {
+					const o=branch[x];
+					return !!o && typeof o === "object" && !Array.isArray(o);
+				})
 				.forEach((key) => {
 					const children = Object.keys(branch[key]);
 					if (!children || !children.length) {
@@ -93,12 +96,12 @@
 				if(x.slice(0,2) === './') return x.replace(/^\.\//, '/');
 				return '/' + x;
 			});
-
 		const addKeepFiles = treeFlat.reduce((all, one, i, array) => {
 			const found = array.filter((x) => x !== one && x.startsWith(one));
 			if(found.length === 0 && !treeFiles.includes(one)) all.push(one);
 			return all;
 		}, []);
+
 		return treeFlat.map(
 			x => addKeepFiles.includes(x)
 				? x + '/.keep'
