@@ -211,7 +211,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
 		https://josephkhan.me/how-to-cancel-a-fetch-request/
 		*/
-		
+
 		const loadAsync = async () => {
 			if(!name) return;
 			if(currentDoc && path === currentDoc.path){
@@ -229,13 +229,14 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 				perf.track('editor store get');
 			}
 			if(!storedDoc){
+				//TODO: try getting this directly from doc store instead
 				text = await fetch(path).then(x => x.text());
 				perf.track('file store get');
 			}
 
 			if(currentDoc.path !== path) return callback('cancel loading');
 
-			this.setValue(storedDoc ? storedDoc.text : text.trim());
+			this.setValue(storedDoc ? storedDoc.text : text);
 			this.doc.clearHistory();
 
 			const historyOkay = storedDoc &&
