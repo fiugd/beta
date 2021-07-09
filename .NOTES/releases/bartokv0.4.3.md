@@ -4,7 +4,6 @@
 started: 2021-04-20
 release: TBD
 
-- [ ] . and .. needs to work properly (as noted)
 - [ ] .keep files seem to not be created for new folder
 - [ ] terminal commands do not terminate properly
 - [X] copy is not hooked up in tree
@@ -12,6 +11,7 @@ release: TBD
 - [ ] sw freaks and app doesn't crash well:
 - [ ] with dragging a file from one new folder to another new folder
 - [ ] rename file and folder need to be verified
+- [ ] . and .. needs to work properly (as noted)
 
 - [ ] commits
 	- delete

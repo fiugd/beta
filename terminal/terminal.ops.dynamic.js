@@ -138,6 +138,7 @@ class ProcessWorker {
 			resolve();
 			this.exit();
 		};
+		const debounceTime = 300;
 
 		const promise = new Promise(async (resolve) => {
 			const module = await this.module;
@@ -158,7 +159,6 @@ class ProcessWorker {
 						return finish(resolve);
 					}
 				};
-				const debounceTime = 300;
 				const listener = (eventName) => debounce(runOperation(eventName), debounceTime);
 				await listener('init')(args);
 				if(!args.watch) return;
