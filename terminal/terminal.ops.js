@@ -221,7 +221,7 @@ const manualCommands = { readFile };
 const changeFolder = (state, folderPath) => {
 	if(!state.cwd || !state.service) return;
 	let newCwd = state.service.trim()+ '/' + pather(
-		cwd.replace(state.service.trim(), ''),
+		state.cwd.replace(state.service.trim(), ''),
 		folderPath
 	);
 	state.cwd = newCwd;
