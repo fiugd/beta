@@ -4,7 +4,7 @@
 started: TBD
 release: TBD
 
-THEME: QUALITY | FINE-TOOTHED COMB
+THEME: PERFORMANCE | QUALITY | FINE-TOOTHED COMB
 SUB-THEMES:
 	- git++
 	- SW++
@@ -46,6 +46,14 @@ SUB-THEMES:
 		- shift to rely strongly on SW state
 	- tree | explorer
 		- anything left from previous iteration?
+
+- [ ] delay occurs before editor loads sometimes
+	- issue seems to occur because of file store get
+- [ ] file change listeners seem to be broken by preview
+	- need details
+- [ ] copy is hooked up in tree
+- [ ] tree(?) fires multiple events
+	- when dragging from one folder to another
 
 ---
 

@@ -4,13 +4,12 @@
 started: 2021-04-20
 release: TBD
 
-- [ ] copy is not hooked up in tree
-
-- [ ] sw freaks and app doesn't crash well:
-	- [ ] with dragging a file from one new folder to another new folder
-- [ ] rename file and folder need to be verified
+- [ ] file content as expected after move/copy operations
+- [ ] file (like .keep) don't show up as ready for commit
 
 - [ ] commits
+	- in short, delete for commits (because add already works)
+	- files in change queue are modified when operations occur
 	- delete
 		- [ ] handle delete files for commit
 		- [ ] handle delete folders for commit
@@ -21,13 +20,10 @@ release: TBD
 		- [ ] handle move files for commit
 		- [ ] handle move folders for commit
 
-- [ ] on editor scroll, show page overlay for a moment then disappear
-- [ ] preview: if current doc matches matcher, show it after preview command exec'ed
-
-- [ ] delay occurs before editor loads sometimes
-	- issue seems to occur because of file store get
-
 ----
+- [X] sw freaks and app doesn't crash well:
+	- [X] with dragging a file from one new folder to another new folder
+- [X] rename file and folder need to be verified
 - [X] paths which include ".." or "." work for all commands
 - [X] cp command works properly for files
 - [X] cp command works properly for folders

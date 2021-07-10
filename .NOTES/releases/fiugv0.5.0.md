@@ -4,6 +4,10 @@
 started: TBD
 release: TBD
 
+- [ ] on editor scroll, show page overlay for a moment then disappear
+- [ ] preview: if current doc matches matcher, show it after preview command exec'ed
+
+
 - [ ] import rewrites in SW with something like this: [lexer](https://github.com/guybedford/es-module-lexer)
 OR
 - [ ] [import maps](https://github.com/WICG/import-maps)
