@@ -155,6 +155,7 @@ const commands = [
 		map: mapFileArg,
 		mapResponse: (res) => ''
 	},
+/*
 	{
 		name: 'Concat',
 		keyword: "cat",
@@ -169,6 +170,7 @@ const commands = [
 			return { file };
 		}
 	},
+*/
 ];
 
 const getStatefulHandlers = (state, { changeFolder }) => ({

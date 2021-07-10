@@ -14,7 +14,7 @@ const operation = async (args) => {
 
 export default class Node {
 	name = 'Concat';
-	keyword = 'cat2';
+	keyword = 'cat';
 	listenerKeys = [];
 	description = description;
 	usage = '[FILE]';
