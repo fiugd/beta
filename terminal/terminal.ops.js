@@ -1,4 +1,19 @@
 import { chalk, jsonColors } from './terminal.utils.js';
+import { pather } from '/shared/modules/utilities.mjs';
+
+const mapFileArg = (args) => {
+	const { cwd, file } = args
+	const target = pather(cwd, file);
+	const filename = target.split('/').pop();
+	const parent = target.split('/').slice(0,-1).join('/');
+	return { ...args, filename };
+};
+const mapSourceDestArg = (args) => {
+	const { cwd, source, dest } = args
+	const src = pather(cwd, source);
+	const tgt = pather(cwd, dest);
+	return { ...args, src, tgt };
+};
 
 const commands = [
 	{
@@ -35,7 +50,13 @@ const commands = [
 		args: [
 			{ name: 'directory', type: String, defaultOption: true, required: true }
 		],
-		map: ({ directory, cwd }) => ({ folderName: directory, parent: '/'+cwd }),
+		map: ({ directory, cwd }) => {
+			const folder = pather(cwd, directory);
+			return {
+				folderName: folder.split('/').pop(),
+				parent: folder.split('/').slice(0,-1).join('/')
+			}
+		},
 		mapResponse: () => '',
 	},
 	// {
@@ -69,54 +90,57 @@ const commands = [
 		name: 'Remove',
 		keyword: "rm",
 		description: "Remove FILE, or DIRECTORY with --recursive (-r) option.",
-		event: ["deleteFile", "deleteFolder"],
+		event: ["deleteFolder","deleteFile"],
 		usage: '[-rf] [FILE|DIRECTORY]',
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true },
 			{ name: 'recursive', type: Boolean, alias: 'r' },
 			{ name: 'force', type: Boolean, alias: 'f' },
 		],
-		map: (args) => ({
-			...args,
-			filename: args.file,
-			parent: args.cwd || ''
-		}),
+		map: mapFileArg,
 		mapResponse: (res) => '',
 	},
 	{
 		name: 'Move',
 		keyword: "mv",
 		description: 'Move SOURCE to DESTINATION.',
-		event: ["moveFile", "moveFolder"],
+		event: ["moveFolder", "moveFile"],
+		eventMap: (args={}) => {
+			const {src} = args;
+			if(!src) return 'moveFile';
+			if(src.endsWith('/')) return 'moveFolder';
+			if(src.includes('.')) return 'moveFile';
+			return 'moveFolder';
+		},
 		usage: '[SOURCE] [DESTINATION]',
 		args: [
 			{ name: 'source', type: String, required: true },
 			{ name: 'dest', type: Boolean, required: true },
 		],
 		argsGet: ([ source, dest ]) => ({ source, dest }),
-		map: (args) => ({
-			...args,
-			src: args.source,
-			tgt: args.dest
-		}),
+		map: mapSourceDestArg,
 	},
 	{
 		name: 'Copy',
 		keyword: 'cp',
 		listenerKeys: [],
 		description: 'Copy from [SOURCE] to [DESTINATION]',
-		event: ["copyFile", "copyFolder"],
+		event: ["copyFolder", "copyFile"],
+		eventMap: (args={}) => {
+			const {src} = args;
+			if(!src) return 'copyFile';
+			if(src.endsWith('/')) return 'copyFolder';
+			if(src.includes('.')) return 'copyFile';
+			return 'copyFolder';
+		},
 		usage: '[SOURCE] [DESTINATION]',
 		args: [
 			{ name: 'source', type: String, required: true },
 			{ name: 'dest', type: Boolean, required: true },
 		],
 		argsGet: ([ source, dest ]) => ({ source, dest }),
-		map: (args) => ({
-			...args,
-			src: args.source,
-			tgt: args.dest
-		}),
+		map: mapSourceDestArg,
+		mapResponse: (res) => '',
 	},
 	{
 		name: 'Touch',
@@ -127,11 +151,7 @@ const commands = [
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true }
 		],
-		map: ({ file, cwd }) => ({
-			filename: file,
-			name: file,
-			parent: cwd || ''
-		}),
+		map: mapFileArg,
 		mapResponse: (res) => ''
 	},
 	{
@@ -143,6 +163,10 @@ const commands = [
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true }
 		],
+		map: (args) => {
+			const { filename: file } = mapFileArg(args);
+			return { file };
+		}
 	},
 ];
 
@@ -258,7 +282,7 @@ const withState = (() => {
 
 async function invokeRaw(args={}, thisCommand){
 	thisCommand = thisCommand || this;
-	const { event, invokeRaw, map: argMapper, comm, mapResponse } = thisCommand;
+	const { event, eventMap, invokeRaw, map: argMapper, comm, mapResponse } = thisCommand;
 	const { response: cwd } = event[0] !== 'showCurrentFolder'
 		? (await invokeRaw.bind({
 				event: ['showCurrentFolder'],
@@ -281,7 +305,9 @@ async function invokeRaw(args={}, thisCommand){
 			type: 'operations',
 			detail: {
 				source: 'TerminalWIP',
-				operation: event[0], //TODO: what if event has more than one item?
+				operation: eventMap
+					? eventMap(mappedArgs)
+					: event[0] || event,
 				...mappedArgs
 			},
 		}
@@ -292,6 +318,14 @@ async function invokeRaw(args={}, thisCommand){
 	if(response && mapResponse){
 		response = mapResponse(response);
 	}
+
+	try {
+		error = response.detail.result.error;
+		error.stack = error.stack
+			.split('\n')
+			.map(x => x.trim());
+	} catch(e){}
+
 	return { error, response };
 }
 

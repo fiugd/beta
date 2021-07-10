@@ -67,6 +67,23 @@ const debounce = (func, wait) => {
 	};
 };
 
+function pather(cwd, path, opts={}){
+	const child = path||'';
+	let parent = (cwd||'').split('/').filter(x=>!!x);
+	if(['~','/'].includes(child[0])){
+		parent = [];
+	}
+	return child.split('/')
+		.filter(x=>!!x)
+		.reduce((all, one) => {
+			if(one === '..') return all.slice(0,-1);
+			if(one === '~') return all;
+			if(one === '.') return all;
+			return [...all, one];
+		}, parent)
+		.join('/');
+}
+
 export {
-	codemirrorModeFromFileType, debounce
+	codemirrorModeFromFileType, debounce, pather
 };

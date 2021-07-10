@@ -4,8 +4,11 @@
 started: 2021-04-20
 release: TBD
 
-- [ ] .keep files seem to not be created for new folder
-- [ ] terminal commands do not terminate properly
+- [ ] copy is not hooked up in tree
+
+- [ ] cp command works properly for files
+- [ ] cp command works properly for folders
+
 - [ ] sw freaks and app doesn't crash well:
 	- [ ] with dragging a file from one new folder to another new folder
 - [ ] rename file and folder need to be verified
@@ -22,8 +25,6 @@ release: TBD
 		- [ ] handle move files for commit
 		- [ ] handle move folders for commit
 
-- [ ] cp command works properly for files
-- [ ] cp command works properly for folders
 
 - [ ] paths which include ".." or "." work for all commands
 
@@ -34,7 +35,8 @@ release: TBD
 	- issue seems to occur because of file store get
 
 ----
-- [X] copy is not hooked up in tree
+- [X] terminal commands do not terminate properly
+- [X] .keep files seem to not be created for new folder
 - [X] cp is not present in terminal
 - [X] mv command works properly for files
 - [X] mv command works properly for folders

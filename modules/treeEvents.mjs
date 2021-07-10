@@ -766,6 +766,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 	const { newTree } = UpdateTree;
 
 	const { id, result, op } = e.detail;
+	if(result?.error) return;
 
 	let selected,
 		expanded = [];

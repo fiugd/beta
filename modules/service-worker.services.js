@@ -249,7 +249,7 @@ const useNew = true;
 			if(!isMove) return operation;
 			let { target, source } = operation;
 			const isFolder = operation.name.includes('Folder');
-			if(isFolder && !target.endsWith('/')) target += '/';
+			//if(isFolder && !target.endsWith('/')) target += '/';
 			if(target.endsWith('/')){
 				target += source.split('/').pop();
 			}

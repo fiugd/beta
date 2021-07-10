@@ -492,19 +492,12 @@ const operationsHandler = ({
 				delete op.source;
 			},
 			"moveFile": (detail, op, service) => {
-				const {src, tgt, parent, cwd } = detail;
-				op.target = stripLeadingSlash(
-					tgt.replace(service+'/', '')
-				);
-				op.source = stripLeadingSlash(
-					`${parent||cwd||service}/${src}`.replace(service+'/', '')
-				);
+				debugger;
 			},
 			"moveFolder": (detail, op, service) => {
-				const {src, tgt=".", folderName } = detail;
-				if(tgt === src) return { error: "invalid move operation" };
-				op.target = tgt.replace(new RegExp(`${folderName}$`), '');
-				op.source = src;
+				const { folderName } = detail;
+				if(op.target === op.source) return { error: "invalid move operation" };
+				op.target = op.target.replace(new RegExp(`${folderName}$`), '');
 			},
 			"copyFile": (detail, op, service) => {
 				debugger;
@@ -519,13 +512,17 @@ const operationsHandler = ({
 				debugger;
 			},
 			"deleteFile": (detail, op, service) => {
-				const { parent, cwd, filename } = detail;
+				const { parent, filename } = detail;
 				op.source = stripLeadingSlash(
-					`${parent||cwd||service}/${filename}`.replace(service+'/', '')
+					`${parent}/${filename}`.replace(service+'/', '')
 				);
 				delete op.target;
 			},
 			"deleteFolder": (detail, op, service) => {
+				const { parent, filename } = detail;
+				op.source = stripLeadingSlash(
+					`${parent}/${filename}`.replace(service+'/', '')
+				);
 				delete op.target;
 			},
 		};
@@ -535,14 +532,15 @@ const operationsHandler = ({
 				'color: yellow;'
 			);
 			const updateOp = allOperations.find((x) => x.name === "update");
-			const currentService = getCurrentService();
+			const currentService = getCurrentService() || { };
+			currentService.name = currentService.name || 'service-not-found'
 			const body = {
 				name: currentService.name,
 				id: currentService.id,
 				operation: {
 					name: event.detail.operation,
-					source: event.detail.src,
-					target: event.detail.tgt,
+					source: event.detail.src.replace(currentService.name+'/', ''),
+					target: event.detail.tgt.replace(currentService.name+'/', ''),
 				}
 			};
 			const { error } = swOps[detail.operation](event.detail, body.operation, currentService.name) || {};
@@ -555,6 +553,7 @@ const operationsHandler = ({
 			const updatedService = result?.detail?.result[0];
 			setCurrentService(updatedService);
 			triggerOperationDone(result);
+			callback && callback(undefined, result);
 			return;
 		}
 

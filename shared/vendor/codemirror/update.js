@@ -6,19 +6,30 @@ const updates = [[
 	`/crosshj/fiug-beta/shared/vendor/codemirror/addon.bundle.js`,
 	`/shared/vendor/codemirror/addon.bundle.js`
 ],[
+	`/crosshj/fiug-beta/shared/modules/utilities.mjs`,
+	`/shared/modules/utilities.mjs`
+],[
 	`/crosshj/fiug-beta/modules/Editor.mjs`,
 	`/_/modules/Editor.mjs`
 ],[
 	`/crosshj/fiug-beta/modules/editorEvents.mjs`,
 	`/_/modules/editorEvents.mjs`
 ],[
+	`/crosshj/fiug-beta/modules/treeEvents.mjs`,
+	`/_/modules/treeEvents.mjs`
+],[
+	`/crosshj/fiug-beta/modules/editorTabsEvents.mjs`,
+	`/_/modules/editorTabsEvents.mjs`
+],[
 	`/crosshj/fiug-beta/modules/operationsEvents.mjs`,
 	`/_/modules/operationsEvents.mjs`
 ],[
 	`/crosshj/fiug-beta/modules/state.mjs`,
 	`/_/modules/state.mjs`
+],[
+	`/crosshj/fiug-beta/terminal/terminal.ops.js`,
+	`/_/modules/terminal/terminal.ops.js`
 ]];
-
 
 const updateCache = async (source, target) => {
 	const bundleText = await fetch(root+source).then(x => x.text());
@@ -34,4 +45,4 @@ for(var i=0, len=updates.length; i<len; i++){
 	await updateCache(...updates[i]);
 }
 
-console.log(`\nupdated:\n ${updates.map(([,x]) => x).join('\n')}`);
+console.log(`\nupdated: \n${updates.map(([,x]) => x).join('\n')}`);

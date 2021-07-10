@@ -320,7 +320,7 @@ describe('update service', ({ beforeEach }) => {
 			operation: {
 				name: 'copyFolder',
 				source: 'source',
-				target: 'target'
+				target: 'target/source'
 			},
 		});
 		const errors = [];
@@ -359,7 +359,7 @@ describe('update service', ({ beforeEach }) => {
 			operation: {
 				name: 'moveFolder',
 				source: 'source',
-				target: 'target'
+				target: 'target/source'
 			},
 		});
 		const errors = [];
