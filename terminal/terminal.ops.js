@@ -119,6 +119,7 @@ const commands = [
 		],
 		argsGet: ([ source, dest ]) => ({ source, dest }),
 		map: mapSourceDestArg,
+		mapResponse: (res) => '',
 	},
 	{
 		name: 'Copy',
