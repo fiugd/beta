@@ -6,13 +6,9 @@ release: TBD
 
 - [ ] copy is not hooked up in tree
 
-- [ ] cp command works properly for files
-- [ ] cp command works properly for folders
-
 - [ ] sw freaks and app doesn't crash well:
 	- [ ] with dragging a file from one new folder to another new folder
 - [ ] rename file and folder need to be verified
-- [ ] . and .. needs to work properly (as noted)
 
 - [ ] commits
 	- delete
@@ -25,9 +21,6 @@ release: TBD
 		- [ ] handle move files for commit
 		- [ ] handle move folders for commit
 
-
-- [ ] paths which include ".." or "." work for all commands
-
 - [ ] on editor scroll, show page overlay for a moment then disappear
 - [ ] preview: if current doc matches matcher, show it after preview command exec'ed
 
@@ -35,6 +28,9 @@ release: TBD
 	- issue seems to occur because of file store get
 
 ----
+- [X] paths which include ".." or "." work for all commands
+- [X] cp command works properly for files
+- [X] cp command works properly for folders
 - [X] terminal commands do not terminate properly
 - [X] .keep files seem to not be created for new folder
 - [X] cp is not present in terminal
