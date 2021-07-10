@@ -4,13 +4,16 @@
 started: TBD
 release: TBD
 
-- [ ] on editor scroll, show page overlay for a moment then disappear
-- [ ] preview: if current doc matches matcher, show it after preview command exec'ed
-
+- [ ] on editor scroll
+	- show page overlay for a moment
+	- then disappear
+- [ ] preview
+	- if current doc matches matcher
+	- show it after preview command exec'ed
 
 - [ ] import rewrites in SW with something like this: [lexer](https://github.com/guybedford/es-module-lexer)
 OR
-- [ ] [import maps](https://github.com/WICG/import-maps)
+- [ ] use [import maps](https://github.com/WICG/import-maps)
 
 - [ ] focus on / zoom to a folder (in explorer)
 - [ ] search has performance issues
@@ -24,13 +27,14 @@ OR
 - [ ] explorer: add expand|collapse
 - [ ] explorer: overscroll seems to not be working
 - [ ] explorer: scroll bar hide/show causes status circle to dance (on Mac)
-- [ ] explorer > right-click > Open In Preview should work with new terminal preview command
+- [ ] explorer > right-click > Open In Preview
+	- should work with new terminal preview command
 
 - [ ] context menu for terminal
 - [ ] terminal passes hotkey events to parent
-  - control-s: save
-  - control-p: open file
-  - control-shift-p: command window
+	- control-s: save
+	- control-p: open file
+	- control-shift-p: command window
 
 - [ ] reveal in sidebar is broken
 - [ ] editor tabs: keep open, pin, reveal in sidebar
@@ -47,7 +51,7 @@ OR
 - [ ] git clone + git pull + status + push (in terminal)
 - [ ] git pull should bring in new changes (okay to reject if changes exist on local)
 - [ ] on repo "clone", don't pull all files
-  - instead get from github as needed (except for templates)
+	- instead get from github as needed (except for templates)
 
 Summary
 =======
@@ -56,39 +60,39 @@ Current State
 =============
 
 ##### meta
-  - [ ] themes fixed
-  - [ ] cleaner loading view
-  - [X] import files
-  - [X] export files
-  - [ ] !!! bartok version at bottom left should be connected to real something
+- [ ] themes fixed
+- [ ] cleaner loading view
+- [X] import files
+- [X] export files
+- [ ] !!! bartok version at bottom left should be connected to real something
 
 ##### paneView
-  - [ ] golden layout or similar for pane splitting
+- [ ] golden layout or similar for pane splitting
 
 ##### explorer
-  - [ ] rename project/service
+- [ ] rename project/service
 
 ##### editor
-  - [ ] auto-detect tabs vs spaces
-  - [ ] linter - https://codemirror.net/demo/lint.html
-  - [ ] show 80 char limit line
-  - [ ] scrolled shadow at top to indicate file is scrolled down
+- [ ] auto-detect tabs vs spaces
+- [ ] linter - https://codemirror.net/demo/lint.html
+- [ ] show 80 char limit line
+- [ ] scrolled shadow at top to indicate file is scrolled down
 
 ##### terminal
-  - [ ] mouse clicks on terminal to select menu items (?)
-  - [ ] loading spinner & done checkmark
-    - https://stackoverflow.com/questions/2685435/cooler-ascii-spinners
-    - http://jsfiddle.net/sindresorhus/2eLtsbey/embedded/result/
-    - https://github.com/sindresorhus/cli-spinners/blob/HEAD/spinners.json
+- [ ] mouse clicks on terminal to select menu items (?)
+- [ ] loading spinner & done checkmark
+	- https://stackoverflow.com/questions/2685435/cooler-ascii-spinners
+	- http://jsfiddle.net/sindresorhus/2eLtsbey/embedded/result/
+	- https://github.com/sindresorhus/cli-spinners/blob/HEAD/spinners.json
 
 ##### server
-  - [ ] deploy pipeline
-    - https://jenkins.io/projects/blueocean/
+- [ ] deploy pipeline
+	- https://jenkins.io/projects/blueocean/
 
 ##### statusBar
 
 ##### serviceMap
-  - https://www.weave.works/oss/scope/
+- https://www.weave.works/oss/scope/
 
 ![image](https://bit.ly/fiugLanscape2)
 
@@ -97,16 +101,16 @@ Current State
 ![image](http://bit.ly/fiugLandscape4)
 
 <style>
-  #container p:first-child img {
-    filter: hue-rotate(377deg) contrast(1.25) saturate(4);
-  }
-  #container p:nth-child(18) img {
-    filter: hue-rotate(53deg) contrast(1.25) saturate(5);
-  }
-  #container p:nth-child(19) img {
-    filter: hue-rotate(0deg) contrast(1.25) saturate(7);
-  }
-  #container p:nth-child(20) img {
-    filter: hue-rotate(132deg) contrast(1.25) saturate(4);
-  }
+	#container p:first-child img {
+		filter: hue-rotate(377deg) contrast(1.25) saturate(4);
+	}
+	#container p:nth-child(18) img {
+		filter: hue-rotate(53deg) contrast(1.25) saturate(5);
+	}
+	#container p:nth-child(19) img {
+		filter: hue-rotate(0deg) contrast(1.25) saturate(7);
+	}
+	#container p:nth-child(20) img {
+		filter: hue-rotate(132deg) contrast(1.25) saturate(4);
+	}
 </style>

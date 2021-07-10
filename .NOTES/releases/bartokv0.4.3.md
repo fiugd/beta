@@ -6,23 +6,13 @@ release: TBD
 
 - [ ] file content as expected after move/copy operations
 - [ ] file (like .keep) don't show up as ready for commit
-
-- [ ] commits
-	- in short, delete for commits (because add already works)
-	- files in change queue are modified when operations occur
-	- delete
-		- [ ] handle delete files for commit
-		- [ ] handle delete folders for commit
-	- copy 
-		- [ ] handle copy files for commit
-		- [ ] handle copy folders for commit
-	- move
-		- [ ] handle move files for commit
-		- [ ] handle move folders for commit
+- [ ] command palette file find -> preview issues
+- [ ] delete for commits (because add already works)
+- [ ] files in change queue are modified when operations occur
 
 ----
 - [X] sw freaks and app doesn't crash well:
-	- [X] with dragging a file from one new folder to another new folder
+	- with dragging a file from one new folder to another new folder
 - [X] rename file and folder need to be verified
 - [X] paths which include ".." or "." work for all commands
 - [X] cp command works properly for files
@@ -55,7 +45,7 @@ release: TBD
 - [X] md/mkdir command works properly
 - [X] syntax highlight broken with editor updates/revert
 - [X] re-enable/fix editor updates from past
-	- [X] editor document state
+	- editor document state
 - [X] cd ../sibling results in parent//sibling (at 1 up from root)
 - [X] terminal has its own cwd not dependent on app cwd
 - [X] cat command works properly
@@ -71,6 +61,6 @@ release: TBD
 - [X] git commit should offer message on success/fail
 - [X] something is messed up about cwd from app (esp for files at root)
 - [X] tabs don't trigger editor properly
-  - this specifically occurs with bartokv0.4.3.md
-  - also occurs in other situations
-  - switch services and come back (seems to trigger this)
+	- this specifically occurs with bartokv0.4.3.md
+	- also occurs in other situations
+	- switch services and come back (seems to trigger this)
