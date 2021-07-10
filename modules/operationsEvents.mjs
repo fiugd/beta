@@ -478,7 +478,7 @@ const operationsHandler = ({
 		const stripLeadingSlash = (s='') => s.startsWith('/') ? s.slice(1) : s;
 		const swOps = {
 			"addFile": (detail, op, service) => {
-				const { parent, name } = detail;
+				const { parent, filename } = detail;
 				op.target = stripLeadingSlash(
 					`${parent}/${filename}`.replace(service+'/', '')
 				);
