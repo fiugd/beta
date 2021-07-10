@@ -6,7 +6,7 @@ const mapFileArg = (args) => {
 	const target = pather(cwd, file);
 	const filename = target.split('/').pop();
 	const parent = target.split('/').slice(0,-1).join('/');
-	return { ...args, filename };
+	return { ...args, filename, parent };
 };
 const mapSourceDestArg = (args) => {
 	const { cwd, source, dest } = args

@@ -480,14 +480,14 @@ const operationsHandler = ({
 			"addFile": (detail, op, service) => {
 				const { parent, name } = detail;
 				op.target = stripLeadingSlash(
-					`${parent||service}/${name}`.replace(service+'/', '')
+					`${parent}/${filename}`.replace(service+'/', '')
 				);
 				op.source = "\n";
 			},
 			"addFolder": (detail, op, service) => {
 				const {folderName, parent } = detail;
 				op.target = stripLeadingSlash(
-					`${parent||service}/${folderName}`.replace(service+'/', '')
+					`${parent}/${folderName}`.replace(service+'/', '')
 				);
 				delete op.source;
 			},
