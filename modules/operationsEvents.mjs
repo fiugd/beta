@@ -534,15 +534,21 @@ const operationsHandler = ({
 			const updateOp = allOperations.find((x) => x.name === "update");
 			const currentService = getCurrentService() || { };
 			currentService.name = currentService.name || 'service-not-found'
+	
 			const body = {
 				name: currentService.name,
 				id: currentService.id,
 				operation: {
 					name: event.detail.operation,
-					source: event.detail.src.replace(currentService.name+'/', ''),
-					target: event.detail.tgt.replace(currentService.name+'/', ''),
 				}
 			};
+			try {
+				body.operation.source = event.detail.src.replace(currentService.name+'/', '');
+			} catch(e){}
+			try {
+				body.operation.target = event.detail.tgt.replace(currentService.name+'/', '');
+			} catch(e){}
+	
 			const { error } = swOps[detail.operation](event.detail, body.operation, currentService.name) || {};
 			if(error){
 				console.error('time to reconsider your life..');

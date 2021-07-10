@@ -220,37 +220,12 @@ const manualCommands = { readFile };
 
 const changeFolder = (state, folderPath) => {
 	if(!state.cwd || !state.service) return;
-
-	if(folderPath.slice(0,2) === '..'){
-		//TODO: handle multiple, eg.  '../../'
-		let newCwd = state.cwd.split('/').slice(0,-1).join('/') + folderPath.slice(2);
-		try {
-			if(!newCwd.includes(state.service.trim())) return state.cwd;
-			state.cwd = newCwd;
-		} catch(e){}
-
-		return state.cwd;
-	}
-
-	if(folderPath[0] === '/'){
-		try{
-			if(folderPath.length === 1){
-				state.cwd = state.service.trim();
-				return state.cwd;
-			}
-			state.cwd = state.service.trim() + folderPath;
-		} catch(e) {}
-
-		return state.cwd;
-	}
-
-	if(folderPath.slice(0,2) === './'){
-		state.cwd += folderPath.slice(1);
-		return state.cwd;
-	}
-
-	state.cwd += '/' + folderPath;
-	return state.cwd;
+	let newCwd = state.service.trim()+ '/' + pather(
+		cwd.replace(state.service.trim(), ''),
+		folderPath
+	);
+	state.cwd = newCwd;
+	return newCwd;
 };
 
 const withState = (() => {
