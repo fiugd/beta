@@ -6,11 +6,12 @@ release: TBD
 
 - [ ] file content as expected after move/copy operations
 - [ ] file (like .keep) don't show up as ready for commit
-- [ ] command palette file find -> preview issues
-- [ ] delete for commits (because add already works)
 - [ ] files in change queue are modified when operations occur
 
+- [ ] delete for commits (because add already works)
+
 ----
+- [X] command palette file find -> preview issues
 - [X] sw freaks and app doesn't crash well:
 	- with dragging a file from one new folder to another new folder
 - [X] rename file and folder need to be verified

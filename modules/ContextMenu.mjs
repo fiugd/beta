@@ -115,7 +115,7 @@ function PaletteModal(parentEl) {
 			background: #0d3048;
 		}
 		.palette-suggest ul li:hover {
-			background: rgba(var(--main-theme-highlight-color), 0.1);
+			background: rgba(var(--main-theme-highlight-color), 0.3);
 		}
 		.palette-suggest ul li div {
 			user-select: none;
