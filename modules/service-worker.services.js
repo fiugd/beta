@@ -653,7 +653,7 @@ const useNew = true;
 					? stripFrontDotSlash(filesToDelete[i])
 					: filesToDelete[i];
 				const existingFile = await filesStore.getItem(path);
-				if(existingFile){
+				if(existingFile !== null){
 					await changesStore.setItem(path, {
 						deleteFile: true,
 						service: (() => {
