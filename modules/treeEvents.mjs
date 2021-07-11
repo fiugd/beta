@@ -282,7 +282,7 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 };
 
 const contextMenuSelectHandler = ({
-	treeAdd, treeRename, treeDelete, treeMove, treeCopy
+	treeAdd, treeRename, treeDelete, treeMove
 }) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
@@ -311,9 +311,8 @@ const contextMenuSelectHandler = ({
 	}
 	if(which === 'Paste'){
 		const isMove = clipboard.operation === 'cut';
-		const parent = data.type === 'file'
-			? data.parent.path
-			: data.path;
+		const target = data;
+		const source = clipboard.data;
 		clipboard = undefined;
 
 		isMove
@@ -321,12 +320,13 @@ const contextMenuSelectHandler = ({
 			: console.log(`paste should be an add`)
 		console.log({ clipboard, data });
 
+		// TODO: should update tree, but...
+		// really should trigger file and folder copy/move
 		if(isMove){
-			treeMove(data.type, data.name, parent);
+			treeMove(clipboard.data.type, source, target);
 		} else {
-			treeCopy(data.type, data.name, parent);
+			treeAdd(clipboard.data.type, source, target);
 		}
-		return;
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
@@ -766,7 +766,6 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 	const { newTree } = UpdateTree;
 
 	const { id, result, op } = e.detail;
-	if(result?.error) return;
 
 	let selected,
 		expanded = [];
@@ -804,7 +803,7 @@ const OperationDoneListener = (UpdateTree) => (e) => {
 function newAttachListener(
 	UpdateTree,
 	{
-		treeAdd, treeDelete, treeSelect, treeMove, treeCopy, treeRename, treeContext,
+		treeAdd, treeDelete, treeSelect, treeMove, treeRename, treeContext,
 		treeChange, treeClearChanged,
 		showSearch, updateTreeMenu, showServiceChooser
 	}
@@ -880,7 +879,6 @@ function newAttachListener(
 		eventName: "contextmenu-select",
 		listener: contextMenuSelectHandler({
 			treeAdd,
-			treeCopy,
 			treeDelete,
 			treeMove,
 			treeRename,

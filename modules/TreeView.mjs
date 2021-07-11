@@ -1054,7 +1054,7 @@ function _TreeView(op) {
 	};
 
 	const treeMethods = [
-		'Add', 'Delete', 'Select', 'Copy', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
+		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
 	].reduce((all, one) => {
 			all['tree'+one] = (...args) => {
 				try {
@@ -1088,14 +1088,12 @@ function _TreeView(op) {
 		'fileSelect',
 		'fileAdd',
 		'fileRename',
-		'fileCopy',
 		'fileMove',
 		'fileDelete',
 
 		'folderSelect',
 		'folderAdd',
 		'folderRename',
-		'folderCopy',
 		'folderMove',
 		'folderDelete'
 	].reduce((all, operation) => {
@@ -1109,13 +1107,11 @@ function _TreeView(op) {
 			fileAdd: 'addFile',
 			fileDelete: 'deleteFile',
 			fileRename: 'renameFile',
-			fileCopy: 'copyFile',
 			fileMove: 'moveFile',
 
 			folderAdd: 'addFolder',
 			folderDelete: 'deleteFolder',
 			folderRename: 'renameFolder',
-			folderCopy: 'copyFolder',
 			folderMove: 'moveFolder',
 		};
 		const treeEventHandler = (args) => {
