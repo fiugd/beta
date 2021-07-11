@@ -114,7 +114,6 @@ export const ServiceMock = ({ utils }) => {
 			fileRemove: { key }
 		});
 	};
-
 	deps.storage.stores.changes.keys = async () => {
 		calls.push({
 			changesKeys: Object.keys(changes) 
@@ -127,10 +126,23 @@ export const ServiceMock = ({ utils }) => {
 		});
 		return changes[key];
 	};
+	deps.storage.stores.changes.setItem = async (key, value) => {
+		changes[key] = value;
+		calls.push({
+			changesSet: { key, value }
+		});
+	};
+	deps.storage.stores.changes.removeItem = async (key, value) => {
+		calls.push({
+			changesRemove: { key, value: changes[key] }
+		});
+		delete changes[key];
+	};
 
 	return {
 		setBody, setService, setFiles,
 		deps, event, calls, params, changes,
-		files: serviceFiles
+		files: serviceFiles,
+		services: allServices
 	};
 }

@@ -70,7 +70,7 @@ describe('update service', ({ beforeEach }) => {
 					delete files[k];
 					files[k.replace('./fake/', `${newServiceName}/`)] = v;
 				});
-		})
+		});
 	});
 
 	it('should add file', async (assert) => {
@@ -99,11 +99,6 @@ describe('update service', ({ beforeEach }) => {
 			errors.push({ message, stack });
 		}
 		assert.custom(errors);
-
-		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/target/addedFile.xxx`);
-		expect(sourceFileAdded, 'source file added').toBeTruthy();
-
 		const addFileChange = mock.changes[`${newServiceName}/target/addedFile.xxx`] || {};
 		expect(!addFileChange.deleteFile).toBeTruthy();
 
@@ -175,9 +170,9 @@ describe('update service', ({ beforeEach }) => {
 		}
 		errors.length && assert.custom(errors);
 
-		const sourceFileAdded = mock.calls
-			.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/target/toCopyCopied.xxx`);
-		expect(sourceFileAdded).toBeTruthy();
+		//const sourceFileAdded = mock.calls
+		//	.find(({ fileSet={} }) => fileSet.key === `${newServiceName}/target/toCopyCopied.xxx`);
+		//expect(sourceFileAdded).toBeTruthy();
 
 		const copyFileAdd = mock.changes[`${newServiceName}/target/toCopyCopied.xxx`] || {};
 		expect(!copyFileAdd.deleteFile).toBeTruthy();
@@ -211,9 +206,9 @@ describe('update service', ({ beforeEach }) => {
 		}
 		errors.length && assert.custom(errors);
 
-		const sourceFileRemoved = mock.calls
-			.find(({ fileRemove={} }) => fileRemove.key === `${newServiceName}/source/toMove.xxx`);
-		expect(sourceFileRemoved, 'source file removed').toBeTruthy();
+		//const sourceFileRemoved = mock.calls
+		//	.find(({ fileRemove={} }) => fileRemove.key === `${newServiceName}/source/toMove.xxx`);
+		//expect(sourceFileRemoved, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes[`${newServiceName}/source/toMove.xxx`];
 		expect(deleteFileChange && deleteFileChange.deleteFile, `delete file change`).toBeTruthy();
@@ -244,12 +239,12 @@ describe('update service', ({ beforeEach }) => {
 		}
 		errors.length && assert.custom(errors);
 
-		const callToSetFile = mock.calls.find(x => x.fileSet).fileSet;
-		expect(callToSetFile.value, "renamed file contents").toEqual(sourceFileContents);
+		//const callToSetFile = mock.calls.find(x => x.fileSet).fileSet;
+		//expect(callToSetFile.value, "renamed file contents").toEqual(sourceFileContents);
 
-		const renameFilePath = `${newServiceName}/source/toRename.xxx`;
-		const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === renameFilePath);
-		expect(sourceFileRemoved).toBeTruthy();
+		//const renameFilePath = `${newServiceName}/source/toRename.xxx`;
+		//const sourceFileRemoved = mock.calls.find(x => x.fileRemove?.key === renameFilePath);
+		//expect(sourceFileRemoved, 'source file removed').toBeTruthy();
 
 		const deleteFileChange = mock.changes[`${newServiceName}/source/toRename.xxx`];
 		expect(deleteFileChange && deleteFileChange.deleteFile, `delete file change`).toBeTruthy();
@@ -481,6 +476,120 @@ describe('update service', ({ beforeEach }) => {
 		expect(preExistingKeepFile).toEqual(undefined);
 		expect(tree.source['.keep']).toEqual(undefined);
 		expect(mock.changes[newServiceName+'/source/.keep'].deleteFile, 'delete pre-existing keep file').toBeTruthy();
+	});
+
+});
+
+describe('update service with changes', ({ beforeEach }) => {
+	beforeEach(() => {
+		mock = ServiceMock({ utils });
+		manager = new ServicesManager(mock.deps);
+		mock.setService(3002, (svc) => {
+			delete svc.tree.fake.source['.keep'];
+			return svc;
+		});
+		mock.setFiles((files) => {
+			Object.entries(files)
+				.forEach(([k,v]) => {
+					delete files[k];
+					files[k.replace('./fake/', `fake/`)] = v;
+				});
+			delete files["fake/source/.keep"];
+		});
+	});
+
+	it('should delete a changed but pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toDelete.xxx"] = {
+			type: 'update',
+			value: 'file to delete from source - WITH CHANGES!!',
+			service: {}
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFile',
+				source: 'source/toDelete.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === `fake/source/toDelete.xxx`);
+		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
+
+		const deleteFileChange = mock.changes[`fake/source/toDelete.xxx`] || {};
+		expect(deleteFileChange.deleteFile, 'deleted file change').toBeTruthy();
+
+		const resultShowsFileDelete = safe(() => result.result[0].tree[newServiceName]
+			.source['toDelete.xxx']) || 'does not exist';
+		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
+	});
+	it('should delete a changed but not pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toDeleteWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: {}
+		};
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['toDeleteWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFile', 
+				source: 'source/toDeleteWasAdded.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === `fake/source/toDeleteWasAdded.xxx`);
+		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
+
+		const deleteFileChange = mock.changes[`fake/source/toDeleteWasAdded.xxx`];
+		expect(deleteFileChange ? 'change exists' : 'no change').toEqual('no change');
+
+		const resultShowsFileDelete = safe(() => result.result[0].tree[newServiceName]
+			.source['toDelete.xxx']) || 'does not exist';
+		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
+
+		const changesRemoveCall = mock.calls.find(x => x.changesRemove);
+		expect(changesRemoveCall, 'provider remove change call').toBeTruthy();
 	});
 
 });

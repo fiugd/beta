@@ -311,7 +311,10 @@ const useNew = true;
 			if(!isFile) return operation;
 			const path = `./${operation.service}/${operation.target}`;
 			const update = `./${operation.service}/${operation.source}`;
-			operation.code[path] = async (store) => await store.getItem(update);
+			const fileGetter = operation.name === 'addFile'
+				? async (store) => operation.source || ''
+				: async (store) => await store.getItem(update);
+			operation.code[path] = fileGetter;
 			const filesToAdd = [ ...operation.filesToAdd, path ];
 			return { ...operation, filesToAdd };
 		};
@@ -629,11 +632,19 @@ const useNew = true;
 					delete fileUpdate.update;
 				}
 				const code = fileUpdateCode || ''; //TODO: if not in update, default for file
-				await providers.fileChange({ path: filesToAdd[i], code, parent });
+				//await providers.fileChange({ path: filesToAdd[i], code, parent });
 
+				await changesStore.setItem(path, {
+					type: 'update',
+					value: code,
+					service: (() => {
+						const { tree, ...rest } = service;
+						return rest;
+					})()
+				});
 				//TODO: I think this is a problem, not sure...
 				//files get written with blank string and dot in front of name
-				await filesStore.setItem(path, code);
+				//await filesStore.setItem(path, code);
 			}
 
 			for (let i = 0, len = filesToDelete.length; i < len; i++) {
@@ -641,9 +652,29 @@ const useNew = true;
 				const path = service.type === 'github'
 					? stripFrontDotSlash(filesToDelete[i])
 					: filesToDelete[i];
-				await filesStore.removeItem(path);
-				await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
+				const existingFile = await filesStore.getItem(path);
+				if(existingFile){
+					await changesStore.setItem(path, {
+						deleteFile: true,
+						service: (() => {
+							const { tree, ...rest } = service;
+							return rest;
+						})()
+					});
+					//await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
+				} else {
+					await changesStore.removeItem(path);
+					//await providers.removeChange({ path: filesToDelete[i], parent });
+				}
 			}
+
+			/*
+
+			this looks like it would:
+				erase all changes for this service
+				put those changes in file store
+
+			this is not exactly the desired behavior in current iteration...
 
 			const changedFiles = (await changesStore.keys())
 				//.filter(key => key.startsWith(`${service.name}/`));
@@ -657,12 +688,23 @@ const useNew = true;
 				await changesStore.removeItem(path);
 				await filesStore.setItem(path, code);
 			}
-			
+
+			*/
+
 			const changed = (await changesStore.keys())
 					.filter(x => x.startsWith(`${service.name}`))
 					.map(x => x.split(service.name+'/')[1]);
 			const opened = (await changesStore.getItem(`state-${service.name}-opened`)) || [];
 			const selected = (opened.find(x => x.order === 0)||{}).name || '';
+
+			/*
+				TODO:
+				addFile - select the file and show it opened
+				removeFile - remove from opened / selected
+				etc..
+				similar thing with treeState
+			*/
+
 			return stringify({
 				result: [{
 					id: service.id,
