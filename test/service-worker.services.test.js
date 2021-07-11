@@ -522,25 +522,6 @@ describe('delete service', ({ beforeEach }) => {
 	it.todo('should remove files when service is deleted', async (assert) => {});
 });
 
-/*
-describe('test examples', () => {
-	it('example of passing test', (assert) => {
-		const add = (one,two) => one+two;
-		assert.equal(add(1, 1), 2);
-	});
-	it.skip('example of skipped test', (assert) => {
-	});
-	it('example of failing test', (assert) => {
-		const add = (one,two) => one+two;
-		assert.equal(add(1, 1), 4, `expected ${add(1,1)} to equal 4`);
-	});
-	it.todo('example of todo test', (assert) => {
-	});
-});
-*/
-
-//TestStart();
-
 let finish;
 const donePromise = new Promise((resolve) => { finish = resolve; });
 TestStart(finish);

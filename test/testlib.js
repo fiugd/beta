@@ -147,7 +147,7 @@ const renderTest = (args) => {
 			.join('')
 		)
 		.join('\n');
-	console.log('summary\n'+summary);
+	console.log('\nsummary\n'+summary);
 };
 
 QUnit.on("testStart", (args) => {
