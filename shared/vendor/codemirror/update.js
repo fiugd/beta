@@ -6,6 +6,9 @@ const updates = [[
 	`/crosshj/fiug-beta/shared/vendor/codemirror/addon.bundle.js`,
 	`/shared/vendor/codemirror/addon.bundle.js`
 ],[
+	`/crosshj/fiug-beta/shared/vendor/codemirror/mode.bundle.js`,
+	`/shared/vendor/codemirror/mode.bundle.js`
+],[
 	`/crosshj/fiug-beta/shared/modules/utilities.mjs`,
 	`/shared/modules/utilities.mjs`
 ],[
