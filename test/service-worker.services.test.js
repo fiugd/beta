@@ -176,7 +176,7 @@ describe('update service', ({ beforeEach }) => {
 
 		const copyFileAdd = mock.changes[`${newServiceName}/target/toCopyCopied.xxx`] || {};
 		expect(!copyFileAdd.deleteFile).toBeTruthy();
-		
+
 		const copyFileRemove = mock.changes[`${newServiceName}/target/toCopy.xxx`];
 		expect(!copyFileRemove).toBeTruthy();
 	});
@@ -425,6 +425,7 @@ describe('update service', ({ beforeEach }) => {
 				source: 'target/sibling.xxx'
 			},
 		});
+		const originalFiles = Object.keys(mock.files);
 		const errors = [];
 		let result;
 		try {
@@ -443,6 +444,12 @@ describe('update service', ({ beforeEach }) => {
 		expect(keepFile).toBeTruthy();
 		expect(tree.target['.keep']).toBeTruthy();
 		expect(mock.changes[newServiceName+'/target/.keep'], "keep file changes").toBeTruthy();
+		
+		assert.deepEqual(
+			originalFiles.sort(),
+			Object.keys(mock.files).sort(),
+			'files should remain unchanged'
+		);
 	});
 	it('should remove .keep file for filled folder', async (assert) => {
 		const { serviceUpdate } = manager.handlers;
@@ -589,9 +596,789 @@ describe('update service with changes', ({ beforeEach }) => {
 		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
 
 		const changesRemoveCall = mock.calls.find(x => x.changesRemove);
-		expect(changesRemoveCall, 'provider remove change call').toBeTruthy();
+		expect(changesRemoveCall, 'changes remove change call').toBeTruthy();
 	});
 
+	it('should copy a changed but pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toCopy.xxx"] = {
+			type: 'update',
+			value: 'copied - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFile',
+				target: 'target/toCopyCopied.xxx',
+				source: 'source/toCopy.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/target/toCopyCopied.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value').toEqual('copied - WITH CHANGES!!');
+		expect(!copyFileAdd.deleteFile).toBeTruthy();
+
+		const copyFileRemove = mock.changes[`fake/source/toCopy.xxx`];
+		expect(!copyFileRemove.deleteFile).toBeTruthy();
+	});
+	it('should copy a changed but not pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['toCopyWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/toCopyWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFile', 
+				source: 'source/toCopyWasAdded.xxx',
+				target: 'target/toCopyCopied.xxx',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/target/toCopyCopied.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value').toEqual('file recently added - WITH CHANGES!!');
+		expect(!copyFileAdd.deleteFile).toBeTruthy();
+
+		const copyFileRemove = mock.changes[`fake/target/toCopy.xxx`];
+		expect(!copyFileRemove).toBeTruthy();
+
+		const expectedChanges = [
+			"source/toCopyWasAdded.xxx",
+			"target/toCopyCopied.xxx"
+		];
+		expect(''+result.result[0].state.changed, 'result state changed').toEqual(''+expectedChanges);
+	});
+
+	it('should move a changed but pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toMove.xxx"] = {
+			type: 'update',
+			value: 'to move - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFile',
+				target: 'target/toMove.xxx',
+				source: 'source/toMove.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const moveFileAdd = mock.changes[`fake/target/toMove.xxx`] || {};
+		expect(moveFileAdd.value, 'moved file value').toEqual('to move - WITH CHANGES!!');
+		expect(!moveFileAdd.deleteFile).toBeTruthy();
+
+		const sourceFileRemove = mock.changes[`fake/source/toMove.xxx`];
+		expect(sourceFileRemove).toBeTruthy();
+	});
+	it('should move a changed but not pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['toMoveWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/toMoveWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFile', 
+				source: 'source/toMoveWasAdded.xxx',
+				target: 'target/toMoveMoved.xxx',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const moveFileAdd = mock.changes[`fake/target/toMoveMoved.xxx`] || {};
+		expect(moveFileAdd.value, 'copied file value')
+			.toEqual('file recently added - WITH CHANGES!!');
+		expect(!moveFileAdd.deleteFile).toBeTruthy();
+
+		const sourceFileRemove = mock.changes['source/toMoveWasAdded.xxx'];
+		expect(!sourceFileRemove).toBeTruthy();
+
+		const expectedChanges = [
+			"target/toMoveMoved.xxx"
+		];
+		expect(''+result.result[0].state.changed, 'result state changed')
+			.toEqual(''+expectedChanges);
+	});
+
+	it('should rename a changed but pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toRename.xxx"] = {
+			type: 'update',
+			value: 'to rename - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'renameFile',
+				target: 'target/toRename.xxx',
+				source: 'source/toRename.xxx'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const moveFileAdd = mock.changes[`fake/target/toRename.xxx`] || {};
+		expect(moveFileAdd.value, 'rename file value').toEqual('to rename - WITH CHANGES!!');
+		expect(!moveFileAdd.deleteFile).toBeTruthy();
+
+		const sourceFileRemove = mock.changes[`fake/source/toRename.xxx`];
+		expect(sourceFileRemove, 'source rename file change').toBeTruthy();
+	});
+	it('should rename a changed but not pre-existing file', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['toRenameWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/toRenameWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFile', 
+				source: 'source/toRenameWasAdded.xxx',
+				target: 'target/toRenameWasAddedRenamed.xxx',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const moveFileAdd = mock.changes[`fake/target/toRenameWasAddedRenamed.xxx`] || {};
+		expect(moveFileAdd.value, 'copied file value')
+			.toEqual('file recently added - WITH CHANGES!!');
+		expect(!moveFileAdd.deleteFile).toBeTruthy();
+
+		const sourceFileRemove = mock.changes[`source/toRenameWasAdded.xxx`];
+		expect(!sourceFileRemove).toBeTruthy();
+
+		const expectedChanges = [
+			"target/toRenameWasAddedRenamed.xxx"
+		];
+		expect(''+result.result[0].state.changed, 'result state changed')
+			.toEqual(''+expectedChanges);
+	});
+
+
+	it('should delete folder with child changed but pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toDelete.xxx"] = {
+			type: 'update',
+			value: 'file to delete from source - WITH CHANGES!!',
+			service: {}
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFolder',
+				source: 'source'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === `fake/source/toDelete.xxx`);
+		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
+
+		const deleteFileChange = mock.changes[`fake/source/toDelete.xxx`] || {};
+		expect(deleteFileChange.deleteFile, 'deleted file change').toBeTruthy();
+
+		const resultShowsFileDelete = safe(() => result.result[0].tree[newServiceName]
+			.source['toDelete.xxx']) || 'does not exist';
+		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
+	});
+	it('should delete folder with child pre-existing and deleted', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toDelete.xxx"] = {
+			deleteFile: true,
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const deletedFileCopied = mock.changes[`fake/target/source/toCopy.xxx`];
+		expect(!deletedFileCopied).toBeTruthy();
+	});
+	it('should delete folder with child changed but not pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/target/toDeleteWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: {}
+		};
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.target['toDeleteWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'deleteFolder',
+				source: 'target'
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const sourceFileRemoved = mock.calls
+			.find(({ fileSet={} }) => fileSet.key === `fake/target/toDeleteWasAdded.xxx`);
+		expect(sourceFileRemoved === undefined, 'source file removed').toBeTruthy();
+
+		const resultShowsFileDelete = safe(() => result.result[0].tree[newServiceName]
+			.source['toDelete.xxx']) || 'does not exist';
+		expect(resultShowsFileDelete === 'does not exist', 'deleted file').toBeTruthy();
+
+		const deleteFileChange = mock.changes[`fake/target/toDeleteWasAdded.xxx`];
+		expect(deleteFileChange ? 'change exists' : 'no change').toEqual('no change');
+
+		const changesRemoveCall = mock.calls.find(x => x.changesRemove);
+		expect(changesRemoveCall, 'changes remove change call').toBeTruthy();
+	});
+
+	it('should copy folder with child changed but pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toCopy.xxx"] = {
+			type: 'update',
+			value: 'copied - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/target/source/toCopy.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value').toEqual('copied - WITH CHANGES!!');
+		expect(!copyFileAdd.deleteFile).toBeTruthy();
+
+		const copyFileRemove = mock.changes[`fake/source/toCopy.xxx`];
+		expect(!copyFileRemove.deleteFile).toBeTruthy();
+	});
+	it('should copy folder with child pre-existing and deleted', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		delete mock.services["3002"].tree.fake.source['toCopy.xxx'];
+		mock.changes["fake/source/toCopy.xxx"] = {
+			deleteFile: true,
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const deletedFileCopied = mock.changes[`fake/target/source/toCopy.xxx`];
+		expect(!deletedFileCopied).toBeTruthy();
+	});
+	it('should copy folder with child changed but not pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['toCopyWasAdded.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/toCopyWasAdded.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'copyFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/target/source/toCopyWasAdded.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value')
+			.toEqual('file recently added - WITH CHANGES!!');
+		expect(!copyFileAdd.deleteFile).toBeTruthy();
+
+		const copyFileRemove = mock.changes[`fake/source/toCopyWasAdded.xxx`];
+		expect(!copyFileRemove.deleteFile).toBeTruthy();
+
+		const expectedChanges = [
+			"source/toCopyWasAdded.xxx",
+			"target/source/toMove.xxx",
+			"target/source/toRename.xxx",
+			"target/source/toDelete.xxx",
+			"target/source/toCopy.xxx",
+			"target/source/toCopyWasAdded.xxx"
+		];
+		expect(''+result.result[0].state.changed, 'result state changed').toEqual(''+expectedChanges);
+	});
+
+	it('should move folder with child changed but pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toMove.xxx"] = {
+			type: 'update',
+			value: 'moved - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const movedFileAdd = mock.changes[`fake/target/source/toMove.xxx`] || {};
+		expect(movedFileAdd.value, 'moved file value').toEqual('moved - WITH CHANGES!!');
+		expect(!movedFileAdd.deleteFile, 'move file add').toBeTruthy();
+
+		const sourceFileRemove = mock.changes[`fake/source/toCopy.xxx`];
+		expect(sourceFileRemove.deleteFile, 'removed source file').toBeTruthy();
+	});
+	it('should move folder with child pre-existing and deleted', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toMove.xxx"] = {
+			deleteFile: true,
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const deletedFileCopied = mock.changes[`fake/target/source/toMove.xxx`];
+		expect(!deletedFileCopied).toBeTruthy();
+	});
+	it('should move folder with child changed but not pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['changedFile.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/changedFile.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'target/source',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/target/source/changedFile.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value')
+			.toEqual('file recently added - WITH CHANGES!!');
+		expect(copyFileAdd && !copyFileAdd.deleteFile).toBeTruthy();
+		
+		const originalFile = mock.changes[`fake/source/toCopyWasAdded.xxx`];
+		expect(!originalFile, 'original file changes').toBeTruthy();
+	});
+	
+	it('should rename folder with child changed but pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toMove.xxx"] = {
+			type: 'update',
+			value: 'moved - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'renameFolder',
+				source: 'source',
+				target: 'renamed',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const movedFileAdd = mock.changes[`fake/renamed/toMove.xxx`] || {};
+		expect(movedFileAdd.value, 'moved file value').toEqual('moved - WITH CHANGES!!');
+		expect(!movedFileAdd.deleteFile, 'move file add').toBeTruthy();
+
+		const sourceFileRemove = mock.changes[`fake/source/toCopy.xxx`];
+		expect(sourceFileRemove.deleteFile, 'removed source file').toBeTruthy();
+	});
+	it('should rename folder with child pre-existing and deleted', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.changes["fake/source/toMove.xxx"] = {
+			deleteFile: true,
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'renamed',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const deletedFileCopied = mock.changes[`fake/renamed/toMove.xxx`];
+		expect(!deletedFileCopied).toBeTruthy();
+	});
+	it('should rename folder with child changed but not pre-existing', async (assert) => {
+		const { serviceUpdate } = manager.handlers;
+		mock.setService(3002, (svc) => {
+			svc.tree.fake.source['changedFile.xxx'] = {};
+			return svc;
+		});
+		mock.changes["fake/source/changedFile.xxx"] = {
+			type: 'update',
+			value: 'file recently added - WITH CHANGES!!',
+			service: mock.services['3002']
+		};
+		mock.setBody({
+			name: 'fake',
+			operation: {
+				name: 'moveFolder',
+				source: 'source',
+				target: 'renamed',
+			},
+		});
+		const errors = [];
+		let result;
+		try {
+			result = await serviceUpdate(mock.params, mock.event);
+			result = JSON.parse(result);
+			if(result.error){
+				errors.push({
+					message: result.error.message,
+					stack: result.error.stack
+				});
+			}
+		} catch(e){
+			const { message, stack } = e;
+			errors.push({ message, stack });
+		}
+
+		errors.length && assert.custom(errors);
+
+		const copyFileAdd = mock.changes[`fake/renamed/changedFile.xxx`] || {};
+		expect(copyFileAdd.value, 'copied file value')
+			.toEqual('file recently added - WITH CHANGES!!');
+		expect(copyFileAdd && !copyFileAdd.deleteFile).toBeTruthy();
+		
+		const originalFile = mock.changes[`fake/source/toCopyWasAdded.xxx`];
+		expect(!originalFile, 'original file changes').toBeTruthy();
+		
+		logJSON(result.result[0])
+	});
 });
 
 describe('create service', ({ beforeEach }) => {

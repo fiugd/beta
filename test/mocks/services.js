@@ -65,66 +65,69 @@ export const ServiceMock = ({ utils }) => {
 		'tree-fake-expanded': [ 'expanded/1', 'expanded/2' ],
 		'state-fake-opened': [{ name: 'opened.js', order: 0 }]
 	};
-
 	deps.providers.fileChange = async (args) => {
-		//console.log(JSON.stringify(args, null, 2));
 		const { path:originalPath, parent, code, deleteFile } = args;
 		const path = originalPath.slice(2);
 		changes[path] = {
 			value: code, deleteFile, service: parent
 		}; 
 		calls.push({
-			'providerFileChange': { ...changes[path], path },
+			providerFileChange: { ...changes[path], path },
 		});
 	};
 	deps.storage.stores.services.getItem = async (key) => {
+		const value = allServices[key] || null;
 		calls.push({
-			'servicesGet': { key }
+			servicesGet: { key, value }
 		});
-		return allServices[key]
+		return value; 
 	};
 	deps.storage.stores.services.setItem = async (key, value) => {
 		allServices[key] = value;
 		calls.push({
-			'serviceSet': { key, value }
+			serviceSet: { key, value }
 		});
 	};
 	deps.storage.stores.files.keys = async () => {
+		const keys = Object.keys(serviceFiles);
 		calls.push({
-			'filesKeys': Object.keys(serviceFiles)
+			filesKeys: { keys }
 		});
-		return Object.keys(serviceFiles);
+		return keys;
 	};
 	deps.storage.stores.files.setItem = async (key, value) => {
 		serviceFiles[key] = value;
 		calls.push({
-			'fileSet': { key, value }
+			fileSet: { key, value }
 		});
 	};
 	deps.storage.stores.files.getItem = async (key) => {
-		const value = serviceFiles[key];
+		const value = serviceFiles[key] || null;
 		calls.push({
 			fileGet: { key, value }
 		});
 		return value;
 	};
 	deps.storage.stores.files.removeItem = async (key) => {
+		const value = serviceFiles[key];
 		delete serviceFiles[key];
 		calls.push({
-			fileRemove: { key }
+			fileRemove: { key, value }
 		});
 	};
 	deps.storage.stores.changes.keys = async () => {
+		const keys = Object.keys(changes);
 		calls.push({
-			changesKeys: Object.keys(changes) 
+			changesKeys: { keys }
 		});
-		return Object.keys(changes);
+		return keys;
 	};
 	deps.storage.stores.changes.getItem = async (key) => {
+		const value = changes[key] || null;
 		calls.push({
-			changesGet: { key }
+			changesGet: { key, value }
 		});
-		return changes[key];
+		return value;
 	};
 	deps.storage.stores.changes.setItem = async (key, value) => {
 		changes[key] = value;
@@ -132,9 +135,10 @@ export const ServiceMock = ({ utils }) => {
 			changesSet: { key, value }
 		});
 	};
-	deps.storage.stores.changes.removeItem = async (key, value) => {
+	deps.storage.stores.changes.removeItem = async (key) => {
+		const value = changes[key];
 		calls.push({
-			changesRemove: { key, value: changes[key] }
+			changesRemove: { key, value }
 		});
 		delete changes[key];
 	};

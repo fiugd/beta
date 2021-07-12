@@ -5,12 +5,13 @@ started: 2021-04-20
 release: TBD
 
 - [ ] file content as expected after move/copy operations
-- [ ] file (like .keep) don't show up as ready for commit
 - [ ] files in change queue are modified when operations occur
+- [ ] changes in queue are reflected in file store after commit
 
 - [ ] delete for commits (because add already works)
 
 ----
+- [X] file (like .keep) don't show up as ready for commit
 - [X] command palette file find -> preview issues
 - [X] sw freaks and app doesn't crash well:
 	- with dragging a file from one new folder to another new folder
@@ -32,8 +33,8 @@ release: TBD
 - [X] rm command works properly for folder
 - [X] editor tabs: on file delete, close tab (and switch editor)
 - [X] service name issues with path in terminal
-  - should not be able to cd lower than serviceName when service is loaded
-  - cd /path should translate into serviceName/path
+	- should not be able to cd lower than serviceName when service is loaded
+	- cd /path should translate into serviceName/path
 - [X] git diff at root is messed up
 - [X] ls command needs to use the folder it was passed versus current state
 - [X] tab doesn't appear sometimes even though editor loads

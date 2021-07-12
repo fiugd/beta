@@ -187,7 +187,7 @@ const expect = (actual, which) => {
 	//https://github.com/sapegin/jest-cheat-sheet
 	return {
 		toEqual: (expected) => {
-			const msg = `expected ${which ? which+' : ' : ''}${actual} to equal ${expected}`;
+			const msg = `expected ${which ? which+' : ' : ''}\n  ${actual} \n  to equal \n  ${expected}`;
 			QUnit.assert.true(actual === expected, msg)
 		},
 		toBeTruthy: () => {

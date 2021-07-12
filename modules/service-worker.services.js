@@ -10,6 +10,7 @@ const useNew = true;
 			return;
 		}
 	};
+	const unique = (a) => [...new Set(a)];
 	function objectPath(obj, path) {
 		var result = obj;
 		try{
@@ -223,11 +224,8 @@ const useNew = true;
 	//https://medium.com/javascript-scene/functors-categories-61e031bac53f#.4hqndcx22
 	const _operationsUpdater = (() => {
 
-		const getBody = (operation) => ({
-			...operation,
-			service: operation.service.name,
-			tree: clone(operation.service.tree) || {},
-			code: ((code={}) => {
+		const getBody = (operation) => {
+			const convertStoreObject = (code={}) => {
 				const entries = Object.entries(code);
 				entries.forEach(([k,v]) => {
 					if(k.slice(2) === './') return;
@@ -240,10 +238,17 @@ const useNew = true;
 					code['./'+k] = v;
 				});
 				return code;
-			})(operation.code),
-			filesToAdd: [],
-			filesToDelete: []
-		});
+			};
+			return {
+				...operation,
+				service: operation.service.name,
+				tree: clone(operation.service.tree) || {},
+				code: convertStoreObject(operation.code),
+				changes: convertStoreObject(operation.changes),
+				filesToAdd: [],
+				filesToDelete: []
+			};
+		}
 		const adjustMoveTarget = (operation) => {
 			const isMove = operation.name.includes('move') || operation.name.includes('copy');
 			if(!isMove) return operation;
@@ -272,7 +277,10 @@ const useNew = true;
 			if(isFile) return operation;
 			const sourcePath = `./${operation.service}/${operation.source}`;
 			const targetPath = `./${operation.service}/${operation.target}`;
-			const children = Object.keys(operation.code)
+			const children = unique([
+				...Object.keys(operation.code),
+				...Object.keys(operation.changes)
+			])
 				.filter(x => x.startsWith(sourcePath+'/'));
 			const childrenMappedToTarget = children.map(child => {
 				const childRelative = child.split(operation.source).pop();
@@ -322,8 +330,11 @@ const useNew = true;
 			const isFile = operation.name.includes('File');
 			if(isFile) return operation;
 			const sourcePath = `./${operation.service}/${operation.source}`;
-			const children = Object.keys(operation.code)
-					.filter(x => x.startsWith(sourcePath+'/'));
+			const children =unique([
+				...Object.keys(operation.code),
+				...Object.keys(operation.changes)
+			])
+				.filter(x => x.startsWith(sourcePath+'/'));
 			const filesToDelete = [
 				...operation.filesToDelete,
 				...children
@@ -361,23 +372,27 @@ const useNew = true;
 		};
 		const keepHelper = (operation) => {
 			let { filesToAdd, filesToDelete } = operation;
-			const { tree, code, utils, service } = operation;
-
-			const mapCodeForHelper = (c) => Object.entries(c)
-				.map(([path,value]) => ({
-					name: path.split('/').pop(),
-					path,
-					update: value
-				}));
-
+			const { tree, code, utils, service, changes } = operation;
+			const mapCodeForHelper = () => {
+				const changesFiles = Object.entries(changes)
+					.map(([path,value]) => ({
+						name: path.split('/').pop(),
+						path
+					}));
+				const codeFiles = Object.entries(code)
+					.map(([path,value]) => ({
+						name: path.split('/').pop(),
+						path
+					}));
+				return [...codeFiles, ...changesFiles];
+			};
 			const keepFilesFromHelper = utils
-				.keepHelper(tree, mapCodeForHelper(code))
+				.keepHelper(tree, mapCodeForHelper())
 				.filter(x => x.includes('/.keep'))
 				.map(x => '.'+x);
 
 			keepFilesFromHelper.forEach(k => {
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
-
 				const parentInTree = objectPath(tree[service], parentPath);
 				parentInTree['.keep'] = {};
 				code[k] = '';
@@ -437,9 +452,9 @@ const useNew = true;
 			deleteFolder: remove
 		};
 
-		return operation => (service, code, utils) =>
+		return operation => (service, code, utils, changes) =>
 			operations[operation.name]({
-				...operation, service, code, utils
+				...operation, service, code, utils, changes
 			});
 
 	})();
@@ -470,14 +485,25 @@ const useNew = true;
 						key.startsWith(`./${_service.name}/`) ||
 						key.startsWith(`${_service.name}/`)
 					);
-				const _code = fileKeys.reduce((all, key) => ({
-					...all,
-					[key]: ''
-				}), {});
+				const changeKeys = (await changesStore.keys())
+					.filter(key =>
+						key.startsWith(`./${_service.name}/`) ||
+						key.startsWith(`${_service.name}/`)
+					);
+				const _code = fileKeys
+					.reduce((all, key) => ({
+						...all,
+						[key]: ''
+					}), {});
+				const _changed = changeKeys
+					.reduce((all, key) => ({
+						...all,
+						[key]: ''
+					}), {});
 
-				update = operationsUpdater(_service, _code, utils);
+				update = operationsUpdater(_service, _code, utils, _changed);
 
-				const getItem = async (key) => {
+				const getItem = (target, update) => async (key) => {
 					let formattedKey = key;
 					if(key.slice(0,2) === './' && _service.type === 'github'){
 						formattedKey = key.slice(2);
@@ -485,11 +511,22 @@ const useNew = true;
 					if(key.slice(0,1) === '/' && _service.type === 'github'){
 						formattedKey = key.slice(1);
 					}
-					return await filesStore.getItem(formattedKey);
+					const changed = await changesStore.getItem(formattedKey);
+					if(changed && changed.type === "update") return changed.value;
+
+					if(changed && changed.deleteFile){
+						update.filesToAdd = update.filesToAdd.filter(x => x!==target);
+						let parent = objectPath(update.tree, target.split('/').slice(0,-1).join('/'));
+						delete parent[target.split('/').pop()]
+						return '';
+					}
+
+					const file = await filesStore.getItem(formattedKey);
+					return file;
 				};
 				for(var key in update.code){
 					if(typeof update.code[key] !== 'function') continue;
-					update.code[key] = await update.code[key]({ getItem });
+					update.code[key] = await update.code[key]({ getItem: getItem(key, update) });
 				}
 			}
 			if(update){
@@ -653,6 +690,7 @@ const useNew = true;
 					? stripFrontDotSlash(filesToDelete[i])
 					: filesToDelete[i];
 				const existingFile = await filesStore.getItem(path);
+
 				if(existingFile !== null){
 					await changesStore.setItem(path, {
 						deleteFile: true,
