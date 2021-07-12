@@ -4,13 +4,12 @@
 started: 2021-04-20
 release: TBD
 
-- [ ] file content as expected after move/copy operations
-- [ ] files in change queue are modified when operations occur
 - [ ] changes in queue are reflected in file store after commit
-
 - [ ] delete for commits (because add already works)
 
 ----
+- [X] file content as expected after move/copy operations
+- [X] files in change queue are modified when operations occur
 - [X] file (like .keep) don't show up as ready for commit
 - [X] command palette file find -> preview issues
 - [X] sw freaks and app doesn't crash well:
