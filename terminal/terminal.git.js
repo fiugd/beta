@@ -123,14 +123,18 @@ const diff = async ({ ops }, args) => {
 };
 const status = async ({ ops }) => {
 	const changesResponse = await _getChanges({ ops });
-	if(!changesResponse.changes.length){
+	const { changes } = changesResponse;
+	if(!changes.length){
 		return '\n   no changes\n';
 	}
-	return '\n' +
-		changesResponse.changes.map(x => 
-			'   ' + chalk.bold('modified: ') + x.fileName
-		).join('\n')
-	+ '\n';
+	const changeRender = (c) => {
+		const { deleteFile, fileName } = c;
+		const changeType = deleteFile
+			? 'deleted'
+			: 'modified';
+		return  '   ' + chalk.bold(`${changeType}: `) + fileName;
+	};
+	return '\n' + changes.map(changeRender).join('\n') + '\n';
 };
 const commit = async ({ ops }, args) => {
 	const { _unknown } = args;
