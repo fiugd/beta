@@ -395,7 +395,7 @@ const useNew = true;
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
 				const parentInTree = objectPath(tree[service], parentPath);
 				parentInTree['.keep'] = {};
-				code[k] = '';
+				code[k] = '🙃';
 				filesToAdd.push(k);
 				filesToDelete = filesToDelete.filter(x => x !== k);
 			});
