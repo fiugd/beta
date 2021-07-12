@@ -91,6 +91,13 @@ const commands = [
 		keyword: "rm",
 		description: "Remove FILE, or DIRECTORY with --recursive (-r) option.",
 		event: ["deleteFolder","deleteFile"],
+		eventMap: (args={}) => {
+			const {src} = args;
+			if(!src) return 'deleteFile';
+			if(src.endsWith('/')) return 'deleteFolder';
+			if(src.includes('.')) return 'deleteFile';
+			return 'deleteFolder';
+		},
 		usage: '[-rf] [FILE|DIRECTORY]',
 		args: [
 			{ name: 'file', type: String, defaultOption: true, required: true },
