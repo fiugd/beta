@@ -1,3 +1,12 @@
+#### 2021-06-28 | 2021-07-15
+	- doc loading speed (still not completely solved)
+	- preview wildcards, help, hidden controls
+	- service worker service operations
+	- svg favicon
+	- palette menu click items
+	- minor fix for editor indent
+	- test patterns ++
+	- ink language running in browser + syntax highlight
 
 #### 2021-06-15 | 2021-06-28
 	- preview command

@@ -4,10 +4,21 @@
 started: 2021-04-20
 release: TBD
 
-THEME: file operations, preview, node
+THEME: FILE OPERATIONS | CLEANUP
+SUB-THEMES:
+	- git++
+	- SW++
+	- editor++
+	- terminal++
+	- preview++
 
-- [ ] changes in queue are reflected in file store after commit
+> get file operations tighter
+> terminal first dev approach
+> migrate towards SW where applicable
+> quality
+
 - [ ] delete for commits (because add already works)
+- [ ] changes in queue are reflected in file store after commit
 
 ----
 - [X] file content as expected after move/copy operations
@@ -39,7 +50,7 @@ THEME: file operations, preview, node
 - [X] git diff at root is messed up
 - [X] ls command needs to use the folder it was passed versus current state
 - [X] tab doesn't appear sometimes even though editor loads
-- [X] terminal watch mode for js files (node)
+- [X] terminal watch mode for js files
 - [X] recall scroll position when markdown preview (for example) updates
 - [X] hook up editor context menu
 - [X] markdown preview recall scroll position

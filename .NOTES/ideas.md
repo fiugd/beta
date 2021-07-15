@@ -98,6 +98,13 @@ _a running list of all the explorations I would like to dig deeper into_
 	- [ohm editor](https://ohmlang.github.io/editor/)
 
 
+### Zietgeist Engine
+- think Mechanical Turk, then stop
+- think facebook analytics or google analytics or search engines or social media, then stop
+- We have not completely figured out how the individual can query the mass brain (or even smaller collectives)
+- I have a picture some place of this... had a long talk with Mehul about it... maybe lost
+
+
 ---
 
 ### wish
