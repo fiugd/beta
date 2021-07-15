@@ -529,7 +529,8 @@ body .CodeMirror .CodeMirror-vscrollbar > div::-webkit-scrollbar-thumb {
 	width: 20px !important;
 }
 .CodeMirror-scroll {
-	margin-right: 2px;
+/* 	margin-right: 2px; */
+	margin-right: 90px !important;
 }
 .functionInput{ visibility: hidden; }
 .CodeMirror { height: 100%;  flex: 1; }

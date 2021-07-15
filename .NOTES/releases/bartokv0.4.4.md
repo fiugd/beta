@@ -9,6 +9,7 @@ SUB-THEMES:
 	- git++
 	- SW++
 	- editor++
+	- plugins
 
 > continue the work locking in "quality" started in (but not the main focus of) v0.4.3
 
@@ -17,6 +18,7 @@ SUB-THEMES:
 		- balance this against offline usage
 	- DO NOT: download all files in service manifest on first load
 		- balance this against offline usage
+		- especially do not download files needed for templates
 	- DO: load editor modes as needed, cache and cleanup
 	- DO: clean up editor state as needed
 		- when undo file change reverts to unchanged state, this file is touched but no longer changed

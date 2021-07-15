@@ -4,6 +4,8 @@
 started: 2021-04-20
 release: TBD
 
+THEME: file operations, preview, node
+
 - [ ] changes in queue are reflected in file store after commit
 - [ ] delete for commits (because add already works)
 
@@ -37,7 +39,7 @@ release: TBD
 - [X] git diff at root is messed up
 - [X] ls command needs to use the folder it was passed versus current state
 - [X] tab doesn't appear sometimes even though editor loads
-- [X] terminal watch mode for js files
+- [X] terminal watch mode for js files (node)
 - [X] recall scroll position when markdown preview (for example) updates
 - [X] hook up editor context menu
 - [X] markdown preview recall scroll position
