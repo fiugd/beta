@@ -371,13 +371,18 @@
 
 				const change = await changesStore.getItem(key);
 				if(!change?.service) continue;
-				const {type: operation, value: content, service: { name: parent } } = change;
+				const {
+					type: operation,
+					value: content,
+					service: { name: parent },
+					deleteFile
+				} = change;
 
 				if(!parent) continue;
 				if(parent !== service.name) continue;
 				const path = key.replace(svcRegExp, '');
 
-				files.push({ path, content, operation });
+				files.push({ path, content, operation, deleteFile });
 				changes.push({ ...change, key });
 			}
 
