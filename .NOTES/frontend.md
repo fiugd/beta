@@ -75,3 +75,10 @@ flux/redux stores typically do this, but react views can do the same
 
 should controllers make network requests?
 how should controllers be composed?
+
+
+------------------------------------------------------------------------
+
+react does diffs before View versus others that diff after model
+https://www.youtube.com/watch?v=mVVNJKv9esE
+

@@ -22,7 +22,16 @@ function codemirrorModeFromFileType(fileType){
 		mjs: { name: 'javascript' },
 		json: { name: 'javascript', json: true },
 		c: 'text/x-csrc',
-		cpp: 'text/x-c++src'
+		cpp: 'text/x-c++src',
+		ocaml: 'text/x-ocaml',
+		fsharp: 'text/x-fsharp',
+		csharp: 'text/x-csharp',
+		java: 'text/x-java',
+		kotlin: 'text/x-kotlin',
+		lisp: 'commonlisp',
+		raku: 'perl6',
+		zig: 'rust',
+		sql: 'text/x-pgsql',
 	};
 	//console.log({ fileType, conversions: conversions[fileType] });
 	return conversions[fileType] || fileType;

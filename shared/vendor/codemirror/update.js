@@ -27,6 +27,9 @@ const updates = [[
 	`/crosshj/fiug-beta/modules/operationsEvents.mjs`,
 	`/_/modules/operationsEvents.mjs`
 ],[
+	`/crosshj/fiug-beta/modules/statusBarEvents.mjs`,
+	`/_/modules/statusBarEvents.mjs`
+],[
 	`/crosshj/fiug-beta/modules/state.mjs`,
 	`/_/modules/state.mjs`
 ],[

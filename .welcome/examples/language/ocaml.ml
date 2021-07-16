@@ -1,13 +1,19 @@
 (* import ../../shared.styl *)
 
 (*
-https://github.com/sebmarkbage/ocamlrun-wasm
-https://try.ocamlpro.com/ uses js_of_ocaml
+example comment
 *)
 
-let rec fib i =
-  if i <= 1 then 1 else fib (i - 1) + fib (i - 2)
+let log: int -> unit = [%raw {|
+	function(a){
+		return update(a + " ");
+	}
+|}]
 
-let () =
-  print_int (fib 1);
-  print_newline ();
+let rec fib n =
+	match n with
+	| 0|1 -> 1
+	| n -> (fib (n - 1)) + (fib (n - 2))
+let _ = for x=0 to 8
+	do log( fib x )
+	done

@@ -837,3 +837,37 @@ graphs on the fly
 - jsonpath (and others?) - https://news.ycombinator.com/item?id=19949240
 - https://github.com/antonmedv/fx
 - https://github.com/stedolan/jq
+
+# use of img vs css background to display picture on page
+[stack overflow post about this](https://stackoverflow.com/questions/492809/when-to-use-img-vs-css-background-image)
+> this seems like a situational smell to me, there's no consensus
+> I find it frustrating
+
+# wet codebase
+[video](https://www.deconstructconf.com/2019/dan-abramov-the-wet-codebase)
+- I watch all of these with a resentment that tempers my ability to consume them
+- there is a base premise: I know what I am talking about and this is THE way to do this or to think in general
+- nuance is lost and all of the solutions come with their own associated problems
+
+## All the Little Things | Sandi Metz | RailsConf 2014
+[video](https://www.youtube.com/watch?v=8bZh5LMaSmE)
+- wrapping final solution in OO is premature
+
+## Minimal API Surface Area | Sebastian Markbage | JSConf EU 2014
+[video](https://www.youtube.com/watch?v=4anAwXYqLG8)
+- why do people use javascript?
+	- agree with ubiquity, but there is more
+	- overhead to using other languages
+	- all languages get it wrong about what matters to their users, even JS
+	- JS is extensible enough, usable enough, etc.  edges others out
+	- see https://github.com/crosshj/experiments/tree/gh-pages/simple_c/homeworkJS
+
+## On the Spectrum of Abstraction | Cheng Lou | react-europe 2016
+[video](https://www.youtube.com/watch?v=mVVNJKv9esE)
+- side note: are all abstraction issues boiled down to files vs folders issues?
+	- should I create one file that has everything in it and ask reader to scroll down?
+	- should I have a folder that contains tons of files that are short?
+- I like the graphs that are used in these slides
+- cost of using declarative DSL versus procedure/imperative
+- power vs utility
+- utility of constraints
