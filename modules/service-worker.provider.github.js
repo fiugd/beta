@@ -267,7 +267,7 @@
 			headers: {
 				authorization: `token ${auth}`,
 				Accept: "application/vnd.github.v3+json"
-			}b
+			}
 		};
 		const ghFetch = async (templateUrl, params={}, extraOpts={}) => {
 			const filledUrl = fill(templateUrl, { ...git, ...params });
