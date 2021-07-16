@@ -170,11 +170,12 @@ function PaletteModal(parentEl) {
 			return svc.name || '';
 		})();
 
-		if (!name || !path || !service){
-			console.error('palette modal: issue getting selected file name');
-			console.log(el.innerText());
-			return;
-		}
+		if (!service)
+			return console.error('palette modal: issue getting selected service name for selected file');
+		if (typeof path === "undefined")
+			return console.error('palette modal: issue getting path for selected file');
+		if (!name)
+			return console.error('palette modal: issue getting name for selected file');
 
 		// TODO: should be doing this with triggers
 		const event = new CustomEvent("fileSelect", {
