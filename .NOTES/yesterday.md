@@ -1,6 +1,6 @@
 #### 2021-07-15 | TBD
 	- ocaml language
-	- 
+	- delete operation
 
 #### 2021-06-28 | 2021-07-15
 	- doc loading speed (still not completely solved)
