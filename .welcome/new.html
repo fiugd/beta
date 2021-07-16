@@ -4,8 +4,23 @@
 		<link rel="stylesheet" href="./new.css">
 	</head>
 
+	<style>
+	.CodeMirror-cursors {
+		opacity: 1;
+		animation: 1s blink ease-in-out infinite;
+	}
+	@keyframes blink {
+		0% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+	}
+	</style>
+
 	<body>
-		<p>some text from html</p>
+		<p class="CodeMirror-cursors">some text from html</p>
 		<a href="">a fake link from html</a>
 	</body>
 

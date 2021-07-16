@@ -795,6 +795,7 @@ const inlineEditor = (ChangeHandler) => ({
 		miniMap: localStorage.getItem('minimap'),
 		miniMapSide: "right",
 		miniMapWidth: 64,
+		cursorBlinkRate: 0
 	};
 	/*
 		This (loadDoc) is good in the sense that it reduces some dependency on shared/editor, but it is confusing and error-prone
