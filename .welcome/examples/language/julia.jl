@@ -10,7 +10,10 @@ function fib(n)
 	return fib(n - 1) + fib(n - 2)
 end
 
-fibprint(n) = println(fib(n))
+function fibprint(n)
+	print( fib(n) )
+	print(" ")
+end
 
 A = collect(0:9)  # create an array with each integer in range
 fibprint.(A)      # apply fibprint to each array item

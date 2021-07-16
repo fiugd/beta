@@ -22,5 +22,5 @@
                               (* 2 f_m^2)
                               (if (oddp m) -2 2))))))))))
   (dotimes (i 10)
-    (#j:console:info (fast-fib-pair i) "\\n"))
+    (#j:console:info (fast-fib-pair i) " "))
 )

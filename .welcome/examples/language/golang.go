@@ -14,6 +14,6 @@ func fib(n int) int {
 func main() {
 	for n := 0; n < 9; n++ {
 		js.Global().Call("doEach", fib(n))
-		js.Global().Call("doEach", "\n")
+		js.Global().Call("doEach", " ")
 	}
 }
