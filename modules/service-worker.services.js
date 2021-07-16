@@ -393,7 +393,8 @@ const useNew = true;
 
 			keepFilesFromHelper.forEach(k => {
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
-				const parentInTree = objectPath(tree[service], parentPath);
+				const parentInTree = objectPath(tree[service], parentPath) || {};
+				if(!parentInTree) return;
 				parentInTree['.keep'] = {};
 				code[k] = ' ';
 				filesToAdd.push(k);
@@ -405,7 +406,7 @@ const useNew = true;
 			keepFilesInCode.forEach(k => {
 				const parentPath = k.split('/').slice(0,-1).join('/').replace(service+'/', '');
 				const parentInTree = objectPath(tree[service], parentPath);
-				const parentKeys = Object.keys(parentInTree).filter(x => x !== '.keep');
+				const parentKeys = Object.keys(parentInTree||{}).filter(x => x !== '.keep');
 				if(parentKeys.length === 0) return;
 				delete parentInTree['.keep'];
 				delete code[k];
