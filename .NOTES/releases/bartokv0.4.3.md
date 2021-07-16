@@ -17,10 +17,10 @@ SUB-THEMES:
 > migrate towards SW where applicable
 > quality
 
-- [ ] delete for commits (because add already works)
 - [ ] changes in queue are reflected in file store after commit
 
 ----
+- [X] delete for commits (because add already works)
 - [X] file content as expected after move/copy operations
 - [X] files in change queue are modified when operations occur
 - [X] file (like .keep) don't show up as ready for commit

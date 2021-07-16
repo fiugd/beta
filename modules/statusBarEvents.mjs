@@ -34,7 +34,7 @@ function getFileType(fileName = "") {
 }
 
 function friendlyModeName(type, mode){
-	if(type.includes('sharp')) return type.replace('sharp', '#');
+	if(type.includes && type.includes('sharp')) return type.replace('sharp', '#');
 	if('cpp' === type) return 'C++';
 	if('ocaml' === type) return { name: 'OCaml' };
 	if(['bat', 'cpp', 'lisp', 'raku', 'zig'].includes(type)) return type;
