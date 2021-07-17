@@ -1376,8 +1376,7 @@ describe('update service with changes', ({ beforeEach }) => {
 		
 		const originalFile = mock.changes[`fake/source/toCopyWasAdded.xxx`];
 		expect(!originalFile, 'original file changes').toBeTruthy();
-		
-		logJSON(result.result[0])
+
 	});
 });
 

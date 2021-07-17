@@ -1,4 +1,3 @@
-//show-preview
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 import { consoleHelper, importCSS, logJSON, fetchJSON, stringify, getStored } from '../.tools/misc.mjs';
 import '../shared.styl';
