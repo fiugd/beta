@@ -104,6 +104,22 @@ _a running list of all the explorations I would like to dig deeper into_
 - We have not completely figured out how the individual can query the mass brain (or even smaller collectives)
 - I have a picture some place of this... had a long talk with Mehul about it... maybe lost
 
+### Systems Architecture
+- this is LESS about classic architecture patterns and thinking
+- this is LESS about making manually making graphs, pictures, and annotations
+- this is MORE about implementing running models of a few system patterns I am interested in
+	- kubernetes
+	- [simple storm](https://github.com/ajlopez/SimpleStorm)
+		- [a talk about the original](https://vimeo.com/40972420) 	
+	- [expression engine](https://github.com/crosshj/experiments/tree/gh-pages/svg/engine-src)
+	- the bartok system (mainly backend portion)
+- I wonder how much distributed systems functionality can/should be implemented in a programming language
+	- can internal system messages be interchanged with external calls?
+	- how can components of a distributed system be seen as parts of one system (is this a naive question?) 	
+- the intent is not to fully implement the system components more than needed to explore the pattern
+- [Analysis of Message-Passing Concurrency](https://www.youtube.com/watch?v=EqZ0uO7g4RQ)
+- 
+
 
 ---
 
