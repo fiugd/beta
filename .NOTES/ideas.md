@@ -119,6 +119,7 @@ _a running list of all the explorations I would like to dig deeper into_
 - the intent is not to fully implement the system components more than needed to explore the pattern
 - [Analysis of Message-Passing Concurrency](https://www.youtube.com/watch?v=EqZ0uO7g4RQ)
 - can shader languages and programming for GPU's inform this discussion?
+	- [Parallel, distributed and GPU computing technologies...](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2703572/) 
 
 
 ---
