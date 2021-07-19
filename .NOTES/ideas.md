@@ -118,7 +118,7 @@ _a running list of all the explorations I would like to dig deeper into_
 	- how can components of a distributed system be seen as parts of one system (is this a naive question?) 	
 - the intent is not to fully implement the system components more than needed to explore the pattern
 - [Analysis of Message-Passing Concurrency](https://www.youtube.com/watch?v=EqZ0uO7g4RQ)
-- 
+- can shader languages and programming for GPU's inform this discussion?
 
 
 ---
