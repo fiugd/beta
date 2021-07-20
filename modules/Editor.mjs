@@ -792,7 +792,8 @@ const inlineEditor = (ChangeHandler) => ({
 			},
 			minFoldSize: 3,
 		},
-		miniMap: localStorage.getItem('minimap'),
+		//miniMap: localStorage.getItem('minimap'),
+		miniMap: true,
 		miniMapSide: "right",
 		miniMapWidth: 64,
 		cursorBlinkRate: 0
