@@ -17,9 +17,7 @@ SUB-THEMES:
 > migrate towards SW where applicable
 > quality
 
-- [ ] changes in queue are reflected in file store after commit
-
-----
+- [X] changes in queue are reflected in file store after commit
 - [X] delete for commits (because add already works)
 - [X] file content as expected after move/copy operations
 - [X] files in change queue are modified when operations occur
