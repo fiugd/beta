@@ -13,6 +13,22 @@ SUB-THEMES:
 
 > continue the work locking in "quality" started in (but not the main focus of) v0.4.3
 
+tasks:
+- version comes frome file
+- remove files from service manifest that don't need to be there
+- move templates to thier own repo
+- refactor modules into their own folders, remove "shared" folder (or drastically reduce size)
+- editor horizontal scroll
+- keep repo files on github until needed
+- merge editor changes with git changed(?)
+- feed exclusively on update event
+	- editor tabs: order, open, changed, new, pinned
+	- tree: service name, selected, changed, new, open, scroll?
+	- editor: selected, history, scroll, etc
+	- terminal: current dir (if not in session), service name
+
+---
+
 - BE SMART
 	- DO NOT: download all github files when cloning repo
 		- balance this against offline usage
@@ -25,15 +41,15 @@ SUB-THEMES:
 		- when a touched file is closed, it is no longer touched
 	- DO: clean up orphaned files
 		- files that are not opened and not in tree should be removed from store
-	- DO NOT: save files to wrong location with empty contents (BUG SOMEWHERE CAUSES THIS)
+	- [X] DO NOT: save files to wrong location with empty contents (BUG SOMEWHERE CAUSES THIS)
 	- DO NOT: keep state in many different places
 		- which files are open: tracked in SW and tabs
 		- which files are changed: tracked in SW and tabs
 		- editor changes and file changes in different stores
 
 - IF IT IS VISIBLE, IT WORKS WELL
-	- settings: does not show status of pulling/cloning
-	- search: chokes sometimes
+	- settings: should show status of pulling/cloning
+	- search: chokes sometimes (use GH search api?)
 	- tabs: still weird issues / dancing
 	- tree: parent folder not indicating changed child
 
@@ -51,8 +67,6 @@ SUB-THEMES:
 
 - [ ] delay occurs before editor loads sometimes
 	- issue seems to occur because of file store get
-- [ ] file change listeners seem to be broken by preview
-	- need details
 - [ ] copy is hooked up in tree
 - [ ] tree(?) fires multiple events
 	- when dragging from one folder to another

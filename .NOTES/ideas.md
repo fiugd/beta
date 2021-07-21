@@ -22,6 +22,8 @@ _a running list of all the explorations I would like to dig deeper into_
 ### Machine Learning
 - when should bank account be checked? (predict likliehood of change)
 
+### Markov Chains
+- https://github.com/Edwin-Pratt/js-markov
 
 ### Reinforcement Learning
 - wtf happened in my college class on this?
@@ -96,6 +98,9 @@ _a running list of all the explorations I would like to dig deeper into_
 	- [babel AST Explorer](https://lihautan.com/babel-ast-explorer/)
 - parser generator
 	- [ohm editor](https://ohmlang.github.io/editor/)
+- user interface markup language
+	- I would like to start UI's with this but not go as low level with it as some I have seen
+	- [wiki](https://en.wikipedia.org/wiki/User_interface_markup_language)
 
 
 ### Zietgeist Engine

@@ -11,3 +11,6 @@ SUB-THEMES:
 
 - hot reload
 - preview changes affect document
+
+- [ ] file change listeners seem to be broken by preview
+	- need details

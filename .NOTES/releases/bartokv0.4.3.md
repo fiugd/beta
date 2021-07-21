@@ -2,7 +2,7 @@
 
 # bartok v0.4.3
 started: 2021-04-20
-release: TBD
+release: 2021-07-20
 
 THEME: FILE OPERATIONS | CLEANUP
 SUB-THEMES:
