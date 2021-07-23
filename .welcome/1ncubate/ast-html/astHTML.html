@@ -17,6 +17,18 @@
 		//https://github.com/jspaine/html-ast-transform
 		//https://github.com/tobiasnickel/tXml
 
+		const NOTES = `
+			it occurs to me to use ohm.js + html grammar to do all this
+
+			here's a ton of info about parsing in JS
+			<a href="https://tomassetti.me/parsing-in-javascript/">parsing-in-javascript</a>
+
+			also note that going from code -> AST is only part of the battle
+			<a href="https://stackoverflow.com/questions/49629651/how-can-i-transform-a-custom-ast-into-js-code">Stackoverflow: AST -> code</a>
+
+			<a href="https://github.com/tree-sitter/tree-sitter">tree-sitter</a>
+		`;
+
 		/*	This work is licensed under Creative Commons GNU LGPL License.
 
 			License: http://creativecommons.org/licenses/LGPL/2.1/
@@ -75,17 +87,9 @@
 		(async () => {
 			const {simplify, parse} = txml;
 			const pre = (x) => document.body.innerHTML += `<div class="pre">${x}</div>`.replace(/^\t\t\t/gm, '');
-			
-			pre('')
-			pre(`
-			it occurs to me to use ohm.js + html grammar to do all this
 
-			here's a ton of info about parsing in JS
-			<a href="https://tomassetti.me/parsing-in-javascript/">parsing-in-javascript</a>
-			
-			also note that going from code -> AST is only part of the battle
-			<a href="https://stackoverflow.com/questions/49629651/how-can-i-transform-a-custom-ast-into-js-code">Stackoverflow: AST -> code</a>
-			`);
+			pre('')
+			pre(NOTES);
 
 			pre('txml:\n'+Object.keys(txml).join('\n'));
 			const parsed = txml.parse(`

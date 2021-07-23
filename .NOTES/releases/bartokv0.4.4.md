@@ -16,7 +16,7 @@ SUB-THEMES:
 tasks:
 - version comes frome file
 - remove files from service manifest that don't need to be there
-- move templates to thier own repo
+- move templates to their own repo
 - refactor modules into their own folders, remove "shared" folder (or drastically reduce size)
 - editor horizontal scroll
 - keep repo files on github until needed

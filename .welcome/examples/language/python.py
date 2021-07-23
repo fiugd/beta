@@ -4,5 +4,5 @@ def fib():
 		yield a
 		a, b = b, a + b
 
-for index, fibonacci_number in zip(range(10), fib()):
+for index, fibonacci_number in zip(range(30), fib()):
 	print('{f:3}'.format(f=fibonacci_number))
