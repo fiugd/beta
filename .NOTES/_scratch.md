@@ -578,6 +578,7 @@ UNSORTED
 	- https://github.com/hundredrabbits/Orca
 	- https://jspaint.app/
 	- https://www.windows93.net/
+	- https://windows96.net/
 - not inspiration, but very similar use case
 	- https://azure.microsoft.com/en-us/resources/videos/building-web-sites-with-visual-studio-online-monaco/
 - mvc/architectural/BS stuff:
