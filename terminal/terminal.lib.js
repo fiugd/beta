@@ -1,3 +1,4 @@
+import packageJson from "/package.json" assert { type: "json" };
 import { chalk } from './terminal.utils.js';
 
 import commandLineArgs from 'https://cdn.skypack.dev/command-line-args';
@@ -17,8 +18,7 @@ const getSupportedCommands = (commands) => {
 	return supported;
 };
 
-//TODO: use state for this
-const SYSTEM_NAME = 'fiug.dev v0.4';
+const SYSTEM_NAME = `${packageJson.name} v${packageJson.version}`;
 
 const missingArg = (op, missing) => `
 ${op}: missing argument${missing.length?'s':''}: ${missing.join(', ')}
