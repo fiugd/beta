@@ -2,6 +2,17 @@ https://gist.github.com/xavierfoucrier/c156027fcc6ae23bcee1204199f177da
 
 https://phiresky.github.io/blog/2021/hosting-sqlite-databases-on-github-pages/
 
+Cognitive Behavior Therapy
+--------------------------
+[Two Easily Remembered Questions That Silence Negative Thoughts | Anthony Metivier](https://www.youtube.com/watch?v=kvtYjdriSpM)
+
+Are my thoughts useful?
+How do they behave?
+
+applied to software development:
+Is this feature useful?
+How does it behave?
+
 
 personal information store
 --------------------------
@@ -14,7 +25,7 @@ personal information store
 2021-02-26 todo
 ---------------
 - [X] straighten the way that files are stored in service worker (full path for id)
-- [ ] templates that work across services
+- [X] templates that work across services
 - [X] fix preview/lock
 
 - [ ] version endpoint in SW - version and commit hash
@@ -29,7 +40,7 @@ personal information store
 
 - [ ] switching between services is awkward
 
-- [ ] dumbdown, tree languages - https://github.com/treenotation/jtree
+- dumbdown, tree languages - https://github.com/treenotation/jtree
 
 
 2020-10-11 todo
@@ -59,7 +70,7 @@ personal information store
 
 - [X] minimap
 - [ ] go to line number
-- [ ] all terminal commands working well (like unix)
+- [X] all terminal commands working well (like unix)
 - [X] working directory in terminal prompt
 - [X] delay loading service on initial load (loading all code-BAD)
 - [X] editor: hover highlights expand/collapse indicators
