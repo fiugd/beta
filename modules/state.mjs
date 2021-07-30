@@ -5,8 +5,9 @@ import { attach, attachTrigger } from "./Listeners.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
 import "/shared/vendor/localforage.min.js";
+import packageJson from "/package.json" assert { type: "json" };
 
-const SYSTEM_NAME = `fiug.dev v0.4`;
+const SYSTEM_NAME = `${packageJson.name} v${packageJson.version}`;
 
 const execTrigger = attachTrigger({
 	name: "State",

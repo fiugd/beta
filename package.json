@@ -1,6 +1,6 @@
 {
-	"name": "bartok",
-	"version": "1.0.0",
+	"name": "fiug",
+	"version": "0.4.3",
 	"description": "api and services composer and host",
 	"main": "index.js",
 	"scripts": {
