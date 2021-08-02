@@ -17,6 +17,7 @@ SUB-THEMES:
 > migrate towards SW where applicable
 > quality
 
+- [X] version (status bar and terminal) comes from package.json
 - [X] changes in queue are reflected in file store after commit
 - [X] delete for commits (because add already works)
 - [X] file content as expected after move/copy operations

@@ -14,7 +14,6 @@ SUB-THEMES:
 > continue the work locking in "quality" started in (but not the main focus of) v0.4.3
 
 tasks:
-- version comes frome file
 - remove files from service manifest that don't need to be there
 - move templates to their own repo
 - refactor modules into their own folders, remove "shared" folder (or drastically reduce size)
