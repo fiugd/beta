@@ -1,4 +1,7 @@
 
+# similar to what I've already built
+- https://blog.stackblitz.com/posts/introducing-webcontainers/
+
 # found from codesandbox.io
 - first of all, why does bartok not use codesandbox?
 	- https://github.com/codesandbox/codesandbox-client/tree/master/standalone-packages/react-sandpack
