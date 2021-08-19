@@ -1,6 +1,6 @@
 {
 	"name": "fiug",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"description": "api and services composer and host",
 	"main": "index.js",
 	"scripts": {
