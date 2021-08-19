@@ -1,3 +1,15 @@
+import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+
+import chalk from 'https://cdn.skypack.dev/chalk';
+const levels = {
+	disabled: 0,
+	basic16: 1,
+	more256: 2,
+	trueColor: 3
+}
+chalk.enabled = true;
+chalk.level = levels.trueColor;
+
 const getNetEstimate = (salary, joint) => {
 	/*
 
@@ -13,6 +25,7 @@ const getNetEstimate = (salary, joint) => {
 
 	*/
 	const taxTable = [
+		// single, married, tax rate
 		[     0,      0, 0.10],
 		[  9951,  19901, 0.12],
 		[ 40526,  81051, 0.22],
@@ -31,15 +44,35 @@ const getNetEstimate = (salary, joint) => {
 				: single >= salary;
 		});
 
-	const netFlub = 1.37; //totally magic, based on personal experience
+	const netFlub = 1.37; //100% magic, based on personal experience
 	return 1 - (netFlub * rate);
 };
+
+const renderRow = (_this) => () => [
+	`${_this.yearly.toFixed(2).padStart(9)} K`,
+	`${_this.net.toFixed(2).padStart(6)} K`,
+	`${_this.hourly.toFixed(2).padStart(6)}`,
+	`${(_this.weeklyNet*2).toFixed(2).padStart(7)} K  `,
+	`${(_this.taxReturn).toFixed(2).padStart(6)} K`
+].join(chalk.hex('#555')('   |   '));
+
+const header = ansiEscapes.clearScreen
++ ansiEscapes.cursorHide
++ chalk.hex('#ccc').bgHex('#333')(`
+                                                                             
+    yearly           ~net        hourly        ~bi-weekly      ~tax return   
+                                                                             `);
+
+const spacer = chalk.hex('#555')(
+'              |              |            |                 |'
+);
 
 class Salary {
 	asHourly = 1000/(40*52);
 	getNetEstimate = getNetEstimate;
 
 	constructor({ hourly, yearly }){
+		this.toString = renderRow(this);
 		this.yearly = yearly
 			? yearly
 			: hourly / this.asHourly;
@@ -54,14 +87,6 @@ class Salary {
 	get hourly(){ return this.yearly * this.asHourly; }
 	get net(){ return this.yearly * this.netEstimate; }
 	get weeklyNet(){ return this.netEstimate*this.yearly/52; }
-
-	toString = () => [
-		`${this.yearly.toFixed(2).padStart(9)} K`,
-		`${this.net.toFixed(2).padStart(6)} K`,
-		`${this.hourly.toFixed(2)}`,
-		`  ${(this.weeklyNet*2).toFixed(2)} K  `,
-		`${(this.taxReturn).toFixed(2)} K`
-	].join('   |   ');
 }
 
 const results = [
@@ -71,9 +96,10 @@ const results = [
 	new Salary({ yearly: 150 }),
 	new Salary({ hourly: 80 }),
 	new Salary({ yearly: 200 }),
+	new Salary({ yearly: 500 }),
 ];
 
-console.log(`
-    yearly    |      ~net    |  hourly   |   ~bi-weekly   |  ~tax return
--------------------------------------------------------------------------------
-${results.join('\n')}`);
+
+console.log(header + `
+${[spacer, ...results, spacer].join('\n')}
+`);
