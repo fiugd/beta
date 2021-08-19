@@ -6,11 +6,37 @@ import {
 	getCurrentService,
 } from "./state.mjs";
 
+const triggers = {
+	ui: attachTrigger({
+		name: "Editor",
+		eventName: "ui",
+		type: "raw",
+	}),
+};
+
+function triggerEvent(type, operation) {
+	triggers[type]({
+		detail: {
+			operation,
+			done: () => {},
+			body: {},
+		},
+	});
+};
+
 const noFrontSlash = (path) => {
 	if(!path) return path;
 	if(!path.includes('/')) return path;
 	if(path[0] === '/') return path.slice(1);
 	return path;
+};
+
+const pathNoServiceName = (service, path) => {
+	if(!path.includes('/')) return path;
+	if(!path.includes(service.name)) return noFrontSlash(path);
+	return noFrontSlash(
+		noFrontSlash(path).replace(service.name, '')
+	);
 };
 
 const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
@@ -20,11 +46,14 @@ const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 	const fileNameWithPath = next
 		? nameWithPathIfPresent(nextPath, next)
 		: nameWithPathIfPresent(parent || path, name);
-	return fileNameWithPath;
+	const service = getCurrentService({ pure: true });
+	return pathNoServiceName(service, fileNameWithPath);
 };
 
 const ChangeHandler = (doc) => {
 	const { code, name, id, filename } = doc;
+	const service = getCurrentService({ pure: true });
+
 	// TODO: if handler already exists, return it
 	const changeThis = (contents, changeObj) => {
 		const file = setState({
@@ -35,9 +64,13 @@ const ChangeHandler = (doc) => {
 			prevCode: code,
 		});
 
+		//TODO: should be using a trigger for this
 		const event = new CustomEvent("fileChange", {
 			bubbles: true,
-			detail: { name, id, filePath: filename, code: contents },
+			detail: {
+				name, id, filePath: filename, code: contents,
+				service: service ? service.name : undefined
+			},
 		});
 		document.body.dispatchEvent(event);
 	};
@@ -69,16 +102,16 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 	e.preventDefault();
 
 	const listItems = [
-		"Change All Occurences",
-		"Format Selection",
-		"Format Document",
-		"seperator",
+		//"Change All Occurences",
+		//"Format Selection",
+		//"Format Document",
+		//"seperator",
 		"Cut",
 		"Copy",
 		"Paste",
 		"seperator",
-		"Command Palette...",
-	].map((x) => (x === "seperator" ? "seperator" : { name: x, disabled: true }));
+		"Command Palette",
+	].map((x) => (x === "seperator" ? "seperator" : { name: x, disabled: false }));
 	let data;
 	try {
 		data = {};
@@ -99,31 +132,36 @@ const contextMenuHandler = ({ showMenu } = {}) => (e) => {
 	return false;
 };
 
-const contextMenuSelectHandler = ({ newFile } = {}) => (e) => {
+const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "Editor") {
 		//console.log('Editor ignored a context-select event');
 		return;
 	}
-};
-
-const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
-	const { detail } = e;
-	const { op, result } = (detail || {});
-	if (![
-		"provider-test", "provider-save", "provider-add-service"
-	].includes(op)) return;
-
-	messageEditor({
-		op: op + "-done",
-		result,
-	});
+	const contextCommands = {
+		"Cut": cutSelected,
+		"Copy": copySelected,
+		"Paste": paste,
+		"Command Palette": () => triggerEvent("ui", "commandPalette")
+	};
+	const handler = contextCommands[which];
+	if(!handler) return console.error(`Unrecognized context menu command: ${which}`);
+	handler({ parent, data });
 };
 
 let firstLoad = true;
 const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	const { name, path, next, nextPath, parent } = event.detail;
+	const { line, column } = event.detail;
 	let savedFileName;
+
+
+	console.log(
+		`%c${name}: %ceditor %cfileSelect`,
+		'color:#CE9178;',
+		'color:#9CDCFE;',
+		'color:#DCDCAA;'
+	);
 
 	if (firstLoad) {
 		firstLoad = false;
@@ -140,6 +178,12 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 			switchEditor(savedFileName.replace("system::", ""), "systemDoc");
 			return;
 		}
+	}
+
+	if(!name){
+		sessionStorage.setItem("editorFile", '');
+		switchEditor(null, "nothingOpen");
+		return;
 	}
 
 	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
@@ -159,7 +203,28 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		return;
 	}
 
-	switchEditor(filePath);
+	switchEditor(filePath, null, { line, column });
+};
+
+const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
+	const { detail } = e;
+	const { op, result } = (detail || {});
+
+	const providerOps = ["provider-test", "provider-save", "provider-add-service"];
+	if (providerOps.includes(op)) {
+		messageEditor({
+			op: op + "-done",
+			result,
+		});
+		return;
+	}
+
+	if (op === 'update') {
+		const name = result[0]?.state?.selected;
+		const fileSelect = fileSelectHandler({ switchEditor });
+		fileSelect({ detail: { name } });
+		return;
+	}
 };
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {
@@ -177,7 +242,7 @@ const serviceSwitchListener = ({ switchEditor }) => async (event) => {
 	switchEditor(fileName, null, fileBody.code);
 };
 
-function attachListener({ switchEditor, messageEditor }) {
+function attachListener({ switchEditor, messageEditor, paste, cutSelected, copySelected }) {
 	const listener = async function (e) {
 		if (
 			[
@@ -281,7 +346,7 @@ function attachListener({ switchEditor, messageEditor }) {
 	attach({
 		name: "Editor",
 		eventName: "contextmenu-select",
-		listener: contextMenuSelectHandler(),
+		listener: contextMenuSelectHandler({ paste, cutSelected, copySelected }),
 	});
 }
 

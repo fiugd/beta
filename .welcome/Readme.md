@@ -1,24 +1,3 @@
-<!-- no-select -->
-
-<style>
-	.background {
-		text-align: center;
-		margin: 0;
-		background-image: url(examples/image/bartok-logo.svg);
-		position: absolute;
-		top: 40px;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background-size: contain;
-		background-repeat: no-repeat;
-		background-position: center;
-		opacity: 0.04;
-		z-index: -1;
-	}
-</style>
-<p class="background"></p>
-
 # welcome!
 This is Bartok, a system that is being created to help you create, run, and manage your code!
 
@@ -70,3 +49,22 @@ share using novel methods
 	- via presentation mediums
 
 understand and track changes
+
+<style>
+	.background {
+		text-align: center;
+		margin: 0;
+		background-image: url(examples/image/bartok-logo.svg);
+		position: absolute;
+		top: 40px;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: center;
+		opacity: 0.04;
+		z-index: -1;
+	}
+</style>
+<p class="background"></p>

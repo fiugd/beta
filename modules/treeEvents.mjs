@@ -281,9 +281,8 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 	return false;
 };
 
-
 const contextMenuSelectHandler = ({
-	treeAdd, treeRename, treeDelete
+	treeAdd, treeRename, treeDelete, treeMove
 }) => (e) => {
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
@@ -311,11 +310,23 @@ const contextMenuSelectHandler = ({
 		clipboard = { operation: 'copy', data };
 	}
 	if(which === 'Paste'){
-		clipboard.operation === 'cut'
+		const isMove = clipboard.operation === 'cut';
+		const target = data;
+		const source = clipboard.data;
+		clipboard = undefined;
+
+		isMove
 			? console.log(`paste should be a move`)
 			: console.log(`paste should be an add`)
-		console.log({ clipboard, data })
-		clipboard = undefined;
+		console.log({ clipboard, data });
+
+		// TODO: should update tree, but...
+		// really should trigger file and folder copy/move
+		if(isMove){
+			treeMove(clipboard.data.type, source, target);
+		} else {
+			treeAdd(clipboard.data.type, source, target);
+		}
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
@@ -353,10 +364,9 @@ const contextMenuSelectHandler = ({
 	}
 
 	if (which === "Open in Preview") {
-		const { name } = data;
 		const event = new CustomEvent("previewSelect", {
 			bubbles: true,
-			detail: { name },
+			detail: data,
 		});
 		document.body.dispatchEvent(event);
 	}
@@ -364,8 +374,8 @@ const contextMenuSelectHandler = ({
 
 const searchProject = ({ showSearch, hideSearch }) => {
 	//TODO: keep track of search state
-
-	showSearch({ show: !hideSearch });
+	const include = `./${currentServiceName}/`;
+	showSearch({ show: !hideSearch, include });
 };
 
 //TODO: code that creates a tree should live in ../TreeView and be passed here!!
@@ -870,6 +880,7 @@ function newAttachListener(
 		listener: contextMenuSelectHandler({
 			treeAdd,
 			treeDelete,
+			treeMove,
 			treeRename,
 		}),
 	});

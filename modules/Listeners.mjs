@@ -60,12 +60,12 @@ function trigger({ e, type, params, source, data, detail }){
 		...{ source },
 		data: _data
 	};
-	const event = new CustomEvent(type, {
-		bubbles: true,
-		detail: detail
-			? { ...defaultDetail, ...detail, data: _data }
-			: defaultDetail
-	});
+
+	const _detail = detail
+		? { ...defaultDetail, ...detail, data: _data }
+		: defaultDetail;
+
+	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
 }
 
@@ -162,8 +162,10 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		triggerEvent.detail.callback = (error, response) => {
-			source.postMessage({ response, error, key }, messageEvent.origin);
+		triggerEvent.detail.callback = (error, response, service) => {
+			source.postMessage({
+				error, response, error, service, key
+			}, messageEvent.origin);
 		}
 		trigger(triggerEvent)
 		return;

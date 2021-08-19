@@ -8,6 +8,7 @@
 .icon-base-pseudo,
 .icon-r:before,
 .icon-apple:before,
+.icon-apl:before,
 .icon-argdown:before,
 .icon-asm:before,
 .icon-audio:before,
@@ -198,6 +199,12 @@
 .icon-apple:before {
   content: '\E002';
   color: white;
+}
+.icon-apl:before {
+  content: "⍝";
+  font-family: 'apl385';
+  transform: translateX(5.5px);
+  color: #fd00dc;
 }
 .icon-argdown:before {
   content: '\E003';
@@ -875,9 +882,9 @@
 .icon-lisp:before,
 .icon-scheme:before {
   content: 'λ';
-  font-family: monospace;
-  margin-left: 5.5px;
-  margin-right: -5.5px;
+  font-family: 'apl385';
+  transform: translate(5px, 1px);
+  font-size: 20px;
 }
 .icon-lisp:before {
   color: #93d493;

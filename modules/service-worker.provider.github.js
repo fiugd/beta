@@ -28,7 +28,10 @@
 
 	//const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-	const debug = () => { debugger; };
+	const debug = () => {
+		console.warn('Someone wants to be debugging...')
+		//debugger;
+	};
 	const NOT_IMPLEMENTED_RESPONSE = () => {
 		return debug() || stringify({ message: 'not implemented' })
 	};
@@ -249,6 +252,8 @@
 		message: commit message
 	*/
 	async function commit({ files, git, auth, message }){
+		//TODO: message can be formatted in Title Description format by including \n\n between the two
+
 		if(!auth) return { error: 'auth is required' };
 		if(!message) return { error: 'message is required' };
 		if(!git.owner) return { error: 'repository owner is required' };
@@ -256,13 +261,14 @@
 		if(!git.repo) return { error: 'repository name is required' };
 		if(!files || !Array.isArray(files) || !files.length) return { error: 'no files were changed'};
 
+		let blobs = [];
+
 		const opts = {
 			headers: {
 				authorization: `token ${auth}`,
 				Accept: "application/vnd.github.v3+json"
 			}
 		};
-
 		const ghFetch = async (templateUrl, params={}, extraOpts={}) => {
 			const filledUrl = fill(templateUrl, { ...git, ...params });
 			return await fetchJSON(filledUrl, {...opts, ...extraOpts });
@@ -271,38 +277,48 @@
 			method: 'POST',
 			body: JSON.stringify(body)
 		});
-
 		const safeBase64 = (content) => {
 			try {
 				return { content: btoa(content), encoding: 'base64' }
 			} catch(e) {
 				return { content, encoding: "utf-8" }
 			}
-		}
-		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null, safeBase64(content));
-		const blobs = await Promise.all(files.map(blobCreate));
-		const latest = await ghFetch(urls.branch);
-
-		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
-		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
+		};
 		const fileToTree = ({ path }, index) => ({
 			path, mode: '100644', type: 'blob',	sha: blobs[index].sha
 		});
-		// in case files are deleted, should filter from fullTree here
-		const filePaths = files.map(x => x.path);
-		const tree = [
-			...files.map(fileToTree),
-			...fullTree.tree
-				.filter(x => !filePaths.includes(x.path) && x.type !== 'tree')
-				.map(treeToTree)
-		];
+		const treeToTree = ({ path, mode, type, sha }) => ({ path, mode, type, sha });
+		const blobCreate = ({ content }) => ghPost(urls.blobCreate, null, safeBase64(content));
+		const createNewTree = (fwodel, fullt, fileps, delfileps) => {
+			return [
+				...fwodel.map(fileToTree),
+				...fullt.tree
+					.filter(x =>
+						x.type !== 'tree' &&
+						!fileps.includes(x.path) &&
+						!delfileps.includes(x.path)
+					)
+					.map(treeToTree)
+			];
+		};
 
-		const createdTree = await ghPost(urls.tree, null, { tree });
+		const filesWithoutDeleted = files.filter(x => !x.deleteFile);
+		const deletedFilePaths = files.filter(x => x.deleteFile).map(x => x.path);
+		const filePaths = filesWithoutDeleted.map(x => x.path);
+
+		blobs = await Promise.all(filesWithoutDeleted.map(blobCreate));
+		const latest = await ghFetch(urls.branch);
+		const fullTree = await ghFetch(urls.treeRecurse, { sha: latest?.commit?.sha });
+		const createdTree = await ghPost(urls.tree, null, {
+			tree: createNewTree(filesWithoutDeleted, fullTree, filePaths, deletedFilePaths)
+		});
 		const newCommit = await ghPost(urls.createCommit, null, {
 			message, tree: createdTree.sha, parents: [ latest.commit.sha ]
 		});
 		const updateRefs = await ghPost(urls.refs, null, { sha: newCommit.sha });
-		return updateRefs?.object?.sha
+		return (updateRefs?.object?.url || 'no commit url available')
+			.replace('https://api.github.com/repos', 'https://github.com')
+			.replace('git/commits','commit');
 	}
 
 	/*
@@ -322,11 +338,16 @@
 			const { storage: { stores }, utils } = githubProvider;
 			const servicesStore = stores.services;
 			const changesStore = stores.changes;
+			const filesStore = stores.files;
 			const { flattenObject } = utils;
 			
 			let service;
 			await servicesStore.iterate((value, key) => {
-				const { tree } = value;
+				const { tree, name } = value;
+				if(cwd === `${name}/`){
+					service = value;
+					return true;
+				}
 				const flattened = flattenObject(tree);
 				if(flattened.includes(cwd)){
 					service = value;
@@ -334,7 +355,10 @@
 				}
 			});
 			if(service?.type !== 'github') return;
-
+			if(!service || !service.name || !service.branch || !service.repo){
+				throw new Error('missing or malformed service');
+			}
+			const svcRegExp = new RegExp('^' + service.name + '/', 'g')
 			const { owner, repo, branch } = service;
 			const git = { owner, repo, branch };
 
@@ -343,21 +367,37 @@
 			const changesKeys = await changesStore.keys();
 			for(let i=0, len=changesKeys.length; i<len; i++){
 				const key = changesKeys[i];
+				if(!svcRegExp.test(key)) continue;
+
 				const change = await changesStore.getItem(key);
 				if(!change?.service) continue;
-				const {type: operation, value: content, service: { name: parent } } = change;
+				const {
+					type: operation,
+					value: content,
+					service: { name: parent },
+					deleteFile
+				} = change;
+
 				if(!parent) continue;
-				if(parent !== service?.name) continue;
-				const path = key.replace(service?.name + '/', '');
-				files.push({ path, content, operation });
+				if(parent !== service.name) continue;
+				const path = key.replace(svcRegExp, '');
+
+				files.push({ path, content, operation, deleteFile });
 				changes.push({ ...change, key });
 			}
 
 			const commitResponse = await commit({ auth, files, git, message })
+			if(!commitResponse) return stringify({ error: 'commit failed' })
 
-			// if commit is successful, should remove each change from store
-			// if commit is successful, should update file with contents of change
-
+			for(let i=0, len=files.length; i<len; i++){
+				const change = changes[i];
+				if(change.deleteFile){
+					await filesStore.removeItem(change.key);
+				} else {
+					await filesStore.setItem(change.key, change.value);
+				}
+				await changesStore.removeItem(change.key);
+			}
 			return stringify({ commitResponse });
 		} catch(e){
 			debugger;

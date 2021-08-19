@@ -36,25 +36,31 @@
 	// this flattens tree files, not structure
 	const flattenTree = (tree) => {
 		const results = [];
+		const queue = [];
 		const recurse = (branch, parent = "/") => {
-			const leaves = Object.keys(branch);
-			leaves.map((key) => {
-				const children = Object.keys(branch[key]);
-				if (!children || !children.length) {
-					results.push({
-						name: key,
-						code: parent + key,
-						path: parent + key,
-					});
-				} else {
-					if (!branch[key]) {
-						debugger;
+			Object.keys(branch)
+				.filter(x => {
+					const o=branch[x];
+					return !!o && typeof o === "object" && !Array.isArray(o);
+				})
+				.forEach((key) => {
+					const children = Object.keys(branch[key]);
+					if (!children || !children.length) {
+						results.push({
+							name: key,
+							code: parent + key,
+							path: parent + key,
+						});
+					} else {
+						if (!branch[key]) {
+							debugger;
+						}
+						queue.push(() => recurse(branch[key], `${parent}${key}/`));
 					}
-					recurse(branch[key], `${parent}${key}/`);
-				}
-			});
+				});
 		};
-		recurse(tree);
+		queue.push(() => recurse(tree));
+		while(queue.length > 0) queue.shift()();
 		return results;
 	};
 
@@ -82,12 +88,20 @@
 
 	const keepHelper = (tree, code) => {
 		const treeFlat = flattenTree(tree).map(x => x.path.replace('/.keep', ''));
-		const treeFiles = code.map(x => x.path).filter(x => !x.includes('/.keep'));
+		const treeFiles = code
+			.map(x => x.path)
+			.filter(x => !x.includes('/.keep'))
+			.map(x => {
+				if(x[0] === '/') return x;
+				if(x.slice(0,2) === './') return x.replace(/^\.\//, '/');
+				return '/' + x;
+			});
 		const addKeepFiles = treeFlat.reduce((all, one, i, array) => {
 			const found = array.filter((x) => x !== one && x.startsWith(one));
 			if(found.length === 0 && !treeFiles.includes(one)) all.push(one);
 			return all;
 		}, []);
+
 		return treeFlat.map(
 			x => addKeepFiles.includes(x)
 				? x + '/.keep'
@@ -179,7 +193,27 @@
 		return JSON.stringify({ params, event, error: "not implemented" }, null, 2);
 	};
 
+	function addBase(html, href="../../", target="_blank"){
+		try {
+			const baseHref = html.includes('<base')
+				? ''
+				: `\n<base href="${href}" target="${target}">\n`;
+			if(!html.includes('<html>')){
+				html = '<html>\n' + html + '\n</html>'
+			}
+			html = html.replace('<html>', html.includes('<head>')
+				? '<html>'
+				: '<html>\n\n<head></head>\n'
+			);
+			html = html.replace('<head>', `<head>${baseHref}`)
+			return html;
+		} catch(e){
+			return html;
+		}
+	}
+
 	module.exports = {
+		addBase,
 		fetchJSON,
 		flattenTree,
 		flattenObject,

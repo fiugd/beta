@@ -891,7 +891,7 @@ class ServiceTree {
 			const leaf = new LeafNode(domNode);
 			this.emit(type+'Add', { source: leaf.path });
 		};
-		
+
 		if(!newTreeNode) return nodeAddDone();
 
 		const doneCreating = (err, data) => {
@@ -899,10 +899,11 @@ class ServiceTree {
 				domNode.remove()
 				return;
 			}
-			this.insertDomNode(targetChildLeaves || targetNode, domNode);
+			this.insertDomNode(domNode.parentNode, domNode);
 			nodeAddDone();
 		};
 		const siblings = ['TODOErrorPopup'];
+		this.select(target, null, 'noEmit');
 		newTreeNode.focus(siblings, doneCreating);
 	}
 

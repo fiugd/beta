@@ -1,15 +1,51 @@
 import { attach, attachTrigger } from "./Listeners.mjs";
-import { getDefaultFile, getState } from "./state.mjs";
+import { getDefaultFile, getState, getCurrentService } from "./state.mjs";
 let tabs, service;
 
-function removeTabByEventDetail(removeTab, eventDetail){
-	const { name, path, parent } = eventDetail;
-	const closedFullName = (path||parent) ? `${(path||parent)}/${name}` : name;
+const clone = x => JSON.parse(JSON.stringify(x));
+
+const sysDocNames = {
+	"add-service-folder": "Open Folder",
+	"connect-service-provider": "Connect to a Provider",
+	"open-previous-service": "Open Previous Service",
+	"open-settings-view": "Settings",
+};
+
+function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
+	let { name, filename, path, parent, next, nextPath } = eventDetail;
+	name = name || filename;
+	path = path || parent;
+
+	if(!path && name?.includes('/')){
+		path = name.split('/').slice(0,-1).join('/');
+		name = name.split('/').pop();
+	}
+	if(!nextPath && next?.includes('/')){
+		nextPath = next.split('/').slice(0,-1).join('/');
+		next = next.split('/').pop();
+	}
+	let closedFullName = path ? `${path}/${name}` : name;
+	if(service?.name && new RegExp("^" + service.name).test(closedFullName)){
+		closedFullName = closedFullName.replace(service.name+'/', '');
+	}
+
 	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
 	const found = tabs.find((x) => tabFullName(x) === closedFullName);
 	if(!found) return;
 	tabs = tabs.filter((x) => tabFullName(x) != closedFullName);
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+
+	if(next || !tabs.find(x => x.active)){
+		const nextTab = next && tabs.find(
+			(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
+		);
+		const tabToActivate = nextTab || tabs[tabs.length-1];
+		if(tabToActivate){
+			tabToActivate.active = true;
+			updateTab(tabToActivate);
+		}
+	}
+
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 	removeTab(found);
 }
 
@@ -103,31 +139,7 @@ function triggerCloseTab(event, fileCloseTrigger) {
 }
 
 const fileCloseHandler = ({ event, updateTab, removeTab }) => {
-	let { name, path, next, nextPath } = event.detail;
-	if(!path && name?.includes('/')){
-		path = name.split('/').slice(0,-1).join('/');
-		name = name.split('/').pop();
-	}
-	if(!nextPath && next?.includes('/')){
-		nextPath = next.split('/').slice(0,-1).join('/');
-		next = next.split('/').pop();
-	}
-
-	removeTabByEventDetail(removeTab, event.detail);
-
-	if (!next) {
-		return;
-	}
-	const nextTab = tabs.find(
-		(x) => (x.name === next && x.parent === nextPath) || x.systemDocsName === next
-	);
-	if (!nextTab) {
-		return;
-	}
-	nextTab.active = true;
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-
-	updateTab(nextTab);
+	removeTabByEventDetail({ removeTab, updateTab }, event.detail);
 };
 
 //TODO: move this to the UI
@@ -163,12 +175,14 @@ const clickHandler = ({ event, container, triggers }) => {
 
 	// const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	// tabsToUpdate.map(updateTab);
+	const service = getCurrentService({ pure: true });
 
 	triggers["fileSelect"]({
 		detail: {
 			name: foundTab.name,
 			path: foundTab.parent,
 			parent: foundTab.parent,
+			service: service ? service.name : '',
 		},
 	});
 };
@@ -181,7 +195,9 @@ const fileSelectHandler = ({
 	updateTab,
 	removeTab,
 }) => {
-	let { name, changed, parent } = event.detail;
+	let { name, changed, parent, path } = event.detail;
+	if(path) parent = path;
+
 	if(!parent && name?.includes('/')){
 		parent = name.split('/').slice(0,-1).join('/');
 		name = name.split('/').pop();
@@ -192,12 +208,7 @@ const fileSelectHandler = ({
 	if(!tabs) return;
 	let systemDocsName;
 	if (name?.includes("system::")) {
-		systemDocsName = {
-			"add-service-folder": "Open Folder",
-			"connect-service-provider": "Connect to a Provider",
-			"open-previous-service": "Open Previous Service",
-			"open-settings-view": "Settings",
-		}[name.replace("system::", "")];
+		systemDocsName = sysDocNames[name.replace("system::", "")];
 	}
 	let id = "TAB" + Math.random().toString().replace("0.", "");
 
@@ -207,7 +218,7 @@ const fileSelectHandler = ({
 	);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
-		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 		return;
 	}
 
@@ -234,7 +245,7 @@ const fileSelectHandler = ({
 		id,
 		changed,
 	});
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const fileChangeHandler = ({
@@ -253,7 +264,7 @@ const fileChangeHandler = ({
 	}
 	foundTab.changed = true;
 	[foundTab].map(updateTab);
-	sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const operationDoneHandler = ({
@@ -265,26 +276,33 @@ const operationDoneHandler = ({
 	removeTab,
 }) => {
 	const { op, id, result = [] } = event.detail || {};
-	if (op === "update") {
-		tabs.forEach((t) => {
-			if (t.changed) t.touched = true;
-			delete t.changed;
-		});
-		tabs.map(updateTab);
-		sessionStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-		return;
-	}
+	if(result?.error) return;
+	if (!["read", "update"].includes(op) || !id) return;
 
-	if (op !== "read" || !id) {
-		return;
-	}
+	service = result[0];
+
+	const { opened=[], changed=[] } = result[0]?.state || {};
+	tabs = opened.map(({ name, order }) => ({
+		id: "TAB" + Math.random().toString().replace("0.", ""),
+		name: name.split('/').pop(),
+		parent: name.split('/').slice(0,-1).join('/'),
+		touched: changed.includes(name),
+		changed: changed.includes(name),
+		active: order === 0,
+		systemDocsName: sysDocNames[name.replace("system::", "")]
+	}));
+	initTabs(tabs);
+	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
+
+	/*
 	service = result[0];
 	const tabsStorageKey = service?.treeState?.select
 		? "tabs/"+(service?.name||'')
 		: "tabs/";
-	const storedTabs = JSON.parse(sessionStorage.getItem(tabsStorageKey) || '[]');
+	const storedTabs = JSON.parse(localStorage.getItem(tabsStorageKey) || '[]');
 	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
 	initTabs(tabs);
+	*/
 };
 
 const operationsHandler = (args) => {
@@ -300,7 +318,7 @@ const operationsHandler = (args) => {
 	if(!operation || !['deleteFile'].includes(operation)) return;
 
 	if(operation === 'deleteFile'){
-		removeTabByEventDetail(removeTab, event.detail);
+		//removeTabByEventDetail({ removeTab, updateTab }, event.detail);
 		return;
 	}
 }
@@ -321,30 +339,30 @@ const contextMenuHandler = ({ event, showMenu }) => {
 	const tab = theTab && tabs.find((x) => x.id === theTabId);
 	// TODO: maybe these should be defined in UI Module
 	// filter actions based on whether tab was found or not
-	const barClickItems = [{ name: "Close All", disabled: true }];
+	const barClickItems = [{ name: "Close All" }];
 	const multiTabsItems = [
 		"Close",
-		{ name: "Close Others", disabled: true },
-		{ name: "Close All", disabled: true },
+		{ name: "Close Others" },
+		{ name: "Close All" },
 		"-------------------",
 		"Copy Path",
 		"Copy Relative Path",
-		"-------------------",
-		"Reveal in Side Bar",
-		"-------------------",
-		{ name: "Keep Open", disabled: true },
-		{ name: "Pin", disabled: true },
+		//"-------------------",
+		//"Reveal in Side Bar",
+		//"-------------------",
+		//{ name: "Keep Open", disabled: true },
+		//{ name: "Pin", disabled: true },
 	];
 	const tabClickItems = [
 		"Close",
 		"-------------------",
 		"Copy Path",
 		"Copy Relative Path",
-		"-------------------",
-		"Reveal in Side Bar",
-		"-------------------",
-		{ name: "Keep Open", disabled: true },
-		{ name: "Pin", disabled: true },
+		//"-------------------",
+		//"Reveal in Side Bar",
+		//"-------------------",
+		//{ name: "Keep Open", disabled: true },
+		//{ name: "Pin", disabled: true },
 	];
 
 	const listItems = (tab
@@ -386,8 +404,8 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 		setTimeout(() => alert(fn + ": not implemented"), 0);
 	const handler = {
 		close: ({ tab }) => triggers.fileClose({ detail: tab }),
-		closeothers: NOT_IMPLEMENTED("closeothers"),
-		closeall: NOT_IMPLEMENTED("closeall"),
+		closeothers: triggers.closeOthers,
+		closeall: triggers.closeAll,
 		copypath: ({ tab }) => copyPath(tab),
 		copyrelativepath: ({ tab }) => copyPath(tab, "relative"),
 		revealinsidebar: ({ tab }) => {
@@ -399,6 +417,33 @@ const contextMenuSelectHandler = ({ event, triggers }) => {
 	}[which.toLowerCase().replace(/ /g, "")];
 
 	handler && handler(data);
+};
+
+const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
+	let tabsToRemove = [];
+	let tabToSelect;
+	let fileToClose;
+	if(which === 'all'){
+		fileToClose = tabs.find(x => x.active);
+		fileToClose.path = fileToClose.parent;
+		tabsToRemove = clone(tabs);
+		tabs = [];
+	}
+	if(which === "others" && tab){
+		tabsToRemove = tabs.filter((t) => t.id !== tab.id);
+		tabs = tabs.filter((t) => t.id === tab.id);
+		if(!tab.active){
+			tabToSelect = clone(tab);
+			tabToSelect.path = tabToSelect.parent;
+		}
+	}
+	localStorage.setItem(
+		"tabs/"+(service?.name||''),
+		JSON.stringify(tabs)
+	);
+	tabsToRemove.forEach(removeTab);
+	if(tabToSelect) triggers.fileSelect({ detail: tabToSelect });
+	if(fileToClose) triggers.fileClose({ detail: fileToClose });
 };
 
 const systemDocsHandler = ({
@@ -484,7 +529,9 @@ function attachListener(
 				untracked: true,
 			},
 		}),
-	};
+	};	
+	triggers.closeAll = closeMultiple(removeTab, triggers, 'all');
+	triggers.closeOthers = closeMultiple(removeTab, triggers, 'others');
 
 	const listener = async function (event) {
 		const showMenu = () => window.showMenu;
@@ -532,6 +579,12 @@ function attachListener(
 	attach({
 		name: "Tab Bar",
 		eventName: "operationDone",
+		listener,
+	});
+
+	attach({
+		name: "Tab Bar",
+		eventName: "operations",
 		listener,
 	});
 

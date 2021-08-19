@@ -5,7 +5,7 @@ import ext from "/shared/icons/seti/ext.json.mjs";
 import { attachListener, connectTrigger } from "./treeEvents.mjs";
 import "/shared/vendor/localforage.min.js";
 
-let treeView, opener, tree, triggers;
+let treeView, opener, tree, triggers, _service;
 
 const driver = [
 	localforage.INDEXEDDB,
@@ -38,7 +38,7 @@ const treeMemory = (service, tree, action) => (...args) => {
 		},
 		select: async (args) => {
 			const selected = tree.context(args[0].target).path;
-			await changesStore.setItem(`tree-${service.name}-selected`, selected);
+			//await changesStore.setItem(`tree-${service.name}-selected`, selected);
 		}
 	};
 	if(!handlers[action]) return;
@@ -125,7 +125,6 @@ const utils = (() => {
 		debounce,
 	};
 })();
-
 
 const ProjectOpener = () => {
 	let _opener = htmlToElement(`
@@ -416,6 +415,11 @@ const SearchBoxHTML = () => {
 			position: relative;
 			white-space: nowrap;
 		}
+		.search-results ul.line-results > li > span,
+		.search-results ul.line-results > li > div {
+			user-select: none;
+			pointer-events: none;
+		}
 		.search-results > li > div .hover-highlight,
 		.search-results > li ul > li .hover-highlight {
 			position: absolute;
@@ -555,9 +559,10 @@ class SearchBox {
 			const handler = {
 				"DIV foldable": () => e.target.parentNode.classList.add("open"),
 				"DIV foldable open": () => e.target.parentNode.classList.remove("open"),
+				"LI line-results": (e) => triggers.fileSelect(e.target.dataset),
 			}[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
 
-			if (handler) return handler();
+			if (handler) return handler(e);
 		});
 	}
 
@@ -619,7 +624,7 @@ class SearchBox {
 			const limit = 1; //only highlight one occurence
 			const listItemEl = (Array.isArray(result) ? result : [result]).map(
 				(r, i) => `
-					<li>
+					<li data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">
 						<div class="hover-highlight"></div>
 						${utils.highlight(term, utils.htmlEscape(r.text.trim()), limit)}
 					</li>
@@ -639,7 +644,9 @@ class SearchBox {
 						<span class="${iconClass}">${result.docName}</span>
 						<span class="doc-path">${result.path}</span>
 					</div>
-					<ul>${addFileResultsLineEl(result).join("\n")}</ul>
+					<ul class="line-results">
+						${addFileResultsLineEl(result).join("\n")}
+					</ul>
 				</li>
 			`);
 			return fileResultsEl;
@@ -935,12 +942,15 @@ const updateTreeMenu = ({ title, project }) => {
 const showSearch = (treeView) => {
 	const treeSearch = treeView.parentNode.querySelector(".tree-search");
 	const searchInput = document.querySelector(".project-search-input");
-	return ({ show }) => {
+
+	return ({ show, include }) => {
 		if (show) {
 			treeView.style.visibility = "hidden";
 			treeSearch.style.visibility = "visible";
 			treeSearch.style.height = "";
 			updateTreeMenu({ title: "search" });
+			include && searchBox.updateInclude(include);
+
 			setTimeout(() => {
 				searchInput.focus();
 				searchInput.select();
@@ -1018,6 +1028,7 @@ function _TreeView(op) {
 	treeView.parentNode.append(treeViewStyle);
 
 	const newTree = ({ service, treeState }) => {
+		_service = service ? service.name : '';
 		const treeRootId = "tree-view";
 		// TODO: clear old tree if exists?
 		const extensionMapper = (extension) => {
@@ -1104,7 +1115,7 @@ function _TreeView(op) {
 			folderMove: 'moveFolder',
 		};
 		const treeEventHandler = (args) => {
-			const { source, target } = args;
+			const { source, target, line, column } = args;
 			const name = (target || source).split('/').pop();
 			const parent = (target || source).split('/').slice(0,-1).join('/');
 			const handlerMessage = {
@@ -1118,7 +1129,9 @@ function _TreeView(op) {
 					operation: operationAdapt[operation] || operation,
 					filename: name,
 					folderName: name,
-					body: {}
+					line, column,
+					body: {},
+					service: _service || '',
 				}
 			};
 			return handler(handlerMessage);

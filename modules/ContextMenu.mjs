@@ -3,7 +3,7 @@ import {
 	attachTrigger as connectTrigger,
 } from "./Listeners.mjs";
 
-import { getCurrentServiceTree } from "./state.mjs";
+import { getCurrentServiceTree, getCurrentService } from "./state.mjs";
 
 const safe = (fn) => {
 	try {
@@ -114,6 +114,13 @@ function PaletteModal(parentEl) {
 			background: rgba(var(--main-theme-highlight-color), 0.3);
 			background: #0d3048;
 		}
+		.palette-suggest ul li:hover {
+			background: rgba(var(--main-theme-highlight-color), 0.3);
+		}
+		.palette-suggest ul li div {
+			user-select: none;
+			pointer-events: none;
+		}
 		.palette-file [class^="icon-"]:before {
 			width: 10px;
 		}
@@ -150,41 +157,52 @@ function PaletteModal(parentEl) {
 	const suggestList = paletteModal.querySelector(".palette-suggest");
 	const searchInput = modalMenu.querySelector(".palette-input input");
 
+	const triggerSelectFile = (el) => {
+		if (!el) {
+			console.error("palette modal: could not find selected element");
+			return;
+		}
+
+		const name = el.querySelector(".palette-file-name").textContent;
+		const path = el.querySelector(".palette-file-path").getAttribute('relative');
+		const service = (() => {
+			const svc = getCurrentService({ pure: true }) || {};
+			return svc.name || '';
+		})();
+
+		if (!service)
+			return console.error('palette modal: issue getting selected service name for selected file');
+		if (typeof path === "undefined")
+			return console.error('palette modal: issue getting path for selected file');
+		if (!name)
+			return console.error('palette modal: issue getting name for selected file');
+
+		// TODO: should be doing this with triggers
+		const event = new CustomEvent("fileSelect", {
+			bubbles: true,
+			detail: { name, path, service },
+		});
+		document.body.dispatchEvent(event);
+		paletteModal.hide();
+	};
+
+
+	let selected;
+
 	const modalClickListener = (event) => {
 		const modalWasClicked = modalMenu.contains(event.target);
 		if (!modalWasClicked) return paletteModal.hide();
 
-		console.log("modal was clicked!");
-		//todo - trigger some event here
+		const el = event.target.tagName === 'LI'
+			? event.target.closest('li')
+			: event.target;
+		triggerSelectFile(el);
+		selected = undefined;
 	};
 
-	const triggerSelectFile = (el) => {
-		if (!el) {
-			console.error("could not find selected element in palette modal");
-			return;
-		}
-		const filename = el.querySelector(".palette-file-name").textContent;
-		if (!filename) {
-			console.log(el.innerText);
-			return;
-		}
-		const path = el.querySelector(".palette-file-path").getAttribute('relative');
-		// TODO: should be doing this with triggers
-		const event = new CustomEvent("fileSelect", {
-			bubbles: true,
-			detail: {
-				name: filename,
-				path,
-			},
-		});
-		document.body.dispatchEvent(event);
-	};
-
-	let selected;
 	const keyListener = function (event) {
 		const handler = {
 			Enter: () => {
-				paletteModal.hide();
 				triggerSelectFile(selected || suggestList.querySelector(".selected"));
 				selected = undefined;
 			},
@@ -218,6 +236,7 @@ function PaletteModal(parentEl) {
 				selected = next;
 			},
 		}[event.key];
+
 		if (handler) {
 			handler();
 			event.preventDefault();

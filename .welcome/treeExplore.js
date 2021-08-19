@@ -1,4 +1,7 @@
 //show-preview
+import { consoleHelper, importCSS } from './.tools/misc.mjs';
+import './shared.styl';
+consoleHelper();
 
 const flattenTree = (tree) => {
 	const results = [];
@@ -95,4 +98,8 @@ const keepHelper = (tree, code) => {
 	return treeFlat.map(x => addKeepFiles.includes(x) ? x + '/.keep' : x)
 }
 
-console.log(keepHelper(parent.tree, parent.code))
+console.log('this is an exercise in creating .keep files for empty dirs');
+console.info(JSON.stringify(
+	keepHelper(parent.tree, parent.code),
+	null, 2
+))
