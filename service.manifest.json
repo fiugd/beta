@@ -12,7 +12,6 @@
 
 				"./settings.html",
 
-				"/shared/vendor/stylus.min.js",
 				"/shared/vendor/materialize.min.js",
 
 				"/shared/vendor/localforage.min.js",
