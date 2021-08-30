@@ -1440,12 +1440,6 @@ describe('special folders', ({ beforeEach }) => {
 	});
 
 	it.only('should not check in files in .git folder', async (assert) => {
-		//https://www.npmjs.com/package/parse-git-config
-		/*
-			git config --local user.name "fname lname"
-			git config --local user.email "example@gmail.com"
-			git config --local user.password "secret"
-		*/
 		expect(true, 'bogus test condition').toEqual(false);
 	});
 	it.todo('should not check in .gitignore files', async (assert) => {
@@ -1457,3 +1451,4 @@ let finish;
 const donePromise = new Promise((resolve) => { finish = resolve; });
 TestStart(finish);
 await donePromise;
+ 

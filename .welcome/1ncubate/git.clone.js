@@ -11,25 +11,16 @@ GOALS:
 
 - do everything this does (lol) https://cli.github.com/
 
-BLOCKER:
-- can't access sessionStorage in worker, need it for github auth
+TODO:
+- service worker should:
+	- ignore contents of .git folder
+	- use .git/config as below(except with global scope) for credentials
 
-SOLUTIONS:
-? 1) beef up communication between worker and main page, expose sessionStorage
-* 2) read/write file (with token in it) using serviceWorker, implement .gitignore so this file isn't checked in
-* 3) service worker can read github auth and use it
+- git config support for the following, mind the "global"
+	git config --global user.name "fname lname"
+	git config --global user.email "example@gmail.com"
+	git config --global user.password "secret"
 
-2 & 3 can be seen as the same solution give or take the .gitignore part
-
-fetch("https://beta.fiug.dev/service/change", {
-	"body": "{\n  \"path\": \"./crosshj/fiug-beta/secrets.json\",\n  \"code\": \"{}\\n\",\n  \"service\": \"crosshj/fiug-beta\"\n}",
-	"method": "POST",
-});
-
-fetch("https://beta.fiug.dev/crosshj/fiug-beta/secrets.json", {
-	"body": "{\n  \"path\": \"./crosshj/fiug-beta/secrets.json\",\n  \"code\": \"{}\\n\",\n  \"service\": \"crosshj/fiug-beta\"\n}",
-	"method": "GET",
-});
 
 https://github.com/nodeca/js-yaml
 https://github.com/eemeli/yaml
@@ -38,8 +29,15 @@ https://codemirror.net/mode/yaml/index.html
 
 */
 
+import ini from 'https://cdn.skypack.dev/ini';
+
 try {
-	const auth = ''; //sessionStorage.getItem('Github Personal Access Token');
+
+	const configUrl = 'https://beta.fiug.dev/crosshj/fiug-beta/.git/config';
+	const configText = await fetch(configUrl).then(x=>x.text());
+	const gitConfig = ini.parse(configText);
+
+	const auth = gitConfig.user.password;
 
 	const cloneUrl = 'https://beta.fiug.dev/service/create/provider';
 	const bodyObj = {
@@ -64,4 +62,3 @@ try {
 } catch(e){
 	console.log(`ERROR: ${e.message}`)
 }
-
