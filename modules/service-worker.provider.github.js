@@ -23,7 +23,7 @@
 	});
 
 	const stringify = o => JSON.stringify(o,null,2);
-	const fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
+	const _fetchJSON = (url, opts) => fetch(url, opts).then(x => x.json());
 	const fill = (url, obj) => Object.keys(obj).reduce((all,one) => all.replace(`{${one}}`, obj[one]),	url);
 
 	//const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -74,7 +74,7 @@
 			if(auth) opts.headers.authorization = `token ${auth}`;
 			opts.headers.Accept = "application/vnd.github.v3+json";
 
-			const result = await fetchJSON(urls.rateLimit, opts);
+			const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
 			let { limit, remaining, reset } = result?.resources?.core;
 			reset = new Date(reset*1000).toLocaleString('sv').split(' ').reverse().join(' ');
 
@@ -136,11 +136,11 @@
 			const latestCommitUrl = urls.latestCommit
 				.replace('{owner}/{repo}', repo)
 				.replace('{branch}', branch);
-			const { commit: { sha } } = await fetchJSON(latestCommitUrl, opts);
+			const { commit: { sha } } = await githubProvider.fetchJSON(latestCommitUrl, opts);
 			const getTreeUrl = urls.getTreeRecursive
 				.replace('{owner}/{repo}', repo)
 				.replace('{tree_sha}', sha);
-			const { tree, truncated } = await fetchJSON(getTreeUrl, opts);
+			const { tree, truncated } = await githubProvider.fetchJSON(getTreeUrl, opts);
 			if(truncated) console.warn('github repo tree truncated - try without recursive flag')
 
 			//const ghTreeItems = tree.filter(x => x.type === 'tree');
@@ -151,7 +151,7 @@
 			// does raw github access (not api) go against quota
 			// if so, warn the user that we can't do it without access token ??
 			// also, may be better to use API in the future
-			const result = await fetchJSON(urls.rateLimit, opts);
+			const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
 			let { remaining, reset, limit } = result?.resources?.core;
 			reset = new Date(reset*1000).toLocaleString('sv').split(' ').reverse().join(' ');
 
@@ -251,15 +251,18 @@
 		auth: github authorization token,
 		message: commit message
 	*/
-	async function commit({ files, git, auth, message }){
+	async function commit({ files, git, auth, message, fetchJSON }){
 		//TODO: message can be formatted in Title Description format by including \n\n between the two
+		
+		if(!files || !Array.isArray(files)) return { error: 'no files were changed'};
+		files = files.filter(x => !x.ignore);
+		if(!files.length) return { error: 'no files were changed'};
 
 		if(!auth) return { error: 'auth is required' };
 		if(!message) return { error: 'message is required' };
 		if(!git.owner) return { error: 'repository owner is required' };
 		if(!git.branch) return { error: 'repository branch name is required' };
 		if(!git.repo) return { error: 'repository name is required' };
-		if(!files || !Array.isArray(files) || !files.length) return { error: 'no files were changed'};
 
 		let blobs = [];
 
@@ -344,6 +347,7 @@
 			let service;
 			await servicesStore.iterate((value, key) => {
 				const { tree, name } = value;
+				
 				if(cwd === `${name}/`){
 					service = value;
 					return true;
@@ -354,8 +358,8 @@
 					return true;
 				}
 			});
-			if(service?.type !== 'github') return;
-			if(!service || !service.name || !service.branch || !service.repo){
+
+			if(!service || !service.name || !service.branch || !service.repo || service?.type !== 'github'){
 				throw new Error('missing or malformed service');
 			}
 			const svcRegExp = new RegExp('^' + service.name + '/', 'g')
@@ -382,12 +386,21 @@
 				if(parent !== service.name) continue;
 				const path = key.replace(svcRegExp, '');
 
-				files.push({ path, content, operation, deleteFile });
+				const file = { path, content, operation, deleteFile };
+				if(file.path.startsWith('.git/')) file.ignore = true;
+				files.push(file);
+
 				changes.push({ ...change, key });
 			}
-
-			const commitResponse = await commit({ auth, files, git, message })
-			if(!commitResponse) return stringify({ error: 'commit failed' })
+			
+			let commitResponse;
+			if(files.filter(x => !x.ignore).length){
+				commitResponse = await commit({ auth, files, git, message, fetchJSON: githubProvider.fetchJSON })
+				if(!commitResponse) throw new Error('commit failed');
+				if(commitResponse.error) throw new Error(commitResponse.error)
+			} else {
+				commitResponse = { error: 'no files changed'}
+			}
 
 			for(let i=0, len=files.length; i<len; i++){
 				const change = changes[i];
@@ -400,8 +413,7 @@
 			}
 			return stringify({ commitResponse });
 		} catch(e){
-			debugger;
-			return;
+			return stringify({ commitResponse: { error: e.message } });
 		}
 	}
 
@@ -413,6 +425,7 @@
 
 					this.storage = storage;
 					this.fetchContents = fetchContents;
+					this.fetchJSON = _fetchJSON;
 					this.app = app;
 					this.utils = utils;
 
