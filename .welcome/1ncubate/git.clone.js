@@ -13,7 +13,7 @@ GOALS:
 
 TODO:
 - service worker should:
-	- ignore contents of .git folder
+	- [X] ignore contents of .git folder
 	- use .git/config as below(except with global scope) for credentials
 
 - git config support for the following, mind the "global"
@@ -22,7 +22,7 @@ TODO:
 	> git config --global user.password "secret"
 	- because repo ("local") is not available before git clone
 
-- when git commit fails should not blow away changes
+- [X] when git commit fails should not blow away changes
 
 
 OTHER:
