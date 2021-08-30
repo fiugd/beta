@@ -17,15 +17,20 @@ TODO:
 	- use .git/config as below(except with global scope) for credentials
 
 - git config support for the following, mind the "global"
-	git config --global user.name "fname lname"
-	git config --global user.email "example@gmail.com"
-	git config --global user.password "secret"
+	> git config --global user.name "fname lname"
+	> git config --global user.email "example@gmail.com"
+	> git config --global user.password "secret"
+	- because repo ("local") is not available before git clone
 
+- when git commit fails should not blow away changes
 
 https://github.com/nodeca/js-yaml
 https://github.com/eemeli/yaml
 
 https://codemirror.net/mode/yaml/index.html
+
+codemirror ini files (like .git/config
+https://codemirror.net/mode/properties/index.html
 
 */
 
