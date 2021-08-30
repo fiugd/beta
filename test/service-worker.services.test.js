@@ -1417,6 +1417,42 @@ describe('delete service', ({ beforeEach }) => {
 	it.todo('should remove files when service is deleted', async (assert) => {});
 });
 
+describe('special folders', ({ beforeEach }) => {
+	const newServiceName = 'fake/foo';
+
+	beforeEach(() => {
+		mock = ServiceMock({ utils });
+		manager = new ServicesManager(mock.deps);
+			mock.setService(3002, (svc) => {
+			svc.tree[newServiceName] = svc.tree.fake;
+			delete svc.tree.fake;
+			svc.name = newServiceName;
+			svc.repo = newServiceName;
+			return svc;
+		});
+		mock.setFiles((files) => {
+			Object.entries(files)
+				.forEach(([k,v]) => {
+					delete files[k];
+					files[k.replace('./fake/', `${newServiceName}/`)] = v;
+				});
+		});
+	});
+
+	it.only('should not check in files in .git folder', async (assert) => {
+		//https://www.npmjs.com/package/parse-git-config
+		/*
+			git config --local user.name "fname lname"
+			git config --local user.email "example@gmail.com"
+			git config --local user.password "secret"
+		*/
+		expect(true, 'bogus test condition').toEqual(false);
+	});
+	it.todo('should not check in .gitignore files', async (assert) => {
+		//https://www.npmjs.com/package/parse-gitignore
+	});
+});
+
 let finish;
 const donePromise = new Promise((resolve) => { finish = resolve; });
 TestStart(finish);
