@@ -396,15 +396,15 @@
 }
 .icon-font:before {
   content: '\E030';
-  color: white;
+  color: #cc3e44;
 }
 .icon-git:before {
   content: '\E031';
-  color: white;
+  color: #41535b;
 }
 .icon-git_folder:before {
   content: '\E032';
-  color: white;
+  color: #41535b;
 }
 .icon-git_ignore:before {
   content: '\E033';

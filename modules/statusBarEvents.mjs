@@ -11,7 +11,9 @@ function getFileType(fileName = "") {
 		/^\./,
 		""
 	);
-
+	if (fileName.toLowerCase() === "config") {
+		type = "config";
+	}
 	if (ext[extension]) {
 		type = ext[extension];
 	}

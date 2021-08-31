@@ -59,7 +59,7 @@ function getFileType(fileName = "") {
 	}
 	
 	//TODO: most of this should be able to go away with addition of getExtension above...
-	if (fileName.toLowerCase() === "config") {
+	if (fileName.toLowerCase() === ".git/config") {
 		type = "config";
 	}
 	if (fileName.toLowerCase() === "license") {

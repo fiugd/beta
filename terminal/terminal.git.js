@@ -74,6 +74,7 @@ const diffPretty = (diff) => {
 		return `${chalk.hex(colors.normal)(x)}\n`;
 	}).join('');
 };
+
 const config = {
 	keyword: "git",
 	description: "git is version control.",
@@ -121,6 +122,7 @@ const diff = async ({ ops }, args) => {
 		})
 		.join('\n');
 };
+
 const status = async ({ ops }) => {
 	const changesResponse = await _getChanges({ ops });
 	const { changes } = changesResponse;
@@ -136,6 +138,7 @@ const status = async ({ ops }) => {
 	};
 	return '\n' + changes.map(changeRender).join('\n') + '\n';
 };
+
 const commit = async ({ ops }, args) => {
 	const { _unknown } = args;
 	const message = _unknown.join(' ')
@@ -154,7 +157,7 @@ const commit = async ({ ops }, args) => {
 const clone = async ({}, args) => {
 	// do what settings does when it clones a github repo
 	return notImplemented('clone');
-}
+};
 const branch = async ({ term }) => notImplemented('branch');
 const push = async ({ term }) => notImplemented('push');
 const pull = async ({ term }) => notImplemented('pull');

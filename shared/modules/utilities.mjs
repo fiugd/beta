@@ -31,6 +31,7 @@ function codemirrorModeFromFileType(fileType){
 		kotlin: 'text/x-kotlin',
 		lisp: 'commonlisp',
 		raku: 'perl6',
+		yml: 'text/x-yaml',
 		zig: 'rust',
 		sql: 'text/x-pgsql',
 	};

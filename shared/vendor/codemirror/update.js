@@ -21,11 +21,17 @@ const updates = [[
 	`/crosshj/fiug-beta/modules/Editor.mjs`,
 	`/_/modules/Editor.mjs`
 ],[
+	`/crosshj/fiug-beta/modules/TreeView.mjs`,
+	`/_/modules/TreeView.mjs`
+],[
 	`/crosshj/fiug-beta/modules/editorEvents.mjs`,
 	`/_/modules/editorEvents.mjs`
 ],[
 	`/crosshj/fiug-beta/modules/treeEvents.mjs`,
 	`/_/modules/treeEvents.mjs`
+],[
+	`/crosshj/fiug-beta/modules/statusBarEvents.mjs`,
+	`/_/modules/statusBarEvents.mjs`
 ],[
 	`/crosshj/fiug-beta/modules/editorTabsEvents.mjs`,
 	`/_/modules/editorTabsEvents.mjs`

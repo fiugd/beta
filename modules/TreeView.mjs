@@ -990,6 +990,12 @@ function _TreeView(op) {
 	const treeViewStyle = htmlToElement(`
 		<style>
 			#tree-view {
+				padding-top: 0.1em;
+			}
+
+			/* tree view dimming*/
+			/*
+			#tree-view {
 				opacity: .7;
 				transition: opacity 25s;
 				padding-top: 0.1em;
@@ -998,6 +1004,8 @@ function _TreeView(op) {
 				opacity: 1;
 				transition: opacity 0.3s;
 			}
+			*/
+
 			#tree-view .tree-expando:not(.hidden) + .tree-leaf-text:before {
 				font-family: codicon;
 				content: "\\eab4";
@@ -1035,7 +1043,8 @@ function _TreeView(op) {
 			const override = {
 				md: "info",
 			};
-			return "icon-" + (override[extension] || ext[extension] || "default");
+			const _ext = extension.toLowerCase();
+			return "icon-" + (override[_ext] || ext[_ext] || "default");
 		};
 		tree = new TreeView(service, treeRootId, treeState, extensionMapper);
 		const memoryHandler = (action) => treeMemory(service, tree, action);
