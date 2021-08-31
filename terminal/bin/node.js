@@ -22,7 +22,7 @@ const operation = async (args, state={}) => {
 	// CRIPE! this won't work because "node" itself is running in a worker...
 	function WithSession(original){
 		try {
-			const storageKeys = original.matchAll(/sessionStorage.getItem\(['`"](.*)['`"]\)/g)).map(([,x])=>x);
+			const storageKeys = Array.from(original.matchAll(/sessionStorage.getItem\(['`"](.*)['`"]\)/g)).map(([,x])=>x);
 			const stored = storageKeys.reduce((all,one) => ({ ...all, [one]: sessionStorage.getItem(one) }), {});
 			const fakeStorage = `const sessionStorage = { getItem: (key) => { return ${JSON.stringify(stored)}[key]; } };\n`;
 			return fakeStorage + original;
