@@ -59,6 +59,12 @@ function getFileType(fileName = "") {
 	}
 	
 	//TODO: most of this should be able to go away with addition of getExtension above...
+	if (filename.toLowerCase() === "config") {
+		type = "config";
+	}
+	if (filename.toLowerCase() === "license") {
+		type = "license";
+	}
 	if (ext[extension]) {
 		type = ext[extension];
 	}

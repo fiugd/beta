@@ -292,7 +292,7 @@
 }
 .icon-config:before {
   content: '\E017';
-  color: white;
+  color: #6d8086;
 }
 .icon-cpp:before {
   content: '\E018';
@@ -408,7 +408,7 @@
 }
 .icon-git_ignore:before {
   content: '\E033';
-  color: white;
+  color: #41535b;
 }
 .icon-github:before {
   content: '\E034';
@@ -548,7 +548,7 @@
 }
 .icon-license:before {
   content: '\E055';
-  color: white;
+  color: #cbcb41;
 }
 .icon-liquid:before {
   content: '\E056';
@@ -836,7 +836,7 @@
 }
 .icon-yml:before {
   content: '\E09A';
-  color: white;
+  color: #a074c4;
 }
 .icon-zip:before {
   content: '\E09B';

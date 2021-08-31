@@ -12,6 +12,12 @@ const updates = [[
 	`/crosshj/fiug-beta/shared/modules/utilities.mjs`,
 	`/shared/modules/utilities.mjs`
 ],[
+	`/crosshj/fiug-beta/shared/modules/editor.mjs`,
+	`/shared/modules/editor.mjs`
+],[
+	`/crosshj/fiug-beta/shared/icons/seti/ext.json.mjs`,
+	`/shared/icons/seti/ext.json.mjs`
+],[
 	`/crosshj/fiug-beta/modules/Editor.mjs`,
 	`/_/modules/Editor.mjs`
 ],[
