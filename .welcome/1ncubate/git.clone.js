@@ -1,44 +1,3 @@
-/*
-
-GOALS:
-- [ ] clone a repo that doesn't already exist
-- [ ] pull/fetch a repo that already exists
-
-- [ ] load a repo that already exists
-- [ ] list all repos that are cloned
-- [ ] list all repos from an owner
-- [ ] list all branches for a repo
-
-- [ ] do everything this does (lol) https://cli.github.com/
-
-TODO:
-- [ ] service worker should:
-	- [X] ignore contents of .git folder
-	- use .git/config as below(except with global scope) for credentials
-
-- [ ] git config support for the following, mind the "global"
-	> git config --global user.name "fname lname"
-	> git config --global user.email "example@gmail.com"
-	> git config --global user.password "secret"
-	- [ ] because repo ("local") is not available before git clone
-
-- [X] when git commit fails should not blow away changes
-
-- [ ] when repo is "cloned" / "pulled" should not blow away .git folder
-- [ ] when repo is "fetched" should not blow away current changes
-
-
-OTHER:
-https://github.com/nodeca/js-yaml
-https://github.com/eemeli/yaml
-
-https://codemirror.net/mode/yaml/index.html
-
-codemirror ini files (like .git/config
-https://codemirror.net/mode/properties/index.html
-
-*/
-
 import ini from 'https://cdn.skypack.dev/ini';
 
 try {
@@ -53,7 +12,7 @@ try {
 	const bodyObj = {
 		providerType:"github-provider",
 		auth,
-		repo: "crosshj/footils",
+		repo: "XAMPPRocky/numcount",
 		branch:"master",
 		operation:"provider-add-service"
 	};
