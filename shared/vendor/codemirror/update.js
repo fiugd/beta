@@ -48,6 +48,9 @@ const updates = [[
 	`/crosshj/fiug-beta/terminal/terminal.ops.js`,
 	`/_/modules/terminal/terminal.ops.js`
 ],[
+	`/crosshj/fiug-beta/terminal/terminal.git.js`,
+	`/_/modules/terminal/terminal.git.js`
+],[
 	`/crosshj/fiug-beta/terminal/terminal.lib.js`,
 	`/_/modules/terminal/terminal.lib.js`
 ]];

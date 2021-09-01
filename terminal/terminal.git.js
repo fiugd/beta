@@ -54,6 +54,28 @@ Online help: ${link('https://github.com/crosshj/fiug/wiki')}
 Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 `)}
 `; };
+
+const unknownArgsHelper = (args) => {
+	const keyed = {};
+	const anon = [];
+	for(var i=0, len=args.length; i<len; i++){
+		const thisArg = args[i];
+		const nextArg = args[i+1];
+		if(thisArg.startsWith('--')){
+			keyed[thisArg.replace(/^--/, '')] = nextArg;
+			i++;
+			continue;
+		}
+		if(thisArg.startsWith('-')){
+			keyed[thisArg.replace(/^-/, '')] = nextArg;
+			i++;
+			continue;
+		}
+		anon.push(thisArg);
+	}
+	return { keyed, anon };
+};
+
 const diffPretty = (diff) => {
 	const colors = {
 		invisible: '#555',
@@ -134,7 +156,7 @@ const status = async ({ ops }) => {
 		const changeType = deleteFile
 			? 'deleted'
 			: 'modified';
-		return  '   ' + chalk.bold(`${changeType}: `) + fileName;
+		return  '   ' + chalk.bold(`${changeTypegit}: `) + fileName;
 	};
 	return '\n' + changes.map(changeRender).join('\n') + '\n';
 };
@@ -151,13 +173,52 @@ const commit = async ({ ops }, args) => {
 	const { commitResponse } = await postJSON(commitUrl, null, {
 		cwd, message, auth
 	});
+	if(commitResponse && commitResponse.error){
+		return `ERROR: ${commitResponse.error}`;
+	}
 	return chalk.hex('#ccc')('\nCommit SHA: ') + commitResponse + '\n';
 };
 
-const clone = async ({}, args) => {
-	// do what settings does when it clones a github repo
-	return notImplemented('clone');
+const clone = async ({term}, args) => {
+	//git clone --branch <branchname> <remote-repo-url>
+	//git clone -b <branchname> <remote-repo-url>
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	const branch = keyed.b || keyed.branch;
+	const [repo] = anon;
+	const cloneUrl = '/service/create/provider';
+	
+	if(!repo || !branch){
+		return chalk.hex('#ccc')(`
+Usage:
+  git clone [-b or --branch] <branch> <repository>
+
+Example:
+  git clone -b main crosshj/fiug-welcome
+
+`);
+	}
+
+	const auth = getStored('Github Personal Access Token');
+	const bodyObj = {
+		providerType:"github-provider",
+		operation:"provider-add-service",
+		auth, repo, branch,
+	};
+	const body = JSON.stringify(bodyObj);
+	const method = 'POST';
+
+	term.write(chalk.hex('#ccc')(
+		`Cloning ${bodyObj.repo}, ${bodyObj.branch} branch... `
+	));
+
+	const { result } = await fetch(cloneUrl, { body, method }).then(x=>x.json());
+	if(result && result.error){
+		return `ERROR: ${result.error}`;
+	}
+	return chalk.hex('#ccc')(`DONE\n`);
 };
+
 const branch = async ({ term }) => notImplemented('branch');
 const push = async ({ term }) => notImplemented('push');
 const pull = async ({ term }) => notImplemented('pull');
