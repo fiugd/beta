@@ -15,6 +15,9 @@ const updates = [[
 	`/crosshj/fiug-beta/shared/modules/editor.mjs`,
 	`/shared/modules/editor.mjs`
 ],[
+	`/crosshj/fiug-beta/shared/images/favicon-beta.svg`,
+	`/shared/images/favicon-beta.svg`
+],[
 	`/crosshj/fiug-beta/shared/icons/seti/ext.json.mjs`,
 	`/shared/icons/seti/ext.json.mjs`
 ],[
@@ -57,9 +60,11 @@ const updates = [[
 
 const updateCache = async (source, target) => {
 	const bundleText = await fetch(root+source).then(x => x.text());
+	let contentType = 'application/javascript; charset=utf-8';
+	if(target.endsWith('.svg')) contentType = 'image/svg+xml';
 	const opts = {
 		headers: {
-			'Content-Type': 'application/javascript; charset=utf-8'
+			'Content-Type': contentType
 		}
 	};
 	await cache.put(root+target, new Response(bundleText, opts));

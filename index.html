@@ -19,12 +19,23 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 	<!-- <link rel="icon" href="data:;base64,="> -->
-	<link rel="icon" href="/shared/images/favicon.svg" type="image/x-icon">
+	<!-- <link rel="icon" href="/shared/images/favicon.svg" type="image/x-icon"> -->
 	<link rel="stylesheet" href="index.css" />
 </head>
 
 <script>
-	document.location.origin.includes('beta') && (document.title += " (beta)");
+	const isBeta = document.location.origin.includes('beta');
+	isBeta && (document.title += " (beta)");
+	
+	(function() {
+		const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+		link.type = 'image/x-icon';
+		link.rel = 'shortcut icon';
+		link.href = isBeta
+			? "/shared/images/favicon-beta.svg"
+			: "/shared/images/favicon.svg";
+		document.getElementsByTagName('head')[0].appendChild(link);
+	})();
 
 	const themeHighlightColor = localStorage.getItem('themeHighlightColor');
 	if(themeHighlightColor){
