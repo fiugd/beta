@@ -15,8 +15,8 @@ const updates = [[
 	`/crosshj/fiug-beta/shared/modules/editor.mjs`,
 	`/shared/modules/editor.mjs`
 ],[
-	`/crosshj/fiug-beta/shared/images/favicon-beta.svg`,
-	`/shared/images/favicon-beta.svg`
+	`/crosshj/fiug-beta/shared/images/faviconBeta.svg`,
+	`/shared/images/faviconBeta.svg`
 ],[
 	`/crosshj/fiug-beta/shared/icons/seti/ext.json.mjs`,
 	`/shared/icons/seti/ext.json.mjs`
