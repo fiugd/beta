@@ -82,11 +82,11 @@
 		const { readdir, writeFile, rmdir, du } = fs.promises;
 
 		const user = 'crosshj';
-		const repo = 'test';
+		const repo = 'fiug-beta';
 		const branch = 'main';
 		
 		log(`fiug-beta clone:
-			${98-59.1-19}MB ~9.11sec (LFS) (cloned with depth=1)
+			${86.9 - 56.7 - 19}MB ~9.11sec (LightningFS) (cloned with depth=1)
 			${41.9-9}MB (current) ~31sec`
 		);
 
@@ -96,10 +96,11 @@
 		await git.clone({
 			fs, http,
 			dir,
-			url: `https://github.com/${user}/${repo}`,
+			url: `https://github.com/${user}/${repo}.git`,
 			corsProxy: 'https://cors.isomorphic-git.org',
 			singleBranch: true,
-			//noCheckout: true,
+			//noCheckout: true, 
+			noTags: true,
 			depth: 1,
 			//corsProxy: "http://localhost:3333",
 			//corsProxy: 'https://api.allorigins.win/raw?url=',
@@ -171,7 +172,7 @@
 			 return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 		}
 
-		log(bytesToSize(await du(`${dir}/.git`)));
+		log(bytesToSize(await du(`${dir}/.git`))); 
 
 	})(); // async wrapper
 </script>
