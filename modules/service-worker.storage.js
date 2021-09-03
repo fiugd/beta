@@ -388,14 +388,27 @@
 		return new Proxy(fn, { apply });
 	}
 
-	let changeCache, fileCache;
+	let changeCache, fileCache, servicesCache;
 	let cacheTTL = 250;
+	let serviesCacheTTL = 500;
 	async function getFile(path){
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
+		const servicesStore = this.stores.services;
+
+		const getAllServices = async () => {
+			const keys = await servicesStore.keys();
+			let services = [];
+			for(let i=0, len=keys.length; i<len; i++){
+				const thisService = await servicesStore.getItem(key);;
+				services.push(thisService);
+			}
+			return services;
+		};
 
 		changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), cacheTTL);
 		fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
+		servicesCache = servicesCache || cacheFn(getAllServices, serviesCacheTTL);
 
 		let t0 = performance.now();
 		const perfNow = () => {
@@ -412,6 +425,11 @@
 
 		const file = await fileCache(path);
 		console.log(`file store: ${perfNow()}ms (${path})`);
+		
+		if(!file){
+		 console.log('TODO: check to see if file should be pulled through github');
+		}
+
 		return file;
 	}
 

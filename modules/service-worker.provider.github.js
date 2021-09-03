@@ -163,6 +163,7 @@
 				});
 			}
 			*/
+			/*
 			const getOneFile = async (ghFile) => {
 				const getBlobUrl = (blob) => urls.rawBlob
 					.replace('{owner}/{repo}', repo)
@@ -176,6 +177,7 @@
 				await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
 				//await sleep(50);
 			}
+			*/
 
 			// check if service exists
 			let foundService = {};
@@ -200,7 +202,7 @@
 				return tree;
 			};
 
-			const saveService = async (githubTree) => {
+			const saveService = async (githubTree, commitSha) => {
 				const id = foundService.id || newId;
 				const type = 'github';
 				const name = repo;
@@ -209,6 +211,10 @@
 					id, type, name, tree,
 					owner: repo.split('/').slice(0,1).join(''),
 					repo: repo.split('/').pop(),
+					git: {
+						tree: githubTree,
+						sha: commitSha
+					},
 					branch
 				};
 
@@ -216,7 +222,7 @@
 				await servicesStore.setItem(id+'', thisService);
 				return { id, thisService };
 			}
-			const { id, thisService } = await saveService(tree);
+			const { id, thisService } = await saveService(tree, sha);
 	
 			// may be issues with merging, but overwrite for now
 			// create files that do not exist
