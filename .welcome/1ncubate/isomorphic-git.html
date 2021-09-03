@@ -113,10 +113,11 @@
 			//onMessage: log
 		});
 		log([...new Set(fs.log.map((x)=>x[0]))]);
-		//return;
+
 
 		const ls = await readdir(dir)
 		log({ ls });
+		return;
 
 		const fileToChange = `${dir}/isogit-test.md`;
 		log(`change ${fileToChange} - ${timeNow}:`);
