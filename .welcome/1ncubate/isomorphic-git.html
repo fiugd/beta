@@ -35,28 +35,15 @@
 	<div id="output"></div>
 </body>
 
-<script>
-	// a file system must implement:
-
-	/*
-		fs.promises.readFile(path[, options])
-		fs.promises.writeFile(file, data[, options])
-		fs.promises.unlink(path)
-		fs.promises.readdir(path[, options])
-		fs.promises.mkdir(path[, mode])
-		fs.promises.rmdir(path)
-		fs.promises.stat(path[, options])
-		fs.promises.lstat(path[, options])
-		fs.promises.readlink(path[, options]) (optional ¹)
-		fs.promises.symlink(target, path[, type]) (optional ¹)
-		fs.promises.chmod(path, mode) (optional ²)
-	*/
-</script>
-
-<script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
 <script src="https://unpkg.com/isomorphic-git"></script>
+
 <script type="module">
-	import http from 'https://unpkg.com/isomorphic-git@beta/http/web/index.js';
+	import http from './isogit-http.js';
+	import FileSystem from './isogit-fs.js';
+	const fs = new FileSystem({ wipe: true });
+
+	const timeNow = (new Date()).toLocaleString();
+
 	(async () => {
 		const output = document.getElementById('output');
 
@@ -68,7 +55,7 @@
 			return value;
 		};
 
-		function progress({ phase, loaded, total }){
+		const progress = (section) => function ({ phase, loaded, total }){
 			const phaseId = phase.toLowerCase().replace(new RegExp(' ', 'g'), '-');
 			let progEl = document.getElementById(phaseId);
 			if(!progEl){
@@ -78,7 +65,7 @@
 				output.appendChild(progEl);
 			}
 			progEl.innerHTML = `
-				<label for="file">${phase}:</label>
+				<label for="file">${section}: ${phase}:</label>
 				<progress id="file" value="${loaded}" max="${total}"> ${100*loaded/total}% </progress>
 			`.replace(new RegExp('      '), '');
 		}
@@ -92,54 +79,99 @@
 			output.appendChild(pre);
 		}
 
-		window.fs = new LightningFS('fs', { wipe: true })
-		const { readdir, writeFile } = window.fs.promises;
+		const { readdir, writeFile, rmdir, du } = fs.promises;
 
-		const dir = '/test-isogit';
+		const user = 'crosshj';
+		const repo = 'fiug-beta';
+		const branch = 'main';
+		
+		log(`fiug-beta clone:
+			${98-59.1-19}MB ~9.11sec (LFS) (cloned with depth=1)
+			${41.9-9}MB (current) ~31sec`
+		);
+
+		log(`clone ${user}/${repo}:`);
+		const dir = `/${user}/${repo}`;
+
 		await git.clone({
-			fs, http, dir,
-			url: 'https://github.com/crosshj/fiug',
-			//corsProxy: 'https://cors.isomorphic-git.org',
-			corsProxy: "http://localhost:3333",
-			onProgress: progress,
+			fs, http,
+			dir,
+			url: `https://github.com/${user}/${repo}`,
+			corsProxy: 'https://cors.isomorphic-git.org',
+			singleBranch: true,
+			//noCheckout: true,
+			depth: 1,
+			//corsProxy: "http://localhost:3333",
+			//corsProxy: 'https://api.allorigins.win/raw?url=',
+			//corsProxy: 'https://cors.isomorphic-git.org/',
+			// onAuth: () => ({
+			// 	username:sessCache(prompt)('Enter username'),
+			// 	password: sessCache(prompt)('Enter password'),
+			// }),
+			onProgress: progress('clone'),
 			//onMessage: log
 		});
+		log([...new Set(fs.log.map((x)=>x[0]))]);
+		//return;
 
 		const ls = await readdir(dir)
-		log({ ls })
-		await writeFile(`${dir}/README2.md`, `
-	${(new Date()).toLocaleString()}   
-	Very short README from bartok isomorphic-git WIP
-	`, 'utf8')
-		await git.status({fs, dir, filepath: 'README2.md'})
-		await git.add({fs, dir, filepath: 'README2.md'})
+		log({ ls });
 
+		const fileToChange = `${dir}/isogit-test.md`;
+		log(`change ${fileToChange} - ${timeNow}:`);
+		await writeFile(fileToChange, `${timeNow} isogit test`, 'utf8')
+		//await git.status({fs, dir, filepath: 'isogit-test.md'});
+		await git.add({fs, dir, filepath: 'isogit-test.md'});
+		log(`DONE`);
+		//return;
+
+
+		log('commit:');
 		let sha = await git.commit({
 			fs,
 			dir,
-			message: 'Update README2.md',
+			message: `test isogit - ${timeNow}`,
 			author: {
 				name: 'crosshj',
 				email: 'github@chimpjuice.com'
 			}
-		})
+		});
+		const commits = await git.log({
+			fs, dir,
+			depth: 10,
+			onAuth: () => ({
+				username:sessCache(prompt)('Enter username'),
+				password: sessCache(prompt)('Enter password'),
+			}),
+		});
+		log(commits.map(x => `${x.oid} => ${x.commit.message}`).join('\n'));
+		//log(commits[0]);
+		//return;
 
-		const commits = await git.log({fs, dir, depth: 1})
-		log('commits');
-		log(commits[0]);
-
+		log('push:');
 		const pushResults = await git.push({
 			fs,
 			http,
 			dir,
-			remote: 'origin',
-			ref: 'master',
-			onProgress: progress,
+			//remote: 'origin',
+			//ref: branch,
+			//corsProxy: 'https://cors.isomorphic-git.org',
+			onProgress: progress('push'),
 			onAuth: () => ({
 				username:sessCache(prompt)('Enter username'),
 				password: sessCache(prompt)('Enter password'),
 			}),
 		});
 		log({ pushResults });
+
+		function bytesToSize(bytes) {
+			 var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+			 if (bytes == 0) return '0 Byte';
+			 var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+			 return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+		}
+
+		log(bytesToSize(await du(`${dir}/.git`)));
+
 	})(); // async wrapper
 </script>

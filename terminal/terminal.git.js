@@ -1,6 +1,9 @@
 /*
 
 https://medium.com/@mehulgala77/github-fundamentals-clone-fetch-push-pull-fork-16d79bb16b79
+https://wyag.thb.lt/ - write yourself a git
+https://medium.com/@urna.hybesis/git-from-scratch-5-steps-guide-8943f19c62b
+
 https://googlechrome.github.io/samples/service-worker/post-message/
 
 */
