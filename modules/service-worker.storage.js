@@ -427,7 +427,35 @@
 		console.log(`file store: ${perfNow()}ms (${path})`);
 		
 		if(!file){
-		 console.log('TODO: check to see if file should be pulled through github');
+			const services = await servicesCache();
+			services.sort((a,b) => b.name.length - a.name.length);
+
+			let serviceFile;
+			for(let i=0, len=services.length; i<len; i++){
+				const thisService = services[i];
+				if(thisService.type !== 'github' || !thisService.git || !thisService.git.tree) continue;
+				if(!path.startsWith(thisService.name)) continue;
+				serviceFile = thisService.git.tree
+					.find(x => path === `${thisService.name}/${x.path}`);
+				if(serviceFile) break;
+			}
+			if(!serviceFile) return file;
+
+			const getFileContents = async ({ url }) => {
+				try {
+					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
+					const ({ content, encoding }) = await fetch(url).then(x => x.json());
+					return encoding === "base64"
+						? atob(content)
+						: content;
+				} catch(e){
+					console.error(e);
+					return;
+				}
+			};
+
+			file = await getFileContents(serviceFile);
+			if(file) filesStore.setItem(path, file);
 		}
 
 		return file;
