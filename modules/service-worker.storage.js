@@ -441,12 +441,27 @@
 			}
 			if(!serviceFile) return file;
 
-			const getFileContents = async ({ url }) => {
+			const base64toBlob = (base64) => {
+				const binary = atob(base64)
+				var array = new Uint8Array(binary.length)
+				for( var i = 0; i < binary.length; i++ ) {
+					array[i] = binary.charCodeAt(i)
+				}
+				return new Blob([array]);
+			};
+
+			const Storeable = (path, content) => {
+				const storeAsBlob = path.endsWith('png');
+				if(storeAsBlob) return base64toBlob(content);
+				return atob(content);
+			};
+
+			const getFileContents = async ({ path, url }) => {
 				try {
 					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
 					const { content, encoding } = await fetch(url).then(x => x.json());
 					return encoding === "base64"
-						? atob(content)
+						? Storeable(path, content)
 						: content;
 				} catch(e){
 					console.error(e);
