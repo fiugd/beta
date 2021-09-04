@@ -459,6 +459,8 @@
 			const getFileContents = async ({ path, url }) => {
 				try {
 					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
+					// also, GET https://api.github.com/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA
+
 					const { content, encoding } = await fetch(url).then(x => x.json());
 					return encoding === "base64"
 						? Storeable(path, content)

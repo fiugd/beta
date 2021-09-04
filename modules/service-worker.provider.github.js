@@ -202,6 +202,17 @@
 				return tree;
 			};
 
+			/*
+				TODO: files in tree should include a url such as this
+				because blobs don't have mime types, but file contents do
+				GET https://api.github.com/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA << file SHA
+				see https://stackoverflow.com/a/34460532/1627873
+
+				Also, auth for API should be handled... in some way
+
+				Also, should maybe preload .templates
+			*/
+
 			const saveService = async (githubTree, commitSha) => {
 				const id = foundService.id || newId;
 				const type = 'github';
