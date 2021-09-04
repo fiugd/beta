@@ -423,7 +423,7 @@
 			return changes.value;
 		}
 
-		const file = await fileCache(path);
+		let file = await fileCache(path);
 		console.log(`file store: ${perfNow()}ms (${path})`);
 		
 		if(!file){
