@@ -444,7 +444,7 @@
 			const getFileContents = async ({ url }) => {
 				try {
 					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
-					const ({ content, encoding }) = await fetch(url).then(x => x.json());
+					const { content, encoding } = await fetch(url).then(x => x.json());
 					return encoding === "base64"
 						? atob(content)
 						: content;
