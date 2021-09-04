@@ -400,7 +400,7 @@
 			const keys = await servicesStore.keys();
 			let services = [];
 			for(let i=0, len=keys.length; i<len; i++){
-				const thisService = await servicesStore.getItem(key);;
+				const thisService = await servicesStore.getItem(keys[i]);
 				services.push(thisService);
 			}
 			return services;
