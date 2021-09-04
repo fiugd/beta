@@ -37,7 +37,12 @@
 		document.getElementsByTagName('head')[0].appendChild(link);
 	})();
 
-	const themeHighlightColor = localStorage.getItem('themeHighlightColor');
+	let themeHighlightColor = localStorage.getItem('themeHighlightColor');
+
+	themeHighlightColor = themeHighlightColor || (isBeta
+		? '44, 174, 190' // Pelorous
+		: '202, 44, 146' // Fuschia
+	);
 	if(themeHighlightColor){
 		document.documentElement.style
 			.setProperty(
@@ -45,6 +50,10 @@
 				themeHighlightColor
 			);
 	}
+
+	//5c4785 (prod)
+	//rgb(var(--main-theme-highlight-color))
+	//http://www.pfnp.me/mother-tongues-the-evolution-of-programming-languages/
 
 </script>
 
