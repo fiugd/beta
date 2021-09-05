@@ -442,16 +442,13 @@
 			}
 			if(!serviceFile) return file;
 
-			const getFileContents = async ({ path, url }) => {
+			const getFileContents = async ({ path }) => {
 				try {
-					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
-					/*
-						from 
-							:gh-api-base/repos/:owner/:repo/git/blobs/FILE_SHA
-						to
-							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=COMMIT_SHA
-					*/
-					const contentUrl = url.split('git/blobs')[0] + `contents/${path}?ref=` + thisService.git.sha;
+					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'
+						.replace('{path}', path
+						.replace('{owner}', thisService.owner)
+						.replace('{repo}', thisService.repo)
+						.replace('{sha}', thisService.git.sha);
 					const contents = await fetchFileContents(contentUrl);
 					return contents;
 				} catch(e){
