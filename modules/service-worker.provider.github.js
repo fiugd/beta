@@ -8,7 +8,7 @@
 		tree: '/repos/{owner}/{repo}/git/trees',
 		getTreeRecursive: '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true',
 		rawBlob: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}',
-		contents: '/repos/{owner}/{repo}/contents/{path}?ref={sha}'
+		contents: '/repos/{owner}/{repo}/contents/{path}?ref={sha}',
 
 		//commit
 		branch: '/repos/{owner}/{repo}/branches/{branch}',
