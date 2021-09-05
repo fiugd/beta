@@ -182,7 +182,7 @@
 				// TODO: could override JIT cache here according to some settimg/param
 				const PLACEHOLDER = '##PLACEHOLDER##';
 				if(!ghFile.path.includes('.templates')){
-					await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, placeholder);
+					await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, PLACEHOLDER);
 					continue;
 				}
 
