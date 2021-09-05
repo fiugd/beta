@@ -166,13 +166,11 @@
 			*/
 
 			const getOneFile = async (ghFile, commitSha) => {
-				/*
-				const getBlobUrl = (file) => urls.rawBlob
+				const getRawUrl = (file) => urls.rawBlob
 					.replace('{owner}/{repo}', repo)
-					.replace('{branch}', branch)
+					.replace('{branch}', commitSha || branch)
 					.replace('{path}', file.path);
-				*/
-
+				
 				const getContentUrl = (file) => urls.contents
 					.replace('{owner}/{repo}', repo)
 					.replace('{branch}', branch)
@@ -180,7 +178,7 @@
 					.replace('{sha}', commitSha);
 
 				const contents = await fetchContents(
-					getContentUrl(ghFile), opts
+					getRawUrl(ghFile), opts
 				);
 				return { ...ghFile, contents };
 			};
