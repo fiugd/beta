@@ -447,11 +447,11 @@
 					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
 					/*
 						from 
-							:gh-api-base/repos/:owner/:repo/git/blobs/SHA
+							:gh-api-base/repos/:owner/:repo/git/blobs/FILE_SHA
 						to
-							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA
+							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=COMMIT_SHA
 					*/
-					const contentUrl = url.replace('git/blobs', `contents/${path}?ref=`);
+					const contentUrl = url.split('git/blobs')[0] + `contents/${path}?ref=` + thisService.git.sha);
 					const contents = await fetchFileContents(contentUrl);
 					return contents;
 				} catch(e){
