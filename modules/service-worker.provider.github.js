@@ -170,15 +170,9 @@
 					.replace('{owner}/{repo}', repo)
 					.replace('{branch}', commitSha || branch)
 					.replace('{path}', file.path);
-				
-				const getContentUrl = (file) => urls.contents
-					.replace('{owner}/{repo}', repo)
-					.replace('{branch}', branch)
-					.replace('{path}', file.path)
-					.replace('{sha}', commitSha);
 
 				const contents = await fetchContents(
-					getRawUrl(ghFile), opts
+					getRawUrl(ghFile)
 				);
 				return { ...ghFile, contents };
 			};
