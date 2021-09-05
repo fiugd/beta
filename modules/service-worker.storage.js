@@ -451,7 +451,7 @@
 						to
 							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA
 					*/
-					const contentUrl = url.replace('git/blobs', `contents/${path}?ref=`
+					const contentUrl = url.replace('git/blobs', `contents/${path}?ref=`);
 					const contents = await fetchFileContents(contentUrl);
 					return contents;
 				} catch(e){
