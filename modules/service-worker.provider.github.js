@@ -165,7 +165,7 @@
 			}
 			*/
 
-			const getOneFile = async (ghFile) => {
+			const getOneFile = async (ghFile, commitSha) => {
 				/*
 				const getBlobUrl = (file) => urls.rawBlob
 					.replace('{owner}/{repo}', repo)
@@ -177,7 +177,7 @@
 					.replace('{owner}/{repo}', repo)
 					.replace('{branch}', branch)
 					.replace('{path}', file.path)
-					.replace('{sha}', file.sha);
+					.replace('{sha}', commitSha);
 
 				const contents = await fetchContents(
 					getContentUrl(ghFile)
@@ -190,7 +190,7 @@
 				// could override JIT cache here according to some settimg/param
 				if(!ghFile.path.includes('.templates')) continue;
 
-				const { contents } = await getOneFile(ghFile);
+				const { contents } = await getOneFile(ghFile, sha);
 				await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
 				//await sleep(50);
 			}
