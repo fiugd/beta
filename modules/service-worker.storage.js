@@ -451,7 +451,7 @@
 						to
 							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=COMMIT_SHA
 					*/
-					const contentUrl = url.split('git/blobs')[0] + `contents/${path}?ref=` + thisService.git.sha);
+					const contentUrl = url.split('git/blobs')[0] + `contents/${path}?ref=` + thisService.git.sha;
 					const contents = await fetchFileContents(contentUrl);
 					return contents;
 				} catch(e){
