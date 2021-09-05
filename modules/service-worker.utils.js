@@ -178,7 +178,7 @@
 	 };
 
 	//TODO: ??? move to provider since fetching is a provider thing
-	async function fetchFileContents(filename) {
+	async function fetchFileContents(filename, opts) {
 		const storeAsBlob = [
 			"image/",
 			"audio/",
@@ -190,7 +190,7 @@
 		const fileNameBlacklist = [
 			".ts", // mistaken as video/mp2t
 		];
-		const fetched = await fetch(filename);
+		const fetched = await fetch(filename, opts);
 
 		//getting content type like this because can't trust server's CT headers
 		const mime = getMime(filename) || {};
