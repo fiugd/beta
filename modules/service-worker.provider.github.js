@@ -179,8 +179,12 @@
 
 			for(let i=0, len = ghFileItems.length; i<len; i++){
 				const ghFile = ghFileItems[i];
-				// could override JIT cache here according to some settimg/param
-				if(!ghFile.path.includes('.templates')) continue;
+				// TODO: could override JIT cache here according to some settimg/param
+				const PLACEHOLDER = '##PLACEHOLDER##';
+				if(!ghFile.path.includes('.templates')){
+					await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, placeholder);
+					continue;
+				}
 
 				const { contents } = await getOneFile(ghFile, sha);
 				await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
