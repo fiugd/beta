@@ -445,7 +445,7 @@
 			const getFileContents = async ({ path }) => {
 				try {
 					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'
-						.replace('{path}', path
+						.replace('{path}', path)
 						.replace('{owner}', thisService.owner)
 						.replace('{repo}', thisService.repo)
 						.replace('{sha}', thisService.git.sha);
