@@ -395,6 +395,7 @@
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 		const servicesStore = this.stores.services;
+		const { fetchFileContents } = this.utils;
 
 		const getAllServices = async () => {
 			const keys = await servicesStore.keys();
@@ -441,30 +442,18 @@
 			}
 			if(!serviceFile) return file;
 
-			const base64toBlob = (base64) => {
-				const binary = atob(base64)
-				var array = new Uint8Array(binary.length)
-				for( var i = 0; i < binary.length; i++ ) {
-					array[i] = binary.charCodeAt(i)
-				}
-				return new Blob([array], { type: "image/png" });
-			};
-
-			const Storeable = (path, content) => {
-				const storeAsBlob = path.endsWith('png');
-				if(storeAsBlob) return base64toBlob(content);
-				return atob(content);
-			};
-
 			const getFileContents = async ({ path, url }) => {
 				try {
 					//TODO: would be wise to use auth with this fetch (or be rate-limited!)
-					// also, GET https://api.github.com/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA
-
-					const { content, encoding } = await fetch(url).then(x => x.json());
-					return encoding === "base64"
-						? Storeable(path, content)
-						: content;
+					/*
+						from 
+							:gh-api-base/repos/:owner/:repo/git/blobs/SHA
+						to
+							:gh-api-base/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA
+					*/
+					const contentUrl = url.replace('git/blobs', `contents/${path}?ref=`
+					const contents = await fetchFileContents(contentUrl);
+					return contents;
 				} catch(e){
 					console.error(e);
 					return;

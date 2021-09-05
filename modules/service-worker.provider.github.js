@@ -7,7 +7,8 @@
 		latestCommit: '/repos/{owner}/{repo}/branches/{branch}',
 		tree: '/repos/{owner}/{repo}/git/trees',
 		getTreeRecursive: '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true',
-		rawBlob: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{blob.path}',
+		rawBlob: 'https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}',
+		contents: '/repos/{owner}/{repo}/contents/{path}?ref={sha}'
 
 		//commit
 		branch: '/repos/{owner}/{repo}/branches/{branch}',
@@ -163,21 +164,36 @@
 				});
 			}
 			*/
-			/*
+
 			const getOneFile = async (ghFile) => {
-				const getBlobUrl = (blob) => urls.rawBlob
+				/*
+				const getBlobUrl = (file) => urls.rawBlob
 					.replace('{owner}/{repo}', repo)
 					.replace('{branch}', branch)
-					.replace('{blob.path}', blob.path);
-				const contents = await fetchContents(getBlobUrl(ghFile));
+					.replace('{path}', file.path);
+				*/
+
+				const getContentUrl = (file) => urls.contents
+					.replace('{owner}/{repo}', repo)
+					.replace('{branch}', branch)
+					.replace('{path}', file.path)
+					.replace('{sha}', file.sha);
+
+				const contents = await fetchContents(
+					getContentUrl(ghFile)
+				);
 				return { ...ghFile, contents };
 			};
+
 			for(let i=0, len = ghFileItems.length; i<len; i++){
-				const { contents } = await getOneFile(ghFileItems[i]);
+				const ghFile = ghFileItems[i];
+				// could override JIT cache here according to some settimg/param
+				if(!ghFile.path.includes('.templates')) continue;
+
+				const { contents } = await getOneFile(ghFile);
 				await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
 				//await sleep(50);
 			}
-			*/
 
 			// check if service exists
 			let foundService = {};
