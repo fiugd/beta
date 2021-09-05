@@ -180,7 +180,7 @@
 					.replace('{sha}', commitSha);
 
 				const contents = await fetchContents(
-					getContentUrl(ghFile)
+					getContentUrl(ghFile), opts
 				);
 				return { ...ghFile, contents };
 			};
