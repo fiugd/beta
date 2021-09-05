@@ -432,8 +432,9 @@
 			services.sort((a,b) => b.name.length - a.name.length);
 
 			let serviceFile;
+			let thisService = {};
 			for(let i=0, len=services.length; i<len; i++){
-				const thisService = services[i];
+				thisService = services[i];
 				if(thisService.type !== 'github' || !thisService.git || !thisService.git.tree) continue;
 				if(!path.startsWith(thisService.name)) continue;
 				serviceFile = thisService.git.tree
