@@ -212,12 +212,16 @@ Example:
 	const method = 'POST';
 
 	term.write(chalk.hex('#ccc')(
-		`Cloning ${bodyObj.repo}, ${bodyObj.branch} branch... `
+		`Cloning ${bodyObj.repo}${
+			bodyObj.branch
+			? `, ${bodyObj.branch} branch`
+			: ''
+		}... `
 	));
 
 	const { result } = await fetch(cloneUrl, { body, method }).then(x=>x.json());
 	if(result && result.error){
-		return `ERROR: ${result.error}`;
+		return `ERROR: ${result.error}\n`;
 	}
 	return chalk.hex('#ccc')(`DONE\n`);
 };
