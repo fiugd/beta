@@ -427,7 +427,7 @@
 		let file = await fileCache(path);
 		console.log(`file store: ${perfNow()}ms (${path})`);
 		
-		if(file.includes('##PLACEHOLDER##')){
+		if(file && file.includes && file.includes('##PLACEHOLDER##')){
 			const services = await servicesCache();
 			services.sort((a,b) => b.name.length - a.name.length);
 
