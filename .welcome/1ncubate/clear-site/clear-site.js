@@ -1,5 +1,5 @@
 //TODO: make importing from something local less annoying
-//ALSO: make errors more obvious
+//ALSO: make errors more obvious (hint: import errors are not obvious)
 //import localforage from "https://beta.fiug.dev/shared/vendor/localforage.min.js"
 
 import localforage from 'https://cdn.skypack.dev/localforage';
@@ -17,14 +17,9 @@ const {clearScreen} = ansiEscapes;
 
 
 import chalk from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
-const levels = {
-	disabled: 0,
-	basic16: 1,
-	more256: 2,
-	trueColor: 3
-}
 chalk.enabled = true;
-chalk.level = levels.trueColor;
+chalk.level = 3;
+
 const grey = x => console.log(chalk.hex('#ccc')(x));
 const blue = x => console.log(chalk.hex('#adf')(x));
 const yellow = x => console.log(chalk.hex('#fd0')(x));
