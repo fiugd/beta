@@ -121,12 +121,17 @@
 		try {
 			const { storage: { stores }, fetchContents, app } = githubProvider;
 			// TODO: should not use auth from this call (should exist on provider)
+
 			const { auth, repo } = payload;
 			const providersStore = stores.providers;
 			const servicesStore = stores.services;
 			const filesStore = stores.files;
 
-			console.log({ payload, params });
+			//console.log({ payload, params });
+
+			const opts = { headers: {} };
+			if(auth) opts.headers.authorization = `token ${auth}`;
+			opts.headers.Accept = "application/vnd.github.v3+json";
 
 			const getDefaultBranch = async () => {
 				const repoInfoUrl = urls.repoInfo
@@ -137,10 +142,6 @@
 			const branch = payload.branch || await getDefaultBranch();
 
 			// TODO: check if provider exists, reject if not (create it, no?)
-
-			const opts = { headers: {} };
-			if(auth) opts.headers.authorization = `token ${auth}`;
-			opts.headers.Accept = "application/vnd.github.v3+json";
 
 			// pull tree (includes files info) from github
 			const latestCommitUrl = urls.latestCommit
