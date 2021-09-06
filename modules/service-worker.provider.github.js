@@ -4,6 +4,7 @@
 	const baseUrl = "https://api.github.com";
 	const urls = {
 		rateLimit: '/rate_limit',
+		repoInfo: '/repos/{owner}/{repo}',
 		latestCommit: '/repos/{owner}/{repo}/branches/{branch}',
 		tree: '/repos/{owner}/{repo}/git/trees',
 		getTreeRecursive: '/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true',
@@ -119,13 +120,21 @@
 	const githubServiceCreate = (githubProvider) => async (payload, params) => {
 		try {
 			const { storage: { stores }, fetchContents, app } = githubProvider;
-			// in the future, should not use auth from this call (should exist on provider)
-			const { auth, repo, branch } = payload;
+			// TODO: should not use auth from this call (should exist on provider)
+			const { auth, repo } = payload;
 			const providersStore = stores.providers;
 			const servicesStore = stores.services;
 			const filesStore = stores.files;
 
 			console.log({ payload, params });
+
+			const getDefaultBranch = async () => {
+				const repoInfoUrl = urls.repoInfo
+					.replace('{owner}/{repo}', repo);
+				const { default_branch } = await githubProvider.fetchJSON(repoInfoUrl, opts);
+				return default_branch;
+			};
+			const branch = payload.branch || await getDefaultBranch();
 
 			// TODO: check if provider exists, reject if not (create it, no?)
 
@@ -138,10 +147,12 @@
 				.replace('{owner}/{repo}', repo)
 				.replace('{branch}', branch);
 			const { commit: { sha } } = await githubProvider.fetchJSON(latestCommitUrl, opts);
+
 			const getTreeUrl = urls.getTreeRecursive
 				.replace('{owner}/{repo}', repo)
 				.replace('{tree_sha}', sha);
 			const { tree, truncated } = await githubProvider.fetchJSON(getTreeUrl, opts);
+
 			if(truncated) console.warn('github repo tree truncated - try without recursive flag')
 
 			//const ghTreeItems = tree.filter(x => x.type === 'tree');

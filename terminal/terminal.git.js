@@ -191,7 +191,7 @@ const clone = async ({term}, args) => {
 	const [repo] = anon;
 	const cloneUrl = '/service/create/provider';
 	
-	if(!repo || !branch){
+	if(!repo){
 		return chalk.hex('#ccc')(`
 Usage:
   git clone [-b or --branch] <branch> <repository>

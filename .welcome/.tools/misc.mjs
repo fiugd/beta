@@ -1,4 +1,4 @@
-import '/shared/vendor/stylus.min.js';
+import '/crosshj/fiug-plugins/vendor/stylus.min.js'
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
