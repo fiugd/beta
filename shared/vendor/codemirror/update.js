@@ -79,7 +79,8 @@ console.log(`\nupdated: \n${updates.map(([,x]) => x).join('\n')}`);
 
 const importMap = {
 	"imports": {
-		"chalk": "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js",
+		"chalk": "https://cdn.skypack.dev/chalk",
+		//"chalk": "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js",
 		//"chalk/": "https://cdn.skypack.dev/-/chalk/",
 	}
 };
