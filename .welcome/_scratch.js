@@ -1,14 +1,8 @@
 import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 
 import chalk from 'https://cdn.skypack.dev/chalk';
-const levels = {
-	disabled: 0,
-	basic16: 1,
-	more256: 2,
-	trueColor: 3
-}
 chalk.enabled = true;
-chalk.level = levels.trueColor;
+chalk.level = 3;
 
 const getNetEstimate = (salary, joint) => {
 	/*
