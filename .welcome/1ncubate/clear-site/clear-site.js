@@ -1,3 +1,5 @@
+import ini from 'https://cdn.skypack.dev/ini';
+
 //TODO: make importing from something local less annoying
 //ALSO: make errors more obvious (hint: import errors are not obvious)
 //import localforage from "https://beta.fiug.dev/shared/vendor/localforage.min.js"
@@ -16,7 +18,7 @@ import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 const {clearScreen} = ansiEscapes;
 
 
-import chalk from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
+import chalk from "chalk";
 chalk.enabled = true;
 chalk.level = 3;
 
@@ -55,13 +57,17 @@ grey([...keys.slice(0,5), '...'].join('\n'));
 yellow('\n' + 'Current Working Dir:');
 grey(cwd);
 
-const configSrc = `
-[user]
-	name = crosshj
-	email = github@crosshj.com
-	password = ***
-`.trim();
-await stores.files.setItem('/.git/config', configSrc);
+const configSrc = {
+	user: {
+		name: 'crosshj',
+		email: 'github@crosshj.com',
+		password: '***'
+	}
+};
+await stores.files.setItem('/.git/config', ini.encode(configSrc));
 const gitConfig = await stores.files.getItem('/.git/config');
+//const configParsed = ini.parse(gitConfig);
+
 yellow('\n' + 'Git Config:');
+//grey(JSON.stringify(configParsed, null, 2));
 grey(gitConfig);

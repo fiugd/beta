@@ -75,3 +75,41 @@ for(var i=0, len=updates.length; i<len; i++){
 }
 
 console.log(`\nupdated: \n${updates.map(([,x]) => x).join('\n')}`);
+
+
+const importMap = {
+	"imports": {
+		"chalk": "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js",
+		//"chalk/": "https://cdn.skypack.dev/-/chalk/",
+	}
+};
+
+const importMapResponse = new Response(
+	JSON.stringify(importMap, null, 2),
+	{
+		headers: {
+			'Content-Type': 'application/importmap+json; charset=utf-8'
+		}
+	}
+);
+
+await cache.put(root+'/importmap.importmap', importMapResponse);
+
+console.log(`also added /importmap.importmap`);
+
+/*
+<script type="importmap" src="/importmap.importmap"></script>
+
+const script = document.createElement('script')
+script.src = '/importmap.importmap';
+script.type = 'importmap';
+document.body.appendChild(script);
+
+probably makes more sense to have service worker rewrite imports versus trying to make this work
+see fiug-beta/.welcome/1ncubate/sw-worker-rewrite
+
+also, look into https://github.com/GoogleChromeLabs/comlink
+this is for communication between workers
+
+
+*/
