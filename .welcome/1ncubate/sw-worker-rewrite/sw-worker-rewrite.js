@@ -50,6 +50,11 @@ function importsPlugin() {
 				// keep in mind that we may want those modules to use SW worker transform
 				if(importMap.imports[path.node.source.value]){
 					path.node.source.value = importMap.imports[path.node.source.value]
+					return;
+				}
+				if(path.node.source.value.startsWith('/')){
+					path.node.source.value = `${self.location.origin}${path.node.source.value}`;
+					return;
 				}
 				return;
 			},
@@ -181,6 +186,7 @@ const exampleSrc = `
 
 	import rel from '../rel';
 	import rel2 from './rel';
+	import abs from '/abs';
 
 	async function helloWorld(){
 		console.log('hello');
