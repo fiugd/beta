@@ -1,25 +1,16 @@
-const require = (url) => {
-	self.module = { exports: {} };
-	importScripts(url.replace("./", "./modules/"));
-	const { exports } = self.module;
-	delete self.module;
-	return exports;
-};
+import utils from "./utils.js";
 
-(async () => {
+import { StorageManager } from "./storage.js";
+import { Router } from "./router.js";
+import { UIManager } from "./ui.js";
+import { ProviderManager } from "./provider.js";
+import { GithubProvider } from "./provider.github.js";
+import { ServicesManager } from "./services.js";
+import { TemplateEngine } from "./templates.js";
+
+export default async () => {
 	const swHandlers = self.handlers;
-
-	const utils = require("./service-worker.utils.js");
-	utils.initMimeTypes();
-
-	const { StorageManager } = require("./service-worker.storage.js");
-	const { Router } = require("./service-worker.router.js");
-	const { UIManager } = require("./service-worker.ui.js");
-	const { ProviderManager } = require("./service-worker.provider.js");
-	const { GithubProvider } = require("./service-worker.provider.github.js");
-
-	const { ServicesManager } = require("./service-worker.services.js");
-	const { TemplateEngine } = require("./service-worker.templates.js");
+	await utils.initMimeTypes();
 
 	//TODO: ideally, would not allow generic access of storage, instead access Manager methods
 	const ui = new UIManager("fiug"); // ui manager is a special kind of storage
@@ -109,4 +100,4 @@ const require = (url) => {
 		// ie. all '.welcome' files should be available
 		// each instantiated service should have its own store
 	};
-})();
+};
