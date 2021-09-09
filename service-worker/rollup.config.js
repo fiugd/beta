@@ -9,6 +9,8 @@ const banner = `/*!
 	Version {{VERSION}}
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
+
+	NOTE: the following is auto-generated via build script, edit at your own peril
 */
 `;
 
@@ -23,7 +25,8 @@ export default {
 		//format: 'iife',
 		//sourcemap: 'inline',
 		//minifyInternalExports: true
-	banner,
+		file: 'crosshj/fiug-beta/service-worker.js',
+		banner,
 	},
 	onwarn: (warning) => {
 		if (warning.code === 'EVAL') return

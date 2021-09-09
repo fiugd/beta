@@ -14,9 +14,6 @@
 
 				"/shared/vendor/materialize.min.js",
 
-				"/shared/vendor/localforage.min.js",
-				"/shared/vendor/json5v-2.0.0.min.js",
-
 				"/shared/fonts/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2",
 				"/shared/fonts/seti.woff2",
 				"/shared/fonts/codicon.ttf",

@@ -24,17 +24,15 @@ https://try.terser.org/
 import config  from './rollup.config.js';
 
 import 'https://unpkg.com/rollup/dist/rollup.browser.js';
-import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
-
-const { clearScreen } = ansiEscapes;
 
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
-const VERSION = `v${packageJson.version} - ${new Date().toISOString()}`;
+const VERSION = `v${packageJson.version}-${new Date().toISOString()}`;
+const AddVersion = (code) => code.replace('{{VERSION}}', VERSION);
 
 async function saveBuild(buildOutput){
 	const changeUrl = 'https://beta.fiug.dev/service/change';
 	const body = {
-		path: './crosshj/fiug-beta/service-worker/service-worker.js',
+		path: `./${config.output.file}`,
 		service: 'crosshj/fiug-beta',
 		command: 'upsert',
 		code: buildOutput
@@ -60,28 +58,14 @@ async function saveBuild(buildOutput){
 	return { error: 'error saving build' };
 }
 
-
-//console.log(clearScreen);
 console.log(`Bundling service-worker with Rollup version ${rollup.VERSION}...`);
 
-// const generateOptions = {
-// 	validate: true,
-// 	format: 'iife'
-// };
 const generated = await rollup.rollup(config)
 	.then(x => x.generate(config.output));
-
-//console.log(JSON.stringify(generated, null, 2));
-//console.log('\n\n');
 const { code } = generated.output[0];
 
-const AddVersion = (code) => code.replace('{{VERSION}}', VERSION);
 
-//console.log(Object.keys(generated.output))
 const {error} = await saveBuild(AddVersion(code));
-// ^^ this works but seems to not because editor state is not updated after
-// and because Chrome shows provisional headers on request
-console.log(error || 'DONE');
-console.log(`\nsee ` +
-`https://beta.fiug.dev/crosshj/fiug-beta/service-worker/service-worker.js`
+console.log(error || `DONE\nsee ` +
+`https://beta.fiug.dev/${config.output.file}`
 );
