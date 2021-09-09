@@ -1,6 +1,6 @@
 //NOTE: sucks that I am stuck with this instance of chalk
 //import chalk2 from "https://cdn.skypack.dev/-/chalk@v2.4.2-3J9R9FJJA7NuvPxkCfFq/dist=es2020,mode=imports/optimized/chalk.js";
-import chalk2 from "https://cdn.skypack.dev/chalk@4.1.1";
+import chalk2 from "https://cdn.skypack.dev/chalk@2.4.2";
 //import colorize from 'https://cdn.skypack.dev/json-colorizer';
 
 // enable browser support for chalk
