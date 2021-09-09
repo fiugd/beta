@@ -27,7 +27,7 @@ const colors = {
 };
 
 //const jsonColors = (json) => colorize(json, { colors, pretty: true });
-const jsonColors = (obj) => JSON.stringify(obj,null,2));
+const jsonColors = (obj) => JSON.stringify(obj,null,2);
 
 const chalk = chalk2;
 
