@@ -159,7 +159,7 @@ const status = async ({ ops }) => {
 		const changeType = deleteFile
 			? 'deleted'
 			: 'modified';
-		return  '   ' + chalk.bold(`${changeTypegit}: `) + fileName;
+		return  '   ' + chalk.bold(`${changeType}: `) + fileName;
 	};
 	return '\n' + changes.map(changeRender).join('\n') + '\n';
 };

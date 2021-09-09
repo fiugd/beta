@@ -8,7 +8,7 @@ import { GithubProvider } from "./provider.github.js";
 import { ServicesManager } from "./services.js";
 import { TemplateEngine } from "./templates.js";
 
-export default async () => {
+const init = async () => {
 	const swHandlers = self.handlers;
 	await utils.initMimeTypes();
 
@@ -101,3 +101,6 @@ export default async () => {
 		// each instantiated service should have its own store
 	};
 };
+
+export default { init };
+

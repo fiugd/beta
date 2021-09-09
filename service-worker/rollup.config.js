@@ -1,8 +1,15 @@
 import resolvePlugin from './rollup-plugin-resolve.js';
 
 const entry = `
-	import Handler from "https://beta.fiug.dev/crosshj/fiug-beta/service-worker/handler.js";
-	Handler();
+	import "https://beta.fiug.dev/crosshj/fiug-beta/service-worker/index.js";
+`;
+
+const banner = `/*!
+	fiug service-worker
+	Version {{VERSION}}
+	https://github.com/crosshj/fiug
+	(c) 20xx-20xx Harrison Cross.
+*/
 `;
 
 export default {
@@ -10,12 +17,17 @@ export default {
 	plugins: [resolvePlugin(entry)],
 	external: ['chalk'],
 	output: {
-		//format: 'es',
+		format: 'es',
 		//sourcemap: true
 		//name: 'service-worker-handler.js',
-		format: 'iife',
+		//format: 'iife',
 		//sourcemap: 'inline',
 		//minifyInternalExports: true
+	banner,
 	},
-	onwarn: (warning) => { console.log(JSON.stringify(warning, null, 2)) }
+	onwarn: (warning) => {
+		if (warning.code === 'EVAL') return
+		if (warning.code === 'THIS_IS_UNDEFINED') return;
+		console.log(JSON.stringify(warning, null, 2))
+	}
 };

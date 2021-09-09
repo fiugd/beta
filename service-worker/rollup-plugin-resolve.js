@@ -6,6 +6,7 @@ const plugin = (entry) => ({
 		}
 		if(source.startsWith('https://')) return source;
 		if(source.startsWith('./')) return source;
+		if(source.startsWith('/')) return source;
 
 		console.log(source);
 		return null; // other ids should be handled as usually
@@ -20,6 +21,10 @@ const plugin = (entry) => ({
 		}
 		if(id.startsWith('./')){
 			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta/service-worker/'+id)
+				.then(x => x.text())
+		}
+		if(id.startsWith('/')){
+			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta'+id)
 				.then(x => x.text())
 		}
 		return null; // other ids should be handled as usually
