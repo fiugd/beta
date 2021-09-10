@@ -21,21 +21,23 @@ https://try.terser.org/
 
 */
 
-import config  from './rollup.config.js';
+import rollupConfig  from './rollup.config.js';
+import terserConfig from './terser.config.js';
 
 import 'https://unpkg.com/rollup/dist/rollup.browser.js';
+import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
 import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
 
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
 const VERSION = `v${packageJson.version}-${new Date().toISOString()}`;
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
-const Mangle = (code) => Terser.minify(code, { output: {comments: 'some'} });
 
+const Minify = (code) => Terser.minify(code, terserConfig());
 
 async function saveBuild(buildOutput){
 	const changeUrl = 'https://beta.fiug.dev/service/change';
 	const body = {
-		path: `./${config.output.file}`,
+		path: `./${rollupConfig.output.file}`,
 		service: 'crosshj/fiug-beta',
 		//command: 'upsert',
 		code: buildOutput
@@ -63,13 +65,13 @@ async function saveBuild(buildOutput){
 
 console.log(`Bundling service-worker with Rollup version ${rollup.VERSION}...`);
 
-const generated = await rollup.rollup(config)
-	.then(x => x.generate(config.output));
+const generated = await rollup.rollup(rollupConfig)
+	.then(x => x.generate(rollupConfig.output));
 const { code } = generated.output[0];
 
 
-const mangled = (await Mangle(AddVersion(code))).code;
+const mangled = (await Minify(AddVersion(code))).code;
 const {error} = await saveBuild(mangled);
 console.log(error || `DONE\nsee ` +
-`https://beta.fiug.dev/${config.output.file}`
+`https://beta.fiug.dev/${rollupConfig.output.file}`
 );
