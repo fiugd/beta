@@ -11,7 +11,7 @@ export default function(){
 		//mangle: false,
 		//compress: false,
 		sourceMap: {
-			//filename: "out.js",
+			filename: "service-worker.js",
 			url: "inline"
 		}
 	};
