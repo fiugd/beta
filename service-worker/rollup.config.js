@@ -9,8 +9,6 @@ const banner = `/*!
 	Version {{VERSION}}
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
-
-	NOTE: the following is auto-generated via build script, edit at your own peril
 */
 `;
 

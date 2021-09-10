@@ -24,10 +24,13 @@ https://try.terser.org/
 import config  from './rollup.config.js';
 
 import 'https://unpkg.com/rollup/dist/rollup.browser.js';
+import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
 
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
 const VERSION = `v${packageJson.version}-${new Date().toISOString()}`;
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
+const Mangle = (code) => Terser.minify(code, { output: {comments: 'some'} });
+
 
 async function saveBuild(buildOutput){
 	const changeUrl = 'https://beta.fiug.dev/service/change';
@@ -65,7 +68,8 @@ const generated = await rollup.rollup(config)
 const { code } = generated.output[0];
 
 
-const {error} = await saveBuild(AddVersion(code));
+const mangled = (await Mangle(AddVersion(code))).code;
+const {error} = await saveBuild(mangled);
 console.log(error || `DONE\nsee ` +
 `https://beta.fiug.dev/${config.output.file}`
 );
