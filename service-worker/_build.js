@@ -34,13 +34,13 @@ const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
 
 const Minify = (code) => Terser.minify(code, terserConfig());
 
-async function saveBuild(buildOutput){
+async function saveBuild({ code, map }){
 	const changeUrl = 'https://beta.fiug.dev/service/change';
 	const body = {
 		path: `./${rollupConfig.output.file}`,
 		service: 'crosshj/fiug-beta',
 		//command: 'upsert',
-		code: buildOutput
+		code: code
 	};
 	const headers = {
 		"accept": "application/json",
@@ -54,6 +54,7 @@ async function saveBuild(buildOutput){
 			credentials: "omit"
 	};
 	//console.log(JSON.stringify(opts, null, 2))
+
 	try {
 		return await fetch(changeUrl, opts).then(x => x.json());
 	} catch(error) {
@@ -70,8 +71,8 @@ const generated = await rollup.rollup(rollupConfig)
 const { code } = generated.output[0];
 
 
-const mangled = (await Minify(AddVersion(code))).code;
-const {error} = await saveBuild(mangled);
+const minified = await Minify(AddVersion(code));
+const {error} = await saveBuild(minified);
 console.log(error || `DONE\nsee ` +
 `https://beta.fiug.dev/${rollupConfig.output.file}`
 );

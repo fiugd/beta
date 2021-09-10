@@ -1,8 +1,2045 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-10T04:08:32.215Z
+	Version v0.4.4-2021-09-10T04:17:38.884Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 */
-const utils=(()=>{let e;const t=(()=>{let e;return(t={})=>Object.entries(t).length?(e=e||Object.entries(t).map((([e,t])=>({contentType:e,extensions:[],...t}))),e):e||[]})(),r=r=>t(e).find((e=>e.extensions.includes(r.split(".").pop()))),s=e=>{const t=[],r=[],s=(e,n="/")=>{Object.keys(e).filter((t=>{const r=e[t];return!!r&&"object"==typeof r&&!Array.isArray(r)})).forEach((a=>{const i=Object.keys(e[a]);i&&i.length?(e[a],r.push((()=>s(e[a],`${n}${a}/`)))):t.push({name:a,code:n+a,path:n+a})}))};for(r.push((()=>s(e)));r.length>0;)r.shift()();return t};const n=async(e,t)=>await(await fetch(e,t)).json();return{addBase:function(e,t="../../",r="_blank"){try{const s=e.includes("<base")?"":`\n<base href="${t}" target="${r}">\n`;return e.includes("<html>")||(e="<html>\n"+e+"\n</html>"),e=(e=e.replace("<html>",e.includes("<head>")?"<html>":"<html>\n\n<head></head>\n")).replace("<head>",`<head>${s}`)}catch(t){return e}},fetchJSON:n,flattenTree:s,flattenObject:e=>{let t=[],r=[{obj:e,path:[]}];for(;r.length>0;){const e=r.pop();Object.keys(e.obj).forEach((s=>{const n=e.obj[s];if("object"!=typeof n)return;const a=e.path.concat(s);t.push(a),r.unshift({obj:n,path:a})}))}return t.map((e=>e.join("/")))},keepHelper:(e,t)=>{const r=s(e).map((e=>e.path.replace("/.keep",""))),n=t.map((e=>e.path)).filter((e=>!e.includes("/.keep"))).map((e=>"/"===e[0]?e:"./"===e.slice(0,2)?e.replace(/^\.\//,"/"):"/"+e)),a=r.reduce(((e,t,r,s)=>(0!==s.filter((e=>e!==t&&e.startsWith(t))).length||n.includes(t)||e.push(t),e)),[]);return r.map((e=>a.includes(e)?e+"/.keep":n.includes(e)?e:void 0)).filter((e=>!!e))},getCodeAsStorage:function(e,t,r){const n=s(e);for(let e=0;e<n.length;e++){const r=n[e];n[e]={key:r.path,value:t.find((e=>e.name===r.path.split("/").pop()))},n[e].value.path=n[e].value.path||r.path,n[e].value.code=n[e].value.code||r.code}const a=t.filter((e=>e.untracked)).map(((e,t)=>({key:`/${r}/${e.name}`,value:{code:e.code,name:e.name,path:`/${r}/`}})));return[...n,...a]},getMime:r,initMimeTypes:async()=>{e=await n("https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json")},notImplementedHandler:async(e,t)=>(console.log("handler not implemented"),JSON.stringify({params:e,event:t,error:"not implemented"},null,2)),safe:e=>{try{return e()}catch(t){return void console.error("possible issue: "+e.toString())}},treeInsertFile:(e,t)=>{const r=e.split("/").filter((e=>!!e&&"."!==e)),s=JSON.parse(JSON.stringify(t));let n=s;return r.forEach((e=>{n[e]=n[e]||{},n=n[e]})),s},unique:(e,t)=>{const r=[],s=new Map;for(const n of e)s.has(t(n))||(s.set(t(n),!0),r.push(n));return r},fetchFileContents:async function(e,t){const s=await fetch(e,t),n=(r(e)||{}).contentType||s.headers.get("Content-Type");return!["image/","audio/","video/","wasm","application/zip"].find((e=>n.includes(e)))||["image/svg","image/x-portable-pixmap"].find((e=>n.includes(e)))||[".ts"].find((t=>e.includes(t)))?await s.text():await s.blob()}}})(),StorageManager=(()=>{const e=()=>[];async function t(e,t,r){const s=(0,this.utils.flattenTree)(e),n={},a=await t.keys();for(const e of a)e.startsWith(`./${r}/`)&&(n[e]={key:e,untracked:!0});for(let e=0;e<s.length;e++){let t=n["."+s[e].path];t&&(t.untracked=!1)}const i=Object.entries(n).map((([,e])=>e)).filter((e=>!0===e.untracked)).map((e=>({...e,name:e.key.split("/").pop(),path:e.key})));return[...s,...i]}class r{path;term;lines;currentLine;currentColumn;constructor(e){this.fileStore=e}async load(e){this.path=e;const t=await this.fileStore.getItem(e);"string"==typeof t?(this.lines=t.split("\n").map((e=>e.toLowerCase())),this.reset()):this.done=!0}reset(){this.currentLine=0,this.currentColumn=0,this.done=!1}next(e){if(this.done)return-1;if(!this.lines||!this.path)return-1;for(e.toLowerCase()!==this.term&&(this.term=e.toLowerCase(),this.reset());;){const e=this.currentColumn,t=(this.lines[this.currentLine]||"").indexOf(this.term,this.currentColumn);if(-1!==t)return this.currentColumn=t+1,{file:this.path,line:this.currentLine,column:this.currentColumn-1,text:this.lines[this.currentLine].slice(0===e?Math.max(0,t-30):e+this.term.length-1,Math.max(t+30+this.term.length)).trim()};if(this.currentColumn=0,this.currentLine++,this.currentLine>this.lines.length-1)return this.done=!0,-1}}}class s{MAX_RESULTS=1e4;encoder=new TextEncoder;timer;stream;async init({term:e,include:t="./",fileStore:s}){this.timer={t1:performance.now()};const n={};await s.iterate(((e,r)=>{(r.startsWith(t)||`./${r}`.startsWith(t))&&(n[r]=e)}));const a=new r({getItem:async e=>n[e]});let i=-1;const o=Object.keys(n),c=this.encoder;let l=0;this.stream=new ReadableStream({start(e){},async pull(t){for(;;)try{const r=a.next(e);if(l>=this.MAX_RESULTS||-1===r&&i===o.length-1)return void t.close();if(-1===r){await a.load(o[++i]);continue}l++,t.enqueue(c.encode(JSON.stringify(r)+"\n"))}catch(e){return console.log(e),void t.close()}}})}async search(e){const t=this.stream.getReader();let r=0;for(;;){const{done:s,value:n}=await t.read();if(s)break;if(e(n),r++,r===this.MAX_RESULTS)break}this.timer.t2=performance.now(),e({summary:{timer:this.timer.t2-this.timer.t1,count:r}})}}async function n({filename:e,filesStore:t,cache:r,storagePath:s,fetchFileContents:n}){const a=await t.getItem(e);let i;return a&&"reload"!==r?a:(i=await n(e),s?t.setItem("."+s.replace("/welcome/","/.welcome/"),i):t.setItem(e,i),i)}async function a({result:e,filesStore:t,cache:r,servicesStore:s,fetchFileContents:a}){const{safe:i,flattenTree:o}=this.utils;if(!i((()=>e.result[0].code.find))){const t=JSON.parse(e.result[0].code);return e.result[0].code=t.files,e.result[0].tree=t.tree,void console.log("will weird things ever stop happening?")}const c=e.result[0].code.find((e=>"service.json"===e.name));if(c&&!c.code){const s=`./.${e.result[0].name}/service.json`;c.code=await n({filename:s,filesStore:t,cache:r,fetchFileContents:a})}if(c){let s=JSON.parse(c.code);if(!s.tree){const e=`./${s.path}/service.json`;c.code=await n({filename:e,filesStore:t,cache:r,fetchFileContents:a}),s=JSON.parse(c.code)}e.result[0].code=s.files,e.result[0].tree={[e.result[0].name]:s.tree}}const l=i((()=>e.result[0].code.length)),d=o(i((()=>e.result[0].tree)));for(var h=0;h<l;h++){const s=e.result[0].code[h];if(!s.code&&s.path){const e="./"+s.path,i=(d.find((e=>e.name===s.name))||{}).path;s.code=await n({filename:e,filesStore:t,cache:r,storagePath:i,fetchFileContents:a})}}e.result[0].name?await s.setItem(e.result[0].id+"",{name:e.result[0].name,id:e.result[0].id,tree:e.result[0].tree}):console.error("cannot set services store item without name")}function i(e,t){const r={};return new Proxy(e,{apply:(e,s,n)=>{const a=e.name;r[a]=r[a]||{};const i=n.toString(),o=r[a][i];return o||(r[a][i]=e.apply(s,n),setTimeout((()=>{delete r[a][i]}),t),r[a][i])}})}let o,c,l;async function d(e){const t=this.stores.changes,r=this.stores.files,s=this.stores.services,{fetchFileContents:n}=this.utils;o=o||i(t.getItem.bind(t),250),c=c||i(r.getItem.bind(r),250),l=l||i((async()=>{const e=await s.keys();let t=[];for(let r=0,n=e.length;r<n;r++){const n=await s.getItem(e[r]);t.push(n)}return t}),500);let a=performance.now();const d=()=>{const e=performance.now()-a;return a=performance.now(),e.toFixed(3)},h=await o(e);if(console.log(`changes store: ${d()}ms (${e})`),h&&"update"===h.type)return h.value;let u=await c(e);if(console.log(`file store: ${d()}ms (${e})`),u&&u.includes&&u.includes("##PLACEHOLDER##")){const t=await l();let s;t.sort(((e,t)=>t.name.length-e.name.length));let a={};for(let r=0,n=t.length;r<n&&(a=t[r],!("github"===a.type&&a.git&&a.git.tree&&e.startsWith(a.name)&&(s=a.git.tree.find((t=>e===`${a.name}/${t.path}`)),s)));r++);if(!s)return u;const i=async({path:e})=>{try{const t="https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}".replace("{path}",e).replace("{owner}",a.owner).replace("{repo}",a.repo).replace("{sha}",a.git.sha);return await n(t)}catch(e){return void console.error(e)}};u=await i(s),u&&r.setItem(e,u)}return u}const h=(e,t,r,s,n)=>async function(a,i){const o=i.request.headers.get("x-cache");if(0===Number(a.id))return await s.read();const c=[];if(!a.id||"*"===a.id){const r=[];await e.iterate(((e,t)=>{r.push(e)}));for(var l=0,d=r.length;l<d;l++){const e=r[l],s=await this.getCodeFromStorageUsingTree(e.tree,t,e.name);e.code=s}const s=[...c,...r].sort(((e,t)=>Number(e.id)-Number(t.id))).map((e=>({id:e.id,name:e.name})));return JSON.stringify({result:this.utils.unique(s,(e=>Number(e.id)))},null,2)}const h=async e=>{const t=(await n.keys()).filter((t=>t.startsWith(`${e.name}`))).map((t=>t.split(e.name+"/")[1])),r=await n.getItem(`state-${e.name}-opened`)||[],s=(r.find((e=>0===e.order))||{}).name||"";e.state={opened:r,selected:s,changed:t},e.treeState={expand:await n.getItem(`tree-${e.name}-expanded`)||[],select:s,changed:t,new:[]}};await t.setItem("lastService",a.id);const u=await e.getItem(a.id);if(u)return u.code=await this.getCodeFromStorageUsingTree(u.tree,t,u.name),await h(u),JSON.stringify({result:[u]},null,2);const p=[]||[],m={result:"*"!==a.id&&a.id?p.filter((e=>Number(e.id)===Number(a.id))):p};return await this.fileSystemTricks({result:m,filesStore:t,servicesStore:e,cache:o,fetchFileContents:r}),m.forEach(h),JSON.stringify(m,null,2)};return class{stores=(()=>{var e=[localforage.INDEXEDDB,localforage.WEBSQL,localforage.LOCALSTORAGE];return{files:localforage.createInstance({driver:e,name:"service-worker",version:1,storeName:"files",description:"permanent state of contents of files across projects"}),services:localforage.createInstance({driver:e,name:"service-worker",version:1,storeName:"services",description:"services directory stucture, type, etc"}),providers:localforage.createInstance({driver:e,name:"service-worker",version:1,storeName:"providers",description:"connects services to outside world"}),changes:localforage.createInstance({driver:e,name:"service-worker",version:1,storeName:"changes",description:"keep track of changes not pushed to provider"}),handlers:localforage.createInstance({driver:e,name:"service-worker",version:1,storeName:"handlers",description:"used after app has booted when service worker is updated"})}})();defaultServices=e;getCodeFromStorageUsingTree=t.bind(this);fileSystemTricks=a.bind(this);getFile=d.bind(this);constructor({utils:e,ui:t}){var r;this.utils=e,this.handlers={serviceSearch:(r=this.stores.files,async(e,t)=>{const n=new s;return await n.init({...e,fileStore:r}),n.stream}),serviceRead:h(this.stores.services,this.stores.files,e.fetchFileContents,t,this.stores.changes).bind(this)}}}})(),Router=(()=>{const e={"/service/create/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/create(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/read/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/read(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/update/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/update(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/change":(()=>{const e=new RegExp(/^((?:.*))\/service\/change(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/commit":(()=>{const e=new RegExp(/^((?:.*))\/service\/commit(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/delete/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/provider/test/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/provider\/test(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/provider/create":(()=>{const e=new RegExp(/^((?:.*))\/service\/provider\/create(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/provider/read/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/provider\/read(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/provider/update/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/provider\/update(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/service/provider/delete/:id?":(()=>{const e=new RegExp(/^((?:.*))\/service\/provider\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/manage/:id?":(()=>{const e=new RegExp(/^((?:.*))\/manage(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/monitor/:id?":(()=>{const e=new RegExp(/^((?:.*))\/monitor(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/persist/:id?":(()=>{const e=new RegExp(/^((?:.*))\/persist(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({id:e.exec(t)[2]})}})(),"/.welcome/:path?":(()=>{const e=new RegExp(/^((?:.*))\/\.welcome\/((?:.*))(?:\/(?=$))?$/i);return{match:t=>e.test(t),params:t=>({path:(e.exec(t)[2]||"").split("?")[0],query:(e.exec(t)[2]||"").split("?")[1]})}})(),"/service/search/":(()=>{const e=new RegExp(/^((?:.*))\/service\/search\/.*$/i);return{match:t=>{return e.test("/"===(r=t)[r.length-1]?r:r+"/");var r},params:(e,t)=>Object.fromEntries(t.split("?").pop().split("&").map((e=>e.split("="))))}})()},t=({_handlers:t})=>r=>(s,n)=>{const a=e[s];let i;a||(i=(e=>{const t=e.replace("/:path?","").replace("/",""),r=new RegExp(`^((?:.*))/${t}/((?:.*))(?:/(?=$))?$`,"i");return{match:e=>r.test(e),params:e=>({path:(r.exec(e)[2]||"").split("?")[0],query:(r.exec(e)[2]||"").split("?")[1]})}})(s));const o=t.find((e=>e.pathString===s&&e.method===r));o?o.handler=n:t.push({...a||i,pathString:s,method:r,handler:n})};return class{_handlers=[];constructor({storage:e,templates:r,swHandlers:s}){this.swHandlers=s,this.storage=e,this.templates=r,this.generic=t(this),this.get=this.generic("get"),this.post=this.generic("post"),this.expressHandler=(({templates:e,storage:t})=>{const{getFile:r}=t;return async(t,s)=>(await e.refresh(),async(s,n)=>{const{path:a,query:i}=s,o=decodeURI(a.replace("/::preview::/","")),c=a.includes("/::preview::/");a.includes(".templates/");const l=c?o.split("/").pop():a.split("/").pop();let d;const h=await r(`${t}/${o}`)||await r(`./${t}/${o}`);let u;try{u="string"!=typeof h?h?JSON.stringify(h,null,2):"":h}catch(e){}return c&&(d=e.convert(l,u)),c&&!d?e.NO_PREVIEW:h&&h.type&&h.size?d||h:d||u||h})})(this),this.addServiceHandler=(({storage:e,expressHandler:t,generic:r,swHandlers:s})=>async function({name:n,msg:a}){const i=e.stores.handlers,o=`^/${n}/(.*)`,c="./modules/service-worker.handler.js",l=s.find((e=>e.handlerName===c)),d=l?l.type:"fetch",h=l?l.handler:"route-handler",u=l?l.handlerText:"service-worker-handler";l&&s.find((e=>e.handlerName===c&&e.routePattern===o))||(s.push({type:d,routePattern:o,route:new RegExp(o),handler:h,handlerName:c,handlerText:u}),await i.setItem(o,{type:d,route:o,handlerName:c,handlerText:u}));const p=await t(n,a);r("get")(`/${n}/:path?`,p)})(this),this.restorePrevious=(({storage:e,addServiceHandler:t})=>async()=>{const r=e.stores.services,s=[];await r.iterate(((e,t)=>{let{name:r}=e;s.push({name:r})}));for(let e=0,r=s.length;e<r;e++){const{name:r}=s[e];await t({name:r,msg:"served from reconstituted"})}})(this),this.find=(({_handlers:e,restorePrevious:t})=>async r=>{const{url:s,method:n}=r,a=(()=>{try{return Object.fromEntries([...new URL(s).searchParams])}catch(e){return{}}})();let i=e.find((e=>n.toLowerCase()===e.method&&e.match(s.split("?")[0])));if(i||(await t(),i=e.find((e=>n.toLowerCase()===e.method&&e.match(s.split("?")[0]))),i))return{exec:async e=>await i.handler(i.params(s.split("?")[0],s),e,a)}})(this),this.restorePrevious()}}})(),{UIManager:UIManager,UIManagerAddChanged:UIManagerAddChanged}=(()=>{const e=e=>JSON.stringify(e,null,2);return{UIManager:class{id=0;name;changeStore=void 0;cache=void 0;changed=void 0;constructor(e){this.name=e}init=(e,t)=>(async(e,{handlerStore:t,changeStore:r})=>{e.changeStore=r,e.changed=await r.getItem("UIManagerChanged")||{};const s=`^/${e.name}/(.*)`,n="./modules/service-worker.handler.js";let a,i=0;for(;!a&&i<5;)a=handlers.find((e=>e.handlerName===n)),a||(i++,await new Promise((e=>setTimeout(e,3e3))));if(!a)return console.error("could not find a handler to base UIManager handler on!");a&&handlers.find((e=>e.handlerName===n&&e.routePattern===s))||(handlers.push({type:a.type,routePattern:s,route:new RegExp(s),handler:a.handler,handlerName:n,handlerText:a.handlerText}),await t.setItem(s,{type:a?a.type:"fetch",route:s,handlerName:n,handlerText:a?a.handlerText:"service-worker-handler(set in ui manager)"}))})(this,{handlerStore:e,changeStore:t});read=()=>(async t=>{let r;return t.cache||await async function(){let e={};const r=[],s=await caches.open(cacheName),n=await s.keys();for(var a=0,i=n.length;a<i;a++){const t=n[a],i=t.url.split(/(\/fiug\/|\/shared\/|\/_\/modules\/)/);i.shift();const l=i.join("").split("/").filter((e=>!!e));let d=e;for(var o=0,c=l.length;o<c;o++){const e=l[o];e&&(d[e]=d[e]||{},d=d[e])}let h=(l[l.length-1]||"").replace("/","");const u=await(await s.match(t)).text();r.push({name:h,code:u,url:t.url})}e.modules=e._.modules,delete e._;const l={id:t.id,name:t.name,tree:{[t.name]:e},code:r};t.cache=l}(),Object.keys(t.changed).length&&(r=function(e,t){const r=JSON.parse(JSON.stringify(t.code));return Object.entries(e).forEach((([e,t])=>{const s=e.split("/").pop(),n=r.find((e=>e.name===s));n&&(n.code=t)})),{...t,code:r}}(t.changed,t.cache)),e({result:[r||t.cache]})})(this);update=t=>(async(t,{service:r})=>{const s=await caches.open(cacheName),n=Object.entries(t.changed);for(var a=0,i=n.length;a<i;a++){const[e,r]=n[a],i=e.split("/").pop(),o=t.cache.code.find((e=>e.name===i)),{url:c}=o,{contentType:l}=getMime(c)||{},d=new Response(r,{headers:{"content-type":l||""}});await s.put(c,d),o.code=r}return console.warn("TODO: save files to backend (if provider is available?)"),t.changed={},await t.changeStore.setItem("UIManagerChanged",t.changed),e({result:[r]})})(this,t);change=t=>(async(t,{path:r,code:s})=>(t.changed[r]=s,console.warn(`changed a file at: ${r}`),await t.changeStore.setItem("UIManagerChanged",t.changed),e({result:{path:r,code:s}})))(this,t)},UIManagerAddChanged:e=>{}}})(),ProviderManager=(()=>{const e=e=>JSON.stringify(e,null,2);async function t(e,t){const r=[".ts"].map((e=>new RegExp(`${e}$`.replace(/\./,".")))),s=await fetch(e,t),n=s.headers.get("Content-Type");return!["image/","audio/","video/","wasm","application/zip","application/octet-stream"].find((e=>n.includes(e)))||["image/svg","image/x-portable-pixmap"].find((e=>n.includes(e)))||r.find((t=>t.test(e)))?await s.text():await s.blob()}const r=({github:t})=>async(r,s)=>{const n=t&&await t.handler("test",{params:r,event:s});if(n)return n;const a=await s.request.json(),{providerType:i,providerUrl:o,providerAccessToken:c}=a;["basic-bartok-provider","github-provider"].includes(i)||e({error:`Unsupported provider type: ${i}`}),"github-provider"===i&&e({success:!0,todo:"test user's access token"});const l=(o+"/file/").replace("//file/","/file/"),d=(o+"/tree/").replace("//tree/","/tree/");try{if(200!==(await fetch(o)).status)return e({error:`Failed to connect to provider at: ${o}`})}catch(t){return e({error:`Failed to connect to provider at: ${o}`})}try{if(200!==(await fetch(l)).status)return e({error:`Failed to connect to provider at: ${l}`})}catch(t){return e({error:`Failed to connect to provider at: ${l}`})}try{if(200!==(await fetch(d)).status)return e({error:`Failed to connect to provider at: ${d}`})}catch(t){return e({error:`Failed to connect to provider at: ${d}`})}return e({success:!0})},s=({create:t,github:r})=>async(s,n)=>{const a=r&&await r.handler("create",{params:s,event:n});if(a)return a;try{const r=await n.request.json(),{providerType:s,providerUrl:a}=r;["basic-bartok-provider"].includes(s)||e({error:`Unsupported provider type: ${s}`});const i=await t({id:a,url:a});return e({success:!0,provider:i})}catch(t){return e({error:t})}},n=({github:t})=>async(r,s)=>{const n=t&&await t.handler("createCommit",{params:r,event:s});return n||e({error:"commits are only implemented for github repos"})};async function a(t){const r=this.stores.services,s=this.stores.files,n=this.github&&await this.github.handler("servicesCreate",{event:t});if(n)return n;try{const n=await t.request.json();let{providerType:a,providerUrl:i,providerAccessToken:o,repoName:c}=n;if(!["basic-bartok-provider"].includes(a))return e({error:`Unsupported provider type: ${a}`});if(!await this.read(i))return e({error:`Provider does not exist: ${i}`});const l=(i+"/tree/").replace("//tree/","/tree/"),d=(i+"/file/").replace("//file/","/file/"),h=[];await r.iterate(((e,t)=>{h.push(e)}));const u=await fetch(l);if(200!==u.status)return e({error:`Failed to connect to provider at: ${i}`});const{files:p,root:m,tree:f}=await u.json(),g=m.split("/").pop(),v=h.find((e=>e.name===g)),w=v?v.id:h.reduce(((e,t)=>Number(t.id)>=e?Number(t.id)+1:e),1),y={name:g,id:w,providerRoot:m,providerUrl:i,tree:f};if(!y.name)return void console.error("cannot set services store item without service name");await r.setItem(w+"",y),y.code=[];for(let e=0;e<p.length;e++){const t=p[e],r=await this.utils.fetchFileContents(`${d}${m}/${t}`);s.setItem(`./${g}/${t}`,r),y.code.push({name:t.split("/").pop(),path:`./${g}/${t}`,code:"string"==typeof r?r:""})}return await this.providerUpdateServiceJson({service:y,servicesStore:r,filesStore:s}),await this.app.addServiceHandler({name:g,msg:"served from fresh baked"}),e({result:{services:[y]}})}catch(t){return console.error(t),e({error:t})}}const i=async function({service:t,servicesStore:r,filesStore:s}){const n=this.github&&await this.github.handler("servicesUpdate",{service:t});if(n)return n;const a=t.code.find((e=>e.path.includes("/service.json")));if(!a)return;const i=JSON.parse(a.code),{code:o,...c}=t,{providerUrl:l,providerRoot:d}=t;i.tree=t.tree[t.name],i.files=t.code.map((e=>({name:e.name,path:e.path.replace("./","")}))).sort(((e,t)=>e.name.toLowerCase()>t.name.toLowerCase()?1:e.name.toLowerCase()<t.name.toLowerCase()?-1:0));const h=`${l}file/${d}${a.path.replace("./"+t.name,"")}`;a.code=e(i),c.name?(await r.setItem(t.id+"",c),await s.setItem(a.path,a.code),await fetch(h,{method:"post",body:a.code})):console.error("cannot set services store item without service name")};async function o(e){let{path:t,code:r,parent:s,deleteFile:n}=e;const a=this.github&&await this.github.handler("filesUpdate",e);if(a)return a;if(s=s||await this.stores.services.iterate(((e,t)=>{if(e.name===s||e.name===s.name)return e})),!s||!s.providerUrl)throw new Error("file not saved to provider: service not associated with a provider");const{providerUrl:i,providerRoot:o}=s,c=`${i}file/${o}${t.replace("./"+s.name,"")}`,l=await this.utils.fetchJSON(c,{method:n?"DELETE":"POST",body:n?void 0:r});if(l.error)throw new Error(l.error);return l}return class{constructor({app:c,storage:l,utils:d,GithubProvider:h}){return new Promise((async u=>{try{this.app=c,this.storage=l,this.utils=d,this.fetchContents=t.bind(this),this.store=l.stores.providers,this.stores=l.stores,this.github=await new h(this),this.handlers={testHandler:r(this),createHandler:s(this),readHandler:async(t,r)=>(console.error("not implemented: provider read.  Should return one or all saved provider details."),e({error:"not implemented"})),updateHandler:async(t,r)=>(console.error("not implemented: provider update.  Should update provider details."),e({error:"not implemented"})),deleteHandler:async(t,r)=>(console.error("not implemented: provider delete.  Should delete saved provider."),e({error:"not implemented"})),createCommit:n(this)},this.createServiceHandler=a.bind(this),this.providerUpdateServiceJson=i.bind(this),this.fileChange=o.bind(this),u(this)}catch(e){reject(e)}}))}create=async e=>await this.store.setItem(e.id+"",e);read=async e=>e?await this.store.getItem(e):await this.store.keys();update=async(e,t)=>{const r=await this.read(e);return t.id&&t.id!==e&&await this.delete(e),await this.store.setItem((t.id||r.id)+"",{...r,...t})};delete=async e=>await this.store.removeItem(e)}})(),GithubProvider=(()=>{const e={rateLimit:"/rate_limit",repoInfo:"/repos/{owner}/{repo}",latestCommit:"/repos/{owner}/{repo}/branches/{branch}",tree:"/repos/{owner}/{repo}/git/trees",getTreeRecursive:"/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true",rawBlob:"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}",contents:"/repos/{owner}/{repo}/contents/{path}?ref={sha}",branch:"/repos/{owner}/{repo}/branches/{branch}",treeRecurse:"/repos/{owner}/{repo}/git/trees/{sha}?recursive=true",commit:"/repos/{owner}/{repo}/git/commits/{sha}",createCommit:"/repos/{owner}/{repo}/git/commits",blobCreate:"/repos/{owner}/{repo}/git/blobs",refs:"/repos/{owner}/{repo}/git/refs/heads/{branch}"};Object.entries(e).forEach((([t,r])=>{"/"===r[0]&&(e[t]="https://api.github.com"+e[t])}));const t=e=>JSON.stringify(e,null,2),r=(e,t)=>fetch(e,t).then((e=>e.json())),s=()=>void console.warn("Someone wants to be debugging...")||t({message:"not implemented"}),n=e=>async(e,t)=>s(),a=r=>async(s,n)=>{try{const{storage:{stores:n},fetchContents:a,app:i}=r,{auth:o,repo:c}=s,l=(n.providers,n.services),d=n.files,h={headers:{}};o&&(h.headers.authorization=`token ${o}`),h.headers.Accept="application/vnd.github.v3+json";const u=async()=>{const t=e.repoInfo.replace("{owner}/{repo}",c),{default_branch:s}=await r.fetchJSON(t,h);return s},p=s.branch||await u(),m=e.latestCommit.replace("{owner}/{repo}",c).replace("{branch}",p),{commit:{sha:f}}=await r.fetchJSON(m,h),g=e.getTreeRecursive.replace("{owner}/{repo}",c).replace("{tree_sha}",f),{tree:v,truncated:w}=await r.fetchJSON(g,h);w&&console.warn("github repo tree truncated - try without recursive flag");const y=v.filter((e=>"blob"===e.type)),b=async(t,r)=>{const s=await a((n=t,e.rawBlob.replace("{owner}/{repo}",c).replace("{branch}",r||p).replace("{path}",n.path)));var n;return{...t,contents:s}};for(let e=0,t=y.length;e<t;e++){const t=y[e],r="##PLACEHOLDER##";if(!t.path.includes(".templates")){await d.setItem(`${c}/${y[e].path}`,r);continue}const{contents:s}=await b(t,f);await d.setItem(`${c}/${y[e].path}`,s)}let $={};const x=[];await l.iterate(((e,t)=>{x.push(t),e.name===c&&($={key:t,...e})}));const S=x.length?Math.max(...x)+1:3e3,k=e=>{const t={[c]:{}},r=t[c];return e.forEach((e=>{e.path.split("/").reduce(((e,t)=>(e[t]=e[t]||{},e[t])),r)})),t},T=async(e,t)=>{const r=$.id||S,s={id:r,type:"github",name:c,tree:k(e),owner:c.split("/").slice(0,1).join(""),repo:c.split("/").pop(),git:{tree:e,sha:t},branch:p};return await l.setItem(r+"",s),{id:r,thisService:s}},{id:I,thisService:N}=await T(v,f);return await i.addServiceHandler({name:c,msg:"service added from github provider"}),t({result:{services:[N]}})}catch(e){return console.error(e),t({error:e})}},i=e=>async(e,t)=>s(),o=e=>async(e,t)=>s(),c=e=>async(e,t)=>s();async function l({files:t,git:r,auth:s,message:n,fetchJSON:a}){if(!t||!Array.isArray(t))return{error:"no files were changed"};if(!(t=t.filter((e=>!e.ignore))).length)return{error:"no files were changed"};if(!s)return{error:"auth is required"};if(!n)return{error:"message is required"};if(!r.owner)return{error:"repository owner is required"};if(!r.branch)return{error:"repository branch name is required"};if(!r.repo)return{error:"repository name is required"};let i=[];const o={headers:{authorization:`token ${s}`,Accept:"application/vnd.github.v3+json"}},c=async(e,t={},s={})=>{const n=(i=e,c={...r,...t},Object.keys(c).reduce(((e,t)=>e.replace(`{${t}}`,c[t])),i));var i,c;return await a(n,{...o,...s})},l=async(e,t,r)=>await c(e,t,{method:"POST",body:JSON.stringify(r)}),d=({path:e},t)=>({path:e,mode:"100644",type:"blob",sha:i[t].sha}),h=({path:e,mode:t,type:r,sha:s})=>({path:e,mode:t,type:r,sha:s}),u=t.filter((e=>!e.deleteFile)),p=t.filter((e=>e.deleteFile)).map((e=>e.path)),m=u.map((e=>e.path));i=await Promise.all(u.map((({content:t})=>l(e.blobCreate,null,(e=>{try{return{content:btoa(e),encoding:"base64"}}catch(t){return{content:e,encoding:"utf-8"}}})(t)))));const f=await c(e.branch),g=await c(e.treeRecurse,{sha:f?.commit?.sha}),v=await l(e.tree,null,{tree:(w=u,y=g,b=m,$=p,[...w.map(d),...y.tree.filter((e=>"tree"!==e.type&&!b.includes(e.path)&&!$.includes(e.path))).map(h)])});var w,y,b,$;const x=await l(e.createCommit,null,{message:n,tree:v.sha,parents:[f.commit.sha]});return((await l(e.refs,null,{sha:x.sha}))?.object?.url||"no commit url available").replace("https://api.github.com/repos","https://github.com").replace("git/commits","commit")}return class{constructor({storage:d,fetchContents:h,app:u,utils:p}){return new Promise(((m,f)=>{try{this.handler=(g=this,async(e,t)=>{try{const{params:r,event:s,service:n,parent:a}=t,i=s&&s?.request?.clone(),o=i&&await(i?.json()),{providerType:c}=o||{};if("createCommit"===e)return await g.createCommit(o,r);if(!(c?"github-provider"===c:"github"===(n||a)?.type))return;const l=g[e];if(!l)return;return["filesUpdate"].includes(e)?await l(t):await l(o,r)}catch(e){}}),this.storage=d,this.fetchContents=h,this.fetchJSON=r,this.app=u,this.utils=p,this.test=(r=>async(s,n)=>{try{const{storage:n}=r,{auth:a,repo:i,branch:o}=s,c={headers:{}};a&&(c.headers.authorization=`token ${a}`),c.headers.Accept="application/vnd.github.v3+json";const l=await r.fetchJSON(e.rateLimit,c);let{limit:d,remaining:h,reset:u}=l?.resources?.core;return u=new Date(1e3*u).toLocaleString("sv").split(" ").reverse().join(" "),console.log(t({limit:d,remaining:h,reset:u})),t({success:!0,limit:d,remaining:h,reset:u})}catch(e){return t({error:e})}})(this),this.create=(e=>async(r,n)=>{try{const{storage:t}=e,{auth:a,repo:i,branch:o}=r;return t.stores.providers,console.log({payload:r,params:n}),s()}catch(e){return console.error(e),t({error:e})}})(this),this.read=async(e,t)=>s(),this.update=n(),this.delete=n(),this.servicesCreate=a(this),this.servicesRead=i(),this.servicesUpdate=o(),this.servicesDelete=c(),this.filesCreate=a(this),this.filesRead=i(),this.filesUpdate=o(),this.filesDelete=c(),this.createCommit=(e=>async(r,s)=>{try{const{message:s,auth:n,cwd:a}=r;if(!s)return t({error:"commit message is required"});if(!n)return t({error:"auth token is required for commit"});if(!a)return t({error:"current working directory (cwd) is required for commit"});const{storage:{stores:i},utils:o}=e,c=i.services,d=i.changes,h=i.files,{flattenObject:u}=o;let p;if(await c.iterate(((e,t)=>{const{tree:r,name:s}=e;return a===`${s}/`||u(r).includes(a)?(p=e,!0):void 0})),!(p&&p.name&&p.branch&&p.repo&&"github"===p?.type))throw new Error("missing or malformed service");const m=new RegExp("^"+p.name+"/","g"),{owner:f,repo:g,branch:v}=p,w={owner:f,repo:g,branch:v},y=[],b=[],$=await d.keys();for(let e=0,t=$.length;e<t;e++){const t=$[e];if(!m.test(t))continue;const r=await d.getItem(t);if(!r?.service)continue;const{type:s,value:n,service:{name:a},deleteFile:i}=r;if(!a)continue;if(a!==p.name)continue;const o={path:t.replace(m,""),content:n,operation:s,deleteFile:i};o.path.startsWith(".git/")&&(o.ignore=!0),y.push(o),b.push({...r,key:t})}let x;if(y.filter((e=>!e.ignore)).length){if(x=await l({auth:n,files:y,git:w,message:s,fetchJSON:e.fetchJSON}),!x)throw new Error("commit failed");if(x.error)throw new Error(x.error)}else x={error:"no files changed"};for(let e=0,t=y.length;e<t;e++){const t=b[e];t.deleteFile?await h.removeItem(t.key):await h.setItem(t.key,t.value),await d.removeItem(t.key)}return t({commitResponse:x})}catch(e){return t({commitResponse:{error:e.message}})}})(this),m(this)}catch(e){f(e)}var g}))}}})(),ServicesManager=(()=>{const e=e=>JSON.stringify(e,null,2),t=t=>{if(t)try{return JSON.parse(e(t))}catch(e){return}},r=e=>[...new Set(e)];function s(e,t){var r=e;try{return t.split("/").every((function(e){return"."===e||(void 0===r[e]?(r=void 0,!1):(r=r[e],!0))})),r}catch(e){return}}const n=(...e)=>t=>e.reduce(((e,t)=>t(e)),t),a=e=>e.replace(/^\.\//,""),i=({app:t,storage:r,providers:s})=>async(n,a)=>{const i=r.stores.services,o=r.stores.files,{id:c}=n;if("provider"===c)return await s.createServiceHandler(a);const{name:l}=await a.request.json()||{};if(!c)return e({params:n,event:a,error:"id required for service create!"});if(!l)return e({params:n,event:a,error:"name required for service create!"});console.log("/service/create/:id? triggered"),await i.setItem(c+"",{name:l,id:c,tree:{[l]:{".templates":{"json.html":{}},"package.json":{}}}}),o.setItem(`./${l}/package.json`,{main:"package.json",comment:"this is an example package.json"}),o.setItem(`./${l}/.templates/json.html`,"\n\t\t\t\t<html>\n\t\t\t\t\t\t<p>basic json template output</p>\n\t\t\t\t\t\t<pre>{{template_value}}</pre>\n\t\t\t\t</html>\n\t\t\t\t"),await t.addServiceHandler({name:l,msg:"served from fresh baked"});const d=r.defaultServices();return e({result:{services:[d.filter((e=>777===Number(e.id)))]}})},o=({storage:t,ui:r,utils:s,templates:n})=>async(a,i)=>{const o=t.stores.services;t.stores.files;const c=t.stores.changes;let l,d;try{const e=i.request.clone();l=await e.json()}catch(e){}try{if(!l){const e=await i.request.formData();l=JSON.parse(e.get("json")),d=e.get("file")}}catch(e){}try{let{path:t,code:a,command:i,service:h}=l;if(d&&(a=d||""),h&&h===r.name)return r.change({path:t,code:a,command:i,service:u});const u=await o.iterate(((e,t)=>{if(e.name===h)return e}));"github"===u.type&&"./"==`${t.slice(0,2)}`&&(t=t.slice(2)),await c.setItem(t,{type:"update",value:a,service:(()=>{const{tree:e,...t}=u;return t})()}),u&&"upsert"===i&&(u.tree=s.treeInsertFile(t,u.tree),await o.setItem(u.id+"",u)),t.includes("/.templates/")&&await n.refresh();const p=()=>"";return e({result:{path:t,code:d?p(d):a}})}catch(t){return e({error:t})}},c=({storage:t,ui:r,utils:s,templates:n})=>async(r,n,a)=>{const{flattenObject:i}=s,o=t.stores.services,c=t.stores.files,l=t.stores.changes,{cwd:d}=a;let h;d&&await o.iterate(((e,t)=>{const{tree:r}=e;if(i(r).includes(d))return h=e.name,!0}));const u=[],p=await l.keys();for(let e=0,t=p.length;e<t;e++){const t=p[e],r=await l.getItem(t),s=r?.service?.name;s&&(h&&s!==h||u.push({fileName:t,...r,original:await c.getItem(t)}))}try{return e({changes:u,cwd:d})}catch(t){return e({error:t})}},l=(()=>{const e=e=>{const r=(e={})=>(Object.entries(e).forEach((([t,r])=>{if("./"!==t.slice(2)){if("/"===t[0])return delete e[t],void(e["."+t]=r);delete e[t],e["./"+t]=r}})),e);return{...e,service:e.service.name,tree:t(e.service.tree)||{},code:r(e.code),changes:r(e.changes),filesToAdd:[],filesToDelete:[]}},a=e=>{if(!(e.name.includes("move")||e.name.includes("copy")))return e;let{target:t,source:r}=e;return e.name.includes("Folder"),t.endsWith("/")&&(t+=r.split("/").pop()),{...e,target:t}},i=e=>{if(!e.name.includes("rename"))return e;let t=e.target;return!e.target.includes("/")&&e.source.includes("/")&&(t=[...e.source.split("/").slice(0,-1),t].join("/")),{...e,target:t}},o=e=>{let{filesToAdd:t,filesToDelete:r}=e;const{tree:n,code:a,utils:i,service:o,changes:c}=e;i.keepHelper(n,(()=>{const e=Object.entries(c).map((([e,t])=>({name:e.split("/").pop(),path:e})));return[...Object.entries(a).map((([e,t])=>({name:e.split("/").pop(),path:e}))),...e]})()).filter((e=>e.includes("/.keep"))).map((e=>"."+e)).forEach((e=>{const i=e.split("/").slice(0,-1).join("/").replace(o+"/",""),c=s(n[o],i)||{};c&&(c[".keep"]={},a[e]=" ",t.push(e),r=r.filter((t=>t!==e)))}));return Object.keys(e.code).filter((e=>e.includes("/.keep"))).forEach((e=>{const i=e.split("/").slice(0,-1).join("/").replace(o+"/",""),c=s(n[o],i)||{};if(0===Object.keys(c).filter((e=>".keep"!==e)).length)return;delete c[".keep"],delete a[e];t.find((t=>t===e))||r.push(e),t=t.filter((t=>t!==e))})),{...e,filesToAdd:t,filesToDelete:r,code:a,tree:n}},c=n((e=>{if(e.name.includes("File"))return e;const t=`./${e.service}/${e.source}`,s=`./${e.service}/${e.target}`,n=r([...Object.keys(e.code),...Object.keys(e.changes)]).filter((e=>e.startsWith(t+"/"))),a=n.map((t=>{const r=t.split(e.source).pop();return`${s}${r}`})),i=[...e.filesToAdd,...a];return n.forEach(((t,r)=>{e.code[a[r]]=async e=>await e.getItem(t)})),{...e,filesToAdd:i}}),(e=>{const{service:t,source:r,target:n,tree:a}=e,i=s(a[t],r)||{},o=n.split("/"),c=1===o.length?o[0]:o.slice(-1).join("/"),l=1===o.length?"":o.slice(0,-1).join("/");return(1===o.length?a[t]:s(a[t],l))[c]=i,{...e,tree:a}}),(e=>{if(!e.name.includes("File"))return e;const t=`./${e.service}/${e.target}`,r=`./${e.service}/${e.source}`,s="addFile"===e.name?async t=>e.source||"":async e=>await e.getItem(r);e.code[t]=s;const n=[...e.filesToAdd,t];return{...e,filesToAdd:n}})),l=n((e=>{if(e.name.includes("File"))return e;const t=`./${e.service}/${e.source}`,s=r([...Object.keys(e.code),...Object.keys(e.changes)]).filter((e=>e.startsWith(t+"/"))),n=[...e.filesToDelete,...s];return s.forEach((t=>{delete e.code[t]})),{...e,filesToDelete:n}}),(e=>{const{service:t,source:r,tree:n}=e,a=r.split("/"),i=1===a.length?a[0]:a.slice(-1).join("/"),o=1===a.length?"":a.slice(0,-1).join("/");return delete(1===a.length?n[t]:s(n[t],o))[i],e}),(e=>{if(!e.name.includes("File"))return e;const t=`./${e.service}/${e.source}`;delete e.code[`./${e.service}/${e.source}`];const r=[...e.filesToDelete,t];return{...e,filesToDelete:r}})),d=(...t)=>n(e,a,i,...t,o),h=d(c),u=d(c),p=d(c,l),m=d(c,l),f=d(l),g={addFile:h,addFolder:h,moveFile:p,moveFolder:p,copyFile:u,copyFolder:u,renameFile:m,renameFolder:m,deleteFile:f,deleteFolder:f};return e=>(t,r,s,n)=>g[e.name]({...e,service:t,code:r,utils:s,changes:n})})(),d=({storage:t,providers:r,ui:n,utils:i})=>async(r,o)=>{const c=t.stores.services,d=t.stores.files,h=t.stores.changes;try{const{id:t}=r,f=await o.request.json(),{name:g,operation:v}=f,w=v?.name?.includes("rename")||v?.name?.includes("move"),y=v?.name?.includes("copy"),b=l(v);let $;if(b){const e=await c.getItem(t+""),r=(await d.keys()).filter((t=>t.startsWith(`./${e.name}/`)||t.startsWith(`${e.name}/`))),n=(await h.keys()).filter((t=>t.startsWith(`./${e.name}/`)||t.startsWith(`${e.name}/`))),a=r.reduce(((e,t)=>({...e,[t]:""})),{}),o=n.reduce(((e,t)=>({...e,[t]:""})),{});$=b(e,a,i,o);const l=(t,r)=>async n=>{let a=n;"./"===n.slice(0,2)&&"github"===e.type&&(a=n.slice(2)),"/"===n.slice(0,1)&&"github"===e.type&&(a=n.slice(1));const i=await h.getItem(a);if(i&&"update"===i.type)return i.value;if(i&&i.deleteFile){return r.filesToAdd=r.filesToAdd.filter((e=>e!==t)),delete s(r.tree,t.split("/").slice(0,-1).join("/"))[t.split("/").pop()],""}return await d.getItem(a)};for(var u in $.code)"function"==typeof $.code[u]&&($.code[u]=await $.code[u]({getItem:l(u,$)}))}if($&&(f.code=Object.entries($.code).map((([e,t])=>({name:e.split("/").pop(),path:e.replace(/^\.\//,""),update:t}))),f.tree=$.tree),!$&&(w||y)){const e=await c.getItem(t+""),r=(await d.keys()).filter((t=>t.startsWith(`./${e.name}/`)));f.code=[];for(var p=0,m=r.length;p<m;p++){const t=r[p],s=v.target.endsWith("/")?v.source.split("/").pop():"",n=await d.getItem(t),a=(t,r)=>w||r?t.replace(`./${e.name}/${v.source}`,`./${e.name}/${v.target}${s}`):t,i=()=>{if(!t.includes(`./${e.name}/${v.source}`))return;const r={name:v.target.split("/").pop(),update:n,path:a(t,"force").replace(/^\./,"")};f.code.push(r)};f.code.push({name:t.split("/").pop(),update:n,path:a(t).replace(/^\./,"")}),y&&i()}f.tree=e.tree;const s=(e,t)=>({parent:e.split("/").slice(0,-1).reduce(((e,t)=>(e[t]=e[t]||{},e[t])),f.tree),param:e.split("/").pop()}),n=s(`${e.name}/${v.source}`,f.tree),a=s(`${e.name}/${v.target}`,f.tree);a.parent[a.param||n.param]=n.parent[n.param],w&&delete n.parent[n.param]}const x=!Array.isArray(f.code)&&i.safe((()=>JSON.parse(f.code)));if(x&&x.tree&&(f.tree=x.tree,f.code=x.files),t===n.id||t===n.id.toString())return n.update({service:f});const S={...await c.getItem(t+"")||{},name:g,tree:f.tree};if(!S.name)return void console.error("cannot set meta store item without name");await c.setItem(t+"",S);const{filesToAdd:k,filesToDelete:T}=await(async()=>{if($&&$.filesToAdd&&$.filesToDelete)return $;const e=i.keepHelper(f.tree,f.code).map((e=>`.${e}`)),t=(await d.keys()).filter((e=>e.startsWith(`./${S.name}/`))),r=t.filter((t=>!e.includes(t)));return{filesToAdd:e.filter((e=>!t.includes(e))),filesToDelete:r}})();for(let e=0,t=k.length;e<t;e++){const t="github"===S.type?a(k[e]):k[e],r=f.code.find((e=>`.${e.path}`===t||e.path===`/${t}`||e.path===t));let s;r?.update&&(s=r.update,delete r.update);const n=s||"";await h.setItem(t,{type:"update",value:n,service:(()=>{const{tree:e,...t}=S;return t})()})}for(let e=0,t=T.length;e<t;e++){const t="github"===S.type?a(T[e]):T[e];null!==await d.getItem(t)?await h.setItem(t,{deleteFile:!0,service:(()=>{const{tree:e,...t}=S;return t})()}):await h.removeItem(t)}const I=(await h.keys()).filter((e=>e.startsWith(`${S.name}`))).map((e=>e.split(S.name+"/")[1])),N=await h.getItem(`state-${S.name}-opened`)||[],j=(N.find((e=>0===e.order))||{}).name||"";return e({result:[{id:S.id,name:S.name,code:f.code.map((({name:e,path:t})=>({name:e,path:t}))),tree:f.tree,state:{opened:N,selected:j,changed:I},treeState:{expand:await h.getItem(`tree-${S.name}-expanded`)||[],select:j,changed:I,new:[]}}]})}catch(t){console.error(t);const{stack:r,message:s}=t;return e({error:{message:s,stack:r}})}};return class{constructor({app:t,storage:r,providers:s,templates:n,ui:a,utils:l}){this.app=t,this.storage=r,this.providers=s,this.templates=n,this.ui=a,this.utils=l,this.handlers={serviceCreate:i(this),serviceChange:o(this),serviceGetChanges:c(this),serviceUpdate:d(this),serviceDelete:(t,r)=>(console.log("/service/delete/:id? triggered"),e({params:t,event:r}))}}}})(),TemplateEngine=class{templates=[];constructor({storage:e}){this.storage=e,this.refresh=this.refresh.bind(this),this.NO_PREVIEW='\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<pre>\n\t\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t\t</pre>\n\t\t\t</body>\n\t\t</html>\n\t\t'.replace(/^		/g,"")}add(e,t){const r={name:e,extensions:[],body:t,tokens:["{{template_value}}","{{markdown}}","{{template_input}}"],matcher:()=>!1};r.extensions.push(e.split(".").shift()),r.convert=e=>{let t=r.body+"";return r.tokens.forEach((r=>{t=t.replace(new RegExp(r,"g"),e)})),t},this.templates.push(r)}update(e,t){const r=e.split(".").shift(),s=this.templates.filter((e=>e.extensions.includes(r)));s.forEach((e=>e.body=t)),s.length||this.add(e,t)}getTemplate(e="",t=""){const r=e.split(".").pop(),s=this.templates.find((e=>e.extensions.includes(r)));return s||(()=>{if(e.includes(".json")&&t.includes("file-type"))try{const e=JSON.parse(t)["file-type"];if(!e)return;return this.templates.find((t=>t.extensions.includes(e)))}catch(e){return void console.error(e)}})()}convert(e,t){if(e.split(".").pop(),e.includes(".htm"))return t;if(!this.templates.length)return!1;const r=this.getTemplate(e,t);return r?r.convert(t):void 0}async refresh(){const e=this.storage.stores.files,t=(await e.keys()).filter((e=>e.includes("/.templates/")));for(var r=0,s=t.length;r<s;r++){const s=t[r],n=await e.getItem(s),a=s.split("/").pop();this.templates.find((e=>e.name===a))?this.update(a,n):this.add(a,n)}}},init=async()=>{const e=self.handlers;await utils.initMimeTypes();const t=new UIManager("fiug"),r=new StorageManager({utils:utils,ui:t});t.init(r.stores.handlers,r.stores.changes);const s=new TemplateEngine({storage:r}),n=new Router({storage:r,templates:s,swHandlers:e}),a=await new ProviderManager({app:n,storage:r,utils:utils,GithubProvider:GithubProvider}),i=new ServicesManager({app:n,storage:r,providers:a,ui:t,utils:utils,templates:s});n.get("/service/search/",r.handlers.serviceSearch),n.get("/service/read/:id?",r.handlers.serviceRead),n.post("/service/create/:id?",i.handlers.serviceCreate),n.get("/service/change",i.handlers.serviceGetChanges),n.post("/service/change",i.handlers.serviceChange),n.post("/service/commit",a.handlers.createCommit),n.post("/service/update/:id?",i.handlers.serviceUpdate),n.post("/service/provider/delete/:id?",i.handlers.serviceDelete),n.post("/service/provider/test/:id?",a.handlers.testHandler),n.post("/service/provider/create",a.handlers.createHandler),n.post("/service/provider/read/:id?",a.handlers.readHandler),n.post("/service/provider/update/:id?",a.handlers.updateHandler),n.post("/service/provider/delete/:id?",a.handlers.deleteHandler),n.get("/manage/:id?",utils.notImplementedHandler),n.get("/monitor/:id?",utils.notImplementedHandler),n.get("/persist/:id?",utils.notImplementedHandler),self.handler=async e=>{try{const r=e.request.url.replace(location.origin,"").split("/");if(r.includes("::preview::")&&r.includes(t.name))return new Response(s.NO_PREVIEW,{headers:{"Content-Type":"text/html"}})}catch(e){}const r=await n.find(e.request),a=r?await r.exec(e):"no match in service request listener!";let i;if(e.request.url.includes("/::preview::/"))return i=new Response(utils.addBase(a),{headers:{"Content-Type":"text/html"}}),i;let{contentType:o}=utils.getMime(e.request.url)||{};return o||!r||a?.type||({contentType:o}=utils.getMime(".json")),o?(i=new Response(a,{headers:{"Content-Type":o||a.type}}),i):new Response(a)}};var Handler={init:init};const cacheName$1="v0.4.4-2021-09-10T04:08:32.215Z";importScripts("/shared/vendor/localforage.min.js"),importScripts("/shared/vendor/json5v-2.0.0.min.js"),self.addEventListener("install",installHandler),self.addEventListener("activate",activateHandler),self.addEventListener("fetch",asyncFetchHandler),self.addEventListener("foreignfetch",asyncFetchHandler),self.addEventListener("message",messageHandler),self.addEventListener("sync",syncHandler),self.addEventListener("push",pushHandler),self.handlers=[];const driver=[localforage.INDEXEDDB,localforage.WEBSQL,localforage.LOCALSTORAGE];let handlerStore;function getHandlerStore(){return handlerStore||localforage.createInstance({driver:driver,name:"service-worker",version:1,storeName:"handlers",description:"used after app has booted when service worker is updated"})}handlerStore=getHandlerStore(),Handler.init();const activateHandlers=async()=>(handlerStore=getHandlerStore(),await handlerStore.iterate(((value,key)=>{const{type:type,route:route,handlerName:handlerName,handlerText:handlerText}=value,foundHandler=handlers.find((e=>e.handlerName===handlerName)),foundExactHandler=foundHandler&&handlers.find((e=>e.handlerName===handlerName&&e.routePattern===route));if(foundExactHandler)return;let handlerFunction;if(!foundHandler)try{handlerFunction=eval(handlerText)}catch(e){handlerFunction=self.handler}handlers.push({type:type,routePattern:route,route:"fetch"===type?new RegExp(route):route,handler:handlerFunction||foundHandler.handler,handlerName:handlerName,handlerText:handlerText})})));async function installHandler(e){return console.log("service worker install event"),self.skipWaiting()}function activateHandler(e){console.log("service worker activate event"),e.waitUntil((async()=>(await self.clients.claim(),await activateHandlers()))())}function asyncFetchHandler(e){if(!(e.request.url.includes("https://crosshj.auth0.com")||e.request.url.includes("index.bootstrap")||e.request.url.includes("localhost:3333")||e.request.url.includes("allorigins")||e.request.url.includes("browser-sync/socket.io")||e.request.url.includes("browser-sync/browser-sync-client")||e.request.url.includes("?browsersync=")||"no-store"===e.request.cache||"no-cache"===e.request.headers.get("pragma")&&"no-cache"===e.request.headers.get("cache-control")))if(e.request.url.includes("unpkg")||e.request.url.includes("cdn.jsdelivr")||e.request.url.includes("rawgit.com")||e.request.url.includes("cdn.skypack.dev")){const t=async()=>{const t=await caches.open(cacheName$1),r=await t.match(e.request);if(r)return r;const s=await fetch(e.request);return t.put(e.request,s.clone()),s};e.respondWith(t())}else e.request.url.includes("https://webtorrent.io/torrents/")||e.request.url.includes("api.github.com")||e.respondWith(async function(){handlers.length||await activateHandlers();return await fetchHandler(e)}())}async function fetchHandler(e){const t=["//(.*)"],r=handlers.filter((e=>!t.includes(e.routePattern))),s=e.request.url.replace(location.origin,"");if(r.find((e=>"fetch"===e.type&&e.route.test(s))))return self.handler(e);const n=await caches.match(e.request);return n||await fetch(e.request)}function messageHandler(e){const{data:t}=e,{bootstrap:r}=t||{};r?(async()=>{try{console.log("booting");const t=t=>{const r=e.source;r?r.postMessage({module:t,msg:"module-loaded"}):console.error("failed to notify client on boot complete")},s=await bootstrapHandler(r,t),n=e.source;if(!n)return void console.error("failed to notify client on boot complete");n.postMessage({modules:s.filter((e=>!e.includes||!e.includes("NOTE:"))),msg:"boot complete"})}catch(t){console.log(t);const r=e.source;if(!r)return void console.error("failed to notify client on boot complete");r.postMessage({msg:"boot error - you offline?"})}})():(console.log("service worker message event"),console.log({data:t}))}function syncHandler(e){console.log("service worker sync event")}function pushHandler(e){console.log("service worker push event")}async function bootstrapHandler({manifest:e},t){const r=await fetch(e),s=JSON5.parse(await r.text()),n=new Response(JSON.stringify(s,null,2),{status:r.status,statusText:r.statusText,headers:r.headers});await caches.open(cacheName$1).then((function(t){t.put(e,n)}));const{modules:a}=s||{};if(a&&Array.isArray(a)){for(var i=0,o=a.length;i<o;i++)await registerModule(a[i]),t(a[i]);return a}console.error("Unable to find modules in service manifest")}async function registerModule(module){try{if(module.includes&&module.includes("NOTE:"))return;const{source:source,include:include,route:route,handler:handler,resources:resources,type:type}=module;if(!route&&!resources)return void console.error("module must be registered with a route or array of resources!");if(handler){let foundHandler=handlers.find((e=>e.handlerName===handler)),handlerFunction,handlerText;"./modules/service-worker.handler.js"===handler&&self.handler&&(handlerText="service-worker-handler-register-module",handlerFunction=self.handler,foundHandler={handler:handler,handlerText:handlerText}),foundHandler&&foundHandler.handler||(handlerText=await(await fetch(handler)).text(),handlerFunction=eval(handlerText));const foundExactHandler=foundHandler&&handlers.find((e=>e.handlerName===handler&&e.routePattern===route));if(foundExactHandler)return;return await handlerStore.setItem(route,{type:type,route:route,handlerName:handler,handlerText:handlerText||foundHandler.handlerText}),void handlers.push({type:type,routePattern:route,route:"fetch"===type?new RegExp(route):route,handler:handlerFunction||foundHandler.handler,handlerName:handler,handlerText:handlerText||foundHandler.handlerText})}if(resources&&await Promise.all(resources.map((async e=>{const t={};e.includes(".htm")&&(t.headers=t.headers||{},t.headers.Accept=t.headers.Accept||"",t.headers.Accept="text/html,"+t.headers.Accept);const r=await fetch(e,t);return await caches.open(cacheName$1).then((function(t){t.put(e,r)}))}))),include){const e=await fetch(source),t=[];await Promise.all(include.map((async e=>{const r=await(await fetch(e)).text();t.push(`\n\n/*\n\n${e}\n\n*/ \n ${r}`)})));let r=`/* ${source} */\n ${await e.text()}`+t.join("");const s=new Response(r,{status:e.status,statusText:e.statusText,headers:e.headers});return await caches.open(cacheName$1).then((function(e){e.put(route,s)}))}if(source){const e=await fetch(source);return caches.open(cacheName$1).then((function(t){t.put(route,e)}))}}catch(e){console.error("failed to register module"),console.log(module),console.log(e)}}
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIjAiXSwibmFtZXMiOlsidXRpbHMiLCJtaW1lVHlwZXMiLCJ4ZnJtTWltZXMiLCJjYWNoZSIsIm0iLCJPYmplY3QiLCJlbnRyaWVzIiwibGVuZ3RoIiwibWFwIiwiY29udGVudFR5cGUiLCJyZXN0IiwiZXh0ZW5zaW9ucyIsImdldE1pbWUiLCJmaWxlbmFtZSIsImZpbmQiLCJpbmNsdWRlcyIsInNwbGl0IiwicG9wIiwiZmxhdHRlblRyZWUiLCJ0cmVlIiwicmVzdWx0cyIsInF1ZXVlIiwicmVjdXJzZSIsImJyYW5jaCIsInBhcmVudCIsImtleXMiLCJmaWx0ZXIiLCJ4IiwibyIsIkFycmF5IiwiaXNBcnJheSIsImZvckVhY2giLCJrZXkiLCJjaGlsZHJlbiIsInB1c2giLCJuYW1lIiwiY29kZSIsInBhdGgiLCJzaGlmdCIsImZldGNoSlNPTiIsImFzeW5jIiwidXJsIiwib3B0cyIsImZldGNoIiwianNvbiIsImFkZEJhc2UiLCJodG1sIiwiaHJlZiIsInRhcmdldCIsImJhc2VIcmVmIiwicmVwbGFjZSIsImUiLCJmbGF0dGVuT2JqZWN0Iiwicm9vdCIsInBhdGhzIiwibm9kZXMiLCJvYmoiLCJuIiwiayIsImNvbmNhdCIsInVuc2hpZnQiLCJqb2luIiwia2VlcEhlbHBlciIsInRyZWVGbGF0IiwidHJlZUZpbGVzIiwic2xpY2UiLCJhZGRLZWVwRmlsZXMiLCJyZWR1Y2UiLCJhbGwiLCJvbmUiLCJpIiwiYXJyYXkiLCJzdGFydHNXaXRoIiwidW5kZWZpbmVkIiwiZ2V0Q29kZUFzU3RvcmFnZSIsImZpbGVzIiwic2VydmljZU5hbWUiLCJmbGF0IiwiaW5kZXgiLCJmaWxlIiwidmFsdWUiLCJ1bnRyYWNrZWQiLCJpbml0TWltZVR5cGVzIiwibm90SW1wbGVtZW50ZWRIYW5kbGVyIiwicGFyYW1zIiwiZXZlbnQiLCJjb25zb2xlIiwibG9nIiwiSlNPTiIsInN0cmluZ2lmeSIsImVycm9yIiwic2FmZSIsImZuIiwidG9TdHJpbmciLCJ0cmVlSW5zZXJ0RmlsZSIsInNwbGl0UGF0aCIsIm5ld1RyZWUiLCJwYXJzZSIsImN1cnJlbnRQb2ludGVyIiwidW5pcXVlIiwicmVzdWx0IiwiTWFwIiwiaXRlbSIsImhhcyIsInNldCIsImZldGNoRmlsZUNvbnRlbnRzIiwiZmV0Y2hlZCIsImhlYWRlcnMiLCJnZXQiLCJ0ZXh0IiwiYmxvYiIsIlN0b3JhZ2VNYW5hZ2VyIiwiZGVmYXVsdFNlcnZpY2VzIiwiZ2V0Q29kZUZyb21TdG9yYWdlVXNpbmdUcmVlIiwiZmlsZVN0b3JlIiwidGhpcyIsImFsbEZpbGVzRnJvbVNlcnZpY2UiLCJmaWxlU3RvcmVLZXlzIiwic3RvcmVkRmlsZSIsIkZpbGVTZWFyY2giLCJ0ZXJtIiwibGluZXMiLCJjdXJyZW50TGluZSIsImN1cnJlbnRDb2x1bW4iLCJjb25zdHJ1Y3RvciIsImxvYWQiLCJnZXRJdGVtIiwidG9Mb3dlckNhc2UiLCJyZXNldCIsImRvbmUiLCJuZXh0Iiwib2xkSW5kZXgiLCJuZXdJbmRleCIsImluZGV4T2YiLCJsaW5lIiwiY29sdW1uIiwiTWF0aCIsIm1heCIsInRyaW0iLCJTZXJ2aWNlU2VhcmNoIiwiTUFYX1JFU1VMVFMiLCJlbmNvZGVyIiwiVGV4dEVuY29kZXIiLCJ0aW1lciIsInN0cmVhbSIsImluaXQiLCJpbmNsdWRlIiwidDEiLCJwZXJmb3JtYW5jZSIsIm5vdyIsIml0ZXJhdGUiLCJmaWxlU2VhcmNoIiwiY3VycmVudEZpbGVJbmRleCIsInRoaXNFbmNvZGVyIiwic3RyZWFtUmVzdWx0Q291bnQiLCJSZWFkYWJsZVN0cmVhbSIsInN0YXJ0IiwiY29udHJvbGxlciIsInB1bGwiLCJjbG9zZSIsImVucXVldWUiLCJlbmNvZGUiLCJzZWFyY2giLCJoYW5kbGVyIiwicmVhZGVyIiwiZ2V0UmVhZGVyIiwiY3QiLCJyZWFkIiwidDIiLCJzdW1tYXJ5IiwiY291bnQiLCJnZXRGaWxlQ29udGVudHMiLCJmaWxlc1N0b3JlIiwic3RvcmFnZVBhdGgiLCJjYWNoZWRGaWxlIiwiY29udGVudHMiLCJzZXRJdGVtIiwiZmlsZVN5c3RlbVRyaWNrcyIsInNlcnZpY2VzU3RvcmUiLCJwYXJzZWQiLCJzZXJ2aWNlSlNPTkZpbGUiLCJzZXJ2aWNlSlNPTiIsImxlbiIsImlkIiwiY2FjaGVGbiIsInR0bCIsIlByb3h5IiwiYXBwbHkiLCJ0aGlzQXJnIiwiYXJncyIsImFyZ3NLZXkiLCJjYWNoZWRJdGVtIiwic2V0VGltZW91dCIsImNoYW5nZUNhY2hlIiwiZmlsZUNhY2hlIiwic2VydmljZXNDYWNoZSIsImdldEZpbGUiLCJjaGFuZ2VzU3RvcmUiLCJzdG9yZXMiLCJjaGFuZ2VzIiwic2VydmljZXMiLCJiaW5kIiwidGhpc1NlcnZpY2UiLCJ0MCIsInBlcmZOb3ciLCJkIiwidG9GaXhlZCIsInR5cGUiLCJzZXJ2aWNlRmlsZSIsInNvcnQiLCJhIiwiYiIsImdpdCIsImNvbnRlbnRVcmwiLCJvd25lciIsInJlcG8iLCJzaGEiLCJoYW5kbGVTZXJ2aWNlUmVhZCIsInVpIiwiY2FjaGVIZWFkZXIiLCJyZXF1ZXN0IiwiTnVtYmVyIiwiZGVmYXVsdHMiLCJzYXZlZFNlcnZpY2VzIiwic2VydmljZSIsImFsbFNlcnZpY2VzIiwiYWRkVHJlZVN0YXRlIiwiY2hhbmdlZCIsIm9wZW5lZCIsInNlbGVjdGVkIiwib3JkZXIiLCJzdGF0ZSIsInRyZWVTdGF0ZSIsImV4cGFuZCIsInNlbGVjdCIsIm5ldyIsImZvdW5kU2VydmljZSIsImxzU2VydmljZXMiLCJkcml2ZXIiLCJsb2NhbGZvcmFnZSIsIklOREVYRUREQiIsIldFQlNRTCIsIkxPQ0FMU1RPUkFHRSIsImNyZWF0ZUluc3RhbmNlIiwidmVyc2lvbiIsInN0b3JlTmFtZSIsImRlc2NyaXB0aW9uIiwicHJvdmlkZXJzIiwiaGFuZGxlcnMiLCJnZXRTdG9yZXMiLCJzZXJ2aWNlU2VhcmNoIiwic2VydmljZVJlYWQiLCJSb3V0ZXIiLCJwYXRoVG9SZWdleCIsInJlZ2V4IiwiUmVnRXhwIiwibWF0Y2giLCJ0ZXN0IiwiZXhlYyIsInF1ZXJ5IiwidSIsInVybEZ1bGwiLCJmcm9tRW50cmllcyIsIl9nZW5lcmljIiwiX2hhbmRsZXJzIiwibWV0aG9kIiwicGF0aFN0cmluZyIsImFsdGVybmF0ZVBhdGgiLCJnZW5lcmljUGF0aCIsImZvdW5kSGFuZGxlciIsInN0b3JhZ2UiLCJ0ZW1wbGF0ZXMiLCJzd0hhbmRsZXJzIiwiZ2VuZXJpYyIsInBvc3QiLCJleHByZXNzSGFuZGxlciIsImJhc2UiLCJtc2ciLCJyZWZyZXNoIiwiY2xlYW5QYXRoIiwiZGVjb2RlVVJJIiwicHJldmlld01vZGUiLCJ4Zm9ybWVkRmlsZSIsImZpbGVKU09OU3RyaW5nIiwiY29udmVydCIsIk5PX1BSRVZJRVciLCJzaXplIiwiX2V4cHJlc3NIYW5kbGVyIiwiYWRkU2VydmljZUhhbmRsZXIiLCJoYW5kbGVyc1N0b3JlIiwicm91dGUiLCJoYW5kbGVyTmFtZSIsImhhbmRsZXJUZXh0Iiwicm91dGVQYXR0ZXJuIiwiZXhwSGFuZGxlciIsIl9hZGRTZXJ2aWNlSGFuZGxlciIsInJlc3RvcmVQcmV2aW91cyIsInJlc3RvcmVUb0V4cHJlc3MiLCJfcmVzdG9yZVByZXZpb3VzIiwiVVJMIiwic2VhcmNoUGFyYW1zIiwiZm91bmQiLCJfZmluZCIsIlVJTWFuYWdlciIsIlVJTWFuYWdlckFkZENoYW5nZWQiLCJjaGFuZ2VTdG9yZSIsImhhbmRsZXJTdG9yZSIsIm1hbmFnZXIiLCJjdXJyZW50VHJ5IiwiUHJvbWlzZSIsInIiLCJVSU1hbmFnZXJJbml0Iiwib3ZlcmxheWVkV2l0aENoYW5nZXMiLCJjYWNoZXMiLCJvcGVuIiwiY2FjaGVOYW1lIiwicGF0aFNwbGl0IiwiY3VycmVudCIsImoiLCJqbGVuIiwibGVhZk5hbWUiLCJfY29kZSIsIm1vZHVsZXMiLCJfIiwidWlDb2RlIiwicG9wdWxhdGVDYWNoZSIsIm92ZXJsYXlDb2RlIiwiY2hhbmdlRmlsZW5hbWUiLCJmb3VuZENhY2hlZEZpbGUiLCJhcHBseUNoYW5nZWRUb0NhY2hlIiwiVUlNYW5hZ2VyUmVhZCIsInVwZGF0ZSIsImNoYW5nZXNBc0FycmF5IiwiZmlsZU5hbWUiLCJtYW5hZ2VyQ2FjaGVkRmlsZSIsInJlc3BvbnNlIiwiUmVzcG9uc2UiLCJwdXQiLCJ3YXJuIiwiVUlNYW5hZ2VyVXBkYXRlIiwiY2hhbmdlIiwiVUlNYW5hZ2VyQ2hhbmdlIiwiUHJvdmlkZXJNYW5hZ2VyIiwiX2ZldGNoRmlsZUNvbnRlbnRzIiwiZmlsZU5hbWVCbGFja2xpc3QiLCJoYW5kbGVQcm92aWRlclRlc3QiLCJnaXRodWIiLCJnaXRodWJSZXNwb25zZSIsImJvZHkiLCJwcm92aWRlclR5cGUiLCJwcm92aWRlclVybCIsInByb3ZpZGVyQWNjZXNzVG9rZW4iLCJzdWNjZXNzIiwidG9kbyIsImZpbGVVcmwiLCJ0cmVlVXJsIiwic3RhdHVzIiwiaGFuZGxlUHJvdmlkZXJDcmVhdGUiLCJjcmVhdGUiLCJwcm92aWRlciIsImhhbmRsZUNyZWF0ZUNvbW1pdCIsIl9wcm92aWRlckNyZWF0ZVNlcnZpY2VIYW5kbGVyIiwicmVwb05hbWUiLCJiYXNlUmVzIiwicHJvdmlkZXJGaWxlcyIsInByb3ZpZGVyUm9vdCIsInByb3ZpZGVyVHJlZSIsInByb3ZpZGVyUm9vdE5hbWUiLCJmIiwiZmlsZVBhdGgiLCJmaWxlQ29udGVudHMiLCJwcm92aWRlclVwZGF0ZVNlcnZpY2VKc29uIiwiYXBwIiwiX3Byb3ZpZGVyVXBkYXRlU2VydmljZUpzb24iLCJzZXJ2aWNlSnNvbkZpbGUiLCJzZXJ2aWNlSnNvbiIsInNlcnZpY2VPdGhlciIsImZpbGVQb3N0VXJsIiwiX3Byb3ZpZGVyRmlsZUNoYW5nZSIsImRlbGV0ZUZpbGUiLCJFcnJvciIsImZpbGVQb3N0UmVzIiwiR2l0aHViUHJvdmlkZXIiLCJyZXNvbHZlIiwiZmV0Y2hDb250ZW50cyIsInN0b3JlIiwidGVzdEhhbmRsZXIiLCJjcmVhdGVIYW5kbGVyIiwicmVhZEhhbmRsZXIiLCJ1cGRhdGVIYW5kbGVyIiwiZGVsZXRlSGFuZGxlciIsImNyZWF0ZUNvbW1pdCIsImNyZWF0ZVNlcnZpY2VIYW5kbGVyIiwiZmlsZUNoYW5nZSIsInJlamVjdCIsInVwZGF0ZXMiLCJkZWxldGUiLCJyZW1vdmVJdGVtIiwidXJscyIsInJhdGVMaW1pdCIsInJlcG9JbmZvIiwibGF0ZXN0Q29tbWl0IiwiZ2V0VHJlZVJlY3Vyc2l2ZSIsInJhd0Jsb2IiLCJ0cmVlUmVjdXJzZSIsImNvbW1pdCIsImJsb2JDcmVhdGUiLCJyZWZzIiwidiIsIl9mZXRjaEpTT04iLCJ0aGVuIiwiTk9UX0lNUExFTUVOVEVEX1JFU1BPTlNFIiwibWVzc2FnZSIsImdpdGh1YkRlbGV0ZSIsImdpdGh1YlByb3ZpZGVyIiwicGF5bG9hZCIsImdpdGh1YlNlcnZpY2VDcmVhdGUiLCJhdXRoIiwiYXV0aG9yaXphdGlvbiIsIkFjY2VwdCIsImdldERlZmF1bHRCcmFuY2giLCJyZXBvSW5mb1VybCIsImRlZmF1bHRfYnJhbmNoIiwibGF0ZXN0Q29tbWl0VXJsIiwiZ2V0VHJlZVVybCIsInRydW5jYXRlZCIsImdoRmlsZUl0ZW1zIiwiZ2V0T25lRmlsZSIsImdoRmlsZSIsImNvbW1pdFNoYSIsIlBMQUNFSE9MREVSIiwibmV3SWQiLCJnaXRodWJUb1NlcnZpY2VUcmVlIiwiZ2l0aHViVHJlZUl0ZW1zIiwic2F2ZVNlcnZpY2UiLCJnaXRodWJUcmVlIiwiZ2l0aHViU2VydmljZVJlYWQiLCJnaXRodWJTZXJ2aWNlVXBkYXRlIiwiZ2l0aHViU2VydmljZURlbGV0ZSIsImlnbm9yZSIsImJsb2JzIiwiZ2hGZXRjaCIsInRlbXBsYXRlVXJsIiwiZXh0cmFPcHRzIiwiZmlsbGVkVXJsIiwiZ2hQb3N0IiwiZmlsZVRvVHJlZSIsIm1vZGUiLCJ0cmVlVG9UcmVlIiwiZmlsZXNXaXRob3V0RGVsZXRlZCIsImRlbGV0ZWRGaWxlUGF0aHMiLCJmaWxlUGF0aHMiLCJjb250ZW50IiwiYnRvYSIsImVuY29kaW5nIiwic2FmZUJhc2U2NCIsImxhdGVzdCIsImZ1bGxUcmVlIiwiY3JlYXRlZFRyZWUiLCJmd29kZWwiLCJmdWxsdCIsImZpbGVwcyIsImRlbGZpbGVwcyIsIm5ld0NvbW1pdCIsInBhcmVudHMiLCJvYmplY3QiLCJ3aGljaCIsImhhbmRsZXJBcmdzIiwicmVxIiwiY2xvbmUiLCJnaXRodWJIYW5kbGVyIiwibGltaXQiLCJyZW1haW5pbmciLCJyZXNvdXJjZXMiLCJjb3JlIiwiRGF0ZSIsInRvTG9jYWxlU3RyaW5nIiwicmV2ZXJzZSIsImdpdGh1YlRlc3QiLCJnaXRodWJDcmVhdGUiLCJzZXJ2aWNlc0NyZWF0ZSIsInNlcnZpY2VzUmVhZCIsInNlcnZpY2VzVXBkYXRlIiwic2VydmljZXNEZWxldGUiLCJmaWxlc0NyZWF0ZSIsImZpbGVzUmVhZCIsImZpbGVzVXBkYXRlIiwiZmlsZXNEZWxldGUiLCJjd2QiLCJzdmNSZWdFeHAiLCJjaGFuZ2VzS2V5cyIsIm9wZXJhdGlvbiIsImNvbW1pdFJlc3BvbnNlIiwiZ2l0aHViQ3JlYXRlQ29tbWl0IiwiU2VydmljZXNNYW5hZ2VyIiwiU2V0Iiwib2JqZWN0UGF0aCIsImV2ZXJ5IiwicHJvcCIsInBpcGUiLCJmbnMiLCJzdHJpcEZyb250RG90U2xhc2giLCJoYW5kbGVTZXJ2aWNlQ3JlYXRlIiwibWFpbiIsImNvbW1lbnQiLCJoYW5kbGVTZXJ2aWNlQ2hhbmdlIiwianNvbkRhdGEiLCJmaWxlRGF0YSIsImNsb25lZFJlcXVlc3QiLCJmb3JtRGF0YSIsImNvbW1hbmQiLCJtZXRhRGF0YSIsImhhbmRsZVNlcnZpY2VHZXRDaGFuZ2VzIiwib3JpZ2luYWwiLCJfb3BlcmF0aW9uc1VwZGF0ZXIiLCJnZXRCb2R5IiwiY29udmVydFN0b3JlT2JqZWN0IiwiZmlsZXNUb0FkZCIsImZpbGVzVG9EZWxldGUiLCJhZGp1c3RNb3ZlVGFyZ2V0Iiwic291cmNlIiwiZW5kc1dpdGgiLCJhZGp1c3RSZW5hbWVUYXJnZXQiLCJjaGFuZ2VzRmlsZXMiLCJtYXBDb2RlRm9ySGVscGVyIiwicGFyZW50UGF0aCIsInBhcmVudEluVHJlZSIsImFkZFNvdXJjZVRvVGFyZ2V0Iiwic291cmNlUGF0aCIsInRhcmdldFBhdGgiLCJjaGlsZHJlbk1hcHBlZFRvVGFyZ2V0IiwiY2hpbGQiLCJjaGlsZFJlbGF0aXZlIiwiYyIsInNvdXJjZVZhbHVlIiwidGFyZ2V0U3BsaXQiLCJ0YXJnZXRLZXkiLCJ0YXJnZXRQYXJlbnRQYXRoIiwiZmlsZUdldHRlciIsImRlbGV0ZVNvdXJjZSIsInNvdXJjZVNwbGl0Iiwic291cmNlS2V5Iiwic291cmNlUGFyZW50UGF0aCIsImFkZCIsImNvcHkiLCJtb3ZlIiwicmVuYW1lIiwicmVtb3ZlIiwib3BlcmF0aW9ucyIsImFkZEZpbGUiLCJhZGRGb2xkZXIiLCJtb3ZlRmlsZSIsIm1vdmVGb2xkZXIiLCJjb3B5RmlsZSIsImNvcHlGb2xkZXIiLCJyZW5hbWVGaWxlIiwicmVuYW1lRm9sZGVyIiwiZGVsZXRlRm9sZGVyIiwiaGFuZGxlU2VydmljZVVwZGF0ZSIsImlzTW92ZU9yUmVuYW1lIiwiaXNDb3B5Iiwib3BlcmF0aW9uc1VwZGF0ZXIiLCJfc2VydmljZSIsImZpbGVLZXlzIiwiY2hhbmdlS2V5cyIsIl9jaGFuZ2VkIiwiZm9ybWF0dGVkS2V5IiwiZmlsZXNGcm9tU2VydmljZSIsInJlbmFtZUtleSIsImZvcmNlIiwiY29waWVkRmlsZSIsImdldFBvc0luVHJlZSIsInBhcmFtIiwic291cmNlUG9zIiwidGFyZ2V0UG9zIiwicGFyc2VkQ29kZSIsImZpbGVzRnJvbVVwZGF0ZVRyZWUiLCJmaWxlc0luU3RvcmUiLCJmaWxlVXBkYXRlIiwiZmlsZVVwZGF0ZUNvZGUiLCJzdGFjayIsInNlcnZpY2VDcmVhdGUiLCJzZXJ2aWNlQ2hhbmdlIiwic2VydmljZUdldENoYW5nZXMiLCJzZXJ2aWNlVXBkYXRlIiwic2VydmljZURlbGV0ZSIsIlRlbXBsYXRlRW5naW5lIiwidGVtcGxhdGUiLCJuZXdUZW1wIiwidG9rZW5zIiwibWF0Y2hlciIsInhmcm1lZCIsInQiLCJleHQiLCJtYXRjaGluZ1RlbXBsYXRlcyIsImdldFRlbXBsYXRlIiwiZXh0TWF0Y2giLCJmaWxlVHlwZSIsImZvdW5kVGVtcGxhdGUiLCJjdXJyZW50VGVtcGxhdGVOYW1lcyIsInNlbGYiLCJsb2NhdGlvbiIsIm9yaWdpbiIsInNlcnZpY2VBUElNYXRjaCIsInJlcyIsIkhhbmRsZXIiLCJjYWNoZU5hbWUkMSIsImltcG9ydFNjcmlwdHMiLCJhZGRFdmVudExpc3RlbmVyIiwiaW5zdGFsbEhhbmRsZXIiLCJhY3RpdmF0ZUhhbmRsZXIiLCJhc3luY0ZldGNoSGFuZGxlciIsIm1lc3NhZ2VIYW5kbGVyIiwic3luY0hhbmRsZXIiLCJwdXNoSGFuZGxlciIsImdldEhhbmRsZXJTdG9yZSIsImFjdGl2YXRlSGFuZGxlcnMiLCJmb3VuZEV4YWN0SGFuZGxlciIsImhhbmRsZXJGdW5jdGlvbiIsImV2YWwiLCJza2lwV2FpdGluZyIsIndhaXRVbnRpbCIsImNsaWVudHMiLCJjbGFpbSIsImNhY2hlUmVzcG9uc2UiLCJuZXR3b3JrUmVzcG9uc2UiLCJyZXNwb25kV2l0aCIsImZldGNoSGFuZGxlciIsInJvdXRlSGFuZGxlckJsYWNrbGlzdCIsInNhZmVIYW5kbGVycyIsImNhY2hlTWF0Y2giLCJkYXRhIiwiYm9vdHN0cmFwIiwiYm9vdHN0cmFwTWVzc2FnZUVhY2giLCJtb2R1bGUiLCJjbGllbnQiLCJwb3N0TWVzc2FnZSIsImJvb3RzdHJhcEhhbmRsZXIiLCJtYW5pZmVzdCIsIm1hbmlmZXN0UmVzcG9uc2UiLCJfbWFuaWZlc3QiLCJKU09ONSIsIl9zb3VyY2UiLCJzdGF0dXNUZXh0IiwicmVnaXN0ZXJNb2R1bGUiLCJyZXNvdXJjZVVybCIsImV4dHJhIiwibW9kaWZpZWQiXSwibWFwcGluZ3MiOiI7Ozs7OztBQU9BLE1BQU1BLE1BQVEsTUFDYixJQUFJQyxFQUNKLE1BQU1DLEVBQVksTUFDakIsSUFBSUMsRUFDSixNQUFPLENBQUNDLEVBQUksS0FDUEMsT0FBT0MsUUFBUUYsR0FBR0csUUFHdEJKLEVBQVFBLEdBQ1BFLE9BQU9DLFFBQVFGLEdBQUdJLEtBQUksRUFBRUMsRUFBYUMsTUFBVSxDQUM5Q0QsWUFBQUEsRUFDQUUsV0FBWSxNQUNURCxNQUVFUCxHQVJDQSxHQUFTLElBSkQsR0FlWlMsRUFBV0MsR0FDaEJYLEVBQVVELEdBQVdhLE1BQU1WLEdB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aEksU0FBV3hJLEVBQUUwUSxlQUFpQkgsUUFFekQsR0FBSXVVLGtCQUVILE9BaUJELGFBZk12VCxhQUFhbEksUUFBUWtILE1BQU8sQ0FDakNuRixLQUFBQSxLQUNBbUYsTUFBQUEsTUFDQUMsWUFBYWhJLFFBQ2JpSSxZQUFhQSxhQUFldkIsYUFBYXVCLG1CQUcxQzVDLFNBQVN0TixLQUFLLENBQ2I2SyxLQUFBQSxLQUNBc0YsYUFBY0gsTUFDZEEsTUFBZ0IsVUFBVG5GLEtBQW1CLElBQUlnRCxPQUFPbUMsT0FBU0EsTUFDOUMvSCxRQUFTdWMsaUJBQW1CN1YsYUFBYTFHLFFBQ3pDZ0ksWUFBYWhJLFFBQ2JpSSxZQUFhQSxhQUFldkIsYUFBYXVCLGNBdUIzQyxHQWxCSXFMLGlCQUNHcEssUUFBUWpQLElBQ2JxWixVQUFVamQsS0FBSWdDLE1BQU82bEIsSUFDcEIsTUFBTTNsQixFQUFPLEdBQ1QybEIsRUFBWXRuQixTQUFTLFVBQ3hCMkIsRUFBS2lFLFFBQVVqRSxFQUFLaUUsU0FBVyxHQUMvQmpFLEVBQUtpRSxRQUFnQixPQUFJakUsRUFBS2lFLFFBQWdCLFFBQUssR0FDbkRqRSxFQUFLaUUsUUFBZ0IsT0FBSSxhQUFlakUsRUFBS2lFLFFBQWdCLFFBRTlELE1BQU1vTyxRQUFpQnBTLE1BQU0wbEIsRUFBYTNsQixHQUUxQyxhQUFhK1EsT0FBT0MsS0FBS29TLGFBQWFwTSxNQUFLLFNBQVV2WixHQUNwREEsRUFBTThVLElBQUlvVCxFQUFhdFQsVUFNdkI3TCxRQUFTLENBQ1osTUFBTTZMLFFBQWlCcFMsTUFBTTZkLFFBQ3ZCOEgsRUFBUSxTQUNSalYsUUFBUWpQLElBQ2I4RSxRQUFRMUksS0FBSWdDLE1BQU9iLElBQ2xCLE1BQU1rRixjQUFvQmxFLE1BQU1oQixJQUFJa0YsT0FDcEN5aEIsRUFBTXBtQixLQUFLLGFBQWFQLGNBQWNrRixTQUl4QyxJQUFJMGhCLEVBQ0gsTUFBTS9ILHFCQUFxQnpMLEVBQVNsTyxTQUFXeWhCLEVBQU16a0IsS0FBSyxJQUUzRCxNQUFNcWtCLEVBQVUsSUFBSWxULFNBQVN1VCxFQUFVLENBQ3RDblMsT0FBUXJCLEVBQVNxQixPQUNqQitSLFdBQVlwVCxFQUFTb1QsV0FDckJ4aEIsUUFBU29PLEVBQVNwTyxVQUVuQixhQUFhOE0sT0FBT0MsS0FBS29TLGFBQWFwTSxNQUFLLFNBQVV2WixHQUNwREEsRUFBTThVLElBQUkvQyxNQUFPZ1csTUFVbkIsR0FBSTFILE9BQVEsQ0FDWCxNQUFNMEgsUUFBZ0J2bEIsTUFBTTZkLFFBQzVCLE9BQU8vTSxPQUFPQyxLQUFLb1MsYUFBYXBNLE1BQUssU0FBVXZaLEdBQzlDQSxFQUFNOFUsSUFBSS9DLE1BQU9nVyxPQUdsQixNQUFPL2tCLEdBQ1JtQyxRQUFRSSxNQUFNLDZCQUNkSixRQUFRQyxJQUFJbWlCLFFBQ1pwaUIsUUFBUUMsSUFBSXBDIiwiZmlsZSI6InNlcnZpY2Utd29ya2VyLmpzIn0=
+const utils = (() => {
+    let mimeTypes;
+    const xfrmMimes = (() => {
+        let cache;
+        return (m = {}) => Object.entries(m).length ? (cache = cache || Object.entries(m).map((([contentType, rest]) => ({
+            contentType: contentType,
+            extensions: [],
+            ...rest
+        }))), cache) : cache || [];
+    })(), getMime = filename => xfrmMimes(mimeTypes).find((m => m.extensions.includes(filename.split(".").pop()))), flattenTree = tree => {
+        const results = [], queue = [], recurse = (branch, parent = "/") => {
+            Object.keys(branch).filter((x => {
+                const o = branch[x];
+                return !!o && "object" == typeof o && !Array.isArray(o);
+            })).forEach((key => {
+                const children = Object.keys(branch[key]);
+                children && children.length ? (branch[key], queue.push((() => recurse(branch[key], `${parent}${key}/`)))) : results.push({
+                    name: key,
+                    code: parent + key,
+                    path: parent + key
+                });
+            }));
+        };
+        for (queue.push((() => recurse(tree))); queue.length > 0; ) queue.shift()();
+        return results;
+    };
+    const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json();
+    return {
+        addBase: function(html, href = "../../", target = "_blank") {
+            try {
+                const baseHref = html.includes("<base") ? "" : `\n<base href="${href}" target="${target}">\n`;
+                return html.includes("<html>") || (html = "<html>\n" + html + "\n</html>"), html = (html = html.replace("<html>", html.includes("<head>") ? "<html>" : "<html>\n\n<head></head>\n")).replace("<head>", `<head>${baseHref}`);
+            } catch (e) {
+                return html;
+            }
+        },
+        fetchJSON: fetchJSON,
+        flattenTree: flattenTree,
+        flattenObject: root => {
+            let paths = [], nodes = [ {
+                obj: root,
+                path: []
+            } ];
+            for (;nodes.length > 0; ) {
+                const n = nodes.pop();
+                Object.keys(n.obj).forEach((k => {
+                    const obj = n.obj[k];
+                    if ("object" != typeof obj) return;
+                    const path = n.path.concat(k);
+                    paths.push(path), nodes.unshift({
+                        obj: obj,
+                        path: path
+                    });
+                }));
+            }
+            return paths.map((x => x.join("/")));
+        },
+        keepHelper: (tree, code) => {
+            const treeFlat = flattenTree(tree).map((x => x.path.replace("/.keep", ""))), treeFiles = code.map((x => x.path)).filter((x => !x.includes("/.keep"))).map((x => "/" === x[0] ? x : "./" === x.slice(0, 2) ? x.replace(/^\.\//, "/") : "/" + x)), addKeepFiles = treeFlat.reduce(((all, one, i, array) => (0 !== array.filter((x => x !== one && x.startsWith(one))).length || treeFiles.includes(one) || all.push(one), 
+            all)), []);
+            return treeFlat.map((x => addKeepFiles.includes(x) ? x + "/.keep" : treeFiles.includes(x) ? x : void 0)).filter((x => !!x));
+        },
+        getCodeAsStorage: function(tree, files, serviceName) {
+            const flat = flattenTree(tree);
+            for (let index = 0; index < flat.length; index++) {
+                const file = flat[index];
+                flat[index] = {
+                    key: file.path,
+                    value: files.find((x => x.name === file.path.split("/").pop()))
+                }, flat[index].value.path = flat[index].value.path || file.path, flat[index].value.code = flat[index].value.code || file.code;
+            }
+            const untracked = files.filter((x => x.untracked)).map(((file, i) => ({
+                key: `/${serviceName}/${file.name}`,
+                value: {
+                    code: file.code,
+                    name: file.name,
+                    path: `/${serviceName}/`
+                }
+            })));
+            return [ ...flat, ...untracked ];
+        },
+        getMime: getMime,
+        initMimeTypes: async () => {
+            mimeTypes = await fetchJSON("https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json");
+        },
+        notImplementedHandler: async (params, event) => (console.log("handler not implemented"), 
+        JSON.stringify({
+            params: params,
+            event: event,
+            error: "not implemented"
+        }, null, 2)),
+        safe: fn => {
+            try {
+                return fn();
+            } catch (e) {
+                return void console.error("possible issue: " + fn.toString());
+            }
+        },
+        treeInsertFile: (path, tree) => {
+            const splitPath = path.split("/").filter((x => !!x && "." !== x)), newTree = JSON.parse(JSON.stringify(tree));
+            let currentPointer = newTree;
+            return splitPath.forEach((x => {
+                currentPointer[x] = currentPointer[x] || {}, currentPointer = currentPointer[x];
+            })), newTree;
+        },
+        unique: (array, fn) => {
+            const result = [], map = new Map;
+            for (const item of array) map.has(fn(item)) || (map.set(fn(item), !0), result.push(item));
+            return result;
+        },
+        fetchFileContents: async function(filename, opts) {
+            const fetched = await fetch(filename, opts), contentType = (getMime(filename) || {}).contentType || fetched.headers.get("Content-Type");
+            return ![ "image/", "audio/", "video/", "wasm", "application/zip" ].find((x => contentType.includes(x))) || [ "image/svg", "image/x-portable-pixmap" ].find((x => contentType.includes(x))) || [ ".ts" ].find((x => filename.includes(x))) ? await fetched.text() : await fetched.blob();
+        }
+    };
+})(), StorageManager = (() => {
+    const defaultServices = () => [];
+    async function getCodeFromStorageUsingTree(tree, fileStore, serviceName) {
+        const files = (0, this.utils.flattenTree)(tree), allFilesFromService = {}, fileStoreKeys = await fileStore.keys();
+        for (const key of fileStoreKeys) key.startsWith(`./${serviceName}/`) && (allFilesFromService[key] = {
+            key: key,
+            untracked: !0
+        });
+        for (let index = 0; index < files.length; index++) {
+            let storedFile = allFilesFromService["." + files[index].path];
+            storedFile && (storedFile.untracked = !1);
+        }
+        const untracked = Object.entries(allFilesFromService).map((([, value]) => value)).filter((x => !0 === x.untracked)).map((x => ({
+            ...x,
+            name: x.key.split("/").pop(),
+            path: x.key
+        })));
+        return [ ...files, ...untracked ];
+    }
+    class FileSearch {
+        path;
+        term;
+        lines;
+        currentLine;
+        currentColumn;
+        constructor(fileStore) {
+            this.fileStore = fileStore;
+        }
+        async load(path) {
+            this.path = path;
+            const file = await this.fileStore.getItem(path);
+            "string" == typeof file ? (this.lines = file.split("\n").map((x => x.toLowerCase())), 
+            this.reset()) : this.done = !0;
+        }
+        reset() {
+            this.currentLine = 0, this.currentColumn = 0, this.done = !1;
+        }
+        next(term) {
+            if (this.done) return -1;
+            if (!this.lines || !this.path) return -1;
+            for (term.toLowerCase() !== this.term && (this.term = term.toLowerCase(), this.reset()); ;) {
+                const oldIndex = this.currentColumn, newIndex = (this.lines[this.currentLine] || "").indexOf(this.term, this.currentColumn);
+                if (-1 !== newIndex) return this.currentColumn = newIndex + 1, {
+                    file: this.path,
+                    line: this.currentLine,
+                    column: this.currentColumn - 1,
+                    text: this.lines[this.currentLine].slice(0 === oldIndex ? Math.max(0, newIndex - 30) : oldIndex + this.term.length - 1, Math.max(newIndex + 30 + this.term.length)).trim()
+                };
+                if (this.currentColumn = 0, this.currentLine++, this.currentLine > this.lines.length - 1) return this.done = !0, 
+                -1;
+            }
+        }
+    }
+    class ServiceSearch {
+        MAX_RESULTS=1e4;
+        encoder=new TextEncoder;
+        timer;
+        stream;
+        async init({term: term, include: include = "./", fileStore: fileStore}) {
+            this.timer = {
+                t1: performance.now()
+            };
+            const cache = {};
+            await fileStore.iterate(((value, key) => {
+                (key.startsWith(include) || `./${key}`.startsWith(include)) && (cache[key] = value);
+            }));
+            const fileSearch = new FileSearch({
+                getItem: async key => cache[key]
+            });
+            let currentFileIndex = -1;
+            const files = Object.keys(cache), thisEncoder = this.encoder;
+            let streamResultCount = 0;
+            this.stream = new ReadableStream({
+                start(controller) {},
+                async pull(controller) {
+                    for (;;) try {
+                        const result = fileSearch.next(term);
+                        if (streamResultCount >= this.MAX_RESULTS || -1 === result && currentFileIndex === files.length - 1) return void controller.close();
+                        if (-1 === result) {
+                            await fileSearch.load(files[++currentFileIndex]);
+                            continue;
+                        }
+                        streamResultCount++, controller.enqueue(thisEncoder.encode(JSON.stringify(result) + "\n"));
+                    } catch (e) {
+                        return console.log(e), void controller.close();
+                    }
+                }
+            });
+        }
+        async search(handler) {
+            const reader = this.stream.getReader();
+            let ct = 0;
+            for (;;) {
+                const {done: done, value: value} = await reader.read();
+                if (done) break;
+                if (handler(value), ct++, ct === this.MAX_RESULTS) break;
+            }
+            this.timer.t2 = performance.now(), handler({
+                summary: {
+                    timer: this.timer.t2 - this.timer.t1,
+                    count: ct
+                }
+            });
+        }
+    }
+    async function getFileContents({filename: filename, filesStore: filesStore, cache: cache, storagePath: storagePath, fetchFileContents: fetchFileContents}) {
+        const cachedFile = await filesStore.getItem(filename);
+        let contents;
+        return cachedFile && "reload" !== cache ? cachedFile : (contents = await fetchFileContents(filename), 
+        storagePath ? filesStore.setItem("." + storagePath.replace("/welcome/", "/.welcome/"), contents) : filesStore.setItem(filename, contents), 
+        contents);
+    }
+    async function fileSystemTricks({result: result, filesStore: filesStore, cache: cache, servicesStore: servicesStore, fetchFileContents: fetchFileContents}) {
+        const {safe: safe, flattenTree: flattenTree} = this.utils;
+        if (!safe((() => result.result[0].code.find))) {
+            const parsed = JSON.parse(result.result[0].code);
+            return result.result[0].code = parsed.files, result.result[0].tree = parsed.tree, 
+            void console.log("will weird things ever stop happening?");
+        }
+        const serviceJSONFile = result.result[0].code.find((item => "service.json" === item.name));
+        if (serviceJSONFile && !serviceJSONFile.code) {
+            const filename = `./.${result.result[0].name}/service.json`;
+            serviceJSONFile.code = await getFileContents({
+                filename: filename,
+                filesStore: filesStore,
+                cache: cache,
+                fetchFileContents: fetchFileContents
+            });
+        }
+        if (serviceJSONFile) {
+            let serviceJSON = JSON.parse(serviceJSONFile.code);
+            if (!serviceJSON.tree) {
+                const filename = `./${serviceJSON.path}/service.json`;
+                serviceJSONFile.code = await getFileContents({
+                    filename: filename,
+                    filesStore: filesStore,
+                    cache: cache,
+                    fetchFileContents: fetchFileContents
+                }), serviceJSON = JSON.parse(serviceJSONFile.code);
+            }
+            result.result[0].code = serviceJSON.files, result.result[0].tree = {
+                [result.result[0].name]: serviceJSON.tree
+            };
+        }
+        const len = safe((() => result.result[0].code.length)), flat = flattenTree(safe((() => result.result[0].tree)));
+        for (var i = 0; i < len; i++) {
+            const item = result.result[0].code[i];
+            if (!item.code && item.path) {
+                const filename = "./" + item.path, storagePath = (flat.find((x => x.name === item.name)) || {}).path;
+                item.code = await getFileContents({
+                    filename: filename,
+                    filesStore: filesStore,
+                    cache: cache,
+                    storagePath: storagePath,
+                    fetchFileContents: fetchFileContents
+                });
+            }
+        }
+        result.result[0].name ? await servicesStore.setItem(result.result[0].id + "", {
+            name: result.result[0].name,
+            id: result.result[0].id,
+            tree: result.result[0].tree
+        }) : console.error("cannot set services store item without name");
+    }
+    function cacheFn(fn, ttl) {
+        const cache = {};
+        return new Proxy(fn, {
+            apply: (target, thisArg, args) => {
+                const key = target.name;
+                cache[key] = cache[key] || {};
+                const argsKey = args.toString(), cachedItem = cache[key][argsKey];
+                return cachedItem || (cache[key][argsKey] = target.apply(thisArg, args), setTimeout((() => {
+                    delete cache[key][argsKey];
+                }), ttl), cache[key][argsKey]);
+            }
+        });
+    }
+    let changeCache, fileCache, servicesCache;
+    async function getFile(path) {
+        const changesStore = this.stores.changes, filesStore = this.stores.files, servicesStore = this.stores.services, {fetchFileContents: fetchFileContents} = this.utils;
+        changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), 250), 
+        fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), 250), servicesCache = servicesCache || cacheFn((async () => {
+            const keys = await servicesStore.keys();
+            let services = [];
+            for (let i = 0, len = keys.length; i < len; i++) {
+                const thisService = await servicesStore.getItem(keys[i]);
+                services.push(thisService);
+            }
+            return services;
+        }), 500);
+        let t0 = performance.now();
+        const perfNow = () => {
+            const d = performance.now() - t0;
+            return t0 = performance.now(), d.toFixed(3);
+        }, changes = await changeCache(path);
+        if (console.log(`changes store: ${perfNow()}ms (${path})`), changes && "update" === changes.type) return changes.value;
+        let file = await fileCache(path);
+        if (console.log(`file store: ${perfNow()}ms (${path})`), file && file.includes && file.includes("##PLACEHOLDER##")) {
+            const services = await servicesCache();
+            let serviceFile;
+            services.sort(((a, b) => b.name.length - a.name.length));
+            let thisService = {};
+            for (let i = 0, len = services.length; i < len && (thisService = services[i], !("github" === thisService.type && thisService.git && thisService.git.tree && path.startsWith(thisService.name) && (serviceFile = thisService.git.tree.find((x => path === `${thisService.name}/${x.path}`)), 
+            serviceFile))); i++) ;
+            if (!serviceFile) return file;
+            const getFileContents = async ({path: path}) => {
+                try {
+                    const contentUrl = "https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}".replace("{path}", path).replace("{owner}", thisService.owner).replace("{repo}", thisService.repo).replace("{sha}", thisService.git.sha);
+                    return await fetchFileContents(contentUrl);
+                } catch (e) {
+                    return void console.error(e);
+                }
+            };
+            file = await getFileContents(serviceFile), file && filesStore.setItem(path, file);
+        }
+        return file;
+    }
+    const handleServiceRead = (servicesStore, filesStore, fetchFileContents, ui, changesStore) => async function(params, event) {
+        const cacheHeader = event.request.headers.get("x-cache");
+        if (0 === Number(params.id)) return await ui.read();
+        const defaults = [];
+        if (!params.id || "*" === params.id) {
+            const savedServices = [];
+            await servicesStore.iterate(((value, key) => {
+                savedServices.push(value);
+            }));
+            for (var i = 0, len = savedServices.length; i < len; i++) {
+                const service = savedServices[i], code = await this.getCodeFromStorageUsingTree(service.tree, filesStore, service.name);
+                service.code = code;
+            }
+            const allServices = [ ...defaults, ...savedServices ].sort(((a, b) => Number(a.id) - Number(b.id))).map((x => ({
+                id: x.id,
+                name: x.name
+            })));
+            return JSON.stringify({
+                result: this.utils.unique(allServices, (x => Number(x.id)))
+            }, null, 2);
+        }
+        const addTreeState = async service => {
+            const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
+            service.state = {
+                opened: opened,
+                selected: selected,
+                changed: changed
+            }, service.treeState = {
+                expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
+                select: selected,
+                changed: changed,
+                new: []
+            };
+        };
+        await filesStore.setItem("lastService", params.id);
+        const foundService = await servicesStore.getItem(params.id);
+        if (foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
+        await addTreeState(foundService), JSON.stringify({
+            result: [ foundService ]
+        }, null, 2);
+        const lsServices = [] || [], result = {
+            result: "*" !== params.id && params.id ? lsServices.filter((x => Number(x.id) === Number(params.id))) : lsServices
+        };
+        return await this.fileSystemTricks({
+            result: result,
+            filesStore: filesStore,
+            servicesStore: servicesStore,
+            cache: cacheHeader,
+            fetchFileContents: fetchFileContents
+        }), result.forEach(addTreeState), JSON.stringify(result, null, 2);
+    };
+    return class {
+        stores=(() => {
+            var driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
+            return {
+                files: localforage.createInstance({
+                    driver: driver,
+                    name: "service-worker",
+                    version: 1,
+                    storeName: "files",
+                    description: "permanent state of contents of files across projects"
+                }),
+                services: localforage.createInstance({
+                    driver: driver,
+                    name: "service-worker",
+                    version: 1,
+                    storeName: "services",
+                    description: "services directory stucture, type, etc"
+                }),
+                providers: localforage.createInstance({
+                    driver: driver,
+                    name: "service-worker",
+                    version: 1,
+                    storeName: "providers",
+                    description: "connects services to outside world"
+                }),
+                changes: localforage.createInstance({
+                    driver: driver,
+                    name: "service-worker",
+                    version: 1,
+                    storeName: "changes",
+                    description: "keep track of changes not pushed to provider"
+                }),
+                handlers: localforage.createInstance({
+                    driver: driver,
+                    name: "service-worker",
+                    version: 1,
+                    storeName: "handlers",
+                    description: "used after app has booted when service worker is updated"
+                })
+            };
+        })();
+        defaultServices=defaultServices;
+        getCodeFromStorageUsingTree=getCodeFromStorageUsingTree.bind(this);
+        fileSystemTricks=fileSystemTricks.bind(this);
+        getFile=getFile.bind(this);
+        constructor({utils: utils, ui: ui}) {
+            var fileStore;
+            this.utils = utils, this.handlers = {
+                serviceSearch: (fileStore = this.stores.files, async (params, event) => {
+                    const serviceSearch = new ServiceSearch;
+                    return await serviceSearch.init({
+                        ...params,
+                        fileStore: fileStore
+                    }), serviceSearch.stream;
+                }),
+                serviceRead: handleServiceRead(this.stores.services, this.stores.files, utils.fetchFileContents, ui, this.stores.changes).bind(this)
+            };
+        }
+    };
+})(), Router = (() => {
+    const pathToRegex = {
+        "/service/create/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/create(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/read/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/read(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/update/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/update(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/change": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/change(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/commit": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/commit(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/delete/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/provider/test/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/provider\/test(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/provider/create": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/provider\/create(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/provider/read/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/provider\/read(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/provider/update/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/provider\/update(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/service/provider/delete/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/provider\/delete(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/manage/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/manage(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/monitor/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/monitor(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/persist/:id?": (() => {
+            const regex = new RegExp(/^((?:.*))\/persist(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    id: regex.exec(url)[2]
+                })
+            };
+        })(),
+        "/.welcome/:path?": (() => {
+            const regex = new RegExp(/^((?:.*))\/\.welcome\/((?:.*))(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    path: (regex.exec(url)[2] || "").split("?")[0],
+                    query: (regex.exec(url)[2] || "").split("?")[1]
+                })
+            };
+        })(),
+        "/service/search/": (() => {
+            const regex = new RegExp(/^((?:.*))\/service\/search\/.*$/i);
+            return {
+                match: url => {
+                    return regex.test("/" === (u = url)[u.length - 1] ? u : u + "/");
+                    var u;
+                },
+                params: (url, urlFull) => Object.fromEntries(urlFull.split("?").pop().split("&").map((x => x.split("="))))
+            };
+        })()
+    }, _generic = ({_handlers: _handlers}) => method => (pathString, handler) => {
+        const path = pathToRegex[pathString];
+        let alternatePath;
+        path || (alternatePath = (pathString => {
+            const name = pathString.replace("/:path?", "").replace("/", ""), regex = new RegExp(`^((?:.*))/${name}/((?:.*))(?:/(?=$))?$`, "i");
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    path: (regex.exec(url)[2] || "").split("?")[0],
+                    query: (regex.exec(url)[2] || "").split("?")[1]
+                })
+            };
+        })(pathString));
+        const foundHandler = _handlers.find((x => x.pathString === pathString && x.method === method));
+        foundHandler ? foundHandler.handler = handler : _handlers.push({
+            ...path || alternatePath,
+            pathString: pathString,
+            method: method,
+            handler: handler
+        });
+    };
+    return class {
+        _handlers=[];
+        constructor({storage: storage, templates: templates, swHandlers: swHandlers}) {
+            this.swHandlers = swHandlers, this.storage = storage, this.templates = templates, 
+            this.generic = _generic(this), this.get = this.generic("get"), this.post = this.generic("post"), 
+            this.expressHandler = (({templates: templates, storage: storage}) => {
+                const {getFile: getFile} = storage;
+                return async (base, msg) => (await templates.refresh(), async (params, event) => {
+                    const {path: path, query: query} = params, cleanPath = decodeURI(path.replace("/::preview::/", "")), previewMode = path.includes("/::preview::/");
+                    path.includes(".templates/");
+                    const filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
+                    let xformedFile;
+                    const file = await getFile(`${base}/${cleanPath}`) || await getFile(`./${base}/${cleanPath}`);
+                    let fileJSONString;
+                    try {
+                        fileJSONString = "string" != typeof file ? file ? JSON.stringify(file, null, 2) : "" : file;
+                    } catch (e) {}
+                    return previewMode && (xformedFile = templates.convert(filename, fileJSONString)), 
+                    previewMode && !xformedFile ? templates.NO_PREVIEW : file && file.type && file.size ? xformedFile || file : xformedFile || fileJSONString || file;
+                });
+            })(this), this.addServiceHandler = (({storage: storage, expressHandler: expressHandler, generic: generic, swHandlers: swHandlers}) => async function({name: name, msg: msg}) {
+                const handlersStore = storage.stores.handlers, route = `^/${name}/(.*)`, handlerName = "./modules/service-worker.handler.js", foundHandler = swHandlers.find((x => x.handlerName === handlerName)), type = foundHandler ? foundHandler.type : "fetch", handler = foundHandler ? foundHandler.handler : "route-handler", handlerText = foundHandler ? foundHandler.handlerText : "service-worker-handler";
+                foundHandler && swHandlers.find((x => x.handlerName === handlerName && x.routePattern === route)) || (swHandlers.push({
+                    type: type,
+                    routePattern: route,
+                    route: new RegExp(route),
+                    handler: handler,
+                    handlerName: handlerName,
+                    handlerText: handlerText
+                }), await handlersStore.setItem(route, {
+                    type: type,
+                    route: route,
+                    handlerName: handlerName,
+                    handlerText: handlerText
+                }));
+                const expHandler = await expressHandler(name, msg);
+                generic("get")(`/${name}/:path?`, expHandler);
+            })(this), this.restorePrevious = (({storage: storage, addServiceHandler: addServiceHandler}) => async () => {
+                const servicesStore = storage.stores.services, restoreToExpress = [];
+                await servicesStore.iterate(((value, key) => {
+                    let {name: name} = value;
+                    restoreToExpress.push({
+                        name: name
+                    });
+                }));
+                for (let i = 0, len = restoreToExpress.length; i < len; i++) {
+                    const {name: name} = restoreToExpress[i];
+                    await addServiceHandler({
+                        name: name,
+                        msg: "served from reconstituted"
+                    });
+                }
+            })(this), this.find = (({_handlers: _handlers, restorePrevious: restorePrevious}) => async request => {
+                const {url: url, method: method} = request, query = (() => {
+                    try {
+                        return Object.fromEntries([ ...new URL(url).searchParams ]);
+                    } catch (e) {
+                        return {};
+                    }
+                })();
+                let found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0])));
+                if (found || (await restorePrevious(), found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0]))), 
+                found)) return {
+                    exec: async event => await found.handler(found.params(url.split("?")[0], url), event, query)
+                };
+            })(this), this.restorePrevious();
+        }
+    };
+})(), {UIManager: UIManager, UIManagerAddChanged: UIManagerAddChanged} = (() => {
+    const stringify = o => JSON.stringify(o, null, 2);
+    return {
+        UIManager: class {
+            id=0;
+            name;
+            changeStore=void 0;
+            cache=void 0;
+            changed=void 0;
+            constructor(name) {
+                this.name = name;
+            }
+            init=(handlerStore, changeStore) => (async (manager, {handlerStore: handlerStore, changeStore: changeStore}) => {
+                manager.changeStore = changeStore, manager.changed = await changeStore.getItem("UIManagerChanged") || {};
+                const route = `^/${manager.name}/(.*)`, handler = "./modules/service-worker.handler.js";
+                let foundHandler, currentTry = 0;
+                for (;!foundHandler && currentTry < 5; ) foundHandler = handlers.find((x => x.handlerName === handler)), 
+                foundHandler || (currentTry++, await new Promise((r => setTimeout(r, 3e3))));
+                if (!foundHandler) return console.error("could not find a handler to base UIManager handler on!");
+                foundHandler && handlers.find((x => x.handlerName === handler && x.routePattern === route)) || (handlers.push({
+                    type: foundHandler.type,
+                    routePattern: route,
+                    route: new RegExp(route),
+                    handler: foundHandler.handler,
+                    handlerName: handler,
+                    handlerText: foundHandler.handlerText
+                }), await handlerStore.setItem(route, {
+                    type: foundHandler ? foundHandler.type : "fetch",
+                    route: route,
+                    handlerName: handler,
+                    handlerText: foundHandler ? foundHandler.handlerText : "service-worker-handler(set in ui manager)"
+                }));
+            })(this, {
+                handlerStore: handlerStore,
+                changeStore: changeStore
+            });
+            read=() => (async manager => {
+                let overlayedWithChanges;
+                return manager.cache || await async function() {
+                    let tree = {};
+                    const code = [], cache = await caches.open(cacheName), keys = await cache.keys();
+                    for (var i = 0, len = keys.length; i < len; i++) {
+                        const request = keys[i], split = request.url.split(/(\/fiug\/|\/shared\/|\/_\/modules\/)/);
+                        split.shift();
+                        const pathSplit = split.join("").split("/").filter((x => !!x));
+                        let current = tree;
+                        for (var j = 0, jlen = pathSplit.length; j < jlen; j++) {
+                            const leafName = pathSplit[j];
+                            leafName && (current[leafName] = current[leafName] || {}, current = current[leafName]);
+                        }
+                        let name = (pathSplit[pathSplit.length - 1] || "").replace("/", "");
+                        const _code = await (await cache.match(request)).text();
+                        code.push({
+                            name: name,
+                            code: _code,
+                            url: request.url
+                        });
+                    }
+                    tree.modules = tree._.modules, delete tree._;
+                    const uiCode = {
+                        id: manager.id,
+                        name: manager.name,
+                        tree: {
+                            [manager.name]: tree
+                        },
+                        code: code
+                    };
+                    manager.cache = uiCode;
+                }(), Object.keys(manager.changed).length && (overlayedWithChanges = function(changed, cache) {
+                    const overlayCode = JSON.parse(JSON.stringify(cache.code));
+                    return Object.entries(changed).forEach((([key, value]) => {
+                        const changeFilename = key.split("/").pop(), foundCachedFile = overlayCode.find((x => x.name === changeFilename));
+                        foundCachedFile && (foundCachedFile.code = value);
+                    })), {
+                        ...cache,
+                        code: overlayCode
+                    };
+                }(manager.changed, manager.cache)), stringify({
+                    result: [ overlayedWithChanges || manager.cache ]
+                });
+            })(this);
+            update=args => (async (manager, {service: service}) => {
+                const cache = await caches.open(cacheName), changesAsArray = Object.entries(manager.changed);
+                for (var i = 0, len = changesAsArray.length; i < len; i++) {
+                    const [key, value] = changesAsArray[i], fileName = key.split("/").pop(), managerCachedFile = manager.cache.code.find((x => x.name === fileName)), {url: url} = managerCachedFile, {contentType: contentType} = getMime(url) || {}, response = new Response(value, {
+                        headers: {
+                            "content-type": contentType || ""
+                        }
+                    });
+                    await cache.put(url, response), managerCachedFile.code = value;
+                }
+                return console.warn("TODO: save files to backend (if provider is available?)"), 
+                manager.changed = {}, await manager.changeStore.setItem("UIManagerChanged", manager.changed), 
+                stringify({
+                    result: [ service ]
+                });
+            })(this, args);
+            change=args => (async (manager, {path: path, code: code}) => (manager.changed[path] = code, 
+            console.warn(`changed a file at: ${path}`), await manager.changeStore.setItem("UIManagerChanged", manager.changed), 
+            stringify({
+                result: {
+                    path: path,
+                    code: code
+                }
+            })))(this, args);
+        },
+        UIManagerAddChanged: manager => {}
+    };
+})(), ProviderManager = (() => {
+    const stringify = o => JSON.stringify(o, null, 2);
+    async function _fetchFileContents(url, opts) {
+        const fileNameBlacklist = [ ".ts" ].map((x => new RegExp(`${x}$`.replace(/\./, ".")))), fetched = await fetch(url, opts), contentType = fetched.headers.get("Content-Type");
+        return ![ "image/", "audio/", "video/", "wasm", "application/zip", "application/octet-stream" ].find((x => contentType.includes(x))) || [ "image/svg", "image/x-portable-pixmap" ].find((x => contentType.includes(x))) || fileNameBlacklist.find((x => x.test(url))) ? await fetched.text() : await fetched.blob();
+    }
+    const handleProviderTest = ({github: github}) => async (params, event) => {
+        const githubResponse = github && await github.handler("test", {
+            params: params,
+            event: event
+        });
+        if (githubResponse) return githubResponse;
+        const body = await event.request.json(), {providerType: providerType, providerUrl: providerUrl, providerAccessToken: providerAccessToken} = body;
+        [ "basic-bartok-provider", "github-provider" ].includes(providerType) || stringify({
+            error: `Unsupported provider type: ${providerType}`
+        }), "github-provider" === providerType && stringify({
+            success: !0,
+            todo: "test user's access token"
+        });
+        const fileUrl = (providerUrl + "/file/").replace("//file/", "/file/"), treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/");
+        try {
+            if (200 !== (await fetch(providerUrl)).status) return stringify({
+                error: `Failed to connect to provider at: ${providerUrl}`
+            });
+        } catch (e) {
+            return stringify({
+                error: `Failed to connect to provider at: ${providerUrl}`
+            });
+        }
+        try {
+            if (200 !== (await fetch(fileUrl)).status) return stringify({
+                error: `Failed to connect to provider at: ${fileUrl}`
+            });
+        } catch (e) {
+            return stringify({
+                error: `Failed to connect to provider at: ${fileUrl}`
+            });
+        }
+        try {
+            if (200 !== (await fetch(treeUrl)).status) return stringify({
+                error: `Failed to connect to provider at: ${treeUrl}`
+            });
+        } catch (e) {
+            return stringify({
+                error: `Failed to connect to provider at: ${treeUrl}`
+            });
+        }
+        return stringify({
+            success: !0
+        });
+    }, handleProviderCreate = ({create: create, github: github}) => async (params, event) => {
+        const githubResponse = github && await github.handler("create", {
+            params: params,
+            event: event
+        });
+        if (githubResponse) return githubResponse;
+        try {
+            const body = await event.request.json(), {providerType: providerType, providerUrl: providerUrl} = body;
+            [ "basic-bartok-provider" ].includes(providerType) || stringify({
+                error: `Unsupported provider type: ${providerType}`
+            });
+            const provider = await create({
+                id: providerUrl,
+                url: providerUrl
+            });
+            return stringify({
+                success: !0,
+                provider: provider
+            });
+        } catch (error) {
+            return stringify({
+                error: error
+            });
+        }
+    }, handleCreateCommit = ({github: github}) => async (params, event) => {
+        const githubResponse = github && await github.handler("createCommit", {
+            params: params,
+            event: event
+        });
+        return githubResponse || stringify({
+            error: "commits are only implemented for github repos"
+        });
+    };
+    async function _providerCreateServiceHandler(event) {
+        const servicesStore = this.stores.services, filesStore = this.stores.files, githubResponse = this.github && await this.github.handler("servicesCreate", {
+            event: event
+        });
+        if (githubResponse) return githubResponse;
+        try {
+            const body = await event.request.json();
+            let {providerType: providerType, providerUrl: providerUrl, providerAccessToken: providerAccessToken, repoName: repoName} = body;
+            if (![ "basic-bartok-provider" ].includes(providerType)) return stringify({
+                error: `Unsupported provider type: ${providerType}`
+            });
+            if (!await this.read(providerUrl)) return stringify({
+                error: `Provider does not exist: ${providerUrl}`
+            });
+            const treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/"), fileUrl = (providerUrl + "/file/").replace("//file/", "/file/"), allServices = [];
+            await servicesStore.iterate(((value, key) => {
+                allServices.push(value);
+            }));
+            const baseRes = await fetch(treeUrl);
+            if (200 !== baseRes.status) return stringify({
+                error: `Failed to connect to provider at: ${providerUrl}`
+            });
+            const {files: providerFiles, root: providerRoot, tree: providerTree} = await baseRes.json(), providerRootName = providerRoot.split("/").pop(), foundService = allServices.find((x => x.name === providerRootName)), id = foundService ? foundService.id : allServices.reduce(((all, one) => Number(one.id) >= all ? Number(one.id) + 1 : all), 1), service = {
+                name: providerRootName,
+                id: id,
+                providerRoot: providerRoot,
+                providerUrl: providerUrl,
+                tree: providerTree
+            };
+            if (!service.name) return void console.error("cannot set services store item without service name");
+            await servicesStore.setItem(id + "", service), service.code = [];
+            for (let f = 0; f < providerFiles.length; f++) {
+                const filePath = providerFiles[f], fileContents = await this.utils.fetchFileContents(`${fileUrl}${providerRoot}/${filePath}`);
+                filesStore.setItem(`./${providerRootName}/${filePath}`, fileContents), service.code.push({
+                    name: filePath.split("/").pop(),
+                    path: `./${providerRootName}/${filePath}`,
+                    code: "string" == typeof fileContents ? fileContents : ""
+                });
+            }
+            return await this.providerUpdateServiceJson({
+                service: service,
+                servicesStore: servicesStore,
+                filesStore: filesStore
+            }), await this.app.addServiceHandler({
+                name: providerRootName,
+                msg: "served from fresh baked"
+            }), stringify({
+                result: {
+                    services: [ service ]
+                }
+            });
+        } catch (error) {
+            return console.error(error), stringify({
+                error: error
+            });
+        }
+    }
+    const _providerUpdateServiceJson = async function({service: service, servicesStore: servicesStore, filesStore: filesStore}) {
+        const githubResponse = this.github && await this.github.handler("servicesUpdate", {
+            service: service
+        });
+        if (githubResponse) return githubResponse;
+        const serviceJsonFile = service.code.find((x => x.path.includes("/service.json")));
+        if (!serviceJsonFile) return;
+        const serviceJson = JSON.parse(serviceJsonFile.code), {code: code, ...serviceOther} = service, {providerUrl: providerUrl, providerRoot: providerRoot} = service;
+        serviceJson.tree = service.tree[service.name], serviceJson.files = service.code.map((x => ({
+            name: x.name,
+            path: x.path.replace("./", "")
+        }))).sort(((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0));
+        const filePostUrl = `${providerUrl}file/${providerRoot}${serviceJsonFile.path.replace("./" + service.name, "")}`;
+        serviceJsonFile.code = stringify(serviceJson), serviceOther.name ? (await servicesStore.setItem(service.id + "", serviceOther), 
+        await filesStore.setItem(serviceJsonFile.path, serviceJsonFile.code), await fetch(filePostUrl, {
+            method: "post",
+            body: serviceJsonFile.code
+        })) : console.error("cannot set services store item without service name");
+    };
+    async function _providerFileChange(args) {
+        let {path: path, code: code, parent: service, deleteFile: deleteFile} = args;
+        const githubResponse = this.github && await this.github.handler("filesUpdate", args);
+        if (githubResponse) return githubResponse;
+        if (service = service || await this.stores.services.iterate(((value, key) => {
+            if (value.name === service || value.name === service.name) return value;
+        })), !service || !service.providerUrl) throw new Error("file not saved to provider: service not associated with a provider");
+        const {providerUrl: providerUrl, providerRoot: providerRoot} = service, filePostUrl = `${providerUrl}file/${providerRoot}${path.replace("./" + service.name, "")}`, filePostRes = await this.utils.fetchJSON(filePostUrl, {
+            method: deleteFile ? "DELETE" : "POST",
+            body: deleteFile ? void 0 : code
+        });
+        if (filePostRes.error) throw new Error(filePostRes.error);
+        return filePostRes;
+    }
+    return class {
+        constructor({app: app, storage: storage, utils: utils, GithubProvider: GithubProvider}) {
+            return new Promise((async resolve => {
+                try {
+                    this.app = app, this.storage = storage, this.utils = utils, this.fetchContents = _fetchFileContents.bind(this), 
+                    this.store = storage.stores.providers, this.stores = storage.stores, this.github = await new GithubProvider(this), 
+                    this.handlers = {
+                        testHandler: handleProviderTest(this),
+                        createHandler: handleProviderCreate(this),
+                        readHandler: async (params, event) => (console.error("not implemented: provider read.  Should return one or all saved provider details."), 
+                        stringify({
+                            error: "not implemented"
+                        })),
+                        updateHandler: async (params, event) => (console.error("not implemented: provider update.  Should update provider details."), 
+                        stringify({
+                            error: "not implemented"
+                        })),
+                        deleteHandler: async (params, event) => (console.error("not implemented: provider delete.  Should delete saved provider."), 
+                        stringify({
+                            error: "not implemented"
+                        })),
+                        createCommit: handleCreateCommit(this)
+                    }, this.createServiceHandler = _providerCreateServiceHandler.bind(this), this.providerUpdateServiceJson = _providerUpdateServiceJson.bind(this), 
+                    this.fileChange = _providerFileChange.bind(this), resolve(this);
+                } catch (error) {
+                    reject(error);
+                }
+            }));
+        }
+        create=async provider => await this.store.setItem(provider.id + "", provider);
+        read=async id => id ? await this.store.getItem(id) : await this.store.keys();
+        update=async (id, updates) => {
+            const provider = await this.read(id);
+            return updates.id && updates.id !== id && await this.delete(id), await this.store.setItem((updates.id || provider.id) + "", {
+                ...provider,
+                ...updates
+            });
+        };
+        delete=async id => await this.store.removeItem(id);
+    };
+})(), GithubProvider = (() => {
+    const urls = {
+        rateLimit: "/rate_limit",
+        repoInfo: "/repos/{owner}/{repo}",
+        latestCommit: "/repos/{owner}/{repo}/branches/{branch}",
+        tree: "/repos/{owner}/{repo}/git/trees",
+        getTreeRecursive: "/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true",
+        rawBlob: "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}",
+        contents: "/repos/{owner}/{repo}/contents/{path}?ref={sha}",
+        branch: "/repos/{owner}/{repo}/branches/{branch}",
+        treeRecurse: "/repos/{owner}/{repo}/git/trees/{sha}?recursive=true",
+        commit: "/repos/{owner}/{repo}/git/commits/{sha}",
+        createCommit: "/repos/{owner}/{repo}/git/commits",
+        blobCreate: "/repos/{owner}/{repo}/git/blobs",
+        refs: "/repos/{owner}/{repo}/git/refs/heads/{branch}"
+    };
+    Object.entries(urls).forEach((([k, v]) => {
+        "/" === v[0] && (urls[k] = "https://api.github.com" + urls[k]);
+    }));
+    const stringify = o => JSON.stringify(o, null, 2), _fetchJSON = (url, opts) => fetch(url, opts).then((x => x.json())), NOT_IMPLEMENTED_RESPONSE = () => void console.warn("Someone wants to be debugging...") || stringify({
+        message: "not implemented"
+    }), githubDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceCreate = githubProvider => async (payload, params) => {
+        try {
+            const {storage: {stores: stores}, fetchContents: fetchContents, app: app} = githubProvider, {auth: auth, repo: repo} = payload, servicesStore = (stores.providers, 
+            stores.services), filesStore = stores.files, opts = {
+                headers: {}
+            };
+            auth && (opts.headers.authorization = `token ${auth}`), opts.headers.Accept = "application/vnd.github.v3+json";
+            const getDefaultBranch = async () => {
+                const repoInfoUrl = urls.repoInfo.replace("{owner}/{repo}", repo), {default_branch: default_branch} = await githubProvider.fetchJSON(repoInfoUrl, opts);
+                return default_branch;
+            }, branch = payload.branch || await getDefaultBranch(), latestCommitUrl = urls.latestCommit.replace("{owner}/{repo}", repo).replace("{branch}", branch), {commit: {sha: sha}} = await githubProvider.fetchJSON(latestCommitUrl, opts), getTreeUrl = urls.getTreeRecursive.replace("{owner}/{repo}", repo).replace("{tree_sha}", sha), {tree: tree, truncated: truncated} = await githubProvider.fetchJSON(getTreeUrl, opts);
+            truncated && console.warn("github repo tree truncated - try without recursive flag");
+            const ghFileItems = tree.filter((x => "blob" === x.type)), getOneFile = async (ghFile, commitSha) => {
+                const contents = await fetchContents((file = ghFile, urls.rawBlob.replace("{owner}/{repo}", repo).replace("{branch}", commitSha || branch).replace("{path}", file.path)));
+                var file;
+                return {
+                    ...ghFile,
+                    contents: contents
+                };
+            };
+            for (let i = 0, len = ghFileItems.length; i < len; i++) {
+                const ghFile = ghFileItems[i], PLACEHOLDER = "##PLACEHOLDER##";
+                if (!ghFile.path.includes(".templates")) {
+                    await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, PLACEHOLDER);
+                    continue;
+                }
+                const {contents: contents} = await getOneFile(ghFile, sha);
+                await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
+            }
+            let foundService = {};
+            const keys = [];
+            await servicesStore.iterate(((value, key) => {
+                keys.push(key), value.name === repo && (foundService = {
+                    key: key,
+                    ...value
+                });
+            }));
+            const newId = keys.length ? Math.max(...keys) + 1 : 3e3, githubToServiceTree = githubTreeItems => {
+                const tree = {
+                    [repo]: {}
+                }, root = tree[repo];
+                return githubTreeItems.forEach((item => {
+                    item.path.split("/").reduce(((all, one) => (all[one] = all[one] || {}, all[one])), root);
+                })), tree;
+            }, saveService = async (githubTree, commitSha) => {
+                const id = foundService.id || newId, thisService = {
+                    id: id,
+                    type: "github",
+                    name: repo,
+                    tree: githubToServiceTree(githubTree),
+                    owner: repo.split("/").slice(0, 1).join(""),
+                    repo: repo.split("/").pop(),
+                    git: {
+                        tree: githubTree,
+                        sha: commitSha
+                    },
+                    branch: branch
+                };
+                return await servicesStore.setItem(id + "", thisService), {
+                    id: id,
+                    thisService: thisService
+                };
+            }, {id: id, thisService: thisService} = await saveService(tree, sha);
+            return await app.addServiceHandler({
+                name: repo,
+                msg: "service added from github provider"
+            }), stringify({
+                result: {
+                    services: [ thisService ]
+                }
+            });
+        } catch (error) {
+            return console.error(error), stringify({
+                error: error
+            });
+        }
+    }, githubServiceRead = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceUpdate = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+    async function commit({files: files, git: git, auth: auth, message: message, fetchJSON: fetchJSON}) {
+        if (!files || !Array.isArray(files)) return {
+            error: "no files were changed"
+        };
+        if (!(files = files.filter((x => !x.ignore))).length) return {
+            error: "no files were changed"
+        };
+        if (!auth) return {
+            error: "auth is required"
+        };
+        if (!message) return {
+            error: "message is required"
+        };
+        if (!git.owner) return {
+            error: "repository owner is required"
+        };
+        if (!git.branch) return {
+            error: "repository branch name is required"
+        };
+        if (!git.repo) return {
+            error: "repository name is required"
+        };
+        let blobs = [];
+        const opts = {
+            headers: {
+                authorization: `token ${auth}`,
+                Accept: "application/vnd.github.v3+json"
+            }
+        }, ghFetch = async (templateUrl, params = {}, extraOpts = {}) => {
+            const filledUrl = (url = templateUrl, obj = {
+                ...git,
+                ...params
+            }, Object.keys(obj).reduce(((all, one) => all.replace(`{${one}}`, obj[one])), url));
+            var url, obj;
+            return await fetchJSON(filledUrl, {
+                ...opts,
+                ...extraOpts
+            });
+        }, ghPost = async (url, params, body) => await ghFetch(url, params, {
+            method: "POST",
+            body: JSON.stringify(body)
+        }), fileToTree = ({path: path}, index) => ({
+            path: path,
+            mode: "100644",
+            type: "blob",
+            sha: blobs[index].sha
+        }), treeToTree = ({path: path, mode: mode, type: type, sha: sha}) => ({
+            path: path,
+            mode: mode,
+            type: type,
+            sha: sha
+        }), filesWithoutDeleted = files.filter((x => !x.deleteFile)), deletedFilePaths = files.filter((x => x.deleteFile)).map((x => x.path)), filePaths = filesWithoutDeleted.map((x => x.path));
+        blobs = await Promise.all(filesWithoutDeleted.map((({content: content}) => ghPost(urls.blobCreate, null, (content => {
+            try {
+                return {
+                    content: btoa(content),
+                    encoding: "base64"
+                };
+            } catch (e) {
+                return {
+                    content: content,
+                    encoding: "utf-8"
+                };
+            }
+        })(content)))));
+        const latest = await ghFetch(urls.branch), fullTree = await ghFetch(urls.treeRecurse, {
+            sha: latest?.commit?.sha
+        }), createdTree = await ghPost(urls.tree, null, {
+            tree: (fwodel = filesWithoutDeleted, fullt = fullTree, fileps = filePaths, delfileps = deletedFilePaths, 
+            [ ...fwodel.map(fileToTree), ...fullt.tree.filter((x => "tree" !== x.type && !fileps.includes(x.path) && !delfileps.includes(x.path))).map(treeToTree) ])
+        });
+        var fwodel, fullt, fileps, delfileps;
+        const newCommit = await ghPost(urls.createCommit, null, {
+            message: message,
+            tree: createdTree.sha,
+            parents: [ latest.commit.sha ]
+        });
+        return ((await ghPost(urls.refs, null, {
+            sha: newCommit.sha
+        }))?.object?.url || "no commit url available").replace("https://api.github.com/repos", "https://github.com").replace("git/commits", "commit");
+    }
+    return class {
+        constructor({storage: storage, fetchContents: fetchContents, app: app, utils: utils}) {
+            return new Promise(((resolve, reject) => {
+                try {
+                    this.handler = (githubProvider = this, async (which, handlerArgs) => {
+                        try {
+                            const {params: params, event: event, service: service, parent: parent} = handlerArgs, req = event && event?.request?.clone(), payload = req && await (req?.json()), {providerType: providerType} = payload || {};
+                            if ("createCommit" === which) return await githubProvider.createCommit(payload, params);
+                            if (!(providerType ? "github-provider" === providerType : "github" === (service || parent)?.type)) return;
+                            const githubHandler = githubProvider[which];
+                            if (!githubHandler) return;
+                            return [ "filesUpdate" ].includes(which) ? await githubHandler(handlerArgs) : await githubHandler(payload, params);
+                        } catch (e) {}
+                    }), this.storage = storage, this.fetchContents = fetchContents, this.fetchJSON = _fetchJSON, 
+                    this.app = app, this.utils = utils, this.test = (githubProvider => async (payload, params) => {
+                        try {
+                            const {storage: storage} = githubProvider, {auth: auth, repo: repo, branch: branch} = payload, opts = {
+                                headers: {}
+                            };
+                            auth && (opts.headers.authorization = `token ${auth}`), opts.headers.Accept = "application/vnd.github.v3+json";
+                            const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
+                            let {limit: limit, remaining: remaining, reset: reset} = result?.resources?.core;
+                            return reset = new Date(1e3 * reset).toLocaleString("sv").split(" ").reverse().join(" "), 
+                            console.log(stringify({
+                                limit: limit,
+                                remaining: remaining,
+                                reset: reset
+                            })), stringify({
+                                success: !0,
+                                limit: limit,
+                                remaining: remaining,
+                                reset: reset
+                            });
+                        } catch (error) {
+                            return stringify({
+                                error: error
+                            });
+                        }
+                    })(this), this.create = (githubProvider => async (payload, params) => {
+                        try {
+                            const {storage: storage} = githubProvider, {auth: auth, repo: repo, branch: branch} = payload;
+                            return storage.stores.providers, console.log({
+                                payload: payload,
+                                params: params
+                            }), NOT_IMPLEMENTED_RESPONSE();
+                        } catch (error) {
+                            return console.error(error), stringify({
+                                error: error
+                            });
+                        }
+                    })(this), this.read = async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), this.update = githubDelete(), 
+                    this.delete = githubDelete(), this.servicesCreate = githubServiceCreate(this), this.servicesRead = githubServiceRead(), 
+                    this.servicesUpdate = githubServiceUpdate(), this.servicesDelete = githubServiceDelete(), 
+                    this.filesCreate = githubServiceCreate(this), this.filesRead = githubServiceRead(), 
+                    this.filesUpdate = githubServiceUpdate(), this.filesDelete = githubServiceDelete(), 
+                    this.createCommit = (githubProvider => async (payload, params) => {
+                        try {
+                            const {message: message, auth: auth, cwd: cwd} = payload;
+                            if (!message) return stringify({
+                                error: "commit message is required"
+                            });
+                            if (!auth) return stringify({
+                                error: "auth token is required for commit"
+                            });
+                            if (!cwd) return stringify({
+                                error: "current working directory (cwd) is required for commit"
+                            });
+                            const {storage: {stores: stores}, utils: utils} = githubProvider, servicesStore = stores.services, changesStore = stores.changes, filesStore = stores.files, {flattenObject: flattenObject} = utils;
+                            let service;
+                            if (await servicesStore.iterate(((value, key) => {
+                                const {tree: tree, name: name} = value;
+                                return cwd === `${name}/` || flattenObject(tree).includes(cwd) ? (service = value, 
+                                !0) : void 0;
+                            })), !(service && service.name && service.branch && service.repo && "github" === service?.type)) throw new Error("missing or malformed service");
+                            const svcRegExp = new RegExp("^" + service.name + "/", "g"), {owner: owner, repo: repo, branch: branch} = service, git = {
+                                owner: owner,
+                                repo: repo,
+                                branch: branch
+                            }, files = [], changes = [], changesKeys = await changesStore.keys();
+                            for (let i = 0, len = changesKeys.length; i < len; i++) {
+                                const key = changesKeys[i];
+                                if (!svcRegExp.test(key)) continue;
+                                const change = await changesStore.getItem(key);
+                                if (!change?.service) continue;
+                                const {type: operation, value: content, service: {name: parent}, deleteFile: deleteFile} = change;
+                                if (!parent) continue;
+                                if (parent !== service.name) continue;
+                                const file = {
+                                    path: key.replace(svcRegExp, ""),
+                                    content: content,
+                                    operation: operation,
+                                    deleteFile: deleteFile
+                                };
+                                file.path.startsWith(".git/") && (file.ignore = !0), files.push(file), changes.push({
+                                    ...change,
+                                    key: key
+                                });
+                            }
+                            let commitResponse;
+                            if (files.filter((x => !x.ignore)).length) {
+                                if (commitResponse = await commit({
+                                    auth: auth,
+                                    files: files,
+                                    git: git,
+                                    message: message,
+                                    fetchJSON: githubProvider.fetchJSON
+                                }), !commitResponse) throw new Error("commit failed");
+                                if (commitResponse.error) throw new Error(commitResponse.error);
+                            } else commitResponse = {
+                                error: "no files changed"
+                            };
+                            for (let i = 0, len = files.length; i < len; i++) {
+                                const change = changes[i];
+                                change.deleteFile ? await filesStore.removeItem(change.key) : await filesStore.setItem(change.key, change.value), 
+                                await changesStore.removeItem(change.key);
+                            }
+                            return stringify({
+                                commitResponse: commitResponse
+                            });
+                        } catch (e) {
+                            return stringify({
+                                commitResponse: {
+                                    error: e.message
+                                }
+                            });
+                        }
+                    })(this), resolve(this);
+                } catch (error) {
+                    reject(error);
+                }
+                var githubProvider;
+            }));
+        }
+    };
+})(), ServicesManager = (() => {
+    const stringify = o => JSON.stringify(o, null, 2), clone = o => {
+        if (o) try {
+            return JSON.parse(stringify(o));
+        } catch (e) {
+            return;
+        }
+    }, unique = a => [ ...new Set(a) ];
+    function objectPath(obj, path) {
+        var result = obj;
+        try {
+            return path.split("/").every((function(prop) {
+                return "." === prop || (void 0 === result[prop] ? (result = void 0, !1) : (result = result[prop], 
+                !0));
+            })), result;
+        } catch (e) {
+            return;
+        }
+    }
+    const pipe = (...fns) => x => fns.reduce(((v, f) => f(v)), x), stripFrontDotSlash = x => x.replace(/^\.\//, ""), handleServiceCreate = ({app: app, storage: storage, providers: providers}) => async (params, event) => {
+        const servicesStore = storage.stores.services, filesStore = storage.stores.files, {id: id} = params;
+        if ("provider" === id) return await providers.createServiceHandler(event);
+        const {name: name} = await event.request.json() || {};
+        if (!id) return stringify({
+            params: params,
+            event: event,
+            error: "id required for service create!"
+        });
+        if (!name) return stringify({
+            params: params,
+            event: event,
+            error: "name required for service create!"
+        });
+        console.log("/service/create/:id? triggered"), await servicesStore.setItem(id + "", {
+            name: name,
+            id: id,
+            tree: {
+                [name]: {
+                    ".templates": {
+                        "json.html": {}
+                    },
+                    "package.json": {}
+                }
+            }
+        }), filesStore.setItem(`./${name}/package.json`, {
+            main: "package.json",
+            comment: "this is an example package.json"
+        }), filesStore.setItem(`./${name}/.templates/json.html`, "\n\t\t\t\t<html>\n\t\t\t\t\t\t<p>basic json template output</p>\n\t\t\t\t\t\t<pre>{{template_value}}</pre>\n\t\t\t\t</html>\n\t\t\t\t"), 
+        await app.addServiceHandler({
+            name: name,
+            msg: "served from fresh baked"
+        });
+        const services = storage.defaultServices();
+        return stringify({
+            result: {
+                services: [ services.filter((x => 777 === Number(x.id))) ]
+            }
+        });
+    }, handleServiceChange = ({storage: storage, ui: ui, utils: utils, templates: templates}) => async (params, event) => {
+        const servicesStore = storage.stores.services;
+        storage.stores.files;
+        const changesStore = storage.stores.changes;
+        let jsonData, fileData;
+        try {
+            const clonedRequest = event.request.clone();
+            jsonData = await clonedRequest.json();
+        } catch (e) {}
+        try {
+            if (!jsonData) {
+                const formData = await event.request.formData();
+                jsonData = JSON.parse(formData.get("json")), fileData = formData.get("file");
+            }
+        } catch (e) {}
+        try {
+            let {path: path, code: code, command: command, service: serviceName} = jsonData;
+            if (fileData && (code = fileData || ""), serviceName && serviceName === ui.name) return ui.change({
+                path: path,
+                code: code,
+                command: command,
+                service: service
+            });
+            const service = await servicesStore.iterate(((value, key) => {
+                if (value.name === serviceName) return value;
+            }));
+            "github" === service.type && "./" == `${path.slice(0, 2)}` && (path = path.slice(2)), 
+            await changesStore.setItem(path, {
+                type: "update",
+                value: code,
+                service: (() => {
+                    const {tree: tree, ...rest} = service;
+                    return rest;
+                })()
+            }), service && "upsert" === command && (service.tree = utils.treeInsertFile(path, service.tree), 
+            await servicesStore.setItem(service.id + "", service)), path.includes("/.templates/") && await templates.refresh();
+            const metaData = () => "";
+            return stringify({
+                result: {
+                    path: path,
+                    code: fileData ? metaData(fileData) : code
+                }
+            });
+        } catch (error) {
+            return stringify({
+                error: error
+            });
+        }
+    }, handleServiceGetChanges = ({storage: storage, ui: ui, utils: utils, templates: templates}) => async (params, event, query) => {
+        const {flattenObject: flattenObject} = utils, servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes, {cwd: cwd} = query;
+        let service;
+        cwd && await servicesStore.iterate(((value, key) => {
+            const {tree: tree} = value;
+            if (flattenObject(tree).includes(cwd)) return service = value.name, !0;
+        }));
+        const changes = [], changesKeys = await changesStore.keys();
+        for (let i = 0, len = changesKeys.length; i < len; i++) {
+            const key = changesKeys[i], value = await changesStore.getItem(key), parent = value?.service?.name;
+            parent && (service && parent !== service || changes.push({
+                fileName: key,
+                ...value,
+                original: await filesStore.getItem(key)
+            }));
+        }
+        try {
+            return stringify({
+                changes: changes,
+                cwd: cwd
+            });
+        } catch (error) {
+            return stringify({
+                error: error
+            });
+        }
+    }, _operationsUpdater = (() => {
+        const getBody = operation => {
+            const convertStoreObject = (code = {}) => (Object.entries(code).forEach((([k, v]) => {
+                if ("./" !== k.slice(2)) {
+                    if ("/" === k[0]) return delete code[k], void (code["." + k] = v);
+                    delete code[k], code["./" + k] = v;
+                }
+            })), code);
+            return {
+                ...operation,
+                service: operation.service.name,
+                tree: clone(operation.service.tree) || {},
+                code: convertStoreObject(operation.code),
+                changes: convertStoreObject(operation.changes),
+                filesToAdd: [],
+                filesToDelete: []
+            };
+        }, adjustMoveTarget = operation => {
+            if (!(operation.name.includes("move") || operation.name.includes("copy"))) return operation;
+            let {target: target, source: source} = operation;
+            return operation.name.includes("Folder"), target.endsWith("/") && (target += source.split("/").pop()), 
+            {
+                ...operation,
+                target: target
+            };
+        }, adjustRenameTarget = operation => {
+            if (!operation.name.includes("rename")) return operation;
+            let target = operation.target;
+            return !operation.target.includes("/") && operation.source.includes("/") && (target = [ ...operation.source.split("/").slice(0, -1), target ].join("/")), 
+            {
+                ...operation,
+                target: target
+            };
+        }, keepHelper = operation => {
+            let {filesToAdd: filesToAdd, filesToDelete: filesToDelete} = operation;
+            const {tree: tree, code: code, utils: utils, service: service, changes: changes} = operation;
+            utils.keepHelper(tree, (() => {
+                const changesFiles = Object.entries(changes).map((([path, value]) => ({
+                    name: path.split("/").pop(),
+                    path: path
+                })));
+                return [ ...Object.entries(code).map((([path, value]) => ({
+                    name: path.split("/").pop(),
+                    path: path
+                }))), ...changesFiles ];
+            })()).filter((x => x.includes("/.keep"))).map((x => "." + x)).forEach((k => {
+                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", ""), parentInTree = objectPath(tree[service], parentPath) || {};
+                parentInTree && (parentInTree[".keep"] = {}, code[k] = " ", filesToAdd.push(k), 
+                filesToDelete = filesToDelete.filter((x => x !== k)));
+            }));
+            return Object.keys(operation.code).filter((x => x.includes("/.keep"))).forEach((k => {
+                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", ""), parentInTree = objectPath(tree[service], parentPath) || {};
+                if (0 === Object.keys(parentInTree).filter((x => ".keep" !== x)).length) return;
+                delete parentInTree[".keep"], delete code[k];
+                filesToAdd.find((x => x === k)) || filesToDelete.push(k), filesToAdd = filesToAdd.filter((x => x !== k));
+            })), {
+                ...operation,
+                filesToAdd: filesToAdd,
+                filesToDelete: filesToDelete,
+                code: code,
+                tree: tree
+            };
+        }, addSourceToTarget = pipe((operation => {
+            if (operation.name.includes("File")) return operation;
+            const sourcePath = `./${operation.service}/${operation.source}`, targetPath = `./${operation.service}/${operation.target}`, children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/"))), childrenMappedToTarget = children.map((child => {
+                const childRelative = child.split(operation.source).pop();
+                return `${targetPath}${childRelative}`;
+            })), filesToAdd = [ ...operation.filesToAdd, ...childrenMappedToTarget ];
+            return children.forEach(((c, i) => {
+                operation.code[childrenMappedToTarget[i]] = async store => await store.getItem(c);
+            })), {
+                ...operation,
+                filesToAdd: filesToAdd
+            };
+        }), (operation => {
+            const {service: service, source: source, target: target, tree: tree} = operation, sourceValue = objectPath(tree[service], source) || {}, targetSplit = target.split("/"), targetKey = 1 === targetSplit.length ? targetSplit[0] : targetSplit.slice(-1).join("/"), targetParentPath = 1 === targetSplit.length ? "" : targetSplit.slice(0, -1).join("/");
+            return (1 === targetSplit.length ? tree[service] : objectPath(tree[service], targetParentPath))[targetKey] = sourceValue, 
+            {
+                ...operation,
+                tree: tree
+            };
+        }), (operation => {
+            if (!operation.name.includes("File")) return operation;
+            const path = `./${operation.service}/${operation.target}`, update = `./${operation.service}/${operation.source}`, fileGetter = "addFile" === operation.name ? async store => operation.source || "" : async store => await store.getItem(update);
+            operation.code[path] = fileGetter;
+            const filesToAdd = [ ...operation.filesToAdd, path ];
+            return {
+                ...operation,
+                filesToAdd: filesToAdd
+            };
+        })), deleteSource = pipe((operation => {
+            if (operation.name.includes("File")) return operation;
+            const sourcePath = `./${operation.service}/${operation.source}`, children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/"))), filesToDelete = [ ...operation.filesToDelete, ...children ];
+            return children.forEach((c => {
+                delete operation.code[c];
+            })), {
+                ...operation,
+                filesToDelete: filesToDelete
+            };
+        }), (operation => {
+            const {service: service, source: source, tree: tree} = operation, sourceSplit = source.split("/"), sourceKey = 1 === sourceSplit.length ? sourceSplit[0] : sourceSplit.slice(-1).join("/"), sourceParentPath = 1 === sourceSplit.length ? "" : sourceSplit.slice(0, -1).join("/");
+            return delete (1 === sourceSplit.length ? tree[service] : objectPath(tree[service], sourceParentPath))[sourceKey], 
+            operation;
+        }), (operation => {
+            if (!operation.name.includes("File")) return operation;
+            const path = `./${operation.service}/${operation.source}`;
+            delete operation.code[`./${operation.service}/${operation.source}`];
+            const filesToDelete = [ ...operation.filesToDelete, path ];
+            return {
+                ...operation,
+                filesToDelete: filesToDelete
+            };
+        })), init = (...fns) => pipe(getBody, adjustMoveTarget, adjustRenameTarget, ...fns, keepHelper), add = init(addSourceToTarget), copy = init(addSourceToTarget), move = init(addSourceToTarget, deleteSource), rename = init(addSourceToTarget, deleteSource), remove = init(deleteSource), operations = {
+            addFile: add,
+            addFolder: add,
+            moveFile: move,
+            moveFolder: move,
+            copyFile: copy,
+            copyFolder: copy,
+            renameFile: rename,
+            renameFolder: rename,
+            deleteFile: remove,
+            deleteFolder: remove
+        };
+        return operation => (service, code, utils, changes) => operations[operation.name]({
+            ...operation,
+            service: service,
+            code: code,
+            utils: utils,
+            changes: changes
+        });
+    })(), handleServiceUpdate = ({storage: storage, providers: providers, ui: ui, utils: utils}) => async (params, event) => {
+        const servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes;
+        try {
+            const {id: id} = params, body = await event.request.json(), {name: name, operation: operation} = body, isMoveOrRename = operation?.name?.includes("rename") || operation?.name?.includes("move"), isCopy = operation?.name?.includes("copy"), operationsUpdater = _operationsUpdater(operation);
+            let update;
+            if (operationsUpdater) {
+                const _service = await servicesStore.getItem(id + ""), fileKeys = (await filesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`))), changeKeys = (await changesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`))), _code = fileKeys.reduce(((all, key) => ({
+                    ...all,
+                    [key]: ""
+                })), {}), _changed = changeKeys.reduce(((all, key) => ({
+                    ...all,
+                    [key]: ""
+                })), {});
+                update = operationsUpdater(_service, _code, utils, _changed);
+                const getItem = (target, update) => async key => {
+                    let formattedKey = key;
+                    "./" === key.slice(0, 2) && "github" === _service.type && (formattedKey = key.slice(2)), 
+                    "/" === key.slice(0, 1) && "github" === _service.type && (formattedKey = key.slice(1));
+                    const changed = await changesStore.getItem(formattedKey);
+                    if (changed && "update" === changed.type) return changed.value;
+                    if (changed && changed.deleteFile) {
+                        return update.filesToAdd = update.filesToAdd.filter((x => x !== target)), delete objectPath(update.tree, target.split("/").slice(0, -1).join("/"))[target.split("/").pop()], 
+                        "";
+                    }
+                    return await filesStore.getItem(formattedKey);
+                };
+                for (var key in update.code) "function" == typeof update.code[key] && (update.code[key] = await update.code[key]({
+                    getItem: getItem(key, update)
+                }));
+            }
+            if (update && (body.code = Object.entries(update.code).map((([path, value]) => ({
+                name: path.split("/").pop(),
+                path: path.replace(/^\.\//, ""),
+                update: value
+            }))), body.tree = update.tree), !update && (isMoveOrRename || isCopy)) {
+                const service = await servicesStore.getItem(id + ""), filesFromService = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`)));
+                body.code = [];
+                for (var i = 0, len = filesFromService.length; i < len; i++) {
+                    const key = filesFromService[i], filename = operation.target.endsWith("/") ? operation.source.split("/").pop() : "", update = await filesStore.getItem(key), renameKey = (key, force) => isMoveOrRename || force ? key.replace(`./${service.name}/${operation.source}`, `./${service.name}/${operation.target}${filename}`) : key, copyFile = () => {
+                        if (!key.includes(`./${service.name}/${operation.source}`)) return;
+                        const copiedFile = {
+                            name: operation.target.split("/").pop(),
+                            update: update,
+                            path: renameKey(key, "force").replace(/^\./, "")
+                        };
+                        body.code.push(copiedFile);
+                    };
+                    body.code.push({
+                        name: key.split("/").pop(),
+                        update: update,
+                        path: renameKey(key).replace(/^\./, "")
+                    }), isCopy && copyFile();
+                }
+                body.tree = service.tree;
+                const getPosInTree = (path, tree) => ({
+                    parent: path.split("/").slice(0, -1).reduce(((all, one) => (all[one] = all[one] || {}, 
+                    all[one])), body.tree),
+                    param: path.split("/").pop()
+                }), sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree), targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
+                targetPos.parent[targetPos.param || sourcePos.param] = sourcePos.parent[sourcePos.param], 
+                isMoveOrRename && delete sourcePos.parent[sourcePos.param];
+            }
+            const parsedCode = !Array.isArray(body.code) && utils.safe((() => JSON.parse(body.code)));
+            if (parsedCode && parsedCode.tree && (body.tree = parsedCode.tree, body.code = parsedCode.files), 
+            id === ui.id || id === ui.id.toString()) return ui.update({
+                service: body
+            });
+            const service = {
+                ...await servicesStore.getItem(id + "") || {},
+                name: name,
+                tree: body.tree
+            };
+            if (!service.name) return void console.error("cannot set meta store item without name");
+            await servicesStore.setItem(id + "", service);
+            const {filesToAdd: filesToAdd, filesToDelete: filesToDelete} = await (async () => {
+                if (update && update.filesToAdd && update.filesToDelete) return update;
+                const filesFromUpdateTree = utils.keepHelper(body.tree, body.code).map((x => `.${x}`)), filesInStore = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`))), filesToDelete = filesInStore.filter((file => !filesFromUpdateTree.includes(file)));
+                return {
+                    filesToAdd: filesFromUpdateTree.filter((file => !filesInStore.includes(file))),
+                    filesToDelete: filesToDelete
+                };
+            })();
+            for (let i = 0, len = filesToAdd.length; i < len; i++) {
+                const path = "github" === service.type ? stripFrontDotSlash(filesToAdd[i]) : filesToAdd[i], fileUpdate = body.code.find((x => `.${x.path}` === path || x.path === `/${path}` || x.path === path));
+                let fileUpdateCode;
+                fileUpdate?.update && (fileUpdateCode = fileUpdate.update, delete fileUpdate.update);
+                const code = fileUpdateCode || "";
+                await changesStore.setItem(path, {
+                    type: "update",
+                    value: code,
+                    service: (() => {
+                        const {tree: tree, ...rest} = service;
+                        return rest;
+                    })()
+                });
+            }
+            for (let i = 0, len = filesToDelete.length; i < len; i++) {
+                const path = "github" === service.type ? stripFrontDotSlash(filesToDelete[i]) : filesToDelete[i];
+                null !== await filesStore.getItem(path) ? await changesStore.setItem(path, {
+                    deleteFile: !0,
+                    service: (() => {
+                        const {tree: tree, ...rest} = service;
+                        return rest;
+                    })()
+                }) : await changesStore.removeItem(path);
+            }
+            const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
+            return stringify({
+                result: [ {
+                    id: service.id,
+                    name: service.name,
+                    code: body.code.map((({name: name, path: path}) => ({
+                        name: name,
+                        path: path
+                    }))),
+                    tree: body.tree,
+                    state: {
+                        opened: opened,
+                        selected: selected,
+                        changed: changed
+                    },
+                    treeState: {
+                        expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
+                        select: selected,
+                        changed: changed,
+                        new: []
+                    }
+                } ]
+            });
+        } catch (error) {
+            console.error(error);
+            const {stack: stack, message: message} = error;
+            return stringify({
+                error: {
+                    message: message,
+                    stack: stack
+                }
+            });
+        }
+    };
+    return class {
+        constructor({app: app, storage: storage, providers: providers, templates: templates, ui: ui, utils: utils}) {
+            this.app = app, this.storage = storage, this.providers = providers, this.templates = templates, 
+            this.ui = ui, this.utils = utils, this.handlers = {
+                serviceCreate: handleServiceCreate(this),
+                serviceChange: handleServiceChange(this),
+                serviceGetChanges: handleServiceGetChanges(this),
+                serviceUpdate: handleServiceUpdate(this),
+                serviceDelete: (params, event) => (console.log("/service/delete/:id? triggered"), 
+                stringify({
+                    params: params,
+                    event: event
+                }))
+            };
+        }
+    };
+})(), TemplateEngine = class {
+    templates=[];
+    constructor({storage: storage}) {
+        this.storage = storage, this.refresh = this.refresh.bind(this), this.NO_PREVIEW = '\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<pre>\n\t\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t\t</pre>\n\t\t\t</body>\n\t\t</html>\n\t\t'.replace(/^		/g, "");
+    }
+    add(name, template) {
+        const newTemp = {
+            name: name,
+            extensions: [],
+            body: template,
+            tokens: [ "{{template_value}}", "{{markdown}}", "{{template_input}}" ],
+            matcher: () => !1
+        };
+        newTemp.extensions.push(name.split(".").shift()), newTemp.convert = contents => {
+            let xfrmed = newTemp.body + "";
+            return newTemp.tokens.forEach((t => {
+                xfrmed = xfrmed.replace(new RegExp(t, "g"), contents);
+            })), xfrmed;
+        }, this.templates.push(newTemp);
+    }
+    update(name, contents) {
+        const ext = name.split(".").shift(), matchingTemplates = this.templates.filter((t => t.extensions.includes(ext)));
+        matchingTemplates.forEach((m => m.body = contents)), matchingTemplates.length || this.add(name, contents);
+    }
+    getTemplate(filename = "", contents = "") {
+        const ext = filename.split(".").pop(), extMatch = this.templates.find((x => x.extensions.includes(ext)));
+        return extMatch || (() => {
+            if (filename.includes(".json") && contents.includes("file-type")) try {
+                const fileType = JSON.parse(contents)["file-type"];
+                if (!fileType) return;
+                return this.templates.find((x => x.extensions.includes(fileType)));
+            } catch (e) {
+                return void console.error(e);
+            }
+        })();
+    }
+    convert(filename, contents) {
+        if (filename.split(".").pop(), filename.includes(".htm")) return contents;
+        if (!this.templates.length) return !1;
+        const foundTemplate = this.getTemplate(filename, contents);
+        return foundTemplate ? foundTemplate.convert(contents) : void 0;
+    }
+    async refresh() {
+        const filesStore = this.storage.stores.files, currentTemplateNames = (await filesStore.keys()).filter((x => x.includes("/.templates/")));
+        for (var i = 0, len = currentTemplateNames.length; i < len; i++) {
+            const key = currentTemplateNames[i], value = await filesStore.getItem(key), name = key.split("/").pop();
+            this.templates.find((x => x.name === name)) ? this.update(name, value) : this.add(name, value);
+        }
+    }
+}, init = async () => {
+    const swHandlers = self.handlers;
+    await utils.initMimeTypes();
+    const ui = new UIManager("fiug"), storage = new StorageManager({
+        utils: utils,
+        ui: ui
+    });
+    ui.init(storage.stores.handlers, storage.stores.changes);
+    const templates = new TemplateEngine({
+        storage: storage
+    }), app = new Router({
+        storage: storage,
+        templates: templates,
+        swHandlers: swHandlers
+    }), providers = await new ProviderManager({
+        app: app,
+        storage: storage,
+        utils: utils,
+        GithubProvider: GithubProvider
+    }), services = new ServicesManager({
+        app: app,
+        storage: storage,
+        providers: providers,
+        ui: ui,
+        utils: utils,
+        templates: templates
+    });
+    app.get("/service/search/", storage.handlers.serviceSearch), app.get("/service/read/:id?", storage.handlers.serviceRead), 
+    app.post("/service/create/:id?", services.handlers.serviceCreate), app.get("/service/change", services.handlers.serviceGetChanges), 
+    app.post("/service/change", services.handlers.serviceChange), app.post("/service/commit", providers.handlers.createCommit), 
+    app.post("/service/update/:id?", services.handlers.serviceUpdate), app.post("/service/provider/delete/:id?", services.handlers.serviceDelete), 
+    app.post("/service/provider/test/:id?", providers.handlers.testHandler), app.post("/service/provider/create", providers.handlers.createHandler), 
+    app.post("/service/provider/read/:id?", providers.handlers.readHandler), app.post("/service/provider/update/:id?", providers.handlers.updateHandler), 
+    app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler), app.get("/manage/:id?", utils.notImplementedHandler), 
+    app.get("/monitor/:id?", utils.notImplementedHandler), app.get("/persist/:id?", utils.notImplementedHandler), 
+    self.handler = async event => {
+        try {
+            const splitPath = event.request.url.replace(location.origin, "").split("/");
+            if (splitPath.includes("::preview::") && splitPath.includes(ui.name)) return new Response(templates.NO_PREVIEW, {
+                headers: {
+                    "Content-Type": "text/html"
+                }
+            });
+        } catch (e) {}
+        const serviceAPIMatch = await app.find(event.request), res = serviceAPIMatch ? await serviceAPIMatch.exec(event) : "no match in service request listener!";
+        let response;
+        if (event.request.url.includes("/::preview::/")) return response = new Response(utils.addBase(res), {
+            headers: {
+                "Content-Type": "text/html"
+            }
+        }), response;
+        let {contentType: contentType} = utils.getMime(event.request.url) || {};
+        return contentType || !serviceAPIMatch || res?.type || ({contentType: contentType} = utils.getMime(".json")), 
+        contentType ? (response = new Response(res, {
+            headers: {
+                "Content-Type": contentType || res.type
+            }
+        }), response) : new Response(res);
+    };
+};
+
+var Handler = {
+    init: init
+};
+
+const cacheName$1 = "v0.4.4-2021-09-10T04:17:38.884Z";
+
+importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
+self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 
+self.addEventListener("fetch", asyncFetchHandler), self.addEventListener("foreignfetch", asyncFetchHandler), 
+self.addEventListener("message", messageHandler), self.addEventListener("sync", syncHandler), 
+self.addEventListener("push", pushHandler), self.handlers = [];
+
+const driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
+
+let handlerStore;
+
+function getHandlerStore() {
+    return handlerStore || localforage.createInstance({
+        driver: driver,
+        name: "service-worker",
+        version: 1,
+        storeName: "handlers",
+        description: "used after app has booted when service worker is updated"
+    });
+}
+
+handlerStore = getHandlerStore(), Handler.init();
+
+const activateHandlers = async () => (handlerStore = getHandlerStore(), await handlerStore.iterate(((value, key) => {
+    const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value, foundHandler = handlers.find((x => x.handlerName === handlerName)), foundExactHandler = foundHandler && handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
+    if (foundExactHandler) return;
+    let handlerFunction;
+    if (!foundHandler) try {
+        handlerFunction = eval(handlerText);
+    } catch (e) {
+        handlerFunction = self.handler;
+    }
+    handlers.push({
+        type: type,
+        routePattern: route,
+        route: "fetch" === type ? new RegExp(route) : route,
+        handler: handlerFunction || foundHandler.handler,
+        handlerName: handlerName,
+        handlerText: handlerText
+    });
+})));
+
+async function installHandler(event) {
+    return console.log("service worker install event"), self.skipWaiting();
+}
+
+function activateHandler(event) {
+    console.log("service worker activate event"), event.waitUntil((async () => (await self.clients.claim(), 
+    await activateHandlers()))());
+}
+
+function asyncFetchHandler(event) {
+    if (!(event.request.url.includes("https://crosshj.auth0.com") || event.request.url.includes("index.bootstrap") || event.request.url.includes("localhost:3333") || event.request.url.includes("allorigins") || event.request.url.includes("browser-sync/socket.io") || event.request.url.includes("browser-sync/browser-sync-client") || event.request.url.includes("?browsersync=") || "no-store" === event.request.cache || "no-cache" === event.request.headers.get("pragma") && "no-cache" === event.request.headers.get("cache-control"))) if (event.request.url.includes("unpkg") || event.request.url.includes("cdn.jsdelivr") || event.request.url.includes("rawgit.com") || event.request.url.includes("cdn.skypack.dev")) {
+        const response = async () => {
+            const cache = await caches.open(cacheName$1), cacheResponse = await cache.match(event.request);
+            if (cacheResponse) return cacheResponse;
+            const networkResponse = await fetch(event.request);
+            return cache.put(event.request, networkResponse.clone()), networkResponse;
+        };
+        event.respondWith(response());
+    } else event.request.url.includes("https://webtorrent.io/torrents/") || event.request.url.includes("api.github.com") || event.respondWith(async function() {
+        handlers.length || await activateHandlers();
+        return await fetchHandler(event);
+    }());
+}
+
+async function fetchHandler(event) {
+    const routeHandlerBlacklist = [ "//(.*)" ], safeHandlers = handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))), path = event.request.url.replace(location.origin, "");
+    if (safeHandlers.find((x => "fetch" === x.type && x.route.test(path)))) return self.handler(event);
+    const cacheMatch = await caches.match(event.request);
+    return cacheMatch || await fetch(event.request);
+}
+
+function messageHandler(event) {
+    const {data: data} = event, {bootstrap: bootstrap} = data || {};
+    bootstrap ? (async () => {
+        try {
+            console.log("booting");
+            const bootstrapMessageEach = module => {
+                const client = event.source;
+                client ? client.postMessage({
+                    module: module,
+                    msg: "module-loaded"
+                }) : console.error("failed to notify client on boot complete");
+            }, modules = await bootstrapHandler(bootstrap, bootstrapMessageEach), client = event.source;
+            if (!client) return void console.error("failed to notify client on boot complete");
+            client.postMessage({
+                modules: modules.filter((x => !x.includes || !x.includes("NOTE:"))),
+                msg: "boot complete"
+            });
+        } catch (e) {
+            console.log(e);
+            const client = event.source;
+            if (!client) return void console.error("failed to notify client on boot complete");
+            client.postMessage({
+                msg: "boot error - you offline?"
+            });
+        }
+    })() : (console.log("service worker message event"), console.log({
+        data: data
+    }));
+}
+
+function syncHandler(event) {
+    console.log("service worker sync event");
+}
+
+function pushHandler(event) {
+    console.log("service worker push event");
+}
+
+async function bootstrapHandler({manifest: manifest}, bootstrapMessageEach) {
+    const manifestResponse = await fetch(manifest), _manifest = JSON5.parse(await manifestResponse.text()), _source = new Response(JSON.stringify(_manifest, null, 2), {
+        status: manifestResponse.status,
+        statusText: manifestResponse.statusText,
+        headers: manifestResponse.headers
+    });
+    await caches.open(cacheName$1).then((function(cache) {
+        cache.put(manifest, _source);
+    }));
+    const {modules: modules} = _manifest || {};
+    if (modules && Array.isArray(modules)) {
+        for (var i = 0, len = modules.length; i < len; i++) await registerModule(modules[i]), 
+        bootstrapMessageEach(modules[i]);
+        return modules;
+    }
+    console.error("Unable to find modules in service manifest");
+}
+
+async function registerModule(module) {
+    try {
+        if (module.includes && module.includes("NOTE:")) return;
+        const {source: source, include: include, route: route, handler: handler, resources: resources, type: type} = module;
+        if (!route && !resources) return void console.error("module must be registered with a route or array of resources!");
+        if (handler) {
+            let foundHandler = handlers.find((x => x.handlerName === handler)), handlerFunction, handlerText;
+            "./modules/service-worker.handler.js" === handler && self.handler && (handlerText = "service-worker-handler-register-module", 
+            handlerFunction = self.handler, foundHandler = {
+                handler: handler,
+                handlerText: handlerText
+            }), foundHandler && foundHandler.handler || (handlerText = await (await fetch(handler)).text(), 
+            handlerFunction = eval(handlerText));
+            const foundExactHandler = foundHandler && handlers.find((x => x.handlerName === handler && x.routePattern === route));
+            if (foundExactHandler) return;
+            return await handlerStore.setItem(route, {
+                type: type,
+                route: route,
+                handlerName: handler,
+                handlerText: handlerText || foundHandler.handlerText
+            }), void handlers.push({
+                type: type,
+                routePattern: route,
+                route: "fetch" === type ? new RegExp(route) : route,
+                handler: handlerFunction || foundHandler.handler,
+                handlerName: handler,
+                handlerText: handlerText || foundHandler.handlerText
+            });
+        }
+        if (resources && await Promise.all(resources.map((async resourceUrl => {
+            const opts = {};
+            resourceUrl.includes(".htm") && (opts.headers = opts.headers || {}, opts.headers.Accept = opts.headers.Accept || "", 
+            opts.headers.Accept = "text/html," + opts.headers.Accept);
+            const response = await fetch(resourceUrl, opts);
+            return await caches.open(cacheName$1).then((function(cache) {
+                cache.put(resourceUrl, response);
+            }));
+        }))), include) {
+            const response = await fetch(source), extra = [];
+            await Promise.all(include.map((async x => {
+                const text = await (await fetch(x)).text();
+                extra.push(`\n\n/*\n\n${x}\n\n*/ \n ${text}`);
+            })));
+            let modified = `/* ${source} */\n ${await response.text()}` + extra.join("");
+            const _source = new Response(modified, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers
+            });
+            return await caches.open(cacheName$1).then((function(cache) {
+                cache.put(route, _source);
+            }));
+        }
+        if (source) {
+            const _source = await fetch(source);
+            return caches.open(cacheName$1).then((function(cache) {
+                cache.put(route, _source);
+            }));
+        }
+    } catch (e) {
+        console.error("failed to register module"), console.log(module), console.log(e);
+    }
+}

@@ -5,14 +5,14 @@ export default function(){
 		format: {
 			// comments: 'all',
 			comments: 'some',
-			//beautify: true,
-			//max_line_len: 80
+			beautify: true,
+			// max_line_len: 80
 		},
-		//mangle: false,
-		//compress: false,
-		sourceMap: {
-			filename: "service-worker.js",
-			url: "inline"
-		}
+		mangle: false,
+		// compress: false,
+		// sourceMap: {
+		// 	filename: "service-worker.js",
+		// 	url: "inline"
+		// }
 	};
 }
