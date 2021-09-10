@@ -27,7 +27,7 @@ import 'https://unpkg.com/rollup/dist/rollup.browser.js';
 
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
 const VERSION = `v${packageJson.version}-${new Date().toISOString()}`;
-const AddVersion = (code) => code.replace('{{VERSION}}', VERSION);
+const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
 
 async function saveBuild(buildOutput){
 	const changeUrl = 'https://beta.fiug.dev/service/change';

@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-10T00:58:27.120Z
+	Version v0.4.4-2021-09-10T01:02:21.728Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 
@@ -3331,7 +3331,7 @@ const init = async () => {
 var Handler = { init };
 
 /* doing the same thing as workbox here? */
-const cacheName$1 = "{{VERSION}}";
+const cacheName$1 = "v0.4.4-2021-09-10T01:02:21.728Z";
 
 //TODO: next won't work because rollup rewrites dep due to module root level "this"
 //import "/shared/vendor/localforage.min.js";
