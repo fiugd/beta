@@ -34,7 +34,7 @@ async function saveBuild(buildOutput){
 	const body = {
 		path: `./${config.output.file}`,
 		service: 'crosshj/fiug-beta',
-		command: 'upsert',
+		//command: 'upsert',
 		code: buildOutput
 	};
 	const headers = {

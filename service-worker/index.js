@@ -3,8 +3,13 @@ const cacheName = "{{VERSION}}";
 
 import Handler from './handler.js';
 
-import "/shared/vendor/localforage.min.js";
-import "/shared/vendor/json5v-2.0.0.min.js";
+//TODO: next won't work because rollup rewrites dep due to module root level "this"
+//import "/shared/vendor/localforage.min.js";
+//import "/shared/vendor/json5v-2.0.0.min.js";
+
+// use this for now
+importScripts("/shared/vendor/localforage.min.js");
+importScripts("/shared/vendor/json5v-2.0.0.min.js");
 
 self.addEventListener("install", installHandler);
 self.addEventListener("activate", activateHandler);
