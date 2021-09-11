@@ -35,16 +35,22 @@ const commandHelp = (command) => { return `
 
 ${bold('Usage:')} ${command.keyword} ${hex('#BBB')(command.usage||'')}
 
-These are common Git COMMANDs which are supported in some form here:
+These are common Git COMMANDs which are loosely supported in some form here:
 
 ${hex('#BBB')('start a working area')}
    ${bold('clone')}      Copy a remote repository to local
+   ${bold('init')}       Create an empty Git repository or reinitialize an existing one
+
+${hex('#BBB')('work on the current change')}
+   ${bold('add')}        Add file contents to the index
+   ${bold('rm')}         Remove files from the working tree and from the index
 
 ${hex('#BBB')('examine the history and state')}
    ${bold('diff')}       Show local changes per file
    ${bold('status')}     List all files changed locally
+   ${bold('log')}        Show commit logs
 
-${hex('#BBB')('grow, mark and tweak your common history')}
+${hex('#BBB')('grow, mark, and tweak your common history')}
    ${bold('branch')}     List, create, or delete branches
    ${bold('commit')}     Record changes to the repository
 
@@ -52,11 +58,53 @@ ${hex('#BBB')('collaborate')}
    ${bold('pull')}       Fetch recent changes from remote
    ${bold('push')}       Update remote with local commits
 
+${hex('#BBB')('other')}
+   ${bold('config')}     Get and set repository or global options
+
+${hex('#BBB')('totally non-standard utils')}
+   ${bold('list')}       List all cloned repositories
+   ${bold('open')}       Load a repository for editing
+   ${bold('close')}      Unload a repository
+
 ${italic(`
 Online help: ${link('https://github.com/crosshj/fiug/wiki')}
 Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
 `)}
 `; };
+
+/*
+start a working area (see also: git help tutorial)
+   clone      Clone a repository into a new directory
+   init       Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add        Add file contents to the index
+   mv         Move or rename a file, a directory, or a symlink
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect     Use binary search to find the commit that introduced a bug
+   grep       Print lines matching a pattern
+   log        Show commit logs
+   show       Show various types of objects
+   status     Show the working tree status
+
+grow, mark and tweak your common history
+   branch     List, create, or delete branches
+   checkout   Switch branches or restore working tree files
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   merge      Join two or more development histories together
+   rebase     Reapply commits on top of another base tip
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch      Download objects and refs from another repository
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+
+*/
 
 const unknownArgsHelper = (args) => {
 	const keyed = {};
@@ -226,11 +274,39 @@ Example:
 	return chalk.hex('#ccc')(`DONE\n`);
 };
 
+const config = async ({ term }, args) => {
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	return jsonColors({ keyed, anon });
+};
+const list = async ({ term }, args) => {
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	return jsonColors({ keyed, anon });
+};
+const open = async ({ term }, args) => {
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	return jsonColors({ keyed, anon });
+};
+const close = async ({ term }, args) => {
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	return jsonColors({ keyed, anon });
+};
+
 const branch = async ({ term }) => notImplemented('branch');
 const push = async ({ term }) => notImplemented('push');
 const pull = async ({ term }) => notImplemented('pull');
+const init = async ({ term }) => notImplemented('init');
+const add = async ({ term }) => notImplemented('add');
+const rm = async ({ term }) => notImplemented('rm');
+const log = async ({ term }) => notImplemented('log');
 
-const commands = { clone, diff, status, branch, commit, push, pull };
+const commands = {
+	diff,  status, commit, clone, config, list, open, close,
+	branch, push, pull, init, add, rm, log //not implemented
+};
 
 async function invokeRaw(_this, args){
 	const { command } = args;
