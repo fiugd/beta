@@ -39,11 +39,11 @@ These are common Git COMMANDs which are supported in some form here:
 
 ${hex('#BBB')('start a working area')}
    ${bold('clone')}      Copy a remote repository to local
-   ${bold('init')}       Create an empty Git repository or reinitialize an existing one
+   ${bold('init')}       Create an empty repository
 
 ${hex('#BBB')('work on the current change')}
-   ${bold('add')}        Add file contents to the index
-   ${bold('rm')}         Remove files from the working tree and from the index
+   ${bold('add')}        Add files to commit
+   ${bold('rm')}         Remove files from commit
 
 ${hex('#BBB')('examine the history and state')}
    ${bold('diff')}       Show local changes per file
