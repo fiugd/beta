@@ -351,12 +351,12 @@ const Git = (term, comm) => ({
 	invokeRaw,
 	exit,
 	listenerKeys: [],
-	args: config.args || [],
-	event: Array.isArray(config.event) ? config.event : [config.event],
-	required: (config.args || [])
+	args: opConfig.args || [],
+	event: Array.isArray(opConfig.event) ? opConfig.event : [opConfig.event],
+	required: (opConfig.args || [])
 		.filter(x => x.required)
 		.map(x => x.name),
-	help: () => commandHelp(config),
+	help: () => commandHelp(opConfig),
 });
 
 export { Git };
