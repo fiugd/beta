@@ -35,7 +35,7 @@ const commandHelp = (command) => { return `
 
 ${bold('Usage:')} ${command.keyword} ${hex('#BBB')(command.usage||'')}
 
-These are common Git COMMANDs which are loosely supported in some form here:
+These are common Git COMMANDs which are supported in some form here:
 
 ${hex('#BBB')('start a working area')}
    ${bold('clone')}      Copy a remote repository to local
