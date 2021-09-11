@@ -148,7 +148,7 @@ const diffPretty = (diff) => {
 	}).join('');
 };
 
-const config = {
+const opConfig = {
 	keyword: "git",
 	description: "git is version control.",
 	event: "",
@@ -343,7 +343,7 @@ async function invoke(args, done){
 async function exit(){}
 
 const Git = (term, comm) => ({
-	...config,
+	...opConfig,
 	ops: GetOps(term, comm),
 	term,
 	comm,
