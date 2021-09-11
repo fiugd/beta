@@ -17,7 +17,9 @@ const history = [
 	`node --watch .example.js`,
 	`preview zip_project.html`,
 	`node --watch service-worker.services.test.js`,
-	`node update.js`
+	`node update.js`,
+	`git config --global user.email johndoe@example.com`,
+	`git config --local user.name "John Doe"`,
 ];
 
 const usage = (chalk) => {
