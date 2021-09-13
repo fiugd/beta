@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-13T22:40:22.043Z
+	Version v0.4.4-2021-09-13T22:40:52.954Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 */
@@ -725,6 +725,7 @@ const utils = (() => {
                 return manager.cache || await async function() {
                     let tree = {};
                     const code = [], keys = await caches.open(cacheName).then((x => x.keys()));
+                    console.log(keys);
                     for (var i = 0, len = keys.length; i < len; i++) {
                         const request = keys[i], split = request.url.split(/(\/fiug\/|\/shared\/|\/_\/modules\/)/);
                         split.shift();
@@ -1851,7 +1852,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.4-2021-09-13T22:40:22.043Z";
+const cacheName = "v0.4.4-2021-09-13T22:40:52.954Z";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 
