@@ -1,6 +1,18 @@
-const cacheName = `v0.4.9`;
+const semVer = `([0-9]+(\.[0-9]+)+)`;
+const iso8601Date = `[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?`;
+const semVerDateRegex = new RegExp(`v${semVer}-${iso8601Date}\$`);
+
+const getCacheName = async () => {
+	const allCaches = await caches.keys();
+	const allVersioned = allCaches
+		.filter(x => semVerDateRegex.exec(x))
+	return allVersioned.sort().reverse()[0];
+};
+
+const cacheName = await getCacheName();
 const root = `https://beta.fiug.dev`;
 const cache = await caches.open(cacheName);
+
 
 const updates = [[
 	`/crosshj/fiug-beta/shared/vendor/codemirror/addon.bundle.js`,
@@ -48,11 +60,20 @@ const updates = [[
 	`/crosshj/fiug-beta/modules/state.mjs`,
 	`/_/modules/state.mjs`
 ],[
+	`/crosshj/fiug-beta/terminal/terminal.html`,
+	`/_/modules/terminal/index.html`
+],[
+	`/crosshj/fiug-beta/terminal/terminal.js`,
+	`/_/modules/terminal/terminal.js`
+],[
 	`/crosshj/fiug-beta/terminal/terminal.ops.js`,
 	`/_/modules/terminal/terminal.ops.js`
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.git.js`,
 	`/_/modules/terminal/terminal.git.js`
+],[
+	`/crosshj/fiug-beta/terminal/terminal.css`,
+	`/_/modules/terminal/terminal.css`
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.lib.js`,
 	`/_/modules/terminal/terminal.lib.js`
@@ -62,6 +83,7 @@ const updateCache = async (source, target) => {
 	const bundleText = await fetch(root+source).then(x => x.text());
 	let contentType = 'application/javascript; charset=utf-8';
 	if(target.endsWith('.svg')) contentType = 'image/svg+xml';
+	if(target.endsWith('.html')) contentType = 'text/html';
 	const opts = {
 		headers: {
 			'Content-Type': contentType
@@ -74,7 +96,7 @@ for(var i=0, len=updates.length; i<len; i++){
 	await updateCache(...updates[i]);
 }
 
-console.log(`\nupdated: \n${updates.map(([,x]) => x).join('\n')}`);
+console.log(`\nupdated cache [${cacheName}]:\n\n${updates.map(([,x]) => x).join('\n')}`);
 
 
 const importMap = {

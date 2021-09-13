@@ -1,6 +1,11 @@
 import { chalk, jsonColors } from './terminal.utils.js';
 import { pather } from '/shared/modules/utilities.mjs';
 
+const state = {
+	cwd: undefined,
+	service: undefined
+};
+
 const mapFileArg = (args) => {
 	const { cwd, file } = args
 	const target = pather(cwd, file);
@@ -15,6 +20,24 @@ const mapSourceDestArg = (args) => {
 	return { ...args, src, tgt };
 };
 
+const getCurrentService = async () => {
+	const currentServiceId = localStorage.getItem('lastService');
+	if(!currentServiceId && currentServiceId !== "0"){
+		return '~';
+	}
+
+	const { result: [ service ] } = await fetch(`/service/read/${currentServiceId}`, {
+		"headers": {
+			"accept": "application/json",
+			"content-type": "application/json",
+		},
+	}).then(x => x.json());
+
+	return service.name;
+};
+state.service = await getCurrentService();
+state.cwd = state.service + '/';
+
 const commands = [
 	{
 		name: 'PrintWorkingDir',
@@ -22,6 +45,11 @@ const commands = [
 		description: "Print current working directory.",
 		event: "showCurrentFolder",
 		mapResponse: (folder) => {
+			if(folder.length > 2 && folder.startsWith('~/')){
+				state.cwd = folder.slice(2);
+				state.service = folder.slice(2);
+				return folder.slice(2);
+			}
 			if(folder.endsWith('/')) return folder.slice(0,-1);
 			if(folder.endsWith('/~')) return folder.slice(0,-2);
 			if(folder.endsWith('/.')) return folder.slice(0,-2);
@@ -239,11 +267,6 @@ const changeFolder = (state, folderPath) => {
 };
 
 const withState = (() => {
-	const state = {
-		cwd: undefined,
-		service: undefined
-	};
-
 	const stateFnWrapper = (func) => async (args) => {
 		let handler;
 		try {
