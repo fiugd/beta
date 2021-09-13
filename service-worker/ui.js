@@ -54,10 +54,10 @@ const { UIManager, UIManagerAddChanged } = (() => {
 				}
 
 				let name = (pathSplit[pathSplit.length - 1] || "").replace("/", "");
-				const _code = await (await cache.match(request)).text();
+				//const _code = await (await cache.match(request)).text();
 				code.push({
 					name,
-					code: _code,
+					code: [], //_code,
 					url: request.url,
 				});
 			}
