@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-13T22:38:13.935Z
+	Version v0.4.4-2021-09-13T22:40:22.043Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 */
@@ -742,7 +742,7 @@ const utils = (() => {
                             url: request.url
                         });
                     }
-                    tree.modules = tree._.modules, delete tree._;
+                    tree._ && (tree.modules = tree._.modules, delete tree._);
                     const uiCode = {
                         id: manager.id,
                         name: manager.name,
@@ -1851,7 +1851,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.4-2021-09-13T22:38:13.935Z";
+const cacheName = "v0.4.4-2021-09-13T22:40:22.043Z";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 

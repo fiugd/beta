@@ -35,6 +35,7 @@ const { UIManager, UIManagerAddChanged } = (() => {
 			//const cache = await caches.open(cacheName);
 			// const keys = await cache.keys();
 			const keys = await caches.open(cacheName).then(x => x.keys());
+			console.log(keys);
 
 			for (var i = 0, len = keys.length; i < len; i++) {
 				const request = keys[i];
@@ -66,8 +67,10 @@ const { UIManager, UIManagerAddChanged } = (() => {
 			//tree = { ...tree.fiug, ...tree };
 			//delete tree.fiug;
 
-			tree.modules = tree._.modules;
-			delete tree._;
+			if(tree._){
+				tree.modules = tree._.modules;
+				delete tree._;
+			}
 
 			const uiCode = {
 				id: manager.id,
