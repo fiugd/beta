@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-10T04:17:38.884Z
+	Version v0.4.4-2021-09-13T22:28:19.368Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 */
@@ -692,8 +692,8 @@ const utils = (() => {
             changeStore=void 0;
             cache=void 0;
             changed=void 0;
-            constructor(name) {
-                this.name = name;
+            constructor(name, cacheName) {
+                this.name = name, this.cacheName = cacheName;
             }
             init=(handlerStore, changeStore) => (async (manager, {handlerStore: handlerStore, changeStore: changeStore}) => {
                 manager.changeStore = changeStore, manager.changed = await changeStore.getItem("UIManagerChanged") || {};
@@ -720,6 +720,7 @@ const utils = (() => {
                 changeStore: changeStore
             });
             read=() => (async manager => {
+                const {cacheName: cacheName} = manager;
                 let overlayedWithChanges;
                 return manager.cache || await async function() {
                     let tree = {};
@@ -765,7 +766,7 @@ const utils = (() => {
                 });
             })(this);
             update=args => (async (manager, {service: service}) => {
-                const cache = await caches.open(cacheName), changesAsArray = Object.entries(manager.changed);
+                const {cacheName: cacheName} = manager, cache = await caches.open(cacheName), changesAsArray = Object.entries(manager.changed);
                 for (var i = 0, len = changesAsArray.length; i < len; i++) {
                     const [key, value] = changesAsArray[i], fileName = key.split("/").pop(), managerCachedFile = manager.cache.code.find((x => x.name === fileName)), {url: url} = managerCachedFile, {contentType: contentType} = getMime(url) || {}, response = new Response(value, {
                         headers: {
@@ -1785,10 +1786,10 @@ const utils = (() => {
             this.templates.find((x => x.name === name)) ? this.update(name, value) : this.add(name, value);
         }
     }
-}, init = async () => {
+}, init = async ({cacheName: cacheName}) => {
     const swHandlers = self.handlers;
     await utils.initMimeTypes();
-    const ui = new UIManager("fiug"), storage = new StorageManager({
+    const ui = new UIManager("fiug", cacheName), storage = new StorageManager({
         utils: utils,
         ui: ui
     });
@@ -1850,7 +1851,7 @@ var Handler = {
     init: init
 };
 
-const cacheName$1 = "v0.4.4-2021-09-10T04:17:38.884Z";
+const cacheName = "v0.4.4-2021-09-13T22:28:19.368Z";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 
@@ -1872,7 +1873,9 @@ function getHandlerStore() {
     });
 }
 
-handlerStore = getHandlerStore(), Handler.init();
+handlerStore = getHandlerStore(), Handler.init({
+    cacheName: cacheName
+});
 
 const activateHandlers = async () => (handlerStore = getHandlerStore(), await handlerStore.iterate(((value, key) => {
     const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value, foundHandler = handlers.find((x => x.handlerName === handlerName)), foundExactHandler = foundHandler && handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
@@ -1905,7 +1908,7 @@ function activateHandler(event) {
 function asyncFetchHandler(event) {
     if (!(event.request.url.includes("https://crosshj.auth0.com") || event.request.url.includes("index.bootstrap") || event.request.url.includes("localhost:3333") || event.request.url.includes("allorigins") || event.request.url.includes("browser-sync/socket.io") || event.request.url.includes("browser-sync/browser-sync-client") || event.request.url.includes("?browsersync=") || "no-store" === event.request.cache || "no-cache" === event.request.headers.get("pragma") && "no-cache" === event.request.headers.get("cache-control"))) if (event.request.url.includes("unpkg") || event.request.url.includes("cdn.jsdelivr") || event.request.url.includes("rawgit.com") || event.request.url.includes("cdn.skypack.dev")) {
         const response = async () => {
-            const cache = await caches.open(cacheName$1), cacheResponse = await cache.match(event.request);
+            const cache = await caches.open(cacheName), cacheResponse = await cache.match(event.request);
             if (cacheResponse) return cacheResponse;
             const networkResponse = await fetch(event.request);
             return cache.put(event.request, networkResponse.clone()), networkResponse;
@@ -1968,7 +1971,7 @@ async function bootstrapHandler({manifest: manifest}, bootstrapMessageEach) {
         statusText: manifestResponse.statusText,
         headers: manifestResponse.headers
     });
-    await caches.open(cacheName$1).then((function(cache) {
+    await caches.open(cacheName).then((function(cache) {
         cache.put(manifest, _source);
     }));
     const {modules: modules} = _manifest || {};
@@ -2014,7 +2017,7 @@ async function registerModule(module) {
             resourceUrl.includes(".htm") && (opts.headers = opts.headers || {}, opts.headers.Accept = opts.headers.Accept || "", 
             opts.headers.Accept = "text/html," + opts.headers.Accept);
             const response = await fetch(resourceUrl, opts);
-            return await caches.open(cacheName$1).then((function(cache) {
+            return await caches.open(cacheName).then((function(cache) {
                 cache.put(resourceUrl, response);
             }));
         }))), include) {
@@ -2029,13 +2032,13 @@ async function registerModule(module) {
                 statusText: response.statusText,
                 headers: response.headers
             });
-            return await caches.open(cacheName$1).then((function(cache) {
+            return await caches.open(cacheName).then((function(cache) {
                 cache.put(route, _source);
             }));
         }
         if (source) {
             const _source = await fetch(source);
-            return caches.open(cacheName$1).then((function(cache) {
+            return caches.open(cacheName).then((function(cache) {
                 cache.put(route, _source);
             }));
         }

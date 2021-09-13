@@ -28,6 +28,7 @@ const { UIManager, UIManagerAddChanged } = (() => {
 	const stringify = o => JSON.stringify(o,null,2);
 
 	const UIManagerRead = async (manager) => {
+		const { cacheName } = manager;
 		async function populateCache() {
 			let tree = {};
 			const code = [];
@@ -106,6 +107,7 @@ const { UIManager, UIManagerAddChanged } = (() => {
 
 	const UIManagerUpdate = async (manager, { service }) => {
 		// update caches with changed files
+		const { cacheName } = manager;
 		const cache = await caches.open(cacheName);
 		const changesAsArray = Object.entries(manager.changed);
 		for (var i = 0, len = changesAsArray.length; i < len; i++) {
@@ -203,8 +205,9 @@ const { UIManager, UIManagerAddChanged } = (() => {
 		cache = undefined;
 		changed = undefined;
 
-		constructor(name) {
+		constructor(name, cacheName) {
 			this.name = name;
+			this.cacheName = cacheName;
 		}
 		init = (handlerStore, changeStore) =>
 			UIManagerInit(this, { handlerStore, changeStore });

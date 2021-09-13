@@ -41,7 +41,7 @@ function getHandlerStore() {
 }
 handlerStore = getHandlerStore();
 
-Handler.init();
+Handler.init({ cacheName });
 
 const activateHandlers = async () => {
 	handlerStore = getHandlerStore();

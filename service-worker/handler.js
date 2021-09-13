@@ -8,12 +8,12 @@ import { GithubProvider } from "./provider.github.js";
 import { ServicesManager } from "./services.js";
 import { TemplateEngine } from "./templates.js";
 
-const init = async () => {
+const init = async ({ cacheName }) => {
 	const swHandlers = self.handlers;
 	await utils.initMimeTypes();
 
 	//TODO: ideally, would not allow generic access of storage, instead access Manager methods
-	const ui = new UIManager("fiug"); // ui manager is a special kind of storage
+	const ui = new UIManager("fiug", cacheName); // ui manager is a special kind of storage
 	const storage = new StorageManager({ utils, ui });
 	ui.init(storage.stores.handlers, storage.stores.changes);
 
