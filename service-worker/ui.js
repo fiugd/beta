@@ -32,8 +32,9 @@ const { UIManager, UIManagerAddChanged } = (() => {
 		async function populateCache() {
 			let tree = {};
 			const code = [];
-			const cache = await caches.open(cacheName);
-			const keys = await cache.keys();
+			//const cache = await caches.open(cacheName);
+			// const keys = await cache.keys();
+			const keys = await caches.open(cacheName).then(x => x.keys());
 
 			for (var i = 0, len = keys.length; i < len; i++) {
 				const request = keys[i];
