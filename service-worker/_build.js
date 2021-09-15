@@ -29,8 +29,10 @@ import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
 import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
 
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
-const VERSION = `v${packageJson.version}-${new Date().toISOString()}`;
+const VERSION = `v${packageJson.version}`;
+const DATE = new Date().toISOString();
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
+const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
 
 const Minify = (code) => Terser.minify(code, terserConfig());
 

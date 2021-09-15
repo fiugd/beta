@@ -1,9 +1,8 @@
-/* doing the same thing as workbox here? */
 const cacheName = "{{VERSION}}";
 
 import Handler from './handler.js';
 
-//TODO: next won't work because rollup rewrites dep due to module root level "this"
+//TODO: next lines won't work because rollup rewrites dep due to module root level "this"
 //import "/shared/vendor/localforage.min.js";
 //import "/shared/vendor/json5v-2.0.0.min.js";
 

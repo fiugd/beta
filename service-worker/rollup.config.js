@@ -7,8 +7,9 @@ const entry = `
 const banner = `/*!
 	fiug service-worker
 	Version {{VERSION}}
+	Build Date {{DATE}}
 	https://github.com/crosshj/fiug
-	(c) 20xx-20xx Harrison Cross.
+	(c) 2011-2012 Harrison Cross.
 */
 `;
 
