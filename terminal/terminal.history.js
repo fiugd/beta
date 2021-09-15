@@ -17,7 +17,7 @@ const history = [
 	`node --watch terminal/.example.js`,
 	`preview zip_project.html`,
 	`node --watch test/service-worker.services.test.js`,
-	`node service-worker/_build.js`;
+	`node service-worker/_build.js`,
 	`node shared/vendor/codemirror/update.js`,
 	`git config --global user.email johndoe@example.com`,
 	`git config --local user.name "John Doe"`,
