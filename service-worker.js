@@ -1,8 +1,9 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-15T17:35:43.941Z
+	Version v0.4.4
+	Build Date 2021-09-15T18:04:40.132Z
 	https://github.com/crosshj/fiug
-	(c) 20xx-20xx Harrison Cross.
+	(c) 2011-2012 Harrison Cross.
 */
 const utils = (() => {
     let mimeTypes;
@@ -1850,7 +1851,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.4-2021-09-15T17:35:43.941Z";
+const cacheName = "v0.4.4";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 

@@ -34,6 +34,7 @@ const DATE = new Date().toISOString();
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
 const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
 
+const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 const Minify = (code) => Terser.minify(code, terserConfig());
 
 async function saveBuild({ code, map }){
@@ -73,7 +74,7 @@ const generated = await rollup.rollup(rollupConfig)
 const { code } = generated.output[0];
 
 
-const minified = await Minify(AddVersion(code));
+const minified = await pipe(AddDate,AddVersion,Minify)(code);
 const {error} = await saveBuild(minified);
 console.log(error || `DONE\nsee ` +
 `https://beta.fiug.dev/${rollupConfig.output.file}`
