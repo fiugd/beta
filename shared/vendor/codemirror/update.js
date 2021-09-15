@@ -59,6 +59,12 @@ const updates = [[
 ],[
 	`/crosshj/fiug-beta/modules/state.mjs`,
 	`/_/modules/state.mjs`
+],
+
+//terminal
+[
+	`/crosshj/fiug-beta/modules/Terminal.mjs`,
+	`/_/modules/Terminal.mjs`
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.html`,
 	`/_/modules/terminal/index.html`
@@ -68,6 +74,9 @@ const updates = [[
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.ops.js`,
 	`/_/modules/terminal/terminal.ops.js`
+],[
+	`/crosshj/fiug-beta/terminal/terminal.history.js`,
+	`/_/modules/terminal/terminal.history.js`
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.git.js`,
 	`/_/modules/terminal/terminal.git.js`

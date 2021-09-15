@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version v0.4.4-2021-09-13T23:07:16.673Z
+	Version v0.4.4-2021-09-15T17:35:43.941Z
 	https://github.com/crosshj/fiug
 	(c) 20xx-20xx Harrison Cross.
 */
@@ -1812,7 +1812,7 @@ const utils = (() => {
         utils: utils,
         templates: templates
     });
-    app.get("/service/search/", storage.handlers.serviceSearch), app.get("/service/read/:id?", storage.handlers.serviceRead), 
+    return app.get("/service/search/", storage.handlers.serviceSearch), app.get("/service/read/:id?", storage.handlers.serviceRead), 
     app.post("/service/create/:id?", services.handlers.serviceCreate), app.get("/service/change", services.handlers.serviceGetChanges), 
     app.post("/service/change", services.handlers.serviceChange), app.post("/service/commit", providers.handlers.createCommit), 
     app.post("/service/update/:id?", services.handlers.serviceUpdate), app.post("/service/provider/delete/:id?", services.handlers.serviceDelete), 
@@ -1820,7 +1820,7 @@ const utils = (() => {
     app.post("/service/provider/read/:id?", providers.handlers.readHandler), app.post("/service/provider/update/:id?", providers.handlers.updateHandler), 
     app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler), app.get("/manage/:id?", utils.notImplementedHandler), 
     app.get("/monitor/:id?", utils.notImplementedHandler), app.get("/persist/:id?", utils.notImplementedHandler), 
-    self.handler = async event => {
+    async event => {
         try {
             const splitPath = event.request.url.replace(location.origin, "").split("/");
             if (splitPath.includes("::preview::") && splitPath.includes(ui.name)) return new Response(templates.NO_PREVIEW, {
@@ -1850,7 +1850,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.4-2021-09-13T23:07:16.673Z";
+const cacheName = "v0.4.4-2021-09-15T17:35:43.941Z";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 
@@ -1860,7 +1860,7 @@ self.addEventListener("push", pushHandler), self.handlers = [];
 
 const driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
 
-let handlerStore;
+let handlerStore, handler;
 
 function getHandlerStore() {
     return handlerStore || localforage.createInstance({
@@ -1872,28 +1872,36 @@ function getHandlerStore() {
     });
 }
 
-handlerStore = getHandlerStore(), Handler.init({
-    cacheName: cacheName
-});
+async function getHandler() {
+    return handler = handler || await Handler.init({
+        cacheName: cacheName
+    }), handler;
+}
 
-const activateHandlers = async () => (handlerStore = getHandlerStore(), await handlerStore.iterate(((value, key) => {
-    const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value, foundHandler = handlers.find((x => x.handlerName === handlerName)), foundExactHandler = foundHandler && handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
-    if (foundExactHandler) return;
-    let handlerFunction;
-    if (!foundHandler) try {
-        handlerFunction = eval(handlerText);
-    } catch (e) {
-        handlerFunction = self.handler;
-    }
-    handlers.push({
-        type: type,
-        routePattern: route,
-        route: "fetch" === type ? new RegExp(route) : route,
-        handler: handlerFunction || foundHandler.handler,
-        handlerName: handlerName,
-        handlerText: handlerText
-    });
-})));
+handlerStore = getHandlerStore();
+
+const activateHandlers = async () => {
+    handlerStore = getHandlerStore();
+    const genericHandler = await getHandler(), eachHandlerStoreItem = (value, key) => {
+        const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value, foundHandler = self.handlers.find((x => x.handlerName === handlerName)), foundExactHandler = foundHandler && self.handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
+        if (foundExactHandler) return;
+        let handlerFunction;
+        if (!foundHandler) try {
+            handlerFunction = eval(handlerText);
+        } catch (e) {
+            handlerFunction = genericHandler;
+        }
+        self.handlers.push({
+            type: type,
+            routePattern: route,
+            route: "fetch" === type ? new RegExp(route) : route,
+            handler: handlerFunction || (foundHandler ? foundHandler.handler : void 0),
+            handlerName: handlerName,
+            handlerText: handlerText
+        });
+    };
+    return await handlerStore.iterate(eachHandlerStoreItem);
+};
 
 async function installHandler(event) {
     return console.log("service worker install event"), self.skipWaiting();
@@ -1914,14 +1922,14 @@ function asyncFetchHandler(event) {
         };
         event.respondWith(response());
     } else event.request.url.includes("https://webtorrent.io/torrents/") || event.request.url.includes("api.github.com") || event.respondWith(async function() {
-        handlers.length || await activateHandlers();
+        self.handlers.length || await activateHandlers();
         return await fetchHandler(event);
     }());
 }
 
 async function fetchHandler(event) {
-    const routeHandlerBlacklist = [ "//(.*)" ], safeHandlers = handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))), path = event.request.url.replace(location.origin, "");
-    if (safeHandlers.find((x => "fetch" === x.type && x.route.test(path)))) return self.handler(event);
+    const genericHandler = await getHandler(), routeHandlerBlacklist = [ "//(.*)" ], safeHandlers = self.handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))), path = event.request.url.replace(location.origin, "");
+    if (safeHandlers.find((x => "fetch" === x.type && x.route.test(path)))) return genericHandler(event);
     const cacheMatch = await caches.match(event.request);
     return cacheMatch || await fetch(event.request);
 }
@@ -1988,21 +1996,22 @@ async function registerModule(module) {
         const {source: source, include: include, route: route, handler: handler, resources: resources, type: type} = module;
         if (!route && !resources) return void console.error("module must be registered with a route or array of resources!");
         if (handler) {
-            let foundHandler = handlers.find((x => x.handlerName === handler)), handlerFunction, handlerText;
-            "./modules/service-worker.handler.js" === handler && self.handler && (handlerText = "service-worker-handler-register-module", 
-            handlerFunction = self.handler, foundHandler = {
+            const genericHandler = await getHandler();
+            let foundHandler = self.handlers.find((x => x.handlerName === handler)), handlerFunction, handlerText;
+            "./modules/service-worker.handler.js" === handler && genericHandler && (handlerText = "service-worker-handler-register-module", 
+            handlerFunction = genericHandler, foundHandler = {
                 handler: handler,
                 handlerText: handlerText
             }), foundHandler && foundHandler.handler || (handlerText = await (await fetch(handler)).text(), 
             handlerFunction = eval(handlerText));
-            const foundExactHandler = foundHandler && handlers.find((x => x.handlerName === handler && x.routePattern === route));
+            const foundExactHandler = foundHandler && self.handlers.find((x => x.handlerName === handler && x.routePattern === route));
             if (foundExactHandler) return;
             return await handlerStore.setItem(route, {
                 type: type,
                 route: route,
                 handlerName: handler,
                 handlerText: handlerText || foundHandler.handlerText
-            }), void handlers.push({
+            }), void self.handlers.push({
                 type: type,
                 routePattern: route,
                 route: "fetch" === type ? new RegExp(route) : route,

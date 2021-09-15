@@ -48,7 +48,7 @@ const init = async ({ cacheName }) => {
 	app.get("/monitor/:id?", utils.notImplementedHandler);
 	app.get("/persist/:id?", utils.notImplementedHandler);
 
-	self.handler = async (event) => {
+	return async (event) => {
 		//console.warn('Service Request Handler - usage');
 		//console.log(event.request.url);
 

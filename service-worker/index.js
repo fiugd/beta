@@ -41,19 +41,24 @@ function getHandlerStore() {
 }
 handlerStore = getHandlerStore();
 
-Handler.init({ cacheName });
+let handler;
+async function getHandler(){
+	handler = handler || await Handler.init({ cacheName });
+	return handler;
+}
 
 const activateHandlers = async () => {
 	handlerStore = getHandlerStore();
+	const genericHandler = await getHandler();
 
-	return await handlerStore.iterate((value, key) => {
+	const eachHandlerStoreItem = (value, key) => {
 		const { type, route, handlerName, handlerText } = value;
 		//this (and the fact that all handlers currently use it) ensures that ./modules/serviceRequestHandler.js is a singleton
-		const foundHandler = handlers.find((x) => x.handlerName === handlerName);
+		const foundHandler = self.handlers.find((x) => x.handlerName === handlerName);
 
 		const foundExactHandler =
 			foundHandler &&
-			handlers.find(
+			self.handlers.find(
 				(x) => x.handlerName === handlerName && x.routePattern === route
 			);
 		if (foundExactHandler) {
@@ -65,20 +70,22 @@ const activateHandlers = async () => {
 			try {
 				handlerFunction = eval(handlerText);
 			} catch (e) {
-				handlerFunction = self.handler;
+				handlerFunction = genericHandler;
 			}
 		}
 
 		//console.log(`handler installed for ${route} (from indexDB handlerStore)`);
-		handlers.push({
+		self.handlers.push({
 			type,
 			routePattern: route,
 			route: type === "fetch" ? new RegExp(route) : route,
-			handler: handlerFunction || foundHandler.handler,
+			handler: handlerFunction || (foundHandler ? foundHandler.handler : undefined),
 			handlerName,
 			handlerText,
 		});
-	});
+	};
+
+	return await handlerStore.iterate(eachHandlerStoreItem);
 };
 
 async function installHandler(event) {
@@ -168,7 +175,7 @@ function asyncFetchHandler(event) {
 
 	event.respondWith(
 		(async function () {
-			if (!handlers.length) {
+			if (!self.handlers.length) {
 				await activateHandlers();
 			}
 			const res = await fetchHandler(event);
@@ -181,9 +188,10 @@ function asyncFetchHandler(event) {
 }
 
 async function fetchHandler(event) {
+	const genericHandler = await getHandler();
 	const routeHandlerBlacklist = ["//(.*)"];
 
-	const safeHandlers = handlers.filter(
+	const safeHandlers = self.handlers.filter(
 		(x) => !routeHandlerBlacklist.includes(x.routePattern)
 	);
 	const path = event.request.url.replace(location.origin, "");
@@ -194,7 +202,7 @@ async function fetchHandler(event) {
 		//console.log(foundHandler)
 		//TODO: check if the handler returns a response object, otherwise don't use it??
 		//return foundHandler.handler(event);
-		return self.handler(event);
+		return genericHandler(event);
 	}
 
 	const cacheMatch = await caches.match(event.request);
@@ -293,6 +301,7 @@ async function bootstrapHandler({ manifest }, bootstrapMessageEach) {
 	}
 	return modules;
 }
+
 async function registerModule(module) {
 	try {
 		if (module.includes && module.includes("NOTE:")) {
@@ -312,11 +321,12 @@ async function registerModule(module) {
 	should instantiate this function and add it to handlers, but also add to DB
 	*/
 		if (handler) {
-			let foundHandler = handlers.find((x) => x.handlerName === handler);
+			const genericHandler = await getHandler();
+			let foundHandler = self.handlers.find((x) => x.handlerName === handler);
 			let handlerFunction, handlerText;
-			if (handler === "./modules/service-worker.handler.js" && self.handler) {
+			if (handler === "./modules/service-worker.handler.js" && genericHandler) {
 				handlerText = "service-worker-handler-register-module";
-				handlerFunction = self.handler;
+				handlerFunction = genericHandler;
 				foundHandler = { handler, handlerText };
 			}
 			if (!foundHandler || !foundHandler.handler) {
@@ -325,7 +335,7 @@ async function registerModule(module) {
 			}
 			const foundExactHandler =
 				foundHandler &&
-				handlers.find(
+				self.handlers.find(
 					(x) => x.handlerName === handler && x.routePattern === route
 				);
 			if (foundExactHandler) {
@@ -339,7 +349,7 @@ async function registerModule(module) {
 				handlerText: handlerText || foundHandler.handlerText,
 			});
 			//console.log(`handler installed for ${route} (boot)`);
-			handlers.push({
+			self.handlers.push({
 				type,
 				routePattern: route,
 				route: type === "fetch" ? new RegExp(route) : route,
