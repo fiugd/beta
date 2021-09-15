@@ -1,5 +1,6 @@
 <!-- discord badge -->
-[![Discord](https://img.shields.io/discord/887775860881514557?color=%237289DA&logo=Discord&logoColor=white)](https://discord.gg/pdYZvsUexX)
+[![Discord Channel](https://img.shields.io/discord/887775860881514557?color=%237289DA&logo=Discord&logoColor=white)](https://discord.gg/pdYZvsUexX)
+[![Discord Invite](https://img.shields.io/badge/discord-invite-yall?color=%237289DA&logo=Discord&logoColor=white)](https://discord.com/channels/887775860881514557)
 
 ![image](https://user-images.githubusercontent.com/1816471/93670856-78e66b00-fa6c-11ea-9ee3-2d35db13c030.png)
 
