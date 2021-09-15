@@ -1,3 +1,5 @@
+TODO: Discord Badge
+
 ![image](https://user-images.githubusercontent.com/1816471/93670856-78e66b00-fa6c-11ea-9ee3-2d35db13c030.png)
 
 
