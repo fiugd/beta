@@ -75,6 +75,18 @@ const { UIManager, UIManagerAddChanged } = (() => {
 				name: manager.name,
 				tree: { [manager.name]: tree },
 				code,
+
+				state: {
+					opened: [],
+					selected: "",
+					changed: []
+				},
+				treeState: {
+					expand: [],
+					select: "",
+					changed: [],
+					new: []
+				}
 			};
 			manager.cache = uiCode;
 		}

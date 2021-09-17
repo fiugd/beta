@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-15T18:04:40.132Z
+	Build Date 2021-09-17T21:30:31.720Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -749,7 +749,18 @@ const utils = (() => {
                         tree: {
                             [manager.name]: tree
                         },
-                        code: code
+                        code: code,
+                        state: {
+                            opened: [],
+                            selected: "",
+                            changed: []
+                        },
+                        treeState: {
+                            expand: [],
+                            select: "",
+                            changed: [],
+                            new: []
+                        }
                     };
                     manager.cache = uiCode;
                 }(), Object.keys(manager.changed).length && (overlayedWithChanges = function(changed, cache) {
