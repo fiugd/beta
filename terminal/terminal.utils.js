@@ -35,9 +35,10 @@ export { chalk, jsonColors };
 
 export const fetchJSON = url => fetch(url).then(x => x.json());
 
-export const getCurrentService = async () => {
+export const getCurrentService = async (prop="name") => {
 	const currentServiceId = localStorage.getItem('lastService');
-	if(!currentServiceId && currentServiceId !== "0"){
+	if(!currentServiceId || currentServiceId === "0"){
+		if(prop==="all") return { id: 0, name: '~'};
 		return '~';
 	}
 	const { result: [ service ] } = await fetch(`/service/read/${currentServiceId}`, {
@@ -46,7 +47,8 @@ export const getCurrentService = async () => {
 			"content-type": "application/json",
 		},
 	}).then(x => x.json());
-	return service.name;
+	if(prop==="all") return service;
+	return service[prop];
 };
 
 export const readDir = async (serviceName, dir, cwd) => {
@@ -83,3 +85,51 @@ export const readDir = async (serviceName, dir, cwd) => {
 		return { error };
 	}
 };
+
+export const addFile = async (target, source, service={}) => {
+	const currentService = await getCurrentService("all");
+	const serviceName = service.name || currentService.name;
+	const serviceId = service.id || currentService.id;
+	const body = JSON.stringify({
+		name: serviceName,
+		id: serviceId,
+		operation: { name: "addFile", source, target }
+	});
+	try {
+		return fetch("https://beta.fiug.dev/service/update/"+serviceId, {
+			method: "POST",
+			headers: {
+				"accept": "application/json",
+				"content-type": "application/json",
+			},
+			body,
+		}).then(x => x.json());
+	} catch(e){
+		console.log(e);
+		return { error: 'failed to write file: ' + target }
+	}
+}
+
+export const addFolder = async (target, service={}) => {
+	const currentService = await getCurrentService("all");
+	const serviceName = service.name || currentService.name;
+	const serviceId = service.id || currentService.id;
+	const body = JSON.stringify({
+		name: serviceName,
+		id: serviceId,
+		operation: { name: "addFolder", target }
+	});
+	try {
+		return fetch("https://beta.fiug.dev/service/update/"+serviceId, {
+			method: "POST",
+			headers: {
+				"accept": "application/json",
+				"content-type": "application/json",
+			},
+			body,
+		}).then(x => x.json());
+	} catch(e){
+		console.log(e);
+		return { error: 'failed to create folder: ' + target }
+	}
+}

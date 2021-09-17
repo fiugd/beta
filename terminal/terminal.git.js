@@ -7,9 +7,11 @@ https://medium.com/@urna.hybesis/git-from-scratch-5-steps-guide-8943f19c62b
 https://googlechrome.github.io/samples/service-worker/post-message/
 
 */
-import GetOps from './terminal.ops.js';
+import ini from 'https://cdn.skypack.dev/ini';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
-import { chalk, jsonColors, getCurrentService } from './terminal.utils.js';
+
+import GetOps from './terminal.ops.js';
+import { chalk, jsonColors, getCurrentService, addFile, addFolder } from './terminal.utils.js';
 
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
@@ -275,41 +277,52 @@ Example:
 };
 
 class GitConfig {
-	constructor({ service }={}){
+	constructor(service){
 		this.root = location.origin;
 		this.service = service;
-		this.url = `${this.root}/${service ? service+'/' :''}.git/config`;
+		this.path = '.git/config';
+		this.url = `${this.root}/${this.service.name}/${this.path}`;
 	}
 	async update(prop, value){
 		await this.read();
-		fn(this.config);
-		await this.save();
+		const propSplit = prop.split('.');
+		let cursor = this.config;
+		for(var i=0, len=propSplit.length; i<len; i++){
+			cursor[propSplit[i]] = i === len-1
+				? value
+				: cursor[propSplit[i]] || {};
+			cursor = cursor[propSplit[i]];
+		}
+		return await this.save();
 	}
 	async read(){
 		let configText = await fetch(this.url).then(x=> x.ok ? x.text() : undefined);
-		configText = configText.split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
-		const ConfigProxy = (config) => {
-			const get = (target, key, receiver) => {
-				const ignore = target[key] ||
-					['toJSON', 'toObject', 'then'].includes(key);
-				if(ignore) return Reflect.get(target, key, receiver);
-				target[key] = {};
-				return ConfigProxy(target[key]);
-			};
-			return new Proxy(config, { get });
-		};
-		this.config = ConfigProxy(
-			configText
-				? ini.parse(configText)
-				: {}
-		);
+		configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
+		this.config = ini.parse(configText);
 	}
 	async save(){
-		const { config } = this;
-		console.log(`\nsave config to ${this.url}:\n`);
+		const { config, path } = this;
+		const source = ini.encode(config, { whitespace: true });
+		const service = this.service;
 		console.log(JSON.stringify(config, null, 2)+'\n\n');
-		console.log(ini.encode(config, { whitespace: true }) + '\n\n');
+		console.log(source);
+
+		let response = `saved config to ${this.url}`;
+		try {
+			// const {error:addFolderError} = await addFolder(`.git`, service);
+			// if(addFolderError){
+			// 	response = addFolderError;
+			// 	return;
+			// }
+			const {error:addFileError} = await addFile(path, source, service);
+			if(addFileError) response = addFileError;
+		} catch(e){
+			console.log(e);
+			response = 'error: ' + e.message;
+		}
+		return response + '\n';
 	}
+	
 }
 
 const config = async ({ term }, args) => {
@@ -319,9 +332,9 @@ const config = async ({ term }, args) => {
 	const prop = local || global;
 	const value = anon.join(' ').replace(/['"]/g, '')
 	const service = local
-		? await getCurrentService()
-		: '';
-	return await(new GitConfig({ service })).update(prop, value);
+		? await getCurrentService("all")
+		: { name: '~', id: 0 };
+	return await(new GitConfig(service)).update(prop, value);
 };
 const list = async ({ term }, args) => {
 	const { _unknown=[] } = args;

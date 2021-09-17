@@ -1,6 +1,6 @@
 const semVer = `([0-9]+(\.[0-9]+)+)`;
 const iso8601Date = `[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?`;
-const semVerDateRegex = new RegExp(`v${semVer}-${iso8601Date}\$`);
+const semVerDateRegex = new RegExp(`v${semVer}\$`);
 
 const getCacheName = async () => {
 	const allCaches = await caches.keys();
