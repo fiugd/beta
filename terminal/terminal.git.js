@@ -309,11 +309,11 @@ class GitConfig {
 
 		let response = `saved config to ${this.url}`;
 		try {
-			// const {error:addFolderError} = await addFolder(`.git`, service);
-			// if(addFolderError){
-			// 	response = addFolderError;
-			// 	return;
-			// }
+			const {error:addFolderError} = await addFolder(`.git`, service);
+			if(addFolderError){
+				response = addFolderError;
+				return;
+			}
 			const {error:addFileError} = await addFile(path, source, service);
 			if(addFileError) response = addFileError;
 		} catch(e){
