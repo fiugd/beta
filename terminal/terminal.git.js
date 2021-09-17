@@ -9,7 +9,7 @@ https://googlechrome.github.io/samples/service-worker/post-message/
 */
 import GetOps from './terminal.ops.js';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
-import { chalk, jsonColors } from './terminal.utils.js';
+import { chalk, jsonColors, getCurrentService } from './terminal.utils.js';
 
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
@@ -274,10 +274,54 @@ Example:
 	return chalk.hex('#ccc')(`DONE\n`);
 };
 
+class GitConfig {
+	constructor({ service }={}){
+		this.root = location.origin;
+		this.service = service;
+		this.url = `${this.root}/${service ? service+'/' :''}.git/config`;
+	}
+	async update(prop, value){
+		await this.read();
+		fn(this.config);
+		await this.save();
+	}
+	async read(){
+		let configText = await fetch(this.url).then(x=> x.ok ? x.text() : undefined);
+		configText = configText.split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
+		const ConfigProxy = (config) => {
+			const get = (target, key, receiver) => {
+				const ignore = target[key] ||
+					['toJSON', 'toObject', 'then'].includes(key);
+				if(ignore) return Reflect.get(target, key, receiver);
+				target[key] = {};
+				return ConfigProxy(target[key]);
+			};
+			return new Proxy(config, { get });
+		};
+		this.config = ConfigProxy(
+			configText
+				? ini.parse(configText)
+				: {}
+		);
+	}
+	async save(){
+		const { config } = this;
+		console.log(`\nsave config to ${this.url}:\n`);
+		console.log(JSON.stringify(config, null, 2)+'\n\n');
+		console.log(ini.encode(config, { whitespace: true }) + '\n\n');
+	}
+}
+
 const config = async ({ term }, args) => {
 	const { _unknown=[] } = args;
 	const { keyed, anon } = unknownArgsHelper(_unknown);
-	return jsonColors({ keyed, anon });
+	const { local, global } = keyed;
+	const prop = local || global;
+	const value = anon.join(' ').replace(/['"]/g, '')
+	const service = local
+		? await getCurrentService()
+		: '';
+	return await(new GitConfig({ service })).update(prop, value);
 };
 const list = async ({ term }, args) => {
 	const { _unknown=[] } = args;

@@ -1,4 +1,4 @@
-import { chalk, jsonColors } from './terminal.utils.js';
+import { chalk, jsonColors,getCurrentService } from './terminal.utils.js';
 import { pather } from '/shared/modules/utilities.mjs';
 
 const state = {
@@ -20,21 +20,6 @@ const mapSourceDestArg = (args) => {
 	return { ...args, src, tgt };
 };
 
-const getCurrentService = async () => {
-	const currentServiceId = localStorage.getItem('lastService');
-	if(!currentServiceId && currentServiceId !== "0"){
-		return '~';
-	}
-
-	const { result: [ service ] } = await fetch(`/service/read/${currentServiceId}`, {
-		"headers": {
-			"accept": "application/json",
-			"content-type": "application/json",
-		},
-	}).then(x => x.json());
-
-	return service.name;
-};
 state.service = await getCurrentService();
 state.cwd = state.service + '/';
 

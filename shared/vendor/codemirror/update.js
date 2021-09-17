@@ -86,6 +86,9 @@ const updates = [[
 ],[
 	`/crosshj/fiug-beta/terminal/terminal.lib.js`,
 	`/_/modules/terminal/terminal.lib.js`
+],[
+	`/crosshj/fiug-beta/terminal/terminal.utils.js`,
+	`/_/modules/terminal/terminal.utils.js`
 ]];
 
 const updateCache = async (source, target) => {
