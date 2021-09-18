@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T04:36:54.458Z
+	Build Date 2021-09-18T04:47:50.686Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -382,7 +382,7 @@ const utils = (() => {
                             config: {}
                         },
                         "settings.json": {},
-                        Welcome: {}
+                        welcome: {}
                     }
                 }
             }, await servicesStore.setItem("0", foundService), await filesStore.setItem("~/.git/config", ""), 

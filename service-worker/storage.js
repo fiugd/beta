@@ -542,7 +542,7 @@ const StorageManager = (() => {
 					tree: { '~': {
 						'.git': { config: {} },
 						'settings.json': {},
-						'Welcome': {}
+						'welcome': {}
 					}},
 				};
 				await servicesStore.setItem('0', foundService);
