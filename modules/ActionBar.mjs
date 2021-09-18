@@ -84,16 +84,14 @@ function ActionBar() {
 	<div class="action-bar-top">
 		<ul role="toolbar" class="">
 				<li class="explorer checked" role="button" title="Code">
-					<!-- a></a -->
 					<i class="material-icons">code</i>
 				</li>
-				<li class="search" role="button" title="Search">
+				<!-- <li class="search" role="button" title="Search">
 					<i class="material-icons">search</i>
-					<!-- a></a -->
-				</li>
-				<li class="services" role="button" title="Services">
+				</li> -->
+				<!-- <li class="services" role="button" title="Services">
 					<i class="material-icons">device_hub</i>
-				</li>
+				</li> -->
 				<!-- li class="services" role="button" title="">
 					<i class="material-icons">queue_music</i>
 				</li -->
@@ -131,6 +129,7 @@ function ActionBar() {
 			query: "li.explorer",
 			action: "showServiceCode",
 		},
+		/*
 		{
 			query: "li.search",
 			action: "showSearch",
@@ -139,6 +138,7 @@ function ActionBar() {
 			query: "li.services",
 			action: "showServicesMap",
 		},
+		*/
 	];
 
 	triggers.forEach((trigger) => {
@@ -172,6 +172,7 @@ function ActionBar() {
 				e.target.id === "open-settings-view"),
 	});
 
+	/*
 	attach({
 		name: "ActionBar",
 		eventName: "ui",
@@ -185,6 +186,7 @@ function ActionBar() {
 			actionBar.querySelector("li.search").classList.add("checked");
 		},
 	});
+	*/
 }
 
 export default ActionBar;
