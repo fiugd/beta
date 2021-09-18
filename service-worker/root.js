@@ -14,8 +14,16 @@ const initRootService = async ({ stores }) => {
 	await services.setItem('0', service);
 	await files.setItem("~/.git/config", '\n');
 	await files.setItem("~/settings.json", '{}');
-	await files.setItem("~/.profile", '\n#configure prompt here');
-	await files.setItem("~/welcome", 'welcome to fiug\ntodo: make this better\n');
+
+	await files.setItem("~/.profile", `
+# configure prompt here
+# https://phoenixnap.com/kb/change-bash-prompt-linux
+`.trim() +'\n');
+
+	await files.setItem("~/welcome", `
+Welcome to fiug!
+TODO: make this better
+`.trim() +'\n');
 
 	await changes.setItem(`state-${service.name}-opened`, [
 		{ name: 'welcome', order: 0 }
