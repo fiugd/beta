@@ -2543,6 +2543,10 @@ notes-section.loading:after {
 	justify-content: space-between;
 }
 
+#terminal{
+	background: var(--main-theme-color);
+}
+
 .term-contain {
 	/* padding-top: 15px; */
 	/* height: calc(100vh - 30px); */
