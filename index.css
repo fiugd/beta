@@ -873,7 +873,7 @@ notes-section.loading:after {
 }
 
 /* hide tree menu */
-#explorer #tree-view { calc(100% - 13px); }
+#explorer #tree-view { height: calc(100% - 13px); }
 #explorer #tree-menu { height: 13px; visibility: hidden; }
 /* hide tree menu (end) */
 
