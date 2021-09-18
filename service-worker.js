@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T04:47:50.686Z
+	Build Date 2021-09-18T18:30:04.181Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1815,8 +1815,9 @@ function asyncFetchHandler(event) {
 }
 
 async function fetchHandler(event) {
-    const genericHandler = await getHandler(), routeHandlerBlacklist = [ "//(.*)" ], safeHandlers = self.handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))), path = event.request.url.replace(location.origin, "");
-    if (safeHandlers.find((x => "fetch" === x.type && x.route.test(path)))) return genericHandler(event);
+    const genericHandler = await getHandler(), routeHandlerBlacklist = [ "//(.*)" ], path = event.request.url.replace(location.origin, "");
+    if (event.request.url.includes(location.origin + "/~/")) return genericHandler(event);
+    if (self.handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))).find((x => "fetch" === x.type && x.route.test(path)))) return genericHandler(event);
     const cacheMatch = await caches.match(event.request);
     return cacheMatch || await fetch(event.request);
 }

@@ -189,11 +189,15 @@ function asyncFetchHandler(event) {
 async function fetchHandler(event) {
 	const genericHandler = await getHandler();
 	const routeHandlerBlacklist = ["//(.*)"];
+	const path = event.request.url.replace(location.origin, "");
+
+	if(event.request.url.includes(location.origin+'/~/')){
+		return genericHandler(event);
+	}
 
 	const safeHandlers = self.handlers.filter(
 		(x) => !routeHandlerBlacklist.includes(x.routePattern)
 	);
-	const path = event.request.url.replace(location.origin, "");
 	const foundHandler = safeHandlers.find((x) => {
 		return x.type === "fetch" && x.route.test(path);
 	});
