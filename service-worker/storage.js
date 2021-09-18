@@ -532,7 +532,28 @@ const StorageManager = (() => {
 			// (currently doesn't do anything since app uses localStorage version of this)
 			await filesStore.setItem("lastService", params.id);
 
-			const foundService = await servicesStore.getItem(params.id);
+			let foundService = await servicesStore.getItem(params.id);
+
+			const initRootService = async () => {
+				foundService = {
+					name: '~',
+					id: 0,
+					type: 'default',
+					tree: { '~': {
+						'.git': { config: {} },
+						'settings.json': {},
+						'Welcome': {}
+					}},
+				};
+				await servicesStore.setItem('0', foundService);
+				await filesStore.setItem("~/.git/config", '');
+				await filesStore.setItem("~/settings.json", '{}');
+				await filesStore.setItem("~/welcome", '\nwelcome to fiug\ntodo: make this better\n');
+			};
+			if(!foundService && [0, '0'].includes(params.id)){
+				await initRootService();
+			}
+
 			if (foundService) {
 				foundService.code = await this.getCodeFromStorageUsingTree(
 					foundService.tree,

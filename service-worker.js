@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T03:33:21.264Z
+	Build Date 2021-09-18T04:36:54.458Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -370,8 +370,24 @@ const utils = (() => {
             };
         };
         await filesStore.setItem("lastService", params.id);
-        const foundService = await servicesStore.getItem(params.id);
-        if (foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
+        let foundService = await servicesStore.getItem(params.id);
+        if (!foundService && [ 0, "0" ].includes(params.id) && await (async () => {
+            foundService = {
+                name: "~",
+                id: 0,
+                type: "default",
+                tree: {
+                    "~": {
+                        ".git": {
+                            config: {}
+                        },
+                        "settings.json": {},
+                        Welcome: {}
+                    }
+                }
+            }, await servicesStore.setItem("0", foundService), await filesStore.setItem("~/.git/config", ""), 
+            await filesStore.setItem("~/settings.json", "{}"), await filesStore.setItem("~/welcome", "\nwelcome to fiug\ntodo: make this better\n");
+        })(), foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
         await addTreeState(foundService), JSON.stringify({
             result: [ foundService ]
         }, null, 2);
