@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T22:43:12.367Z
+	Build Date 2021-09-18T23:06:32.590Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -137,8 +137,8 @@ const utils = (() => {
         }
     };
     return await services.setItem("0", service), await files.setItem("~/.git/config", "\n"), 
-    await files.setItem("~/settings.json", "{}"), await files.setItem("~/.profile", "\n# configure prompt here\n# https://phoenixnap.com/kb/change-bash-prompt-linux\n".trim() + "\n"), 
-    await files.setItem("~/welcome", "\nWelcome to fiug!\nTODO: make this better\n".trim() + "\n"), 
+    await files.setItem("~/settings.json", "{}"), await files.setItem("~/.profile", '\n# configure prompt here\n# https://phoenixnap.com/kb/change-bash-prompt-linux\n# http://bashrcgenerator.com/\n\n# in the future, parse this and use for promptexport PS1="[\\033[38;5;14m]h[$(tput sgr0)] [$(tput sgr0)][\\033[38;5;2m]W[$(tput sgr0)]\n\\$ [$(tput sgr0)]"' + "\n\n".trim() + "\n"), 
+    await files.setItem("~/welcome", '\nWelcome to fiug!\n\nHere are some tips and examples.\n\nClone a repo:\ngit clone crosshj/fiug-welcome\n\nOpen a repo in editor:\ngit open crosshj/fiug-welcome\n\nView all changed files:\ngit status\n\nView changes:\ngit diff\n\nCreate and push a commit to github:\ngit commit -m "message about changes"\n\nDownload all templates for preview:\ngit clone crosshj/fiug-plugins\n\nThis previews a file\npreview *.*\n\nClick on preview and hit Control to show a quit button.\n\nUse git config to set your name, email, ang github token.\n\n\n'.trim() + "\n"), 
     await changes.setItem(`state-${service.name}-opened`, [ {
         name: "welcome",
         order: 0
