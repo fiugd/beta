@@ -871,6 +871,11 @@ notes-section.loading:after {
 	overflow-x: hidden;
 }
 
+#explorer #tree-menu {
+	height: 13px;
+	visibility: hidden;
+}
+
 #tree-menu {
 	height: 35px;
 	display: flex;
