@@ -868,7 +868,7 @@ notes-section.loading:after {
 	white-space: nowrap;
 	font-size: 1.03em;
 /* 	overflow-y: auto; */
-	overflow-y: scroll;
+	overflow-y: overlay;
 	overflow-x: hidden;
 }
 
