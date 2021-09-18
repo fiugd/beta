@@ -199,6 +199,7 @@ const ProjectOpener = () => {
 };
 
 const ScrollShadow = () => {
+	const showMenuBar = false;
 	let scrollShadow = htmlToElement(`
 		<div class="scroll-shadow">
 			<style>
@@ -206,7 +207,7 @@ const ScrollShadow = () => {
 					box-shadow: #000000 0 6px 6px -6px inset;
 					height: 6px;
 					position: absolute;
-					top: 35px;
+					${showMenuBar?'top: 35px;':''}
 					left: 0;
 					right: 0;
 					display: none;
