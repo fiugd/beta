@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T18:30:04.181Z
+	Build Date 2021-09-18T22:30:52.905Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -120,7 +120,37 @@ const utils = (() => {
             return ![ "image/", "audio/", "video/", "wasm", "application/zip" ].find((x => contentType.includes(x))) || [ "image/svg", "image/x-portable-pixmap" ].find((x => contentType.includes(x))) || [ ".ts" ].find((x => filename.includes(x))) ? await fetched.text() : await fetched.blob();
         }
     };
-})(), StorageManager = (() => {
+})(), initRootService = async ({stores: stores}) => {
+    const {services: services, files: files, changes: changes} = stores, service = {
+        name: "~",
+        id: 0,
+        type: "default",
+        tree: {
+            "~": {
+                ".git": {
+                    config: {}
+                },
+                ".profile": {},
+                "settings.json": {},
+                welcome: {}
+            }
+        }
+    };
+    return await services.setItem("0", service), await files.setItem("~/.git/config", "\n"), 
+    await files.setItem("~/settings.json", "{}"), await files.setItem("~/.profile", "\n#configure prompt here"), 
+    await files.setItem("~/welcome", "welcome to fiug\ntodo: make this better\n"), await changes.setItem(`state-${service.name}-opened`, [ {
+        name: "welcome",
+        order: 0
+    } ]), service;
+};
+
+class RootService {
+    constructor(stores) {
+        this.stores = stores, this.init = () => initRootService(this);
+    }
+}
+
+const StorageManager = (() => {
     const defaultServices = () => [];
     async function getCodeFromStorageUsingTree(tree, fileStore, serviceName) {
         const files = (0, this.utils.flattenTree)(tree), allFilesFromService = {}, fileStoreKeys = await fileStore.keys();
@@ -337,70 +367,65 @@ const utils = (() => {
         }
         return file;
     }
-    const handleServiceRead = (servicesStore, filesStore, fetchFileContents, changesStore) => async function(params, event) {
-        const cacheHeader = event.request.headers.get("x-cache"), defaults = [];
-        if (0 !== Number(params.id) && !params.id || "*" === params.id) {
-            const savedServices = [];
-            await servicesStore.iterate(((value, key) => {
-                savedServices.push(value);
-            }));
-            for (var i = 0, len = savedServices.length; i < len; i++) {
-                const service = savedServices[i], code = await this.getCodeFromStorageUsingTree(service.tree, filesStore, service.name);
-                service.code = code;
-            }
-            const allServices = [ ...defaults, ...savedServices ].sort(((a, b) => Number(a.id) - Number(b.id))).map((x => ({
-                id: x.id,
-                name: x.name
-            })));
-            return JSON.stringify({
-                result: this.utils.unique(allServices, (x => Number(x.id)))
-            }, null, 2);
-        }
-        const addTreeState = async service => {
-            const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
-            service.state = {
-                opened: opened,
-                selected: selected,
-                changed: changed
-            }, service.treeState = {
-                expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
-                select: selected,
-                changed: changed,
-                new: []
-            };
+    const handleServiceRead = (servicesStore, filesStore, fetchFileContents, changesStore) => {
+        const stores = {
+            files: filesStore,
+            services: servicesStore,
+            changes: changesStore
         };
-        await filesStore.setItem("lastService", params.id);
-        let foundService = await servicesStore.getItem(params.id);
-        if (!foundService && [ 0, "0" ].includes(params.id) && await (async () => {
-            foundService = {
-                name: "~",
-                id: 0,
-                type: "default",
-                tree: {
-                    "~": {
-                        ".git": {
-                            config: {}
-                        },
-                        "settings.json": {},
-                        welcome: {}
-                    }
+        return async function(params, event) {
+            const cacheHeader = event.request.headers.get("x-cache"), defaults = [];
+            if (0 !== Number(params.id) && !params.id || "*" === params.id) {
+                const savedServices = [];
+                await servicesStore.iterate(((value, key) => {
+                    savedServices.push(value);
+                }));
+                for (var i = 0, len = savedServices.length; i < len; i++) {
+                    const service = savedServices[i], code = await this.getCodeFromStorageUsingTree(service.tree, filesStore, service.name);
+                    service.code = code;
                 }
-            }, await servicesStore.setItem("0", foundService), await filesStore.setItem("~/.git/config", ""), 
-            await filesStore.setItem("~/settings.json", "{}"), await filesStore.setItem("~/welcome", "\nwelcome to fiug\ntodo: make this better\n");
-        })(), foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
-        await addTreeState(foundService), JSON.stringify({
-            result: [ foundService ]
-        }, null, 2);
-        const lsServices = [] || [], result = {
-            result: "*" !== params.id && params.id ? lsServices.filter((x => Number(x.id) === Number(params.id))) : lsServices
+                const allServices = [ ...defaults, ...savedServices ].sort(((a, b) => Number(a.id) - Number(b.id))).map((x => ({
+                    id: x.id,
+                    name: x.name
+                })));
+                return JSON.stringify({
+                    result: this.utils.unique(allServices, (x => Number(x.id)))
+                }, null, 2);
+            }
+            const addTreeState = async service => {
+                const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
+                service.state = {
+                    opened: opened,
+                    selected: selected,
+                    changed: changed
+                }, service.treeState = {
+                    expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
+                    select: selected,
+                    changed: changed,
+                    new: []
+                };
+            };
+            await filesStore.setItem("lastService", params.id);
+            let foundService = await servicesStore.getItem(params.id);
+            if (!foundService && [ 0, "0" ].includes(params.id)) {
+                const root = new RootService(stores);
+                foundService = await root.init();
+            }
+            if (foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
+            await addTreeState(foundService), JSON.stringify({
+                result: [ foundService ]
+            }, null, 2);
+            const lsServices = [] || [], result = {
+                result: "*" !== params.id && params.id ? lsServices.filter((x => Number(x.id) === Number(params.id))) : lsServices
+            };
+            return await this.fileSystemTricks({
+                result: result,
+                filesStore: filesStore,
+                servicesStore: servicesStore,
+                cache: cacheHeader,
+                fetchFileContents: fetchFileContents
+            }), result.forEach(addTreeState), JSON.stringify(result, null, 2);
         };
-        return await this.fileSystemTricks({
-            result: result,
-            filesStore: filesStore,
-            servicesStore: servicesStore,
-            cache: cacheHeader,
-            fetchFileContents: fetchFileContents
-        }), result.forEach(addTreeState), JSON.stringify(result, null, 2);
     };
     return class {
         stores=(() => {

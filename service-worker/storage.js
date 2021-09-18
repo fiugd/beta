@@ -1,3 +1,5 @@
+import { RootService } from './root.js';
+
 const StorageManager = (() => {
 	const getStores = () => {
 		var driver = [
@@ -472,8 +474,13 @@ const StorageManager = (() => {
 
 	const handleServiceRead = (
 		servicesStore, filesStore, fetchFileContents, changesStore
-	) =>
-		async function (params, event) {
+	) => {
+		const stores = {
+			files: filesStore,
+			services: servicesStore,
+			changes: changesStore
+		};
+		return async function (params, event) {
 			//also, what if not "file service"?
 			//also, what if "offline"?
 
@@ -534,24 +541,9 @@ const StorageManager = (() => {
 
 			let foundService = await servicesStore.getItem(params.id);
 
-			const initRootService = async () => {
-				foundService = {
-					name: '~',
-					id: 0,
-					type: 'default',
-					tree: { '~': {
-						'.git': { config: {} },
-						'settings.json': {},
-						'welcome': {}
-					}},
-				};
-				await servicesStore.setItem('0', foundService);
-				await filesStore.setItem("~/.git/config", '');
-				await filesStore.setItem("~/settings.json", '{}');
-				await filesStore.setItem("~/welcome", '\nwelcome to fiug\ntodo: make this better\n');
-			};
 			if(!foundService && [0, '0'].includes(params.id)){
-				await initRootService();
+				const root = new RootService(stores);
+				foundService = await root.init();
 			}
 
 			if (foundService) {
@@ -586,6 +578,7 @@ const StorageManager = (() => {
 			result.forEach(addTreeState);
 			return JSON.stringify(result, null, 2);
 		};
+	};
 
 	class StorageManager {
 		stores = getStores();
