@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-18T23:16:40.468Z
+	Build Date 2021-09-18T23:22:25.323Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -138,7 +138,7 @@ const utils = (() => {
     };
     return await services.setItem("0", service), await files.setItem("~/.git/config", "\n"), 
     await files.setItem("~/settings.json", "{}"), await files.setItem("~/.profile", '\n# configure prompt here\n# https://phoenixnap.com/kb/change-bash-prompt-linux\n# http://bashrcgenerator.com/\n\n# in the future, parse this and use for prompt\nexport PS1="[\\033[38;5;14m]h[$(tput sgr0)] [$(tput sgr0)][\\033[38;5;2m]W[$(tput sgr0)]\n\\$ [$(tput sgr0)]"' + "\n\n".trim() + "\n"), 
-    await files.setItem("~/welcome", '\nWelcome to fiug!\n\nHere are some tips and examples.  Try these in the terminal to the right.\n\nClone a repo:\ngit clone crosshj/fiug-welcome\n\nUse git config to set your name, email, ang github token.\n(OUT OF ORDER)\n\n(OUT OF ORDER)\nList all cloned repos:\ngit list\n\n(OUT OF ORDER)\nOpen a repo in editor:\ngit open crosshj/fiug-welcome\n\nView names of changed files:\ngit status\n\nView changes:\ngit diff\n\nView changes in a specific file:\ngit diff README.md\n\nCreate and push a commit to github:\ngit commit -m "message about changes"\n\nDownload all templates for preview:\ngit clone crosshj/fiug-plugins\n\nPreviews files:\npreview *.*\n\nPreview a specific file:\npreview README.md\n\nClick on preview and hit Control to show a quit button.\n\n'.trim() + "\n"), 
+    await files.setItem("~/welcome", '\nWelcome to fiug!\n\nHere are some tips and examples.  Try these in the terminal to the right.\n\nClone a repo:\ngit clone crosshj/fiug-welcome\n\n[OUT OF ORDER]\nUse git config to set your name, email, ang github token.\n\n[OUT OF ORDER]\nList all cloned repos:\ngit list\n\n[OUT OF ORDER]\nOpen a repo in editor:\ngit open crosshj/fiug-welcome\n\nView names of changed files:\ngit status\n\nView changes:\ngit diff\n\nView changes in a specific file:\ngit diff README.md\n\nCreate and push a commit to github:\ngit commit -m "message about changes"\n\nDownload all templates for preview:\ngit clone crosshj/fiug-plugins\n\nPreviews files:\npreview *.*\n\nPreview a specific file:\npreview README.md\n\nClick on preview and hit Control to show a quit button.\n\n'.trim() + "\n"), 
     await changes.setItem(`state-${service.name}-opened`, [ {
         name: "welcome",
         order: 0

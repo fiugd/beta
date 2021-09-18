@@ -35,14 +35,14 @@ Here are some tips and examples.  Try these in the terminal to the right.
 Clone a repo:
 git clone crosshj/fiug-welcome
 
+[OUT OF ORDER]
 Use git config to set your name, email, ang github token.
-(OUT OF ORDER)
 
-(OUT OF ORDER)
+[OUT OF ORDER]
 List all cloned repos:
 git list
 
-(OUT OF ORDER)
+[OUT OF ORDER]
 Open a repo in editor:
 git open crosshj/fiug-welcome
 
