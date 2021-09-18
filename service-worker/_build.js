@@ -1,34 +1,11 @@
-/*
-
-would like to bundle the service worker into one file and not have to use bastardized module.exports/require
-
-*** rollup:
-http://rollupjs.org/repl/
-https://github.com/rollup/rollup/blob/master/docs/999-big-list-of-options.md
-https://github.com/rollup/rollup/blob/master/docs/05-plugin-development.md
-https://rollupjs.org/guide/en/#outputformat
-https://rollupjs.org/guide/en/#rolluprollup
-
-
-parcel:
-https://parcel-repl.vercel.app/
-from https://github.com/parcel-bundler/parcel/issues/1253
-
-other:
-https://skalman.github.io/UglifyJS-online/
-https://try.terser.org/
-
-
-*/
-
-import rollupConfig  from './rollup.config.js';
-import terserConfig from './terser.config.js';
-
 import 'https://unpkg.com/rollup/dist/rollup.browser.js';
 import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
 import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
 
+import rollupConfig from 'https://beta.fiug.dev/crosshj/fiug-beta/service-worker/build/rollup.config.js';
+import terserConfig from 'https://beta.fiug.dev/crosshj/fiug-beta/service-worker/build/terser.config.js';
 import packageJson from "https://beta.fiug.dev/crosshj/fiug-beta/package.json" assert { type: "json" };
+
 const VERSION = `v${packageJson.version}`;
 const DATE = new Date().toISOString();
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
@@ -79,3 +56,24 @@ const {error} = await saveBuild(minified);
 console.log(error || `DONE\nsee ` +
 `https://beta.fiug.dev/${rollupConfig.output.file}`
 );
+
+/*
+NOTES from initial go at this:
+
+would like to bundle the service worker into one file and not have to use bastardized module.exports/require
+
+*** rollup:
+http://rollupjs.org/repl/
+https://github.com/rollup/rollup/blob/master/docs/999-big-list-of-options.md
+https://github.com/rollup/rollup/blob/master/docs/05-plugin-development.md
+https://rollupjs.org/guide/en/#outputformat
+https://rollupjs.org/guide/en/#rolluprollup
+
+parcel:
+https://parcel-repl.vercel.app/
+from https://github.com/parcel-bundler/parcel/issues/1253
+
+other:
+https://skalman.github.io/UglifyJS-online/
+https://try.terser.org/
+*/

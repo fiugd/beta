@@ -97,7 +97,7 @@ const ServicesManager = (() => {
 		});
 	};
 
-	const handleServiceChange = ({ storage, ui, utils, templates }) => async (
+	const handleServiceChange = ({ storage, utils, templates }) => async (
 		params,
 		event
 	) => {
@@ -124,8 +124,6 @@ const ServicesManager = (() => {
 			if (fileData) {
 				code = fileData || "";
 			}
-			if (serviceName && serviceName === ui.name)
-				return ui.change({ path, code, command, service });
 
 			const service = await servicesStore.iterate((value, key) => {
 				if (value.name === serviceName) return value;
@@ -170,7 +168,7 @@ const ServicesManager = (() => {
 		}
 	};
 
-	const handleServiceGetChanges = ({ storage, ui, utils, templates }) => async (
+	const handleServiceGetChanges = ({ storage, utils, templates }) => async (
 		params,
 		event,
 		query
@@ -460,7 +458,7 @@ const ServicesManager = (() => {
 
 	})();
 
-	const handleServiceUpdate = ({ storage, providers, ui, utils }) => async (
+	const handleServiceUpdate = ({ storage, providers, utils }) => async (
 		params,
 		event
 	) => {
@@ -610,9 +608,6 @@ const ServicesManager = (() => {
 				body.tree = parsedCode.tree;
 				body.code = parsedCode.files;
 			}
-
-			if (id === ui.id || id === ui.id.toString())
-				return ui.update({ service: body });
 
 			const preExistingService =
 				(await servicesStore.getItem(id + "")) || {};
@@ -772,12 +767,11 @@ const ServicesManager = (() => {
 	};
 
 	class ServicesManager {
-		constructor({ app, storage, providers, templates, ui, utils }) {
+		constructor({ app, storage, providers, templates, utils }) {
 			this.app = app;
 			this.storage = storage;
 			this.providers = providers;
 			this.templates = templates;
-			this.ui = ui;
 			this.utils = utils;
 
 			this.handlers = {

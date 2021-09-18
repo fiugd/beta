@@ -471,7 +471,7 @@ const StorageManager = (() => {
 	};
 
 	const handleServiceRead = (
-		servicesStore, filesStore, fetchFileContents, ui, changesStore
+		servicesStore, filesStore, fetchFileContents, changesStore
 	) =>
 		async function (params, event) {
 			//also, what if not "file service"?
@@ -482,13 +482,11 @@ const StorageManager = (() => {
 			// - if no id passed (or * passed), return all services from DB
 			const cacheHeader = event.request.headers.get("x-cache");
 
-			if (Number(params.id) === 0) return await ui.read();
-
 			const defaults = defaultServices();
 
 			//if not id, return all services
-			if (!params.id || params.id === "*") {
-				//TODO: include Fuig Service here, too!!!
+			const noValidId = (Number(params.id) !== 0 && !params.id);
+			if (noValidId || params.id === "*") {
 				const savedServices = [];
 				await servicesStore.iterate((value, key) => {
 					savedServices.push(value);
@@ -575,7 +573,7 @@ const StorageManager = (() => {
 		fileSystemTricks = fileSystemTricks.bind(this);
 		getFile = getFile.bind(this);
 
-		constructor({ utils, ui }) {
+		constructor({ utils }) {
 			this.utils = utils;
 			this.handlers = {
 				serviceSearch: handleServiceSearch(this.stores.files),
@@ -583,7 +581,6 @@ const StorageManager = (() => {
 					this.stores.services,
 					this.stores.files,
 					utils.fetchFileContents,
-					ui,
 					this.stores.changes
 				).bind(this),
 			};

@@ -2,7 +2,6 @@ import utils from "./utils.js";
 
 import { StorageManager } from "./storage.js";
 import { Router } from "./router.js";
-import { UIManager } from "./ui.js";
 import { ProviderManager } from "./provider.js";
 import { GithubProvider } from "./provider.github.js";
 import { ServicesManager } from "./services.js";
@@ -12,11 +11,7 @@ const init = async ({ cacheName }) => {
 	const swHandlers = self.handlers;
 	await utils.initMimeTypes();
 
-	//TODO: ideally, would not allow generic access of storage, instead access Manager methods
-	const ui = new UIManager("fiug", cacheName); // ui manager is a special kind of storage
-	const storage = new StorageManager({ utils, ui });
-	ui.init(storage.stores.handlers, storage.stores.changes);
-
+	const storage = new StorageManager({ utils });
 	const templates = new TemplateEngine({ storage });
 
 	const app = new Router({ storage, templates, swHandlers });
@@ -24,7 +19,7 @@ const init = async ({ cacheName }) => {
 		app, storage, utils, GithubProvider
 	});
 	const services = new ServicesManager({
-		app, storage, providers, ui, utils, templates
+		app, storage, providers, utils, templates
 	});
 
 	app.get("/service/search/", storage.handlers.serviceSearch); // move handler to services
@@ -49,31 +44,12 @@ const init = async ({ cacheName }) => {
 	app.get("/persist/:id?", utils.notImplementedHandler);
 
 	return async (event) => {
-		//console.warn('Service Request Handler - usage');
-		//console.log(event.request.url);
-
-		try {
-			const splitPath = event.request.url
-				.replace(location.origin, "")
-				.split("/");
-			if (splitPath.includes("::preview::") && splitPath.includes(ui.name)) {
-				return new Response(templates.NO_PREVIEW, {
-					headers: { "Content-Type": "text/html" },
-				});
-			}
-		} catch (e) {}
-
 		const serviceAPIMatch = await app.find(event.request);
 
 		const res = serviceAPIMatch
 			? await serviceAPIMatch.exec(event)
 			: "no match in service request listener!";
 		let response;
-
-		// if(res && res.type){ //most likely a blob
-		//     response = new Response(res, {headers:{'Content-Type': res.type }});
-		//     return response;
-		// }
 
 		if (event.request.url.includes("/::preview::/")) {
 			response = new Response(utils.addBase(res), {
@@ -95,10 +71,6 @@ const init = async ({ cacheName }) => {
 		}
 
 		return new Response(res);
-
-		// should be able to interact with instantiated services as well,
-		// ie. all '.welcome' files should be available
-		// each instantiated service should have its own store
 	};
 };
 

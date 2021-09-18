@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-17T21:30:31.720Z
+	Build Date 2021-09-18T03:33:21.264Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -337,11 +337,9 @@ const utils = (() => {
         }
         return file;
     }
-    const handleServiceRead = (servicesStore, filesStore, fetchFileContents, ui, changesStore) => async function(params, event) {
-        const cacheHeader = event.request.headers.get("x-cache");
-        if (0 === Number(params.id)) return await ui.read();
-        const defaults = [];
-        if (!params.id || "*" === params.id) {
+    const handleServiceRead = (servicesStore, filesStore, fetchFileContents, changesStore) => async function(params, event) {
+        const cacheHeader = event.request.headers.get("x-cache"), defaults = [];
+        if (0 !== Number(params.id) && !params.id || "*" === params.id) {
             const savedServices = [];
             await servicesStore.iterate(((value, key) => {
                 savedServices.push(value);
@@ -433,7 +431,7 @@ const utils = (() => {
         getCodeFromStorageUsingTree=getCodeFromStorageUsingTree.bind(this);
         fileSystemTricks=fileSystemTricks.bind(this);
         getFile=getFile.bind(this);
-        constructor({utils: utils, ui: ui}) {
+        constructor({utils: utils}) {
             var fileStore;
             this.utils = utils, this.handlers = {
                 serviceSearch: (fileStore = this.stores.files, async (params, event) => {
@@ -443,7 +441,7 @@ const utils = (() => {
                         fileStore: fileStore
                     }), serviceSearch.stream;
                 }),
-                serviceRead: handleServiceRead(this.stores.services, this.stores.files, utils.fetchFileContents, ui, this.stores.changes).bind(this)
+                serviceRead: handleServiceRead(this.stores.services, this.stores.files, utils.fetchFileContents, this.stores.changes).bind(this)
             };
         }
     };
@@ -683,125 +681,6 @@ const utils = (() => {
                 };
             })(this), this.restorePrevious();
         }
-    };
-})(), {UIManager: UIManager, UIManagerAddChanged: UIManagerAddChanged} = (() => {
-    const stringify = o => JSON.stringify(o, null, 2);
-    return {
-        UIManager: class {
-            id=0;
-            name;
-            changeStore=void 0;
-            cache=void 0;
-            changed=void 0;
-            constructor(name, cacheName) {
-                this.name = name, this.cacheName = cacheName;
-            }
-            init=(handlerStore, changeStore) => (async (manager, {handlerStore: handlerStore, changeStore: changeStore}) => {
-                manager.changeStore = changeStore, manager.changed = await changeStore.getItem("UIManagerChanged") || {};
-                const route = `^/${manager.name}/(.*)`, handler = "./modules/service-worker.handler.js";
-                let foundHandler, currentTry = 0;
-                for (;!foundHandler && currentTry < 5; ) foundHandler = handlers.find((x => x.handlerName === handler)), 
-                foundHandler || (currentTry++, await new Promise((r => setTimeout(r, 3e3))));
-                if (!foundHandler) return console.error("could not find a handler to base UIManager handler on!");
-                foundHandler && handlers.find((x => x.handlerName === handler && x.routePattern === route)) || (handlers.push({
-                    type: foundHandler.type,
-                    routePattern: route,
-                    route: new RegExp(route),
-                    handler: foundHandler.handler,
-                    handlerName: handler,
-                    handlerText: foundHandler.handlerText
-                }), await handlerStore.setItem(route, {
-                    type: foundHandler ? foundHandler.type : "fetch",
-                    route: route,
-                    handlerName: handler,
-                    handlerText: foundHandler ? foundHandler.handlerText : "service-worker-handler(set in ui manager)"
-                }));
-            })(this, {
-                handlerStore: handlerStore,
-                changeStore: changeStore
-            });
-            read=() => (async manager => {
-                const {cacheName: cacheName} = manager;
-                let overlayedWithChanges;
-                return manager.cache || await async function() {
-                    let tree = {};
-                    const code = [], cache = await caches.open(cacheName), keys = await cache.keys();
-                    for (var i = 0, len = keys.length; i < len; i++) {
-                        const request = keys[i], split = request.url.split(/(\/fiug\/|\/shared\/|\/_\/modules\/)/);
-                        split.shift();
-                        const pathSplit = split.join("").split("/").filter((x => !!x));
-                        let current = tree;
-                        for (var j = 0, jlen = pathSplit.length; j < jlen; j++) {
-                            const leafName = pathSplit[j];
-                            leafName && (current[leafName] = current[leafName] || {}, current = current[leafName]);
-                        }
-                        let name = (pathSplit[pathSplit.length - 1] || "").replace("/", "");
-                        code.push({
-                            name: name,
-                            code: [],
-                            url: request.url
-                        });
-                    }
-                    tree._ && (tree.modules = tree._.modules, delete tree._);
-                    const uiCode = {
-                        id: manager.id,
-                        name: manager.name,
-                        tree: {
-                            [manager.name]: tree
-                        },
-                        code: code,
-                        state: {
-                            opened: [],
-                            selected: "",
-                            changed: []
-                        },
-                        treeState: {
-                            expand: [],
-                            select: "",
-                            changed: [],
-                            new: []
-                        }
-                    };
-                    manager.cache = uiCode;
-                }(), Object.keys(manager.changed).length && (overlayedWithChanges = function(changed, cache) {
-                    const overlayCode = JSON.parse(JSON.stringify(cache.code));
-                    return Object.entries(changed).forEach((([key, value]) => {
-                        const changeFilename = key.split("/").pop(), foundCachedFile = overlayCode.find((x => x.name === changeFilename));
-                        foundCachedFile && (foundCachedFile.code = value);
-                    })), {
-                        ...cache,
-                        code: overlayCode
-                    };
-                }(manager.changed, manager.cache)), stringify({
-                    result: [ overlayedWithChanges || manager.cache ]
-                });
-            })(this);
-            update=args => (async (manager, {service: service}) => {
-                const {cacheName: cacheName} = manager, cache = await caches.open(cacheName), changesAsArray = Object.entries(manager.changed);
-                for (var i = 0, len = changesAsArray.length; i < len; i++) {
-                    const [key, value] = changesAsArray[i], fileName = key.split("/").pop(), managerCachedFile = manager.cache.code.find((x => x.name === fileName)), {url: url} = managerCachedFile, {contentType: contentType} = getMime(url) || {}, response = new Response(value, {
-                        headers: {
-                            "content-type": contentType || ""
-                        }
-                    });
-                    await cache.put(url, response), managerCachedFile.code = value;
-                }
-                return console.warn("TODO: save files to backend (if provider is available?)"), 
-                manager.changed = {}, await manager.changeStore.setItem("UIManagerChanged", manager.changed), 
-                stringify({
-                    result: [ service ]
-                });
-            })(this, args);
-            change=args => (async (manager, {path: path, code: code}) => (manager.changed[path] = code, 
-            console.warn(`changed a file at: ${path}`), await manager.changeStore.setItem("UIManagerChanged", manager.changed), 
-            stringify({
-                result: {
-                    path: path,
-                    code: code
-                }
-            })))(this, args);
-        },
-        UIManagerAddChanged: manager => {}
     };
 })(), ProviderManager = (() => {
     const stringify = o => JSON.stringify(o, null, 2);
@@ -1387,7 +1266,7 @@ const utils = (() => {
                 services: [ services.filter((x => 777 === Number(x.id))) ]
             }
         });
-    }, handleServiceChange = ({storage: storage, ui: ui, utils: utils, templates: templates}) => async (params, event) => {
+    }, handleServiceChange = ({storage: storage, utils: utils, templates: templates}) => async (params, event) => {
         const servicesStore = storage.stores.services;
         storage.stores.files;
         const changesStore = storage.stores.changes;
@@ -1404,12 +1283,7 @@ const utils = (() => {
         } catch (e) {}
         try {
             let {path: path, code: code, command: command, service: serviceName} = jsonData;
-            if (fileData && (code = fileData || ""), serviceName && serviceName === ui.name) return ui.change({
-                path: path,
-                code: code,
-                command: command,
-                service: service
-            });
+            fileData && (code = fileData || "");
             const service = await servicesStore.iterate(((value, key) => {
                 if (value.name === serviceName) return value;
             }));
@@ -1435,7 +1309,7 @@ const utils = (() => {
                 error: error
             });
         }
-    }, handleServiceGetChanges = ({storage: storage, ui: ui, utils: utils, templates: templates}) => async (params, event, query) => {
+    }, handleServiceGetChanges = ({storage: storage, utils: utils, templates: templates}) => async (params, event, query) => {
         const {flattenObject: flattenObject} = utils, servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes, {cwd: cwd} = query;
         let service;
         cwd && await servicesStore.iterate(((value, key) => {
@@ -1592,7 +1466,7 @@ const utils = (() => {
             utils: utils,
             changes: changes
         });
-    })(), handleServiceUpdate = ({storage: storage, providers: providers, ui: ui, utils: utils}) => async (params, event) => {
+    })(), handleServiceUpdate = ({storage: storage, providers: providers, utils: utils}) => async (params, event) => {
         const servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes;
         try {
             const {id: id} = params, body = await event.request.json(), {name: name, operation: operation} = body, isMoveOrRename = operation?.name?.includes("rename") || operation?.name?.includes("move"), isCopy = operation?.name?.includes("copy"), operationsUpdater = _operationsUpdater(operation);
@@ -1655,10 +1529,7 @@ const utils = (() => {
                 isMoveOrRename && delete sourcePos.parent[sourcePos.param];
             }
             const parsedCode = !Array.isArray(body.code) && utils.safe((() => JSON.parse(body.code)));
-            if (parsedCode && parsedCode.tree && (body.tree = parsedCode.tree, body.code = parsedCode.files), 
-            id === ui.id || id === ui.id.toString()) return ui.update({
-                service: body
-            });
+            parsedCode && parsedCode.tree && (body.tree = parsedCode.tree, body.code = parsedCode.files);
             const service = {
                 ...await servicesStore.getItem(id + "") || {},
                 name: name,
@@ -1733,9 +1604,9 @@ const utils = (() => {
         }
     };
     return class {
-        constructor({app: app, storage: storage, providers: providers, templates: templates, ui: ui, utils: utils}) {
+        constructor({app: app, storage: storage, providers: providers, templates: templates, utils: utils}) {
             this.app = app, this.storage = storage, this.providers = providers, this.templates = templates, 
-            this.ui = ui, this.utils = utils, this.handlers = {
+            this.utils = utils, this.handlers = {
                 serviceCreate: handleServiceCreate(this),
                 serviceChange: handleServiceChange(this),
                 serviceGetChanges: handleServiceGetChanges(this),
@@ -1800,12 +1671,9 @@ const utils = (() => {
 }, init = async ({cacheName: cacheName}) => {
     const swHandlers = self.handlers;
     await utils.initMimeTypes();
-    const ui = new UIManager("fiug", cacheName), storage = new StorageManager({
-        utils: utils,
-        ui: ui
-    });
-    ui.init(storage.stores.handlers, storage.stores.changes);
-    const templates = new TemplateEngine({
+    const storage = new StorageManager({
+        utils: utils
+    }), templates = new TemplateEngine({
         storage: storage
     }), app = new Router({
         storage: storage,
@@ -1820,7 +1688,6 @@ const utils = (() => {
         app: app,
         storage: storage,
         providers: providers,
-        ui: ui,
         utils: utils,
         templates: templates
     });
@@ -1833,14 +1700,6 @@ const utils = (() => {
     app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler), app.get("/manage/:id?", utils.notImplementedHandler), 
     app.get("/monitor/:id?", utils.notImplementedHandler), app.get("/persist/:id?", utils.notImplementedHandler), 
     async event => {
-        try {
-            const splitPath = event.request.url.replace(location.origin, "").split("/");
-            if (splitPath.includes("::preview::") && splitPath.includes(ui.name)) return new Response(templates.NO_PREVIEW, {
-                headers: {
-                    "Content-Type": "text/html"
-                }
-            });
-        } catch (e) {}
         const serviceAPIMatch = await app.find(event.request), res = serviceAPIMatch ? await serviceAPIMatch.exec(event) : "no match in service request listener!";
         let response;
         if (event.request.url.includes("/::preview::/")) return response = new Response(utils.addBase(res), {
