@@ -29,45 +29,53 @@ const initRootService = async ({ stores }) => {
 
 	await files.setItem("~/welcome.md", `
 Welcome to fiug!
+================
 
-Try out the terminal to the right.
+Try out the terminal on the right.
 
-Clone a repo:
-git clone crosshj/fiug-welcome
+#### clone a repo:
+\`git clone crosshj/fiug-welcome\`
 
-[OUT OF ORDER]
-git config sets your name, email, and token.
+#### configure git:
+\`git config --global user.name john\`
+\`git config --global user.email johndoe@example.com\`
+\`git config --global user.password {your github token}\`
+> OUT OF ORDER
 
-[OUT OF ORDER]
-List all cloned repos:
-git list
+#### list all cloned repos:
+\`git list\`
+> OUT OF ORDER
 
-[OUT OF ORDER]
-Open a repo in editor:
-git open crosshj/fiug-welcome
+#### open a repo in editor:
+\`git open crosshj/fiug-welcome\`
+> OUT OF ORDER
 
-View names of changed files:
-git status
+#### view names of changed files:
+\`git status\`
 
-View changes:
-git diff
+#### view changes:
+\`git diff\`
 
-View changes in a specific file:
-git diff README.md
+#### view changes in a specific file:
+\`git diff README.md\`
 
-Create and push a commit to github:
-git commit -m "message about changes"
+#### create and push a commit to github:
+\`git commit -m "message about changes"\`
 
-Download all templates for preview:
-git clone crosshj/fiug-plugins
+#### download all templates (for preview):
+\`git clone crosshj/fiug-plugins\`
 
-Previews files:
-preview *.*
+#### preview files:
+\`preview *.*\`
 
-Preview a specific file:
-preview README.md
+#### preview a specific file:
+\`preview README.md\`
 
-Click preview pane press Control to quit.
+#### quit preview
+1. click preview pane
+2. press Control
+3. click quit
+
 `.trim() +'\n');
 
 	await changes.setItem(`state-${service.name}-opened`, [
