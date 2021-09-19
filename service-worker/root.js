@@ -8,7 +8,7 @@ const initRootService = async ({ stores }) => {
 			'.git': { config: {} },
 			'.profile': {},
 			'settings.json': {},
-			'welcome': {}
+			'welcome.md': {}
 		}},
 	};
 	await services.setItem('0', service);
@@ -27,7 +27,7 @@ const initRootService = async ({ stores }) => {
 
 `.trim() +'\n');
 
-	await files.setItem("~/welcome", `
+	await files.setItem("~/welcome.md", `
 Welcome to fiug!
 
 Try out the terminal to the right.
@@ -36,7 +36,7 @@ Clone a repo:
 git clone crosshj/fiug-welcome
 
 [OUT OF ORDER]
-git config sets your name, email, ang token.
+git config sets your name, email, and token.
 
 [OUT OF ORDER]
 List all cloned repos:
@@ -71,7 +71,7 @@ Click preview pane press Control to quit.
 `.trim() +'\n');
 
 	await changes.setItem(`state-${service.name}-opened`, [
-		{ name: 'welcome', order: 0 }
+		{ name: 'welcome.md', order: 0 }
 	]);
 
 	return service;
