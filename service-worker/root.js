@@ -30,13 +30,13 @@ const initRootService = async ({ stores }) => {
 	await files.setItem("~/welcome", `
 Welcome to fiug!
 
-Here are some tips and examples.  Try these in the terminal to the right.
+Try out the terminal to the right.
 
 Clone a repo:
 git clone crosshj/fiug-welcome
 
 [OUT OF ORDER]
-Use git config to set your name, email, ang github token.
+git config sets your name, email, ang token.
 
 [OUT OF ORDER]
 List all cloned repos:
@@ -67,8 +67,7 @@ preview *.*
 Preview a specific file:
 preview README.md
 
-Click on preview and hit Control to show a quit button.
-
+Click preview pane press Control to quit.
 `.trim() +'\n');
 
 	await changes.setItem(`state-${service.name}-opened`, [
