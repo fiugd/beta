@@ -114,6 +114,7 @@ export default {
 		"cmd": "shell",
 		"zsh": "shell",
 		"fish": "shell",
+		"profile": "shell",
 		"slim": "slim",
 		"smarty": "smarty",
 		"smarty.tpl": "smarty",
