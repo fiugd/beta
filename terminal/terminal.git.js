@@ -339,19 +339,26 @@ const config = async ({ term }, args) => {
 const list = async ({ term }, args) => {
 	const { result: allServices } = await fetchJSON('/service/read');
 	return '\n' + allServices
-		.map(x=>x.name)
-		.filter(x => x!=='~')
+		.map(x=>x.name + ` (${x.id})`)
+		.filter(x => x !== '~ (0)')
 		.join('\n') + '\n';
 };
 const open = async ({ term }, args) => {
 	const { _unknown=[] } = args;
 	const { keyed, anon } = unknownArgsHelper(_unknown);
-	return jsonColors({ keyed, anon });
+	const param = anon.join('');
+	const { result: allServices } = await fetchJSON('/service/read');
+	const found = allServices.find(x => (x.id+'') === param || x.name === param);
+	if(!found) return `could not find repo; unable to open\n`;
+
+	localStorage.setItem('lastService',found.id);
+	//document.location.reload();
+	return 'repo opened, please refresh page to continue\n';
 };
 const close = async ({ term }, args) => {
-	const { _unknown=[] } = args;
-	const { keyed, anon } = unknownArgsHelper(_unknown);
-	return jsonColors({ keyed, anon });
+	localStorage.setItem('lastService',found.id);
+	//document.location.reload();
+	return 'repo closed, please refresh page to continue\n';
 };
 
 const branch = async ({ term }) => notImplemented('branch');

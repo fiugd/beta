@@ -45,9 +45,9 @@ Try out the terminal on the right.
 #### list all cloned repos:
 \`git list\`
 
-#### open a repo in editor:
+#### open/close a repo in editor:
 \`git open crosshj/fiug-welcome\`
-> OUT OF ORDER
+\`git close\`
 
 #### view names of changed files:
 \`git status\`
