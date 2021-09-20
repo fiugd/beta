@@ -55,7 +55,6 @@ export const readDir = async (serviceName, dir, cwd) => {
 	let response, error;
 	try {
 		const { result: allServices } = await fetchJSON('/service/read');
-		if(!serviceName && cwd === "~") return { response: allServices };
 		if(!serviceName && !cwd) return { response: allServices };
 		const { id: serviceId } = serviceName
 			? allServices.find(x => x.name === serviceName )

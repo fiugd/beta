@@ -44,7 +44,6 @@ Try out the terminal on the right.
 
 #### list all cloned repos:
 \`git list\`
-> OUT OF ORDER
 
 #### open a repo in editor:
 \`git open crosshj/fiug-welcome\`
@@ -66,7 +65,7 @@ Try out the terminal on the right.
 \`git clone crosshj/fiug-plugins\`
 
 #### preview files:
-\`preview *.*\`
+\`preview\`
 
 #### preview a specific file:
 \`preview README.md\`

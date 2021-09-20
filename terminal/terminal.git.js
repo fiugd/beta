@@ -337,9 +337,11 @@ const config = async ({ term }, args) => {
 	return await(new GitConfig(service)).update(prop, value);
 };
 const list = async ({ term }, args) => {
-	const { _unknown=[] } = args;
-	const { keyed, anon } = unknownArgsHelper(_unknown);
-	return jsonColors({ keyed, anon });
+	const { result: allServices } = await fetchJSON('/service/read');
+	return '\n' + allServices
+		.map(x=>x.name)
+		.filter(x => x!=='~')
+		.join('\n') + '\n';
 };
 const open = async ({ term }, args) => {
 	const { _unknown=[] } = args;
