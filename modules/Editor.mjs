@@ -92,7 +92,7 @@ function getFileType(fileName = "") {
 	if (extension === 'hbs'){
 		type = {name: "handlebars", base: "text/html"}
 	}
-	if (filename === '.profile'){
+	if (fileName === '.profile'){
 		type = "shell"
 	}
 	return type;
