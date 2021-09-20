@@ -32,7 +32,7 @@ function getFileType(fileName = "") {
 			mimeType: "application/x-ejs",
 		};
 	}
-	if (filename === '.profile'){
+	if (fileName === '.profile'){
 		type = "shell"
 	}
 	return type;
