@@ -195,7 +195,7 @@ const diff = async ({ ops }, args) => {
 		.filter(x => x && getDiff(x.original, x.value).trim())
 		.map(x => {
 			if(x.deleteFile)
-				return return `\n${x.fileName}\n\n${chalk.red('DELETED')}\n`
+				return `\n${x.fileName}\n\n${chalk.red('DELETED')}\n`
 			return `\n${x.fileName}\n\n${getDiff(x.original, x.value)}\n`
 		})
 		.join('\n');
