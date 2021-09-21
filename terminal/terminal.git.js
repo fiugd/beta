@@ -302,6 +302,17 @@ class GitConfig {
 		configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
 		this.config = ini.parse(configText);
 	}
+	async readProp(prop=""){
+		if(!this.config) await this.read();
+		let cursor = this.config;
+		const propSplit = prop.split('.');
+		if(!propSplit[0].trim()) return cursor;
+
+		for(var i=0, len=propSplit.length; i<len; i++){
+			cursor = cursor[propSplit[i]];
+		}
+		return cursor;
+	}
 	async save(){
 		const { config, path } = this;
 		const source = ini.encode(config, { whitespace: true });
@@ -322,7 +333,7 @@ class GitConfig {
 			console.log(e);
 			response = 'error: ' + e.message;
 		}
-		return response + '\n';
+		return response;
 	}
 	
 }
@@ -332,11 +343,20 @@ const config = async ({ term }, args) => {
 	const { keyed, anon } = unknownArgsHelper(_unknown);
 	const { local, global } = keyed;
 	const prop = local || global;
-	const value = anon.join(' ').replace(/['"]/g, '')
+	const value = anon.join(' ').replace(/['"]/g, '').trim();
 	const service = local
 		? await getCurrentService("all")
 		: { name: '~', id: 0 };
-	return await(new GitConfig(service)).update(prop, value);
+	const config = new GitConfig(service);
+
+	if(!value){
+		const propVal = await config.readProp(prop);
+		const out = typeof propVal === 'object'
+			? ini.encode(propVal, { whitespace: true }).trim()
+			: propVal;
+		return `${out}\n`;
+	}
+	return await config.update(prop, value) + '\n';
 };
 const list = async ({ term }, args) => {
 	const { result: allServices } = await fetchJSON('/service/read');
