@@ -355,12 +355,12 @@ const open = async ({ term }, args) => {
 
 	localStorage.setItem('lastService',found.id);
 	//document.location.reload();
-	return 'repo opened, please refresh page to continue\n';
+	return 'repo opened, please refresh page\n';
 };
 const close = async ({ term }, args) => {
-	localStorage.setItem('lastService',found.id);
+	localStorage.setItem('lastService', '0');
 	//document.location.reload();
-	return 'repo closed, please refresh page to continue\n';
+	return 'repo closed, please refresh page\n';
 };
 
 const branch = async ({ term }) => notImplemented('branch');
