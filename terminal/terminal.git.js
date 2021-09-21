@@ -115,12 +115,12 @@ const unknownArgsHelper = (args) => {
 		const thisArg = args[i];
 		const nextArg = args[i+1];
 		if(thisArg.startsWith('--')){
-			keyed[thisArg.replace(/^--/, '')] = nextArg;
+			keyed[thisArg.replace(/^--/, '')] = nextArg || null;
 			i++;
 			continue;
 		}
 		if(thisArg.startsWith('-')){
-			keyed[thisArg.replace(/^-/, '')] = nextArg;
+			keyed[thisArg.replace(/^-/, '')] = nextArg || null;
 			i++;
 			continue;
 		}
@@ -218,9 +218,21 @@ const status = async ({ ops }) => {
 
 const commit = async ({ ops }, args) => {
 	const { _unknown } = args;
-	const message = _unknown.join(' ')
+	const message = (_unknown||[]).join(' ')
 		.match(/(?:"[^"]*"|^[^"]*$)/)[0]
 		.replace(/"/g, "");
+
+	if(!message.trim()){
+		return chalk.hex('#ccc')(`
+Usage:
+  git commit -m <commit message>
+
+Example:
+  git commit -m "made some changes to service"
+
+`);
+	}
+
 	const pwdCommand = ops.find(x => x.keyword === 'pwd');
 	const { response: cwd = '' } = await pwdCommand.invokeRaw();
 	const commitUrl = '/service/commit';
@@ -342,6 +354,19 @@ const config = async ({ term }, args) => {
 	const { _unknown=[] } = args;
 	const { keyed, anon } = unknownArgsHelper(_unknown);
 	const { local, global } = keyed;
+
+	if(local === undefined && global === undefined){
+		return chalk.hex('#ccc')(`
+Usage:
+  git config [--local or --global] <optional value-pattern>
+
+Examples:
+  git config --global user.name "Jimmy Fiug"
+  git config --local
+
+`);
+	}
+
 	const prop = local || global;
 	const value = anon.join(' ').replace(/['"]/g, '').trim();
 	const service = local
