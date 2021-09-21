@@ -650,7 +650,7 @@ const ServicesManager = (() => {
 			const binaryFiles = [];
 
 			for (let i = 0, len = filesToAdd.length; i < len; i++) {
-				const path = service.type === 'github'
+				const path = ['github', 'default'].includes(service.type)
 					? stripFrontDotSlash(filesToAdd[i])
 					: filesToAdd[i];
 				const fileUpdate = body.code.find(x =>

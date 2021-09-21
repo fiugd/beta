@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.4
-	Build Date 2021-09-20T16:06:20.178Z
+	Build Date 2021-09-21T16:57:32.648Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1588,7 +1588,7 @@ const StorageManager = (() => {
                 };
             })();
             for (let i = 0, len = filesToAdd.length; i < len; i++) {
-                const path = "github" === service.type ? stripFrontDotSlash(filesToAdd[i]) : filesToAdd[i], fileUpdate = body.code.find((x => `.${x.path}` === path || x.path === `/${path}` || x.path === path));
+                const path = [ "github", "default" ].includes(service.type) ? stripFrontDotSlash(filesToAdd[i]) : filesToAdd[i], fileUpdate = body.code.find((x => `.${x.path}` === path || x.path === `/${path}` || x.path === path));
                 let fileUpdateCode;
                 fileUpdate?.update && (fileUpdateCode = fileUpdate.update, delete fileUpdate.update);
                 const code = fileUpdateCode || "";

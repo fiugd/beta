@@ -88,7 +88,7 @@ export const readDir = async (serviceName, dir, cwd) => {
 export const addFile = async (target, source, service={}) => {
 	const currentService = await getCurrentService("all");
 	const serviceName = service.name || currentService.name;
-	const serviceId = service.id || currentService.id;
+	const serviceId = (service.id+'') || currentService.id;
 	const body = JSON.stringify({
 		name: serviceName,
 		id: serviceId,
@@ -112,7 +112,7 @@ export const addFile = async (target, source, service={}) => {
 export const addFolder = async (target, service={}) => {
 	const currentService = await getCurrentService("all");
 	const serviceName = service.name || currentService.name;
-	const serviceId = service.id || currentService.id;
+	const serviceId = (service.id+'') || currentService.id;
 	const body = JSON.stringify({
 		name: serviceName,
 		id: serviceId,
