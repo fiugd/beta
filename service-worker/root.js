@@ -33,14 +33,13 @@ Welcome to fiug!
 
 Try out the terminal on the right.
 
-#### clone a repo:
-\`git clone crosshj/fiug-welcome\`
-
 #### configure git:
 \`git config --global user.name john\`
 \`git config --global user.email johndoe@example.com\`
 \`git config --global user.password {your github token}\`
-> OUT OF ORDER
+
+#### clone a repo:
+\`git clone crosshj/fiug-welcome\`
 
 #### list all cloned repos:
 \`git list\`

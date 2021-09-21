@@ -176,7 +176,8 @@ const unrecognizedCommand = (command) => `\n${command}: command not found\n`
 
 const diff = async ({ ops }, args) => {
 	const { _unknown: files } = args;
-	const { changes } = await _getChanges({ ops });
+	let { changes } = await _getChanges({ ops });
+	changes = changes.filter(x => !x.fileName.includes('/.git/'));
 
 	let filesToShow = changes;
 	if(files && Array.isArray(files)){
@@ -200,7 +201,8 @@ const diff = async ({ ops }, args) => {
 
 const status = async ({ ops }) => {
 	const changesResponse = await _getChanges({ ops });
-	const { changes } = changesResponse;
+	let { changes } = changesResponse;
+	changes = changes.filter(x => !x.fileName.includes('/.git/'));
 	if(!changes.length){
 		return '\n   no changes\n';
 	}
