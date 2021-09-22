@@ -137,7 +137,7 @@ const diffPretty = (diff) => {
 		special: '#38b8bf',
 		normal: '#ddd',
 	};
-	return diff.split('\n').map((x,i,all) => {
+	return (diff||'').split('\n').map((x,i,all) => {
 		const invisibles = (str) => str
 			.replace(/ /g, chalk.hex(colors.invisible)('·'))
 			.replace(/\t/g, chalk.hex(colors.invisible)(' → '));
@@ -186,7 +186,7 @@ class GitConfig {
 	async update(prop, value){
 		const {service, current, comm} = this;
 		await this.read();
-		const propSplit = prop.split('.');
+		const propSplit = (prop||'').split('.');
 		let cursor = this.config;
 		for(var i=0, len=propSplit.length; i<len; i++){
 			cursor[propSplit[i]] = i === len-1
@@ -216,10 +216,10 @@ class GitConfig {
 		configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
 		this.config = ini.parse(configText);
 	}
-	async readProp(prop=""){
+	async readProp(prop){
 		if(!this.config) await this.read();
 		let cursor = this.config;
-		const propSplit = prop.split('.');
+		const propSplit = (prop||'').split('.');
 		if(!propSplit[0].trim()) return cursor;
 
 		for(var i=0, len=propSplit.length; i<len; i++){
