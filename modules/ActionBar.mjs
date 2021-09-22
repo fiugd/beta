@@ -86,9 +86,9 @@ function ActionBar() {
 				<li class="explorer checked" role="button" title="Code">
 					<i class="material-icons">code</i>
 				</li>
-				<!-- <li class="search" role="button" title="Search">
+				<li class="search" role="button" title="Search">
 					<i class="material-icons">search</i>
-				</li> -->
+				</li>
 				<!-- <li class="services" role="button" title="Services">
 					<i class="material-icons">device_hub</i>
 				</li> -->
@@ -129,11 +129,11 @@ function ActionBar() {
 			query: "li.explorer",
 			action: "showServiceCode",
 		},
-		/*
 		{
 			query: "li.search",
 			action: "showSearch",
 		},
+		/*
 		{
 			query: "li.services",
 			action: "showServicesMap",
@@ -172,7 +172,6 @@ function ActionBar() {
 				e.target.id === "open-settings-view"),
 	});
 
-	/*
 	attach({
 		name: "ActionBar",
 		eventName: "ui",
@@ -186,7 +185,7 @@ function ActionBar() {
 			actionBar.querySelector("li.search").classList.add("checked");
 		},
 	});
-	*/
+
 }
 
 export default ActionBar;
