@@ -293,13 +293,16 @@ Example:
 };
 
 class GitConfig {
-	constructor(service){
+	constructor(service, current, comm){
 		this.root = location.origin;
 		this.service = service;
+		this.current = current;
+		this.comm = comm;
 		this.path = '.git/config';
 		this.url = `${this.root}/${this.service.name}/${this.path}`;
 	}
 	async update(prop, value){
+		const {service, current, comm} = this;
 		await this.read();
 		const propSplit = prop.split('.');
 		let cursor = this.config;
@@ -309,7 +312,22 @@ class GitConfig {
 				: cursor[propSplit[i]] || {};
 			cursor = cursor[propSplit[i]];
 		}
-		return await this.save();
+		const { message, result } = await this.save();
+
+		if(current.id === service.id){
+			const triggerEvent = {
+				type: 'operationDone',
+				detail: {
+					op: 'update',
+					id: this.service.id+'',
+					result,
+					source: 'Terminal'
+				}
+			};
+			comm.execute({ triggerEvent });
+		}
+
+		return message;
 	}
 	async read(){
 		let configText = await fetch(this.url).then(x=> x.ok ? x.text() : undefined);
@@ -334,25 +352,27 @@ class GitConfig {
 		console.log(JSON.stringify(config, null, 2)+'\n\n');
 		console.log(source);
 
-		let response = `saved config to ${this.url}`;
+		let message = `saved config to ${this.url}`;
+		let result;
 		try {
 			const {error:addFolderError} = await addFolder(`.git`, service);
 			if(addFolderError){
-				response = addFolderError;
+				message = addFolderError;
 				return;
 			}
-			const {error:addFileError} = await addFile(path, source, service);
-			if(addFileError) response = addFileError;
+			const {error:addFileError, result: addFileResult} = await addFile(path, source, service);
+			if(addFileError) message = addFileError;
+			if(addFileResult) result = addFileResult;
 		} catch(e){
 			console.log(e);
-			response = 'error: ' + e.message;
+			message = 'error: ' + e.message;
 		}
-		return response;
+		return { message, result };
 	}
 	
 }
 
-const config = async ({ term }, args) => {
+const config = async ({ term, comm }, args) => {
 	const { _unknown=[] } = args;
 	const { keyed, anon } = unknownArgsHelper(_unknown);
 	const { local, global } = keyed;
@@ -371,10 +391,9 @@ Examples:
 
 	const prop = local || global;
 	const value = anon.join(' ').replace(/['"]/g, '').trim();
-	const service = local
-		? await getCurrentService("all")
-		: { name: '~', id: 0 };
-	const config = new GitConfig(service);
+	const current = await getCurrentService("all");
+	const service = local ? current : { name: '~', id: 0 };
+	const config = new GitConfig(service, current, comm);
 
 	if(!value){
 		const propVal = await config.readProp(prop);
@@ -383,7 +402,10 @@ Examples:
 			: propVal;
 		return `${out}\n`;
 	}
-	return await config.update(prop, value) + '\n';
+
+	const message = await config.update(prop, value)
+
+	return message + '\n';
 };
 const list = async ({ term }, args) => {
 	const { result: allServices } = await fetchJSON('/service/read');
