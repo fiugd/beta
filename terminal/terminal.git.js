@@ -174,6 +174,132 @@ const _getChanges = async ({ ops }) => {
 const notImplemented = (command) => chalk.hex('#ccc')(`\ngit ${command}: not implemented\n`);
 const unrecognizedCommand = (command) => `\n${command}: command not found\n`
 
+class GitConfig {
+	constructor(service, current, comm){
+		this.root = location.origin;
+		this.service = service;
+		this.current = current;
+		this.comm = comm;
+		this.path = '.git/config';
+		this.url = `${this.root}/${this.service.name}/${this.path}`;
+	}
+	async update(prop, value){
+		const {service, current, comm} = this;
+		await this.read();
+		const propSplit = prop.split('.');
+		let cursor = this.config;
+		for(var i=0, len=propSplit.length; i<len; i++){
+			cursor[propSplit[i]] = i === len-1
+				? value
+				: cursor[propSplit[i]] || {};
+			cursor = cursor[propSplit[i]];
+		}
+		const { message, result } = await this.save();
+
+		if(current.id === service.id){
+			const triggerEvent = {
+				type: 'operationDone',
+				detail: {
+					op: 'update',
+					id: this.service.id+'',
+					result,
+					source: 'Terminal'
+				}
+			};
+			comm.execute({ triggerEvent });
+		}
+
+		return message;
+	}
+	async read(){
+		let configText = await fetch(this.url).then(x=> x.ok ? x.text() : undefined);
+		configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
+		this.config = ini.parse(configText);
+	}
+	async readProp(prop=""){
+		if(!this.config) await this.read();
+		let cursor = this.config;
+		const propSplit = prop.split('.');
+		if(!propSplit[0].trim()) return cursor;
+
+		for(var i=0, len=propSplit.length; i<len; i++){
+			if(!cursor) break;
+			cursor = cursor[propSplit[i]];
+		}
+		return cursor;
+	}
+	async save(){
+		const { config, path } = this;
+		const source = ini.encode(config, { whitespace: true });
+		const service = this.service;
+		console.log(JSON.stringify(config, null, 2)+'\n\n');
+		console.log(source);
+
+		let message = `saved config to ${this.url}`;
+		let result;
+		try {
+			const {error:addFolderError} = await addFolder(`.git`, service);
+			if(addFolderError){
+				message = addFolderError;
+				return;
+			}
+			const {error:addFileError, result: addFileResult} = await addFile(path, source, service);
+			if(addFileError) message = addFileError;
+			if(addFileResult) result = addFileResult;
+		} catch(e){
+			console.log(e);
+			message = 'error: ' + e.message;
+		}
+		return { message, result };
+	}	
+}
+
+const getConfig = async (prop) => {
+	const current = await getCurrentService("all");
+	const localConfig = new GitConfig(current);
+	const globalConfig = new GitConfig({id: 0, name: '~'});
+	return {
+		local: await localConfig.readProp(prop),
+		global: await globalConfig.readProp(prop)
+	};
+}
+
+const config = async ({ term, comm }, args) => {
+	const { _unknown=[] } = args;
+	const { keyed, anon } = unknownArgsHelper(_unknown);
+	const { local, global } = keyed;
+
+	if(local === undefined && global === undefined){
+		return chalk.hex('#ccc')(`
+Usage:
+  git config [--local or --global] <optional value-pattern>
+
+Examples:
+  git config --global user.name "Jimmy Fiug"
+  git config --local
+
+`);
+	}
+
+	const prop = local || global;
+	const value = anon.join(' ').replace(/['"]/g, '').trim();
+	const current = await getCurrentService("all");
+	const service = local ? current : { name: '~', id: 0 };
+	const config = new GitConfig(service, current, comm);
+
+	if(!value){
+		const propVal = await config.readProp(prop);
+		const out = typeof propVal === 'object'
+			? ini.encode(propVal, { whitespace: true }).trim()
+			: propVal;
+		return `${out}\n`;
+	}
+
+	const message = await config.update(prop, value)
+
+	return message + '\n';
+};
+
 const diff = async ({ ops }, args) => {
 	const { _unknown: files } = args;
 	let { changes } = await _getChanges({ ops });
@@ -238,7 +364,10 @@ Example:
 	const pwdCommand = ops.find(x => x.keyword === 'pwd');
 	const { response: cwd = '' } = await pwdCommand.invokeRaw();
 	const commitUrl = '/service/commit';
-	const auth = getStored('Github Personal Access Token');
+	
+	const authConfig = await getConfig('user.token');
+	const token = authConfig.local || authConfig.global;
+	const auth = token || getStored('Github Personal Access Token');
 	const { commitResponse } = await postJSON(commitUrl, null, {
 		cwd, message, auth
 	});
@@ -267,8 +396,9 @@ Example:
 
 `);
 	}
-
-	const auth = getStored('Github Personal Access Token');
+	const authConfig = await getConfig('user.token');
+	const token = authConfig.local || authConfig.global;
+	const auth = token || getStored('Github Personal Access Token');
 	const bodyObj = {
 		providerType:"github-provider",
 		operation:"provider-add-service",
@@ -292,121 +422,6 @@ Example:
 	return chalk.hex('#ccc')(`DONE\n`);
 };
 
-class GitConfig {
-	constructor(service, current, comm){
-		this.root = location.origin;
-		this.service = service;
-		this.current = current;
-		this.comm = comm;
-		this.path = '.git/config';
-		this.url = `${this.root}/${this.service.name}/${this.path}`;
-	}
-	async update(prop, value){
-		const {service, current, comm} = this;
-		await this.read();
-		const propSplit = prop.split('.');
-		let cursor = this.config;
-		for(var i=0, len=propSplit.length; i<len; i++){
-			cursor[propSplit[i]] = i === len-1
-				? value
-				: cursor[propSplit[i]] || {};
-			cursor = cursor[propSplit[i]];
-		}
-		const { message, result } = await this.save();
-
-		if(current.id === service.id){
-			const triggerEvent = {
-				type: 'operationDone',
-				detail: {
-					op: 'update',
-					id: this.service.id+'',
-					result,
-					source: 'Terminal'
-				}
-			};
-			comm.execute({ triggerEvent });
-		}
-
-		return message;
-	}
-	async read(){
-		let configText = await fetch(this.url).then(x=> x.ok ? x.text() : undefined);
-		configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
-		this.config = ini.parse(configText);
-	}
-	async readProp(prop=""){
-		if(!this.config) await this.read();
-		let cursor = this.config;
-		const propSplit = prop.split('.');
-		if(!propSplit[0].trim()) return cursor;
-
-		for(var i=0, len=propSplit.length; i<len; i++){
-			cursor = cursor[propSplit[i]];
-		}
-		return cursor;
-	}
-	async save(){
-		const { config, path } = this;
-		const source = ini.encode(config, { whitespace: true });
-		const service = this.service;
-		console.log(JSON.stringify(config, null, 2)+'\n\n');
-		console.log(source);
-
-		let message = `saved config to ${this.url}`;
-		let result;
-		try {
-			const {error:addFolderError} = await addFolder(`.git`, service);
-			if(addFolderError){
-				message = addFolderError;
-				return;
-			}
-			const {error:addFileError, result: addFileResult} = await addFile(path, source, service);
-			if(addFileError) message = addFileError;
-			if(addFileResult) result = addFileResult;
-		} catch(e){
-			console.log(e);
-			message = 'error: ' + e.message;
-		}
-		return { message, result };
-	}
-	
-}
-
-const config = async ({ term, comm }, args) => {
-	const { _unknown=[] } = args;
-	const { keyed, anon } = unknownArgsHelper(_unknown);
-	const { local, global } = keyed;
-
-	if(local === undefined && global === undefined){
-		return chalk.hex('#ccc')(`
-Usage:
-  git config [--local or --global] <optional value-pattern>
-
-Examples:
-  git config --global user.name "Jimmy Fiug"
-  git config --local
-
-`);
-	}
-
-	const prop = local || global;
-	const value = anon.join(' ').replace(/['"]/g, '').trim();
-	const current = await getCurrentService("all");
-	const service = local ? current : { name: '~', id: 0 };
-	const config = new GitConfig(service, current, comm);
-
-	if(!value){
-		const propVal = await config.readProp(prop);
-		const out = typeof propVal === 'object'
-			? ini.encode(propVal, { whitespace: true }).trim()
-			: propVal;
-		return `${out}\n`;
-	}
-
-	const message = await config.update(prop, value)
-
-	return message + '\n';
-};
 const list = async ({ term }, args) => {
 	const { result: allServices } = await fetchJSON('/service/read');
 	return '\n' + allServices
