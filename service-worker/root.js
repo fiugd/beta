@@ -36,7 +36,7 @@ Try out the terminal on the right.
 #### configure git:
 \`git config --global user.name john\`
 \`git config --global user.email johndoe@example.com\`
-\`git config --global user.password {your github token}\`
+\`git config --global user.token {your github token}\`
 
 #### clone a repo:
 \`git clone crosshj/fiug-welcome\`
