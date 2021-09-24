@@ -106,9 +106,11 @@ function ActionBar() {
 				<li class="full-screen" role="button">
 					<a></a>
 				</li>
+				<!--
 				<li id="open-settings-view" class="settings" role="button">
 					<i class="material-icons">settings</i>
 				</li>
+				-->
 			</ul>
 	</div>
 	`;
@@ -162,6 +164,7 @@ function ActionBar() {
 		});
 	});
 
+	/*
 	connectTrigger({
 		name: "ActionBar",
 		eventName: "open-settings-view",
@@ -171,6 +174,7 @@ function ActionBar() {
 			(e.target.parentNode.id === "open-settings-view" ||
 				e.target.id === "open-settings-view"),
 	});
+	*/
 
 	attach({
 		name: "ActionBar",
