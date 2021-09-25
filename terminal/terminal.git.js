@@ -387,7 +387,7 @@ const commit = async ({ ops, term }, args) => {
 	if(commitResponse && commitResponse.error){
 		return `ERROR: ${commitResponse.error}`;
 	}
-	return chalk.hex('#ccc')('Commit SHA: ') + commitResponse + '\n';
+	return chalk.hex('#ccc')('\nCommit Info: ') + commitResponse + '\n';
 };
 
 const cloneUsage = chalk.hex('#ccc')(`
