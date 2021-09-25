@@ -400,11 +400,10 @@ const commit = async ({ ops, term }, args) => {
 	if(commitResponse && commitResponse.error){
 		return `ERROR: ${commitResponse.error}`;
 	}
-	return chalk.hex('#ccc')(
-		'\nCommit Info: ' +
-		shortenShaUrl(commitResponse) +
-		'\n'
-	);
+	return '\n' +
+		chalk.hex('#ccc')('Commit Info: ') +
+		chalk.hex('#9cdcfe')(shortenShaUrl(commitResponse)) +
+		'\n';
 };
 
 const cloneUsage = chalk.hex('#ccc')(`
