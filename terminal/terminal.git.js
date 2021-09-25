@@ -467,7 +467,7 @@ const list = async ({ term }, args) => {
 		.filter(x => x !== '~ (0)')
 		.join('\n') + '\n';
 };
-const open = async ({ term }, args) => {
+const open = async ({ term, comm }, args) => {
 	const { _unknown=[] } = args;
 	const { keyed, anon } = unknownArgsHelper(_unknown);
 	const param = anon.join('');
@@ -476,13 +476,35 @@ const open = async ({ term }, args) => {
 	if(!found) return `could not find repo; unable to open\n`;
 
 	localStorage.setItem('lastService',found.id);
+	const { result } = await fetchJSON('/service/read/'+found.id);
+	const triggerEvent = {
+		type: 'operationDone',
+		detail: {
+			op: 'update',
+			id: found.id+'',
+			result,
+			source: 'Terminal'
+		}
+	};
+	comm.execute({ triggerEvent });
 	//document.location.reload();
-	return 'repo opened, please refresh page\n';
+	return 'repo opened, please refresh page to change terminal\n';
 };
-const close = async ({ term }, args) => {
+const close = async ({ term, comm }, args) => {
 	localStorage.setItem('lastService', '0');
+	const { result } = await fetchJSON('/service/read/0');
+	const triggerEvent = {
+		type: 'operationDone',
+		detail: {
+			op: 'update',
+			id: '0',
+			result,
+			source: 'Terminal'
+		}
+	};
+	comm.execute({ triggerEvent });
 	//document.location.reload();
-	return 'repo closed, please refresh page\n';
+	return 'repo closed, please refresh page to change terminal\n';
 };
 
 const branch = async ({ term }) => notImplemented('branch');
