@@ -348,14 +348,8 @@ const status = async ({ ops }) => {
 	return '\n' + changes.map(changeRender).join('\n') + '\n';
 };
 
-const commit = async ({ ops }, args) => {
-	const { _unknown } = args;
-	const message = (_unknown||[]).join(' ')
-		.match(/(?:"[^"]*"|^[^"]*$)/)[0]
-		.replace(/"/g, "");
 
-	if(!message.trim()){
-		return chalk.hex('#ccc')(`
+const commitUsage = chalk.hex('#ccc')(`
 Usage:
   git commit -m <commit message>
 
@@ -363,7 +357,13 @@ Example:
   git commit -m "made some changes to service"
 
 `);
-	}
+const commit = async ({ ops, term }, args) => {
+	const { _unknown } = args;
+	const message = (_unknown||[]).join(' ')
+		.match(/(?:"[^"]*"|^[^"]*$)/)[0]
+		.replace(/"/g, "");
+
+	if(!message.trim())return commitUsage;
 
 	const pwdCommand = ops.find(x => x.keyword === 'pwd');
 	const { response: cwd = '' } = await pwdCommand.invokeRaw();
@@ -372,15 +372,32 @@ Example:
 	const authConfig = await getConfig('user.token');
 	const token = authConfig.local || authConfig.global;
 	const auth = token || getStored('Github Personal Access Token');
-	const { commitResponse } = await postJSON(commitUrl, null, {
-		cwd, message, auth
+
+	const spin = new Spinner({
+		stdOut: term.write.bind(term),
+		message: chalk.hex('#ccc')(`Pushing commit`),
+		color: '#0FF',
+		doneColor: '#0FF',
+		doneMsg: 'DONE'
 	});
+	const commitRequest = postJSON(commitUrl, null, { cwd, message, auth });
+	spin.until(commitRequest);
+
+	const { commitResponse } = await commitRequest;
 	if(commitResponse && commitResponse.error){
 		return `ERROR: ${commitResponse.error}`;
 	}
-	return chalk.hex('#ccc')('\nCommit SHA: ') + commitResponse + '\n';
+	return chalk.hex('#ccc')('Commit SHA: ') + commitResponse + '\n';
 };
 
+const cloneUsage = chalk.hex('#ccc')(`
+Usage:
+  git clone [-b or --branch] <branch> <repository>
+
+Example:
+  git clone -b main crosshj/fiug-welcome
+
+`);
 const clone = async ({term}, args) => {
 	//git clone --branch <branchname> <remote-repo-url>
 	//git clone -b <branchname> <remote-repo-url>
@@ -390,16 +407,8 @@ const clone = async ({term}, args) => {
 	const [repo] = anon;
 	const cloneUrl = '/service/create/provider';
 	
-	if(!repo){
-		return chalk.hex('#ccc')(`
-Usage:
-  git clone [-b or --branch] <branch> <repository>
+	if(!repo) return cloneUsage;
 
-Example:
-  git clone -b main crosshj/fiug-welcome
-
-`);
-	}
 	const authConfig = await getConfig('user.token');
 	const token = authConfig.local || authConfig.global;
 	const auth = token || getStored('Github Personal Access Token');
@@ -418,7 +427,6 @@ Example:
 			: ''
 		}`
 	);
-
 	const spin = new Spinner({
 		stdOut: term.write.bind(term),
 		message: cloneMessage,
@@ -426,11 +434,10 @@ Example:
 		doneColor: '#0FF',
 		doneMsg: 'DONE'
 	});
-
 	const cloneRequest = fetch(cloneUrl, { body, method }).then(x=>x.json());
 	spin.until(cloneRequest);
-	const { result } = await cloneRequest;
 
+	const { result } = await cloneRequest;
 	if(result && result.error){
 		return `ERROR: ${result.error}\n`;
 	}
