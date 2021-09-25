@@ -383,11 +383,28 @@ const commit = async ({ ops, term }, args) => {
 	const commitRequest = postJSON(commitUrl, null, { cwd, message, auth });
 	spin.until(commitRequest);
 
+	const shortenShaUrl = (url) => {
+		const newHashLength = 6;
+		try {
+			return [
+				...url.split('/').slice(0,-1).join('/'),
+				url.split('/').pop().slice(0, newHashLength)
+			].join('/');
+		}catch(e){
+			console.log(e);
+			return url;
+		}
+	}
+
 	const { commitResponse } = await commitRequest;
 	if(commitResponse && commitResponse.error){
 		return `ERROR: ${commitResponse.error}`;
 	}
-	return chalk.hex('#ccc')('\nCommit Info: ') + commitResponse + '\n';
+	return chalk.hex('#ccc')(
+		'\nCommit Info: ' +
+		shortenShaUrl(commitResponse) +
+		'\n'
+	);
 };
 
 const cloneUsage = chalk.hex('#ccc')(`
