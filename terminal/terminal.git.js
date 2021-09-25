@@ -10,7 +10,7 @@ https://googlechrome.github.io/samples/service-worker/post-message/
 import ini from 'https://cdn.skypack.dev/ini';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 
-import GetOps from './terminal.ops.js';
+import GetOps, { switchService } from './terminal.ops.js';
 import {
 	chalk, jsonColors,
 	getCurrentService, addFile, addFolder,
@@ -487,10 +487,10 @@ const open = async ({ term, comm }, args) => {
 		}
 	};
 	comm.execute({ triggerEvent });
-	//document.location.reload();
-	return 'repo opened, please refresh page to change terminal\n';
+	switchService(found);
+	return '\n';
 };
-const close = async ({ term, comm }, args) => {
+const close = async ({ term, comm, ops }, args) => {
 	localStorage.setItem('lastService', '0');
 	const { result } = await fetchJSON('/service/read/0');
 	const triggerEvent = {
@@ -503,8 +503,8 @@ const close = async ({ term, comm }, args) => {
 		}
 	};
 	comm.execute({ triggerEvent });
-	//document.location.reload();
-	return 'repo closed, please refresh page to change terminal\n';
+	switchService({ id: 0, name: '~' });
+	return '\n';
 };
 
 const branch = async ({ term }) => notImplemented('branch');
