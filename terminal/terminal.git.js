@@ -387,7 +387,7 @@ const commit = async ({ ops, term }, args) => {
 		const newHashLength = 6;
 		try {
 			return [
-				...url.split('/').slice(0,-1).join('/'),
+				...url.split('/').slice(0,-1),
 				url.split('/').pop().slice(0, newHashLength)
 			].join('/');
 		}catch(e){
