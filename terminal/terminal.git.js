@@ -11,7 +11,11 @@ import ini from 'https://cdn.skypack.dev/ini';
 import Diff from 'https://cdn.skypack.dev/diff-lines';
 
 import GetOps from './terminal.ops.js';
-import { chalk, jsonColors, getCurrentService, addFile, addFolder } from './terminal.utils.js';
+import {
+	chalk, jsonColors,
+	getCurrentService, addFile, addFolder,
+	Spinner
+} from './terminal.utils.js';
 
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
@@ -407,19 +411,30 @@ Example:
 	const body = JSON.stringify(bodyObj);
 	const method = 'POST';
 
-	term.write(chalk.hex('#ccc')(
+	const cloneMessage = chalk.hex('#ccc')(
 		`Cloning ${bodyObj.repo}${
 			bodyObj.branch
 			? `, ${bodyObj.branch} branch`
 			: ''
-		}... `
-	));
+		}`
+	);
 
-	const { result } = await fetch(cloneUrl, { body, method }).then(x=>x.json());
+	const spin = new Spinner({
+		stdOut: term.write.bind(term),
+		message: cloneMessage,
+		color: '#0FF',
+		doneColor: '#0FF',
+		doneMsg: 'DONE'
+	});
+
+	const cloneRequest = fetch(cloneUrl, { body, method }).then(x=>x.json());
+	spin.until(cloneRequest);
+	const { result } = await cloneRequest;
+
 	if(result && result.error){
 		return `ERROR: ${result.error}\n`;
 	}
-	return chalk.hex('#ccc')(`DONE\n`);
+	return `\n`;
 };
 
 const list = async ({ term }, args) => {
