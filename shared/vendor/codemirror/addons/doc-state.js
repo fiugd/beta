@@ -51,6 +51,8 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	let docsLoad;
 	const docsCache = {};
 
+	const sleep = (time) => new Promise((resolve)=> setTimeout(() => resolve('done'), time) );
+
 	CodeMirror.defineOption('docStore', () => {}, (cm, localforage) => {
 		if(!localforage || !localforage.createInstance) return;
 
@@ -214,6 +216,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 		const loadAsync = async () => {
 			if(!name) return;
+			if(forceUpdate) await sleep(500);
 			if(!forceUpdate && currentDoc && path === currentDoc.path){
 				if(line) selectLine(this, currentDoc.editor, line, ch);
 				return;
