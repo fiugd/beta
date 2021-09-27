@@ -202,7 +202,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	};
 
 	CodeMirror.defineExtension('loadDoc', function ({
-		callback, name, path, text, mode, scrollTop, scrollLeft, line, ch
+		callback, name, path, text, mode, scrollTop, scrollLeft, line, ch, forceUpdate
 	}){
 		/*
 		TODO: loading async and using a callback seems not to help
@@ -214,7 +214,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 
 		const loadAsync = async () => {
 			if(!name) return;
-			if(currentDoc && path === currentDoc.path){
+			if(!forceUpdate && currentDoc && path === currentDoc.path){
 				if(line) selectLine(this, currentDoc.editor, line, ch);
 				return;
 			}
