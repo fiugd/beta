@@ -468,6 +468,7 @@ const ServicesManager = (() => {
 		const servicesStore = storage.stores.services;
 		const filesStore = storage.stores.files;
 		const changesStore = storage.stores.changes;
+		const editorStore = storage.stores.editor;
 
 		try {
 			const { id } = params;
@@ -678,6 +679,8 @@ const ServicesManager = (() => {
 						return rest;
 					})()
 				});
+				await editorStore.removeItem('/' + path);
+
 				//TODO: I think this is a problem, not sure...
 				//files get written with blank string and dot in front of name
 				//await filesStore.setItem(path, code);

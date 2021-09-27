@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-09-27T21:28:40.149Z
+	Build Date 2021-09-27T22:04:26.056Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -431,42 +431,50 @@ const StorageManager = (() => {
     return class {
         stores=(() => {
             var driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
+            const files = localforage.createInstance({
+                driver: driver,
+                name: "service-worker",
+                version: 1,
+                storeName: "files",
+                description: "permanent state of contents of files across projects"
+            }), services = localforage.createInstance({
+                driver: driver,
+                name: "service-worker",
+                version: 1,
+                storeName: "services",
+                description: "services directory stucture, type, etc"
+            }), providers = localforage.createInstance({
+                driver: driver,
+                name: "service-worker",
+                version: 1,
+                storeName: "providers",
+                description: "connects services to outside world"
+            }), changes = localforage.createInstance({
+                driver: driver,
+                name: "service-worker",
+                version: 1,
+                storeName: "changes",
+                description: "keep track of changes not pushed to provider"
+            }), handlers = localforage.createInstance({
+                driver: driver,
+                name: "service-worker",
+                version: 1,
+                storeName: "handlers",
+                description: "used after app has booted when service worker is updated"
+            });
             return {
-                files: localforage.createInstance({
+                editor: localforage.createInstance({
                     driver: driver,
-                    name: "service-worker",
+                    name: "editorState",
                     version: 1,
-                    storeName: "files",
-                    description: "permanent state of contents of files across projects"
+                    storeName: "editor",
+                    description: "scroll and cursor position, history, selection"
                 }),
-                services: localforage.createInstance({
-                    driver: driver,
-                    name: "service-worker",
-                    version: 1,
-                    storeName: "services",
-                    description: "services directory stucture, type, etc"
-                }),
-                providers: localforage.createInstance({
-                    driver: driver,
-                    name: "service-worker",
-                    version: 1,
-                    storeName: "providers",
-                    description: "connects services to outside world"
-                }),
-                changes: localforage.createInstance({
-                    driver: driver,
-                    name: "service-worker",
-                    version: 1,
-                    storeName: "changes",
-                    description: "keep track of changes not pushed to provider"
-                }),
-                handlers: localforage.createInstance({
-                    driver: driver,
-                    name: "service-worker",
-                    version: 1,
-                    storeName: "handlers",
-                    description: "used after app has booted when service worker is updated"
-                })
+                files: files,
+                services: services,
+                providers: providers,
+                changes: changes,
+                handlers: handlers
             };
         })();
         defaultServices=defaultServices;
@@ -1510,7 +1518,7 @@ const StorageManager = (() => {
             changes: changes
         });
     })(), handleServiceUpdate = ({storage: storage, providers: providers, utils: utils}) => async (params, event) => {
-        const servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes;
+        const servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes, editorStore = storage.stores.editor;
         try {
             const {id: id} = params, body = await event.request.json(), {name: name, operation: operation} = body, isMoveOrRename = operation?.name?.includes("rename") || operation?.name?.includes("move"), isCopy = operation?.name?.includes("copy"), operationsUpdater = _operationsUpdater(operation);
             let update;
@@ -1600,7 +1608,7 @@ const StorageManager = (() => {
                         const {tree: tree, ...rest} = service;
                         return rest;
                     })()
-                });
+                }), await editorStore.removeItem("/" + path);
             }
             for (let i = 0, len = filesToDelete.length; i < len; i++) {
                 const path = "github" === service.type ? stripFrontDotSlash(filesToDelete[i]) : filesToDelete[i];
