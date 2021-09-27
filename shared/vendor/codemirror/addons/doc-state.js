@@ -139,7 +139,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		const newLine = ch ? { line, ch } : line;
 
 		//const t = doc.cm.charCoords(newLine, "local").top;
-		//cm.scrollTo(0,�t�-�SCROLL_MARGIN);
+		//cm.scrollTo(0, t - SCROLL_MARGIN);
 		cm.scrollIntoView(newLine, SCROLL_MARGIN);
 
 		doc.setSelections([])
