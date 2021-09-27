@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
-	Version v0.4.4
-	Build Date 2021-09-22T20:41:53.758Z
+	Version v0.4.5
+	Build Date 2021-09-27T21:28:40.149Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1330,6 +1330,7 @@ const StorageManager = (() => {
                 if (value.name === serviceName) return value;
             }));
             "github" === service.type && "./" == `${path.slice(0, 2)}` && (path = path.slice(2)), 
+            "default" === service.type && "./" == `${path.slice(0, 2)}` && (path = path.slice(2)), 
             await changesStore.setItem(path, {
                 type: "update",
                 value: code,
@@ -1763,7 +1764,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.4";
+const cacheName = "v0.4.5";
 
 importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
 self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 

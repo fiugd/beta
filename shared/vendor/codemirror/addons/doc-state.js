@@ -69,14 +69,14 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			});
 		cm.options.docStore = {
 			setItem: (key, value) => {
-				docsCache[key] = value;
+				//docsCache[key] = value;
 				docStore.setItem(key, value);
 			},
 			getItem: async (key) => {
 				if(docsCache[key]) return docsCache[key];
 				const value = await docStore.getItem(key);
-				docsCache[key] = value;
-				docsInStore.push(key);
+				//docsCache[key] = value;
+				!docsInStore.includes(key) && docsInStore.push(key);
 				return value;
 			}
 		};
@@ -139,7 +139,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 		const newLine = ch ? { line, ch } : line;
 
 		//const t = doc.cm.charCoords(newLine, "local").top;
-		//cm.scrollTo(0,·t·-·SCROLL_MARGIN);
+		//cm.scrollTo(0,ï¿½tï¿½-ï¿½SCROLL_MARGIN);
 		cm.scrollIntoView(newLine, SCROLL_MARGIN);
 
 		doc.setSelections([])
