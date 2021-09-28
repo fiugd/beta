@@ -29,7 +29,7 @@ async function getHandler(args){
 			plugins: [
 				['importMap', { map }],
 				'console',
-				'processExit'
+				//'processExit'
 			],
 			//sourceType: "module"
 		});

@@ -1,4 +1,3 @@
-//show-preview
 import { sleep } from './.example_import.js';
 
 if(typeof document !== "undefined"){
