@@ -13,11 +13,23 @@ async function getHandler(args){
 	const { stores } = this;
 	const { path, query } = args;
 
+	//TODO: fetch json from "https://beta.fiug.dev/importmap.importmap"
+	//fail gracefully
+	const map = {
+		imports: {
+			foo: 'foo-got-mapped'
+		}
+	};
+
 	let content;
 	try {
 		content = await stores.changes.getItem(path) || await stores.files.getItem(path);
 		var output = Babel.transform(content, {
-			plugins: ['importMap', 'console', 'processExit'],
+			plugins: [
+				['importMap', { map }],
+				'console',
+				'processExit'
+			],
 			//sourceType: "module"
 		});
 
