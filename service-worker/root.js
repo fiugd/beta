@@ -1,5 +1,6 @@
 import { settings } from './root.settings.js';
 import { welcome } from './root.welcome.js';
+import { profile } from './root.profile.js';
 
 const initRootService = async ({ stores }) => {
 	const {services, files, changes} = stores;
