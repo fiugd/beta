@@ -5,16 +5,23 @@ async function getHandler(args){
 	const { stores } = this;
 	const { path, query } = args;
 
-	const content = await stores.files.getItem(path);
-	var output = Babel.transform(content, {
-		//plugins: ['importMap', 'console', 'processExit'],
-		//sourceType: "module"
-	});
+	let content;
+	try {
+		content = await stores.files.getItem(path);
+		var output = Babel.transform(content, {
+			//plugins: ['importMap', 'console', 'processExit'],
+			//sourceType: "module"
+		});
 
-	return JSON.stringify({
-		stores: Object.keys(stores),
-		path, query, output
-	}, null, 2);
+		return output.code;
+
+		// return JSON.stringify({
+		// 	stores: Object.keys(stores),
+		// 	path, query, output
+		// }, null, 2);
+	} catch(e){
+		return `${e.message}\n${content}`;
+	}
 }
 
 class WorkerRewrite {
