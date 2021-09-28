@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-09-28T16:30:18.285Z
+	Build Date 2021-09-28T16:43:18.588Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1730,12 +1730,14 @@ const StorageManager = (() => {
     }
 };
 
-function getHandler$1(args) {
-    const {stores: stores} = this;
-    return console.log({
-        args: args,
-        stores: Object.keys(stores)
-    }), "this is the worker rewrite handler";
+async function getHandler$1(args) {
+    const {stores: stores} = this, {path: path, query: query} = args, content = await stores.files.getItem(path);
+    return JSON.stringify({
+        stores: Object.keys(stores),
+        path: path,
+        query: query,
+        content: content
+    }, null, 2);
 }
 
 class WorkerRewrite {

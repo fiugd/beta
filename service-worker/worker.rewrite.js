@@ -1,10 +1,13 @@
-function getHandler(args){
+async function getHandler(args){
 	const { stores } = this;
-	console.log({
-		args,
-		stores: Object.keys(stores)
-	})
-	return 'this is the worker rewrite handler';
+	const { path, query } = args;
+
+	const content = await stores.files.getItem(path);
+
+	return JSON.stringify({
+		stores: Object.keys(stores),
+		path, query, content
+	}, null, 2);
 }
 
 class WorkerRewrite {
