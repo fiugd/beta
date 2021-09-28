@@ -23,7 +23,8 @@ async function getHandler(args){
 
 	let content;
 	try {
-		content = await stores.changes.getItem(path) || await stores.files.getItem(path);
+		content = (await stores.changes.getItem(path) || {}).value ||
+			await stores.files.getItem(path);
 		var output = Babel.transform(content, {
 			plugins: [
 				['importMap', { map }],
