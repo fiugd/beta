@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-09-28T03:38:41.264Z
+	Build Date 2021-09-28T16:23:34.613Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -640,6 +640,16 @@ const StorageManager = (() => {
                     var u;
                 },
                 params: (url, urlFull) => Object.fromEntries(urlFull.split("?").pop().split("&").map((x => x.split("="))))
+            };
+        })(),
+        "/!/:path?": (() => {
+            const regex = new RegExp(/^((?:.*))\/\!\/((?:.*))(?:\/(?=$))?$/i);
+            return {
+                match: url => regex.test(url),
+                params: url => ({
+                    path: (regex.exec(url)[2] || "").split("?")[0],
+                    query: (regex.exec(url)[2] || "").split("?")[1]
+                })
             };
         })()
     }, _generic = ({_handlers: _handlers}) => method => (pathString, handler) => {
@@ -1718,7 +1728,25 @@ const StorageManager = (() => {
             this.templates.find((x => x.name === name)) ? this.update(name, value) : this.add(name, value);
         }
     }
-}, init = async ({cacheName: cacheName}) => {
+};
+
+function getHandler$1(args) {
+    const {stores: stores} = this;
+    return console.log({
+        args: args,
+        stores: Object.keys(stores)
+    }), "this is the worker rewrite handler";
+}
+
+class WorkerRewrite {
+    constructor({storage: storage}) {
+        this.stores = storage.stores, this.handlers = {
+            get: getHandler$1.bind(this)
+        };
+    }
+}
+
+const init = async ({cacheName: cacheName}) => {
     const swHandlers = self.handlers;
     await utils.initMimeTypes();
     const storage = new StorageManager({
@@ -1740,6 +1768,8 @@ const StorageManager = (() => {
         providers: providers,
         utils: utils,
         templates: templates
+    }), workerRewrite = new WorkerRewrite({
+        storage: storage
     });
     return app.get("/service/search/", storage.handlers.serviceSearch), app.get("/service/read/:id?", storage.handlers.serviceRead), 
     app.post("/service/create/:id?", services.handlers.serviceCreate), app.get("/service/change", services.handlers.serviceGetChanges), 
@@ -1749,7 +1779,7 @@ const StorageManager = (() => {
     app.post("/service/provider/read/:id?", providers.handlers.readHandler), app.post("/service/provider/update/:id?", providers.handlers.updateHandler), 
     app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler), app.get("/manage/:id?", utils.notImplementedHandler), 
     app.get("/monitor/:id?", utils.notImplementedHandler), app.get("/persist/:id?", utils.notImplementedHandler), 
-    async event => {
+    app.get("/!/:path?", workerRewrite.handlers.get), async event => {
         const serviceAPIMatch = await app.find(event.request), res = serviceAPIMatch ? await serviceAPIMatch.exec(event) : "no match in service request listener!";
         let response;
         if (event.request.url.includes("/::preview::/")) return response = new Response(utils.addBase(res), {
