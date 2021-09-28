@@ -34,7 +34,11 @@ async function getHandler(args){
 			//sourceType: "module"
 		});
 
-		return output.code;
+		const processWrite = `
+			const processWrite = (...args) => postMessage({ log: args });
+		`.trim() + '\n\n';
+
+		return processWrite + output.code;
 
 		// return JSON.stringify({
 		// 	stores: Object.keys(stores),

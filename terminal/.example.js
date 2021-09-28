@@ -14,28 +14,23 @@ const these = [
 	['three', 300],
 ];
 
-const delay = (time) => new Promise((resolve)=> setTimeout(() => resolve('done'), time) );
-
 const AsyncTask = async (item) => {
 	const [name, time] = item;
 	console.log(`start execution ${name}`);
 	//throw new Error('error test');
-	//sleep(time); //<< will block other threads from starting
-	await delay(time); //will allow worker to exit since it's a microtask... sigh
+	
+	// will block other threads from starting
+	// sleep(time);
+
+	//will allow worker to exit since it's a microtask... sigh
+	await sleep(time);
+
 	console.log(`end execution ${name}`);
-	await delay(1);
+	await sleep(1);
 }
 
 const mapTasks = () => these.map(async (item) => await AsyncTask(item));
 
-//console.log('start');
-(async () => {
-	//await Promise.allSettled(mapTasks());
-	//await AsyncTask(these[0]);
-	//console.log('done\n');
-	
-	for(var i=0, len=10; i<len; i++){
-		//await delay(600);
-		console.log(`${i} - test this`);
-	}
-})();
+console.log('start');
+await Promise.allSettled(mapTasks());
+console.log('done\n');
