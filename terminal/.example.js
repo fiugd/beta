@@ -1,5 +1,5 @@
 //show-preview
-//import { sleep } from './.example_import.js';
+import { sleep } from './.example_import.js';
 
 if(typeof document !== "undefined"){
 	document.body.innerHTML += `
