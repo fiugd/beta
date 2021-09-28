@@ -1,3 +1,10 @@
+/*
+
+this build needs to not be tied to beta.fiug.dev
+so it can be ran using PROD
+
+*/
+
 import 'https://unpkg.com/rollup/dist/rollup.browser.js';
 import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
 import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
