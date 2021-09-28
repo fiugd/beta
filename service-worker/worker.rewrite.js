@@ -6,7 +6,7 @@ async function getHandler(args){
 	const { path, query } = args;
 
 	const content = await stores.files.getItem(path);
-	var output = Babel.transform(exampleSrc, {
+	var output = Babel.transform(content, {
 		//plugins: ['importMap', 'console', 'processExit'],
 		//sourceType: "module"
 	});
