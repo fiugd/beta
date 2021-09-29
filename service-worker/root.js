@@ -1,6 +1,7 @@
 import { settings } from './root.settings.js';
 import { welcome } from './root.welcome.js';
 import { profile } from './root.profile.js';
+import { importmap } from './root.importmap.js';
 
 const initRootService = async ({ stores }) => {
 	const {services, files, changes} = stores;
@@ -11,6 +12,7 @@ const initRootService = async ({ stores }) => {
 		tree: { '~': {
 			'.git': { config: {} },
 			'.profile': {},
+			'importmap.json': {},
 			'settings.json': {},
 			'welcome.md': {}
 		}},
@@ -21,6 +23,7 @@ const initRootService = async ({ stores }) => {
 	await files.setItem("~/settings.json", settings());
 	await files.setItem("~/.profile", profile());
 	await files.setItem("~/welcome.md", welcome());
+	await files.setItem("~/importmap.json", importmap());
 
 	await changes.setItem(`state-${service.name}-opened`, [
 		{ name: 'welcome.md', order: 0 }
