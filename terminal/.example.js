@@ -1,36 +1,24 @@
-import { sleep } from './.example_import.js';
-
-if(typeof document !== "undefined"){
-	document.body.innerHTML += `
-		<style>body{ margin: 2em;color: #777; font: 20px sans-serif; }</style>
-		<div>This file is used for testing with "node" keyword.</div>
-		<div>See console out.</div>
-	`;
-}
+const { sleep }  = await import('./.example_import2.js');
 
 const these = [
-	['one', 5000],
-	['two', 1000],
-	['three', 300],
+	['one', 3000],
+	['two', 2000],
+	['three', 1000],
 ];
 
 const AsyncTask = async (item) => {
 	const [name, time] = item;
-	console.log(`start execution ${name}`);
-	//throw new Error('error test');
-	
-	// will block other threads from starting
-	// sleep(time);
-
-	//will allow worker to exit since it's a microtask... sigh
+	console.log(`start: ${name}`);
 	await sleep(time);
-
-	console.log(`end execution ${name}`);
-	await sleep(1);
+	console.log(`end: ${name}`);
 }
 
-const mapTasks = () => these.map(async (item) => await AsyncTask(item));
+(async () => {
+	console.log('start');
+	await Promise.all(these.map(AsyncTask));
+	console.log('done\n');
 
-console.log('start');
-await Promise.allSettled(mapTasks());
-console.log('done\n');
+	//throw new Error('woops');
+
+	postMessage({ exit: true });
+})();
