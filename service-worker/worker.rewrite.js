@@ -15,7 +15,7 @@ async function getHandler(args){
 
 	//TODO: fetch from other places besides the root dir
 	const map = await fetch(self.location.origin + "/~/importmap.json")
-		.then(x => response.ok ? x.json() : undefined);
+		.then(x => x.ok ? x.json() : undefined);
 
 	let content;
 	try {
