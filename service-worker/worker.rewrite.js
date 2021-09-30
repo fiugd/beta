@@ -27,8 +27,7 @@ async function getHandler(args){
 	if(!isJS(path)) return content;
 
 	//TODO: get importmap from other places besides the root dir
-	const map = await fetch(self.location.origin + "/~/importmap.json")
-		.then(x => x.ok ? x.json() : undefined);
+	const map = await getFile("/~/importmap.json");
 
 	try {
 		var output = Babel.transform(content, {
