@@ -1,5 +1,17 @@
+import _ from 'lodash';
 
-import foo from 'foo';
+console.log('\n\nlodash test');
+console.log('----------------')
+console.log('lodash version: ' + _.VERSION);
+let words = [
+	'sky', 'wood', 'forest', 'falcon',
+	'pear', 'ocean', 'universe'
+];
+console.log(`First element: ${_.first(words)}`);
+console.log(`Last element: ${_.last(words)}`);
+console.log('----------------\n\n\n')
+
+
 const { sleep }  = await import('./.example_import2.js');
 
 const these = [
@@ -13,7 +25,7 @@ const AsyncTask = async (item) => {
 	console.log(`start: ${name}`);
 	await sleep(time);
 	console.log(`end: ${name}`);
-}
+};
 
 (async () => {
 	console.log('start');
