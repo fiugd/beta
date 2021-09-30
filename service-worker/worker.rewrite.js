@@ -12,15 +12,25 @@ Babel.registerPlugin('processExit', processExitPlugin);
 async function getHandler(args){
 	const { stores } = this;
 	const { path, query } = args;
+	const isJS = x => new RegExp('\.js$').test(x);
+	
+	const getFile = async (filePath) => {
+		const value = (await stores.changes.getItem(filePath) || {}).value ||
+			await stores.files.getItem(filePath);
+		try {
+			return JSON.parse(value);
+		} catch(e){}
+		return value;
+	};
 
-	//TODO: fetch from other places besides the root dir
+	const content = await getFile(path)
+	if(!isJS(path)) return content;
+
+	//TODO: get importmap from other places besides the root dir
 	const map = await fetch(self.location.origin + "/~/importmap.json")
 		.then(x => x.ok ? x.json() : undefined);
 
-	let content;
 	try {
-		content = (await stores.changes.getItem(path) || {}).value ||
-			await stores.files.getItem(path);
 		var output = Babel.transform(content, {
 			plugins: [
 				['importMap', { map }],
@@ -35,11 +45,6 @@ async function getHandler(args){
 		`.trim() + '\n\n';
 
 		return processWrite + output.code;
-
-		// return JSON.stringify({
-		// 	stores: Object.keys(stores),
-		// 	path, query, output
-		// }, null, 2);
 	} catch(e){
 		return `${e.message}\n${content}`;
 	}

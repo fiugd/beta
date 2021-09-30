@@ -19,11 +19,29 @@ const initRootService = async ({ stores }) => {
 	};
 	await services.setItem('0', service);
 
-	await files.setItem("~/.git/config", '\n');
-	await files.setItem("~/settings.json", settings());
-	await files.setItem("~/.profile", profile());
-	await files.setItem("~/welcome.md", welcome());
-	await files.setItem("~/importmap.json", importmap());
+	const getFile = async (filePath) => {
+		const value = (await changes.getItem(filePath) || {}).value ||
+			await files.getItem(filePath);
+		try {
+			return JSON.parse(value);
+		} catch(e){}
+		return value;
+	};
+
+	const rootFiles = [
+		["~/.git/config", '\n'],
+		["~/settings.json", settings()],
+		["~/.profile", profile()],
+		["~/welcome.md", welcome()],
+		["~/importmap.json", importmap()],
+	];
+
+	for(let i=0, len=rootFiles.length; i<len; i++){
+		const [path, defaultContent] = rootFiles[i];
+		const existingContent = await getFile(path);
+		if(existingContent) continue;
+		await files.setItem(path, defaultContent);
+	}
 
 	await changes.setItem(`state-${service.name}-opened`, [
 		{ name: 'welcome.md', order: 0 }
