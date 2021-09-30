@@ -1,3 +1,5 @@
+
+import foo from 'foo';
 const { sleep }  = await import('./.example_import2.js');
 
 const these = [

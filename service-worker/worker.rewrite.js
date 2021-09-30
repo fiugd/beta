@@ -18,7 +18,7 @@ async function getHandler(args){
 		const value = (await stores.changes.getItem(filePath) || {}).value ||
 			await stores.files.getItem(filePath);
 		try {
-			return JSON.parse(value);
+			return JSON5.parse(value);
 		} catch(e){}
 		return value;
 	};

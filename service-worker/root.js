@@ -23,7 +23,7 @@ const initRootService = async ({ stores }) => {
 		const value = (await changes.getItem(filePath) || {}).value ||
 			await files.getItem(filePath);
 		try {
-			return JSON.parse(value);
+			return JSON5.parse(value);
 		} catch(e){}
 		return value;
 	};
