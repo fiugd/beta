@@ -127,7 +127,7 @@ const operation = async (args, state={}) => {
 		const worker = new Worker(url, { type: 'module' });
 
 		const exitWorker = ({ error }={}) => {
-			if(error) postMessage({ error });
+			if(error) postMessage({ error: error.message || 'unknown error occured' });
 			worker.terminate();
 			resolve();
 		};

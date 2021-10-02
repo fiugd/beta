@@ -11,7 +11,6 @@ console.log(`First element: ${_.first(words)}`);
 console.log(`Last element: ${_.last(words)}`);
 console.log('----------------\n\n\n');
 
-
 const { sleep }  = await import('./.example_import2.js');
 
 const these = [
@@ -28,9 +27,9 @@ const AsyncTask = async (item) => {
 };
 
 (async () => {
-	console.log('start');
+	console.log('\nstart');
 	await Promise.all(these.map(AsyncTask));
-	console.log('done\n');
+	console.log('done');
 
 	//throw new Error('woops');
 
