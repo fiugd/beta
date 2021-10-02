@@ -1,6 +1,8 @@
 //import Babel from 'https://cdn.skypack.dev/@babel/standalone';
 import Babel from 'https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmADpc5jJR5wUwi/dist=es2020,mode=imports,min/optimized/@babel/standalone.js';
 
+import babelPluginSyntaxImportAssertions from 'https://cdn.skypack.dev/@babel/plugin-syntax-import-assertions'
+
 import consolePlugin from './worker-rewrite-plugins/console.js';
 import importMapPlugin from './worker-rewrite-plugins/importMap.js';
 import processExitPlugin from './worker-rewrite-plugins/processExit.js';
@@ -8,6 +10,29 @@ import processExitPlugin from './worker-rewrite-plugins/processExit.js';
 Babel.registerPlugin('console', consolePlugin);
 Babel.registerPlugin('importMap', importMapPlugin);
 Babel.registerPlugin('processExit', processExitPlugin);
+Babel.registerPlugin('@babel/syntax-import-assertions', babelPluginSyntaxImportAssertions);
+
+const transpile = (content, map) => {
+	try {
+		var output = Babel.transform(content, {
+			plugins: [
+				['importMap', { map }],
+				'console',
+				'processExit',
+				"@babel/syntax-import-assertions",
+			],
+			//sourceType: "module"
+		});
+
+		const processWrite = `
+			const processWrite = (...args) => postMessage({ log: args });
+		`.trim() + '\n\n';
+
+		return processWrite + output.code;
+	} catch(e){
+		return `/*\n${e.message}\n*/\n\n${content}`;
+	}
+};
 
 async function getHandler(args){
 	const { stores } = this;
@@ -29,24 +54,7 @@ async function getHandler(args){
 	//TODO: get importmap from other places besides the root dir
 	const map = await getFile("~/importmap.json");
 
-	try {
-		var output = Babel.transform(content, {
-			plugins: [
-				['importMap', { map }],
-				'console',
-				'processExit'
-			],
-			//sourceType: "module"
-		});
-
-		const processWrite = `
-			const processWrite = (...args) => postMessage({ log: args });
-		`.trim() + '\n\n';
-
-		return processWrite + output.code;
-	} catch(e){
-		return `${e.message}\n${content}`;
-	}
+	return transpile(content, map);
 }
 
 class WorkerRewrite {
@@ -59,4 +67,4 @@ class WorkerRewrite {
 	}
 }
 
-export { WorkerRewrite };
+export { transpile, WorkerRewrite };
