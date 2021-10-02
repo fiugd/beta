@@ -1,7 +1,5 @@
-//import Babel from 'https://cdn.skypack.dev/@babel/standalone';
-import Babel from 'https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmADpc5jJR5wUwi/dist=es2020,mode=imports,min/optimized/@babel/standalone.js';
-
-import babelPluginSyntaxImportAssertions from 'https://cdn.skypack.dev/@babel/plugin-syntax-import-assertions'
+import Babel from '@babel/standalone';
+import babelPluginSyntaxImportAssertions from '@babel/syntax-import-assertions';
 
 import consolePlugin from './worker-rewrite-plugins/console.js';
 import importMapPlugin from './worker-rewrite-plugins/importMap.js';
