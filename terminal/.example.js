@@ -9,7 +9,7 @@ let words = [
 ];
 console.log(`First element: ${_.first(words)}`);
 console.log(`Last element: ${_.last(words)}`);
-console.log('----------------\n\n\n')
+console.log('----------------\n\n\n');
 
 
 const { sleep }  = await import('./.example_import2.js');

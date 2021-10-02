@@ -2,7 +2,7 @@
 // NOTE: this is not a function that is ran in main window context
 // instead it's source is dumped into a worker
 // be mindful of this!!!
-const operation = async (args, state={}) => {
+const operationOLD = async (args, state={}) => {
 	const { file, cwd } = args;
 	let filePath='';
 	if(file.includes('/')){
@@ -112,6 +112,34 @@ const operation = async (args, state={}) => {
 		};
 	});
 	return await runScript(`node-${file}`, scriptText, postMessage);
+};
+
+const operation = async (args, state={}) => {
+	const { file, cwd } = args;
+	let filePath='';
+	if(file.includes('/')){
+		filePath = '/' + file.split('/').slice(0,-1).join('/');
+	}
+
+	const scriptUrl = `${location.origin}/!/${cwd}/${file}`;
+
+	const runScript = (name, url, logger) => new Promise((resolve, reject) => {
+		const worker = new Worker(url, { type: 'module' });
+
+		const exitWorker = ({ error }={}) => {
+			if(error) postMessage({ error });
+			worker.terminate();
+			resolve();
+		};
+		worker.onmessage = (e) => {
+			postMessage(e.data);
+			if(e.data.exit) exitWorker();
+		};
+		worker.onerror = (error) => exitWorker({ error });
+		worker.onmessageerror = worker.onerror;
+	});
+
+	return await runScript(file, scriptUrl, postMessage);
 };
 
 export default class Node {

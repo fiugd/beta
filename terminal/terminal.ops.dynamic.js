@@ -192,7 +192,7 @@ class ProcessWorker {
 				log && logger(log);
 				result && logger(result);
 				error && logger('ERROR: ' + error);//should be red?
-				if(exit || error) exitWorker();
+				if(exit || (error && !args.watch)) exitWorker();
 			};
 			worker.postMessage(args);
 
