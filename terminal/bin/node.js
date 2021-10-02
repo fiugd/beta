@@ -132,8 +132,9 @@ const operation = async (args, state={}) => {
 			resolve();
 		};
 		worker.onmessage = (e) => {
-			postMessage(e.data);
-			if(e.data.exit) exitWorker();
+			const { log, error, exit } = e.data;
+			log && console.log(...log);
+			if(exit) exitWorker();
 		};
 		worker.onerror = (error) => exitWorker({ error });
 		worker.onmessageerror = worker.onerror;
