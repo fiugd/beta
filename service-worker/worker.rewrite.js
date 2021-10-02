@@ -24,9 +24,25 @@ const transpile = (content, map) => {
 
 		const processWrite = `
 			const processWrite = (...args) => postMessage({ log: args });
+			self.asyncHooks = [];
+			self.hookCount = 0;
+		`.trim() + '\n\n';
+		
+		const processExit = '\n\n' + `
+			//queueMicrotask(() => {
+			//	postMessage({ exit: true });
+			//});
+			setTimeout(async () => {
+				//console.log(self.asyncHooks.length);
+				await Promise.allSettled(self.asyncHooks);
+				//console.log(self.asyncHooks.length);
+				queueMicrotask(() => {
+					postMessage({ exit: true });
+				});
+			}, 1);
 		`.trim() + '\n\n';
 
-		return processWrite + output.code;
+		return processWrite + output.code + processExit;
 	} catch(e){
 		return `/*\n${e.message}\n*/\n\n${content}`;
 	}
