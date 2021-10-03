@@ -10,7 +10,9 @@ import 'terser';
 
 import rollupConfig from '/service-worker/build/rollup.config.js';
 import terserConfig from '/service-worker/build/terser.config.js';
-import packageJson from "/package.json" assert { type: "json" };
+//import packageJson from "/package.json" assert { type: "json" };
+
+const packageJson = await fetch("/package.json").then(x => x.json());
 
 const VERSION = `v${packageJson.version}`;
 const DATE = new Date().toISOString();

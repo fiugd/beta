@@ -159,6 +159,6 @@ export default class Node {
 	}]
 
 	constructor(){
-		this.operation = operationOLD;
+		this.operation = operation;
 	}
 };
