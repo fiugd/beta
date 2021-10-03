@@ -241,8 +241,9 @@ const contextMenuHandler = ({ treeView, treeContext, showMenu }) => (e) => {
 			hidden: context.type === 'folder'
 		},
 		{
+			//TODO: revisit this with terminal revamp
 			name: "Open in Terminal",
-			hidden: true //TODO: revisit this with terminal revamp
+			hidden: true
 		},
 
 		"seperator",
