@@ -1,3 +1,19 @@
+
+/*
+<script type="importmap" src="/importmap.importmap"></script>
+
+const script = document.createElement('script')
+script.src = '/importmap.importmap';
+script.type = 'importmap';
+document.body.appendChild(script);
+
+probably makes more sense to have service worker rewrite imports versus trying to make this work
+see fiug-beta/.welcome/1ncubate/sw-worker-rewrite
+
+also, look into https://github.com/GoogleChromeLabs/comlink
+this is for communication between workers
+*/
+
 import Babel from "https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmADpc5jJR5wUwi/dist=es2020,mode=imports,min/optimized/@babel/standalone.js";
 //import Babel from '@babel/standalone';
 
@@ -11,11 +27,28 @@ Babel.registerPlugin('importMap', importMapPlugin);
 Babel.registerPlugin('processExit', processExitPlugin);
 Babel.registerPlugin('@babel/syntax-import-assertions', importAssertions);
 
-const transpile = (content, map) => {
+/*
+TODO: babelrc, eg.:
+
+// Comments are allowed as opposed to regular JSON files
+{
+	presets: [
+		// Use the preset-env babel plugins
+		'@babel/preset-env'
+	],
+	plugins: [
+		// Besides the presets, use this plugin
+		'@babel/plugin-proposal-class-properties'
+	]
+}
+*/
+
+
+const transpile = (content, map, cwd) => {
 	try {
 		var output = Babel.transform(content, {
 			plugins: [
-				['importMap', { map }],
+				['importMap', { map, cwd }],
 				'console',
 				'processExit',
 				"@babel/syntax-import-assertions"
@@ -24,16 +57,16 @@ const transpile = (content, map) => {
 		});
 
 		const processWrite = `
-			const processWrite = (...args) => postMessage({ log: args });
-			self.hooks = [];
-		`.trim() + '\n\n';
+const processWrite = (...args) => postMessage({ log: args });
+self.hooks = [];
+`.trim() + '\n\n';
 		
 		const processExit = '\n\n' + `
-			setTimeout(async () => {
-				await Promise.allSettled(self.hooks);
-				queueMicrotask(() => { postMessage({ exit: true }); });
-			}, 1);
-		`.trim() + '\n\n';
+setTimeout(async () => {
+	await Promise.allSettled(self.hooks);
+	queueMicrotask(() => { postMessage({ exit: true }); });
+}, 1);
+`.trim() + '\n\n';
 
 		return processWrite + output.code + processExit;
 	} catch(e){
@@ -44,6 +77,7 @@ const transpile = (content, map) => {
 async function getHandler(args){
 	const { stores } = this;
 	const { path, query } = args;
+	const cwd = path.split('/').slice(0,-1).join('/')
 	const isJS = x => new RegExp('\.js$').test(x);
 	
 	const getFile = async (filePath) => {
@@ -61,7 +95,7 @@ async function getHandler(args){
 	//TODO: get importmap from other places besides the root dir
 	const map = await getFile("~/importmap.json");
 
-	return transpile(content, map);
+	return transpile(content, map, cwd);
 }
 
 class WorkerRewrite {

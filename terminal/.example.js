@@ -26,12 +26,11 @@ const AsyncTask = async (item) => {
 	console.log(`end: ${name}`);
 };
 
-(async () => {
-	console.log('\nstart');
-	await Promise.all(these.map(AsyncTask));
-	console.log('done');
+console.log('\nstart');
 
-	//throw new Error('woops');
+const asyncTasks = these.map(AsyncTask);
+await Promise.all(asyncTasks);
 
-	postMessage({ exit: true });
-})();
+console.log('done');
+//throw new Error('woops');
+
