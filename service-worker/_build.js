@@ -18,6 +18,7 @@ from https://github.com/parcel-bundler/parcel/issues/1253
 other:
 https://skalman.github.io/UglifyJS-online/
 https://try.terser.org/
+
 */
 
 import 'rollup';
