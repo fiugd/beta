@@ -24,8 +24,8 @@ import 'rollup';
 import 'rollupPluginSourceMap';
 import 'terser';
 
-import rollupConfig from '/crosshj/fiug-beta/service-worker/build/rollup.config.js';
-import terserConfig from '/crosshj/fiug-beta/service-worker/build/terser.config.js';
+import rollupConfig from './build/rollup.config.js';
+import terserConfig from './build/terser.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
 const VERSION = `v${packageJson.version}`;
