@@ -6,9 +6,14 @@ so it can be ran using PROD
 */
 self.hooks = [];
 
-import 'rollup';
-import 'rollupPluginSourceMap';
-import 'terser';
+// import 'rollup';
+// import 'rollupPluginSourceMap';
+// import 'terser';
+
+import 'https://unpkg.com/rollup/dist/rollup.browser.js';
+import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
+import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
+
 
 import rollupConfig from '/service-worker/build/rollup.config.js';
 import terserConfig from '/service-worker/build/terser.config.js';

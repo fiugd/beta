@@ -4,7 +4,7 @@ import Babel from "https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmAD
 import consolePlugin from './worker-rewrite-plugins/console.js';
 import importMapPlugin from './worker-rewrite-plugins/importMap.js';
 import processExitPlugin from './worker-rewrite-plugins/processExit.js';
-import importAssertions from './worker-rewrite-plugins/processExit.js';
+import importAssertions from './worker-rewrite-plugins/importAssertions.js';
 
 Babel.registerPlugin('console', consolePlugin);
 Babel.registerPlugin('importMap', importMapPlugin);
@@ -18,7 +18,7 @@ const transpile = (content, map) => {
 				['importMap', { map }],
 				'console',
 				'processExit',
-				"@babel/syntax-import-assertions",
+				"@babel/syntax-import-assertions"
 			],
 			//sourceType: "module"
 		});
