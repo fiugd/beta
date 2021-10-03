@@ -1,14 +1,15 @@
-import Babel from '@babel/standalone';
-import babelPluginSyntaxImportAssertions from '@babel/syntax-import-assertions';
+import Babel from "https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmADpc5jJR5wUwi/dist=es2020,mode=imports,min/optimized/@babel/standalone.js";
+//import Babel from '@babel/standalone';
 
 import consolePlugin from './worker-rewrite-plugins/console.js';
 import importMapPlugin from './worker-rewrite-plugins/importMap.js';
 import processExitPlugin from './worker-rewrite-plugins/processExit.js';
+import importAssertions from './worker-rewrite-plugins/processExit.js';
 
 Babel.registerPlugin('console', consolePlugin);
 Babel.registerPlugin('importMap', importMapPlugin);
 Babel.registerPlugin('processExit', processExitPlugin);
-Babel.registerPlugin('@babel/syntax-import-assertions', babelPluginSyntaxImportAssertions);
+Babel.registerPlugin('@babel/syntax-import-assertions', importAssertions);
 
 const transpile = (content, map) => {
 	try {
