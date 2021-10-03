@@ -4,6 +4,8 @@ this build needs to not be tied to beta.fiug.dev
 so it can be ran using PROD
 
 */
+self.hooks = [];
+
 import 'rollup';
 import 'rollupPluginSourceMap';
 import 'terser';
@@ -66,6 +68,11 @@ console.log(error || `DONE\nsee ` +
 );
 
 /*
+
+
+
+
+
 NOTES from initial go at this:
 
 would like to bundle the service worker into one file and not have to use bastardized module.exports/require

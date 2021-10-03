@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-10-02T23:40:34.990Z
+	Build Date 2021-10-03T00:12:53.069Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1791,7 +1791,8 @@ const transpile = (content, map) => {
                 map: map
             } ], "console", "processExit", "@babel/syntax-import-assertions" ]
         });
-        return "\n\t\t\tconst processWrite = (...args) => postMessage({ log: args });\n\t\t".trim() + "\n\n" + output.code;
+        const processWrite = "\n\t\t\tconst processWrite = (...args) => postMessage({ log: args });\n\t\t\tself.hooks = [];\n\t\t".trim() + "\n\n", processExit = "\n\n" + "\n\t\t\tsetTimeout(async () => {\n\t\t\t\tawait Promise.allSettled(self.hooks);\n\t\t\t\tqueueMicrotask(() => { postMessage({ exit: true }); });\n\t\t\t}, 1);\n\t\t".trim() + "\n\n";
+        return processWrite + output.code + processExit;
     } catch (e) {
         return `/*\n${e.message}\n*/\n\n${content}`;
     }

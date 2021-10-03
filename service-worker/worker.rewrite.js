@@ -24,21 +24,13 @@ const transpile = (content, map) => {
 
 		const processWrite = `
 			const processWrite = (...args) => postMessage({ log: args });
-			self.asyncHooks = [];
-			self.hookCount = 0;
+			self.hooks = [];
 		`.trim() + '\n\n';
 		
 		const processExit = '\n\n' + `
-			//queueMicrotask(() => {
-			//	postMessage({ exit: true });
-			//});
 			setTimeout(async () => {
-				//console.log(self.asyncHooks.length);
-				await Promise.allSettled(self.asyncHooks);
-				//console.log(self.asyncHooks.length);
-				queueMicrotask(() => {
-					postMessage({ exit: true });
-				});
+				await Promise.allSettled(self.hooks);
+				queueMicrotask(() => { postMessage({ exit: true }); });
 			}, 1);
 		`.trim() + '\n\n';
 
