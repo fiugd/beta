@@ -15,11 +15,11 @@ import 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js';
 import 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js';
 
 
-import rollupConfig from '/service-worker/build/rollup.config.js';
-import terserConfig from '/service-worker/build/terser.config.js';
+import rollupConfig from 'https://beta.fiug.dev/crosshj/fiug-beta/service-worker/build/rollup.config.js';
+import terserConfig from 'https://beta.fiug.dev/crosshj/fiug-beta/service-worker/build/terser.config.js';
 //import packageJson from "/package.json" assert { type: "json" };
 
-const packageJson = await fetch("/package.json").then(x => x.json());
+const packageJson = await fetch("https://beta.fiug.dev/package.json").then(x => x.json());
 
 const VERSION = `v${packageJson.version}`;
 const DATE = new Date().toISOString();
