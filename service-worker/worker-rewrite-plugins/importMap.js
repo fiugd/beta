@@ -16,7 +16,7 @@ function importsPlugin() {
 					return;
 				}
 				if(path.node.source.value.startsWith('./')){
-					path.node.source.value = `${cwd}${path.node.source.value.slice(1)}`;
+					path.node.source.value = `/${cwd}${path.node.source.value.slice(1)}`;
 					return;
 				}
 				return;
