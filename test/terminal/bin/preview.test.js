@@ -27,15 +27,22 @@ const args = {
 	}
 };
 
-let done;
-const previewDone = new Promise((resolve, reject) => {
-	done = (response) => {
-		console.log(response || 'preview done');
-		resolve();
-	};
-})
+class Resolver {
+	constructor(callback){
+		this.done = undefined;
+		this.promise = new Promise((resolve, reject) => {
+			this.done = (response) => {
+				callback(response);
+				resolve();
+			};
+		})
+	}
+}
 
-const response = await operation(args, done);
+const resolver = new Resolver(
+	(res) => console.log(res || 'preview done')
+);
+const response = await operation(args, resolver.done);
 console.log(response);
 
-await previewDone;
+await resolver.promise;
