@@ -42,6 +42,19 @@ export { chalk, jsonColors };
 
 export const fetchJSON = url => fetch(url).then(x => x.json());
 
+export const getServices = async (id) => {
+	const url = typeof id !== 'undefined'
+		? `/service/read/` + id
+		: `/service/read`;
+	const { result: services } = await fetch(url, {
+		"headers": {
+			"accept": "application/json",
+			"content-type": "application/json",
+		},
+	}).then(x => x.json());
+	return services;
+};
+
 export const getCurrentService = async (prop="name") => {
 	const currentServiceId = localStorage.getItem('lastService');
 	if(!currentServiceId || currentServiceId === "0"){
