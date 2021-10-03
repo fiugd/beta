@@ -1,4 +1,4 @@
-import {operation} from 'terminal/bin/preview.js';
+import {operation} from '/crosshj/fiug-beta/terminal/bin/preview.js';
 
 const createElement = () => ({
 	classList: {
@@ -35,7 +35,7 @@ const previewDone = new Promise((resolve, reject) => {
 	};
 })
 
-const response = awaitÂ operation(args, done);
+const response = await operation(args, done);
 console.log(response);
 
 await previewDone;
