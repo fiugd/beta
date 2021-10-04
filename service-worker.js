@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-10-04T20:56:49.664Z
+	Build Date 2021-10-04T22:17:35.515Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */
@@ -1693,7 +1693,7 @@ const StorageManager = (() => {
 })(), TemplateEngine = class {
     templates=[];
     constructor({storage: storage}) {
-        this.storage = storage, this.refresh = this.refresh.bind(this), this.NO_PREVIEW = '\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<pre>\n\t\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t\t</pre>\n\t\t\t</body>\n\t\t</html>\n\t\t'.replace(/^		/g, "");
+        this.storage = storage, this.refresh = this.refresh.bind(this), this.NO_PREVIEW = '\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: system-ui, sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t</body>\n\t\t</html>\n\t\t'.replace(/^		/g, "");
     }
     add(name, template) {
         const newTemp = {
