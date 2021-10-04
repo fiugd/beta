@@ -27,7 +27,7 @@ import 'terser';
 
 import rollupConfig from './build/rollup.config.js';
 import terserConfig from './build/terser.config.js';
-import packageJson from "/package.json" assert { type: "json" };
+import packageJson from "https://beta.fiug.dev/package.json" assert { type: "json" };
 
 const VERSION = `v${packageJson.version}`;
 const DATE = new Date().toISOString();
