@@ -1,3 +1,13 @@
+/*
+
+	node should not be able to create its own workers
+	instead, it should call a "spawn" function by sending message to terminal
+	this way terminal can clean up node's spawned processes when it kills node
+	this would also keep node very simple
+	
+	it's also debateable whether or not "node" should be a worker
+*/
+
 
 // NOTE: this is not a function that is ran in main window context
 // instead it's source is dumped into a worker
@@ -114,6 +124,9 @@ const operationOLD = async (args, state={}) => {
 	return await runScript(`node-${file}`, scriptText, postMessage);
 };
 
+// NOTE: this is not a function that is ran in main window context
+// instead it's source is dumped into a worker
+// be mindful of this!!!
 const operation = async (args, state={}) => {
 	const { file, cwd } = args;
 	let filePath='';
@@ -124,20 +137,22 @@ const operation = async (args, state={}) => {
 	const scriptUrl = `${location.origin}/!/${cwd}/${file}`;
 
 	const runScript = (name, url, logger) => new Promise((resolve, reject) => {
-		const worker = new Worker(url, { type: 'module' });
+		if(self.worker) self.worker.terminate();
+
+		self.worker = new Worker(url, { type: 'module' });
 
 		const exitWorker = ({ error }={}) => {
 			if(error) postMessage({ error: error.message || 'unknown error occured' });
-			worker.terminate();
+			self.worker.terminate();
 			resolve();
 		};
-		worker.onmessage = (e) => {
+		self.worker.onmessage = (e) => {
 			const { log, error, exit } = e.data;
 			log && console.log(...log);
 			if(exit) exitWorker();
 		};
-		worker.onerror = (error) => exitWorker({ error });
-		worker.onmessageerror = worker.onerror;
+		self.worker.onerror = (error) => exitWorker({ error });
+		self.worker.onmessageerror = worker.onerror;
 	});
 
 	return await runScript(file, scriptUrl, postMessage);
@@ -150,7 +165,7 @@ export default class Node {
 	usage = '[--watch] [FILE]';
 
 	listenerKeys = [];
-	previousUrl;
+	previousUrl; 
 
 	args = [{
 		name: 'file', alias: 'f', type: String, defaultOption: true, required: true

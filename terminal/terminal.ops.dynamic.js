@@ -200,6 +200,9 @@ class ProcessWorker {
 				worker.terminate();
 				finish(resolve);
 			};
+			this.kill = () => {
+				worker.terminate();
+			};
 			worker.onmessage = (e) => {
 				const { result, log, exit, error } = e.data;
 				log && logger(log);
@@ -249,6 +252,9 @@ function exit(){
 		this.listenerKey.forEach(detach);
 		this.listenerKey = undefined;
 	}
+	try {
+		this.process.kill();
+	} catch(e){}
 	this.term.write(showCursor);
 }
 
