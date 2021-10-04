@@ -1,7 +1,7 @@
 /*!
 	fiug service-worker
 	Version v0.4.5
-	Build Date 2021-10-04T20:45:57.339Z
+	Build Date 2021-10-04T20:56:49.664Z
 	https://github.com/crosshj/fiug
 	(c) 2011-2012 Harrison Cross.
 */

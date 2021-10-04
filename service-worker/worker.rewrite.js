@@ -15,12 +15,11 @@ this is for communication between workers
 */
 
 import Babel from "./babel/babel.js";
-//import Babel from '@babel/standalone';
 
-import consolePlugin from './worker-rewrite-plugins/console.js';
-import importMapPlugin from './worker-rewrite-plugins/importMap.js';
-import processExitPlugin from './worker-rewrite-plugins/processExit.js';
-import importAssertions from './worker-rewrite-plugins/importAssertions.js';
+import consolePlugin from './babel/console.js';
+import importMapPlugin from './babel/importMap.js';
+import processExitPlugin from './babel/processExit.js';
+import importAssertions from './babel/importAssertions.js';
 
 Babel.registerPlugin('console', consolePlugin);
 Babel.registerPlugin('importMap', importMapPlugin);
