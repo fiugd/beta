@@ -80,9 +80,10 @@ async function getHandler(args){
 	const cwd = path.split('/').slice(0,-1).join('/')
 	const isJS = x => new RegExp('\.js$').test(x);
 	
-	const getFile = async (filePath) => {
+	const getFile = async (filePath, raw) => {
 		const value = (await stores.changes.getItem(filePath) || {}).value ||
 			await stores.files.getItem(filePath);
+		if(raw) return value;
 		try {
 			return JSON5.parse(value);
 		} catch(e){}
@@ -90,7 +91,7 @@ async function getHandler(args){
 	};
 
 	const content = await getFile(path)
-	if(!isJS(path)) return content;
+	if(!isJS(path)) return await getFile(path, '!raw');
 
 	//TODO: get importmap from other places besides the root dir
 	const map = await getFile("~/importmap.json");
