@@ -130,8 +130,8 @@ const operationOLD = async (args, state={}) => {
 const operation = async (args, state={}, event={}) => {
 	const { file, cwd } = args;
 	const { eventName } = event.data || {};
-
-	//console.log(`node heard event: ${eventName||'unknown'}`);
+	
+	if (eventName && eventName !== 'fileChange') return;
 
 	let filePath='';
 	if(file.includes('/')){
