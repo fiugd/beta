@@ -107,7 +107,7 @@ class ProcessWorker {
 
 			try {
 				script = script || e.data;
-				result = await operation(script || e.data, state);
+				result = await operation(script || e.data, state, e);
 			} catch(e){
 				error = e.message;
 			}

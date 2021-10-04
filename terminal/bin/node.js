@@ -127,8 +127,12 @@ const operationOLD = async (args, state={}) => {
 // NOTE: this is not a function that is ran in main window context
 // instead it's source is dumped into a worker
 // be mindful of this!!!
-const operation = async (args, state={}) => {
+const operation = async (args, state={}, event={}) => {
 	const { file, cwd } = args;
+	const { eventName } = event;
+
+	console.log(`node heard event: ${eventName||'unknown'}`);
+
 	let filePath='';
 	if(file.includes('/')){
 		filePath = '/' + file.split('/').slice(0,-1).join('/');
@@ -144,6 +148,7 @@ const operation = async (args, state={}) => {
 		const exitWorker = ({ error }={}) => {
 			if(error) postMessage({ error: error.message || 'unknown error occured' });
 			self.worker.terminate();
+			self.worker = undefined;
 			resolve();
 		};
 		self.worker.onmessage = (e) => {
