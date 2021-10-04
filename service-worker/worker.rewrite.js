@@ -75,11 +75,12 @@ setTimeout(async () => {
 };
 
 async function getHandler(args){
-	const { stores } = this;
+	const { stores, getFile } = this;
 	const { path, query } = args;
 	const cwd = path.split('/').slice(0,-1).join('/')
 	const isJS = x => new RegExp('\.js$').test(x);
-	
+
+	/*
 	const getFile = async (filePath, raw) => {
 		//TODO: should fetch from github if ###PLACEHOLDER###
 		const value = (await stores.changes.getItem(filePath) || {}).value ||
@@ -90,6 +91,7 @@ async function getHandler(args){
 		} catch(e){}
 		return value;
 	};
+	*/
 
 	const content = await getFile(path)
 	if(!isJS(path)) return await getFile(path, '!raw');
@@ -103,6 +105,7 @@ async function getHandler(args){
 class WorkerRewrite {
 	constructor({ storage }){
 		this.stores = storage.stores;
+		this.getFile = storage.getFile;
 
 		this.handlers = {
 			get: getHandler.bind(this)
