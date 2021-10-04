@@ -15,7 +15,7 @@ function importsPlugin() {
 					path.node.source.value = `/${cwd}${path.node.source.value.slice(1)}`;
 				}
 				if(path.node.source.value.startsWith('/')){
-					path.node.source.value = `${self.location.origin}${path.node.source.value}`;
+					path.node.source.value = `${self.location.origin}/!${path.node.source.value}`;
 					return;
 				}
 				return;

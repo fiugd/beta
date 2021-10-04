@@ -131,7 +131,7 @@ const operation = async (args, state={}, event={}) => {
 	const { file, cwd } = args;
 	const { eventName } = event;
 
-	console.log(`node heard event: ${eventName||'unknown'}`);
+	//console.log(`node heard event: ${eventName||'unknown'}`);
 
 	let filePath='';
 	if(file.includes('/')){
