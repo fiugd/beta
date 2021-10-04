@@ -129,7 +129,7 @@ const operationOLD = async (args, state={}) => {
 // be mindful of this!!!
 const operation = async (args, state={}, event={}) => {
 	const { file, cwd } = args;
-	const { eventName } = event;
+	const { eventName } = event.data || {};
 
 	//console.log(`node heard event: ${eventName||'unknown'}`);
 
