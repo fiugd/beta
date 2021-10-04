@@ -130,7 +130,7 @@ const operationOLD = async (args, state={}) => {
 const operation = async (args, state={}, event={}) => {
 	const { file, cwd } = args;
 	const { eventName } = event.data || {};
-	
+
 	if (eventName && eventName !== 'fileChange') return;
 
 	let filePath='';
