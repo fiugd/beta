@@ -1,3 +1,16 @@
+/*
+
+"dynamic" basically just means that this command is not cached with sw
+instead this module loads "dynamic" op from github / uses terminalCache
+
+it may be tempting to think that "dynamic" means that crosshj/fiug-beta/terminal/bin
+files are ran autommatically, but this is not the case
+
+basically, this file just shortcuts the need for sw and service.manifest.json entry
+
+*/
+
+
 import { chalk, jsonColors } from './terminal.utils.js';
 import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 const showCursor = ansiEscapes.cursorShow;
