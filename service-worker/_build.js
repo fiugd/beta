@@ -38,7 +38,7 @@ const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 const Minify = (code) => Terser.minify(code, terserConfig());
 
-async function saveBuild({ code, map }){
+function saveBuild({ code, map }){
 	const changeUrl = '/service/change';
 	const body = {
 		path: `./${rollupConfig.output.file}`,
@@ -57,31 +57,33 @@ async function saveBuild({ code, map }){
 			mode: "cors",
 			credentials: "omit"
 	};
-	try {
-		debugger;
-		const response = await fetch(changeUrl, opts);
-		const responseJSON = await response.json();
-		return responseJSON;
-	} catch(error) {
-		debugger;
-		return { error: error.message };
-	}
-
-	return { error: 'error saving build' };
+	return fetch(changeUrl, opts).then(x => x.json());
 }
 console.log(`rollup v${rollup.VERSION}`);
 console.log(`bundling service-worker...`);
 
-let error;
-try {
-	const generated = await rollup.rollup(rollupConfig)
-		.then(x => x.generate(rollupConfig.output));
-	const { code } = generated.output[0];
-	const minified = await pipe(AddDate,AddVersion,Minify)(code);
-	({error} = await saveBuild(minified));
-} catch (e){
-	error = e.message;
-}
-console.log(error || `DONE\nsee ` +
-`${self.location.origin}/${rollupConfig.output.file}`
-);
+const build = async () => {
+	let error;
+	try {
+		const generated = await rollup.rollup(rollupConfig)
+			.then(x => x.generate(rollupConfig.output));
+		const { code } = generated.output[0];
+		const minified = await pipe(AddDate,AddVersion,Minify)(code);
+		const response = await saveBuild(minified);
+		if(response.error){
+			error = response.error
+		}
+	} catch (e){
+		error = e.message;
+	}
+
+	if(error){
+		console.log(error);
+	} else {
+		console.log(`DONE\nsee ` +
+		`${self.location.origin}/${rollupConfig.output.file}`
+		);
+	}
+};
+
+await build();
