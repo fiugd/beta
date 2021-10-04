@@ -14,7 +14,7 @@ also, look into https://github.com/GoogleChromeLabs/comlink
 this is for communication between workers
 */
 
-import Babel from "https://cdn.skypack.dev/-/@babel/standalone@v7.15.7-1HPSIsmADpc5jJR5wUwi/dist=es2020,mode=imports,min/optimized/@babel/standalone.js";
+import Babel from "./babel/babel.js";
 //import Babel from '@babel/standalone';
 
 import consolePlugin from './worker-rewrite-plugins/console.js';
