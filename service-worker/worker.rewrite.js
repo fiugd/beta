@@ -81,6 +81,7 @@ async function getHandler(args){
 	const isJS = x => new RegExp('\.js$').test(x);
 	
 	const getFile = async (filePath, raw) => {
+		//TODO: should fetch from github if ###PLACEHOLDER###
 		const value = (await stores.changes.getItem(filePath) || {}).value ||
 			await stores.files.getItem(filePath);
 		if(raw) return value;
