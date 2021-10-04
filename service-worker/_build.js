@@ -57,11 +57,14 @@ async function saveBuild({ code, map }){
 			mode: "cors",
 			credentials: "omit"
 	};
-
 	try {
-		return await fetch(changeUrl, opts).then(x => x.json());
+		debugger;
+		const response = await fetch(changeUrl, opts);
+		const responseJSON = await response.json();
+		return responseJSON;
 	} catch(error) {
-		return { error }; 
+		debugger;
+		return { error: error.message };
 	}
 
 	return { error: 'error saving build' };
@@ -69,13 +72,16 @@ async function saveBuild({ code, map }){
 console.log(`rollup v${rollup.VERSION}`);
 console.log(`bundling service-worker...`);
 
-const generated = await rollup.rollup(rollupConfig)
-	.then(x => x.generate(rollupConfig.output));
-const { code } = generated.output[0];
-
-const minified = await pipe(AddDate,AddVersion,Minify)(code);
-const {error} = await saveBuild(minified);
-
+let error;
+try {
+	const generated = await rollup.rollup(rollupConfig)
+		.then(x => x.generate(rollupConfig.output));
+	const { code } = generated.output[0];
+	const minified = await pipe(AddDate,AddVersion,Minify)(code);
+	({error} = await saveBuild(minified));
+} catch (e){
+	error = e.message;
+}
 console.log(error || `DONE\nsee ` +
 `${self.location.origin}/${rollupConfig.output.file}`
 );
