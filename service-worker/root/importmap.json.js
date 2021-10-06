@@ -10,4 +10,4 @@ export const importmap = () => {
 	}
 }
 `.trim()+ '\n';
-}
+};

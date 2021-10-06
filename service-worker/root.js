@@ -1,7 +1,8 @@
-import { settings } from './root.settings.js';
-import { welcome } from './root.welcome.js';
-import { profile } from './root.profile.js';
-import { importmap } from './root.importmap.js';
+import { editorconfig } from './root/.editorconfig.js';
+import { profile } from './root/.profile.js';
+import { importmap } from './root/importmap.json.js';
+import { settings } from './root/settings.json.js';
+import { welcome } from './root/welcome.md.js';
 
 const initRootService = async ({ stores }) => {
 	const {services, files, changes} = stores;
@@ -11,10 +12,11 @@ const initRootService = async ({ stores }) => {
 		type: 'default',
 		tree: { '~': {
 			'.git': { config: {} },
+			'.editorconfig': {},
 			'.profile': {},
 			'importmap.json': {},
 			'settings.json': {},
-			'welcome.md': {}
+			'welcome.md': {},
 		}},
 	};
 	await services.setItem('0', service);
@@ -30,10 +32,11 @@ const initRootService = async ({ stores }) => {
 
 	const rootFiles = [
 		["~/.git/config", '\n'],
-		["~/settings.json", settings()],
 		["~/.profile", profile()],
-		["~/welcome.md", welcome()],
+		["~/.editorconfig", editorconfig()],
 		["~/importmap.json", importmap()],
+		["~/settings.json", settings()],
+		["~/welcome.md", welcome()],
 	];
 
 	for(let i=0, len=rootFiles.length; i<len; i++){
