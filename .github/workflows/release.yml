@@ -20,7 +20,7 @@ jobs:
         id: create_release_branch
         uses: jessicalostinspace/cut-release-action@v1.0.0
         with:
-          repository-url: 'https://crosshj:${{ ${{ secrets.API_TOKEN_GITHUB }}@github.com/crosshj/fiug.git'
+          repository-url: 'https://crosshj:${{ secrets.API_TOKEN_GITHUB }}@github.com/crosshj/fiug.git'
           branch-prefix: 'release-v'
           semantic-version: ${{ github.event.inputs.version }}
       - name: Push to fiug main
@@ -35,4 +35,4 @@ jobs:
           user-email: github@chimpjuice.com
           commit-message: v${{ github.event.inputs.version }}
           # commit-message: v${{ github.event.inputs.version }}, see ORIGIN_COMMIT from $GITHUB_REF
-          target-branch: "release-v${{ github.event.inputs.version }}"
+          target-branch: release-v${{ github.event.inputs.version }}
