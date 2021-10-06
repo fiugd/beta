@@ -2,7 +2,7 @@
 
 mkdir .release
 
-touch ./release/test.md
+cp -r ./ ./.release
 
 echo "Bash script thinks version is: $1"
 
