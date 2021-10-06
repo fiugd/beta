@@ -13,7 +13,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: creates output
-        run:  sh ./create_release.sh ${{ github.event.inputs.version }}
+        run:  sh ./.create_release.sh ${{ github.event.inputs.version }}
       - name: troubleshoot version
         run:  echo "Version ${{ github.event.inputs.version }}"
       - name: Push to fiug main
