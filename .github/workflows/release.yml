@@ -14,15 +14,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: creates output
         run:  sh ./.create_release.sh ${{ github.event.inputs.version }}
-      - name: troubleshoot version
-        run:  echo "Version ${{ github.event.inputs.version }}"
-      - name: create release branch
-        id: create_release_branch
-        uses: jessicalostinspace/cut-release-action@v1.0.0
+      - uses: GuillaumeFalourd/create-other-repo-branch-action@v1
         with:
-          repository-url: 'https://crosshj:${{ secrets.API_TOKEN_GITHUB }}@github.com/crosshj/fiug.git'
-          branch-prefix: 'release-v'
-          semantic-version: ${{ github.event.inputs.version }}
+          repository_owner: crosshj
+          repository_name: fiug
+          new_branch_name: release-v${{ github.event.inputs.version }}
+          #new_branch_ref: main
+          access_token: ${{ secrets.API_TOKEN_GITHUB }}
       - name: Push to fiug main
         id: push_directory
         uses: cpina/github-action-push-to-another-repository@main
