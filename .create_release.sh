@@ -2,10 +2,10 @@
 
 
 mkdir /tmp/.release
-cp -r ./ /tmp/.release
+cp -vr ./ /tmp/.release
 
 mkdir .release
-cp -r /tmp/.release ./.release
+cp -vr /tmp/.release ./.release
 
 echo "Bash script thinks version is: $1"
 
