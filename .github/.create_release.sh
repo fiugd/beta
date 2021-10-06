@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# this is ran at / NOT at ./.github, keep this in mind
+
 mkdir /tmp/.release
 cp -vr ./ /tmp/.release
 
