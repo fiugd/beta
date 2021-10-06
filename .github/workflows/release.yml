@@ -16,4 +16,15 @@ jobs:
         run:  sh ./create_release.sh ${{ github.event.inputs.version }}
       - name: troubleshoot version
         run:  echo "Version ${{ github.event.inputs.version }}"
-
+      - name: Push to fiug main
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: '.release'
+          destination-github-username: 'crosshj'
+          destination-repository-name: 'fiug'
+          user-email: github@chimpjuice.com
+          commit-message: See ORIGIN_COMMIT from $GITHUB_REF
+          target-branch: release-${{ github.event.inputs.version }}
