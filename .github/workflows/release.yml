@@ -13,7 +13,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: creates output
-        run:  sh ./.create_release.sh ${{ github.event.inputs.version }}
+        run:  sh ./.github/.create_release.sh ${{ github.event.inputs.version }}
       - uses: GuillaumeFalourd/create-other-repo-branch-action@v1
         with:
           repository_owner: crosshj
