@@ -35,4 +35,4 @@ jobs:
           user-email: github@chimpjuice.com
           commit-message: v${{ github.event.inputs.version }}
           # commit-message: v${{ github.event.inputs.version }}, see ORIGIN_COMMIT from $GITHUB_REF
-          target-branch: release-v${{ github.event.inputs.version }}
+          target-branch: "release-v${{ github.event.inputs.version }}"
