@@ -27,4 +27,4 @@ jobs:
           destination-repository-name: 'fiug'
           user-email: github@chimpjuice.com
           commit-message: See ORIGIN_COMMIT from $GITHUB_REF
-          target-branch: release-${{ github.event.inputs.version }}
+          target-branch: release-staging
