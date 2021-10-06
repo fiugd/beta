@@ -1,6 +1,8 @@
 #!/bin/sh
 
-mkdir release
+mkdir .release
+
+touch ./release/test.md
 
 echo "Bash script thinks version is: $1"
 
