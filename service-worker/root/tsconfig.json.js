@@ -1,3 +1,5 @@
+export const tsconfig = () => {
+	return `
 {
     "compilerOptions": {
         "rootDir": "src",
@@ -26,3 +28,5 @@
         "src"
     ]
 }
+`.trim() + '\n';
+};

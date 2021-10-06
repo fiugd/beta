@@ -74,11 +74,11 @@ const build = async () => {
 			error = response.error
 		}
 	} catch (e){
-		error = e.message;
+		error = e.message + '\n' + e.stack;
 	}
 
 	if(error){
-		console.log(error);
+		console.log('\n' + error);
 	} else {
 		console.log(`DONE\nsee ` +
 		`${self.location.origin}/${rollupConfig.output.file}`

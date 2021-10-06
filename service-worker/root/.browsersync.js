@@ -1,3 +1,5 @@
+export const bsConfig = () => {
+	return `
 /*
  |--------------------------------------------------------------------------
  | Browser-sync config file
@@ -25,7 +27,7 @@ module.exports = {
 	middleware: [
 		function (req, res, next) {
 			// if (req.url === "/") {
-			// 	res.writeHead(302, { Location: `/` });
+			// 	res.writeHead(302, { Location: "/" });
 			// 	res.end();
 			// 	return;
 			// }
@@ -37,9 +39,11 @@ module.exports = {
 		rule: {
 			match: /<\/body>/i,
 			fn: function (snippet, match) {
-				const customSnippet = `<script async src='/browser-sync/browser-sync-client.js?v=2.26.7'><\/script>\n`;
+				const customSnippet = "<script async src='/browser-sync/browser-sync-client.js?v=2.26.7'><\/script>\n";
 				return customSnippet + match;
 			},
 		},
 	},
+};
+`.trim() + '\n';
 };

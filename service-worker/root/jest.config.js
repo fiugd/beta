@@ -1,4 +1,5 @@
-
+export const jestConfig = () => {
+	return `
 module.exports = {
 	modulePathIgnorePatterns: [
 		'<rootDir>/__services'
@@ -9,4 +10,6 @@ module.exports = {
 	transform: {
 		".*.js": "<rootDir>/node_modules/babel-jest"
 	},
+};
+`.trim() + '\n';
 };

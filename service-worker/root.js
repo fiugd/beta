@@ -1,7 +1,10 @@
+import { bsConfig } from './root/.browsersync.js';
 import { editorconfig } from './root/.editorconfig.js';
 import { profile } from './root/.profile.js';
 import { importmap } from './root/importmap.json.js';
+import { jestConfig } from './root/jest.config.js';
 import { settings } from './root/settings.json.js';
+import { tsconfig } from './root/tsconfig.json.js';
 import { welcome } from './root/welcome.md.js';
 
 const initRootService = async ({ stores }) => {
@@ -12,10 +15,13 @@ const initRootService = async ({ stores }) => {
 		type: 'default',
 		tree: { '~': {
 			'.git': { config: {} },
+			'.browsersync.js': {},
 			'.editorconfig': {},
 			'.profile': {},
 			'importmap.json': {},
+			'jest.config.js': {},
 			'settings.json': {},
+			'tsconfig.json': {},
 			'welcome.md': {},
 		}},
 	};
@@ -32,10 +38,13 @@ const initRootService = async ({ stores }) => {
 
 	const rootFiles = [
 		["~/.git/config", '\n'],
-		["~/.profile", profile()],
+		["~/.browsersync.js", bsConfig()],
 		["~/.editorconfig", editorconfig()],
+		["~/.profile", profile()],
 		["~/importmap.json", importmap()],
+		['~/jest.config.js', jestConfig()],
 		["~/settings.json", settings()],
+		["~/tsconfig.json", tsconfig()],
 		["~/welcome.md", welcome()],
 	];
 
