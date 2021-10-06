@@ -1,6 +1,6 @@
 {
 	"name": "fiug",
-	"version": "0.4.5",
+	"version": "0.4.6",
 	"description": "cloud IDE without the cloud",
 	"main": "index.js",
 	"scripts": {
