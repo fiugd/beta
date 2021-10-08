@@ -19,7 +19,9 @@
 			</div>
 		</div>
 	</body>
-	<script>
+	<script type="module">
+		import Editor from './editor.js';
+
 		const isRunningAsModule = document.location.href.includes("_/modules");
 
 		if(!isRunningAsModule){
@@ -28,6 +30,19 @@
 			document.getElementsByTagName('head')[0].appendChild(base);
 		}
 
+		const { inlineEditor: editor } = Editor();
+		editor({
+			line: 2,
+			column: 0,
+			name: '404.html',
+			id: '1',
+			filename: '404.html',
+			path: '../404.html',
+			callback: () => {
+				console.warn('probably do not want to use this callback')
+			}
+		});
+
 		const head=document.getElementsByTagName("head")[0];
 
 		const cssnode = document.createElement('link');
@@ -35,11 +50,6 @@
 		cssnode.rel = 'stylesheet';
 		cssnode.href = './editor.css';
 		head.appendChild(cssnode);
-
-		const scriptnode=document.createElement('script');
-		scriptnode.type="module";
-		scriptnode.src='./editor.js';
-		head.appendChild(scriptnode);
 
 	</script>
 </html>

@@ -1,18 +1,20 @@
-import Editor from "/shared/modules/editor.mjs";
-import EditorTabs from "./EditorTabs.mjs";
+import Editor from "../shared/modules/editor.mjs";
+import EditorTabs from "./editorTabs.js";
 import {
 	attachListener,
 	connectTrigger,
 	ChangeHandler,
 	CursorActivityHandler,
-} from "./editorEvents.mjs";
-import ext from "/shared/icons/seti/ext.json.mjs";
+} from "./editorEvents.js";
+import ext from "../shared/icons/seti/ext.json.mjs";
+
 import {
 	getState, getAllServices, getSettings,
 	setCurrentFile, getCurrentFileFull
-} from "./state.mjs";
-import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
-import "/shared/vendor/localforage.min.js";
+} from "./state.js";
+
+import { codemirrorModeFromFileType } from "../shared/modules/utilities.mjs";
+import "../shared/vendor/localforage.min.js";
 
 let editorGutter;
 let cmDom;

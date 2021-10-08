@@ -1,10 +1,10 @@
-import { attach, attachTrigger } from "./Listeners.mjs";
+import { attach, attachTrigger } from "./Listeners.js";
 import {
 	setState,
 	getState,
 	getCurrentFile,
 	getCurrentService,
-} from "./state.mjs";
+} from "./state.js";
 
 const triggers = {
 	ui: attachTrigger({
