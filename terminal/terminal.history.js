@@ -20,7 +20,7 @@ const history = [
 	`node --watch test/service-worker.services.test.js`,
 	`node service-worker/_build.js`,
 	`node shared/vendor/codemirror/update.js`,
-	`git commit -m "editor in it's own iframe"`,
+	`git commit -m "editor in its own iframe"`,
 	'preview editor/editor.html',
 ];
 
