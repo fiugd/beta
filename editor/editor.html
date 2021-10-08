@@ -29,19 +29,25 @@
 			base.href = '../../';
 			document.getElementsByTagName('head')[0].appendChild(base);
 		}
+		
+		const state = {
+			selected: {
+				line: 2,
+				column: 0,
+				name: '404.html',
+				id: '1',
+				filename: '404.html',
+				path: '../404.html',
+				callback: () => {
+					console.warn('probably do not want to use this callback')
+				}
+			},
+			opened: ['404.html', 'index.html'],
+			changed: ['404.html']
+		}
 
 		const { inlineEditor: editor } = Editor();
-		editor({
-			line: 2,
-			column: 0,
-			name: '404.html',
-			id: '1',
-			filename: '404.html',
-			path: '../404.html',
-			callback: () => {
-				console.warn('probably do not want to use this callback')
-			}
-		});
+		editor(state.selected);
 
 		const head=document.getElementsByTagName("head")[0];
 
