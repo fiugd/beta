@@ -289,7 +289,6 @@ const initTabs = (parent) => (tabDefArray = []) => {
 let tabsContainer;
 let tabsList;
 function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
-	debugger;
 	if (tabsContainer) {
 		//console.log('already exists');
 		tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");

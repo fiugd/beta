@@ -275,6 +275,7 @@ const operationDoneHandler = ({
 	updateTab,
 	removeTab,
 }) => {
+
 	const { op, id, result = [] } = event.detail || {};
 	if(result?.error) return;
 	if (!["read", "update"].includes(op) || !id) return;

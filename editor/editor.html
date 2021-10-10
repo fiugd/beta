@@ -21,6 +21,7 @@
 	</body>
 	<script type="module">
 		import Editor from './editor.js';
+		import { trigger } from './Listeners.js';
 
 		const isRunningAsModule = document.location.href.includes("_/modules");
 
@@ -29,24 +30,22 @@
 			base.href = '../../';
 			document.getElementsByTagName('head')[0].appendChild(base);
 		}
-		
-		const state = {
-			selected: {
-				line: 2,
-				column: 0,
-				name: '404.html',
-				id: '1',
-				filename: '404.html',
-				path: '../404.html',
-				callback: () => {
-					console.warn('probably do not want to use this callback')
-				}
-			},
-			opened: ['404.html', 'index.html'],
-			changed: ['404.html']
-		}
 
 		const { inlineEditor: editor } = Editor();
+
+		const state = {
+			selected: {
+				// line: 2, << causes focus to be stolen
+				// column: 0, << causes focus to be stolen
+				id: '1',
+				name: 'index.html',
+				filename: 'index.html',
+				path: '../index.html',
+			},
+			opened: [{ name: '404.html', order: 1 }, { name: 'index.html', order: 0 }],
+			changed: ['index.html']
+		};
+
 		editor(state.selected);
 
 		const head=document.getElementsByTagName("head")[0];
@@ -56,6 +55,22 @@
 		cssnode.rel = 'stylesheet';
 		cssnode.href = './editor.css';
 		head.appendChild(cssnode);
+
+		trigger({
+			e: {},
+			type: 'operationDone',
+			params: {},
+			source: {},
+			data: {},
+			detail: {
+				op: 'read',
+				id: 1,
+				result: [{
+					name: 'crosshj/fake',
+					state
+				}]
+			}
+		})
 
 	</script>
 </html>

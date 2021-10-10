@@ -14,13 +14,17 @@ const setCurrentFile = dummyFunc('setCurrentFile');
 const getCurrentService = dummyFunc('getCurrentService');
 const getCurrentServiceTree = dummyFunc('getCurrentServiceTree');
 const getDefaultFile = dummyFunc('getDefaultFile');
-const setCurrentService = dummyFunc('setCurrentService');
+const setCurrentService = dummyFunc('setCurrentService', {
+	name: 'crosshj/fiug-beta'
+});
 const getCurrentFolder = dummyFunc('getCurrentFolder');
 const setCurrentFolder = dummyFunc('setCurrentFolder');
+
 const getState = dummyFunc('getState');
 const setState = dummyFunc('setState');
 const resetState = dummyFunc('resetState');
-const getSettings = dummyFunc('getSettings');
+
+const getSettings = dummyFunc('getSettings', { indentWithTabs: true, tabSize: 2 });
 const openFile = dummyFunc('openFile');
 const closeFile = dummyFunc('closeFile');
 const moveFile = dummyFunc('moveFile');
