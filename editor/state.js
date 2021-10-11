@@ -15,7 +15,7 @@ const getCurrentService = dummyFunc('getCurrentService');
 const getCurrentServiceTree = dummyFunc('getCurrentServiceTree');
 const getDefaultFile = dummyFunc('getDefaultFile');
 const setCurrentService = dummyFunc('setCurrentService', {
-	name: 'crosshj/fiug-beta'
+	name: 'crosshj/fake'
 });
 const getCurrentFolder = dummyFunc('getCurrentFolder');
 const setCurrentFolder = dummyFunc('setCurrentFolder');

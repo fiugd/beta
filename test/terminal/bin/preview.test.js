@@ -42,7 +42,7 @@ class Resolver {
 const resolver = new Resolver(
 	(res) => console.log(res || 'preview done')
 );
-const response = await operation(args, resolver.done);
+const response = await operation(args, resolver.done);
 console.log(response);
 
 await resolver.promise;
