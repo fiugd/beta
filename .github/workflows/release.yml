@@ -1,4 +1,4 @@
-
+# this workflow is triggered manually and creates a release in /fiug (from beta)
 name: release
 
 on:
