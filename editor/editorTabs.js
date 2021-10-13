@@ -159,23 +159,25 @@ const createTab = (parent, init) => (tabDef) => {
 		}[tabDef.name.replace("system::", "")];
 		systemClass = "italic";
 	}
+	tab.title = `${tabDef.parent ? (tabDef.parent+'/') : ''}`;
 	tab.innerHTML = `
 		<span style="pointer-events: none;"
 			class="${systemClass ? systemClass + " " : ""}icon-${systemType || fileType}"
 		>${systemName || tabDef.name.split('/').pop()}</span>
 		<div class="tab-close">
-		<div class="monaco-action-bar animated">
-			<ul class="actions-container" role="toolbar" aria-label="Tab actions">
-				<li class="action-item" role="presentation">
-					<a class="action-label icon close-editor-action"
-						data-name="${tabDef.name}"
-						data-parent="${tabDef.parent||''}"
-						role="button"
-						title="Close"
-					>
-					</a>
-				</li>
-			</ul>
+			<div class="monaco-action-bar animated">
+				<ul class="actions-container" role="toolbar" aria-label="Tab actions">
+					<li class="action-item" role="presentation">
+						<a class="action-label icon close-editor-action"
+							data-name="${tabDef.name}"
+							data-parent="${tabDef.parent||''}"
+							role="button"
+							title="Close"
+						>
+						</a>
+					</li>
+				</ul>
+			</div>
 		</div>
 	`;
 	//	const oldScroll = parent.scrollLeft;
