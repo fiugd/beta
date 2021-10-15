@@ -23,13 +23,20 @@ export default () => {
 	window.addEventListener("resize", fit);
 	fit();
 
-	/*
-	const linkHandler = (e, uri) => alert(`Attempt to navigate to: ${uri}`)
+
+	const linkstart = `\u00ab`;
+	const linkend = `\u00bb`;
+	const linkHandler = (e, uri) => {
+		const cleanUri = uri.replace(/\u00ab|\u00bb/g, '');
+		if(cleanUri !== uri) return term.onInternalLink(cleanUri);
+		window.open(uri);
+	}
 	const linkMatcherOpts = {};
+	const useLinkProvider = false;
 	//https://xtermjs.org/docs/api/terminal/interfaces/ilinkmatcheroptions/
 
-	term.loadAddon(new WebLinksAddon(linkHandler, linkMatcherOpts));
-	
+	/*
+
 	https://github.com/xtermjs/xterm.js/pull/538
 	https://npmdoc.github.io/node-npmdoc-xterm/build/apidoc.html#apidoc.module.xterm.Linkifier
 	https://github.com/xtermjs/xterm-addon-web-links
@@ -44,11 +51,54 @@ export default () => {
 	- not sure xterm.js supports this yet, though
 
 	*/
-	term.loadAddon(new WebLinksAddon());
 
-	term._attachHandlers = ({ bubbleHandler, keyHandler }) => {
+	const originalActivate = WebLinksAddon.prototype.activate;
+	WebLinksAddon.prototype.activate = function(term){
+		this._terminal = term;
+		if(this._useLinkProvider){
+			return originalActivate.bind(this)(term);
+		}
+		const protocolClause = '(https?:\\/\\/)';
+		const domainCharacterSet = '[\\da-z\\.-]+';
+		const negatedDomainCharacterSet = '[^\\da-z\\.-]+';
+		const domainBodyClause = '(' + domainCharacterSet + ')';
+		const tldClause = '([a-z\\.]{2,6})';
+		const ipClause = '((\\d{1,3}\\.){3}\\d{1,3})';
+		const localHostClause = '(localhost)';
+		const portClause = '(:\\d{1,5})';
+		const hostClause = '((' + domainBodyClause + '\\.' + tldClause + ')|' + ipClause + '|' + localHostClause + ')' + portClause + '?';
+		const pathCharacterSet = '(\\/[\\/\\w\\.\\-%~:+@]*)*([^:"\'\\s])';
+		const pathClause = '(' + pathCharacterSet + ')?';
+		const queryStringHashFragmentCharacterSet = '[0-9\\w\\[\\]\\(\\)\\/\\?\\!#@$%&\'*+,:;~\\=\\.\\-]*';
+		const queryStringClause = '(\\?' + queryStringHashFragmentCharacterSet + ')?';
+		const hashFragmentClause = '(#' + queryStringHashFragmentCharacterSet + ')?';
+		const negatedPathCharacterSet = '[^\\/\\w\\.\\-%]+';
+		const bodyClause = hostClause + pathClause + queryStringClause + hashFragmentClause;
+		const start = '(?:^|' + negatedDomainCharacterSet + ')(';
+		const end = ')($|' + negatedPathCharacterSet + ')';
+		const strictUrlRegex = protocolClause + bodyClause;
+
+		const matchFiug = `${linkstart}` + `(.*)` + pathClause + linkend;
+		const originalRegex = new RegExp(start + `(${strictUrlRegex}|${matchFiug})` + end);
+		
+		const handler = {};
+		const i = originalRegex || new Proxy(originalRegex, handler);
+
+		this._linkMatcherId = this._terminal.registerLinkMatcher(
+			i, this._handler, this._options
+		);
+	};
+
+	const linksAddon = new WebLinksAddon(linkHandler, linkMatcherOpts, useLinkProvider);
+	term.loadAddon(linksAddon);
+
+	term._attachHandlers = ({ bubbleHandler, keyHandler, internalLinkHandler }) => {
 		term.attachCustomKeyEventHandler(bubbleHandler);
 		term.onKey(keyHandler);
+		term.onBinary((...args) => {
+			console.log({ args })
+		});
+		term.onInternalLink = internalLinkHandler;
 	};
 
 	return term;

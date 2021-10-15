@@ -17,6 +17,9 @@ import {
 	Spinner
 } from './terminal.utils.js';
 
+const linkstart = `\u00ab`;
+const linkend = `\u00bb`;
+
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
 	if(stored) return stored;
@@ -326,7 +329,7 @@ const diff = async ({ ops }, args) => {
 		.map(x => {
 			if(x.deleteFile)
 				return `\n${x.fileName}\n\n${chalk.red('DELETED')}\n`
-			return `\n${x.fileName}\n\n${getDiff(x.original, x.value)}\n`
+			return `\n${chalk.hex('#fff')(linkstart + x.fileName+linkend)}\n\n${getDiff(x.original, x.value)}\n`
 		})
 		.join('\n');
 };

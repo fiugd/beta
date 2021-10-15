@@ -52,7 +52,10 @@ setTimeout(async () => {
 			term, ops, setBuffer, getBuffer, setRunning, getRunning, comm
 		});
 		const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
-		term._attachHandlers({ bubbleHandler, keyHandler });
+		const internalLinkHandler = (uri) => {
+			alert(`TODO: INTERNAL LINK => ${uri}`);
+		};
+		term._attachHandlers({ bubbleHandler, keyHandler, internalLinkHandler });
 
 		await callWithRetry(getCwd);
 
