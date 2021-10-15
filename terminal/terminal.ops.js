@@ -180,6 +180,33 @@ const commands = [
 		map: mapFileArg,
 		mapResponse: (res) => ''
 	},
+	{
+		name: 'Open',
+		keyword: "open",
+		description: `Open a file in editor`,
+		event: "fileSelect",
+		type: "fileSelect",
+		usage: '[FILE]',
+		args: [
+			{ name: 'file', type: String, defaultOption: true, required: true }
+		],
+		map: ({ file, cwd }) => {
+			const _cwd = (file||'').startsWith(state.service)
+				? '/'
+				: cwd;
+			const _file = pather(_cwd, file);
+			const name = _file.split('/').pop();
+			const parent = _file.split('/').slice(0,-1).join('/')
+				.replace(state.service, '');
+			return {
+				name: _file.split('/').pop(),
+				parent,
+				path: parent,
+				service: state.service
+			};
+		},
+		mapResponse: (res) => ''
+	},
 /*
 	{
 		name: 'Concat',
@@ -280,7 +307,7 @@ const withState = (() => {
 
 async function invokeRaw(args={}, thisCommand){
 	thisCommand = thisCommand || this;
-	const { event, eventMap, invokeRaw, map: argMapper, comm, mapResponse } = thisCommand;
+	const { event, type, eventMap, invokeRaw, map: argMapper, comm, mapResponse } = thisCommand;
 	const { response: cwd } = event[0] !== 'showCurrentFolder'
 		? (await invokeRaw.bind({
 				event: ['showCurrentFolder'],
@@ -300,7 +327,7 @@ async function invokeRaw(args={}, thisCommand){
 
 	let { error, response } = await withState(comm.execute)({
 		triggerEvent: {
-			type: 'operations',
+			type: type ||'operations',
 			detail: {
 				source: 'TerminalWIP',
 				operation: eventMap

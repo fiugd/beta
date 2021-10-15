@@ -1,3 +1,4 @@
+import { Link } from './terminal.utils.js';
 import { WebLinksAddon } from 'https://cdn.skypack.dev/xterm-addon-web-links';
 
 export default () => {
@@ -24,10 +25,10 @@ export default () => {
 	fit();
 
 
-	const linkstart = `\u00ab`;
-	const linkend = `\u00bb`;
+	const linkstart = Link.start;
+	const linkend = Link.end;
 	const linkHandler = (e, uri) => {
-		const cleanUri = uri.replace(/\u00ab|\u00bb/g, '');
+		const cleanUri = Link.text(uri);
 		if(cleanUri !== uri) return term.onInternalLink(cleanUri);
 		window.open(uri);
 	}
@@ -49,7 +50,8 @@ export default () => {
 	import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 	ansiEscapes.link(text, url)
 	- not sure xterm.js supports this yet, though
-
+	
+	CLOSED ISSUE: https://github.com/xtermjs/xterm.js/issues/583
 	*/
 
 	const originalActivate = WebLinksAddon.prototype.activate;

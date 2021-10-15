@@ -42,6 +42,19 @@ export { chalk, jsonColors };
 
 export const fetchJSON = url => fetch(url).then(x => x.json());
 
+export const Link = {
+	start: '\u02f9',
+	end: '\u02fa',
+	text: (uri) => {
+		const startEndCharsRegex = new RegExp(Link.start+'|'+Link.end, 'g')
+		const cleanUri = uri.replace(startEndCharsRegex, '');
+		return cleanUri;
+	},
+	create: (uri, color="#fff") => {
+		return chalk.hex(color)(`${Link.start}${uri}${Link.end}`)
+	}
+};
+
 export const getServices = async (id) => {
 	const url = typeof id !== 'undefined'
 		? `/service/read/` + id

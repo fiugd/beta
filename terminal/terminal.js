@@ -37,6 +37,7 @@ setTimeout(async () => {
 		const history = new History({ chalk, setBuffer, getBuffer });
 		const coreOps = GetOps(term, comm);
 		const pwdCommand = coreOps.find(x => x.keyword === 'pwd') || {};
+		const openCommand = coreOps.find(x => x.keyword === 'open') || {};
 		const getCwd = async () => {
 			const { response: cwd } = await pwdCommand.invokeRaw();
 			if(!cwd) throw new Error('cwd not found');
@@ -53,7 +54,9 @@ setTimeout(async () => {
 		});
 		const { bubbleHandler, keyHandler } = Keys({ lib, getBuffer, setBuffer });
 		const internalLinkHandler = (uri) => {
-			alert(`TODO: INTERNAL LINK => ${uri}`);
+			openCommand.invokeRaw({ file: uri });
+			//console.log(coreOps.map(x=>x.keyword))
+			//alert(`TODO: INTERNAL LINK => ${uri}`);
 		};
 		term._attachHandlers({ bubbleHandler, keyHandler, internalLinkHandler });
 

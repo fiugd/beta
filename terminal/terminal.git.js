@@ -14,11 +14,11 @@ import GetOps, { switchService } from './terminal.ops.js';
 import {
 	chalk, jsonColors,
 	getCurrentService, addFile, addFolder,
-	Spinner
+	Spinner, Link
 } from './terminal.utils.js';
 
-const linkstart = `\u00ab`;
-const linkend = `\u00bb`;
+const linkstart = Link.start;
+const linkend = Link.end;
 
 const getStored = (varName) => {
 	const stored = sessionStorage.getItem(varName);
@@ -329,7 +329,7 @@ const diff = async ({ ops }, args) => {
 		.map(x => {
 			if(x.deleteFile)
 				return `\n${x.fileName}\n\n${chalk.red('DELETED')}\n`
-			return `\n${chalk.hex('#fff')(linkstart + x.fileName+linkend)}\n\n${getDiff(x.original, x.value)}\n`
+			return `\n${Link.create(x.fileName)}\n\n${getDiff(x.original, x.value)}\n`
 		})
 		.join('\n');
 };
