@@ -1,4 +1,3 @@
-//import JSTreeView from "/shared/vendor/js-treeview.1.1.5.js";
 import TreeView from "/shared/modules/TreeView.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
