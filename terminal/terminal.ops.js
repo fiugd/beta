@@ -197,7 +197,7 @@ const commands = [
 			const _file = pather(_cwd, file);
 			const name = _file.split('/').pop();
 			const parent = _file.split('/').slice(0,-1).join('/')
-				.replace(state.service, '');
+				.replace(state.service+'/', '');
 			return {
 				name: _file.split('/').pop(),
 				parent,

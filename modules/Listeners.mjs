@@ -162,12 +162,17 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		triggerEvent.detail.callback = (error, response, service) => {
+		const callback = (error, response, service) => {
 			source.postMessage({
 				error, response, error, service, key
 			}, messageEvent.origin);
 		}
-		trigger(triggerEvent)
+		triggerEvent.detail.callback = callback;
+		trigger(triggerEvent);
+
+		const autoRespond = ['fileSelect'];
+		if(autoRespond.includes(eventName)) return callback();
+
 		return;
 	}
 
