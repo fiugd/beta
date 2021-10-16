@@ -27,11 +27,11 @@ Go to [https://fiug.dev](https://fiug.dev) (try it out!)
 to run UI:
 - git clone this repo
 - `npm install`
-- `npm run watch` 
+- `npm run watch`
 
 to run server:
 - run UI as above
-- `npm run watch.server` 
+- `npm run watch.server`
 
 there is also a basic server which does much less than what I had this server doing, see "about the name"
 
