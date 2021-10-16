@@ -2,14 +2,14 @@ import { attachListener } from "./loaderBarEvents.mjs";
 
 let bar;
 function LoaderBar() {
-  if (bar) {
-    return bar;
-  }
-  bar = document.createElement("div");
-  bar.id = "loader-bar";
-  bar.style.display = "none";
+	if (bar) {
+		return bar;
+	}
+	bar = document.createElement("div");
+	bar.id = "loader-bar";
+	bar.style.display = "none";
 
-  bar.innerHTML = `
+	bar.innerHTML = `
 		<style>
 			#loader-bar {
 				display: block;
