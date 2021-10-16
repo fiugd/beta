@@ -50,7 +50,7 @@ export default () => {
 	import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 	ansiEscapes.link(text, url)
 	- not sure xterm.js supports this yet, though
-	
+
 	CLOSED ISSUE: https://github.com/xtermjs/xterm.js/issues/583
 	*/
 
