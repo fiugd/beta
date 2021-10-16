@@ -198,7 +198,6 @@ const commands = [
 			const name = _file.split('/').pop();
 			const parent = _file.split('/').slice(0,-1).join('/')
 				.replace(state.service+'/', '');
-			const name = _file.split('/').pop();
 			return {
 				name,
 				parent,
