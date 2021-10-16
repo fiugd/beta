@@ -171,7 +171,7 @@ window.addEventListener('message', function(messageEvent) {
 		trigger(triggerEvent);
 
 		const autoRespond = ['fileSelect'];
-		if(autoRespond.includes(triggerEvent.detail.type)){
+		if(autoRespond.includes(triggerEvent.type)){
 			return callback();
 		}
 
