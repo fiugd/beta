@@ -11,7 +11,6 @@ import Xterm from './terminal.xterm.js';
 
 let ops;
 const term = Xterm();
-window.term = term;
 
 //TODO: state
 let running = undefined;
@@ -20,6 +19,9 @@ const setBuffer = (str) => { charBuffer = str.split('') };
 const getBuffer = () => charBuffer.join('');
 const getRunning = () => running;
 const setRunning = (target) => running = target;
+
+window.term = term;
+window.sendKeys = setBuffer;
 
 const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
