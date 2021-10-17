@@ -14,6 +14,8 @@ import {
 	getCurrentFile, setCurrentFile, getCurrentFileFull
 } from "./state.js";
 
+import { showFileInEditor } from './utils/misc.js';
+
 import "../shared/vendor/localforage.min.js";
 
 // call editor tabs once early so event handlers are attached
@@ -114,7 +116,9 @@ function _Editor(callback) {
 	});
 
 	const switchEditor = async (filename, mode, {line, column}={}) => {
+
 		//TODO: should go into loading mode first
+		//switchEditor should be called each and every time a doc loads
 
 		if (mode === "systemDoc") {
 			const editorCallback = () => {

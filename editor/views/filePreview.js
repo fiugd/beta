@@ -1,8 +1,11 @@
-const showFileInEditor = (filename, contents) => {
-	const fileType = getFileType(filename);
-	return !["image", "font", "audio", "video", "zip"].includes(fileType) &&
-		!(typeof fileType === "string" && fileType.includes('image/'));
-};
+import {
+	getExtension,
+	getFileType
+} from '../utils/misc.js';
+import {
+	getState,
+	getAllServices,
+} from "../state.js";
 
 let binaryPreview;
 const showBinaryPreview = ({ filename, path = "." } = {}) => {

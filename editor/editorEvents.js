@@ -200,7 +200,20 @@ const serviceSwitchListener = ({ switchEditor }) => async (event) => {
 };
 
 function attachListener({ switchEditor, messageEditor, paste, cutSelected, copySelected }) {
+	const operationDone = operationDoneHandler({ switchEditor, messageEditor });
+	const serviceSwitch = serviceSwitchListener({ switchEditor });
+	const fileSelect = fileSelectHandler({ switchEditor });
+	const contextMenu = contextMenuHandler({ showMenu: () => window.showMenu });
+	const contextMenuSelect = contextMenuSelectHandler({ paste, cutSelected, copySelected })
+
 	const listener = async function (e) {
+
+		if (e.type === "operationDone") return operationDone(e);
+		if (e.type === "service-switch-notify") return serviceSwitch(e);
+		if (e.type === "fileSelect") return fileSelect(e);
+		if (e.type === "contextmenu") return contextMenu(e);
+		if (e.type === "contextmenu-select") return contextMenuSelect(e);
+
 		if (
 			[
 				"add-service-folder",
@@ -247,12 +260,12 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 	attach({
 		name: "Editor",
 		eventName: "service-switch-notify",
-		listener: serviceSwitchListener({ switchEditor }),
+		listener,
 	});
 	attach({
 		name: "Editor",
 		eventName: "operationDone",
-		listener: operationDoneHandler({ switchEditor, messageEditor }),
+		listener,
 	});
 	attach({
 		name: "Editor",
@@ -274,7 +287,6 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 		eventName: "connect-service-provider",
 		listener,
 	});
-
 	attach({
 		name: "Editor",
 		eventName: "noServiceSelected",
@@ -283,7 +295,7 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 	attach({
 		name: "Editor",
 		eventName: "fileSelect",
-		listener: fileSelectHandler({ switchEditor }),
+		listener,
 	});
 	attach({
 		name: "Editor",
@@ -293,17 +305,13 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 	attach({
 		name: "Editor",
 		eventName: "contextmenu",
-		listener: contextMenuHandler({
-			showMenu: () => window.showMenu,
-		}),
-		options: {
-			capture: true,
-		},
+		listener,
+		options: { capture: true },
 	});
 	attach({
 		name: "Editor",
 		eventName: "contextmenu-select",
-		listener: contextMenuSelectHandler({ paste, cutSelected, copySelected }),
+		listener,
 	});
 }
 

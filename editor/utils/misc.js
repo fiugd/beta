@@ -73,5 +73,10 @@ function getFileType(fileName = "") {
 	return type;
 }
 
+const showFileInEditor = (filename, contents) => {
+	const fileType = getFileType(filename);
+	return !["image", "font", "audio", "video", "zip"].includes(fileType) &&
+		!(typeof fileType === "string" && fileType.includes('image/'));
+};
 
-export { htmlToElement, getFileType, codemirrorModeFromFileType };
+export { htmlToElement, getExtension, getFileType, codemirrorModeFromFileType, showFileInEditor };

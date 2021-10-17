@@ -8,7 +8,13 @@ const getAllServices = dummyFunc('getAllServices');
 const getCodeFromService = dummyFunc('getCodeFromService');
 
 const getCurrentFile = dummyFunc('getCurrentFile');
-const getCurrentFileFull = dummyFunc('getCurrentFileFull');
+const getCurrentFileFull = dummyFunc('getCurrentFileFull', {
+	code: '',
+	path: '../index.html',
+	name: 'index.html',
+	id: 1,
+	filename: 'index.html',
+});
 const setCurrentFile = dummyFunc('setCurrentFile');
 
 const getCurrentService = dummyFunc('getCurrentService');
