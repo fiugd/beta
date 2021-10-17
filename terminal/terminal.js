@@ -11,6 +11,7 @@ import Xterm from './terminal.xterm.js';
 
 let ops;
 const term = Xterm();
+window.term = term;
 
 //TODO: state
 let running = undefined;
