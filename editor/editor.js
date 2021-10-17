@@ -1,3 +1,5 @@
+import { trigger } from './Listeners.js';
+
 import EditorTabs from "./editorTabs.js";
 
 import Search from './views/search.js';
@@ -242,4 +244,56 @@ function _Editor(callback) {
 	};
 }
 
-export default _Editor;
+
+const Editor = _Editor;;
+
+const isRunningAsModule = document.location.href.includes("_/modules");
+
+if(!isRunningAsModule){
+	const base = document.createElement('base');
+	base.href = '../../';
+	document.getElementsByTagName('head')[0].appendChild(base);
+}
+
+window.showMenu = () => true;
+
+const { inlineEditor: editor } = Editor();
+
+const state = {
+	selected: {
+		// line: 2, << causes focus to be stolen
+		// column: 0, << causes focus to be stolen
+		id: '1',
+		name: '404.html',
+		filename: '404.html',
+		path: '../404.html',
+	},
+	opened: [{ name: '404.html', order: 0 }, { name: 'index.html', order: 1 }],
+	changed: ['index.html']
+};
+
+editor(state.selected);
+
+const head=document.getElementsByTagName("head")[0];
+
+const cssnode = document.createElement('link');
+cssnode.type = 'text/css';
+cssnode.rel = 'stylesheet';
+cssnode.href = './editor.css';
+head.appendChild(cssnode);
+
+trigger({
+	e: {},
+	type: 'operationDone',
+	params: {},
+	source: {},
+	data: {},
+	detail: {
+		op: 'read',
+		id: 1,
+		result: [{
+			name: 'crosshj/fake',
+			state
+		}]
+	}
+})

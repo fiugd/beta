@@ -239,8 +239,6 @@ class GitConfig {
 		const { config, path } = this;
 		const source = ini.encode(config, { whitespace: true });
 		const service = this.service;
-		console.log(JSON.stringify(config, null, 2)+'\n\n');
-		console.log(source);
 
 		let message = `saved config to ${this.url}`;
 		let result;
