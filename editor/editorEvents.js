@@ -1,7 +1,5 @@
 import { attach, attachTrigger } from "./Listeners.js";
 import {
-	setState,
-	getState,
 	getCurrentFile,
 	getCurrentService,
 } from "./state.js";
@@ -48,47 +46,6 @@ const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
 		: nameWithPathIfPresent(parent || path, name);
 	const service = getCurrentService({ pure: true });
 	return pathNoServiceName(service, fileNameWithPath);
-};
-
-const ChangeHandler = (doc) => {
-	const { code, name, id, filename } = doc;
-	const service = getCurrentService({ pure: true });
-
-	// TODO: if handler already exists, return it
-	const changeThis = (contents, changeObj) => {
-		const file = setState({
-			name,
-			id,
-			filename,
-			code: contents,
-			prevCode: code,
-		});
-
-		//TODO: should be using a trigger for this
-		const event = new CustomEvent("fileChange", {
-			bubbles: true,
-			detail: {
-				name, id, filePath: filename, code: contents,
-				service: service ? service.name : undefined
-			},
-		});
-		document.body.dispatchEvent(event);
-	};
-
-	return (editor, changeObj) => {
-		//console.log('editor changed');
-		//console.log(changeObj);
-		changeThis(editor.getValue(), changeObj);
-	};
-};
-
-// this is really a trigger
-const CursorActivityHandler = ({ line, column }) => {
-	const event = new CustomEvent("cursorActivity", {
-		bubbles: true,
-		detail: { line, column },
-	});
-	document.body.dispatchEvent(event);
 };
 
 const contextMenuHandler = ({ showMenu } = {}) => (e) => {
@@ -352,4 +309,4 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 
 const connectTrigger = (args) => attachTrigger({ ...args, name: "Editor" });
 
-export { attachListener, connectTrigger, ChangeHandler, CursorActivityHandler };
+export { attachListener, connectTrigger };
