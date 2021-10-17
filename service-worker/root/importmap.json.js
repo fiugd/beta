@@ -2,6 +2,7 @@ export const importmap = () => {
 	return `
 {
 	imports: {
+		"ansi-escapes":·"https://cdn.skypack.dev/ansi-escapes",
 		chalk: "https://cdn.skypack.dev/chalk",
 		lodash: 'https://cdn.skypack.dev/lodash',
 		rollup: 'https://unpkg.com/rollup/dist/rollup.browser.js',
