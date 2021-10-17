@@ -3,20 +3,12 @@ import { trigger } from './Listeners.js';
 import EditorTabs from "./editorTabs.js";
 
 import Search from './views/search.js';
-import showNothingOpen from './views/nothingOpen.js';
-import showBinaryPreview from './views/filePreview.js';
-import showSystemDocsView from './views/systemDocs.js';
 import inlineEditor from './views/inlineEditor.js';
+import switcher from './views/switcher.js';
 
 import { attachListener, connectTrigger } from "./editorEvents.js";
 
-import {
-	getState, setState,
-	getAllServices, getCurrentService,
-	getCurrentFile, setCurrentFile, getCurrentFileFull
-} from "./state.js";
-
-import { showFileInEditor } from './utils/misc.js';
+import { setState, getCurrentService } from "./state.js";
 
 import "../shared/vendor/localforage.min.js";
 
@@ -66,8 +58,12 @@ const ChangeHandler = (doc) => {
 
 function _Editor(callback) {
 	const editor = inlineEditor(ChangeHandler, EditorTabs, Search, CursorActivityHandler);
-	let editorPreview, editorDom, nothingOpenDom, systemDocsView;
 	let systemDocsErrors = [];
+
+	const switchEditor = switcher(
+		editor,
+		systemDocsErrors
+	);
 
 	const messageEditor = ({ op, result }) => {
 		if (result.error) {
@@ -116,103 +112,6 @@ function _Editor(callback) {
 			document.querySelector("#editor").contains(e.target) &&
 			e.target.classList.contains("provider-add-service"),
 	});
-
-	const switchEditor = async (filename, mode, {line, column}={}) => {
-
-		//TODO: should go into loading mode first
-		//switchEditor should be called each and every time a doc loads
-
-		if (mode === "systemDoc") {
-			const editorCallback = () => {
-				editorDom = document.querySelector(".CodeMirror");
-				editorDom && editorDom.classList.add("hidden");
-			};
-			editor({
-				code: "",
-				name: "",
-				id: "",
-				filename,
-				callback: editorCallback,
-			});
-
-			systemDocsView = showSystemDocsView({
-				filename,
-				errors: systemDocsErrors,
-			});
-			systemDocsView && systemDocsView.classList.remove("hidden");
-
-			editorPreview && editorPreview.classList.add("hidden");
-			nothingOpenDom && nothingOpenDom.classList.add("hidden");
-
-			return;
-		}
-
-		if (mode === "nothingOpen") {
-			const editorCallback = () => {
-				editorDom = document.querySelector(".CodeMirror");
-				editorDom && editorDom.classList.add("hidden");
-			};
-			editor({
-				code: "",
-				name: "",
-				id: "",
-				filename: "",
-				callback: editorCallback,
-			});
-
-			nothingOpenDom = showNothingOpen();
-			nothingOpenDom && nothingOpenDom.classList.remove("hidden");
-
-			editorPreview && editorPreview.classList.add("hidden");
-			editorDom && editorDom.classList.add("hidden");
-			systemDocsView && systemDocsView.classList.add("hidden");
-			return;
-		}
-
-		setCurrentFile({ filePath: filename });
-
-		const currentFile = await getCurrentFileFull({ noFetch: true });
-		const {
-			code = "error",
-			path,
-			name,
-			id,
-			filename: defaultFile,
-		} = currentFile || {};
-
-		if (!currentFile || !showFileInEditor(filename, code)) {
-			const editorCallback = () => {
-				editorDom = document.querySelector(".CodeMirror");
-				editorDom && editorDom.classList.add("hidden");
-			};
-			editor({
-				code: "",
-				name: "",
-				id: "",
-				filename: "",
-				callback: editorCallback,
-			});
-
-			editorPreview = showBinaryPreview({ filename, code });
-			editorPreview && editorPreview.classList.remove("hidden");
-
-			editorDom && editorDom.classList.add("hidden");
-			nothingOpenDom && nothingOpenDom.classList.add("hidden");
-			systemDocsView && systemDocsView.classList.add("hidden");
-			return;
-		}
-
-		editor({
-			code, line, column, name, id, path,
-			filename: filename || defaultFile
-		});
-		editorDom = document.querySelector(".CodeMirror");
-		editorDom && editorDom.classList.remove("hidden");
-
-		editorPreview && editorPreview.classList.add("hidden");
-		nothingOpenDom && nothingOpenDom.classList.add("hidden");
-		systemDocsView && systemDocsView.classList.add("hidden");
-	};
 
 	const paste = async () => {
 		window.Editor.focus();
