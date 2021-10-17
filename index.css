@@ -543,7 +543,7 @@ body .CodeMirror .CodeMirror-vscrollbar > div::-webkit-scrollbar-thumb {
 }
 .functionInput{ visibility: hidden; }
 .CodeMirror { height: 100%;  flex: 1; }
-.CodeMirror-sizer { margin-right: 110px; }
+/* .CodeMirror-sizer { margin-right: 110px; } */
 
 
 ul.editor-controls {
