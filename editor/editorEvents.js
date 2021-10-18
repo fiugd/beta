@@ -4,6 +4,14 @@ import {
 	getCurrentService,
 } from "./state.js";
 
+import operationDoneHandler from './handlers/editor/operationDone.js';
+import fileSelectHandler from './handlers/editor/fileSelect.js';
+import {
+	getFilePath as gfp, noFrontSlash, pathNoServiceName
+} from './utils/misc.js'
+const getFilePath = gfp(getCurrentService);
+
+
 const triggers = {
 	ui: attachTrigger({
 		name: "Editor",
@@ -20,32 +28,6 @@ function triggerEvent(type, operation) {
 			body: {},
 		},
 	});
-};
-
-const noFrontSlash = (path) => {
-	if(!path) return path;
-	if(!path.includes('/')) return path;
-	if(path[0] === '/') return path.slice(1);
-	return path;
-};
-
-const pathNoServiceName = (service, path) => {
-	if(!path.includes('/')) return path;
-	if(!path.includes(service.name)) return noFrontSlash(path);
-	return noFrontSlash(
-		noFrontSlash(path).replace(service.name, '')
-	);
-};
-
-const getFilePath = ({ name="", parent="", path="", next="", nextPath="" }) => {
-	const nameWithPathIfPresent = (_path, _name) => _path
-		? noFrontSlash(`${_path}/${_name}`)
-		: noFrontSlash(_name);
-	const fileNameWithPath = next
-		? nameWithPathIfPresent(nextPath, next)
-		: nameWithPathIfPresent(parent || path, name);
-	const service = getCurrentService({ pure: true });
-	return pathNoServiceName(service, fileNameWithPath);
 };
 
 const contextMenuHandler = ({ showMenu } = {}) => (e) => {
@@ -104,84 +86,6 @@ const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => 
 	const handler = contextCommands[which];
 	if(!handler) return console.error(`Unrecognized context menu command: ${which}`);
 	handler({ parent, data });
-};
-
-let firstLoad = true;
-const fileSelectHandler = ({ switchEditor }) => async (event) => {
-	const { name, path, next, nextPath, parent } = event.detail;
-	const { line, column } = event.detail;
-	let savedFileName;
-
-
-	console.log(
-		`%c${name}: %ceditor %cfileSelect`,
-		'color:#CE9178;',
-		'color:#9CDCFE;',
-		'color:#DCDCAA;'
-	);
-
-	if (firstLoad) {
-		firstLoad = false;
-		savedFileName = sessionStorage.getItem("editorFile");
-		if (savedFileName && savedFileName === "noFileSelected") {
-			switchEditor(null, "nothingOpen");
-			return;
-		}
-		if (
-			savedFileName &&
-			savedFileName.includes("system::") &&
-			savedFileName.includes("systemDoc::")
-		){
-			switchEditor(savedFileName.replace("system::", ""), "systemDoc");
-			return;
-		}
-	}
-
-	if(!name){
-		sessionStorage.setItem("editorFile", '');
-		switchEditor(null, "nothingOpen");
-		return;
-	}
-
-	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
-
-	const filePath = savedFileName || fileNameWithPath;
-
-	if (!savedFileName) {
-		sessionStorage.setItem("editorFile", filePath);
-	}
-
-	if (name.includes("system::") || filePath.includes("systemDoc::")) {
-		switchEditor(filePath
-				.replace("system::", "")
-				.replace("systemDoc::", ""),
-			"systemDoc"
-		);
-		return;
-	}
-
-	switchEditor(filePath, null, { line, column });
-};
-
-const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
-	const { detail } = e;
-	const { op, result } = (detail || {});
-
-	const providerOps = ["provider-test", "provider-save", "provider-add-service"];
-	if (providerOps.includes(op)) {
-		messageEditor({
-			op: op + "-done",
-			result,
-		});
-		return;
-	}
-
-	if (op === 'update') {
-		const name = result[0]?.state?.selected;
-		const fileSelect = fileSelectHandler({ switchEditor });
-		fileSelect({ detail: { name } });
-		return;
-	}
 };
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {

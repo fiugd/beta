@@ -1,11 +1,11 @@
 
+let allServices;
+let currentService;
+
 const dummyFunc = (fnName, returns='') => (...args) => {
 	console.log({ ...args, fnName });
 	return returns;
 };
-
-const getAllServices = dummyFunc('getAllServices');
-const getCodeFromService = dummyFunc('getCodeFromService');
 
 const getCurrentFile = dummyFunc('getCurrentFile');
 const getCurrentFileFull = dummyFunc('getCurrentFileFull', {
@@ -17,7 +17,11 @@ const getCurrentFileFull = dummyFunc('getCurrentFileFull', {
 });
 const setCurrentFile = dummyFunc('setCurrentFile');
 
-const getCurrentService = dummyFunc('getCurrentService');
+
+const getAllServices = () => allServices;
+const getCodeFromService = dummyFunc('getCodeFromService');
+
+const getCurrentService = () => currentService;
 const getCurrentServiceTree = dummyFunc('getCurrentServiceTree');
 const getDefaultFile = dummyFunc('getDefaultFile');
 const setCurrentService = dummyFunc('setCurrentService', {
@@ -36,7 +40,13 @@ const closeFile = dummyFunc('closeFile');
 const moveFile = dummyFunc('moveFile');
 const getOpenedFiles = dummyFunc('getOpenedFiles');
 
+const initState = (all, current) => {
+	allServices = all;
+	currentService = current;
+};
+
 export {
+	initState,
 	getAllServices,
 	getCodeFromService,
 

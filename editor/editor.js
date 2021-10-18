@@ -8,7 +8,7 @@ import switcher from './views/switcher.js';
 
 import { attachListener, connectTrigger } from "./editorEvents.js";
 
-import { setState, getCurrentService } from "./state.js";
+import { initState, getCurrentService } from "./state.js";
 
 import "../shared/vendor/localforage.min.js";
 
@@ -136,11 +136,6 @@ function _Editor(callback) {
 		cutSelected,
 		copySelected
 	});
-
-	//deprecate
-	return {
-		inlineEditor: editor,
-	};
 }
 
 
@@ -154,25 +149,6 @@ if(!isRunningAsModule){
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
 
-window.showMenu = () => true;
-
-const { inlineEditor: editor } = Editor();
-
-const state = {
-	selected: {
-		// line: 2, << causes focus to be stolen
-		// column: 0, << causes focus to be stolen
-		id: '1',
-		name: '404.html',
-		filename: '404.html',
-		path: '../404.html',
-	},
-	opened: [{ name: '404.html', order: 0 }, { name: 'index.html', order: 1 }],
-	changed: ['index.html']
-};
-
-editor(state.selected);
-
 const head=document.getElementsByTagName("head")[0];
 
 const cssnode = document.createElement('link');
@@ -180,6 +156,30 @@ cssnode.type = 'text/css';
 cssnode.rel = 'stylesheet';
 cssnode.href = './editor.css';
 head.appendChild(cssnode);
+
+window.showMenu = () => true;
+Editor();
+
+const service = {
+	name: 'crosshj/fake',
+	state: {
+		selected: {
+			// line: 2, << causes focus to be stolen
+			// column: 0, << causes focus to be stolen
+			id: '1',
+			name: '404.html',
+			filename: '404.html',
+			path: '../404.html',
+		},
+		opened: [
+			{ name: '404.html', order: 0 },
+			{ name: 'index.html', order: 1 }
+		],
+		changed: ['index.html']
+	}
+};
+
+initState([service], service);
 
 trigger({
 	e: {},
@@ -190,9 +190,6 @@ trigger({
 	detail: {
 		op: 'read',
 		id: 1,
-		result: [{
-			name: 'crosshj/fake',
-			state
-		}]
+		result: [service]
 	}
-})
+});

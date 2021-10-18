@@ -79,4 +79,37 @@ const showFileInEditor = (filename, contents) => {
 		!(typeof fileType === "string" && fileType.includes('image/'));
 };
 
-export { htmlToElement, getExtension, getFileType, codemirrorModeFromFileType, showFileInEditor };
+const noFrontSlash = (path) => {
+	try {
+		if(!path) return path;
+		if(!path.includes('/')) return path;
+		if(path[0] === '/') return path.slice(1);
+		return path;
+	} catch(e){ debugger}
+};
+
+const pathNoServiceName = (service, path) => {
+	if(!path.includes('/')) return path;
+	if(!path.includes(service.name)) return noFrontSlash(path);
+	return noFrontSlash(
+		noFrontSlash(path).replace(service.name, '')
+	);
+};
+
+const getFilePath = (getCurrentService) => ({ name="", parent="", path="", next="", nextPath="" }) => {
+	const nameWithPathIfPresent = (_path, _name) => _path
+		? noFrontSlash(`${_path}/${_name}`)
+		: noFrontSlash(_name);
+	const fileNameWithPath = next
+		? nameWithPathIfPresent(nextPath, next)
+		: nameWithPathIfPresent(parent || path, name);
+	const service = getCurrentService({ pure: true });
+	return pathNoServiceName(service, fileNameWithPath);
+};
+
+export {
+	htmlToElement,
+	getExtension, getFileType, codemirrorModeFromFileType,
+	noFrontSlash, pathNoServiceName, getFilePath,
+	showFileInEditor
+};

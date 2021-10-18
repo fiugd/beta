@@ -1,5 +1,7 @@
 import { attach, attachTrigger } from "./Listeners.js";
 import { getDefaultFile, getState, getCurrentService } from "./state.js";
+import _fileSelect from './handlers/tabs/fileSelect.js';
+
 let tabs, service;
 
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -10,6 +12,54 @@ const sysDocNames = {
 	"open-previous-service": "Open Previous Service",
 	"open-settings-view": "Settings",
 };
+
+function clearLastTab({ tabs, removeTab }) {
+	if(!tabs.length) return;
+	const lastTab = tabs[tabs.length - 1];
+	if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
+		return;
+	tabs = tabs.filter((t) => t.id !== lastTab.id);
+	removeTab(lastTab);
+	return { tabs, cleared: lastTab };
+}
+
+function getTabsToUpdate(filePath) {
+	const name = filePath?.split('/').pop();
+	const tabsToUpdate = [];
+	let foundTab;
+	for (var i = 0, len = tabs.length; i < len; i++) {
+		if (name === tabs[i].name) {
+			foundTab = tabs[i];
+		}
+		// update: if tab exists and not active, activate it
+		if (name === tabs[i].name && !tabs[i].active) {
+			tabs[i].active = true;
+			tabsToUpdate.push(tabs[i]);
+		}
+		// update: remove active state from active tab
+		if (name !== tabs[i].name && tabs[i].active) {
+			delete tabs[i].active;
+			tabsToUpdate.push(tabs[i]);
+		}
+		if (!foundTab) {
+		}
+	}
+	return { foundTab, tabsToUpdate };
+}
+
+const tabsAPI = {
+	list: () => tabs,
+	update: (t) => tabs = t,
+	push: (t) => tabs.push(t),
+	clearLast: clearLastTab,
+	toUpdate: getTabsToUpdate
+};
+
+const serviceAPI = {
+	get: () => service,
+};
+
+const fileSelectHandler = _fileSelect(tabsAPI, serviceAPI, sysDocNames);
 
 function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
 	let { name, filename, path, parent, next, nextPath } = eventDetail;
@@ -71,40 +121,6 @@ function copyPath(data, relative) {
 			console.error(`Error writing path to clipboard: ${path}`);
 			console.error(e);
 		});
-}
-
-function clearLastTab({ tabs, removeTab }) {
-	if(!tabs.length) return;
-	const lastTab = tabs[tabs.length - 1];
-	if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
-		return;
-	tabs = tabs.filter((t) => t.id !== lastTab.id);
-	removeTab(lastTab);
-	return { tabs, cleared: lastTab };
-}
-
-function getTabsToUpdate(filePath) {
-	const name = filePath?.split('/').pop();
-	const tabsToUpdate = [];
-	let foundTab;
-	for (var i = 0, len = tabs.length; i < len; i++) {
-		if (name === tabs[i].name) {
-			foundTab = tabs[i];
-		}
-		// update: if tab exists and not active, activate it
-		if (name === tabs[i].name && !tabs[i].active) {
-			tabs[i].active = true;
-			tabsToUpdate.push(tabs[i]);
-		}
-		// update: remove active state from active tab
-		if (name !== tabs[i].name && tabs[i].active) {
-			delete tabs[i].active;
-			tabsToUpdate.push(tabs[i]);
-		}
-		if (!foundTab) {
-		}
-	}
-	return { foundTab, tabsToUpdate };
 }
 
 function triggerCloseTab(event, fileCloseTrigger) {
@@ -185,67 +201,6 @@ const clickHandler = ({ event, container, triggers }) => {
 			service: service ? service.name : '',
 		},
 	});
-};
-
-const fileSelectHandler = ({
-	event,
-	container,
-	initTabs,
-	createTab,
-	updateTab,
-	removeTab,
-}) => {
-	let { name, changed, parent, path } = event.detail;
-	if(path) parent = path;
-
-	if(!parent && name?.includes('/')){
-		parent = name.split('/').slice(0,-1).join('/');
-		name = name.split('/').pop();
-	}
-	if(name?.includes('system::')){
-		tabs = tabs || [];
-	}
-	if(!tabs) return;
-	let systemDocsName;
-	if (name?.includes("system::")) {
-		systemDocsName = sysDocNames[name.replace("system::", "")];
-	}
-	let id = "TAB" + Math.random().toString().replace("0.", "");
-
-	let { tabsToUpdate, foundTab } = getTabsToUpdate(parent
-		? `${parent}/${name}`
-		: name
-	);
-	if (foundTab) {
-		tabsToUpdate.map(updateTab);
-		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-		return;
-	}
-
-	createTab({
-		name,
-		parent,
-		active: true,
-		id,
-		changed,
-	});
-	const shouldClearTab = !name.includes("Untitled-");
-
-	const { cleared, tabs: newTabs } = (shouldClearTab && clearLastTab({
-		tabs, removeTab 
-	})) || {};
-	if (newTabs) tabs = newTabs;
-	if (cleared) tabsToUpdate = tabsToUpdate.filter((t) => t.id !== cleared.id);
-	tabsToUpdate.map(updateTab);
-	tabs.push({
-		name,
-		parent,
-		systemDocsName,
-		active: true,
-		id,
-		changed,
-	});
-	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
 };
 
 const fileChangeHandler = ({
