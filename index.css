@@ -48,9 +48,10 @@ body {
 }
 
 /* #explorer:hover,
+*/
 .CodeMirror:hover .CodeMirror-hscrollbar {
 	overflow-x: auto !important;
-} */
+}
 .CodeMirror:hover .CodeMirror-vscrollbar {
 	overflow-y: auto !important;
 }
