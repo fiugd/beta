@@ -90,7 +90,7 @@ const contextMenuSelectHandler = ({ paste, cutSelected, copySelected } = {}) => 
 
 const serviceSwitchListener = ({ switchEditor }) => async (event) => {
 	const fileName = getCurrentFile();
-	sessionStorage.setItem("editorFile", fileName);
+	//sessionStorage.setItem("editorFile", fileName);
 	const currentService = getCurrentService({ pure: true });
 	const fileBody = currentService.code.find((x) => x.name === fileName);
 	if (!fileBody) {
@@ -126,7 +126,7 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 				"open-previous-service",
 			].includes(e.type)
 		) {
-			sessionStorage.setItem("editorFile", "systemDoc::" + e.type);
+			//sessionStorage.setItem("editorFile", "systemDoc::" + e.type);
 			switchEditor(e.type, "systemDoc");
 			return;
 		}
@@ -142,7 +142,7 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 		}
 
 		if (e.type === "fileClose" && !next) {
-			sessionStorage.setItem("editorFile", "noFileSelected");
+			//sessionStorage.setItem("editorFile", "noFileSelected");
 			switchEditor(null, "nothingOpen");
 			return;
 		}
@@ -155,7 +155,7 @@ function attachListener({ switchEditor, messageEditor, paste, cutSelected, copyS
 
 		let savedFileName;
 		if (!savedFileName && filePath) {
-			sessionStorage.setItem("editorFile", filePath);
+			//sessionStorage.setItem("editorFile", filePath);
 		}
 		// should include path here if needed
 		switchEditor(savedFileName || filePath);
