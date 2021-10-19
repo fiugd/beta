@@ -2362,7 +2362,7 @@ notes-section.loading:after {
 	position: absolute;
 /* 	left: 0px; */
 /* 	right: -11px; */
-	width: 100vw;
+	width: 100%;
 	top: -1px;
 	bottom: -1px;
 	user-select: none;
