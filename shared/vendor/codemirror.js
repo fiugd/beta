@@ -3636,8 +3636,11 @@
       this.horiz.style.right = needsV ? sWidth + "px" : "0";
       this.horiz.style.left = measure.barLeft + "px";
       var totalWidth = measure.viewWidth - measure.barLeft - (needsV ? sWidth : 0);
+      const HARRISON_HACK_FOR_MINIMAP = 100;
       this.horiz.firstChild.style.width =
-        Math.max(0, measure.scrollWidth - measure.clientWidth + totalWidth) + "px";
+        Math.max(0, measure.scrollWidth - measure.clientWidth + totalWidth - HARRISON_HACK_FOR_MINIMAP) + "px";
+      // this.horiz.firstChild.style.width =
+      //   Math.max(0, measure.scrollWidth - measure.clientWidth + totalWidth) + "px";
     } else {
       this.horiz.style.display = "";
       this.horiz.firstChild.style.width = "0";
