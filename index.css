@@ -51,6 +51,7 @@ body {
 */
 .CodeMirror:hover .CodeMirror-hscrollbar {
 	overflow-x: auto !important;
+	margin-right: 100px;
 }
 .CodeMirror:hover .CodeMirror-vscrollbar {
 	overflow-y: auto !important;
@@ -2362,7 +2363,7 @@ notes-section.loading:after {
 	position: absolute;
 /* 	left: 0px; */
 /* 	right: -11px; */
-	width: 100%;
+	width: calc(100% + 30px);
 	top: -1px;
 	bottom: -1px;
 	user-select: none;
