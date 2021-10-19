@@ -130,10 +130,6 @@ iframe::-webkit-scrollbar-track {
 	50% { opacity: 0; }
 }
 
-/* .CodeMirror-sizer {
-	padding-bottom: 500px !important;
-} */
-
 .CodeMirror-selected {
 	/* background: #b5007b !important; */
 	background: rgba(var(--main-theme-highlight-color), 0.35) !important;
@@ -459,12 +455,6 @@ nav a.sidenav-trigger i,
 	/* z-index: 9999; */
 }
 
-/* .CodeMirror-scroll {
-	height: auto;
-	overflow-y: hidden;
-	overflow-x: auto;
-} */
-
 .cm-m-apl.cm-comment,
 .cm-m-brainfuck.cm-comment {
 /* 	color: #8b9c77 !important; */
@@ -544,14 +534,9 @@ body .CodeMirror .CodeMirror-vscrollbar {
 body .CodeMirror .CodeMirror-vscrollbar > div::-webkit-scrollbar-thumb {
 	width: 20px !important;
 }
-.CodeMirror-scroll {
-/* 	margin-right: 2px; */
-/* 	margin-right: 85px !important; */
-}
+
 .functionInput{ visibility: hidden; }
 .CodeMirror { height: 100%;  flex: 1; }
-/* .CodeMirror-sizer { margin-right: 110px; } */
-
 
 ul.editor-controls {
 	display: flex;
@@ -2362,6 +2347,26 @@ notes-section.loading:after {
 	height: 100%;
 }
 
+/* Left area near gutters annoys me */
+/*
+.CodeMirror-sizer > div:first-child {
+	border-left: 1px solid #e6e6e61a;
+}
+*/
+.CodeMirror-sizer {
+/* 	padding-bottom: 500px !important; */
+/* 	margin-right: 100px; */
+}
+.CodeMirror-scroll {
+/* 	margin-right: 2px; */
+	margin-right: 85px !important;
+}
+/* .CodeMirror-scroll {
+	height: auto;
+	overflow-y: hidden;
+	overflow-x: auto;
+} */
+
 .CodeMirror .activeline:before {
 	content: "";
 	display: block;
@@ -2437,13 +2442,6 @@ notes-section.loading:after {
 	content: "→";
 	color: #404f7d;
 }
-
-/* Left area near gutters annoys me */
-/*
-.CodeMirror-sizer > div:first-child {
-	border-left: 1px solid #e6e6e61a;
-}
-*/
 
 /* EDITOR THEME */
 /*
