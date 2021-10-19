@@ -8,14 +8,17 @@ const dummyFunc = (fnName, returns='') => (...args) => {
 };
 
 const getCurrentFile = dummyFunc('getCurrentFile');
-const getCurrentFileFull = dummyFunc('getCurrentFileFull', {
-	code: '',
-	path: '../index.html',
-	name: 'index.html',
-	id: 1,
-	filename: 'index.html',
-});
-const setCurrentFile = dummyFunc('setCurrentFile');
+const getCurrentFileFull = () => currentService.state.selected;
+const setCurrentFile = ({ filePath }) => {
+	const found = currentService.code
+		.find(x => x.name === filePath)
+	if(found){;
+		currentService.state.selected = found;
+		currentService.state.selected.filename = found.name;
+		return;
+	}
+	console.error(`could not find ${filePath}`)
+};
 
 
 const getAllServices = () => allServices;

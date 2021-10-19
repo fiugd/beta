@@ -98,7 +98,9 @@ const pathNoServiceName = (service, path) => {
 
 const getFilePath = (getCurrentService) => ({ name="", parent="", path="", next="", nextPath="" }) => {
 	const nameWithPathIfPresent = (_path, _name) => _path
-		? noFrontSlash(`${_path}/${_name}`)
+		? _path.endsWith(_name)
+			? noFrontSlash(_path)
+			: noFrontSlash(`${_path}/${_name}`)
 		: noFrontSlash(_name);
 	const fileNameWithPath = next
 		? nameWithPathIfPresent(nextPath, next)

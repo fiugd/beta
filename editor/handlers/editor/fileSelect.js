@@ -18,6 +18,7 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 	);
 	*/
 
+	/*
 	if (firstLoad) {
 		firstLoad = false;
 		savedFileName = sessionStorage.getItem("editorFile");
@@ -40,14 +41,16 @@ const fileSelectHandler = ({ switchEditor }) => async (event) => {
 		switchEditor(null, "nothingOpen");
 		return;
 	}
+	*/
 
 	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
-
 	const filePath = savedFileName || fileNameWithPath;
 
+	/*
 	if (!savedFileName) {
 		sessionStorage.setItem("editorFile", filePath);
 	}
+	*/
 
 	if (name.includes("system::") || filePath.includes("systemDoc::")) {
 		switchEditor(filePath

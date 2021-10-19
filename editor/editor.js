@@ -167,15 +167,36 @@ const service = {
 			// line: 2, << causes focus to be stolen
 			// column: 0, << causes focus to be stolen
 			id: '1',
-			name: '404.html',
-			filename: '404.html',
-			path: '../404.html',
+			name: 'index.colors.css',
+			filename: 'index.colors.css',
+			path: '/crosshj/fiug-beta/index.colors.css',
 		},
 		opened: [
-			{ name: '404.html', order: 0 },
-			{ name: 'index.html', order: 1 }
+			{ name: 'index.colors.css', order: 0 },
+			{ name: '404.html', order: 1 },
+			{ name: 'index.html', order: 2 }
 		],
 		changed: ['index.html']
+	},
+	code: [{
+		name: 'index.colors.css',
+		code: '/crosshj/fiug-beta/index.colors.css',
+		path: '/crosshj/fiug-beta/index.colors.css'
+	},{
+		name: '404.html',
+		code: '/crosshj/fiug-beta/404.html',
+		path: '/crosshj/fiug-beta/404.html'
+	},{
+		name: 'index.html',
+		code: '/crosshj/fiug-beta/index.html',
+		path: '/crosshj/fiug-beta/index.html'
+	}],
+	tree: {
+		'crosshj/fake': {
+			'404.html': {},
+			'index.colors.css': {},
+			'index.html': {}
+		}
 	}
 };
 
