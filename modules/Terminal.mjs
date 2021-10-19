@@ -26,7 +26,8 @@ const termContainerSrc = `
 		right: -1px;
 		left: -1px;
 		bottom: -1px;
-		width: calc(100% + 5px);
+		/*width: calc(100% + 5px);*/
+		width: 100%;
 		height: 100%;
 		z-index: 100;
 		border: 0px;
