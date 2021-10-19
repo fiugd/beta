@@ -51,7 +51,6 @@ body {
 */
 .CodeMirror:hover .CodeMirror-hscrollbar {
 	overflow-x: auto !important;
-	margin-right: 100px;
 }
 .CodeMirror:hover .CodeMirror-vscrollbar {
 	overflow-y: auto !important;
@@ -91,7 +90,8 @@ iframe::-webkit-scrollbar,
 }
 
 .CodeMirror-hscrollbar {
-	right: 0.5em !important;
+/* 	right: 0.5em !important; */
+	margin-right: calc(100px + 0.5em);
 }
 .CodeMirror-vscrollbar {
 	bottom: 0.5em !important;
@@ -508,6 +508,11 @@ nav a.sidenav-trigger i,
 
 .CodeMirror-gutter {
 	background: var(--main-theme-color);
+}
+.CodeMirror-gutter-wrapper {
+	background: var(--main-theme-color) !important;
+	width: 2px;
+	height: 100%;
 }
 
 .CodeMirror pre.CodeMirror-line {
