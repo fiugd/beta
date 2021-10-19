@@ -1,5 +1,5 @@
-import { attachListeners } from './statusBarEvents.mjs';
-import { getSettings } from './state.mjs';
+import { attachListeners } from './editorStatusEvents.js';
+import { getSettings } from './state.js';
 
 const { SYSTEM_NAME } = getSettings();
 
@@ -29,10 +29,13 @@ function StatusBar(){
 			right: 0;
 			top: 0;
 			bottom: 0;
-			background: #1f476b;
-			background: #4f263d;
-			background: rgb(var(--main-theme-highlight-color));
-			filter: brightness(0.6);
+			box-sizing: border-box;
+			background: #3333;
+			// border-top: 1px solid #111a;
+			// background: #1f476b;
+			// background: #4f263d;
+			// background: rgb(var(--main-theme-highlight-color));
+			// filter: brightness(0.6);
 		}
 		#status-bar, #status-bar * {
 			cursor: default;
@@ -55,7 +58,7 @@ function StatusBar(){
 	<div class="bg"></div>
 
 	<div class="statusbar-item statusbar-entry left" statusbar-entry-priority="10000" statusbar-entry-alignment="0">
-		<a title="">${SYSTEM_NAME}</a>
+		<!-- a title="">${SYSTEM_NAME}</a -->
 	</div>
 
 	<div class="statusbar-item right">

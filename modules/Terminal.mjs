@@ -19,19 +19,20 @@ const termContainerSrc = `
 		bottom: 0px;
 		overflow: hidden;
 	}
-	#terminal .term-contain { z-index: 999; }
 	#terminal iframe {
 		position: relative;
 		top: 0;
-		right: -1px;
 		left: -1px;
-		bottom: -1px;
-		/*width: calc(100% + 5px);*/
 		width: 100%;
 		height: 100%;
-		z-index: 100;
 		border: 0px;
+
+		/*right: -1px;*/
+		/*bottom: -1px;*/
+		/*width: calc(100% + 5px);*/
+		/*z-index: 100;*/
 	}
+	/* #terminal .term-contain { z-index: 999; } */
 </style>
 <iframe
 	sandbox="${iframeSandboxPermissions}"

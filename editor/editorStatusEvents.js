@@ -1,7 +1,7 @@
-import { attach } from "./Listeners.mjs";
+import { attach } from "./Listeners.js";
 import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
-import { getDefaultFile } from "./state.mjs";
+import { getDefaultFile } from "./state.js";
 
 let statusBarDom;
 

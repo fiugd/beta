@@ -1,6 +1,7 @@
 import { trigger } from './Listeners.js';
 
 import EditorTabs from "./editorTabs.js";
+import EditorStatus from "./editorStatus.js";
 
 import Search from './views/search.js';
 import inlineEditor from './views/inlineEditor.js';
@@ -8,12 +9,13 @@ import switcher from './views/switcher.js';
 
 import { attachListener, connectTrigger } from "./editorEvents.js";
 
-import { initState, getCurrentService } from "./state.js";
+import { initState, getCurrentService, setState } from "./state.js";
 
 import "../shared/vendor/localforage.min.js";
 
 // call editor tabs once early so event handlers are attached
 EditorTabs();
+EditorStatus();
 
 // this is really a trigger
 const CursorActivityHandler = ({ line, column }) => {
