@@ -42,6 +42,7 @@ const getDom = (() => {
 					height: calc(100% - 1px);
 					border: 0;
 					/*border: 1px solid blue;*/
+					/*border: 1px solid var(--tree-selected);*/
 				}
 				.hidden { display: none; }
 				.not-visible { visibility: hidden; }
