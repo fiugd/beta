@@ -154,40 +154,25 @@ window.listTriggers = listTriggers;
 window.listListeners = list;
 
 
-window.addEventListener('message', function(messageEvent) {
-	const { data } = messageEvent;
-	const { register='', unregister, triggerEvent, name, eventName, key } = data;
-	const source = messageEvent.source;
-	const origin = messageEvent.source;
+window.addEventListener('message', function(messageEvent) {}, false);
 
-	if(triggerEvent){
-		triggerEvent.detail = triggerEvent.detail || {};
-		triggerEvent.detail.callback = (error, response, service) => {
-			source.postMessage({
-				error, response, error, service, key
-			}, messageEvent.origin);
-		}
-		trigger(triggerEvent)
-		return;
-	}
+/*
 
-	source.postMessage(
-		{ msg: 'ACK', ...data },
-		messageEvent.origin
-	);
+see https://felixgerschau.com/how-to-communicate-with-service-workers/
 
-	if(unregister === 'listener') return remove({ key });
+TODO:
+	- call to service worker to set up exchange
+	- SW events trigger handlers as registered with this file, ie. attach
+	- triggers from this file result in message to SW
+	
+	- SW will have to be configure to fire messages for things that are currently HTTP requests
+*/
+const registration = await navigator.serviceWorker.ready;
+//console.log(registration)
 
-	if(register !== 'listener' || !name || !eventName) return;
-
-	const listener = (listenerEvent) => {
-		const { detail } = listenerEvent;
-		const safeObject = (obj) => JSON.parse(JSON.stringify(obj));
-		source.postMessage(safeObject({ key, detail }), origin);
-	};
-	attach({ name, listener, eventName, key });
-
-}, false);
+navigator.serviceWorker.controller.postMessage({
+	type: 'TEST_MESSAGE',
+});
 
 export {
 	trigger, //deprecate exporting this?

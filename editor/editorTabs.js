@@ -159,7 +159,7 @@ const createTab = (parent, init) => (tabDef) => {
 		}[tabDef.name.replace("system::", "")];
 		systemClass = "italic";
 	}
-	tab.title = `${tabDef.parent ? (tabDef.parent+'/') : ''}`;
+	tab.title = `${tabDef.parent ? (tabDef.parent+'/') : ''}${tabDef.name.split('/').pop()}`;
 	tab.innerHTML = `
 		<span style="pointer-events: none;"
 			class="${systemClass ? systemClass + " " : ""}icon-${systemType || fileType}"
