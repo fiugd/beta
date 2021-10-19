@@ -35,7 +35,11 @@ const getDom = (() => {
 					background-color: var(--main-theme-color);
 				}
 				#preview-container iframe {
-					position: absolute; left:0; top:1px; width: 100%; height: calc(100% - 1px);
+					position: absolute;
+					left: 1px;
+					top: 1px;
+					width: calc(100% - 1px);
+					height: calc(100% - 1px);
 					border: 0;
 					/*border: 1px solid blue;*/
 				}
