@@ -499,7 +499,8 @@ nav a.sidenav-trigger i,
 .CodeMirror-gutter {
 	background: var(--main-theme-color);
 }
-.CodeMirror-gutter-wrapper {
+/* need div in following line for specificity.. grrrr... */
+div .CodeMirror-gutter-wrapper {
 	background: var(--main-theme-color) !important;
 	width: 2px;
 	height: 100%;
