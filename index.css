@@ -90,8 +90,8 @@ iframe::-webkit-scrollbar,
 }
 
 .CodeMirror-hscrollbar {
-/* 	right: 0.5em !important; */
-	margin-right: calc(100px + 0.5em);
+	right: calc(100px + 0.5em) !important;
+/* 	margin-right: calc(100px + 0.5em); */
 }
 .CodeMirror-vscrollbar {
 	bottom: 0.5em !important;
