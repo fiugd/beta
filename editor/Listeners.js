@@ -1,8 +1,10 @@
+import { flatFromProp } from './utils/misc.js';
+
 const listeners = {};
 const triggers = {};
 
 function attach({
-	name, listener, eventName, options, key
+	name, listener, eventName, options, key, context
 }){
 	if(!name || !listener || !eventName){
 		console.error('Attempt to improperly attach an event listener');
@@ -15,8 +17,9 @@ function attach({
 	// TODO: alter this approach, instead use ONE event listener attached to window (?)
 	// this approach kinda sucks because a lot of listeners get added to window
 	// also there is less control over events as they are handled
-	window.addEventListener(eventName, listener, options);
-	listeners[listenerName] = listener;
+	const _listener = (e) => listener(e, context || {});
+	window.addEventListener(eventName, _listener, options);
+	listeners[listenerName] = listener; 
 	if(key){
 		listeners[listenerName]._meta = { key, name, eventName, options };
 	}
@@ -153,6 +156,30 @@ function listTriggers(){
 window.listTriggers = listTriggers;
 window.listListeners = list;
 
+function attachEvents(events, context) {
+	const listenersConfig = flatFromProp(events.listeners, 'handlers');
+	for(const handler of listenersConfig){
+		attach({ ...handler, context });
+	}
+
+	const triggersConfig = flatFromProp(events.triggers, 'handlers');
+	const triggers = triggersConfig
+		.reduce((acc, { name, eventName, ...item }) => {
+			const trigger = attachTrigger(item);
+			if(!trigger) return acc;
+			return { ...acc, [name || eventName]: trigger };
+		}, {});
+
+	context.triggerEvent = (name, operation) => {
+		triggers[name]({
+			detail: {
+				operation,
+				done: () => {},
+				body: {},
+			},
+		});
+	};
+}
 
 window.addEventListener('message', function(messageEvent) {}, false);
 
@@ -177,5 +204,6 @@ navigator.serviceWorker.controller.postMessage({
 export {
 	trigger, //deprecate exporting this?
 	attach, remove, list,
-	attachTrigger, removeTrigger, listTriggers
+	attachTrigger, removeTrigger, listTriggers,
+	attachEvents
 };

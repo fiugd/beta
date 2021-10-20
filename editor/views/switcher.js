@@ -10,13 +10,15 @@ import showSystemDocsView from './systemDocs.js';
 
 let editorDom, editorPreview, nothingOpenDom, systemDocsView;
 
-const switchEditor = (
-	editor,
-	systemDocsErrors,
-) => async (filename, mode, {line, column}={}) => {
+/*
+TODO:
+	1. should probably be no distinction between switch & message
+	2. should probably delete (some/all ?) views (versus just hiding them)
+*/
 
+const switchEditor = async (args, { editor, context }) => {
+	const { filename, mode, line, column } = args;
 	//TODO: should go into loading mode first
-	//switchEditor should be called each and every time a doc loads
 
 	if (mode === "systemDoc") {
 		const editorCallback = () => {
@@ -31,10 +33,7 @@ const switchEditor = (
 			callback: editorCallback,
 		});
 
-		systemDocsView = showSystemDocsView({
-			filename,
-			errors: systemDocsErrors,
-		});
+		systemDocsView = showSystemDocsView({ filename }, context);
 		systemDocsView && systemDocsView.classList.remove("hidden");
 
 		editorPreview && editorPreview.classList.add("hidden");
@@ -110,5 +109,13 @@ const switchEditor = (
 	systemDocsView && systemDocsView.classList.add("hidden");
 };
 
-export default switchEditor;
+const messageEditor = (args, { editor, context }) => {
+	const { op, result } = args;
+	if (!result.error) return showSystemDocsView({ op });
+	context.systemDocsErrors = context.systemDocsErrors.filter((x) => x.op === op);
+	context.systemDocsErrors.push({ op, error: result.error });
+	showSystemDocsView({ errors: context.systemDocsErrors });
+};
+
+export { switchEditor, messageEditor };
 

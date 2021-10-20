@@ -1,144 +1,54 @@
-import { trigger } from './Listeners.js';
+import { initState, setState, getCurrentFile, getCurrentService } from './state.js';
+
+import { getFilePath as gfp } from './utils/misc.js';
+const getFilePath = gfp(getCurrentService);
 
 import EditorTabs from "./editorTabs.js";
 import EditorStatus from "./editorStatus.js";
-
-import Search from './views/search.js';
 import inlineEditor from './views/inlineEditor.js';
-import switcher from './views/switcher.js';
+import { switchEditor, messageEditor } from './views/switcher.js';
 
-import { attachListener, connectTrigger } from "./editorEvents.js";
-
-import { initState, getCurrentService, setState } from "./state.js";
+import { attachEvents, list, trigger as rawTrigger  } from "./Listeners.js";
+import events from './events.js';
+import CursorActivityHandler from './handlers/editor/cursor.js';
+import ChangeHandler from './handlers/editor/change.js';
 
 import "../shared/vendor/localforage.min.js";
 
-// call editor tabs once early so event handlers are attached
-EditorTabs();
-EditorStatus();
-
-// this is really a trigger
-const CursorActivityHandler = ({ line, column }) => {
-	const event = new CustomEvent("cursorActivity", {
-		bubbles: true,
-		detail: { line, column },
-	});
-	document.body.dispatchEvent(event);
-};
-
-const ChangeHandler = (doc) => {
-	const { code, name, id, filename } = doc;
-	const service = getCurrentService({ pure: true });
-
-	// TODO: if handler already exists, return it
-	const changeThis = (contents, changeObj) => {
-		const file = setState({
-			name,
-			id,
-			filename,
-			code: contents,
-			prevCode: code,
-		});
-
-		//TODO: should be using a trigger for this
-		const event = new CustomEvent("fileChange", {
-			bubbles: true,
-			detail: {
-				name, id, filePath: filename, code: contents,
-				service: service ? service.name : undefined
-			},
-		});
-		document.body.dispatchEvent(event);
-	};
-
-	return (editor, changeObj) => {
-		//console.log('editor changed');
-		//console.log(changeObj);
-		changeThis(editor.getValue(), changeObj);
-	};
-};
-
 function _Editor(callback) {
-	const editor = inlineEditor(ChangeHandler, EditorTabs, Search, CursorActivityHandler);
-	let systemDocsErrors = [];
+	//TODO: ChangeHandler and CursorActivityHandler should come from triggers
+	//
 
-	const switchEditor = switcher(
-		editor,
-		systemDocsErrors
-	);
+	//debugger; //enable this debugger to see what UI looks like at this point
 
-	const messageEditor = ({ op, result }) => {
-		if (result.error) {
-			systemDocsErrors = systemDocsErrors.filter((x) => x.op === op);
-			systemDocsErrors.push({ op, error: result.error });
-			showSystemDocsView({ errors: systemDocsErrors });
-			return;
-		} else {
-			showSystemDocsView({ op });
-		}
+	// call editor tabs once early so event handlers are attached
+	EditorTabs();
+	EditorStatus();
+	const editor = inlineEditor(ChangeHandler, EditorTabs, CursorActivityHandler);
+
+	const context = {
+		getCurrentFile, // << access within file instead
+		getFilePath, // << access within file instead
+		showMenu: () => window.showMenu,
+		switchEditor: (x) => switchEditor(x, { editor, context }),
+		messageEditor: (x) => messageEditor(x,{ editor, context }),
+		systemDocsErrors: [],
 	};
-
-	connectTrigger({
-		eventName: "provider-test",
-		type: 'click',
-		data: (event) => {
-			return Array.from(
-				event.target.parentNode.querySelectorAll('input:not([name="hidden"])')
-			).map(({ name, value }) => ({ name, value }));
-		},
-		filter: (e) =>
-			document.querySelector("#editor").contains(e.target) &&
-			e.target.classList.contains("provider-test"),
-	});
-	connectTrigger({
-		eventName: "provider-save",
-		type: 'click',
-		data: (event) => {
-			return Array.from(
-				event.target.parentNode.querySelectorAll('input:not([name="hidden"])')
-			).map(({ name, value }) => ({ name, value }));
-		},
-		filter: (e) =>
-			document.querySelector("#editor").contains(e.target) &&
-			e.target.classList.contains("provider-save"),
-	});
-	connectTrigger({
-		eventName: "provider-add-service",
-		type: 'click',
-		data: (event) => {
-			return Array.from(
-				event.target.parentNode.querySelectorAll('input:not([name="hidden"])')
-			).map(({ name, value }) => ({ name, value }));
-		},
-		filter: (e) =>
-			document.querySelector("#editor").contains(e.target) &&
-			e.target.classList.contains("provider-add-service"),
-	});
-
-	const paste = async () => {
-		window.Editor.focus();
-		const toPaste = await navigator.clipboard.readText();
-		window.Editor.replaceSelection(toPaste);
-	};
-	const cutSelected = () => {
-		window.Editor.focus();
-		const copied = window.Editor.getSelection();
-		navigator.clipboard.writeText(copied);
-		window.Editor.replaceSelection('');
-	};
-	const copySelected = () => {
-		const copied = window.Editor.getSelection();
-		navigator.clipboard.writeText(copied);
-	};
-
-	attachListener({
-		switchEditor,
-		messageEditor,
-		paste,
-		cutSelected,
-		copySelected
-	});
+	attachEvents(events, context);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const Editor = _Editor;;
@@ -204,7 +114,7 @@ const service = {
 
 initState([service], service);
 
-trigger({
+rawTrigger({
 	e: {},
 	type: 'operationDone',
 	params: {},
@@ -216,3 +126,5 @@ trigger({
 		result: [service]
 	}
 });
+
+console.log(list().map(x => x.split('__').reverse().join(': ')).join('\n'))

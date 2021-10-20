@@ -11,7 +11,7 @@ function StatusBar(){
 	const statusBar = document.createElement('div');
 	statusBar.id = "status-bar";
 	const settings = getSettings();
-	const tabSettingsElString = (s) => `${s.indentWithTabs ? 'Tab Size' : 'Spaces'}: <span class="tab-size">${s.tabSize}</span>`
+	const tabSettingsElString = (s) => `${s.indentWithTabs ? 'Tabs' : 'Spaces'}: <span class="tab-size">${s.tabSize}</span>`
 	statusBar.innerHTML = `
 	<style>
 		#status-bar {
@@ -22,6 +22,7 @@ function StatusBar(){
 			height: 22px;
 			font-size: 12px;
 			padding: 2px 10px;
+			box-shadow: 0 -1px 5px #0001;
 		}
 		#status-bar .bg {
 			position: absolute;
@@ -31,19 +32,24 @@ function StatusBar(){
 			bottom: 0;
 			box-sizing: border-box;
 			background: #3333;
-			// border-top: 1px solid #111a;
-			// background: #1f476b;
-			// background: #4f263d;
-			// background: rgb(var(--main-theme-highlight-color));
-			// filter: brightness(0.6);
+			pointer-events: none;
+			/*
+			border-top: 1px solid #111a;
+			background: #1f476b;
+			background: #4f263d;
+			background: rgb(var(--main-theme-highlight-color));
+			filter: brightness(0.6);
+			*/
 		}
 		#status-bar, #status-bar * {
 			cursor: default;
 		}
-		#status-bar a {
-			color: white;
-			opacity: 0.65;
-		}
+		#status-bar a:hover { color: var(--main-theme-text-color); }
+		#status-bar a { color: var(--main-theme-text-invert-color); }
+		/*
+		#status-bar a { color: var(--main-theme-text-color); }
+		*/
+
 		.statusbar-item.right a {
 			margin-left: 10px;
 		}
@@ -58,13 +64,12 @@ function StatusBar(){
 	<div class="bg"></div>
 
 	<div class="statusbar-item statusbar-entry left" statusbar-entry-priority="10000" statusbar-entry-alignment="0">
-		<!-- a title="">${SYSTEM_NAME}</a -->
 	</div>
 
 	<div class="statusbar-item right">
 		<div class="editor-statusbar-item">
 			<a class="editor-status-selection" title="Go to Line" style="">
-				Ln <span class="line-number">--</span>,
+				Line <span class="line-number">--</span>,
 				Col <span class="column-number">--</span>
 			</a>
 			<a class="editor-status-indentation" title="Select Indentation" style="">${tabSettingsElString(settings)}</a>

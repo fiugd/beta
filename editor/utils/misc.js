@@ -109,7 +109,43 @@ const getFilePath = (getCurrentService) => ({ name="", parent="", path="", next=
 	return pathNoServiceName(service, fileNameWithPath);
 };
 
+/*
+	Example usage of flatFromProp:
+
+	const input = [{
+		one: '1',
+		two: [
+			{ three: 'a' },
+			{ three: 'b'}
+		]
+	}];
+	const output = flatFromProp(input, "two")
+	assert(output === [
+		{ one: '1', three: 'a'},
+		{ one: '1', three: 'b'},
+	])
+
+*/
+const flatFromProp = (arr, prop) => arr.flatMap(
+	({ [prop]: p, ...x }) => p.length
+		? p.map(y => ({ ...x, ...y }))
+		: x
+);
+
+const formatHandlers = (namespace, x) => Object.entries(x)
+	.reduce((all, [key, value]) => {
+		return {
+			...all,
+			[key]: {
+				listener: value,
+				name: namespace
+			}
+		};
+	}, {});
+
 export {
+	flatFromProp,
+	formatHandlers,
 	htmlToElement,
 	getExtension, getFileType, codemirrorModeFromFileType,
 	noFrontSlash, pathNoServiceName, getFilePath,

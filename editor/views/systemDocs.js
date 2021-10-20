@@ -251,7 +251,8 @@ const SystemDocs = (section, errors) => {
 };
 
 let systemDocsDOM;
-const showSystemDocsView = ({ filename='', errors=[], op='' }) => {
+const showSystemDocsView = ({ filename='', op='' }, context) => {
+	const { systemDocsErrors : errors } = context
 	try{
 		document.getElementById('file-search').style.visibility = "";
 	}catch(e){}

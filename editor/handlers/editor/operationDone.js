@@ -1,6 +1,8 @@
-import fileSelectHandler from './fileSelect.js';
+import fileSelect from './fileSelect.js';
 
-const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
+const operationDoneHandler = (e, context) => {
+	const { messageEditor } = context;
+
 	const { detail } = e;
 	const { op, result } = (detail || {});
 
@@ -15,8 +17,7 @@ const operationDoneHandler = ({ switchEditor, messageEditor }) => (e) => {
 
 	if (['read', 'update'].includes(op)) {
 		const selected = result[0]?.state?.selected;
-		const fileSelect = fileSelectHandler({ switchEditor });
-		fileSelect({ detail: selected });
+		fileSelect({ detail: selected }, context);
 		return;
 	}
 };

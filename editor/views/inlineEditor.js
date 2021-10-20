@@ -1,5 +1,7 @@
 import Editor from "../../shared/modules/editor.mjs";
 import Container from './container.js';
+import Search from './search.js';
+
 import {
 	codemirrorModeFromFileType,
 	htmlToElement,
@@ -21,7 +23,6 @@ const BLANK_CODE_PAGE = "";
 const InlineEditor = (
 	ChangeHandler,
 	EditorTabs,
-	Search,
 	CursorActivityHandler
 ) => ({
 	code = BLANK_CODE_PAGE,
