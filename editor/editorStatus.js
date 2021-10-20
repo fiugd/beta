@@ -44,9 +44,12 @@ function StatusBar(){
 		#status-bar, #status-bar * {
 			cursor: default;
 		}
+		#status-bar a { color: #dadada; }
+		#status-bar a:hover { color: white }
+		/*
 		#status-bar a:hover { color: var(--main-theme-text-color); }
 		#status-bar a { color: var(--main-theme-text-invert-color); }
-		/*
+		
 		#status-bar a { color: var(--main-theme-text-color); }
 		*/
 
