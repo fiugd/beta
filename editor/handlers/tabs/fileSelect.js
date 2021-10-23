@@ -1,12 +1,12 @@
-const fileSelectHandler = (e, { tabs: container }) => {
+const handler = (e, { tabs }) => {
 	const {
 		initTabs,
 		createTab,
 		updateTab,
 		removeTab,
-	} = container.operations;
-	
-	const { sysDocNames } = container;
+	} = tabs.operations;
+
+	const { sysDocNames } = tabs;
 
 	let { name, changed, parent, path } = event.detail;
 	if(path) parent = path;
@@ -18,14 +18,14 @@ const fileSelectHandler = (e, { tabs: container }) => {
 	if(name?.includes('system::')){
 		tabs.update(tabsApi.list() || []);
 	}
-	if(!tabs.list()) return;
+	if(!tabs.api.list()) return;
 	let systemDocsName;
 	if (name?.includes("system::")) {
 		systemDocsName = sysDocNames[name.replace("system::", "")];
 	}
 	let id = "TAB" + Math.random().toString().replace("0.", "");
 
-	let { tabsToUpdate, foundTab } = tabs.toUpdate(parent
+	let { tabsToUpdate, foundTab } = tabs.api.toUpdate(parent
 		? `${parent}/${name}`
 		: name
 	);
@@ -44,13 +44,13 @@ const fileSelectHandler = (e, { tabs: container }) => {
 	});
 	const shouldClearTab = !name.includes("Untitled-");
 
-	const { cleared, tabs: newTabs } = (shouldClearTab && tabs.clearLast({
+	const { cleared, tabs: newTabs } = (shouldClearTab && tabs.api.clearLast({
 		tabs, removeTab 
 	})) || {};
 	if (newTabs) tabs = newTabs;
 	if (cleared) tabsToUpdate = tabsToUpdate.filter((t) => t.id !== cleared.id);
 	tabsToUpdate.map(updateTab);
-	tabs.push({
+	tabs.api.push({
 		name,
 		parent,
 		systemDocsName,
@@ -61,4 +61,4 @@ const fileSelectHandler = (e, { tabs: container }) => {
 	//localStorage.setItem("tabs/"+(service.get()?.name||''), JSON.stringify(tabs));
 };
 
-export default fileSelectHandler;
+export default handler;

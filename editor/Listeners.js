@@ -53,6 +53,7 @@ future todo:
 
 // this thing is used too many ways... SIGH
 function trigger({ e, type, params, source, data, detail }){
+	//debugger
 	const _data = typeof data === "function"
 		? data(e)
 		: data || (detail||{}).data || {};
@@ -82,13 +83,15 @@ const attachTrigger = function attachTrigger({
 }){
 	if(type === 'raw'){
 		const triggerName = `${eventName}__${name}`;
-		const _trigger = (args) => trigger({
-			...args,
-			e: args,
-			data,
-			type: eventName,
-			source: name
-		});
+		const _trigger = (args) => {
+			trigger({
+				...args,
+				e: args,
+				data,
+				type: eventName,
+				source: name
+			});
+		};
 		triggers[triggerName] = {
 			eventName, type, trigger: _trigger
 		};
@@ -165,10 +168,12 @@ function attachEvents(events, context) {
 	const triggersConfig = flatFromProp(events.triggers, 'handlers');
 	const triggers = triggersConfig
 		.reduce((acc, { name, eventName, ...item }) => {
-			const trigger = attachTrigger(item);
+			const trigger = attachTrigger({ ...item, eventName });
 			if(!trigger) return acc;
 			return { ...acc, [name || eventName]: trigger };
 		}, {});
+
+	context.triggers = triggers;
 
 	context.triggerEvent = (name, operation) => {
 		triggers[name]({

@@ -127,4 +127,8 @@ rawTrigger({
 	}
 });
 
-console.log(list().map(x => x.split('__').reverse().join(': ')).join('\n'))
+console.log(
+	list().map(x => x.split('__').reverse().join(': '))
+	.sort()
+	.join('\n')
+)

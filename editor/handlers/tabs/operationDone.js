@@ -1,4 +1,4 @@
-const operationDoneHandler = (e, { tabs: container }) => {
+const handler = (e, { tabs: container }) => {
 	const {
 		initTabs,
 		createTab,
@@ -20,9 +20,10 @@ const operationDoneHandler = (e, { tabs: container }) => {
 		active: order === 0,
 		//systemDocsName: sysDocNames[name.replace("system::", "")]
 	}));
+	container.api.update(tabs);
 	initTabs(tabs);
 };
 
-export default operationDoneHandler;
+export default handler;
 
 

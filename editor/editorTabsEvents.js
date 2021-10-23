@@ -316,27 +316,27 @@ const contextMenuHandler = ({ event, showMenu }) => {
 	return false;
 };
 
-const contextMenuSelectHandler = ({ event, triggers }) => {
-	const { which, parent, data } = event.detail || {};
-	if (parent !== "Tab Bar") return;
-	const NOT_IMPLEMENTED = (fn) => () =>
-		setTimeout(() => alert(fn + ": not implemented"), 0);
-	const handler = {
-		close: ({ tab }) => triggers.fileClose({ detail: tab }),
-		closeothers: triggers.closeOthers,
-		closeall: triggers.closeAll,
-		copypath: ({ tab }) => copyPath(tab),
-		copyrelativepath: ({ tab }) => copyPath(tab, "relative"),
-		revealinsidebar: ({ tab }) => {
-			triggers.fileSelect({ detail: tab });
-			document.getElementById("explorer").focus();
-		},
-		keepopen: NOT_IMPLEMENTED("keepopen"),
-		pin: NOT_IMPLEMENTED("pin"),
-	}[which.toLowerCase().replace(/ /g, "")];
+// const contextMenuSelectHandler = ({ event, triggers }) => {
+// 	const { which, parent, data } = event.detail || {};
+// 	if (parent !== "Tab Bar") return;
+// 	const NOT_IMPLEMENTED = (fn) => () =>
+// 		setTimeout(() => alert(fn + ": not implemented"), 0);
+// 	const handler = {
+// 		close: ({ tab }) => triggers.fileClose({ detail: tab }),
+// 		closeothers: triggers.closeOthers,
+// 		closeall: triggers.closeAll,
+// 		copypath: ({ tab }) => copyPath(tab),
+// 		copyrelativepath: ({ tab }) => copyPath(tab, "relative"),
+// 		revealinsidebar: ({ tab }) => {
+// 			triggers.fileSelect({ detail: tab });
+// 			document.getElementById("explorer").focus();
+// 		},
+// 		keepopen: NOT_IMPLEMENTED("keepopen"),
+// 		pin: NOT_IMPLEMENTED("pin"),
+// 	}[which.toLowerCase().replace(/ /g, "")];
 
-	handler && handler(data);
-};
+// 	handler && handler(data);
+// };
 
 const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 	let tabsToRemove = [];
@@ -388,39 +388,39 @@ const systemDocsHandler = ({
 	});
 };
 
-const uiHandler = ({ event, triggers, updateTab }) => {
-	const { fileSelect } = triggers;
-	const { detail } = event;
-	const { operation } = detail;
-	const doHandle = {
-		prevDocument: () => {
-			// TODO: determine what tab is previous
-			// fileSelect it
-			console.warn("prevDocument: not implemented!");
-		},
-		nextDocument: () => {
-			// TODO: determine what tab is next
-			// fileSelect it
-			console.warn("nextDocument: not implemented!");
-		},
-	}[operation];
-	if (!doHandle) return;
-	doHandle();
-};
+// const uiHandler = ({ event, triggers, updateTab }) => {
+// 	const { fileSelect } = triggers;
+// 	const { detail } = event;
+// 	const { operation } = detail;
+// 	const doHandle = {
+// 		prevDocument: () => {
+// 			// TODO: determine what tab is previous
+// 			// fileSelect it
+// 			console.warn("prevDocument: not implemented!");
+// 		},
+// 		nextDocument: () => {
+// 			// TODO: determine what tab is next
+// 			// fileSelect it
+// 			console.warn("nextDocument: not implemented!");
+// 		},
+// 	}[operation];
+// 	if (!doHandle) return;
+// 	doHandle();
+// };
 
 const handlers = {
-	ui: uiHandler,
-	click: clickHandler,
-	//fileSelect: fileSelectHandler,
-	fileClose: fileCloseHandler,
-	fileChange: fileChangeHandler,
-	operations: operationsHandler,
-	contextmenu: contextMenuHandler,
-	"contextmenu-select": contextMenuSelectHandler,
-	"add-service-folder": systemDocsHandler,
-	"connect-service-provider": systemDocsHandler,
-	"open-previous-service": systemDocsHandler,
-	"open-settings-view": systemDocsHandler,
+	// ui: uiHandler,
+	// click: clickHandler,
+	// //fileSelect: fileSelectHandler,
+	// fileClose: fileCloseHandler,
+	// fileChange: fileChangeHandler,
+	// operations: operationsHandler,
+	// contextmenu: contextMenuHandler,
+	// "contextmenu-select": contextMenuSelectHandler,
+	// "add-service-folder": systemDocsHandler,
+	// "connect-service-provider": systemDocsHandler,
+	// "open-previous-service": systemDocsHandler,
+	// "open-settings-view": systemDocsHandler,
 };
 
 function attachListener(
@@ -467,74 +467,66 @@ function attachListener(
 			});
 	};
 
-	attach({
-		name: "Tab Bar",
-		eventName: "ui",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "open-settings-view",
-		listener,
-	});
-	attach({
-		name: "Tab Bar",
-		eventName: "add-service-folder",
-		listener,
-	});
-	attach({
-		name: "Tab Bar",
-		eventName: "open-previous-service",
-		listener,
-	});
-	attach({
-		name: "Tab Bar",
-		eventName: "connect-service-provider",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "operations",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "fileSelect",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "fileClose",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "fileChange",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "click",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "contextmenu",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "contextmenu-select",
-		listener,
-	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "ui",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "open-settings-view",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "add-service-folder",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "open-previous-service",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "connect-service-provider",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "operations",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "fileSelect",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "fileClose",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "fileChange",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "click",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "contextmenu",
+// 		listener,
+// 	});
+// 	attach({
+// 		name: "Tab Bar",
+// 		eventName: "contextmenu-select",
+// 		listener,
+// 	});
 
 	return triggers;
 }

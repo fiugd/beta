@@ -379,6 +379,50 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 
 	tabsContainer.operations = operations;
 
+
+	function clearLastTab({ tabs, removeTab }) {
+		if(!tabs.length) return;
+		const lastTab = tabs[tabs.length - 1];
+		if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
+			return;
+		tabs = tabs.filter((t) => t.id !== lastTab.id);
+		removeTab(lastTab);
+		return { tabs, cleared: lastTab };
+	}
+
+	function getTabsToUpdate(filePath) {
+		const name = filePath?.split('/').pop();
+		const tabsToUpdate = [];
+		let foundTab;
+		for (var i = 0, len = tabs.length; i < len; i++) {
+			if (name === tabs[i].name) {
+				foundTab = tabs[i];
+			}
+			// update: if tab exists and not active, activate it
+			if (name === tabs[i].name && !tabs[i].active) {
+				tabs[i].active = true;
+				tabsToUpdate.push(tabs[i]);
+			}
+			// update: remove active state from active tab
+			if (name !== tabs[i].name && tabs[i].active) {
+				delete tabs[i].active;
+				tabsToUpdate.push(tabs[i]);
+			}
+			if (!foundTab) {
+			}
+		}
+		return { foundTab, tabsToUpdate };
+	}
+
+	let tabs = [];
+	tabsContainer.api = {
+		list: () => tabs,
+		update: (t) => tabs = t,
+		push: (t) => tabs.push(t),
+		clearLast: clearLastTab,
+		toUpdate: getTabsToUpdate
+	};
+
 	return tabsContainer;
 }
 

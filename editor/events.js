@@ -13,16 +13,16 @@ const listeners = [{
 	handlers: [ tabs.operationDone ]
 }, {
 	eventName: "open-settings-view",
-	handlers: [ editor.systemDocs, tabs.systemDocs ]
+	handlers: [ editor.systemDocs, tabs.fileSelect ]
 }, {
 	eventName: "add-service-folder",
-	handlers: [ editor.systemDocs, tabs.systemDocs ]
+	handlers: [ editor.systemDocs, tabs.fileSelect ]
 }, {
 	eventName: "open-previous-service",
-	handlers: [ editor.systemDocs, tabs.systemDocs ]
+	handlers: [ editor.systemDocs, tabs.fileSelect ]
 }, {
 	eventName: "connect-service-provider",
-	handlers: [ editor.systemDocs, tabs.systemDocs ]
+	handlers: [ editor.systemDocs, tabs.fileSelect ]
 }, {
 	eventName: "noServiceSelected",
 	handlers: [ editor.nothingOpen ]
