@@ -1,6 +1,9 @@
 import ext from "../../shared/icons/seti/ext.json.mjs";
 import { codemirrorModeFromFileType } from "../../shared/modules/utilities.mjs";
 
+
+// TODO: maybe use insertAdjacentHTML for this instead
+// this works like jquery append ^^^
 function htmlToElement(html) {
 	var template = document.createElement("template");
 	html = html.trim(); // Never return a text node of whitespace as the result
