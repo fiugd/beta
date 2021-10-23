@@ -127,7 +127,7 @@ const getFilePath = (getCurrentService) => ({ name="", parent="", path="", next=
 
 */
 const flatFromProp = (arr, prop) => arr.flatMap(
-	({ [prop]: p, ...x }) => p.length
+	({ [prop]: p, ...x }) => typeof p !== 'undefined' && p.length
 		? p.map(y => ({ ...x, ...y }))
 		: x
 );

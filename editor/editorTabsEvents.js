@@ -59,7 +59,7 @@ const serviceAPI = {
 	get: () => service,
 };
 
-const fileSelectHandler = _fileSelect(tabsAPI, serviceAPI, sysDocNames);
+//const fileSelectHandler = _fileSelect(tabsAPI, serviceAPI, sysDocNames);
 
 function removeTabByEventDetail({ removeTab, updateTab }, eventDetail){
 	let { name, filename, path, parent, next, nextPath } = eventDetail;
@@ -177,6 +177,8 @@ const clickHandler = ({ event, container, triggers }) => {
 		return;
 	}
 	const id = event.target.id;
+
+	//TODO: use the dom for this
 	const foundTab = tabs.find((x) => x.id === id);
 	if (
 		tabs
@@ -220,45 +222,6 @@ const fileChangeHandler = ({
 	foundTab.changed = true;
 	[foundTab].map(updateTab);
 	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-};
-
-const operationDoneHandler = ({
-	event,
-	container,
-	initTabs,
-	createTab,
-	updateTab,
-	removeTab,
-}) => {
-
-	const { op, id, result = [] } = event.detail || {};
-	if(result?.error) return;
-	if (!["read", "update"].includes(op) || !id) return;
-
-	service = result[0];
-
-	const { opened=[], changed=[] } = result[0]?.state || {};
-	tabs = opened.map(({ name, order }) => ({
-		id: "TAB" + Math.random().toString().replace("0.", ""),
-		name: name.split('/').pop(),
-		parent: name.split('/').slice(0,-1).join('/'),
-		touched: changed.includes(name),
-		changed: changed.includes(name),
-		active: order === 0,
-		systemDocsName: sysDocNames[name.replace("system::", "")]
-	}));
-	initTabs(tabs);
-	localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-
-	/*
-	service = result[0];
-	const tabsStorageKey = service?.treeState?.select
-		? "tabs/"+(service?.name||'')
-		: "tabs/";
-	const storedTabs = JSON.parse(localStorage.getItem(tabsStorageKey) || '[]');
-	tabs = [...storedTabs, ...(tabs||[]).filter(x => x.systemDocsName)];
-	initTabs(tabs);
-	*/
 };
 
 const operationsHandler = (args) => {
@@ -448,11 +411,10 @@ const uiHandler = ({ event, triggers, updateTab }) => {
 const handlers = {
 	ui: uiHandler,
 	click: clickHandler,
-	fileSelect: fileSelectHandler,
+	//fileSelect: fileSelectHandler,
 	fileClose: fileCloseHandler,
 	fileChange: fileChangeHandler,
 	operations: operationsHandler,
-	operationDone: operationDoneHandler,
 	contextmenu: contextMenuHandler,
 	"contextmenu-select": contextMenuSelectHandler,
 	"add-service-folder": systemDocsHandler,
@@ -529,12 +491,6 @@ function attachListener(
 	attach({
 		name: "Tab Bar",
 		eventName: "connect-service-provider",
-		listener,
-	});
-
-	attach({
-		name: "Tab Bar",
-		eventName: "operationDone",
 		listener,
 	});
 

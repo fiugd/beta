@@ -22,7 +22,7 @@ function _Editor(callback) {
 	//debugger; //enable this debugger to see what UI looks like at this point
 
 	// call editor tabs once early so event handlers are attached
-	EditorTabs();
+	const tabs = EditorTabs();
 	EditorStatus();
 	const editor = inlineEditor(ChangeHandler, EditorTabs, CursorActivityHandler);
 
@@ -33,18 +33,10 @@ function _Editor(callback) {
 		switchEditor: (x) => switchEditor(x, { editor, context }),
 		messageEditor: (x) => messageEditor(x,{ editor, context }),
 		systemDocsErrors: [],
+		tabs,
 	};
 	attachEvents(events, context);
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -79,14 +71,15 @@ const service = {
 			// line: 2, << causes focus to be stolen
 			// column: 0, << causes focus to be stolen
 			id: '1',
-			name: 'index.colors.css',
-			filename: 'index.colors.css',
-			path: '/crosshj/fiug-beta/index.colors.css',
+			name: 'editorTabsEvents.js',
+			filename: 'editorTabsEvents.js',
+			path: '/crosshj/fiug-beta/editor/editorTabsEvents.js',
 		},
 		opened: [
-			{ name: 'index.colors.css', order: 0 },
-			{ name: '404.html', order: 1 },
-			{ name: 'index.html', order: 2 }
+			{ name: 'editorTabsEvents.js', order: 0 },
+			{ name: 'index.colors.css', order: 1 },
+			{ name: '404.html', order: 2 },
+			{ name: 'index.html', order: 3 }
 		],
 		changed: ['index.html']
 	},
@@ -101,13 +94,20 @@ const service = {
 	},{
 		name: 'index.html',
 		code: '/crosshj/fiug-beta/index.html',
-		path: '/crosshj/fiug-beta/index.html'
+		path: '/crosshj/fiug-beta/index.html',
+	},{
+		name: 'editorTabsEvents.js',
+		code: '/crosshj/fiug-beta/editor/editorTabsEvents.js',
+		path: '/crosshj/fiug-beta/editor/editorTabsEvents.js'
 	}],
 	tree: {
 		'crosshj/fake': {
 			'404.html': {},
 			'index.colors.css': {},
-			'index.html': {}
+			'index.html': {},
+			editor: {
+				'events.js': {}
+			}
 		}
 	}
 };

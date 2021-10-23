@@ -1,11 +1,13 @@
-const fileSelectHandler = (tabs, service, sysDocNames) => ({
-	event,
-	container,
-	initTabs,
-	createTab,
-	updateTab,
-	removeTab,
-}) => {
+const fileSelectHandler = (e, { tabs: container }) => {
+	const {
+		initTabs,
+		createTab,
+		updateTab,
+		removeTab,
+	} = container.operations;
+	
+	const { sysDocNames } = container;
+
 	let { name, changed, parent, path } = event.detail;
 	if(path) parent = path;
 
@@ -29,7 +31,7 @@ const fileSelectHandler = (tabs, service, sysDocNames) => ({
 	);
 	if (foundTab) {
 		tabsToUpdate.map(updateTab);
-		localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs.list()));
+		//localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs.list()));
 		return;
 	}
 
@@ -56,7 +58,7 @@ const fileSelectHandler = (tabs, service, sysDocNames) => ({
 		id,
 		changed,
 	});
-	localStorage.setItem("tabs/"+(service.get()?.name||''), JSON.stringify(tabs));
+	//localStorage.setItem("tabs/"+(service.get()?.name||''), JSON.stringify(tabs));
 };
 
 export default fileSelectHandler;

@@ -357,17 +357,27 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	one idea I have not tried is to put padding divs to the left and right of tabs list; maybe later
 	*/
 
-	triggers = attachListener(tabsContainer, {
+	const operations = {
 		initTabs: initTabs(tabsList),
 		createTab: createTab(tabsList),
 		updateTab: updateTab(tabsList),
 		removeTab: removeTab(tabsList),
-	});
+	};
+	triggers = attachListener(tabsContainer, operations);
 
 	//'modal-menu-show'
 
 	//should not be doing this, rely on event instead!!!
 	//tabsArray && initTabs(tabsList)(tabsArray);
+	
+	tabsContainer.sysDocNames = {
+		"add-service-folder": "Open Folder",
+		"connect-service-provider": "Connect to a Provider",
+		"open-previous-service": "Open Previous Service",
+		"open-settings-view": "Settings",
+	};
+
+	tabsContainer.operations = operations;
 
 	return tabsContainer;
 }
