@@ -53,7 +53,6 @@ future todo:
 
 // this thing is used too many ways... SIGH
 function trigger({ e, type, params, source, data, detail }){
-	//debugger
 	const _data = typeof data === "function"
 		? data(e)
 		: data || (detail||{}).data || {};

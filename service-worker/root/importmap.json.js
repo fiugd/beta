@@ -4,10 +4,13 @@ export const importmap = () => {
 	imports: {
 		ansiEscapes: "https://cdn.skypack.dev/ansi-escapes",
 		chalk: "https://cdn.skypack.dev/chalk",
-		lodash: 'https://cdn.skypack.dev/lodash',
-		rollup: 'https://unpkg.com/rollup/dist/rollup.browser.js',
-		rollupPluginSourceMap: 'https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js',
-		terser: 'https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js',
+		fileSaver: "https://cdn.skypack.dev/file-saver",
+		jsZip: "https://cdn.skypack.dev/@progress/jszip-esm",
+		lodash: "https://cdn.skypack.dev/lodash",
+		papaParse: "https://cdn.skypack.dev/papaparse",
+		rollup: "https://unpkg.com/rollup/dist/rollup.browser.js",
+		rollupPluginSourceMap: "https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js",
+		terser: "https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js",
 	}
 }
 `.trim()+ '\n';
