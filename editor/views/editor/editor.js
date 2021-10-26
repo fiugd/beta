@@ -1,4 +1,4 @@
-import Editor from "../../shared/modules/editor.mjs";
+import Editor from "../../../shared/modules/editor.mjs";
 import Container from './container.js';
 import Search from './search.js';
 
@@ -6,14 +6,14 @@ import {
 	codemirrorModeFromFileType,
 	htmlToElement,
 	getFileType,
-} from '../utils/misc.js';
+} from '../../utils/misc.js';
 import {
 	getState, getAllServices, getSettings,
 	setCurrentFile, getCurrentFileFull
-} from "../state.js";
+} from "../../state.js";
 const { indentWithTabs, tabSize } = getSettings();
 
-import attachGutterHelper from '../utils/gutterHelper.js';
+import attachGutterHelper from '../../utils/gutterHelper.js';
 
 let editorGutter;
 let cmDom;

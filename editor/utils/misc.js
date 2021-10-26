@@ -68,6 +68,7 @@ function getFileType(fileName = "") {
 		type = {
 			name: "htmlmixed",
 			mimeType: "application/x-ejs",
+			icon: 'html'
 		};
 	}
 	if (extension === 'hbs'){
@@ -75,6 +76,24 @@ function getFileType(fileName = "") {
 	}
 	return type;
 }
+
+// from tabs
+// function getFileType(fileName = "") {
+// 	let type = "default";
+// 	const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(
+// 		/^\./,
+// 		""
+// 	);
+
+// 	//console.log(extension)
+// 	if (ext[extension]) {
+// 		type = ext[extension];
+// 	}
+// 	if (extension === "md") {
+// 		type = "info";
+// 	}
+// 	return type;
+// }
 
 const showFileInEditor = (filename, contents) => {
 	const fileType = getFileType(filename);

@@ -1,10 +1,10 @@
 import {
 	htmlToElement,
-} from '../utils/misc.js';
+} from '../../utils/misc.js';
 
 import {
 	getAllServices
-} from "../state.js";
+} from "../../state.js";
 
 const miscSystemSettings = [
 	{

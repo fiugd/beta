@@ -1,5 +1,36 @@
 import { getCurrentService } from "../../state.js";
 
+function triggerCloseTab(event, fileCloseTrigger, tabs) {
+	let name, parent;
+	try {
+		name = event.target.dataset.name.trim();
+		parent = (event.target.dataset.parent||'').trim();
+	} catch (e) {
+		console.log("error trying to handle close tab click");
+		console.log(e);
+	}
+	if (!name) {
+		return;
+	}
+	const closedFullName = parent ? `${parent}/${name}` : name;
+	const tabFullName = (x) => (x.parent ? `${x.parent}/${x.name}` : x.name);
+
+	const closedTab = tabs.find((x) => closedFullName === tabFullName(x));
+	const nextTabs = tabs.filter((x) => closedFullName !== tabFullName(x));
+	const nextTab = closedTab.active
+		? (nextTabs[nextTabs.length - 1] || {})
+		: (tabs.filter((x) => x.active) || [{}])[0];
+
+	fileCloseTrigger({
+		detail: {
+			name: closedTab.name,
+			path: closedTab.parent,
+			next: nextTab.name,
+			nextPath: nextTab.parent,
+		},
+	});
+}
+
 const handler = (e, context) => {
 	const { tabs, triggers } = context;
 	const container = tabs;
@@ -16,7 +47,7 @@ const handler = (e, context) => {
 	}
 
 	if (event.target.classList.contains("close-editor-action")) {
-		triggerCloseTab(event, triggers["fileClose"]);
+		triggerCloseTab(event, triggers["fileClose"], tabs.api.list());
 		event.preventDefault();
 		return;
 	}

@@ -1,8 +1,8 @@
 
-import { showFileInEditor } from '../utils/misc.js';
+import { showFileInEditor } from '../../utils/misc.js';
 import {
 	getCurrentFileFull, setCurrentFile
-} from "../state.js";
+} from "../../state.js";
 
 import showNothingOpen from './nothingOpen.js';
 import showBinaryPreview from './filePreview.js';

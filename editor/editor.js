@@ -3,9 +3,9 @@ import { initState, setState, getCurrentFile, getCurrentService } from './state.
 import { getFilePath as gfp } from './utils/misc.js';
 const getFilePath = gfp(getCurrentService);
 
-import EditorTabs from "./editorTabs.js";
-import EditorStatus from "./editorStatus.js";
-import inlineEditor from './views/inlineEditor.js';
+import EditorTabs from "./views/tabs/tabs.js";
+import EditorStatus from "./views/status/status.js";
+import inlineEditor from './views/editor/editor.js';
 import { switchEditor, messageEditor } from './views/switcher.js';
 
 import { attachEvents, list, trigger as rawTrigger  } from "./Listeners.js";

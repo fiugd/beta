@@ -1,5 +1,5 @@
-import { attachListeners } from './editorStatusEvents.js';
-import { getSettings } from './state.js';
+import { attachListeners } from '../../editorStatusEvents.js';
+import { getSettings } from '../../state.js';
 
 const { SYSTEM_NAME } = getSettings();
 

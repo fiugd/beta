@@ -1,5 +1,4 @@
-import { attachListener } from "./editorTabsEvents.js";
-import ext from "../shared/icons/seti/ext.json.mjs";
+import { getFileType } from '../../utils/misc.js';
 
 let triggers;
 
@@ -118,23 +117,6 @@ function scrollToChild(child) {
 	// })
 }
 
-function getFileType(fileName = "") {
-	let type = "default";
-	const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(
-		/^\./,
-		""
-	);
-
-	//console.log(extension)
-	if (ext[extension]) {
-		type = ext[extension];
-	}
-	if (extension === "md") {
-		type = "info";
-	}
-	return type;
-}
-
 const createTab = (parent, init) => (tabDef) => {
 	const tab = document.createElement("div");
 	tab.id = tabDef.id;
@@ -147,7 +129,6 @@ const createTab = (parent, init) => (tabDef) => {
 	tabDef.changed && tab.classList.add("changed");
 	tabDef.touched && tab.classList.add("touched");
 
-	const fileType = getFileType(tabDef.name);
 	let systemType, systemName, systemClass;
 	if (tabDef.name.includes("system::")) {
 		systemType = "config";
@@ -160,9 +141,11 @@ const createTab = (parent, init) => (tabDef) => {
 		systemClass = "italic";
 	}
 	tab.title = `${tabDef.parent ? (tabDef.parent+'/') : ''}${tabDef.name.split('/').pop()}`;
+	const fileType = getFileType(tabDef.name);
+	const icon = systemType || fileType.icon || fileType;
 	tab.innerHTML = `
 		<span style="pointer-events: none;"
-			class="${systemClass ? systemClass + " " : ""}icon-${systemType || fileType}"
+			class="${systemClass ? systemClass + " " : ""}icon-${icon}"
 		>${systemName || tabDef.name.split('/').pop()}</span>
 		<div class="tab-close">
 			<div class="monaco-action-bar animated">
@@ -363,7 +346,8 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 		updateTab: updateTab(tabsList),
 		removeTab: removeTab(tabsList),
 	};
-	triggers = attachListener(tabsContainer, operations);
+	triggers = [];
+	// triggers = attachListener(tabsContainer, operations);
 
 	//'modal-menu-show'
 
@@ -417,6 +401,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	let tabs = [];
 	tabsContainer.api = {
 		list: () => tabs,
+		find: (x) => tabs.find(x),
 		update: (t) => tabs = t,
 		push: (t) => tabs.push(t),
 		clearLast: clearLastTab,
@@ -427,3 +412,4 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 }
 
 export default EditorTabs;
+
