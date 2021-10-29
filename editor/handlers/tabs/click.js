@@ -1,4 +1,4 @@
-import { getCurrentService } from "../../state.js";
+import { getCurrentService } from "../../utils/State.js";
 
 function triggerCloseTab(event, fileCloseTrigger, tabs) {
 	let name, parent;

@@ -10,7 +10,7 @@ import {
 import {
 	getState, getAllServices, getSettings,
 	setCurrentFile, getCurrentFileFull
-} from "../../state.js";
+} from "../../utils/State.js";
 const { indentWithTabs, tabSize } = getSettings();
 
 import attachGutterHelper from '../../utils/gutterHelper.js';

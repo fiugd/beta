@@ -1,4 +1,4 @@
-import { getCurrentService } from "../../state.js";
+import { getCurrentService } from "../../utils/State.js";
 
 function removeTabByEventDetail({ removeTab, updateTab }, eventDetail, tabs){
 	let { name, filename, path, parent, next, nextPath } = eventDetail;
