@@ -77,6 +77,15 @@ function getFileType(fileName = "") {
 	return type;
 }
 
+function friendlyModeName(type, mode){
+	if(type.includes && type.includes('sharp')) return type.replace('sharp', '#');
+	if('cpp' === type) return 'C++';
+	if('ocaml' === type) return { name: 'OCaml' };
+	if(['bat', 'cpp', 'lisp', 'raku', 'zig'].includes(type)) return type;
+	if(mode.includes && mode.includes('text/x-')) return type;
+	return mode;
+}
+
 // from tabs
 // function getFileType(fileName = "") {
 // 	let type = "default";
@@ -169,7 +178,7 @@ export {
 	flatFromProp,
 	formatHandlers,
 	htmlToElement,
-	getExtension, getFileType, codemirrorModeFromFileType,
+	getExtension, getFileType, codemirrorModeFromFileType, friendlyModeName,
 	noFrontSlash, pathNoServiceName, getFilePath,
 	showFileInEditor
 };

@@ -1,14 +1,16 @@
 
+- [ ] tiggers have proper namespace
+- [ ] connect to service worker (or overall app)
 
-- [ ] reduce the need for:
+- [X] reduce the need for:
 	- state.js
 	- Types.js
 	- Listeners.js
-- [ ] a single events handling file
-- [ ] break editor.js and editorTabs.js up
+- [X] a single events handling file
+- [X] break editor.js and editorTabs.js up
 	- components get modularized and referenced
 	- event attachment should congeal from there
-- [ ] make editorEvents and editorTabEvents super simple
+- [X] make editorEvents and editorTabEvents super simple
 	- bring listeners into editor.js and editorTabs.js
 	- figure out how to cope with this ^^^ later
 - [X] why do editor tabs not work?

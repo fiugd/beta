@@ -1,13 +1,16 @@
 import editor from './handlers/editor/index.js';
 import tabs from './handlers/tabs/index.js';
-
+import status from './handlers/status/index.js';
 
 const listeners = [{
 	eventName: "service-switch-notify",
 	handlers: [ editor.serviceSwitch ]
 }, {
+	eventName: "cursorActivity",
+	handlers: [ status.cursorActivity ]
+}, {
 	eventName: "operationDone",
-	handlers: [ editor.operationDone, tabs.operationDone ]
+	handlers: [ editor.operationDone, tabs.operationDone, status.operationDone ]
 }, {
 	eventName: "operations",
 	handlers: [ tabs.operationDone ]
@@ -28,13 +31,13 @@ const listeners = [{
 	handlers: [ editor.nothingOpen ]
 }, {
 	eventName: "fileSelect",
-	handlers: [ editor.fileSelect, tabs.fileSelect ]
+	handlers: [ editor.fileSelect, tabs.fileSelect, status.fileSelect ]
 }, {
 	eventName: "fileClose",
-	handlers: [ editor.fileClose, tabs.fileClose ]
+	handlers: [ editor.fileClose, tabs.fileClose, status.fileClose ]
 }, {
 	eventName: "fileChange",
-	handlers: [ tabs.fileChange ]
+	handlers: [ tabs.fileChange, status.fileChange ]
 }, {
 	eventName: "contextmenu",
 	handlers: [

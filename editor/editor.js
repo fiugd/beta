@@ -72,12 +72,12 @@ const service = {
 			// line: 2, << causes focus to be stolen
 			// column: 0, << causes focus to be stolen
 			id: '1',
-			name: 'editorStatusEvents.js',
-			filename: 'editorStatusEvents.js',
-			path: '/crosshj/fiug-beta/editor/editorStatusEvents.js',
+			name: 'editor.js',
+			filename: 'editor.js',
+			path: '/crosshj/fiug-beta/editor/editor.js',
 		},
 		opened: [
-			{ name: 'editorStatusEvents.js', order: 0 },
+			{ name: 'editor.js', order: 0 },
 			{ name: 'index.colors.css', order: 1 },
 			{ name: '404.html', order: 2 },
 			{ name: 'index.html', order: 3 }
@@ -97,9 +97,9 @@ const service = {
 		code: '/crosshj/fiug-beta/index.html',
 		path: '/crosshj/fiug-beta/index.html',
 	},{
-		name: 'editorStatusEvents.js',
-		code: '/crosshj/fiug-beta/editor/editorStatusEvents.js',
-		path: '/crosshj/fiug-beta/editor/editorStatusEvents.js'
+		name: 'editor.js',
+		code: '/crosshj/fiug-beta/editor/editor.js',
+		path: '/crosshj/fiug-beta/editor/editor.js'
 	}],
 	tree: {
 		'crosshj/fake': {
