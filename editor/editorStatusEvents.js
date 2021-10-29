@@ -1,7 +1,7 @@
-import { attach } from "./Listeners.js";
+import { attach } from "./utils/EventSystem.js";
 import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
-import { getDefaultFile } from "./state.js";
+import { getDefaultFile } from "./utils/State.js";
 
 let statusBarDom;
 
@@ -105,14 +105,14 @@ const fileSelect = ({
 	const mode = codemirrorModeFromFileType(fileType);
 	setDocType(friendlyModeName(fileType,mode));
 	if (!firstRun) {
-		sessionStorage.setItem(
-			"statusbar",
-			JSON.stringify({
-				mode,
-				line: 1,
-				col: 1,
-			})
-		);
+		// sessionStorage.setItem(
+		// 	"statusbar",
+		// 	JSON.stringify({
+		// 		mode,
+		// 		line: 1,
+		// 		col: 1,
+		// 	})
+		// );
 	}
 	setLineNumber(1);
 	setColNumber(1);

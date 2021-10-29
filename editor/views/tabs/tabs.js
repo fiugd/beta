@@ -1,6 +1,6 @@
 import { getFileType } from '../../utils/misc.js';
 
-let triggers;
+//let triggers;
 
 function log() {
 	return console.log.call(
@@ -251,19 +251,22 @@ function attachWheel(el) {
 	}
 }
 
-function attachDoubleClick(el) {
+function attachDoubleClick(el, context) {
 	if (!el) return;
-	el.addEventListener("dblclick", (e) => triggers.addFileUntracked(e));
+	el.addEventListener("dblclick", (e) => {
+		const { triggers } = context;
+		triggers.addFileUntracked(e);
+	});
 }
 
-const initTabs = (parent) => (tabDefArray = []) => {
+const initTabs = (parent) => (tabDefArray = [], context) => {
 	Array.from(parent.querySelectorAll(".tab")).map(removeTab(parent));
 	const init = true;
 	tabDefArray.map(createTab(parent, init));
 	setTimeout(() => {
 		const tabs = document.querySelector("#editor-tabs");
 		attachWheel(tabs);
-		attachDoubleClick(tabs);
+		attachDoubleClick(tabs, context);
 		const activeTab = document.querySelector("#editor-tabs-container .active");
 		if (activeTab) {
 			activeTab.scrollIntoView();
@@ -346,7 +349,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 		updateTab: updateTab(tabsList),
 		removeTab: removeTab(tabsList),
 	};
-	triggers = [];
+	//triggers = [];
 	// triggers = attachListener(tabsContainer, operations);
 
 	//'modal-menu-show'

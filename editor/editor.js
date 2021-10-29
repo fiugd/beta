@@ -1,4 +1,4 @@
-import { initState, setState, getCurrentFile, getCurrentService } from './state.js';
+import { initState, setState, getCurrentFile, getCurrentService } from './utils/State.js';
 
 import { getFilePath as gfp } from './utils/misc.js';
 const getFilePath = gfp(getCurrentService);
@@ -6,9 +6,9 @@ const getFilePath = gfp(getCurrentService);
 import EditorTabs from "./views/tabs/tabs.js";
 import EditorStatus from "./views/status/status.js";
 import inlineEditor from './views/editor/editor.js';
-import { switchEditor, messageEditor } from './views/switcher.js';
+import { switchEditor, messageEditor } from './views/editor/switcher.js';
 
-import { attachEvents, list, trigger as rawTrigger  } from "./Listeners.js";
+import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
 import events from './events.js';
 import CursorActivityHandler from './handlers/editor/cursor.js';
 import ChangeHandler from './handlers/editor/change.js';
@@ -23,7 +23,7 @@ function _Editor(callback) {
 
 	// call editor tabs once early so event handlers are attached
 	const tabs = EditorTabs();
-	EditorStatus();
+	const status = EditorStatus();
 	const editor = inlineEditor(ChangeHandler, EditorTabs, CursorActivityHandler);
 
 	const context = {
@@ -34,6 +34,7 @@ function _Editor(callback) {
 		messageEditor: (x) => messageEditor(x,{ editor, context }),
 		systemDocsErrors: [],
 		tabs,
+		status
 	};
 	attachEvents(events, context);
 }
@@ -71,12 +72,12 @@ const service = {
 			// line: 2, << causes focus to be stolen
 			// column: 0, << causes focus to be stolen
 			id: '1',
-			name: 'editorTabsEvents.js',
-			filename: 'editorTabsEvents.js',
-			path: '/crosshj/fiug-beta/editor/editorTabsEvents.js',
+			name: 'editorStatusEvents.js',
+			filename: 'editorStatusEvents.js',
+			path: '/crosshj/fiug-beta/editor/editorStatusEvents.js',
 		},
 		opened: [
-			{ name: 'editorTabsEvents.js', order: 0 },
+			{ name: 'editorStatusEvents.js', order: 0 },
 			{ name: 'index.colors.css', order: 1 },
 			{ name: '404.html', order: 2 },
 			{ name: 'index.html', order: 3 }
@@ -96,9 +97,9 @@ const service = {
 		code: '/crosshj/fiug-beta/index.html',
 		path: '/crosshj/fiug-beta/index.html',
 	},{
-		name: 'editorTabsEvents.js',
-		code: '/crosshj/fiug-beta/editor/editorTabsEvents.js',
-		path: '/crosshj/fiug-beta/editor/editorTabsEvents.js'
+		name: 'editorStatusEvents.js',
+		code: '/crosshj/fiug-beta/editor/editorStatusEvents.js',
+		path: '/crosshj/fiug-beta/editor/editorStatusEvents.js'
 	}],
 	tree: {
 		'crosshj/fake': {
@@ -128,7 +129,15 @@ rawTrigger({
 });
 
 console.log(
+	'Listeners:\n' + 
 	list().map(x => x.split('__').reverse().join(': '))
+	.sort()
+	.join('\n')
+)
+
+console.log(
+	'Triggers:\n' + 
+	listTriggers().map(x => x.split('__').reverse().join(': '))
 	.sort()
 	.join('\n')
 )

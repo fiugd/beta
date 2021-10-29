@@ -1,5 +1,5 @@
 import { getExtension, getFileType } from '../../utils/misc.js';
-import { getState, getAllServices } from "../../state.js";
+import { getState, getAllServices } from "../../utils/State.js";
 
 let binaryPreview;
 const showBinaryPreview = ({ filename, path = "." } = {}) => {

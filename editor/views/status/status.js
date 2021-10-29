@@ -1,5 +1,5 @@
 import { attachListeners } from '../../editorStatusEvents.js';
-import { getSettings } from '../../state.js';
+import { getSettings } from '../../utils/State.js';
 
 const { SYSTEM_NAME } = getSettings();
 
@@ -150,5 +150,9 @@ function StatusBar(){
 	attachListeners({ setLineNumber, setColNumber, setTabSize, setDocType });
 
 	document.body.appendChild(statusBar);
+	return {
+		operations: { setLineNumber, setColNumber, setTabSize, setDocType },
+		container: statusBar
+	};
 }
 export default StatusBar;

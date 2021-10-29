@@ -1,4 +1,5 @@
-const handler = (e, { tabs: container }) => {
+const handler = (e, context) => {
+	const {tabs:container} = context;
 	const {
 		initTabs,
 		createTab,
@@ -21,7 +22,7 @@ const handler = (e, { tabs: container }) => {
 		//systemDocsName: sysDocNames[name.replace("system::", "")]
 	}));
 	container.api.update(tabs);
-	initTabs(tabs);
+	initTabs(tabs, context);
 };
 
 export default handler;

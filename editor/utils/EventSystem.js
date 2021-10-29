@@ -1,4 +1,4 @@
-import { flatFromProp } from './utils/misc.js';
+import { flatFromProp } from './misc.js';
 
 const listeners = {};
 const triggers = {};
