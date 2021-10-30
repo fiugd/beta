@@ -155,18 +155,19 @@ window.listListeners = list;
 
 const addFrameOffsets = (event, triggerEvent) => {
 	if(triggerEvent.type !== 'contextMenuShow') return;
-	const terminalIframe = document.querySelector('#terminal iframe');
+	const terminal = document.querySelector('#terminal');
 	const editor = document.querySelector('#editor');
 	const isEventParent = (el) => {
 		try{
 			return el.contains(event.source);
 		}catch(_){}
 		try{
-			return el.contentDocument.contains(event.source.frameElement);
+			return el.querySelector('iframe').contentDocument
+				.contains(event.source.frameElement);
 		}catch(_){}
 	};
 
-	const parent = [terminalIframe, editor].find(isEventParent)
+	const parent = [terminal, editor].find(isEventParent)
 	if(!parent) return;
 
 	const {offsetLeft, offsetTop} = parent;
