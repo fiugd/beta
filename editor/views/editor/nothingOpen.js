@@ -25,6 +25,7 @@ const showNothingOpen = () => {
 				align-items: center;
 				overflow: hidden;
 				min-width: 160px;
+				z-index: 1;
 			}
 			#editor-empty-logo {
 				opacity: .7;

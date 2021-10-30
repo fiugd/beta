@@ -31,12 +31,6 @@ const fileSelectHandler = async (event, { getFilePath, switchEditor }) => {
 			return;
 		}
 	}
-
-	if(!name){
-		sessionStorage.setItem("editorFile", '');
-		switchEditor(null, "nothingOpen");
-		return;
-	}
 	*/
 
 	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
@@ -55,6 +49,12 @@ const fileSelectHandler = async (event, { getFilePath, switchEditor }) => {
 				.replace("systemDoc::", ""),
 			mode: "systemDoc"
 		});
+		return;
+	}
+
+	if(!name){
+		//sessionStorage.setItem("editorFile", '');
+		switchEditor({ mode: "nothingOpen" });
 		return;
 	}
 
