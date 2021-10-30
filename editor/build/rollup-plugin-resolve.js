@@ -1,5 +1,13 @@
 import {pather} from '/crosshj/fiug-beta/shared/modules/utilities.mjs';
 
+const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
+const braces = url => {
+	const blacklist = ['jsdelivr', 'virtual-module'];
+	if(blacklist.find(x => url.includes(x))) return url;
+	return `˹${url}˺`;
+};
+const noOrigin = x => x.replace(new RegExp(location.origin+'/'), '');
+
 const plugin = (entry) => ({
 	name: 'service worker build', // this name will show up in warnings and errors
 	resolveId ( source, importer ) {
@@ -22,11 +30,12 @@ const plugin = (entry) => ({
 		return output;
 	},
 	load: async ( id ) => {
-		console.log(id);
-
 		if (id === 'virtual-module') {
 			return entry; // the source code for "virtual-module"
 		}
+
+		console.log(pipe(noOrigin, braces)(id));
+
 		if(id.startsWith('https://')){
 			return await fetch(id)
 				.then(x => x.text())

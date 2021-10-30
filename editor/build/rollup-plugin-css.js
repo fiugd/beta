@@ -13,13 +13,15 @@ todo enable stylus parsing for css
 
 const assertMatcher = new RegExp(' assert { type: "css" }', 'g');
 
-const newWay = (source) => {
+const newWay = (source, id) => {
 	return `
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(\`${source}\`);
-document.adoptedStyleSheets = [
-	sheet, ...document.adoptedStyleSheets
-];
+
+// usage:
+// document.adoptedStyleSheets = [
+// 	sheet, ...document.adoptedStyleSheets
+// ];
 
 export default sheet;
 `.trim() + '\n';
@@ -31,7 +33,9 @@ const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.id = "${id.split('/').pop()}";
 styleSheet.innerHTML = \`${source}\`;
-document.head.appendChild(styleSheet);
+
+// usage:
+// document.head.appendChild(styleSheet);
 
 export default styleSheet;
 `.trim() + '\n';
@@ -48,7 +52,7 @@ function css(options={}) {
 				return stripAsserts;
 			}
 			if (id.slice(-4) !== '.css'){ return null; }
-			return oldWay(source, id);
+			return newWay(source, id);
 		}
 	}
 }

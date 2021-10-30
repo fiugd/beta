@@ -3,11 +3,16 @@
 
 
 */
-import '../../../../shared/css/codemirror.css' assert { type: "css" };
-import '../../../../shared/css/bespin.css' assert { type: "css" };
-import '../../../../shared/css/vscode.codemirror.css' assert { type: "css" };
-
 import '../../../../shared/vendor/codemirror.js';
+
+import codeMirrorCSS from '../../../../shared/css/codemirror.css' assert { type: "css" };
+import bespinCSS from '../../../../shared/css/bespin.css' assert { type: "css" };
+import darkCSS from '../../../../shared/css/vscode.codemirror.css' assert { type: "css" };
+document.adoptedStyleSheets = [
+	...document.adoptedStyleSheets,
+	codeMirrorCSS, bespinCSS, darkCSS
+];
+
 import '../../../../shared/vendor/codemirror/addon.bundle.js';
 import '../../../../shared/vendor/codemirror/mode.bundle.js';
 

@@ -8,10 +8,9 @@ const entry = `
 
 const banner = `/*!
 	fiug editor component
-	Version {{VERSION}}
-	Build Date {{DATE}}
-	https://github.com/crosshj/fiug
-	(c) 2020-2021 Harrison Cross.
+	Version {{VERSION}} ( {{DATE}} )
+	https://github.com/crosshj/fiug/editor
+	(c) 2020-2021 Harrison Cross, MIT License
 */
 `;
 

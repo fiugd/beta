@@ -7,7 +7,7 @@ import rollupConfig from './rollup.config.js';
 import terserConfig from './terser.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
-const VERSION = `v${packageJson.version}`;
+const VERSION = `${packageJson.version}`;
 const DATE = new Date().toISOString();
 
 const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
@@ -53,8 +53,9 @@ async function copyFile(from, to){
 		.then(x => x.json());;
 }
 
+console.log(`fiug editor v${VERSION}`);
 console.log(`rollup v${rollup.VERSION}`);
-console.log(`bundling editor...`);
+console.log(`bundling ...`);
 
 const build = async () => {
 	let error;
@@ -69,12 +70,6 @@ const build = async () => {
 		response = await copyFile(
 			'/crosshj/fiug-beta/editor/editor.html',
 			'./crosshj/fiug-beta/dist/editor.html'
-		);
-		if(response.error) throw new Error(response.error);
-
-		response = await copyFile(
-			'/crosshj/fiug-beta/editor/editor.css',
-			'./crosshj/fiug-beta/dist/editor.css'
 		);
 		if(response.error) throw new Error(response.error);
 

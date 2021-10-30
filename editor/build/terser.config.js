@@ -7,7 +7,7 @@ const minified = {
 		// max_line_len: 80
 	},
 	mangle: true,
-	compress: true,
+	compress: false,
 	// sourceMap: {
 	// 	filename: "service-worker.js",
 	// 	url: "inline"
@@ -26,6 +26,7 @@ const unmin = {
 };
 
 export default function(){
-	return unmin;
+	return minified;
+	//return unmin;
 }
 

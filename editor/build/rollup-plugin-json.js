@@ -11,7 +11,7 @@ function json(options={}) {
 				return stripAsserts;
 			}
 			if (id.slice(-5) !== '.json'){ return null; }
-			return `export default ${source}`;
+			return `/*!\n\tfrom ${id}\n*/\nexport default ${source}`;
 		}
 	}
 }

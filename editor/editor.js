@@ -1,5 +1,9 @@
-import './editor.css' assert { type: "css" };
-// import '../index.css' assert { type: "css" };
+import editorCSS from './editor.css' assert { type: "css" };
+//import indexCSS from '../index.css' assert { type: "css" };
+document.adoptedStyleSheets = [
+	...document.adoptedStyleSheets,
+	editorCSS//, indexCSS
+];
 
 import { initState, setState, getCurrentFile, getCurrentService } from './utils/State.js';
 

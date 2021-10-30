@@ -1,15 +1,20 @@
-// https://cdn.jsdelivr.net/npm/codemirror@5.58.1/lib/codemirror.js
+/*!
+	CodeMirror
+	Version 5.58.1 (modified by crosshj)
+	from https://cdn.jsdelivr.net/npm/codemirror@5.58.1/lib/codemirror.js
 
-// added passive: true|false to event listeners to avoid warnings in console
+	This is CodeMirror (https://codemirror.net), a code editor
+	implemented in JavaScript on top of the browser's DOM.
 
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: https://codemirror.net/LICENSE
+	You can find some technical background for some of the code below
+	at http://marijnhaverbeke.nl/blog/#cm-internals .
 
-// This is CodeMirror (https://codemirror.net), a code editor
-// implemented in JavaScript on top of the browser's DOM.
-//
-// You can find some technical background for some of the code below
-// at http://marijnhaverbeke.nl/blog/#cm-internals .
+	copyright (c) by Marijn Haverbeke and others
+	Distributed under an MIT license: https://codemirror.net/LICENSE
+
+	CHANGES:
+	added passive: true|false to event listeners to avoid warnings in console
+*/
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
