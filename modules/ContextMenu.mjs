@@ -599,6 +599,14 @@ function ContextPane() {
 
 	connectListener({
 		name: "Context Menu",
+		eventName: "contextMenuShow",
+		listener: (event) => {
+			showMenu(event.detail);
+		},
+	});
+
+	connectListener({
+		name: "Context Menu",
 		eventName: "modal-menu-show",
 		listener: (event) => {
 			console.error("TODO: context-menu-show versus window.showMenu!");

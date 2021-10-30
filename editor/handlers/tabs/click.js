@@ -47,7 +47,7 @@ const handler = (e, context) => {
 	}
 
 	if (event.target.classList.contains("close-editor-action")) {
-		triggerCloseTab(event, triggers["fileClose"], tabs.api.list());
+		triggerCloseTab(event, triggers.tabs.fileClose, tabs.api.list());
 		event.preventDefault();
 		return;
 	}
@@ -69,7 +69,7 @@ const handler = (e, context) => {
 	// tabsToUpdate.map(updateTab);
 	const service = getCurrentService({ pure: true });
 
-	triggers["fileSelect"]({
+	triggers.tabs.fileSelect({
 		detail: {
 			name: foundTab.name,
 			path: foundTab.parent,

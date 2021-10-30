@@ -11,7 +11,10 @@ const getCurrentFile = dummyFunc('getCurrentFile');
 const getCurrentFileFull = () => currentService.state.selected;
 const setCurrentFile = ({ filePath }) => {
 	const found = currentService.code
-		.find(x => x.name === filePath || x.path === '/'+filePath)
+		.find(x => x.name === filePath ||
+			x.path === '/'+filePath ||
+			x.path === '/'+currentService.name+'/'+filePath
+		)
 	if(found){;
 		currentService.state.selected = found;
 		currentService.state.selected.filename = found.name;

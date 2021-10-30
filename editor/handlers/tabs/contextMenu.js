@@ -1,4 +1,4 @@
-const handler = (event, { showMenu }) => {
+const handler = (event, { triggers, tabs }) => {
 	const editorDom = document.querySelector("#editor-tabs-container");
 	if (!editorDom.contains(event.target)) {
 		return true;
@@ -11,7 +11,7 @@ const handler = (event, { showMenu }) => {
 			? event.target
 			: undefined;
 	const theTabId = theTab && theTab.id;
-	const tab = theTab && tabs.find((x) => x.id === theTabId);
+	const tab = theTab && tabs.api.find((x) => x.id === theTabId);
 	// TODO: maybe these should be defined in UI Module
 	// filter actions based on whether tab was found or not
 	const barClickItems = [{ name: "Close All" }];
@@ -61,13 +61,14 @@ const handler = (event, { showMenu }) => {
 		console.error("some issue finding data for this context click!");
 		return;
 	}
-
-	showMenu()({
-		x: event.clientX,
-		y: event.clientY,
-		list: listItems,
-		parent: "Tab Bar",
-		data,
+	triggers.tabs.contextMenuShow({
+		detail: {
+			x: event.clientX,
+			y: event.clientY,
+			list: listItems,
+			parent: "Tab Bar",
+			data,
+		}
 	});
 	return false;
 };

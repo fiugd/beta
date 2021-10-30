@@ -52,7 +52,8 @@ future todo:
 */
 
 // this thing is used too many ways... SIGH
-function trigger({ e, type, params, source, data, detail }){
+function trigger(args){
+	const { e, type, params, source, data, detail } = args;
 	const _data = typeof data === "function"
 		? data(e)
 		: data || (detail||{}).data || {};
@@ -70,6 +71,14 @@ function trigger({ e, type, params, source, data, detail }){
 
 	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
+	
+	const blackList = [
+		'operationDone'
+	];
+	const { e:ignore, ...triggerEvent } = args;
+	if(!blackList.includes(type)){
+		window.top.postMessage({ triggerEvent }, location);
+	}
 }
 
 let triggerClickListener;
@@ -164,25 +173,31 @@ function attachEvents(events, context) {
 		attach({ ...handler, context });
 	}
 
-	const triggersConfig = flatFromProp(events.triggers, 'handlers');
-	const triggers = triggersConfig
-		.reduce((acc, { name, eventName, ...item }) => {
-			const trigger = attachTrigger({ ...item, eventName });
-			if(!trigger) return acc;
-			return { ...acc, [name || eventName]: trigger };
-		}, {});
+	context.triggers = {};
+	context.triggerEvent = {};
 
-	context.triggers = triggers;
-
-	context.triggerEvent = (name, operation) => {
-		triggers[name]({
-			detail: {
-				operation,
-				done: () => {},
-				body: {},
-			},
-		});
+	const connectTriggers = ([namespace, _triggers]) => {
+		const _name = namespace.toLowerCase();
+		const triggersConfig = flatFromProp(_triggers, 'handlers');
+		const triggers = triggersConfig
+			.reduce((acc, { name, eventName, ...item }) => {
+				const trigger = attachTrigger({ ...item, name: namespace, eventName });
+				if(!trigger) return acc;
+				return { ...acc, [name || eventName]: trigger };
+			}, {});
+		context.triggers[_name] = triggers;
+		context.triggerEvent[_name] = (eventName, operation) => {
+			context.triggers[_name][eventName]({
+				detail: {
+					operation,
+					done: () => {},
+					body: {},
+				},
+			});
+		};
 	};
+
+	Object.entries(events.triggers).map(connectTriggers);
 }
 
 window.addEventListener('message', function(messageEvent) {}, false);

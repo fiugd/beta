@@ -40,10 +40,6 @@ function _Editor(callback) {
 }
 
 
-
-
-
-
 const Editor = _Editor;;
 
 const isRunningAsModule = document.location.href.includes("_/modules");
@@ -62,56 +58,73 @@ cssnode.rel = 'stylesheet';
 cssnode.href = './editor.css';
 head.appendChild(cssnode);
 
-window.showMenu = () => true;
+
+
+window.showMenu = (args) => {
+// 	console.log('show menu');
+// 	console.log(args);
+// 	console.log(location)
+// 	window.top.postMessage({ type: 'showMenu', ...args }, location);
+};
 Editor();
 
-const service = {
-	name: 'crosshj/fake',
-	state: {
-		selected: {
-			// line: 2, << causes focus to be stolen
-			// column: 0, << causes focus to be stolen
-			id: '1',
-			name: 'editor.js',
-			filename: 'editor.js',
-			path: '/crosshj/fiug-beta/editor/editor.js',
-		},
-		opened: [
-			{ name: 'editor.js', order: 0 },
-			{ name: 'index.colors.css', order: 1 },
-			{ name: '404.html', order: 2 },
-			{ name: 'index.html', order: 3 }
-		],
-		changed: ['index.html']
-	},
-	code: [{
-		name: 'index.colors.css',
-		code: '/crosshj/fiug-beta/index.colors.css',
-		path: '/crosshj/fiug-beta/index.colors.css'
-	},{
-		name: '404.html',
-		code: '/crosshj/fiug-beta/404.html',
-		path: '/crosshj/fiug-beta/404.html'
-	},{
-		name: 'index.html',
-		code: '/crosshj/fiug-beta/index.html',
-		path: '/crosshj/fiug-beta/index.html',
-	},{
-		name: 'editor.js',
-		code: '/crosshj/fiug-beta/editor/editor.js',
-		path: '/crosshj/fiug-beta/editor/editor.js'
-	}],
-	tree: {
-		'crosshj/fake': {
-			'404.html': {},
-			'index.colors.css': {},
-			'index.html': {},
-			editor: {
-				'events.js': {}
-			}
-		}
-	}
-};
+const currentServiceId = localStorage.getItem('lastService');
+const serviceUrl = `/service/read/${currentServiceId}`;
+const { result: [currentService] } = await fetch(serviceUrl).then(x => x.json())
+
+const service = currentService;
+service.state.selected = {
+	name: service.state.selected.split('/').pop(),
+	path: `${service.name}/${service.state.selected}`
+}
+console.log(service)
+// const service = {
+// 	name: 'crosshj/fake',
+// 	state: {
+// 		selected: {
+// 			// line: 2, << causes focus to be stolen
+// 			// column: 0, << causes focus to be stolen
+// 			id: '1',
+// 			name: 'editor.js',
+// 			filename: 'editor.js',
+// 			path: '/crosshj/fiug-beta/editor/editor.js',
+// 		},
+// 		opened: [
+// 			{ name: 'editor.js', order: 0 },
+// 			{ name: 'index.colors.css', order: 1 },
+// 			{ name: '404.html', order: 2 },
+// 			{ name: 'index.html', order: 3 }
+// 		],
+// 		changed: ['index.html']
+// 	},
+// 	code: [{
+// 		name: 'index.colors.css',
+// 		code: '/crosshj/fiug-beta/index.colors.css',
+// 		path: '/crosshj/fiug-beta/index.colors.css'
+// 	},{
+// 		name: '404.html',
+// 		code: '/crosshj/fiug-beta/404.html',
+// 		path: '/crosshj/fiug-beta/404.html'
+// 	},{
+// 		name: 'index.html',
+// 		code: '/crosshj/fiug-beta/index.html',
+// 		path: '/crosshj/fiug-beta/index.html',
+// 	},{
+// 		name: 'editor.js',
+// 		code: '/crosshj/fiug-beta/editor/editor.js',
+// 		path: '/crosshj/fiug-beta/editor/editor.js'
+// 	}],
+// 	tree: {
+// 		'crosshj/fake': {
+// 			'404.html': {},
+// 			'index.colors.css': {},
+// 			'index.html': {},
+// 			editor: {
+// 				'events.js': {}
+// 			}
+// 		}
+// 	}
+// };
 
 initState([service], service);
 

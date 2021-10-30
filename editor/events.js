@@ -56,36 +56,60 @@ const listeners = [{
 	handlers: [ tabs.click ]
 }];
 
-const triggers = [{
-	eventName: "ui",
-	type: "raw",
-}, {
-	eventName: "fileClose",
-	type: 'raw',
-}, {
-	eventName: "fileSelect",
-	type: 'raw',
-}, {
-	name: "addFileUntracked",
-	eventName: "operations",
-	type: 'raw',
-	data: {
-		operation: "addFile",
-		untracked: true,
-	},
-//DEPRECATE trigger click pattern
-}, {
-	eventName: "provider-test",
-	type: 'click',
-	handlers: [ editor.provider.test ]
-}, {
-	eventName: "provider-save",
-	type: 'click',
-	handlers: [ editor.provider.save ]
-}, {
-	eventName: "provider-add-service",
-	type: 'click',
-	handlers: [ editor.provider.addService ]
-}];
+const triggers = {
+	Editor: [{
+			eventName: "ui",
+			type: "raw",
+		}, {
+			eventName: "fileClose",
+			type: 'raw',
+		}, {
+			eventName: "fileSelect",
+			type: 'raw',
+		}, {
+			eventName: "provider-test",
+			type: 'click',
+			handlers: [ editor.provider.test ]
+		}, {
+			eventName: "provider-save",
+			type: 'click',
+			handlers: [ editor.provider.save ]
+		}, {
+			eventName: "provider-add-service",
+			type: 'click',
+			handlers: [ editor.provider.addService ]
+		}],
+	Tabs: [{
+			eventName: "ui",
+			type: "raw",
+		}, {
+			eventName: "fileClose",
+			type: 'raw',
+		}, {
+			eventName: "fileSelect",
+			type: 'raw',
+		}, {
+			eventName: "contextMenuShow",
+			type: 'raw',
+		}, {
+			name: "addFileUntracked",
+			eventName: "operations",
+			type: 'raw',
+			data: {
+				operation: "addFile",
+				untracked: true,
+			},
+		}],
+	Status: [{
+			eventName: "ui",
+			type: "raw",
+		}, {
+			eventName: "fileClose",
+			type: 'raw',
+		}, {
+			eventName: "fileSelect",
+			type: 'raw',
+		}],
+};
 
 export default { listeners, triggers };
