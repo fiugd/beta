@@ -22,6 +22,8 @@ const history = [
 	`node shared/vendor/codemirror/update.js`,
 	`git commit -m "editor in its own iframe"`,
 	'preview editor/editor.html',
+	'node editor/build/build.js',
+	'preview dist/editor.html',
 ];
 
 const usage = (chalk) => {
