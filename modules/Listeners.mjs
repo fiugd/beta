@@ -153,7 +153,7 @@ function listTriggers(){
 window.listTriggers = listTriggers;
 window.listListeners = list;
 
-const frameOffsets = (event) => {
+const addFrameOffsets = (event) => {
 	if(event.type !== 'contextMenuShow') return;
 	const { source } = event;
 	const terminalIframe = document.querySelector('#terminal iframe');
@@ -180,7 +180,7 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		addOffsets(triggerEvent);
+		addFrameOffsets(triggerEvent);
 
 		const callback = (error, response, service) => {
 			source.postMessage({
