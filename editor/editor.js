@@ -25,7 +25,6 @@ import "../shared/vendor/localforage.min.js";
 
 function _Editor(callback) {
 	//TODO: ChangeHandler and CursorActivityHandler should come from triggers
-	//
 
 	//debugger; //enable this debugger to see what UI looks like at this point
 
