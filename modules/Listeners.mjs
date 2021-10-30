@@ -153,15 +153,17 @@ function listTriggers(){
 window.listTriggers = listTriggers;
 window.listListeners = list;
 
-const addFrameOffsets = (event) => {
-	if(event.type !== 'contextMenuShow') return;
-	const { source } = event;
+const addFrameOffsets = (event, triggerEvent) => {
+	if(triggerEvent.type !== 'contextMenuShow') return;
 	const terminalIframe = document.querySelector('#terminal iframe');
 	const editor = document.querySelector('#editor');
 	const isEventParent = (el) => {
 		try{
-			return el.contentDocument.contains(source.frameElement);
-		}catch(e){}
+			return el.contains(event.source);
+		}catch(_){}
+		try{
+			return el.contentDocument.contains(event.source.frameElement);
+		}catch(_){}
 	};
 
 	const parent = [terminalIframe, editor].find(isEventParent)
@@ -180,7 +182,7 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		addFrameOffsets(messageEvent);
+		addFrameOffsets(messageEvent, triggerEvent);
 
 		const callback = (error, response, service) => {
 			source.postMessage({
