@@ -180,7 +180,7 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
-		addFrameOffsets(triggerEvent);
+		addFrameOffsets(messageEvent);
 
 		const callback = (error, response, service) => {
 			source.postMessage({
