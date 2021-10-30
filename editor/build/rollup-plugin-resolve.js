@@ -1,4 +1,4 @@
-import {pather} from 'crosshj/fiug-beta/shared/modules/utilities.mjs';
+import {pather} from '/crosshj/fiug-beta/shared/modules/utilities.mjs';
 
 const plugin = (entry) => ({
 	name: 'service worker build', // this name will show up in warnings and errors
