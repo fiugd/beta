@@ -1,7 +1,7 @@
 /*!
 	fiug editor component
 	Version v0.4.6
-	Build Date 2021-10-30T06:45:39.783Z
+	Build Date 2021-10-30T06:47:46.962Z
 	https://github.com/crosshj/fiug
 	(c) 2020-2021 Harrison Cross.
 */

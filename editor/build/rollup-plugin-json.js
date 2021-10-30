@@ -1,4 +1,4 @@
-const assertMatcher = new RegExp(' assert { type: \"json" }', 'g');
+const assertMatcher = new RegExp(' assert { type: "json" }', 'g');
 
 function json(options={}) {
 
