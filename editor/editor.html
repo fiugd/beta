@@ -10,9 +10,9 @@
 		<link rel="stylesheet" href="/index.css" />
 	</head>
 	<style>
-	body #editor {
-		height: calc(100% - 22px);
-	}
+		body #editor {
+			height: calc(100% - 22px);
+		}
 	</style>
 	<body>
 		<div id="editor">
@@ -23,6 +23,12 @@
 			</div>
 		</div>
 	</body>
+	<script>
+		const isInIframe = window.self !== window.top;
+		document.body.style.background = isInIframe
+			? 'var(--main-theme-background-color)'
+			: 'rgba(var(--main-theme-highlight-color))';
+	</script>
 	<script type="module" src="./editor.js"></script>
 </html>
 

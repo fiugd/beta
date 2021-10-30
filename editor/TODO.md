@@ -1,6 +1,10 @@
 
-- [ ] tiggers have proper namespace
+- [X] tiggers have proper namespace
 - [ ] connect to service worker (or overall app)
+	- internal messages go to outside
+	- external messages come to inside
+- [ ] insert editor iframe into app
+- [ ] bring codemirror deps into editor folder
 
 - [X] reduce the need for:
 	- state.js

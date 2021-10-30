@@ -1,4 +1,3 @@
-// import { attachListeners } from '../../editorStatusEvents.js';
 import { getSettings } from '../../utils/State.js';
 
 const { SYSTEM_NAME } = getSettings();
@@ -22,7 +21,11 @@ function StatusBar(){
 			height: 22px;
 			font-size: 12px;
 			padding: 2px 10px;
-			box-shadow: 0 -1px 5px #0001;
+			z-index: 10;
+			border-top: 0.5px solid #000A;
+			/*
+			box-shadow: 0 -1px 5px #000F;
+			*/
 		}
 		#status-bar .bg {
 			position: absolute;
@@ -33,6 +36,8 @@ function StatusBar(){
 			box-sizing: border-box;
 			background: #3333;
 			pointer-events: none;
+			background: #0006;
+			z-index: -1;
 			/*
 			border-top: 1px solid #111a;
 			background: #1f476b;
@@ -44,15 +49,17 @@ function StatusBar(){
 		#status-bar, #status-bar * {
 			cursor: default;
 		}
-		#status-bar a { color: #dadada; }
 		#status-bar a:hover { color: white }
+		#status-bar a { color: #dadada; }
+
 		/*
-		#status-bar a:hover { color: var(--main-theme-text-color); }
 		#status-bar a { color: var(--main-theme-text-invert-color); }
-		
+		#status-bar a { color: white; }
+		#status-bar a:hover { color: var(--main-theme-text-color); }
 		#status-bar a { color: var(--main-theme-text-color); }
 		*/
 
+		.statusbar-item { z-index: 1; }
 		.statusbar-item.right a {
 			margin-left: 10px;
 		}
