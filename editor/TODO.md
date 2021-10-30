@@ -1,11 +1,14 @@
 
-- [X] tiggers have proper namespace
 - [ ] connect to service worker (or overall app)
-	- internal messages go to outside
+	- [X] internal messages go to outside
 	- external messages come to inside
 - [ ] insert editor iframe into app
+	- [X] editor build
+	- [ ] dist in service manifest
 - [ ] bring codemirror deps into editor folder
 
+- [X] tiggers have proper namespace
+	- some triggers may need to be removed
 - [X] reduce the need for:
 	- state.js
 	- Types.js
