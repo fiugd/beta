@@ -14,16 +14,17 @@ const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
 const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
 
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
-//const Minify = (code) => Terser.minify(code, terserConfig());
-const Minify = (code) => ({ code });
+const Minify = (code) => Terser.minify(code, terserConfig());
+//const Minify = (code) => ({ code });
 
-function saveBuild({ code, map }){
-	const changeUrl = '/service/change';
+const changeUrl = '/service/change';
+
+function writeFile({ path, code }){
 	const body = {
-		path: `./${rollupConfig.output.file}`,
+		path,
 		service: 'crosshj/fiug-beta',
 		//command: 'upsert',
-		code: code
+		code
 	};
 	const headers = {
 		"accept": "application/json",
@@ -36,8 +37,22 @@ function saveBuild({ code, map }){
 			mode: "cors",
 			credentials: "omit"
 	};
-	return fetch(changeUrl, opts).then(x => x.json());
+	return fetch(changeUrl, opts);
 }
+
+function saveBuild({ code, map }){
+	const path = `./${rollupConfig.output.file}`;
+	return writeFile({ path, code })
+		.then(x => x.json());
+}
+
+async function copyFile(from, to){
+	const code = await fetch(from).then(x => x.text());
+	const path = to;
+	return await writeFile({ path, code })
+		.then(x => x.json());;
+}
+
 console.log(`rollup v${rollup.VERSION}`);
 console.log(`bundling editor...`);
 
@@ -48,10 +63,21 @@ const build = async () => {
 			.then(x => x.generate(rollupConfig.output));
 		const { code } = generated.output[0];
 		const minified = await pipe(AddDate,AddVersion,Minify)(code);
-		const response = await saveBuild(minified);
-		if(response.error){
-			error = response.error
-		}
+		let response = await saveBuild(minified);
+		if(response.error) throw new Error(response.error);
+		
+		response = await copyFile(
+			'/crosshj/fiug-beta/editor/editor.html',
+			'./crosshj/fiug-beta/dist/editor.html'
+		);
+		if(response.error) throw new Error(response.error);
+
+		response = await copyFile(
+			'/crosshj/fiug-beta/editor/editor.css',
+			'./crosshj/fiug-beta/dist/editor.css'
+		);
+		if(response.error) throw new Error(response.error);
+
 	} catch (e){
 		error = e.message + '\n' + e.stack;
 	}

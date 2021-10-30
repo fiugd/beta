@@ -2,15 +2,16 @@
 
 export default function(){
 	return {
+		module: true,
 		format: {
 			// comments: 'all',
 			comments: 'some',
-			beautify: true,
+			//beautify: true,
 			// max_line_len: 80
 		},
-		mangle: false,
-		//mangle: true,
-		//compress: true,
+		//mangle: false,
+		mangle: true,
+		compress: true,
 		// sourceMap: {
 		// 	filename: "service-worker.js",
 		// 	url: "inline"

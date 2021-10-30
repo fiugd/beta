@@ -9,7 +9,7 @@ const banner = `/*!
 	Version {{VERSION}}
 	Build Date {{DATE}}
 	https://github.com/crosshj/fiug
-	(c) 2011-2012 Harrison Cross.
+	(c) 2020-2021 Harrison Cross.
 */
 `;
 
@@ -22,7 +22,7 @@ export default {
 		//sourcemap: true
 		//name: 'service-worker-handler.js',
 		//format: 'iife',
-		//sourcemap: 'inline',
+		// sourcemap: 'inline',
 		//minifyInternalExports: true
 		file: 'crosshj/fiug-beta/dist/editor.js',
 		banner,

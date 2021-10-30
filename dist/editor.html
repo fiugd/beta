@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"  class="dark-enabled">
+	<head>
+		<title></title>
+		<meta charset="utf-8">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="mobile-web-app-capable" content="yes">
+		<link rel="stylesheet" href="/index.css" />
+	</head>
+	<style>
+		body #editor {
+			height: calc(100% - 22px);
+		}
+	</style>
+	<body>
+		<div id="editor">
+			<div 
+				class="section simulation editor"
+				id="full-page-container"
+			>
+			</div>
+		</div>
+	</body>
+	<script>
+		const isInIframe = window.self !== window.top;
+		document.body.style.background = isInIframe
+			? 'var(--main-theme-background-color)'
+			: 'rgba(var(--main-theme-highlight-color))';
+	</script>
+	<script type="module" src="./editor.js"></script>
+</html>
+
