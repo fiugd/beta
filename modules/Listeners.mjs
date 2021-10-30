@@ -153,6 +153,24 @@ function listTriggers(){
 window.listTriggers = listTriggers;
 window.listListeners = list;
 
+const frameOffsets = (event) => {
+	if(event.type !== 'contextMenuShow') return;
+	const { source } = event;
+	const terminalIframe = document.querySelector('#terminal iframe');
+	const editor = document.querySelector('#editor');
+	const isEventParent = (el) => {
+		try{
+			return el.contentDocument.contains(source.frameElement);
+		}catch(e){}
+	};
+
+	const parent = [terminalIframe, editor].find(isEventParent)
+	if(!parent) return;
+
+	const {offsetLeft, offsetTop} = parent;
+	triggerEvent.detail.x += offsetLeft;
+	triggerEvent.detail.y += offsetTop;
+};
 
 window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
@@ -162,6 +180,8 @@ window.addEventListener('message', function(messageEvent) {
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
+		addOffsets(triggerEvent);
+
 		const callback = (error, response, service) => {
 			source.postMessage({
 				error, response, error, service, key

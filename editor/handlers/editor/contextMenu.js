@@ -1,4 +1,4 @@
-const contextMenuHandler = (e, { showMenu }) => {
+const contextMenuHandler = (e, { triggers }) => {
 	const editorDom = document.querySelector("#editor .CodeMirror");
 	if (!editorDom) {
 		return true;
@@ -29,12 +29,14 @@ const contextMenuHandler = (e, { showMenu }) => {
 		return;
 	}
 
-	showMenu()({
-		x: e.clientX,
-		y: e.clientY,
-		list: listItems,
-		parent: "Editor",
-		data,
+	triggers.editor.contextMenuShow({
+		detail: {
+			x: e.clientX,
+			y: e.clientY,
+			list: listItems,
+			parent: "Editor",
+			data,
+		}
 	});
 	return false;
 };

@@ -67,6 +67,9 @@ const triggers = {
 			eventName: "fileSelect",
 			type: 'raw',
 		}, {
+			eventName: "contextMenuShow",
+			type: 'raw',
+		}, {
 			eventName: "provider-test",
 			type: 'click',
 			handlers: [ editor.provider.test ]
