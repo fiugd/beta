@@ -92,7 +92,8 @@ function pather(cwd, path, opts={}){
 			if(one === '.') return all;
 			return [...all, one];
 		}, parent)
-		.join('/');
+		.join('/')
+		.replace('https:/', 'https://');
 }
 
 export {
