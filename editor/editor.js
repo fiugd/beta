@@ -20,9 +20,6 @@ import events from './events.js';
 import CursorActivityHandler from './handlers/editor/cursor.js';
 import ChangeHandler from './handlers/editor/change.js';
 
-import "../shared/vendor/localforage.min.js";
-
-
 function _Editor(callback) {
 	//TODO: ChangeHandler and CursorActivityHandler should come from triggers
 
