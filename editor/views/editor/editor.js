@@ -1,4 +1,4 @@
-import Editor from "../../../shared/modules/editor.mjs";
+import Editor from "./deprecate/editorModule.js";
 import Container from './container.js';
 import Search from './search.js';
 

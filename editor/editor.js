@@ -1,3 +1,6 @@
+import './editor.css' assert { type: "css" };
+// import '../index.css' assert { type: "css" };
+
 import { initState, setState, getCurrentFile, getCurrentService } from './utils/State.js';
 
 import { getFilePath as gfp } from './utils/misc.js';
@@ -14,6 +17,7 @@ import CursorActivityHandler from './handlers/editor/cursor.js';
 import ChangeHandler from './handlers/editor/change.js';
 
 import "../shared/vendor/localforage.min.js";
+
 
 function _Editor(callback) {
 	//TODO: ChangeHandler and CursorActivityHandler should come from triggers
@@ -40,7 +44,7 @@ function _Editor(callback) {
 }
 
 
-const Editor = _Editor;;
+const Editor = _Editor;
 
 const isRunningAsModule = document.location.href.includes("_/modules");
 
@@ -50,22 +54,6 @@ if(!isRunningAsModule){
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
 
-const head=document.getElementsByTagName("head")[0];
-
-const cssnode = document.createElement('link');
-cssnode.type = 'text/css';
-cssnode.rel = 'stylesheet';
-cssnode.href = './editor.css';
-head.appendChild(cssnode);
-
-
-
-window.showMenu = (args) => {
-// 	console.log('show menu');
-// 	console.log(args);
-// 	console.log(location)
-// 	window.top.postMessage({ type: 'showMenu', ...args }, location);
-};
 Editor();
 
 const currentServiceId = localStorage.getItem('lastService');
