@@ -1,4 +1,5 @@
 import resolvePlugin from './rollup-plugin-resolve.js';
+import json from './rollup-plugin-json.js';
 
 const entry = `
 	import "https://beta.fiug.dev/crosshj/fiug-beta/editor/editor.js";
@@ -15,7 +16,7 @@ const banner = `/*!
 
 export default {
 	input: 'virtual-module', // resolved by plugin
-	plugins: [resolvePlugin(entry)],
+	plugins: [resolvePlugin(entry), json()],
 	external: ['chalk'],
 	output: {
 		format: 'es',

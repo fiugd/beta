@@ -1,6 +1,6 @@
 import ext from "../../shared/icons/seti/ext.json.mjs";
 import { codemirrorModeFromFileType } from "../../shared/modules/utilities.mjs";
-
+import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json" assert { type: "json" };
 
 // TODO: maybe use insertAdjacentHTML for this instead
 // this works like jquery append ^^^
@@ -12,20 +12,17 @@ function htmlToElement(html) {
 	return template.content.firstChild;
 }
 
-let getMime = () => {};
-(async () => {
-	const source = await (await fetch('/modules/service-worker.utils.js')).text();
-	const SWUtils = eval(`
-		(function(){
-		const module = { exports: {} };
-		${source}
-		const { exports } = module;
-		return exports;
-		})()
-	`);
-	SWUtils.initMimeTypes();
-	getMime = SWUtils.getMime;
-})();
+const xfrmMimes = (m) => Object.entries(m || {})
+	.map(([contentType, rest]) => ({
+		contentType,
+		extensions: [],
+		...rest,
+	}));
+
+const getMime = (file) => xfrmMimes(mimeTypes)
+	.find(({ extensions: ext }) =>
+		ext.includes(file.split(".").pop())
+	);
 
 const getExtension = (fileName) =>
 	((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(/^\./, "");
@@ -38,7 +35,7 @@ function getFileType(fileName = "") {
 	if(mime?.contentType ){
 		type = mime.contentType;
 	}
-	
+
 	//TODO: most of this should be able to go away with addition of getExtension above...
 	if (fileName.toLowerCase() === ".git/config") {
 		type = "config";
