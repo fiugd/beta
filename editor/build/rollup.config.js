@@ -22,7 +22,7 @@ const analyzeConfig = {
 			chalk.hex('#ccc')(x)
 				.replace(/█/g, chalk.hex('#636')('█'))
 				.replace(/░/g, chalk.hex('#2a2a43')('█'))
-				.replace(/\((.*)\)/g, chalk.hex('#dad')('| $1 \n\n')) +
+				.replace(/\((.*)\)/g, chalk.hex('#dad')('| $1 \n')) +
 			chalk.hex('#aaa')('       . . . [ analysis truncated for brevity ] . . . \n\n\n')
 		),
 	transformModuleId: (x) => chalk.hex('#dfe')('\n' +
