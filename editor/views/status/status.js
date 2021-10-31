@@ -131,6 +131,7 @@ function StatusBar(){
 			'default': 'Plain Text',
 			'text/x-csrc': 'C',
 			'text/x-c++src': 'C++',
+			'text/webassembly': 'WebAssembly',
 			'wat': 'WebAssembly',
 			'piskel': 'Piskel',
 			'javascript': 'JavaScript',
