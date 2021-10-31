@@ -14,9 +14,10 @@ todo enable stylus parsing for css
 const assertMatcher = new RegExp(' assert { type: "css" }', 'g');
 
 const newWay = (source, id) => {
-	return `
+	const escapeSlashes = (x) => x.replace(/\\/g, '\\\\');
+	const cssAsModule = `
 const sheet = new CSSStyleSheet();
-sheet.replaceSync(\`${source}\`);
+sheet.replaceSync(\`${escapeSlashes(source)}\`);
 
 // usage:
 // document.adoptedStyleSheets = [
@@ -25,6 +26,8 @@ sheet.replaceSync(\`${source}\`);
 
 export default sheet;
 `.trim() + '\n';
+	console.log(cssAsModule)
+	return cssAsModule;
 };
 
 const oldWay = (source, id) => {
