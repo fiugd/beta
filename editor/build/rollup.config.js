@@ -22,8 +22,8 @@ const analyzeConfig = {
 			chalk.hex('#ccc')(x)
 				.replace(/█/g, chalk.hex('#636')('█'))
 				.replace(/░/g, chalk.hex('#2a2a43')('█'))
-				.replace(/\((.*)\)/g, chalk.hex('#dad')('| $1 \n')) +
-			chalk.hex('#aaa')('       . . . [ analysis truncated for brevity ] . . . \n\n\n')
+				.replace(/\((.*)\)/g, chalk.hex('#dad')('| $1')) +
+			chalk.hex('#aaa')('\n       . . . [ analysis truncated for brevity ] . . . \n\n\n')
 		),
 	transformModuleId: (x) => chalk.hex('#dfe')('\n' +
 		braces(x.replace(`${location.origin}/crosshj/fiug-beta/`, '')) + '\n'
