@@ -1,6 +1,17 @@
 import resolvePlugin from './rollup-plugin-resolve.js';
 import json from './rollup-plugin-json.js';
 import css from './rollup-plugin-css.js';
+import analyze from './rollup-plugin-analyze.js';
+
+import chalk from 'chalk';
+chalk.enabled = true;
+chalk.level = 3; //levels.trueColor;
+
+const braces = url => {
+	const blacklist = ['jsdelivr', 'virtual-module'];
+	if(blacklist.find(x => url.includes(x))) return url;
+	return `˹${url}˺`;
+};
 
 const entry = `
 	import "https://beta.fiug.dev/crosshj/fiug-beta/editor/editor.js";
@@ -19,7 +30,23 @@ export default {
 	plugins: [
 		resolvePlugin(entry),
 		json(),
-		css()
+		css(),
+		analyze({
+			//root: location.origin+'/',
+			root: ' ',
+			summaryOnly: true,
+			limit: 7,
+			writeTo: (x) => processWrite('DONE\n\n'+
+					chalk.hex('#ccc')(x)
+						.replace(/█/g, chalk.hex('#636')('█'))
+						.replace(/░/g, chalk.hex('#2a2a43')('█'))
+						.replace(/\)/g, ')\n\n') +
+					chalk.hex('#aaa')('   . . . [ analysis truncated for brevity ] . . . \n\n')
+				),
+			transformModuleId: (x) => chalk.hex('#dfe')('\n' +
+				braces(x.replace(`${location.origin}/crosshj/fiug-beta/`, '')) + '\n'
+			)
+		}),
 	],
 	external: ['chalk'],
 	output: {

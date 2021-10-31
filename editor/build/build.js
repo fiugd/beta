@@ -53,9 +53,9 @@ async function copyFile(from, to){
 		.then(x => x.json());;
 }
 
-console.log(`fiug editor v${VERSION}`);
+console.log(`\nfiug editor v${VERSION}`);
 console.log(`rollup v${rollup.VERSION}`);
-console.log(`bundling ...`);
+console.log(`\nbundling ...`);
 
 const build = async () => {
 	let error;
@@ -80,7 +80,8 @@ const build = async () => {
 	if(error){
 		console.log('\n' + error);
 	} else {
-		console.log(`DONE\nsee ` +
+		console.log('NOTE: analysis does not include terser effects\n')
+		console.log(`\nOUTPUT: ` +
 		`${self.location.origin}/${rollupConfig.output.file}`
 		);
 	}

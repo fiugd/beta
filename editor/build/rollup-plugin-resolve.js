@@ -34,7 +34,7 @@ const plugin = (entry) => ({
 			return entry; // the source code for "virtual-module"
 		}
 
-		console.log(pipe(noOrigin, braces)(id));
+		//console.log(pipe(noOrigin, braces)(id));
 
 		if(id.startsWith('https://')){
 			return await fetch(id)
