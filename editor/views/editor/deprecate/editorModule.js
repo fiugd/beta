@@ -69,7 +69,7 @@ const setupEditor = (text, opts) => {
 	const options = { ...defaultOptions, ...opts };
 
 	//console.log({ mimeModes: CodeMirror.mimeModes, modes: CodeMirror.modes })
-	const textArea = document.querySelector('.simulation .functionInput');
+	const textArea = document.querySelector('.editor textarea');
 	if(!textArea){
 		return;
 	}

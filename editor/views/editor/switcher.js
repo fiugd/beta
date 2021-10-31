@@ -31,7 +31,7 @@ const switchEditor = async (args, { editor, context }) => {
 			id: "",
 			filename,
 			callback: editorCallback,
-		});
+		}, context);
 
 		systemDocsView = showSystemDocsView({ filename }, context);
 		systemDocsView && systemDocsView.classList.remove("hidden");
@@ -53,7 +53,7 @@ const switchEditor = async (args, { editor, context }) => {
 			id: "",
 			filename: "",
 			callback: editorCallback,
-		});
+		}, context);
 
 		nothingOpenDom = showNothingOpen();
 		nothingOpenDom && nothingOpenDom.classList.remove("hidden");
@@ -86,7 +86,7 @@ const switchEditor = async (args, { editor, context }) => {
 			id: "",
 			filename: "",
 			callback: editorCallback,
-		});
+		}, context);
 
 		editorPreview = showBinaryPreview({ filename, code });
 		editorPreview && editorPreview.classList.remove("hidden");
@@ -100,7 +100,7 @@ const switchEditor = async (args, { editor, context }) => {
 	editor({
 		code, line, column, name, id, path,
 		filename: filename || defaultFile
-	});
+	}, context);
 	editorDom = document.querySelector(".CodeMirror");
 	editorDom && editorDom.classList.remove("hidden");
 

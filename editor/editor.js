@@ -12,39 +12,33 @@ const getFilePath = gfp(getCurrentService);
 
 import EditorTabs from "./views/tabs/tabs.js";
 import EditorStatus from "./views/status/status.js";
-import inlineEditor from './views/editor/editor.js';
+import Editor from './views/editor/editor.js';
 import { switchEditor, messageEditor } from './views/editor/switcher.js';
 
 import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
 import events from './events.js';
-import CursorActivityHandler from './handlers/editor/cursor.js';
-import ChangeHandler from './handlers/editor/change.js';
 
-function _Editor(callback) {
-	//TODO: ChangeHandler and CursorActivityHandler should come from triggers
+// this is needed by CM:loadDoc addon
+// import "../shared/vendor/localforage.min.js";
 
-	//debugger; //enable this debugger to see what UI looks like at this point
+const tabs = EditorTabs();
+const status = EditorStatus();
+const editor = Editor();
 
-	// call editor tabs once early so event handlers are attached
-	const tabs = EditorTabs();
-	const status = EditorStatus();
-	const editor = inlineEditor(ChangeHandler, EditorTabs, CursorActivityHandler);
+const context = {
+	getCurrentFile, // << access within file instead
+	getFilePath, // << access within file instead
 
-	const context = {
-		getCurrentFile, // << access within file instead
-		getFilePath, // << access within file instead
-		showMenu: () => window.showMenu,
-		switchEditor: (x) => switchEditor(x, { editor, context }),
-		messageEditor: (x) => messageEditor(x,{ editor, context }),
-		systemDocsErrors: [],
-		tabs,
-		status
-	};
-	attachEvents(events, context);
-}
+	switchEditor: (x) => switchEditor(x, { editor, context }),
+	messageEditor: (x) => messageEditor(x,{ editor, context }),
+	systemDocsErrors: [],
 
+	editor,
+	tabs,
+	status
+};
+attachEvents(events, context);
 
-const Editor = _Editor;
 
 const isRunningAsModule = document.location.href.includes("_/modules");
 
@@ -54,7 +48,6 @@ if(!isRunningAsModule){
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
 
-Editor();
 
 const currentServiceId = localStorage.getItem('lastService');
 const serviceUrl = `/service/read/${currentServiceId}`;

@@ -70,6 +70,14 @@ const triggers = {
 			eventName: "contextMenuShow",
 			type: 'raw',
 		}, {
+			eventName: "fileChange",
+			type: 'raw',
+			handlers: [ editor.fileChange ]
+		}, {
+			eventName: "cursorActivity",
+			type: 'raw',
+			handlers: [ editor.cursorActivity ]
+		}, {
 			eventName: "provider-test",
 			type: 'click',
 			handlers: [ editor.provider.test ]
@@ -81,7 +89,7 @@ const triggers = {
 			eventName: "provider-add-service",
 			type: 'click',
 			handlers: [ editor.provider.addService ]
-		}],
+		}], 
 	Tabs: [{
 			eventName: "ui",
 			type: "raw",

@@ -12,6 +12,8 @@ const systemDocs = (e, { switchEditor }) => switchEditor(e.type, "systemDoc");
 
 //triggers
 import provider from './provider.js'
+import fileChange from './fileChange.js'
+import cursorActivity from './cursorActivity.js'
 
 export default {
 	...formatHandlers('Editor', {
@@ -24,5 +26,7 @@ export default {
 		nothingOpen,
 		systemDocs,
 	}),
-	provider
+	provider,
+	fileChange,
+	cursorActivity
 };

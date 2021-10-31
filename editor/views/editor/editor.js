@@ -15,16 +15,14 @@ const { indentWithTabs, tabSize } = getSettings();
 
 import attachGutterHelper from '../../utils/gutterHelper.js';
 
+import "../../../shared/vendor/localforage.min.js";
+
 let editorGutter;
 let cmDom;
 let prevDoc;
 
 const BLANK_CODE_PAGE = "";
-const InlineEditor = (
-	ChangeHandler,
-	EditorTabs,
-	CursorActivityHandler
-) => ({
+const InlineEditor = () => ({
 	code = BLANK_CODE_PAGE,
 	line: loadLine,
 	column: loadColumn,
@@ -33,7 +31,7 @@ const InlineEditor = (
 	filename,
 	path,
 	callback,
-} = {}) => {
+} = {}, context) => {
 	const prevEditor = document.querySelector("#editor-container");
 	let editorDiv = prevEditor;
 	if (!editorDiv) {
@@ -55,27 +53,29 @@ const InlineEditor = (
 			</div>
 		`;
 
-		editorDiv.appendChild(
-			EditorTabs(name ? [{ name, active: true }] : undefined)
-		);
-
+		editorDiv.appendChild(context.tabs);
 		editorDiv.appendChild(Search());
 
 		const editorTextArea = document.createElement("textarea");
 		editorTextArea.id = "service_code";
-		editorTextArea.classList.add("functionInput");
 		editorTextArea.classList.add("hidden");
 		editorDiv.appendChild(editorTextArea);
 		containerDiv.querySelector(".contain").appendChild(editorDiv);
 	}
 
-	window.M && M.updateTextFields();
-
 	//const editorPane = document.querySelector('#editor');
 	//editorPane.style.width = editorPane.clientWidth + 'px';
 	const darkEnabled = window.localStorage.getItem("themeDark") === "true";
-	const handlerBoundToDoc = ChangeHandler({ code, name, id, filename });
-
+	const onChange = (cm, changeObj) => {
+		context.triggers.editor.fileChange({
+			code: cm.getValue(),
+			prevCode: code,
+			name,
+			id,
+			filename,
+			filePath: filename
+		});
+	}
 	var currentHandle = null,
 		currentLine;
 	function updateLineInfo(cm, line) {
@@ -97,7 +97,7 @@ const InlineEditor = (
 		const column = cursor.ch + 1;
 		updateLineInfo(instance, line);
 		// STATUS_CURRENT_LINE.textContent = cursor.line + 1;
-		CursorActivityHandler({ line, column });
+		context.triggers.editor.cursorActivity({ line, column });
 	};
 
 	const onScrollCursor = (instance, event) => {
@@ -118,7 +118,7 @@ const InlineEditor = (
 			)
 				return true;
 		return false;
-	}
+	} 
 	function selectNextOccurrence(cm) {
 		var Pos = CodeMirror.Pos;
 
@@ -239,12 +239,12 @@ const InlineEditor = (
 
 		editor.on("fold", foldHandler);
 		editor.on("unfold", unfoldHandler);
-		editor.on("change", handlerBoundToDoc);
+		editor.on("change", onChange);
 		editor.on("cursorActivity", onCursorActivity);
 		editor.on("scrollCursorIntoView", onScrollCursor);
 
 		editor._cleanup = () => {
-			editor.off("change", handlerBoundToDoc);
+			editor.off("change", onChange);
 			editor.off("cursorActivity", onCursorActivity);
 			editor.off("scrollCursorIntoView", onScrollCursor);
 			editor.off("fold", foldHandler);

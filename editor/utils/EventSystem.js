@@ -75,7 +75,7 @@ function trigger(args){
 	const blackList = [
 		'operationDone'
 	];
-	const { e:ignore, ...triggerEvent } = args;
+	const triggerEvent = { type, detail: _detail };
 	if(!blackList.includes(type)){
 		window.top.postMessage({ triggerEvent }, location);
 	}

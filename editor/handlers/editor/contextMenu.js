@@ -35,9 +35,8 @@ const contextMenuHandler = (e, { triggers }) => {
 			y: e.clientY,
 			list: listItems,
 			parent: "Editor",
-			data,
-		}
-	});
+			// data,
+	}});
 	return false;
 };
 
