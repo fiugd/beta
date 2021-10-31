@@ -12,7 +12,7 @@ const getFilePath = gfp(getCurrentService);
 
 import EditorTabs from "./views/tabs/tabs.js";
 import EditorStatus from "./views/status/status.js";
-import Editor from './views/editor/editor.js';
+import editor from './views/editor/editor.js';
 import { switchEditor, messageEditor } from './views/editor/switcher.js';
 
 import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
@@ -23,7 +23,6 @@ import events from './events.js';
 
 const tabs = EditorTabs();
 const status = EditorStatus();
-const editor = Editor();
 
 const context = {
 	getCurrentFile, // << access within file instead

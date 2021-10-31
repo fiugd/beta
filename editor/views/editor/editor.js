@@ -13,7 +13,7 @@ import {
 } from "../../utils/State.js";
 const { indentWithTabs, tabSize } = getSettings();
 
-import attachGutterHelper from '../../utils/gutterHelper.js';
+import attachGutterHelper from './gutterHelper.js';
 
 import "../../../shared/vendor/localforage.min.js";
 
@@ -22,52 +22,48 @@ let cmDom;
 let prevDoc;
 
 const BLANK_CODE_PAGE = "";
-const InlineEditor = () => ({
-	code = BLANK_CODE_PAGE,
-	line: loadLine,
-	column: loadColumn,
-	name,
-	id,
-	filename,
-	path,
-	callback,
-} = {}, context) => {
+
+const initEditor = (context) => {
+	const triggers = context.triggers.editor;
+
+	const containerDiv = Container({
+		operations: ["create", "cancel", "delete", "persist", "update"],
+	});
+	const editorDiv = document.createElement("div");
+	editorDiv.id = "editor-container";
+
+	editorDiv.appendChild(context.tabs);
+	editorDiv.appendChild(Search());
+
+	const editorTextArea = document.createElement("textarea");
+	editorTextArea.id = "service_code";
+	editorTextArea.classList.add("hidden");
+	editorDiv.appendChild(editorTextArea);
+	containerDiv.querySelector(".contain").appendChild(editorDiv);
+
+	return editorDiv;
+}
+
+const InlineEditor = (args, context) => {
+	const {
+		code = BLANK_CODE_PAGE,
+		line: loadLine,
+		column: loadColumn,
+		name,
+		id,
+		filename,
+		path,
+		callback,
+	} = args || {};
+
 	const prevEditor = document.querySelector("#editor-container");
-	let editorDiv = prevEditor;
-	if (!editorDiv) {
-		const containerDiv = Container({
-			operations: ["create", "cancel", "delete", "persist", "update"],
-		});
-		editorDiv = document.createElement("div");
-		editorDiv.id = "editor-container";
-		editorDiv.innerHTML = `
-			<div id="service-fields" class="row no-margin">
-				<div class="input-field col s6">
-					<input id="service_name" type="text" class="" value="${name}">
-					<label for="service_name">Name</label>
-				</div>
-				<div class="input-field col s6">
-					<input id="service_id" type="text" class="" value="${id}">
-					<label for="service_id">ID</label>
-				</div>
-			</div>
-		`;
-
-		editorDiv.appendChild(context.tabs);
-		editorDiv.appendChild(Search());
-
-		const editorTextArea = document.createElement("textarea");
-		editorTextArea.id = "service_code";
-		editorTextArea.classList.add("hidden");
-		editorDiv.appendChild(editorTextArea);
-		containerDiv.querySelector(".contain").appendChild(editorDiv);
-	}
+	const editorDiv = prevEditor || initEditor(context);
 
 	//const editorPane = document.querySelector('#editor');
 	//editorPane.style.width = editorPane.clientWidth + 'px';
 	const darkEnabled = window.localStorage.getItem("themeDark") === "true";
 	const onChange = (cm, changeObj) => {
-		context.triggers.editor.fileChange({
+		triggers.fileChange({
 			code: cm.getValue(),
 			prevCode: code,
 			name,
@@ -97,7 +93,7 @@ const InlineEditor = () => ({
 		const column = cursor.ch + 1;
 		updateLineInfo(instance, line);
 		// STATUS_CURRENT_LINE.textContent = cursor.line + 1;
-		context.triggers.editor.cursorActivity({ line, column });
+		triggers.cursorActivity({ line, column });
 	};
 
 	const onScrollCursor = (instance, event) => {

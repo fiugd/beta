@@ -510,15 +510,15 @@ div .CodeMirror-gutter-wrapper {
 	padding-left: 15px;
 }
 
-.simulation {
+.section.editor {
 	/* padding-top: 0; */
 	height: 100%;
 }
 
-body .simulation .CodeMirror .CodeMirror-vscrollbar {
+body .section.editor .CodeMirror .CodeMirror-vscrollbar {
 	display: block;
 }
-body .simulation:hover .CodeMirror .CodeMirror-vscrollbar {
+body .section.editor:hover .CodeMirror .CodeMirror-vscrollbar {
 	overflow: auto !important;
 }
 body .CodeMirror-scrollbar-filler {
