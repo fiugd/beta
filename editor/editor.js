@@ -5,7 +5,9 @@ document.adoptedStyleSheets = [
 	editorCSS//, indexCSS
 ];
 
-import { initState, setState, getCurrentFile, getCurrentService } from './utils/State.js';
+import { 
+	DEBUG, initState, setState, getCurrentFile, getCurrentService
+} from './utils/State.js';
 
 import { getFilePath as gfp } from './utils/misc.js';
 const getFilePath = gfp(getCurrentService);
@@ -57,7 +59,7 @@ service.state.selected = {
 	name: service.state.selected.split('/').pop(),
 	path: `${service.name}/${service.state.selected}`
 }
-console.log(service)
+DEBUG && console.log(service)
 // const service = {
 // 	name: 'crosshj/fake',
 // 	state: {
@@ -121,14 +123,14 @@ rawTrigger({
 	}
 });
 
-console.log(
+DEBUG && console.log(
 	'Listeners:\n' + 
 	list().map(x => x.split('__').reverse().join(': '))
 	.sort()
 	.join('\n')
 )
 
-console.log(
+DEBUG && console.log(
 	'Triggers:\n' + 
 	listTriggers().map(x => x.split('__').reverse().join(': '))
 	.sort()

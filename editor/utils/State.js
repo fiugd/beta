@@ -1,9 +1,10 @@
+const DEBUG = false;
 
 let allServices;
 let currentService;
 
 const dummyFunc = (fnName, returns='') => (...args) => {
-	console.log({ ...args, fnName });
+	DEBUG && console.log({ ...args, fnName });
 	return returns;
 };
 
@@ -52,6 +53,8 @@ const initState = (all, current) => {
 };
 
 export {
+	DEBUG,
+
 	initState,
 	getAllServices,
 	getCodeFromService,

@@ -167,8 +167,9 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	};
 
 	class PerfMonitor {
-		constructor(key){
+		constructor(key, DEBUG){
 			this.key = key;
+			this.DEBUG = DEBUG;
 			this.t0 = performance.now();
 			this.events = [
 				[key,this.t0]
@@ -180,6 +181,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			this.events.push([event, performance.now()]);
 		}
 		log(){
+			const { DEBUG } = this;
 			const fNum = (number) => number.toFixed().padStart(3);
 			const colors = [
 				'color:#CE9178;',
@@ -190,12 +192,12 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 				const timeTook = i > 0
 					? `(${fNum(time-this.events[i-1][1])} ms)`
 					: '';
-				console.log(
+				DEBUG && console.log(
 					`%c${fNum(time-this.t0)}:%c ${event} %c${timeTook}`,
 					...colors
 				);
 			});
-			console.log(
+			DEBUG && console.log(
 				`%c${fNum(performance.now()-this.t0)}: %ctotal %c\n`,
 				...colors
 			);
@@ -215,7 +217,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 	};
 
 	CodeMirror.defineExtension('loadDoc', function ({
-		callback, name, path, text, mode, scrollTop, scrollLeft, line, ch, forceUpdate
+		DEBUG, callback, name, path, text, mode, scrollTop, scrollLeft, line, ch, forceUpdate
 	}){
 		/*
 		TODO: loading async and using a callback seems not to help
@@ -235,7 +237,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			}
 			currentDoc = { path };
 
-			const perf = new PerfMonitor(path);
+			const perf = new PerfMonitor(path, DEBUG);
 
 			let storedDoc;
 			await docsLoad;

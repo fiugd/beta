@@ -9,7 +9,8 @@ import {
 } from '../../utils/misc.js';
 import {
 	getState, getAllServices, getSettings,
-	setCurrentFile, getCurrentFileFull
+	setCurrentFile, getCurrentFileFull,
+	DEBUG
 } from "../../utils/State.js";
 const { indentWithTabs, tabSize } = getSettings();
 
@@ -24,8 +25,6 @@ let prevDoc;
 const BLANK_CODE_PAGE = "";
 
 const initEditor = (context) => {
-	const triggers = context.triggers.editor;
-
 	const containerDiv = Container({
 		operations: ["create", "cancel", "delete", "persist", "update"],
 	});
@@ -45,6 +44,8 @@ const initEditor = (context) => {
 }
 
 const InlineEditor = (args, context) => {
+	const triggers = context.triggers.editor;
+
 	const {
 		code = BLANK_CODE_PAGE,
 		line: loadLine,
@@ -59,9 +60,6 @@ const InlineEditor = (args, context) => {
 	const prevEditor = document.querySelector("#editor-container");
 	const editorDiv = prevEditor || initEditor(context);
 
-	//const editorPane = document.querySelector('#editor');
-	//editorPane.style.width = editorPane.clientWidth + 'px';
-	const darkEnabled = window.localStorage.getItem("themeDark") === "true";
 	const onChange = (cm, changeObj) => {
 		triggers.fileChange({
 			code: cm.getValue(),
@@ -72,8 +70,8 @@ const InlineEditor = (args, context) => {
 			filePath: filename
 		});
 	}
-	var currentHandle = null,
-		currentLine;
+	let currentHandle = null;
+	let currentLine;
 	function updateLineInfo(cm, line) {
 		var handle = cm.getLineHandle(line - 1);
 		if (handle == currentHandle && line == currentLine) return;
@@ -216,7 +214,9 @@ const InlineEditor = (args, context) => {
 		callback && callback();
 		window.Editor = editor;
 
+		const darkEnabled = window.localStorage.getItem("themeDark") === "true";
 		editor.setOption("theme", darkEnabled ? "vscode-dark" : "default");
+
 		editor.setOption("styleActiveLine", { nonEmpty: true });
 		editor.setOption("extraKeys", extraKeys);
 
@@ -326,7 +326,7 @@ const InlineEditor = (args, context) => {
 	};
 
 	const loadDocument = () => {
-		console.log(
+		DEBUG && console.log(
 			`%c${filename}: %ceditor %cloadDoc start`,
 			'color:#CE9178;',
 			'color:#9CDCFE;',
@@ -360,6 +360,7 @@ const InlineEditor = (args, context) => {
 			ch: loadColumn ? Number(loadColumn) : 0,
 			text,
 			mode,
+			DEBUG,
 			callback
 		});
 
