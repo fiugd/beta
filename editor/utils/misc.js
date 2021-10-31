@@ -1,7 +1,9 @@
 import ext from "../../shared/icons/seti/ext.json.mjs";
 import { codemirrorModeFromFileType } from "../../shared/modules/utilities.mjs";
-//import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json" assert { type: "json" };
-import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.50.0/db.json" assert { type: "json" };
+
+import mimeTypes from "https://raw.githubusercontent.com/jshttp/mime-db/master/src/nginx-types.json" assert { type: "json" };
+//import mimeTypes from 'https://raw.githubusercontent.com/jshttp/mime-db/master/src/apache-types.json' assert { type: "json" };
+//import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.50.0/db.json" assert { type: "json" };
 
 // TODO: maybe use insertAdjacentHTML for this instead
 // this works like jquery append ^^^
