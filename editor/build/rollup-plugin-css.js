@@ -26,7 +26,6 @@ sheet.replaceSync(\`${escapeSlashes(source)}\`);
 
 export default sheet;
 `.trim() + '\n';
-	console.log(cssAsModule)
 	return cssAsModule;
 };
 

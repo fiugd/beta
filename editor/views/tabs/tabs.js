@@ -1,7 +1,5 @@
 import { getFileType } from '../../utils/misc.js';
 
-//let triggers;
-
 function log() {
 	return console.log.call(
 		null,
@@ -30,12 +28,7 @@ function scrollToChild(child) {
 			? parent.scrollLeft + (childMax - parentWindowMax) + 20
 			: undefined;
 
-	// console.log({
-	// 	childMin, childMax, parentWindowMin, parentWindowMax, parentMaxScrollLeft
-	// });
-
 	if (childMin === 0) {
-		//parent.scrollLeft = 0;
 		parent.scrollTo({
 			top: 0,
 			left: 0,
@@ -45,7 +38,6 @@ function scrollToChild(child) {
 	}
 
 	if (childMax === parent.scrollWidth) {
-		//parent.scrollLeft = parentMaxScrollLeft;
 		parent.scrollTo({
 			top: 0,
 			left: parentMaxScrollLeft,
@@ -79,12 +71,7 @@ function scrollToChild(child) {
 		return;
 	}
 
-	// console.log({
-	// 	childCenter, idealScrollLeft, parentMaxScrollLeft
-	// });
-
 	if (idealScrollLeft <= 0) {
-		//parent.scrollLeft = 0;
 		parent.scrollTo({
 			top: 0,
 			left: 0,
@@ -93,7 +80,6 @@ function scrollToChild(child) {
 		return;
 	}
 	if (idealScrollLeft <= parentMaxScrollLeft) {
-		//parent.scrollLeft = idealScrollLeft;
 		parent.scrollTo({
 			top: 0,
 			left: idealScrollLeft,
@@ -101,20 +87,11 @@ function scrollToChild(child) {
 		});
 		return;
 	}
-	//parent.scrollLeft = parentMaxScrollLeft;
 	parent.scrollTo({
 		top: 0,
 		left: parentMaxScrollLeft,
 		behavior: "smooth",
 	});
-
-	///window.child = child;
-	//parent.scrollLeft = child.offsetLeft; // - child.clientWidth/2;
-	// console.log({
-	// 	left: parent.scrollLeft,
-	// 	width: parent.clientWidth,
-	// 	scroll: parent.scrollWidth
-	// })
 }
 
 const createTab = (parent, init) => (tabDef) => {
@@ -163,11 +140,7 @@ const createTab = (parent, init) => (tabDef) => {
 			</div>
 		</div>
 	`;
-	//	const oldScroll = parent.scrollLeft;
 	parent.appendChild(tab);
-	//parent.scrollLeft = oldScroll;
-	//parent.scrollLeft = parent.scrollWidth;
-	//setTimeout(() => scrollToChild(tab), 100);
 	scrollToChild(tab);
 	if (tabDef.active) {
 		tab.classList.add("active");
@@ -219,17 +192,6 @@ const removeTab = (parent) => async (tabDef) => {
 	//TODO: scroll parent to put newly active tab in view
 };
 
-// const removeTab = (parent) => (tabDef) => {
-// 	//console.log(tabDef)
-// 	if(tabDef.parentNode){
-// 		tabDef.parentNode.removeChild(tabDef);
-// 		return;
-// 	}
-// 	const child = parent.querySelector(tabDef.id);
-// 	console.log(child)
-// 	child && parent.removeChild(child)
-// };
-
 const scrollHorizontally = (el) =>
 	function (e) {
 		e = window.event || e;
@@ -278,7 +240,6 @@ let tabsContainer;
 let tabsList;
 function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	if (tabsContainer) {
-		//console.log('already exists');
 		tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
 		//should not be doing this, rely on event instead!!!
 		//tabsArray && initTabs(tabsList)(tabsArray);
@@ -329,9 +290,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 
 	TODO:
 	when tabs change, update the width of slider
-
 	when editor tabs scroll position changes, move the slider with it
-
 	when this is done, change from display: none
 
 	ALSO:
@@ -349,14 +308,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 		updateTab: updateTab(tabsList),
 		removeTab: removeTab(tabsList),
 	};
-	//triggers = [];
-	// triggers = attachListener(tabsContainer, operations);
 
-	//'modal-menu-show'
-
-	//should not be doing this, rely on event instead!!!
-	//tabsArray && initTabs(tabsList)(tabsArray);
-	
 	tabsContainer.sysDocNames = {
 		"add-service-folder": "Open Folder",
 		"connect-service-provider": "Connect to a Provider",
@@ -365,7 +317,6 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	};
 
 	tabsContainer.operations = operations;
-
 
 	function clearLastTab({ tabs, removeTab }) {
 		if(!tabs.length) return;

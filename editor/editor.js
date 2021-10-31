@@ -65,7 +65,7 @@ rawTrigger({
 	data: {},
 	detail: {
 		op: 'read',
-		id: 1,
+		id: service.id,
 		result: [service]
 	}
 });
