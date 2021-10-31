@@ -6,7 +6,7 @@ https://github.com/doesdev/rollup-plugin-analyzer
 CHANGES:
 hard-coded to use es6 module export
 misc/minor output modifications
-
+	- hide report title
 */
 
 'use strict';
@@ -200,14 +200,14 @@ const plugin = (opts = {}) => {
 				console.error(msg);
 			}
 		},
-		generateBundle: async function (outOpts, bundle, isWrite) {
+		generateBundle: function (outOpts, bundle, isWrite) {
 			const ctx = this || {};
 			if (!ctx.meta || +(ctx.meta.rollupVersion || 0).charAt(0) < 1) return null
 			const getDeps = (id) => {
 				return ctx.getModuleInfo ? ctx.getModuleInfo(id).importedIds : []
 			};
 
-			return await new Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
 				resolve();
 
 				const modules = [];

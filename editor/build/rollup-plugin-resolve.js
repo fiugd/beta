@@ -8,14 +8,13 @@ const braces = url => {
 };
 const noOrigin = x => x.replace(new RegExp(location.origin+'/'), '');
 
-const plugin = (entry) => ({
-	name: 'service worker build', // this name will show up in warnings and errors
+const plugin = (root) => ({
+	name: 'file resolver',
+
 	resolveId ( source, importer ) {
 		// if null is returned, handles usually
+		// if source is returned, signals that rollup should not ask other plugins or check the file system to find this id
 		let output = null;
-		if (source === 'virtual-module') {
-			output = source; // this signals that rollup should not ask other plugins or check the file system to find this id
-		}
 		if(source.startsWith('https://')){
 			output = source;
 		}
@@ -24,28 +23,13 @@ const plugin = (entry) => ({
 			output = pather(null, parent + '/' + source);
 		}
 		if(source.startsWith('/')){
-			output = source;
+			output = root + source;
 		}
-		//console.log('output: ' + output)
 		return output;
 	},
 	load: async ( id ) => {
-		if (id === 'virtual-module') {
-			return entry; // the source code for "virtual-module"
-		}
-
-		//console.log(pipe(noOrigin, braces)(id));
-
 		if(id.startsWith('https://')){
 			return await fetch(id)
-				.then(x => x.text())
-		}
-		if(id.startsWith('./')){
-			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta/service-worker/'+id)
-				.then(x => x.text())
-		}
-		if(id.startsWith('/')){
-			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta'+id)
 				.then(x => x.text())
 		}
 		return null; // other ids should be handled as usually

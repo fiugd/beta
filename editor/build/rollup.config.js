@@ -13,9 +13,23 @@ const braces = url => {
 	return `˹${url}˺`;
 };
 
-const entry = `
-	import "https://beta.fiug.dev/crosshj/fiug-beta/editor/editor.js";
-`;
+const analyzeConfig = {
+	//root: location.origin+'/',
+	root: ' ',
+	summaryOnly: true,
+	limit: 7,
+	writeTo: (x) => processWrite('DONE\n\n'+
+			chalk.hex('#ccc')(x)
+				.replace(/█/g, chalk.hex('#636')('█'))
+				.replace(/░/g, chalk.hex('#2a2a43')('█'))
+				.replace(/\((.*)\)/g, chalk.hex('#dad')('| $1 \n\n')) +
+			chalk.hex('#aaa')('       . . . [ analysis truncated for brevity ] . . . \n\n\n')
+		),
+	transformModuleId: (x) => chalk.hex('#dfe')('\n' +
+		braces(x.replace(`${location.origin}/crosshj/fiug-beta/`, '')) + '\n'
+	)
+};
+
 
 const banner = `/*!
 	fiug editor component
@@ -25,43 +39,37 @@ const banner = `/*!
 */
 `;
 
+const output = {
+	format: 'es',
+	//sourcemap: true
+	//name: 'service-worker-handler.js',
+	//format: 'iife',
+	// sourcemap: 'inline',
+	//minifyInternalExports: true
+	file: 'crosshj/fiug-beta/dist/editor.js',
+	banner,
+};
+
+const root = location.origin + "/crosshj/fiug-beta"
+
 export default {
-	input: 'virtual-module', // resolved by plugin
+	input: '/editor/editor.js',
 	plugins: [
-		resolvePlugin(entry),
+		resolvePlugin(root),
 		json(),
 		css(),
-		analyze({
-			//root: location.origin+'/',
-			root: ' ',
-			summaryOnly: true,
-			limit: 7,
-			writeTo: (x) => processWrite('DONE\n\n'+
-					chalk.hex('#ccc')(x)
-						.replace(/█/g, chalk.hex('#636')('█'))
-						.replace(/░/g, chalk.hex('#2a2a43')('█'))
-						.replace(/\)/g, ')\n\n') +
-					chalk.hex('#aaa')('   . . . [ analysis truncated for brevity ] . . . \n\n')
-				),
-			transformModuleId: (x) => chalk.hex('#dfe')('\n' +
-				braces(x.replace(`${location.origin}/crosshj/fiug-beta/`, '')) + '\n'
-			)
-		}),
+		analyze(analyzeConfig),
 	],
 	external: ['chalk'],
-	output: {
-		format: 'es',
-		//sourcemap: true
-		//name: 'service-worker-handler.js',
-		//format: 'iife',
-		// sourcemap: 'inline',
-		//minifyInternalExports: true
-		file: 'crosshj/fiug-beta/dist/editor.js',
-		banner,
-	},
+	output,
 	onwarn: (warning) => {
-		if (warning.code === 'EVAL') return
-		if (warning.code === 'THIS_IS_UNDEFINED') return;
-		console.log(JSON.stringify(warning, null, 2))
+		//if (warning.code === 'EVAL') return
+		//if (warning.code === 'THIS_IS_UNDEFINED') return;
+		//console.log(JSON.stringify(warning, null, 2))
+		console.log(chalk.yellow(
+			'\nWARNING:\n' +
+			warning.message + '\n' +
+			`[${warning.loc.line}:${warning.loc.column}] ${braces(warning.id.replace(root+'/', ''))}\n`
+		))
 	}
 };
