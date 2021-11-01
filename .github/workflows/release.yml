@@ -16,7 +16,7 @@ jobs:
         run:  sh ./.github/.create_release.sh ${{ github.event.inputs.version }}
       - uses: GuillaumeFalourd/create-other-repo-branch-action@v1
         with:
-          repository_owner: crosshj
+          repository_owner: fiugd
           repository_name: fiug
           new_branch_name: release-v${{ github.event.inputs.version }}
           #new_branch_ref: main
