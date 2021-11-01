@@ -23,4 +23,3 @@ const operationDoneHandler = (e, context) => {
 };
 
 export default operationDoneHandler;
-

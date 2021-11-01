@@ -7,7 +7,7 @@ const fileClose = (e, { getCurrentFile, getFilePath, switchEditor }) => {
 
 	//TODO: shouldn't this be fileSelect handler after this point?
 
-	if(next.includes("system::")) {
+	if(next && next.includes("system::")) {
 		switchEditor({
 			filename: next.replace("system::", ""),
 			mode: "systemDoc"
