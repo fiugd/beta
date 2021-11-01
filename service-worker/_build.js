@@ -42,7 +42,7 @@ function saveBuild({ code, map }){
 	const changeUrl = '/service/change';
 	const body = {
 		path: `./${rollupConfig.output.file}`,
-		service: 'crosshj/fiug-beta',
+		service: 'fiugd/beta',
 		//command: 'upsert',
 		code: code
 	};

@@ -1,7 +1,7 @@
 import resolvePlugin from './rollup-plugin-resolve.js';
 
 const entry = `
-	import "https://beta.fiug.dev/crosshj/fiug-beta/service-worker/index.js";
+	import "https://beta.fiug.dev/fiugd/beta/service-worker/index.js";
 `;
 
 const banner = `/*!
@@ -24,7 +24,7 @@ export default {
 		//format: 'iife',
 		//sourcemap: 'inline',
 		//minifyInternalExports: true
-		file: 'crosshj/fiug-beta/service-worker.js',
+		file: 'fiugd/beta/service-worker.js',
 		banner,
 	},
 	onwarn: (warning) => {

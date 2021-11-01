@@ -20,11 +20,11 @@ const plugin = (entry) => ({
 				.then(x => x.text())
 		}
 		if(id.startsWith('./')){
-			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta/service-worker/'+id)
+			return await fetch('https://beta.fiug.dev/fiugd/beta/service-worker/'+id)
 				.then(x => x.text())
 		}
 		if(id.startsWith('/')){
-			return await fetch('https://beta.fiug.dev/crosshj/fiug-beta'+id)
+			return await fetch('https://beta.fiug.dev/fiugd/beta'+id)
 				.then(x => x.text())
 		}
 		return null; // other ids should be handled as usually
