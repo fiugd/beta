@@ -3,7 +3,7 @@
 "dynamic" basically just means that this command is not cached with sw
 instead this module loads "dynamic" op from github / uses terminalCache
 
-it may be tempting to think that "dynamic" means that crosshj/fiug-beta/terminal/bin
+it may be tempting to think that "dynamic" means that fiugd/beta/terminal/bin
 files are ran autommatically, but this is not the case
 
 basically, this file just shortcuts the need for sw and service.manifest.json entry
@@ -18,6 +18,12 @@ const showCursor = ansiEscapes.cursorShow;
 const cacheName = 'terminal-cache'
 
 const fetchJSON = url => fetch(url).then(x => x.json());
+
+const root = location.origin.includes('beta')
+	? 'fiugd/beta'
+	: 'fiugd/fiug';
+const branch = 'main';
+
 
 export const readDir = async (serviceName, dir) => {
 	let response, error;
@@ -37,16 +43,9 @@ export const readDir = async (serviceName, dir) => {
 
 export const readSourceDir = async (dir) => {
 	if(location.href.includes('/::preview::/')){
-		return readDir('crosshj/fiug-beta', dir);
+		return readDir(root, dir);
 	}
-	const site = location.origin;
-	const root = site.includes('beta')
-		? `https://api.github.com/repos/crosshj/fiug-beta`
-		: `https://api.github.com/repos/crosshj/fiug`;
-	const branch = site.includes('beta')
-		? 'main'
-		: 'master';
-	const githubContentsUrl = `${root}/contents${dir||''}?ref=${branch}`;
+	const githubContentsUrl = `https://api.github.com/repos/${root}/contents${dir||''}?ref=${branch}`;
 	let response, error;
 	try {
 		const cache = await caches.open(cacheName);
@@ -272,8 +271,8 @@ ${chalk.bold('Examples:')}
   TODO: add examples
 
 ${chalk.italic(`
-Online help: ${link('https://github.com/crosshj/fiug/wiki')}
-Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+Online help: ${link(`https://github.com/${root}/wiki`)}
+Report bugs: ${link(`https://github.com/${root}/issues`)}
 `)}
 `;
 
