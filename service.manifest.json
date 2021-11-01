@@ -127,11 +127,11 @@
 			"handler": null
 		},
 		{
-			"route": "./_/modules/editor.html",
+			"route": "./_/modules/editor/editor.html",
 			"source": "dist/editor.html",
 		},
 		{
-			"route": "./_/modules/editor.js",
+			"route": "./_/modules/editor/editor.js",
 			"source": "dist/editor.js",
 		},
 		"NOTE: -- EDITOR /END --",
