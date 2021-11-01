@@ -2415,7 +2415,7 @@ notes-section.loading:after {
 	z-index: 99;
 	width: 100vw;
 	/* height: 100vh; */
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 
 /*
