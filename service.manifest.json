@@ -142,10 +142,13 @@
 			"type": "domComponent",
 			"source": "modules/Services.mjs"
 		},
+
+		// Editor
 		{
 			"route": "./_/modules/Editor.mjs",
 			"type": "domComponent",
 			"source": "modules/Editor.mjs",
+		// Editor OLD
 			"resources": [
 				"/shared/modules/editor.mjs",
 				"/shared/css/codemirror.css",
@@ -157,6 +160,31 @@
 				"/shared/vendor/codemirror/mode.bundle.js"
 			]
 		},
+		{
+			"route": "./_/modules/EditorTabs.mjs",
+			"source": "modules/EditorTabs.mjs"
+		},
+		{
+			"route": "./_/modules/editorEvents.mjs",
+			"source": "modules/editorEvents.mjs",
+			"handler": null
+		},
+		{
+			"route": "./_/modules/editorTabsEvents.mjs",
+			"source": "modules/editorTabsEvents.mjs",
+			"handler": null
+		},
+		// Editor NEW
+		{
+			"route": "./_/modules/editor.html",
+			"source": "dist/editor.html",
+		},
+		{
+			"route": "./_/modules/editor.js",
+			"source": "dist/editor.js",
+		},
+
+
 		{
 			"route": "./_/modules/ContextMenu.mjs",
 			"type": "domComponent",
@@ -200,16 +228,6 @@
 			"handler": null
 		},
 		{
-			"route": "./_/modules/editorEvents.mjs",
-			"source": "modules/editorEvents.mjs",
-			"handler": null
-		},
-		{
-			"route": "./_/modules/editorTabsEvents.mjs",
-			"source": "modules/editorTabsEvents.mjs",
-			"handler": null
-		},
-		{
 			"route": "./_/modules/operationsEvents.mjs",
 			"source": "modules/operationsEvents.mjs",
 			"handler": null
@@ -225,10 +243,6 @@
 			"route": "./_/modules/Templates.mjs",
 			"source": "modules/Templates.mjs",
 			"handler": null
-		},
-		{
-			"route": "./_/modules/EditorTabs.mjs",
-			"source": "modules/EditorTabs.mjs"
 		},
 		{
 			"route": "./_/modules/motd.mjs",
