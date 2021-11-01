@@ -1,6 +1,8 @@
 const listeners = {};
 const triggers = {};
 
+const clients = [];
+
 function attach({
 	name, listener, eventName, options, key
 }){
@@ -67,6 +69,10 @@ function trigger({ e, type, params, source, data, detail }){
 
 	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
+
+	for(const { source, origin } of clients){
+		source.postMessage({ type, detail: _detail }, origin);
+	}
 }
 
 let triggerClickListener;
@@ -177,9 +183,15 @@ const addFrameOffsets = (event, triggerEvent) => {
 
 window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
-	const { register='', unregister, triggerEvent, name, eventName, key } = data;
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
+
+	if(data === 'subscribe'){
+		clients.push({ source, origin });
+		return;
+	}
+
+	const { register='', unregister, triggerEvent, name, eventName, key } = data;
 
 	if(triggerEvent){
 		triggerEvent.detail = triggerEvent.detail || {};
