@@ -45,8 +45,8 @@ if(!isRunningAsModule){
 	base.href = '../../';
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
-
-const currentServiceId = localStorage.getItem('lastService');
+const ROOT_SERVICE_ID = 0;
+const currentServiceId = localStorage.getItem('lastService') || ROOT_SERVICE_ID;
 const serviceUrl = `/service/read/${currentServiceId}`;
 const { result: [service] } = await fetch(serviceUrl).then(x => x.json())
 service.state.selected = {
