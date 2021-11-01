@@ -565,7 +565,7 @@ ul.editor-controls li:hover {
 	left: 0px; */
 	padding: 0;
 	display: flex;
-	pointer-events: none;
+/* 	pointer-events: none; */
 }
 
 .section.editor .editor-space {
@@ -579,7 +579,7 @@ ul.editor-controls li:hover {
 	flex: 1;
 	width: 100%;
 	/* background-color: #2e2e2e; */
-	pointer-events: all;
+/* 	pointer-events: all; */
 }
 
 .section.editor .CodeMirror {
