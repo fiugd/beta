@@ -1,7 +1,7 @@
 const listeners = {};
 const triggers = {};
 
-const clients = [];
+const clients = {};
 
 function attach({
 	name, listener, eventName, options, key
@@ -70,7 +70,8 @@ function trigger({ e, type, params, source, data, detail }){
 	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
 
-	for(const { source, origin } of clients){
+	for(const [clientid, { source, origin }] of Object.entries(clients)){
+		console.log(`client: ${clientid}, event: ${type}`);
 		source.postMessage({ type, detail: _detail }, origin);
 	}
 }
@@ -186,8 +187,8 @@ window.addEventListener('message', function(messageEvent) {
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
 
-	if(data === 'subscribe'){
-		clients.push({ source, origin });
+	if(data?.subscribe){
+		clients[data.subscribe] = { source, origin };
 		return;
 	}
 
