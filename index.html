@@ -398,7 +398,9 @@
 				// load in the middle
 				return DEFAULT_ORDER;
 			});
-			return ordered.sort((a,b) => a.order - b.order);
+			const sorted = ordered.sort((a,b) => a.order - b.order);
+			console.log('module load order:\n' + sorted.map(x => x.route).join('\n'));
+			return sorted;
 		};
 
 		const addUIModulesToArray = (moduleCache) => {
