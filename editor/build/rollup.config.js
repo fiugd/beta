@@ -39,29 +39,25 @@ const banner = `/*!
 */
 `;
 
-const output = {
-	format: 'es',
-	//sourcemap: true
-	//name: 'service-worker-handler.js',
-	//format: 'iife',
-	// sourcemap: 'inline',
-	//minifyInternalExports: true
-	file: 'crosshj/fiug-beta/dist/editor.js',
-	banner,
-};
-
-const root = location.origin + "/crosshj/fiug-beta"
-
-export default {
+export default (root) => ({
 	input: '/editor/editor.js',
 	plugins: [
-		resolvePlugin(root),
+		resolvePlugin(location.origin + "/" + root),
 		json(),
 		css(),
 		analyze(analyzeConfig),
 	],
 	external: ['chalk'],
-	output,
+	output: {
+		format: 'es',
+		//sourcemap: true
+		//name: 'service-worker-handler.js',
+		//format: 'iife',
+		// sourcemap: 'inline',
+		//minifyInternalExports: true
+		file: root + '/dist/editor.js',
+		banner,
+	},
 	onwarn: (warning) => {
 		//if (warning.code === 'EVAL') return
 		//if (warning.code === 'THIS_IS_UNDEFINED') return;
@@ -72,4 +68,4 @@ export default {
 			`[${warning.loc.line}:${warning.loc.column}] ${braces(warning.id.replace(root+'/', ''))}\n`
 		))
 	}
-};
+});

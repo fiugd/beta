@@ -18,11 +18,13 @@ const Minify = (code) => Terser.minify(code, terserConfig());
 //const Minify = (code) => ({ code });
 
 const changeUrl = '/service/change';
+const root = 'fiugd/beta';
+const config = rollupConfig(root);
 
 function writeFile({ path, code }){
 	const body = {
 		path,
-		service: 'crosshj/fiug-beta',
+		service: root,
 		//command: 'upsert',
 		code
 	};
@@ -41,7 +43,7 @@ function writeFile({ path, code }){
 }
 
 function saveBuild({ code, map }){
-	const path = `./${rollupConfig.output.file}`;
+	const path = `./${config.output.file}`;
 	return writeFile({ path, code })
 		.then(x => x.json());
 }
@@ -59,17 +61,18 @@ console.log(`\nbundling ...`);
 
 const build = async () => {
 	let error;
+
 	try {
-		const generated = await rollup.rollup(rollupConfig)
-			.then(x => x.generate(rollupConfig.output));
+		const generated = await rollup.rollup(config)
+			.then(x => x.generate(config.output));
 		const { code } = generated.output[0];
 		const minified = await pipe(AddDate,AddVersion,Minify)(code);
 		let response = await saveBuild(minified);
 		if(response.error) throw new Error(response.error);
 		
 		response = await copyFile(
-			'/crosshj/fiug-beta/editor/editor.html',
-			'./crosshj/fiug-beta/dist/editor.html'
+			`/${root}/editor/editor.html`,
+			`./${root}/dist/editor.html`
 		);
 		if(response.error) throw new Error(response.error);
 
@@ -82,7 +85,7 @@ const build = async () => {
 	} else {
 		console.log('NOTE: analysis does not include terser effects\n')
 		console.log(`\nOUTPUT: ` +
-		`${self.location.origin}/${rollupConfig.output.file}`
+		`${self.location.origin}/${config.output.file}`
 		);
 	}
 };

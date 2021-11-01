@@ -200,7 +200,11 @@ function attachEvents(events, context) {
 	Object.entries(events.triggers).map(connectTriggers);
 }
 
-window.addEventListener('message', function(messageEvent) {}, false);
+
+window.top.postMessage({ subscribe: 'Editor Iframe' }, location);
+window.addEventListener('message', function(messageEvent) {
+	console.log(messageEvent.data);
+}, false);
 
 /*
 
