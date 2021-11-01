@@ -23,7 +23,7 @@ const history = [
 	`git commit -m "editor in its own iframe"`,
 	'preview editor/editor.html',
 	'node editor/build/build.js',
-	'preview dist/editor.html',
+	'preview --watch=false dist/editor.html',
 ];
 
 const usage = (chalk) => {
