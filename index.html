@@ -396,7 +396,7 @@
 				if(route.includes('Terminal')) return { ...m, order: BIG_NUMBER + 1 };
 
 				// load in the middle
-				return DEFAULT_ORDER;
+				return { ...m, order: DEFAULT_ORDER };
 			});
 			const sorted = ordered.sort((a,b) => a.order - b.order);
 			console.log('module load order:\n' + sorted.map(x => x.route).join('\n'));
