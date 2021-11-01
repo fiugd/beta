@@ -42,7 +42,9 @@ const fileSelectHandler = async (event, { getFilePath, switchEditor }) => {
 	}
 	*/
 
-	if (name.includes("system::") || filePath.includes("systemDoc::")) {
+	const isSystemDoc = (name||'').includes("system::") ||
+		(filePath||'').includes("systemDoc::");
+	if (isSystemDoc) {
 		switchEditor({
 			filename: filePath
 				.replace("system::", "")
