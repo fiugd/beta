@@ -22,8 +22,8 @@ function StatusBar(){
 			font-size: 12px;
 			padding: 2px 10px;
 			z-index: 10;
-			border-top: 0.5px solid #000A;
 			/*
+			border-top: 0.5px solid #000A;
 			box-shadow: 0 -1px 5px #000F;
 			*/
 		}
@@ -34,11 +34,11 @@ function StatusBar(){
 			top: 0;
 			bottom: 0;
 			box-sizing: border-box;
-			background: #3333;
 			pointer-events: none;
-			background: #0006;
 			z-index: -1;
 			/*
+			background: #3333;
+			background: #0006;
 			border-top: 1px solid #111a;
 			background: #1f476b;
 			background: #4f263d;
@@ -49,12 +49,12 @@ function StatusBar(){
 		#status-bar, #status-bar * {
 			cursor: default;
 		}
-		#status-bar a:hover { color: white }
-		#status-bar a { color: #dadada; }
+		#status-bar a:hover { opacity: 1; }
+		#status-bar a { color: var(--main-theme-text-color); opacity: 0.9;}
 
 		/*
 		#status-bar a { color: var(--main-theme-text-invert-color); }
-		#status-bar a { color: white; }
+		#status-bar a { color: white; opacity: 0.65; }
 		#status-bar a:hover { color: var(--main-theme-text-color); }
 		#status-bar a { color: var(--main-theme-text-color); }
 		*/
