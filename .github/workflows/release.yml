@@ -28,8 +28,8 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source-directory: '.release'
-          destination-github-username: 'crosshj'
-          destination-repository-name: 'fiug'
+          destination-github-username: fiugd
+          destination-repository-name: fiug
           user-email: github@chimpjuice.com
           commit-message: v${{ github.event.inputs.version }}
           # commit-message: v${{ github.event.inputs.version }}, see ORIGIN_COMMIT from $GITHUB_REF
