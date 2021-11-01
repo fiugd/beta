@@ -381,34 +381,65 @@
 				memoryStats();
 			});
 
-		const components = [];
+		// make sure modules load in right order; hate me if you want...
+		const magicalSort = (modules) => {
+			const BIG_NUMBER = 9999; //arbitrarily big number
+			const DEFAULT_ORDER = 1;
+			const ordered = modules.map(m => {
+				const {route} = m;
+				// load first ( < 1)
+				if(route.includes('Panes')) return { ...m, order: 0.1 };
+				if(route.includes('Operations')) return { ...m, order: 0.2 };
 
-		const addUIModulesToArray = (modules) => {
-			//let modulesReady = false;
-			//let maxRetry = 100;
-			//let tries=0;
-			//let testModule = modules.find(x => x.type === 'domComponent' && !!x.route);
-			// while(!modulesReady && tries < maxRetry){
-			//   await delay(500);
-			//   tries++;
-			//   try {
-			//     await import(testModule.route);
-			//     modulesReady=true;
-			//   } catch(e) {}
-			// }
-			// if(tries >= maxRetry){
-			//   console.error(`unable to load modules, gave up after ${tries} tries`);
-			//   return;
-			// }
+				// load last ( > any other number)
+				if(route.includes('Editor')) return { ...m, order: BIG_NUMBER };
+				if(route.includes('Terminal')) return { ...m, order: BIG_NUMBER + 1 };
 
-			const _c = modules.filter(x => x.type === 'domComponent');
-			for(var i=0, len=_c.length; i<len; i++){
-				const x = _c[i];
-				const comp = async () => { return (await import(x.route)).default; }
-				//console.log('Will invoke: ' + x.route)
-				components.push(comp);
+				// load in the middle
+				return DEFAULT_ORDER;
+			});
+			return ordered.sort((a,b) => a.order - b.order);
+		};
+
+		const addUIModulesToArray = (moduleCache) => {
+			try {
+				const modules = magicalSort(
+					JSON.parse(moduleCache)
+						.map(x => ({
+							route: x,
+							type: 'domComponent'
+						}))
+				);
+				const _comps = [];
+				//let modulesReady = false;
+				//let maxRetry = 100;
+				//let tries=0;
+				//let testModule = modules.find(x => x.type === 'domComponent' && !!x.route);
+				// while(!modulesReady && tries < maxRetry){
+				//   await delay(500);
+				//   tries++;
+				//   try {
+				//     await import(testModule.route);
+				//     modulesReady=true;
+				//   } catch(e) {}
+				// }
+				// if(tries >= maxRetry){
+				//   console.error(`unable to load modules, gave up after ${tries} tries`);
+				//   return;
+				// }
+
+				const _c = modules.filter(x => x.type === 'domComponent');
+				for(var i=0, len=_c.length; i<len; i++){
+					const x = _c[i];
+					const comp = async () => { return (await import(x.route)).default; }
+					//console.log('Will invoke: ' + x.route)
+					_comps.push(comp);
+				}
+				//await loadUI();
+				return _comps;
+			} catch(e){
+				return [];
 			}
-			//await loadUI();
 		};
 
 		const loadUI = async () => {
@@ -417,15 +448,7 @@
 				console.log('app has not been installed');
 				return;
 			}
-			try {
-				addUIModulesToArray(
-					JSON.parse(moduleCache)
-						.map(x => ({
-							route: x,
-							type: 'domComponent'
-						}))
-				);
-			} catch(e) {}
+			const components = addUIModulesToArray(moduleCache);
 
 			const splashContainer = document.getElementById('container');
 			splashContainer.parentNode.removeChild(splashContainer);

@@ -12,11 +12,13 @@ const iframeSandboxPermissions = [
 const container = document.createElement('div');
 container.classList.add('section', 'editor');
 container.innerHTML = `
-	<iframe
-		sandbox="${iframeSandboxPermissions}"
-		src="/_/modules/editor/editor.html"
-		style="height:100%;width:100%;border:0;"
-	></iframe>
+	<div class="contain">
+		<iframe
+			sandbox="${iframeSandboxPermissions}"
+			src="/_/modules/editor/editor.html"
+			style="height:100%;width:100%;border:0;"
+		></iframe>
+	</contain>
 `.replace(/$		/gm).trim();
 
 let attached;
