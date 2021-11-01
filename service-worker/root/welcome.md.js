@@ -5,18 +5,18 @@ Welcome to fiug!
 Try out the terminal on the right.
 
 #### configure git:
-\`git config --global user.name john\`
-\`git config --global user.email johndoe@example.com\`
+\`git config --global user.name jaind\`
+\`git config --global user.email jain.day@ellery.com\`
 \`git config --global user.token {your github token}\`
 
 #### clone a repo:
-\`git clone crosshj/fiug-welcome\`
+\`git clone fiugd/welcome\`
 
 #### list all cloned repos:
 \`git list\`
 
 #### open/close a repo in editor:
-\`git open crosshj/fiug-welcome\`
+\`git open fiugd/welcome\`
 \`git close\`
 
 #### view names of changed files:
@@ -32,7 +32,7 @@ Try out the terminal on the right.
 \`git commit -m "message about changes"\`
 
 #### download all templates (for preview):
-\`git clone crosshj/fiug-plugins\`
+\`git clone fiugd/plugins\`
 
 #### preview files:
 \`preview\`
