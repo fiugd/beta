@@ -36,6 +36,13 @@ export const parseArgs = (model, argString) => {
 		? model.argsGet(options.argv)
 		: commandLineArgs(model.args, options);
 
+	const {_unknown=[]} = result;
+	for(const unknownArg of _unknown){
+		if(unknownArg.match(/-(-watch|w)\s*=\s*false/i)){
+			result.watch = false;
+		}
+	}
+
 	if(model.args && typeof model.argsGet !== 'function'){
 		model.args
 			.filter(x => x.default)

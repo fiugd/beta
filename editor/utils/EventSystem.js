@@ -53,7 +53,7 @@ future todo:
 
 // this thing is used too many ways... SIGH
 function trigger(args){
-	const { e, type, params, source, data, detail } = args;
+	const { e, type, params, source, data, detail, external } = args;
 	const _data = typeof data === "function"
 		? data(e)
 		: data || (detail||{}).data || {};
@@ -71,7 +71,9 @@ function trigger(args){
 
 	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
-	
+
+	// from here on, send internal events to external
+	if(external) return;
 	const blackList = [
 		'operationDone'
 	];
@@ -203,7 +205,7 @@ function attachEvents(events, context) {
 
 window.top.postMessage({ subscribe: 'Editor Iframe' }, location);
 window.addEventListener('message', function(messageEvent) {
-	console.log(messageEvent.data);
+	trigger({ ...messageEvent.data, external: true });
 }, false);
 
 /*

@@ -39,6 +39,19 @@ const banner = `/*!
 */
 `;
 
+const onwarn = (root) => (warning) => {
+	//if (warning.code === 'EVAL') return
+	//if (warning.code === 'THIS_IS_UNDEFINED') return;
+	//console.log(JSON.stringify(warning, null, 2))
+	const message = [
+		'\nWARNING:\n',
+		warning.message, '\n',
+		warning.loc ? `[${warning.loc.line}:${warning.loc.column}] ` : '',
+		warning.id ? `${braces(warning.id.replace(root+'/', ''))}\n` : '',
+	].join('');
+	console.log(chalk.yellow(message));
+}
+
 export default (root) => ({
 	input: '/editor/editor.js',
 	plugins: [
@@ -58,14 +71,5 @@ export default (root) => ({
 		file: root + '/dist/editor.js',
 		banner,
 	},
-	onwarn: (warning) => {
-		//if (warning.code === 'EVAL') return
-		//if (warning.code === 'THIS_IS_UNDEFINED') return;
-		//console.log(JSON.stringify(warning, null, 2))
-		console.log(chalk.yellow(
-			'\nWARNING:\n' +
-			warning.message + '\n' +
-			`[${warning.loc.line}:${warning.loc.column}] ${braces(warning.id.replace(root+'/', ''))}\n`
-		))
-	}
+	onwarn: onwarn(root)
 });
