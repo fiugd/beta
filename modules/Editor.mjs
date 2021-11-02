@@ -1,3 +1,5 @@
+import "./Listeners.mjs";
+
 const iframeSandboxPermissions = [
 	"allow-same-origin",
 	"allow-scripts",
