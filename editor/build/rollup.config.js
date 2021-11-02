@@ -13,9 +13,9 @@ const braces = url => {
 	return `˹${url}˺`;
 };
 
-const analyzeConfig = {
+const analyzeConfig = (root) => ({
 	//root: location.origin+'/',
-	root: ' ',
+	root: ' ', // << so that externals are not filtered out, and process.env does not exist...
 	summaryOnly: true,
 	limit: 7,
 	writeTo: (x) => processWrite('DONE\n\n'+
@@ -26,9 +26,9 @@ const analyzeConfig = {
 			chalk.hex('#aaa')('\n\n       . . . [ analysis truncated for brevity ] . . . \n\n\n')
 		),
 	transformModuleId: (x) => chalk.hex('#dfe')('\n' +
-		braces(x.replace(`${location.origin}/crosshj/fiug-beta/`, '')) + '\n'
+		braces(x.replace(`${location.origin}/${root}/`, '')) + '\n'
 	)
-};
+});
 
 
 const banner = `/*!
@@ -58,7 +58,7 @@ export default (root) => ({
 		resolvePlugin(location.origin + "/" + root),
 		json(),
 		css(),
-		analyze(analyzeConfig),
+		analyze(analyzeConfig(root)),
 	],
 	external: ['chalk'],
 	output: {

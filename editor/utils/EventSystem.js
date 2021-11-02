@@ -222,9 +222,9 @@ TODO:
 const registration = await navigator.serviceWorker.ready;
 //console.log(registration)
 
-navigator.serviceWorker.controller.postMessage({
-	type: 'TEST_MESSAGE',
-});
+// navigator.serviceWorker.controller.postMessage({
+// 	type: 'TEST_MESSAGE',
+// });
 
 export {
 	trigger, //deprecate exporting this?

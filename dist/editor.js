@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T00:46:42.117Z )
+	Version 0.4.6 ( 2021-11-02T03:51:49.646Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26537,11 +26537,6 @@ TODO:
 	
 	- SW will have to be configure to fire messages for things that are currently HTTP requests
 */ await navigator.serviceWorker.ready;
-
-//console.log(registration)
-navigator.serviceWorker.controller.postMessage({
-    type: "TEST_MESSAGE"
-});
 
 const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor: switchEditor}) => {
     const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = event.detail;
