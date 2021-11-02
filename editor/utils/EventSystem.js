@@ -72,7 +72,7 @@ function trigger(args){
 	const event = new CustomEvent(type, { bubbles: true, detail: _detail });
 	window.dispatchEvent(event);
 
-	// from here on, send internal events to external
+	// SEND INTERNAL EVENTS TO EXTERNAL
 	if(external) return;
 	const blackList = [
 		'operationDone'
@@ -202,11 +202,13 @@ function attachEvents(events, context) {
 	Object.entries(events.triggers).map(connectTriggers);
 }
 
-
-window.top.postMessage({ subscribe: 'Editor Iframe' }, location);
+// LISTEN TO EXTERNAL EVENTS
+// TRIGGER INTERNAL EVENTS
+window.top.postMessage({ subscribe: 'Editor' }, location);
+const useCaptue = false;
 window.addEventListener('message', function(messageEvent) {
 	trigger({ ...messageEvent.data, external: true });
-}, false);
+}, useCaptue);
 
 /*
 

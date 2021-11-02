@@ -71,7 +71,7 @@ function trigger({ e, type, params, source, data, detail }){
 	window.dispatchEvent(event);
 
 	for(const [clientid, { source, origin }] of Object.entries(clients)){
-		console.log(`client: ${clientid}, event: ${type}`);
+		//console.log(`client: ${clientid}, event: ${type}`);
 		let { callback, ...safeDetail } = _detail;
 		source.postMessage({ type, detail: safeDetail }, origin);
 	}

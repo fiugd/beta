@@ -389,11 +389,12 @@
 				const {route} = m;
 				// load first ( < 1)
 				if(route.includes('Panes')) return { ...m, order: 0.1 };
-				if(route.includes('Operations')) return { ...m, order: 0.2 };
+				if(route.includes('Editor')) return { ...m, order: 0.2 };
+				if(route.includes('TreeView')) return { ...m, order: 0.2 };
+				if(route.includes('Terminal')) return { ...m, order: 0.3 };
 
 				// load last ( > any other number)
-				if(route.includes('Editor')) return { ...m, order: BIG_NUMBER };
-				if(route.includes('Terminal')) return { ...m, order: BIG_NUMBER + 1 };
+				if(route.includes('Operations')) return { ...m, order: BIG_NUMBER + 1 };
 
 				// load in the middle
 				return { ...m, order: DEFAULT_ORDER };
