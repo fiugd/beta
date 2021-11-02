@@ -51,10 +51,6 @@ if(!isRunningAsModule){
 	const currentServiceId = localStorage.getItem('lastService') || ROOT_SERVICE_ID;
 	const serviceUrl = `/service/read/${currentServiceId}`;
 	const { result: [service] } = await fetch(serviceUrl).then(x => x.json())
-	service.state.selected = {
-		name: service.state.selected.split('/').pop(),
-		path: `${service.name}/${service.state.selected}`
-	}
 	DEBUG && console.log(service)
 
 	initState([service], service);

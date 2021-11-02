@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T04:34:20.306Z )
+	Version 0.4.6 ( 2021-11-02T20:16:46.343Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -27435,10 +27435,6 @@ if (!isRunningAsModule) {
     const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;
     const serviceUrl = `/service/read/${currentServiceId}`;
     const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
-    service.state.selected = {
-        name: service.state.selected.split("/").pop(),
-        path: `${service.name}/${service.state.selected}`
-    };
     initState([ service ], service);
     trigger$2({
         e: {},
