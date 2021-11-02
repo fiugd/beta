@@ -26605,13 +26605,13 @@ const operationDoneHandler = (e, context) => {
         return;
     }
     const [service] = result;
-    service.state.selected = {
+    const selected = {
         name: service.state.selected.split("/").pop(),
         path: `${service.name}/${service.state.selected}`
     };
     if ([ "read", "update" ].includes(op)) {
         fileSelectHandler({
-            detail: service.stateselected
+            detail: selected
         }, context);
         return;
     }
