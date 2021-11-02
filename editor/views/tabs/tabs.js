@@ -330,14 +330,20 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 
 	tabsContainer.operations = operations;
 
-	function clearLastTab({ tabs, removeTab }) {
+	let tabs = [];
+
+	function clearLastTab() {
 		if(!tabs.length) return;
 		const lastTab = tabs[tabs.length - 1];
-		if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-"))
-			return;
+		if (
+			lastTab.changed ||
+			lastTab.touched ||
+			lastTab.name.includes("Untitled-")
+		) return;
+
 		tabs = tabs.filter((t) => t.id !== lastTab.id);
-		removeTab(lastTab);
-		return { tabs, cleared: lastTab };
+		operations.removeTab(lastTab);
+		//tabs.map(operations.updateTab);
 	}
 
 	function getTabsToUpdate(filePath) {
@@ -364,7 +370,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 		return { foundTab, tabsToUpdate };
 	}
 
-	let tabs = [];
+
 	tabsContainer.api = {
 		list: () => tabs,
 		find: (x) => tabs.find(x),

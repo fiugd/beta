@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T20:25:16.789Z )
+	Version 0.4.6 ( 2021-11-02T21:40:34.991Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -705,7 +705,7 @@ const formatHandlers = (namespace, x) => Object.entries(x).reduce(((all, [key, v
     }
 })), {});
 
-function scrollToChild(child) {
+function scrollToChild$1(child) {
     window.parent = child.parentNode;
     const parentWindowMin = parent.scrollLeft;
     const parentWindowMax = parent.scrollLeft + parent.clientWidth;
@@ -779,7 +779,7 @@ function scrollToChild(child) {
     });
 }
 
-const createTab = (parent, container, init) => tabDef => {
+const createTab$1 = (parent, container, init) => tabDef => {
     const tab = document.createElement("div");
     tab.id = tabDef.id;
     tab.classList.add("tab");
@@ -806,7 +806,7 @@ const createTab = (parent, container, init) => tabDef => {
     const icon = systemType || fileType.icon || fileType;
     tab.innerHTML = `\n\t\t<span style="pointer-events: none;"\n\t\t\tclass="${systemClass ? systemClass + " " : ""}icon-${icon}"\n\t\t>${systemName || tabDef.name.split("/").pop()}</span>\n\t\t<div class="tab-close">\n\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t<ul class="actions-container" role="toolbar" aria-label="Tab actions">\n\t\t\t\t\t<li class="action-item" role="presentation">\n\t\t\t\t\t\t<a class="action-label icon close-editor-action"\n\t\t\t\t\t\t\tdata-name="${tabDef.name}"\n\t\t\t\t\t\t\tdata-parent="${tabDef.parent || ""}"\n\t\t\t\t\t\t\trole="button"\n\t\t\t\t\t\t\ttitle="Close"\n\t\t\t\t\t\t>\n\t\t\t\t\t\t</a>\n\t\t\t\t\t</li>\n\t\t\t\t</ul>\n\t\t\t</div>\n\t\t</div>\n\t`;
     parent.appendChild(tab);
-    scrollToChild(tab);
+    scrollToChild$1(tab);
     if (tabDef.active) {
         tab.classList.add("active");
         tab.classList.remove("new");
@@ -819,7 +819,7 @@ const createTab = (parent, container, init) => tabDef => {
     }
 };
 
-const updateTab = (parent, container) => tabDef => {
+const updateTab$1 = (parent, container) => tabDef => {
     const child = parent.querySelector("#" + tabDef.id);
     if (!child) return;
     if (!tabDef.active && child.classList.contains("active")) {
@@ -827,11 +827,11 @@ const updateTab = (parent, container) => tabDef => {
     }
     if (tabDef.active && !child.classList.contains("active")) {
         child.classList.add("active");
-        scrollToChild(child);
+        scrollToChild$1(child);
     }
     if (tabDef.changed && !child.classList.contains("changed")) {
         child.classList.add("changed");
-        scrollToChild(child);
+        scrollToChild$1(child);
     }
     if (!tabDef.changed && child.classList.contains("changed")) {
         child.classList.remove("changed");
@@ -844,7 +844,7 @@ const updateTab = (parent, container) => tabDef => {
     }
 };
 
-const removeTab = (parent, container) => async tabDef => {
+const removeTab$1 = (parent, container) => async tabDef => {
     if (!tabDef) return console.error("attempt to remove tab without a tab definition");
     const child = parent.querySelector("#" + tabDef.id);
     child.parentNode.removeChild(child);
@@ -856,26 +856,26 @@ const removeTab = (parent, container) => async tabDef => {
     //TODO: scroll parent to put newly active tab in view
 };
 
-const scrollHorizontally = el => function(e) {
+const scrollHorizontally$1 = el => function(e) {
     e = window.event || e;
     el.scrollLeft -= e.wheelDelta || -e.detail;
 };
 
-function attachWheel(el) {
+function attachWheel$1(el) {
     if (!el) return;
     if (el.addEventListener) {
-        el.addEventListener("mousewheel", scrollHorizontally(el), {
+        el.addEventListener("mousewheel", scrollHorizontally$1(el), {
             passive: true
         });
-        el.addEventListener("DOMMouseScroll", scrollHorizontally(el), {
+        el.addEventListener("DOMMouseScroll", scrollHorizontally$1(el), {
             passive: true
         });
     } else {
-        el.attachEvent("onmousewheel", scrollHorizontally(el));
+        el.attachEvent("onmousewheel", scrollHorizontally$1(el));
     }
 }
 
-function attachDoubleClick(el, context) {
+function attachDoubleClick$1(el, context) {
     if (!el) return;
     el.addEventListener("dblclick", (e => {
         const {triggers: triggers} = context;
@@ -883,17 +883,17 @@ function attachDoubleClick(el, context) {
     }));
 }
 
-const initTabs = (parent, container) => (tabDefArray = [], context) => {
-    const _removeTab = removeTab(parent, container);
+const initTabs$1 = (parent, container) => (tabDefArray = [], context) => {
+    const _removeTab = removeTab$1(parent, container);
     const init = true;
-    const _createTab = createTab(parent, container, init);
+    const _createTab = createTab$1(parent, container, init);
     Array.from(parent.querySelectorAll(".tab")).map(_removeTab);
     tabDefArray.map(_createTab);
     const THIS_DELAY_IS_STUPID = 1;
     setTimeout((() => {
         const tabs = document.querySelector("#editor-tabs");
-        attachWheel(tabs);
-        attachDoubleClick(tabs, context);
+        attachWheel$1(tabs);
+        attachDoubleClick$1(tabs, context);
         const activeTab = document.querySelector("#editor-tabs-container .active");
         if (activeTab) {
             activeTab.scrollIntoView();
@@ -901,25 +901,25 @@ const initTabs = (parent, container) => (tabDefArray = [], context) => {
     }), THIS_DELAY_IS_STUPID);
 };
 
-let tabsContainer;
+let tabsContainer$1;
 
-let tabsList;
+let tabsList$1;
 
-function EditorTabs(tabsArray = [ {
+function EditorTabs$1(tabsArray = [ {
     name: "loading...",
     active: true
 } ]) {
-    if (tabsContainer) {
-        tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+    if (tabsContainer$1) {
+        tabsList$1 = tabsList$1 || tabsContainer$1.querySelector("#editor-tabs");
         //should not be doing this, rely on event instead!!!
         //tabsArray && initTabs(tabsList)(tabsArray);
-                return tabsContainer;
+                return tabsContainer$1;
     }
-    tabsContainer = document.createElement("div");
-    tabsContainer.id = "tabs";
-    tabsContainer.classList.add("empty");
-    tabsContainer.innerHTML = `\n\t\t<style>\n\t\t\t#editor-tabs-container .scrollbar {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 575px;\n\t\t\t\theight: 3px;\n\t\t\t\tleft: 0px;\n\t\t\t\tbottom: 0px;\n\t\t\t\tbackground: transparent;\n\t\t\t\tright: -3px;\n\t\t\t\twidth: auto;\n\t\t\t}\n\t\t\t#editor-tabs-container .slider {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0px;\n\t\t\t\tleft: 0px;\n\t\t\t\theight: 3px;\n\t\t\t\twill-change: transform;\n\t\t\t\twidth: 508px;\n\t\t\t}\n\t\t\t#editor-tabs-container:hover .slider {\n\t\t\t\tbackground: #ffffff20;\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t#editor-tabs-container .tab:not(.touched):not(.changed) > span {\n\t\t\t\tfont-style: italic;\n\t\t\t}\n\t\t\t#tabs.empty #editor-tabs-container {\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\t\t</style>\n\t\t<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">\n\t\t\t<div id="editor-tabs" class="row no-margin">\n\t\t\t</div>\n\t\t\t<div class="invisible scrollbar horizontal fade">\n\t\t\t\t<div class="slider">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
-    tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+    tabsContainer$1 = document.createElement("div");
+    tabsContainer$1.id = "tabs";
+    tabsContainer$1.classList.add("empty");
+    tabsContainer$1.innerHTML = `\n\t\t<style>\n\t\t\t#editor-tabs-container .scrollbar {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 575px;\n\t\t\t\theight: 3px;\n\t\t\t\tleft: 0px;\n\t\t\t\tbottom: 0px;\n\t\t\t\tbackground: transparent;\n\t\t\t\tright: -3px;\n\t\t\t\twidth: auto;\n\t\t\t}\n\t\t\t#editor-tabs-container .slider {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0px;\n\t\t\t\tleft: 0px;\n\t\t\t\theight: 3px;\n\t\t\t\twill-change: transform;\n\t\t\t\twidth: 508px;\n\t\t\t}\n\t\t\t#editor-tabs-container:hover .slider {\n\t\t\t\tbackground: #ffffff20;\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t#editor-tabs-container .tab:not(.touched):not(.changed) > span {\n\t\t\t\tfont-style: italic;\n\t\t\t}\n\t\t\t#tabs.empty #editor-tabs-container {\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\t\t</style>\n\t\t<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">\n\t\t\t<div id="editor-tabs" class="row no-margin">\n\t\t\t</div>\n\t\t\t<div class="invisible scrollbar horizontal fade">\n\t\t\t\t<div class="slider">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    tabsList$1 = tabsList$1 || tabsContainer$1.querySelector("#editor-tabs");
     /*
 
 	TODO:
@@ -935,29 +935,27 @@ function EditorTabs(tabsArray = [ {
 
 	one idea I have not tried is to put padding divs to the left and right of tabs list; maybe later
 	*/    const operations = {
-        initTabs: initTabs(tabsList, tabsContainer),
-        createTab: createTab(tabsList, tabsContainer),
-        updateTab: updateTab(tabsList),
-        removeTab: removeTab(tabsList, tabsContainer)
+        initTabs: initTabs$1(tabsList$1, tabsContainer$1),
+        createTab: createTab$1(tabsList$1, tabsContainer$1),
+        updateTab: updateTab$1(tabsList$1),
+        removeTab: removeTab$1(tabsList$1, tabsContainer$1)
     };
-    tabsContainer.sysDocNames = {
+    tabsContainer$1.sysDocNames = {
         "add-service-folder": "Open Folder",
         "connect-service-provider": "Connect to a Provider",
         "open-previous-service": "Open Previous Service",
         "open-settings-view": "Settings"
     };
-    tabsContainer.operations = operations;
-    function clearLastTab({tabs: tabs, removeTab: removeTab}) {
+    tabsContainer$1.operations = operations;
+    let tabs = [];
+    function clearLastTab() {
         if (!tabs.length) return;
         const lastTab = tabs[tabs.length - 1];
         if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
         tabs = tabs.filter((t => t.id !== lastTab.id));
-        removeTab(lastTab);
-        return {
-            tabs: tabs,
-            cleared: lastTab
-        };
-    }
+        operations.removeTab(lastTab);
+        //tabs.map(operations.updateTab);
+        }
     function getTabsToUpdate(filePath) {
         const name = filePath?.split("/").pop();
         const tabsToUpdate = [];
@@ -982,8 +980,7 @@ function EditorTabs(tabsArray = [ {
             tabsToUpdate: tabsToUpdate
         };
     }
-    let tabs = [];
-    tabsContainer.api = {
+    tabsContainer$1.api = {
         list: () => tabs,
         find: x => tabs.find(x),
         update: t => tabs = t,
@@ -991,7 +988,7 @@ function EditorTabs(tabsArray = [ {
         clearLast: clearLastTab,
         toUpdate: getTabsToUpdate
     };
-    return tabsContainer;
+    return tabsContainer$1;
 }
 
 function StatusBar() {
@@ -26811,7 +26808,7 @@ var editor = {
     cursorActivity: trigger
 };
 
-const handler$e = (e, {tabs: tabs}) => {
+const handler$d = (e, {tabs: tabs}) => {
     const {initTabs: initTabs, createTab: createTab, updateTab: updateTab, removeTab: removeTab} = tabs.operations;
     const {sysDocNames: sysDocNames} = tabs;
     let {name: name, changed: changed, parent: parent, path: path} = event.detail;
@@ -26820,87 +26817,314 @@ const handler$e = (e, {tabs: tabs}) => {
         parent = name.split("/").slice(0, -1).join("/");
         name = name.split("/").pop();
     }
-    if (name?.includes("system::")) {
-        tabs.update(tabsApi.list() || []);
-    }
-    if (!tabs.api.list()) return;
-    let systemDocsName;
-    if (name?.includes("system::")) {
-        systemDocsName = sysDocNames[name.replace("system::", "")];
-    }
-    let id = "TAB" + Math.random().toString().replace("0.", "");
+    // if(name?.includes('system::')){
+    // 	tabs.api.update(tabsApi.list());
+    // }
+        let id = "TAB" + Math.random().toString().replace("0.", "");
     let {tabsToUpdate: tabsToUpdate, foundTab: foundTab} = tabs.api.toUpdate(parent ? `${parent}/${name}` : name);
-    if (foundTab) {
-        tabsToUpdate.map(updateTab);
-        //localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs.list()));
-                return;
-    }
-    createTab({
-        name: name,
-        parent: parent,
-        active: true,
-        id: id,
-        changed: changed
-    });
-    const shouldClearTab = !name.includes("Untitled-");
-    const {cleared: cleared, tabs: newTabs} = shouldClearTab && tabs.api.clearLast({
-        tabs: tabs,
-        removeTab: removeTab
-    }) || {};
-    if (newTabs) tabs = newTabs;
-    if (cleared) tabsToUpdate = tabsToUpdate.filter((t => t.id !== cleared.id));
     tabsToUpdate.map(updateTab);
-    tabs.api.push({
+    if (foundTab) return;
+    tabs.api.clearLast();
+    const newTab = {
         name: name,
         parent: parent,
-        systemDocsName: systemDocsName,
+        systemDocsName: name?.includes("system::") ? sysDocNames[name.replace("system::", "")] : "",
         active: true,
         id: id,
         changed: changed
-    });
-    //localStorage.setItem("tabs/"+(service.get()?.name||''), JSON.stringify(tabs));
+    };
+    createTab(newTab);
+    tabs.api.push(newTab);
 };
 
-function removeTabByEventDetail({removeTab: removeTab, updateTab: updateTab}, eventDetail, tabs) {
-    let {name: name, filename: filename, path: path, parent: parent, next: next, nextPath: nextPath} = eventDetail;
-    name = name || filename;
-    path = path || parent;
-    const service = getCurrentService();
-    if (!path && name?.includes("/")) {
-        path = name.split("/").slice(0, -1).join("/");
-        name = name.split("/").pop();
+function scrollToChild(child) {
+    window.parent = child.parentNode;
+    const parentWindowMin = parent.scrollLeft;
+    const parentWindowMax = parent.scrollLeft + parent.clientWidth;
+    const parentMaxScrollLeft = parent.scrollWidth - parent.clientWidth;
+    const childMin = child.offsetLeft;
+    const childMax = child.offsetLeft + child.clientWidth;
+    const childCenter = (childMin + childMax) / 2;
+    const idealScrollLeft = childCenter - parent.clientWidth / 2;
+    const idealScrollMin = childMax > parentWindowMin && childMin < parentWindowMin ? parent.scrollLeft - (parentWindowMin - childMin) - 20 : undefined;
+    const idealScrollMax = childMax > parentWindowMax && childMin < parentWindowMax ? parent.scrollLeft + (childMax - parentWindowMax) + 20 : undefined;
+    if (childMin === 0) {
+        parent.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+        return;
     }
-    if (!nextPath && next?.includes("/")) {
-        nextPath = next.split("/").slice(0, -1).join("/");
-        next = next.split("/").pop();
+    if (childMax === parent.scrollWidth) {
+        parent.scrollTo({
+            top: 0,
+            left: parentMaxScrollLeft,
+            behavior: "smooth"
+        });
+        return;
     }
-    let closedFullName = path ? `${path}/${name}` : name;
-    if (service?.name && new RegExp("^" + service.name).test(closedFullName)) {
-        closedFullName = closedFullName.replace(service.name + "/", "");
+    const childVisible = childMin >= parentWindowMin && childMax <= parentWindowMax;
+    if (childVisible) return;
+    if (idealScrollMin) {
+        console.log({
+            idealScrollMin: idealScrollMin
+        });
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollMin,
+            behavior: "smooth"
+        });
+        return;
     }
-    const tabFullName = x => x.parent ? `${x.parent}/${x.name}` : x.name;
-    const found = tabs.api.find((x => tabFullName(x) === closedFullName));
-    if (!found) return;
-    tabs.api.update(tabs.api.list().filter((x => tabFullName(x) != closedFullName)));
-    if (next || !tabs.api.find((x => x.active))) {
-        const nextTab = next && tabs.api.find((x => x.name === next && x.parent === nextPath || x.systemDocsName === next));
-        const tabToActivate = nextTab || tabs[tabs.length - 1];
-        if (tabToActivate) {
-            tabToActivate.active = true;
-            updateTab(tabToActivate);
-        }
+    if (idealScrollMax) {
+        console.log({
+            idealScrollMax: idealScrollMax
+        });
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollMax,
+            behavior: "smooth"
+        });
+        return;
     }
-    //localStorage.setItem("tabs/"+(service?.name||''), JSON.stringify(tabs));
-        removeTab(found);
+    if (idealScrollLeft <= 0) {
+        parent.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+        return;
+    }
+    if (idealScrollLeft <= parentMaxScrollLeft) {
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollLeft,
+            behavior: "smooth"
+        });
+        return;
+    }
+    parent.scrollTo({
+        top: 0,
+        left: parentMaxScrollLeft,
+        behavior: "smooth"
+    });
 }
 
-const handler$d = (e, {tabs: tabs}) => {
-    const {removeTab: removeTab, updateTab: updateTab} = tabs.operations;
-    removeTabByEventDetail({
-        removeTab: removeTab,
-        updateTab: updateTab
-    }, event.detail, tabs);
+const createTab = (parent, container, init) => tabDef => {
+    const tab = document.createElement("div");
+    tab.id = tabDef.id;
+    tab.classList.add("tab");
+    if (!init) {
+        tab.classList.add("new");
+    } else {
+        tab.classList.remove("new");
+    }
+    tabDef.changed && tab.classList.add("changed");
+    tabDef.touched && tab.classList.add("touched");
+    let systemType, systemName, systemClass;
+    if (tabDef.name.includes("system::")) {
+        systemType = "config";
+        systemName = {
+            "add-service-folder": "Open Folder",
+            "connect-service-provider": "Connect to a Provider",
+            "open-previous-service": "Open Previous Service",
+            "open-settings-view": "Settings"
+        }[tabDef.name.replace("system::", "")];
+        systemClass = "italic";
+    }
+    tab.title = `${tabDef.parent ? tabDef.parent + "/" : ""}${tabDef.name.split("/").pop()}`;
+    const fileType = getFileType(tabDef.name);
+    const icon = systemType || fileType.icon || fileType;
+    tab.innerHTML = `\n\t\t<span style="pointer-events: none;"\n\t\t\tclass="${systemClass ? systemClass + " " : ""}icon-${icon}"\n\t\t>${systemName || tabDef.name.split("/").pop()}</span>\n\t\t<div class="tab-close">\n\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t<ul class="actions-container" role="toolbar" aria-label="Tab actions">\n\t\t\t\t\t<li class="action-item" role="presentation">\n\t\t\t\t\t\t<a class="action-label icon close-editor-action"\n\t\t\t\t\t\t\tdata-name="${tabDef.name}"\n\t\t\t\t\t\t\tdata-parent="${tabDef.parent || ""}"\n\t\t\t\t\t\t\trole="button"\n\t\t\t\t\t\t\ttitle="Close"\n\t\t\t\t\t\t>\n\t\t\t\t\t\t</a>\n\t\t\t\t\t</li>\n\t\t\t\t</ul>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    parent.appendChild(tab);
+    scrollToChild(tab);
+    if (tabDef.active) {
+        tab.classList.add("active");
+        tab.classList.remove("new");
+    }
+    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
+    if (remainingTabs.length) {
+        container.classList.remove("empty");
+    } else {
+        container.classList.add("empty");
+    }
 };
+
+const updateTab = (parent, container) => tabDef => {
+    const child = parent.querySelector("#" + tabDef.id);
+    if (!child) return;
+    if (!tabDef.active && child.classList.contains("active")) {
+        child.classList.remove("active");
+    }
+    if (tabDef.active && !child.classList.contains("active")) {
+        child.classList.add("active");
+        scrollToChild(child);
+    }
+    if (tabDef.changed && !child.classList.contains("changed")) {
+        child.classList.add("changed");
+        scrollToChild(child);
+    }
+    if (!tabDef.changed && child.classList.contains("changed")) {
+        child.classList.remove("changed");
+    }
+    if (!tabDef.touched && child.classList.contains("touched")) {
+        child.classList.remove("touched");
+    }
+    if (tabDef.touched) {
+        child.classList.add("touched");
+    }
+};
+
+const removeTab = (parent, container) => async tabDef => {
+    if (!tabDef) return console.error("attempt to remove tab without a tab definition");
+    const child = parent.querySelector("#" + tabDef.id);
+    child.parentNode.removeChild(child);
+    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
+    if (!remainingTabs.length) {
+        container.classList.add("empty");
+        return;
+    }
+    //TODO: scroll parent to put newly active tab in view
+};
+
+const scrollHorizontally = el => function(e) {
+    e = window.event || e;
+    el.scrollLeft -= e.wheelDelta || -e.detail;
+};
+
+function attachWheel(el) {
+    if (!el) return;
+    if (el.addEventListener) {
+        el.addEventListener("mousewheel", scrollHorizontally(el), {
+            passive: true
+        });
+        el.addEventListener("DOMMouseScroll", scrollHorizontally(el), {
+            passive: true
+        });
+    } else {
+        el.attachEvent("onmousewheel", scrollHorizontally(el));
+    }
+}
+
+function attachDoubleClick(el, context) {
+    if (!el) return;
+    el.addEventListener("dblclick", (e => {
+        const {triggers: triggers} = context;
+        triggers.addFileUntracked(e);
+    }));
+}
+
+const initTabs = (parent, container) => (tabDefArray = [], context) => {
+    const _removeTab = removeTab(parent, container);
+    const init = true;
+    const _createTab = createTab(parent, container, init);
+    Array.from(parent.querySelectorAll(".tab")).map(_removeTab);
+    tabDefArray.map(_createTab);
+    const THIS_DELAY_IS_STUPID = 1;
+    setTimeout((() => {
+        const tabs = document.querySelector("#editor-tabs");
+        attachWheel(tabs);
+        attachDoubleClick(tabs, context);
+        const activeTab = document.querySelector("#editor-tabs-container .active");
+        if (activeTab) {
+            activeTab.scrollIntoView();
+        }
+    }), THIS_DELAY_IS_STUPID);
+};
+
+let tabsContainer;
+
+let tabsList;
+
+function EditorTabs(tabsArray = [ {
+    name: "loading...",
+    active: true
+} ]) {
+    if (tabsContainer) {
+        tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+        //should not be doing this, rely on event instead!!!
+        //tabsArray && initTabs(tabsList)(tabsArray);
+                return tabsContainer;
+    }
+    tabsContainer = document.createElement("div");
+    tabsContainer.id = "tabs";
+    tabsContainer.classList.add("empty");
+    tabsContainer.innerHTML = `\n\t\t<style>\n\t\t\t#editor-tabs-container .scrollbar {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 575px;\n\t\t\t\theight: 3px;\n\t\t\t\tleft: 0px;\n\t\t\t\tbottom: 0px;\n\t\t\t\tbackground: transparent;\n\t\t\t\tright: -3px;\n\t\t\t\twidth: auto;\n\t\t\t}\n\t\t\t#editor-tabs-container .slider {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0px;\n\t\t\t\tleft: 0px;\n\t\t\t\theight: 3px;\n\t\t\t\twill-change: transform;\n\t\t\t\twidth: 508px;\n\t\t\t}\n\t\t\t#editor-tabs-container:hover .slider {\n\t\t\t\tbackground: #ffffff20;\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t#editor-tabs-container .tab:not(.touched):not(.changed) > span {\n\t\t\t\tfont-style: italic;\n\t\t\t}\n\t\t\t#tabs.empty #editor-tabs-container {\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\t\t</style>\n\t\t<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">\n\t\t\t<div id="editor-tabs" class="row no-margin">\n\t\t\t</div>\n\t\t\t<div class="invisible scrollbar horizontal fade">\n\t\t\t\t<div class="slider">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+    /*
+
+	TODO:
+	when tabs change, update the width of slider
+	when editor tabs scroll position changes, move the slider with it
+	when this is done, change from display: none
+
+	ALSO:
+	there is something very screwed up happening with tab bar
+	for example, when I try to add padding or margin to left/right of tabs, left works and right fails
+	I have tried mulitple ways of fixing this, including first-child/last-child and wrapping in a container div
+	nothing seems to work and I don't have time for the frustration right now
+
+	one idea I have not tried is to put padding divs to the left and right of tabs list; maybe later
+	*/    const operations = {
+        initTabs: initTabs(tabsList, tabsContainer),
+        createTab: createTab(tabsList, tabsContainer),
+        updateTab: updateTab(tabsList),
+        removeTab: removeTab(tabsList, tabsContainer)
+    };
+    tabsContainer.sysDocNames = {
+        "add-service-folder": "Open Folder",
+        "connect-service-provider": "Connect to a Provider",
+        "open-previous-service": "Open Previous Service",
+        "open-settings-view": "Settings"
+    };
+    tabsContainer.operations = operations;
+    function clearLastTab({tabs: tabs, removeTab: removeTab}) {
+        if (!tabs.length) return;
+        const lastTab = tabs[tabs.length - 1];
+        if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
+        tabs = tabs.filter((t => t.id !== lastTab.id));
+        removeTab(lastTab);
+        return {
+            tabs: tabs,
+            cleared: lastTab
+        };
+    }
+    function getTabsToUpdate(filePath) {
+        const name = filePath?.split("/").pop();
+        const tabsToUpdate = [];
+        let foundTab;
+        for (var i = 0, len = tabs.length; i < len; i++) {
+            if (name === tabs[i].name) {
+                foundTab = tabs[i];
+            }
+            // update: if tab exists and not active, activate it
+                        if (name === tabs[i].name && !tabs[i].active) {
+                tabs[i].active = true;
+                tabsToUpdate.push(tabs[i]);
+            }
+            // update: remove active state from active tab
+                        if (name !== tabs[i].name && tabs[i].active) {
+                delete tabs[i].active;
+                tabsToUpdate.push(tabs[i]);
+            }
+        }
+        return {
+            foundTab: foundTab,
+            tabsToUpdate: tabsToUpdate
+        };
+    }
+    let tabs = [];
+    tabsContainer.api = {
+        list: () => tabs,
+        find: x => tabs.find(x),
+        update: t => tabs = t,
+        push: t => tabs.push(t),
+        clearLast: clearLastTab,
+        toUpdate: getTabsToUpdate
+    };
+    return tabsContainer;
+}
 
 const handler$c = (event, context) => {
     const {tabs: tabs} = context;
@@ -26910,7 +27134,7 @@ const handler$c = (event, context) => {
         return;
     }
     if (operation === "deleteFile") {
-        handler$d(e, context);
+        EditorTabs(e);
         return;
     }
 };
@@ -27124,7 +27348,7 @@ const handler$5 = (event, context) => {
             name: `system::` + event.type
         }
     };
-    handler$e(fileSelectEvent, context);
+    handler$d(fileSelectEvent, context);
 };
 
 /*
@@ -27150,8 +27374,8 @@ var tabs$1 = {
     ...formatHandlers("Tabs", {
         operations: handler$c,
         operationDone: handler$b,
-        fileSelect: handler$e,
-        fileClose: handler$d,
+        fileSelect: handler$d,
+        fileClose: EditorTabs,
         fileChange: handler$a,
         contextMenu: handler$9,
         contextMenuSelect: handler$8,
@@ -27399,7 +27623,7 @@ document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$3 ];
 
 const getFilePath = getFilePath$1(getCurrentService);
 
-const tabs = EditorTabs();
+const tabs = EditorTabs$1();
 
 const status = StatusBar();
 
