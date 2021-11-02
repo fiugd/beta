@@ -49,6 +49,7 @@ function friendlyModeName(type, mode){
 
 // EVENTS -------------------------------------------------------------
 
+/*
 let firstRun = true;
 const operationDone = ({
 	setLineNumber,
@@ -92,7 +93,9 @@ const operationDone = ({
 	setLineNumber(1);
 	setColNumber(1);
 };
+*/
 
+/*
 const fileSelect = ({
 	setLineNumber,
 	setColNumber,
@@ -120,35 +123,36 @@ const fileSelect = ({
 	setLineNumber(1);
 	setColNumber(1);
 };
+*/
 
-const fileClose = ({ setLineNumber, setColNumber, setTabSize, setDocType }) => (
-	event
-) => {
-	//console.log('status bar listen for fileClose');
-};
+// const fileClose = ({ setLineNumber, setColNumber, setTabSize, setDocType }) => (
+// 	event
+// ) => {
+// 	//console.log('status bar listen for fileClose');
+// };
 
-const fileChange = ({
-	setLineNumber,
-	setColNumber,
-	setTabSize,
-	setDocType,
-}) => (event) => {
-	//console.log('status bar listen for fileChange');
-};
+// const fileChange = ({
+// 	setLineNumber,
+// 	setColNumber,
+// 	setTabSize,
+// 	setDocType,
+// }) => (event) => {
+// 	//console.log('status bar listen for fileChange');
+// };
 
-const cursorActivity = ({ setLineNumber, setColNumber }) => (event) => {
-	const { detail } = event;
-	const { line, column } = detail;
-	setLineNumber(line);
-	setColNumber(column);
-};
+// const cursorActivity = ({ setLineNumber, setColNumber }) => (event) => {
+// 	const { detail } = event;
+// 	const { line, column } = detail;
+// 	setLineNumber(line);
+// 	setColNumber(column);
+// };
 
 const listeners = {
-	operationDone,
-	fileSelect,
-	fileClose,
-	fileChange,
-	cursorActivity,
+	//operationDone,
+	//fileSelect,
+	//fileClose,
+	//fileChange,
+	//cursorActivity,
 };
 
 function attachListeners({
@@ -157,18 +161,18 @@ function attachListeners({
 	setTabSize,
 	setDocType,
 }) {
-	Object.keys(listeners).forEach((key) => {
-		attach({
-			name: "Status Bar",
-			eventName: key,
-			listener: listeners[key]({
-				setLineNumber,
-				setColNumber,
-				setTabSize,
-				setDocType,
-			}),
-		});
-	});
+	// Object.keys(listeners).forEach((key) => {
+	// 	attach({
+	// 		name: "Status Bar",
+	// 		eventName: key,
+	// 		listener: listeners[key]({
+	// 			setLineNumber,
+	// 			setColNumber,
+	// 			setTabSize,
+	// 			setDocType,
+	// 		}),
+	// 	});
+	// });
 }
 
 export { attachListeners };
