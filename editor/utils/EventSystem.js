@@ -219,7 +219,7 @@ TODO:
 	
 	- SW will have to be configure to fire messages for things that are currently HTTP requests
 */
-const registration = await navigator.serviceWorker.ready;
+//const registration = await navigator.serviceWorker.ready;
 //console.log(registration)
 
 // navigator.serviceWorker.controller.postMessage({
