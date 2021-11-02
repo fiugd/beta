@@ -225,9 +225,13 @@ function attachDoubleClick(el, context) {
 }
 
 const initTabs = (parent, container) => (tabDefArray = [], context) => {
-	Array.from(parent.querySelectorAll(".tab")).map(removeTab(parent));
+	const _removeTab = removeTab(parent, container);
 	const init = true;
-	tabDefArray.map(createTab(parent, container, init));
+	const _createTab = createTab(parent, container, init)
+	Array.from(parent.querySelectorAll(".tab")).map(_removeTab);
+	tabDefArray.map(_createTab);
+
+	const THIS_DELAY_IS_STUPID = 1;
 	setTimeout(() => {
 		const tabs = document.querySelector("#editor-tabs");
 		attachWheel(tabs);
@@ -236,7 +240,7 @@ const initTabs = (parent, container) => (tabDefArray = [], context) => {
 		if (activeTab) {
 			activeTab.scrollIntoView();
 		}
-	}, 1000); //TODO: this sucks
+	}, THIS_DELAY_IS_STUPID);
 };
 
 let tabsContainer;
