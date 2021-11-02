@@ -6,13 +6,9 @@
 			"resources": [
 				"./",
 				"./index.service.test.html",
-				"./bootstrap.html",
+				"./index.boot.html",
 				"./index.html",
 				"./service.manifest.json",
-
-				"./settings.html",
-
-				"/shared/vendor/materialize.min.js",
 
 				"/shared/fonts/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2",
 				"/shared/fonts/seti.woff2",
@@ -27,7 +23,7 @@
 		},
 		"NOTE: -- TERMINAL UI /START --",
 		{
-			"route": "./_/modules/terminal/index.html",
+			"route": "./_/modules/terminal/terminal.html",
 			"source": "terminal/terminal.html"
 		},
 		{

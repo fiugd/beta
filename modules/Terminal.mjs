@@ -38,7 +38,7 @@ const termContainerSrc = `
 </style>
 <iframe
 	sandbox="${iframeSandboxPermissions}"
-	src="/_/modules/terminal/index.html"
+	src="/_/modules/terminal/terminal.html"
 ></iframe>
 `.trim();
 

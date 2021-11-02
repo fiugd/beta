@@ -170,6 +170,9 @@ const addFrameOffsets = (event, triggerEvent) => {
 			return el.contains(event.source);
 		}catch(_){}
 		try{
+			return el.contains(event.source.frameElement);
+		}catch(_){}
+		try{
 			return el.querySelector('iframe').contentDocument
 				.contains(event.source.frameElement);
 		}catch(_){}
