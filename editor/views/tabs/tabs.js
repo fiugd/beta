@@ -94,7 +94,7 @@ function scrollToChild(child) {
 	});
 }
 
-const createTab = (parent, init) => (tabDef) => {
+const createTab = (parent, container, init) => (tabDef) => {
 	const tab = document.createElement("div");
 	tab.id = tabDef.id;
 	tab.classList.add("tab");
@@ -148,12 +148,14 @@ const createTab = (parent, init) => (tabDef) => {
 	}
 
 	const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
-	if (!remainingTabs.length) {
-		return;
+	if (remainingTabs.length) {
+		container.classList.remove('empty');
+	} else {
+		container.classList.add('empty');
 	}
 };
 
-const updateTab = (parent) => (tabDef) => {
+const updateTab = (parent, container) => (tabDef) => {
 	const child = parent.querySelector("#" + tabDef.id);
 	if (!child) return;
 	if (!tabDef.active && child.classList.contains("active")) {
@@ -179,7 +181,7 @@ const updateTab = (parent) => (tabDef) => {
 	}
 };
 
-const removeTab = (parent) => async (tabDef) => {
+const removeTab = (parent, container) => async (tabDef) => {
 	if(!tabDef) return console.error('attempt to remove tab without a tab definition');
 
 	const child = parent.querySelector("#" + tabDef.id);
@@ -187,6 +189,7 @@ const removeTab = (parent) => async (tabDef) => {
 
 	const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
 	if (!remainingTabs.length) {
+		container.classList.add('empty');
 		return;
 	}
 	//TODO: scroll parent to put newly active tab in view
@@ -221,10 +224,10 @@ function attachDoubleClick(el, context) {
 	});
 }
 
-const initTabs = (parent) => (tabDefArray = [], context) => {
+const initTabs = (parent, container) => (tabDefArray = [], context) => {
 	Array.from(parent.querySelectorAll(".tab")).map(removeTab(parent));
 	const init = true;
-	tabDefArray.map(createTab(parent, init));
+	tabDefArray.map(createTab(parent, container, init));
 	setTimeout(() => {
 		const tabs = document.querySelector("#editor-tabs");
 		attachWheel(tabs);
@@ -246,6 +249,8 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 		return tabsContainer;
 	}
 	tabsContainer = document.createElement("div");
+	tabsContainer.id = 'tabs';
+	tabsContainer.classList.add('empty');
 	tabsContainer.innerHTML = `
 		<style>
 			#editor-tabs-container .scrollbar {
@@ -272,6 +277,9 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 			}
 			#editor-tabs-container .tab:not(.touched):not(.changed) > span {
 				font-style: italic;
+			}
+			#editor-tabs-container.empty {
+				background: transparent;
 			}
 		</style>
 		<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">
@@ -303,10 +311,10 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	*/
 
 	const operations = {
-		initTabs: initTabs(tabsList),
-		createTab: createTab(tabsList),
-		updateTab: updateTab(tabsList),
-		removeTab: removeTab(tabsList),
+		initTabs: initTabs(tabsList, tabsContainer),
+		createTab: createTab(tabsList, tabsContainer),
+		updateTab: updateTab(tabsList, tabsContainer),
+		removeTab: removeTab(tabsList, tabsContainer),
 	};
 
 	tabsContainer.sysDocNames = {
