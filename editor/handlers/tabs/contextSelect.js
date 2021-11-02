@@ -22,8 +22,9 @@ function copyPath(data, relative) {
 		});
 }
 
-const handler = (event, { tabs }) => {
-	const { triggers } = tabs;
+// TODO: should make sure that this editor instance is the originator of context request
+const handler = (event, context) => {
+	const { tabs, triggers: { tabs: triggers} } = context;
 
 	const { which, parent, data } = event.detail || {};
 	if (parent !== "Tab Bar") return;
@@ -37,6 +38,7 @@ const handler = (event, { tabs }) => {
 		copyrelativepath: ({ tab }) => copyPath(tab, "relative"),
 		revealinsidebar: ({ tab }) => {
 			triggers.fileSelect({ detail: tab });
+			//TODO: this will not work inside editor iframe !!!
 			document.getElementById("explorer").focus();
 		},
 		keepopen: NOT_IMPLEMENTED("keepopen"),
