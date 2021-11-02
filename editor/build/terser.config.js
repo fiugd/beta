@@ -26,7 +26,7 @@ const unmin = {
 };
 
 export default function(){
-	return minified;
-	// return unmin;
+	//return minified;
+	return unmin;
 }
 
