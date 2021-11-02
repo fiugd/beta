@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T20:16:46.343Z )
+	Version 0.4.6 ( 2021-11-02T20:25:16.789Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -606,6 +606,12 @@ function getFileType(fileName = "") {
         type = {
             name: "handlebars",
             base: "text/html"
+        };
+    }
+    if (type === "markdown") {
+        type = {
+            name: "markdown",
+            icon: "info"
         };
     }
     return type;

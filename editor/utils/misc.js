@@ -75,6 +75,12 @@ function getFileType(fileName = "") {
 	if (extension === 'hbs'){
 		type = {name: "handlebars", base: "text/html"}
 	}
+	if(type === "markdown"){
+		type = {
+			name:"markdown",
+			icon: "info"
+		}
+	}
 	return type;
 }
 
