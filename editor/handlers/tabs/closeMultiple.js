@@ -29,18 +29,18 @@ const closeMultiple = (removeTab, triggers, which) => ({ tab }) => {
 	TODO: still work to be done on this
 	- reference the function above (old way)
 	- instead of doing this all at once
-		1) fire the event
-		2) handle the event
+		1) fire the event (to app/serviceWorker)
+		2) handle the event (from app/serviceWorker)
 */
-const closeAll = {
+const all = {
 	data: (event) => {
 		return {};
 	}
 }
-const closeOthers = {
+const others = {
 	data: (event) => {
 		return {};
 	}
 };
 
-export default { closeAll, closeOthers };
+export default { all, others };

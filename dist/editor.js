@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T22:51:50.759Z )
+	Version 0.4.6 ( 2021-11-02T23:21:45.707Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26689,12 +26689,14 @@ const contextMenuHandler = (e, {triggers: triggers}) => {
 };
 
 const paste = async () => {
+    window.focus();
     window.Editor.focus();
     const toPaste = await navigator.clipboard.readText();
     window.Editor.replaceSelection(toPaste);
 };
 
 const cutSelected = () => {
+    window.focus();
     window.Editor.focus();
     const copied = window.Editor.getSelection();
     navigator.clipboard.writeText(copied);
@@ -26702,11 +26704,13 @@ const cutSelected = () => {
 };
 
 const copySelected = () => {
+    window.focus();
     const copied = window.Editor.getSelection();
     navigator.clipboard.writeText(copied);
 };
 
-const contextMenuSelectHandler = (e, {triggerEvent: triggerEvent}) => {
+const contextMenuSelectHandler = (e, context) => {
+    const {triggerEvent: {editor: triggerEvent}} = context;
     const {which: which, parent: parent, data: data} = e.detail || {};
     if (parent !== "Editor") {
         //console.log('Editor ignored a context-select event');
@@ -26988,6 +26992,7 @@ function copyPath(data, relative) {
     }));
 }
 
+// TODO: should make sure that this editor instance is the originator of context request
 const handler$8 = (event, context) => {
     const {tabs: tabs, triggers: {tabs: triggers}} = context;
     const {which: which, parent: parent, data: data} = event.detail || {};
@@ -27108,19 +27113,19 @@ const handler$5 = (event, context) => {
 	TODO: still work to be done on this
 	- reference the function above (old way)
 	- instead of doing this all at once
-		1) fire the event
-		2) handle the event
-*/ const closeAll = {
+		1) fire the event (to app/serviceWorker)
+		2) handle the event (from app/serviceWorker)
+*/ const all = {
     data: event => ({})
 };
 
-const closeOthers = {
+const others = {
     data: event => ({})
 };
 
 var closeMultiple = {
-    closeAll: closeAll,
-    closeOthers: closeOthers
+    all: all,
+    others: others
 };
 
 var tabs$1 = {
@@ -27339,6 +27344,16 @@ const triggers = {
     }, {
         eventName: "fileClose",
         type: "raw"
+    }, {
+        name: "closeOthers",
+        eventName: "fileClose",
+        type: "raw",
+        handlers: [ tabs$1.closeMultiple.others ]
+    }, {
+        name: "closeAll",
+        eventName: "fileClose",
+        type: "raw",
+        handlers: [ tabs$1.closeMultiple.all ]
     }, {
         eventName: "fileSelect",
         type: "raw"

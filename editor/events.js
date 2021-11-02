@@ -97,6 +97,16 @@ const triggers = {
 			eventName: "fileClose",
 			type: 'raw',
 		}, {
+			name: "closeOthers",
+			eventName: "fileClose",
+			type: 'raw',
+			handlers: [ tabs.closeMultiple.others ]
+		}, {
+			name: "closeAll",
+			eventName: "fileClose",
+			type: 'raw',
+			handlers: [ tabs.closeMultiple.all ]
+		}, {
 			eventName: "fileSelect",
 			type: 'raw',
 		}, {
