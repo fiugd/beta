@@ -5,6 +5,7 @@ import { getDefaultFile } from "./state.mjs";
 
 let statusBarDom;
 
+/*
 function getFileType(fileName = "") {
 	let type = "default";
 	const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(
@@ -46,6 +47,7 @@ function friendlyModeName(type, mode){
 	if(mode.includes && mode.includes('text/x-')) return type;
 	return mode;
 }
+*/
 
 // EVENTS -------------------------------------------------------------
 
