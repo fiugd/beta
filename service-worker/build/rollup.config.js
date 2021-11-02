@@ -24,7 +24,7 @@ export default {
 		//format: 'iife',
 		//sourcemap: 'inline',
 		//minifyInternalExports: true
-		file: 'fiugd/beta/service-worker.js',
+		file: 'fiugd/beta/dist/service-worker.js',
 		banner,
 	},
 	onwarn: (warning) => {
