@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T23:21:45.707Z )
+	Version 0.4.6 ( 2021-11-02T23:47:45.177Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26596,7 +26596,7 @@ const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor:
 };
 
 const operationDoneHandler = (e, context) => {
-    const {messageEditor: messageEditor, initState: initState} = context;
+    const {messageEditor: messageEditor} = context;
     const {detail: detail} = e;
     const {op: op, result: result} = detail || {};
     const providerOps = [ "provider-test", "provider-save", "provider-add-service" ];
@@ -26613,8 +26613,11 @@ const operationDoneHandler = (e, context) => {
             name: service.state.selected.split("/").pop(),
             path: `${service.name}/${service.state.selected}`
         };
-        initState([ service ], service);
-        fileSelectHandler({
+        /* START DUMB */        initState([ service ], service);
+        setCurrentFile({
+            filePath: service.state.selected.path
+        });
+        /* END DUMB */        fileSelectHandler({
             detail: service.state.selected
         }, context);
         return;
@@ -27400,8 +27403,6 @@ const context = {
     // << access within file instead
     getFilePath: getFilePath,
     // << access within file instead
-    initState: initState,
-    // ditto
     switchEditor: x => switchEditor(x, {
         editor: InlineEditor,
         context: context

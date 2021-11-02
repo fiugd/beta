@@ -1,7 +1,8 @@
 import fileSelect from './fileSelect.js';
+import { initState, setCurrentFile } from "../../utils/State.js"
 
 const operationDoneHandler = (e, context) => {
-	const { messageEditor, initState } = context;
+	const { messageEditor } = context;
 
 	const { detail } = e;
 	const { op, result } = (detail || {});
@@ -21,7 +22,12 @@ const operationDoneHandler = (e, context) => {
 			name: service.state.selected.split('/').pop(),
 			path: `${service.name}/${service.state.selected}`
 		};
+		/* START DUMB */
 		initState([service], service);
+		setCurrentFile({
+			filePath: service.state.selected.path
+		});
+		/* END DUMB */
 		fileSelect({ detail: service.state.selected }, context);
 		return;
 	}
