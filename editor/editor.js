@@ -26,6 +26,7 @@ const status = EditorStatus();
 const context = {
 	getCurrentFile, // << access within file instead
 	getFilePath, // << access within file instead
+	initState, // ditto
 
 	switchEditor: (x) => switchEditor(x, { editor, context }),
 	messageEditor: (x) => messageEditor(x,{ editor, context }),

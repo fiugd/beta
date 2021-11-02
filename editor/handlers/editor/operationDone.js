@@ -1,7 +1,7 @@
 import fileSelect from './fileSelect.js';
 
 const operationDoneHandler = (e, context) => {
-	const { messageEditor } = context;
+	const { messageEditor, initState } = context;
 
 	const { detail } = e;
 	const { op, result } = (detail || {});
@@ -14,16 +14,15 @@ const operationDoneHandler = (e, context) => {
 		});
 		return;
 	}
-	
-	const [service] = result;
-	service.state.selected = {
-		name: service.state.selected.split('/').pop(),
-		path: `${service.name}/${service.state.selected}`
-	}
 
 	if (['read', 'update'].includes(op)) {
-		const [selected] = service.state;
-		fileSelect({ detail: selected }, context);
+		const [service] = result;
+		service.state.selected = {
+			name: service.state.selected.split('/').pop(),
+			path: `${service.name}/${service.state.selected}`
+		};
+		initState([service], service);
+		fileSelect({ detail: service.state.selected }, context);
 		return;
 	}
 };
