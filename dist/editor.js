@@ -26610,9 +26610,8 @@ const operationDoneHandler = (e, context) => {
         path: `${service.name}/${service.state.selected}`
     };
     if ([ "read", "update" ].includes(op)) {
-        const [selected] = service.state;
         fileSelectHandler({
-            detail: selected
+            detail: service.stateselected
         }, context);
         return;
     }
