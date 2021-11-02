@@ -278,7 +278,7 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 			#editor-tabs-container .tab:not(.touched):not(.changed) > span {
 				font-style: italic;
 			}
-			#editor-tabs-container.empty {
+			#tabs.empty #editor-tabs-container {
 				background: transparent;
 			}
 		</style>
