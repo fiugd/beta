@@ -37,49 +37,49 @@ const context = {
 };
 attachEvents(events, context);
 
-
-const isRunningAsModule = document.location.href.includes("_/modules");
-
-if(!isRunningAsModule){
+const isPreview = document.location.href.includes("/::preview::/");
+if(isPreview){
 	const base = document.createElement('base');
 	base.href = '../../';
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
-const ROOT_SERVICE_ID = 0;
-const currentServiceId = localStorage.getItem('lastService') || ROOT_SERVICE_ID;
-const serviceUrl = `/service/read/${currentServiceId}`;
-const { result: [service] } = await fetch(serviceUrl).then(x => x.json())
-service.state.selected = {
-	name: service.state.selected.split('/').pop(),
-	path: `${service.name}/${service.state.selected}`
-}
-DEBUG && console.log(service)
 
-initState([service], service);
-
-rawTrigger({
-	e: {},
-	type: 'operationDone',
-	params: {},
-	source: {},
-	data: {},
-	detail: {
-		op: 'read',
-		id: service.id,
-		result: [service]
+const isRunningAsModule = document.location.href.includes("_/modules");
+if(!isRunningAsModule){
+	const ROOT_SERVICE_ID = 0;
+	const currentServiceId = localStorage.getItem('lastService') || ROOT_SERVICE_ID;
+	const serviceUrl = `/service/read/${currentServiceId}`;
+	const { result: [service] } = await fetch(serviceUrl).then(x => x.json())
+	service.state.selected = {
+		name: service.state.selected.split('/').pop(),
+		path: `${service.name}/${service.state.selected}`
 	}
-});
+	DEBUG && console.log(service)
 
-DEBUG && console.log(
-	'Listeners:\n' + 
-	list().map(x => x.split('__').reverse().join(': '))
-	.sort()
-	.join('\n')
-);
+	initState([service], service);
+	rawTrigger({
+		e: {},
+		type: 'operationDone',
+		params: {},
+		source: {},
+		data: {},
+		detail: {
+			op: 'read',
+			id: service.id,
+			result: [service]
+		}
+	});
+	DEBUG && console.log(
+		'Listeners:\n' + 
+		list().map(x => x.split('__').reverse().join(': '))
+		.sort()
+		.join('\n')
+	);
+	DEBUG && console.log(
+		'Triggers:\n' + 
+		listTriggers().map(x => x.split('__').reverse().join(': '))
+		.sort()
+		.join('\n')
+	);
+}
 
-DEBUG && console.log(
-	'Triggers:\n' + 
-	listTriggers().map(x => x.split('__').reverse().join(': '))
-	.sort()
-	.join('\n')
-);

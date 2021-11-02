@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T03:51:49.646Z )
+	Version 0.4.6 ( 2021-11-02T04:17:08.890Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26381,7 +26381,7 @@ function trigger$2(args) {
         detail: _detail
     });
     window.dispatchEvent(event);
-    // from here on, send internal events to external
+    // SEND INTERNAL EVENTS TO EXTERNAL
         if (external) return;
     const blackList = [ "operationDone" ];
     const triggerEvent = {
@@ -26515,28 +26515,20 @@ function attachEvents(events, context) {
     Object.entries(events.triggers).map(connectTriggers);
 }
 
+// LISTEN TO EXTERNAL EVENTS
+// TRIGGER INTERNAL EVENTS
 window.top.postMessage({
-    subscribe: "Editor Iframe"
+    subscribe: "Editor"
 }, location);
+
+const useCaptue = false;
 
 window.addEventListener("message", (function(messageEvent) {
     trigger$2({
         ...messageEvent.data,
         external: true
     });
-}), false);
-
-/*
-
-see https://felixgerschau.com/how-to-communicate-with-service-workers/
-
-TODO:
-	- call to service worker to set up exchange
-	- SW events trigger handlers as registered with this file, ie. attach
-	- triggers from this file result in message to SW
-	
-	- SW will have to be configure to fire messages for things that are currently HTTP requests
-*/ await navigator.serviceWorker.ready;
+}), useCaptue);
 
 const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor: switchEditor}) => {
     const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = event.detail;
@@ -26612,8 +26604,13 @@ const operationDoneHandler = (e, context) => {
         });
         return;
     }
+    const [service] = result;
+    service.state.selected = {
+        name: service.state.selected.split("/").pop(),
+        path: `${service.name}/${service.state.selected}`
+    };
     if ([ "read", "update" ].includes(op)) {
-        const selected = result[0]?.state?.selected;
+        const [selected] = service.state;
         fileSelectHandler({
             detail: selected
         }, context);
@@ -27421,38 +27418,36 @@ const context = {
 
 attachEvents(events, context);
 
-const isRunningAsModule = document.location.href.includes("_/modules");
+const isPreview = document.location.href.includes("/::preview::/");
 
-if (!isRunningAsModule) {
+if (isPreview) {
     const base = document.createElement("base");
     base.href = "../../";
     document.getElementsByTagName("head")[0].appendChild(base);
 }
 
-const ROOT_SERVICE_ID = 0;
+const isRunningAsModule = document.location.href.includes("_/modules");
 
-const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;
-
-const serviceUrl = `/service/read/${currentServiceId}`;
-
-const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
-
-service.state.selected = {
-    name: service.state.selected.split("/").pop(),
-    path: `${service.name}/${service.state.selected}`
-};
-
-initState([ service ], service);
-
-trigger$2({
-    e: {},
-    type: "operationDone",
-    params: {},
-    source: {},
-    data: {},
-    detail: {
-        op: "read",
-        id: service.id,
-        result: [ service ]
-    }
-});
+if (!isRunningAsModule) {
+    const ROOT_SERVICE_ID = 0;
+    const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;
+    const serviceUrl = `/service/read/${currentServiceId}`;
+    const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
+    service.state.selected = {
+        name: service.state.selected.split("/").pop(),
+        path: `${service.name}/${service.state.selected}`
+    };
+    initState([ service ], service);
+    trigger$2({
+        e: {},
+        type: "operationDone",
+        params: {},
+        source: {},
+        data: {},
+        detail: {
+            op: "read",
+            id: service.id,
+            result: [ service ]
+        }
+    });
+}

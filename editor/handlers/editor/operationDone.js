@@ -14,9 +14,15 @@ const operationDoneHandler = (e, context) => {
 		});
 		return;
 	}
+	
+	const [service] = result;
+	service.state.selected = {
+		name: service.state.selected.split('/').pop(),
+		path: `${service.name}/${service.state.selected}`
+	}
 
 	if (['read', 'update'].includes(op)) {
-		const selected = result[0]?.state?.selected;
+		const [selected] = service.state;
 		fileSelect({ detail: selected }, context);
 		return;
 	}
