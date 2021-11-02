@@ -11,8 +11,10 @@ const dummyFunc = (fnName, returns='') => (...args) => {
 const getCurrentFile = dummyFunc('getCurrentFile');
 const getCurrentFileFull = () => currentService.state.selected;
 const setCurrentFile = ({ filePath }) => {
+	// TODO: this is UGLY - service worker should be consistent with how it returns files...
 	const found = currentService.code
 		.find(x => x.name === filePath ||
+			x.path === filePath ||
 			x.path === '/'+filePath ||
 			x.path === '/'+currentService.name+'/'+filePath
 		)

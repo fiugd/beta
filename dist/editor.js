@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-02T23:47:45.177Z )
+	Version 0.4.6 ( 2021-11-02T23:58:03.222Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -21,7 +21,8 @@ const getCurrentFile = dummyFunc();
 const getCurrentFileFull = () => currentService.state.selected;
 
 const setCurrentFile = ({filePath: filePath}) => {
-    const found = currentService.code.find((x => x.name === filePath || x.path === "/" + filePath || x.path === "/" + currentService.name + "/" + filePath));
+    // TODO: this is UGLY - service worker should be consistent with how it returns files...
+    const found = currentService.code.find((x => x.name === filePath || x.path === filePath || x.path === "/" + filePath || x.path === "/" + currentService.name + "/" + filePath));
     if (found) {
         currentService.state.selected = found;
         currentService.state.selected.filename = found.name;
