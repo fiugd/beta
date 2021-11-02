@@ -10,8 +10,11 @@ function StatusBar(){
 	}
 	const statusBar = document.createElement('div');
 	statusBar.id = "status-bar";
-	const settings = getSettings();
-	const tabSettingsElString = (s) => `${s.indentWithTabs ? 'Tab Size' : 'Spaces'}: <span class="tab-size">${s.tabSize}</span>`
+	//const settings = getSettings();
+	//const tabSettingsElString = (s) => `${s.indentWithTabs ? 'Tab Size' : 'Spaces'}: <span class="tab-size">${s.tabSize}</span>`
+	const settings = {};
+	const tabSettingsElString = () => '';
+
 	statusBar.innerHTML = `
 	<style>
 		#status-bar {
@@ -59,6 +62,7 @@ function StatusBar(){
 	</div>
 
 	<div class="statusbar-item right">
+		<!--
 		<div class="editor-statusbar-item">
 			<a class="editor-status-selection" title="Go to Line" style="">
 				Ln <span class="line-number">--</span>,
@@ -69,9 +73,11 @@ function StatusBar(){
 			<a class="editor-status-eol hidden" title="Select End of Line Sequence" style="">LF</a>
 			<a class="editor-status-mode" title="Select Language Mode" style="">--</a>
 		</div>
+		-->
 	</div>
 `;
 
+	/*
 	const tabSettingsEl = statusBar.querySelector('.editor-status-indentation');
 	tabSettingsEl.addEventListener("click", () => {
 		//console.warn('pop up menu to select tab size and indentation style');
@@ -136,7 +142,9 @@ function StatusBar(){
 
 		el.innerHTML = docType;
 	}
-	attachListeners({ setLineNumber, setColNumber, setTabSize, setDocType });
+	*/
+	attachListeners({});
+	// attachListeners({ setLineNumber, setColNumber, setTabSize, setDocType });
 
 	document.body.appendChild(statusBar);
 }
