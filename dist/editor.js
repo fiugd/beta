@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-03T00:22:25.365Z )
+	Version 0.4.6 ( 2021-11-03T00:27:15.917Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -888,7 +888,7 @@ function attachWheel(el) {
 function attachDoubleClick(el, context) {
     if (!el) return;
     el.addEventListener("dblclick", (e => {
-        const {triggers: triggers} = context;
+        const {triggers: {tabs: triggers}} = context;
         triggers.addFileUntracked(e);
     }));
 }

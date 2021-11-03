@@ -219,7 +219,7 @@ function attachWheel(el) {
 function attachDoubleClick(el, context) {
 	if (!el) return;
 	el.addEventListener("dblclick", (e) => {
-		const { triggers } = context;
+		const { triggers: { tabs: triggers } } = context;
 		triggers.addFileUntracked(e);
 	});
 }
