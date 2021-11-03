@@ -69,10 +69,16 @@ const build = async () => {
 		const minified = await pipe(AddDate,AddVersion,Minify)(code);
 		let response = await saveBuild(minified);
 		if(response.error) throw new Error(response.error);
-		
+
 		response = await copyFile(
 			`/${root}/terminal/terminal.html`,
 			`./${root}/dist/terminal.html`
+		);
+		if(response.error) throw new Error(response.error);
+
+		response = await copyFile(
+			`/${root}/terminal/terminal.css`,
+			`./${root}/dist/terminal.css`
 		);
 		if(response.error) throw new Error(response.error);
 
