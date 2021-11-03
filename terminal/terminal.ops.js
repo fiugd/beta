@@ -255,8 +255,8 @@ ${chalk.bold('Examples:')}
   TODO: add examples
 
 ${chalk.italic(`
-Online help: ${link('https://github.com/crosshj/fiug/wiki')}
-Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+Online help: ${link('https://github.com/fiugd/fiug/wiki')}
+Report bugs: ${link('https://github.com/fiugd/fiug/issues')}
 `)}
 `;
 
