@@ -85,7 +85,7 @@ const checklistItems = () => { return `
 (async () => {
 	const { result: allServices } = await fetchJSON('/service/read');
 	const svcId = allServices
-		.find(x => x.name === 'crosshj/fiug-beta')
+		.find(x => x.name === 'fiugd/beta')
 		.id;
 
 	const { result: [service] } = await fetchJSON(`/service/read/${svcId}`);
