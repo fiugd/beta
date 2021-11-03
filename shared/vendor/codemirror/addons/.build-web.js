@@ -2,7 +2,7 @@
 const uglifyUrl = 'https://unpkg.com/uglifyjs-lite@2018.8.15/lib.uglifyjs.js';
 
 // TODO: get this dynamically
-const cwd = `crosshj/fiug-beta/shared/vendor/codemirror/addons`;
+const cwd = `fiugd/beta/shared/vendor/codemirror/addons`;
 const serviceId = 3000;
 
 //TODO: need to save output to 
