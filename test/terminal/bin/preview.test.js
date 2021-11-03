@@ -1,4 +1,4 @@
-import {operation} from '/crosshj/fiug-beta/terminal/bin/preview.js';
+import {operation} from '/fiugd/beta/terminal/bin/preview.js';
 
 const createElement = () => ({
 	classList: {
@@ -16,12 +16,12 @@ self.document = {
 
 const args = {
 	eventName: 'init',
-	cwd: "crosshj/fiug-beta",
+	cwd: "fiugd/beta",
 	file: "*.js",
 	//file: "index.html",
 	watch: true,
 	event: {
-		cwd: "crosshj/fiug-beta",
+		cwd: "fiugd/beta",
 		file: "index.html",
 		watch: true
 	}
