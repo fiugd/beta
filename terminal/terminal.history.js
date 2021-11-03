@@ -24,6 +24,7 @@ const history = [
 	'preview editor/editor.html',
 	'node editor/build/build.js',
 	'preview --watch=false dist/editor.html',
+	'node terminal/build/build.js',
 ];
 
 const usage = (chalk) => {
@@ -37,8 +38,8 @@ Prints history of entered commands.
   -h, --help   ${/* SPACER                */''}    Prints this guide
 
 ${chalk.italic(`
-Online help: ${link('https://github.com/crosshj/fiug/wiki')}
-Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+Online help: ${link('https://github.com/fiugd/fiug/wiki')}
+Report bugs: ${link('https://github.com/fiugd/fiug/issues')}
 `)}
 	`;
 }

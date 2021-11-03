@@ -17,8 +17,8 @@ ${chalk.bold('Examples:')}
   watch -e ui fileClose fileSelect operations operationDone
 
 ${chalk.italic(`
-Online help: ${link('https://github.com/crosshj/fiug/wiki')}
-Report bugs: ${link('https://github.com/crosshj/fiug/issues')}
+Online help: ${link('https://github.com/fiugd/fiug/wiki')}
+Report bugs: ${link('https://github.com/fiugd/fiug/issues')}
 `)}
 `;
 
