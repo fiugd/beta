@@ -57,11 +57,10 @@ const initState = (all, current) => {
 		if(x.path.startsWith('/')) return;
 		x.path = '/' + x.path;
 	});
-	if(typeof currentService.state.selected === "string"){
-		currentService.state.selected = {
-			name: currentService.state.selected.split('/').pop(),
-			path: `${currentService.name}/${currentService.state.selected}`
-		};
+	if(typeof currentService.state.selected === "string" && currentService.state.selected){
+		setCurrentFile({
+			filePath: `${currentService.name}/${currentService.state.selected}`
+		});
 	}
 };
 

@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-03T00:08:20.836Z )
+	Version 0.4.6 ( 2021-11-03T00:22:25.365Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -49,11 +49,10 @@ const initState = (all, current) => {
         if (x.path.startsWith("/")) return;
         x.path = "/" + x.path;
     }));
-    if (typeof currentService.state.selected === "string") {
-        currentService.state.selected = {
-            name: currentService.state.selected.split("/").pop(),
-            path: `${currentService.name}/${currentService.state.selected}`
-        };
+    if (typeof currentService.state.selected === "string" && currentService.state.selected) {
+        setCurrentFile({
+            filePath: `${currentService.name}/${currentService.state.selected}`
+        });
     }
 };
 
@@ -26620,14 +26619,14 @@ const operationDoneHandler = (e, context) => {
     }
     if ([ "read", "update" ].includes(op)) {
         const [service] = result;
-        service.state.selected = {
-            name: service.state.selected.split("/").pop(),
-            path: `${service.name}/${service.state.selected}`
-        };
+        // service.state.selected = {
+        // 	name: service.state.selected.split('/').pop(),
+        // 	path: `${service.name}/${service.state.selected}`
+        // };
         /* START DUMB */        initState([ service ], service);
-        setCurrentFile({
-            filePath: service.state.selected.path
-        });
+        // setCurrentFile({
+        // 	filePath: service.state.selected.path
+        // });
         /* END DUMB */        fileSelectHandler({
             detail: service.state.selected
         }, context);
