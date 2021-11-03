@@ -188,7 +188,7 @@ const SystemDocs = (section, errors) => {
 					<label style="margin-top: 30px;">Repository</label>
 					<input type="text"
 						name="provider-repository"
-						value="crosshj/fiug-welcome"
+						value="fiugd/welcome"
 						placeholder="{user}/{repository name}"
 					>
 					<input type="text"
