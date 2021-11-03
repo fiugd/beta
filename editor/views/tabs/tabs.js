@@ -217,10 +217,10 @@ function attachWheel(el) {
 }
 
 function attachDoubleClick(el, context) {
-	alert('TODO: something is wrong with this..');
-	return;
 	if (!el) return;
 	el.addEventListener("dblclick", (e) => {
+		alert('TODO: something is wrong with this..');
+		return;
 		const { triggers: { tabs: triggers } } = context;
 		triggers.addFileUntracked(e);
 	});

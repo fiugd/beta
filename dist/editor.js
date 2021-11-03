@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-03T00:31:43.640Z )
+	Version 0.4.6 ( 2021-11-03T00:37:57.853Z )
 	https://github.com/crosshj/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -886,8 +886,11 @@ function attachWheel(el) {
 }
 
 function attachDoubleClick(el, context) {
-    alert("TODO: something is wrong with this..");
-    return;
+    if (!el) return;
+    el.addEventListener("dblclick", (e => {
+        alert("TODO: something is wrong with this..");
+        return;
+    }));
 }
 
 const initTabs = (parent, container) => (tabDefArray = [], context) => {
@@ -900,7 +903,7 @@ const initTabs = (parent, container) => (tabDefArray = [], context) => {
     setTimeout((() => {
         const tabs = document.querySelector("#editor-tabs");
         attachWheel(tabs);
-        attachDoubleClick();
+        attachDoubleClick(tabs);
         const activeTab = document.querySelector("#editor-tabs-container .active");
         if (activeTab) {
             activeTab.scrollIntoView();
