@@ -1,7 +1,7 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2021-11-03T21:57:05.229Z )
-	https://github.com/crosshj/fiug/terminal
+	Version 0.4.6 ( 2021-11-03T22:40:23.661Z )
+	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
 const target = window.top;
@@ -4708,7 +4708,7 @@ const getStatefulHandlers = (state, {changeFolder: changeFolder}) => ({
 
 const link$3 = url => chalk.hex("#9cdcfe")(url);
 
-const commandHelp$2 = command => `\n\n${chalk.bold("Usage:")} ${command.keyword} ${chalk.hex("#BBB")(command.usage || "")}\n\n${command.description || "MISSING DESCRIPTION: bug someone to add a description."}\n\n  -?, --????   ${chalk.hex("#BBB")("TODO")}        TODO: add args description\n  -h, --help   ${/* SPACER                */ ""}    Prints this guide\n\n${chalk.bold("Examples:")}\n  TODO: add examples\n\n${chalk.italic(`\nOnline help: ${link$3("https://github.com/crosshj/fiug/wiki")}\nReport bugs: ${link$3("https://github.com/crosshj/fiug/issues")}\n`)}\n`;
+const commandHelp$2 = command => `\n\n${chalk.bold("Usage:")} ${command.keyword} ${chalk.hex("#BBB")(command.usage || "")}\n\n${command.description || "MISSING DESCRIPTION: bug someone to add a description."}\n\n  -?, --????   ${chalk.hex("#BBB")("TODO")}        TODO: add args description\n  -h, --help   ${/* SPACER                */ ""}    Prints this guide\n\n${chalk.bold("Examples:")}\n  TODO: add examples\n\n${chalk.italic(`\nOnline help: ${link$3("https://github.com/fiugd/fiug/wiki")}\nReport bugs: ${link$3("https://github.com/fiugd/fiug/issues")}\n`)}\n`;
 
 const readFile = async args => {
     const {file: file, cwd: cwd} = args;
@@ -4871,7 +4871,7 @@ const link$2 = url => chalk.hex("#9cdcfe")(url);
 
 const [bold, hex, italic] = [ chalk.bold.bind(chalk), chalk.hex.bind(chalk), chalk.italic.bind(chalk) ];
 
-const commandHelp$1 = command => `\n\n${bold("Usage:")} ${command.keyword} ${hex("#BBB")(command.usage || "")}\n\nThese are common Git COMMANDs which are supported in some form here:\n\n${hex("#BBB")("start a working area")}\n   ${bold("clone")}      Copy a remote repository to local\n   ${bold("init")}       Create an empty repository\n\n${hex("#BBB")("work on the current change")}\n   ${bold("add")}        Add files to commit\n   ${bold("rm")}         Remove files from commit\n\n${hex("#BBB")("examine the history and state")}\n   ${bold("diff")}       Show local changes per file\n   ${bold("status")}     List all files changed locally\n   ${bold("log")}        Show commit logs\n\n${hex("#BBB")("grow, mark, and tweak your common history")}\n   ${bold("branch")}     List, create, or delete branches\n   ${bold("commit")}     Record changes to the repository\n\n${hex("#BBB")("collaborate")}\n   ${bold("pull")}       Fetch recent changes from remote\n   ${bold("push")}       Update remote with local commits\n\n${hex("#BBB")("other")}\n   ${bold("config")}     Get and set repository or global options\n\n${hex("#BBB")("totally non-standard utils")}\n   ${bold("list")}       List all cloned repositories\n   ${bold("open")}       Load a repository for editing\n   ${bold("close")}      Unload a repository\n\n${italic(`\nOnline help: ${link$2("https://github.com/crosshj/fiug/wiki")}\nReport bugs: ${link$2("https://github.com/crosshj/fiug/issues")}\n`)}\n`;
+const commandHelp$1 = command => `\n\n${bold("Usage:")} ${command.keyword} ${hex("#BBB")(command.usage || "")}\n\nThese are common Git COMMANDs which are supported in some form here:\n\n${hex("#BBB")("start a working area")}\n   ${bold("clone")}      Copy a remote repository to local\n   ${bold("init")}       Create an empty repository\n\n${hex("#BBB")("work on the current change")}\n   ${bold("add")}        Add files to commit\n   ${bold("rm")}         Remove files from commit\n\n${hex("#BBB")("examine the history and state")}\n   ${bold("diff")}       Show local changes per file\n   ${bold("status")}     List all files changed locally\n   ${bold("log")}        Show commit logs\n\n${hex("#BBB")("grow, mark, and tweak your common history")}\n   ${bold("branch")}     List, create, or delete branches\n   ${bold("commit")}     Record changes to the repository\n\n${hex("#BBB")("collaborate")}\n   ${bold("pull")}       Fetch recent changes from remote\n   ${bold("push")}       Update remote with local commits\n\n${hex("#BBB")("other")}\n   ${bold("config")}     Get and set repository or global options\n\n${hex("#BBB")("totally non-standard utils")}\n   ${bold("list")}       List all cloned repositories\n   ${bold("open")}       Load a repository for editing\n   ${bold("close")}      Unload a repository\n\n${italic(`\nOnline help: ${link$2("https://github.com/fiugd/fiug/wiki")}\nReport bugs: ${link$2("https://github.com/fiugd/fiug/issues")}\n`)}\n`;
 
 /*
 start a working area (see also: git help tutorial)
@@ -5174,7 +5174,7 @@ const commit = async ({ops: ops, term: term}, args) => {
     return "\n" + chalk.hex("#ccc")("Commit Info: ") + chalk.hex("#9cdcfe")(shortenShaUrl(commitResponse)) + "\n";
 };
 
-const cloneUsage = chalk.hex("#ccc")(`\nUsage:\n  git clone [-b or --branch] <branch> <repository>\n\nExample:\n  git clone -b main crosshj/fiug-welcome\n\n`);
+const cloneUsage = chalk.hex("#ccc")(`\nUsage:\n  git clone [-b or --branch] <branch> <repository>\n\nExample:\n  git clone -b main fiugd/welcome\n\n`);
 
 const clone = async ({term: term}, args) => {
     //git clone --branch <branchname> <remote-repo-url>
@@ -5355,11 +5355,11 @@ const Git = (term, comm) => ({
 
 const alotOfEvents = [ "ui", "fileClose", "fileSelect", "operations", "operationDone", "contextmenu", "contextmenu-select" ];
 
-const history = [ "watch -e fileSelect", `watch -e ${alotOfEvents.join(" ")}`, `watch`, `git branch`, `git pull`, `git push`, `git clone`, `git status`, `git diff terminal.git.mjs`, `git commit -m "commit me"`, `git config --global user.email johndoe@example.com`, `git config --local user.name "John Doe"`, `cat terminal/terminal.comm.js`, `node --watch terminal/.example.js`, `node --watch test/service-worker.services.test.js`, `node service-worker/_build.js`, `node shared/vendor/codemirror/update.js`, `git commit -m "editor in its own iframe"`, "preview editor/editor.html", "node editor/build/build.js", "preview --watch=false dist/editor.html" ];
+const history = [ "watch -e fileSelect", `watch -e ${alotOfEvents.join(" ")}`, `watch`, `git branch`, `git pull`, `git push`, `git clone`, `git status`, `git diff terminal.git.mjs`, `git commit -m "commit me"`, `git config --global user.email johndoe@example.com`, `git config --local user.name "John Doe"`, `cat terminal/terminal.comm.js`, `node --watch terminal/.example.js`, `node --watch test/service-worker.services.test.js`, `node service-worker/_build.js`, `node shared/vendor/codemirror/update.js`, `git commit -m "editor in its own iframe"`, "preview editor/editor.html", "node editor/build/build.js", "preview --watch=false dist/editor.html", "node terminal/build/build.js" ];
 
 const usage$1 = chalk => {
     const link = url => chalk.hex("#9cdcfe")(url);
-    return `\n\n${chalk.bold("Usage:")} history ${chalk.hex("#BBB")("")}\n\nPrints history of entered commands.\n\n  -h, --help   ${/* SPACER                */ ""}    Prints this guide\n\n${chalk.italic(`\nOnline help: ${link("https://github.com/crosshj/fiug/wiki")}\nReport bugs: ${link("https://github.com/crosshj/fiug/issues")}\n`)}\n\t`;
+    return `\n\n${chalk.bold("Usage:")} history ${chalk.hex("#BBB")("")}\n\nPrints history of entered commands.\n\n  -h, --help   ${/* SPACER                */ ""}    Prints this guide\n\n${chalk.italic(`\nOnline help: ${link("https://github.com/fiugd/fiug/wiki")}\nReport bugs: ${link("https://github.com/fiugd/fiug/issues")}\n`)}\n\t`;
 };
 
 class History {
@@ -7253,7 +7253,7 @@ const link = url => chalk.hex("#9cdcfe")(url)
 // TODO: would be nice if this were auto-generated
 ;
 
-const usage = `\n\n${chalk.bold("Usage:")} watch -e ${chalk.hex("#BBB")("[EVENT(S)]...")}\n\nPrints EVENT(S) as they occur in the system.\n\n  -e, --event  ${chalk.hex("#BBB")("EVENT(S)")}    Events to watch\n  -h, --help   ${/* SPACER        */ "        "}    Prints this guide\n\n${chalk.bold("Examples:")}\n  watch -e fileSelect\n  watch -e ui fileClose fileSelect operations operationDone\n\n${chalk.italic(`\nOnline help: ${link("https://github.com/crosshj/fiug/wiki")}\nReport bugs: ${link("https://github.com/crosshj/fiug/issues")}\n`)}\n`;
+const usage = `\n\n${chalk.bold("Usage:")} watch -e ${chalk.hex("#BBB")("[EVENT(S)]...")}\n\nPrints EVENT(S) as they occur in the system.\n\n  -e, --event  ${chalk.hex("#BBB")("EVENT(S)")}    Events to watch\n  -h, --help   ${/* SPACER        */ "        "}    Prints this guide\n\n${chalk.bold("Examples:")}\n  watch -e fileSelect\n  watch -e ui fileClose fileSelect operations operationDone\n\n${chalk.italic(`\nOnline help: ${link("https://github.com/fiugd/fiug/wiki")}\nReport bugs: ${link("https://github.com/fiugd/fiug/issues")}\n`)}\n`;
 
 async function invoke(args, done) {
     const {attach: attach} = this.comm;
