@@ -55,7 +55,7 @@ steps to opened/closed/selected files state sanity:
 
 Currently, storage writes for this state are here:
 modules/TreeView#L23
-- https://github.com/crosshj/fiug-beta/blob/694dcfbe73e2c29c8c6c6e7f86cfe23010841612/modules/TreeView.mjs#L23
+- https://github.com/fiugd/beta/blob/main/modules/TreeView.mjs#L23
 */
 
 class StateTracker {
