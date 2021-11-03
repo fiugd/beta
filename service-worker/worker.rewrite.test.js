@@ -5,10 +5,11 @@ import 'rollup';
 import 'sourceMap';
 import 'terser';
 
-import rollupConfig from '/crosshj/fiug-beta/service-worker/build/rollup.config.js';
-import terserConfig from '/crosshj/fiug-beta/service-worker/build/terser.config.js';
-import packageJson from "/crosshj/fiug-beta/package.json" assert { type: "json" };
+import rollupConfig from '/fiugd/beta/service-worker/build/rollup.config.js';
+import terserConfig from '/fiugd/beta/service-worker/build/terser.config.js';
+import packageJson from "/fiugd/beta/package.json" assert { type: "json" };
 `;
+
 const map = {
 	imports: {
 		rollup: 'https://unpkg.com/rollup/dist/rollup.browser.js',
