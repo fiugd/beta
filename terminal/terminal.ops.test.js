@@ -14,7 +14,7 @@ const term = {
 	write: console.log
 };
 const comm = () => {};
-const getCwd = () => 'crosshj/fiug-beta/terminal';
+const getCwd = () => 'fiugd/beta/terminal';
 const logger = console.log;
 const done = () => console.log('finished');
 
@@ -45,14 +45,14 @@ const write = (text) => {
 */
 /*
 (async () => {
-	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
+	const baseUrl = location.origin+ '/fiugd/beta/terminal';
 	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
 
 	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
 
 	const term = { write };
 
-	const getCwd = () => 'crosshj/fiug-beta/terminal';
+	const getCwd = () => 'fiugd/beta/terminal';
 	const ops = await GetDynamicOps(term, comm, getCwd);
 
 	const logger = console.log;
@@ -67,14 +67,14 @@ const write = (text) => {
 
 /*
 (async () => {
-	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
+	const baseUrl = location.origin+ '/fiugd/beta/terminal';
 	const { default: GetDynamicOps, readDir } = await import(`${baseUrl}/terminal.ops.dynamic.js`);
 
 	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
 
 	const term = { write };
 
-	const getCwd = () => 'crosshj/fiug-beta/terminal';
+	const getCwd = () => 'fiugd/beta/terminal';
 	const ops = await GetDynamicOps(term, comm, getCwd);
 
 	const logger = console.log;
@@ -88,14 +88,14 @@ const write = (text) => {
 */ 
 
 (async () => {
-	const baseUrl = location.origin+ '/crosshj/fiug-beta/terminal';
+	const baseUrl = location.origin+ '/fiugd/beta/terminal';
 	const { default: GetOps, readDir } = await import(`${baseUrl}/terminal.ops.js`);
 
 	const { parseArgs } = await import(`${baseUrl}/terminal.lib.js`);
 
 	const term = { write: console.log };
 
-	const getCwd = () => 'crosshj/fiug-beta/terminal';
+	const getCwd = () => 'fiugd/beta/terminal';
 	const ops = await GetOps(term, comm, getCwd); 
 
 	const logger = console.log;
