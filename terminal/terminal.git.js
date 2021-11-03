@@ -412,7 +412,7 @@ Usage:
   git clone [-b or --branch] <branch> <repository>
 
 Example:
-  git clone -b main crosshj/fiug-welcome
+  git clone -b main fiugd/welcome
 
 `);
 const clone = async ({term}, args) => {
