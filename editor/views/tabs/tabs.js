@@ -217,6 +217,8 @@ function attachWheel(el) {
 }
 
 function attachDoubleClick(el, context) {
+	alert('TODO: something is wrong with this..');
+	return;
 	if (!el) return;
 	el.addEventListener("dblclick", (e) => {
 		const { triggers: { tabs: triggers } } = context;
