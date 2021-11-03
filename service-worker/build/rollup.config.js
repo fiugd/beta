@@ -8,7 +8,7 @@ const banner = `/*!
 	fiug service-worker
 	Version {{VERSION}}
 	Build Date {{DATE}}
-	https://github.com/crosshj/fiug
+	https://github.com/fiugd/fiug/service-worker
 	(c) 2011-2012 Harrison Cross.
 */
 `;

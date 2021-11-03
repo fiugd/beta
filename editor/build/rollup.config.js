@@ -34,7 +34,7 @@ const analyzeConfig = (root) => ({
 const banner = `/*!
 	fiug editor component
 	Version {{VERSION}} ( {{DATE}} )
-	https://github.com/crosshj/fiug/editor
+	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
 `;
