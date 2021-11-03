@@ -11,10 +11,8 @@ const dummyFunc = (fnName, returns='') => (...args) => {
 const getCurrentFile = dummyFunc('getCurrentFile');
 const getCurrentFileFull = () => currentService.state.selected;
 const setCurrentFile = ({ filePath }) => {
-	// TODO: this is UGLY - service worker should be consistent with how it returns files...
 	const found = currentService.code
 		.find(x => x.name === filePath ||
-			x.path === filePath ||
 			x.path === '/'+filePath ||
 			x.path === '/'+currentService.name+'/'+filePath
 		)
@@ -51,7 +49,20 @@ const getOpenedFiles = dummyFunc('getOpenedFiles');
 
 const initState = (all, current) => {
 	allServices = all;
+
 	currentService = current;
+
+	// TODO: this is UGLY - service worker should be consistent with how it returns files...
+	currentService.code.forEach(x => {
+		if(x.path.startsWith('/')) return;
+		x.path = '/' + x.path;
+	});
+	if(typeof currentService.state.selected === "string"){
+		currentService.state.selected = {
+			name: currentService.state.selected.split('/').pop(),
+			path: `${currentService.name}/${currentService.state.selected}`
+		};
+	}
 };
 
 export {
