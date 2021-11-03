@@ -15,79 +15,79 @@ const cache = await caches.open(cacheName);
 
 
 const updates = [[
-	`/crosshj/fiug-beta/shared/vendor/codemirror/addon.bundle.js`,
+	`/fiugd/beta/shared/vendor/codemirror/addon.bundle.js`,
 	`/shared/vendor/codemirror/addon.bundle.js`
 ],[
-	`/crosshj/fiug-beta/shared/vendor/codemirror/mode.bundle.js`,
+	`/fiugd/beta/shared/vendor/codemirror/mode.bundle.js`,
 	`/shared/vendor/codemirror/mode.bundle.js`
 ],[
-	`/crosshj/fiug-beta/shared/modules/utilities.mjs`,
+	`/fiugd/beta/shared/modules/utilities.mjs`,
 	`/shared/modules/utilities.mjs`
 ],[
-	`/crosshj/fiug-beta/shared/modules/editor.mjs`,
+	`/fiugd/beta/shared/modules/editor.mjs`,
 	`/shared/modules/editor.mjs`
 ],[
-	`/crosshj/fiug-beta/shared/images/faviconBeta.svg`,
+	`/fiugd/beta/shared/images/faviconBeta.svg`,
 	`/shared/images/faviconBeta.svg`
 ],[
-	`/crosshj/fiug-beta/shared/icons/seti/ext.json.mjs`,
+	`/fiugd/beta/shared/icons/seti/ext.json.mjs`,
 	`/shared/icons/seti/ext.json.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/Editor.mjs`,
+	`/fiugd/beta/modules/Editor.mjs`,
 	`/_/modules/Editor.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/TreeView.mjs`,
+	`/fiugd/beta/modules/TreeView.mjs`,
 	`/_/modules/TreeView.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/editorEvents.mjs`,
+	`/fiugd/beta/modules/editorEvents.mjs`,
 	`/_/modules/editorEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/treeEvents.mjs`,
+	`/fiugd/beta/modules/treeEvents.mjs`,
 	`/_/modules/treeEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/statusBarEvents.mjs`,
+	`/fiugd/beta/modules/statusBarEvents.mjs`,
 	`/_/modules/statusBarEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/editorTabsEvents.mjs`,
+	`/fiugd/beta/modules/editorTabsEvents.mjs`,
 	`/_/modules/editorTabsEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/operationsEvents.mjs`,
+	`/fiugd/beta/modules/operationsEvents.mjs`,
 	`/_/modules/operationsEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/statusBarEvents.mjs`,
+	`/fiugd/beta/modules/statusBarEvents.mjs`,
 	`/_/modules/statusBarEvents.mjs`
 ],[
-	`/crosshj/fiug-beta/modules/state.mjs`,
+	`/fiugd/beta/modules/state.mjs`,
 	`/_/modules/state.mjs`
 ],
 
 //terminal
 [
-	`/crosshj/fiug-beta/modules/Terminal.mjs`,
+	`/fiugd/beta/modules/Terminal.mjs`,
 	`/_/modules/Terminal.mjs`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.html`,
+	`/fiugd/beta/terminal/terminal.html`,
 	`/_/modules/terminal/index.html`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.js`,
+	`/fiugd/beta/terminal/terminal.js`,
 	`/_/modules/terminal/terminal.js`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.ops.js`,
+	`/fiugd/beta/terminal/terminal.ops.js`,
 	`/_/modules/terminal/terminal.ops.js`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.history.js`,
+	`/fiugd/beta/terminal/terminal.history.js`,
 	`/_/modules/terminal/terminal.history.js`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.git.js`,
+	`/fiugd/beta/terminal/terminal.git.js`,
 	`/_/modules/terminal/terminal.git.js`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.css`,
+	`/fiugd/beta/terminal/terminal.css`,
 	`/_/modules/terminal/terminal.css`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.lib.js`,
+	`/fiugd/beta/terminal/terminal.lib.js`,
 	`/_/modules/terminal/terminal.lib.js`
 ],[
-	`/crosshj/fiug-beta/terminal/terminal.utils.js`,
+	`/fiugd/beta/terminal/terminal.utils.js`,
 	`/_/modules/terminal/terminal.utils.js`
 ]];
 
