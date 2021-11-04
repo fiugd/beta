@@ -1,22 +1,12 @@
 import Editor from "./deprecate/editorModule.js";
 import Container from './container.js';
 import Search from './search.js';
-
-import {
-	codemirrorModeFromFileType,
-	htmlToElement,
-	getFileType,
-} from '../../utils/misc.js';
-import {
-	getState, getAllServices, getSettings,
-	setCurrentFile, getCurrentFileFull,
-	DEBUG
-} from "../../utils/State.js";
-const { indentWithTabs, tabSize } = getSettings();
-
+import { codemirrorModeFromFileType, getFileType } from '../../utils/misc.js';
+import { getSettings, DEBUG } from "../../utils/State.js";
 import attachGutterHelper from './gutterHelper.js';
+import "../../vendor/localforage.min.js";
 
-import "../../../shared/vendor/localforage.min.js";
+const { indentWithTabs, tabSize } = getSettings();
 
 let editorGutter;
 let cmDom;
@@ -43,7 +33,7 @@ const initEditor = (context) => {
 	return editorDiv;
 }
 
-const InlineEditor = (args, context) => {
+const Editor = (args, context) => {
 	const triggers = context.triggers.editor;
 
 	const {
@@ -382,4 +372,4 @@ const InlineEditor = (args, context) => {
 
 attachGutterHelper(editorGutter);
 
-export default InlineEditor;
+export default Editor;

@@ -6,22 +6,19 @@ document.adoptedStyleSheets = [
 ];
 
 import { 
-	DEBUG, initState, setState, getCurrentFile, getCurrentService
+	DEBUG, initState, getCurrentFile, getCurrentService
 } from './utils/State.js';
 
 import { getFilePath as gfp } from './utils/misc.js';
 const getFilePath = gfp(getCurrentService);
 
-import EditorTabs from "./views/tabs/tabs.js";
-import EditorStatus from "./views/status/status.js";
-import editor from './views/editor/editor.js';
-import { switchEditor, messageEditor } from './views/editor/switcher.js';
+import editor from './main/components/index.js'
+import { switchEditor, messageEditor } from './main/components/switcher.js'
+import { tabs } from './tabs/tabs.js'
+import { status } from './status/status.js'
 
 import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
 import events from './events.js';
-
-const tabs = EditorTabs();
-const status = EditorStatus();
 
 const context = {
 	getCurrentFile, // << access within file instead

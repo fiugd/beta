@@ -1,59 +1,76 @@
-import editor from './handlers/editor/index.js';
-import tabs from './handlers/tabs/index.js';
-import status from './handlers/status/index.js';
+import mainListeners from './main/listeners/index.js';
+import mainTriggers from './main/triggers/index.js';
+
+import tabsListeners from './tabs/listeners/index.js';
+import tabsTriggers from './tabs/triggers/index.js';
+
+import statusListeners from './status/listeners/index.js';
+//import statusTriggers from './status/triggers/index.js';
 
 const listeners = [{
 	eventName: "service-switch-notify",
-	handlers: [ editor.serviceSwitch ]
+	handlers: [ mainListeners.serviceSwitch ]
 }, {
 	eventName: "cursorActivity",
-	handlers: [ status.cursorActivity ]
+	handlers: [ statusListeners.cursorActivity ]
 }, {
 	eventName: "operationDone",
-	handlers: [ editor.operationDone, tabs.operationDone, status.operationDone ]
+	handlers: [
+		mainListeners.operationDone,
+		tabsListeners.operationDone,
+		statusListeners.operationDone
+	]
 }, {
 	eventName: "operations",
-	handlers: [ tabs.operationDone ]
+	handlers: [ tabsListeners.operationDone ]
 }, {
 	eventName: "open-settings-view",
-	handlers: [ editor.systemDocs, tabs.fileSelect ]
+	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
 	eventName: "add-service-folder",
-	handlers: [ editor.systemDocs, tabs.fileSelect ]
+	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
 	eventName: "open-previous-service",
-	handlers: [ editor.systemDocs, tabs.fileSelect ]
+	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
 	eventName: "connect-service-provider",
-	handlers: [ editor.systemDocs, tabs.fileSelect ]
+	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
 	eventName: "noServiceSelected",
-	handlers: [ editor.nothingOpen ]
+	handlers: [ mainListeners.nothingOpen ]
 }, {
 	eventName: "fileSelect",
-	handlers: [ editor.fileSelect, tabs.fileSelect, status.fileSelect ]
+	handlers: [
+		mainListeners.fileSelect,
+		tabsListeners.fileSelect,
+		statusListeners.fileSelect
+	]
 }, {
 	eventName: "fileClose",
-	handlers: [ editor.fileClose, tabs.fileClose, status.fileClose ]
+	handlers: [
+		mainListeners.fileClose,
+		tabsListeners.fileClose,
+		statusListeners.fileClose
+	]
 }, {
 	eventName: "fileChange",
-	handlers: [ tabs.fileChange, status.fileChange ]
+	handlers: [ tabsListeners.fileChange, statusListeners.fileChange ]
 }, {
 	eventName: "contextmenu",
 	handlers: [
-		{ ...editor.contextMenu, options: { capture: true } },
-		{ ...tabs.contextMenu, options: { capture: true } },
+		{ ...mainListeners.contextMenu, options: { capture: true } },
+		{ ...tabsListeners.contextMenu, options: { capture: true } },
 	]
 }, {
 	eventName: "contextmenu-select",
-	handlers: [ editor.contextMenuSelect, tabs.contextMenuSelect ]
+	handlers: [ mainListeners.contextMenuSelect, tabsListeners.contextMenuSelect ]
 }, {
 	eventName: "ui",
-	handlers: [ tabs.ui ]
+	handlers: [ tabsListeners.ui ]
 //DEPRECATE listener click (ui should call trigger)
 }, {
 	eventName: "click",
-	handlers: [ tabs.click ]
+	handlers: [ tabsListeners.click ]
 }];
 
 const triggers = {
@@ -72,23 +89,23 @@ const triggers = {
 		}, {
 			eventName: "fileChange",
 			type: 'raw',
-			handlers: [ editor.fileChange ]
+			handlers: [ mainTriggers.fileChange ]
 		}, {
 			eventName: "cursorActivity",
 			type: 'raw',
-			handlers: [ editor.cursorActivity ]
+			handlers: [ mainTriggers.cursorActivity ]
 		}, {
 			eventName: "provider-test",
 			type: 'click',
-			handlers: [ editor.provider.test ]
+			handlers: [ mainTriggers.provider.test ]
 		}, {
 			eventName: "provider-save",
 			type: 'click',
-			handlers: [ editor.provider.save ]
+			handlers: [ mainTriggers.provider.save ]
 		}, {
 			eventName: "provider-add-service",
 			type: 'click',
-			handlers: [ editor.provider.addService ]
+			handlers: [ mainTriggers.provider.addService ]
 		}], 
 	Tabs: [{
 			eventName: "ui",
@@ -100,12 +117,12 @@ const triggers = {
 			name: "closeOthers",
 			eventName: "fileClose",
 			type: 'raw',
-			handlers: [ tabs.closeMultiple.others ]
+			handlers: [ tabsTriggers.closeMultiple.others ]
 		}, {
 			name: "closeAll",
 			eventName: "fileClose",
 			type: 'raw',
-			handlers: [ tabs.closeMultiple.all ]
+			handlers: [ tabsTriggers.closeMultiple.all ]
 		}, {
 			eventName: "fileSelect",
 			type: 'raw',

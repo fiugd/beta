@@ -1,4 +1,3 @@
-//This is used by inlineEditor
 const Container = () => {
 	const prevConatiner = document.querySelector("#full-page-container");
 	if (prevConatiner) {

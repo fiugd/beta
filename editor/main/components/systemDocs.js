@@ -1,10 +1,6 @@
-import {
-	htmlToElement,
-} from '../../utils/misc.js';
+import { htmlToElement } from '../../utils/misc.js';
 
-import {
-	getAllServices
-} from "../../utils/State.js";
+import { getAllServices } from "../../utils/State.js";
 
 const miscSystemSettings = [
 	{

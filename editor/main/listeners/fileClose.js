@@ -1,4 +1,9 @@
-const fileClose = (e, { getCurrentFile, getFilePath, switchEditor }) => {
+import { getCurrentFile, getCurrentService } from "../../utils/State.js";
+import { getFilePath as gfp } from '../../utils/misc.js';
+
+const getFilePath = gfp(getCurrentService);
+
+const fileClose = (e, { switchEditor }) => {
 	const { name, parent, path, next, nextPath } = e.detail;
 	if(!next){
 		switchEditor({ mode: "nothingOpen" });
@@ -14,7 +19,7 @@ const fileClose = (e, { getCurrentFile, getFilePath, switchEditor }) => {
 		});
 		return;
 	}
-	const currentFile = getCurrentFile();
+	const currentFile = getCurrentFile(get)();
 	if(next === currentFile) return;
 
 	const filename = getFilePath({ name, parent, path, next, nextPath });
