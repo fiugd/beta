@@ -1,5 +1,5 @@
 import { chalk, jsonColors,getCurrentService } from './terminal.utils.js';
-import { pather } from '/shared/modules/utilities.mjs';
+import { pather } from '/shared/utilities.mjs';
 
 const state = {
 	cwd: undefined,

@@ -1,5 +1,5 @@
 import { attach } from "./Listeners.mjs";
-import { codemirrorModeFromFileType } from "/shared/modules/utilities.mjs";
+import { codemirrorModeFromFileType } from "/shared/utilities.mjs";
 import ext from "/shared/icons/seti/ext.json.mjs";
 import { getDefaultFile } from "./state.mjs";
 

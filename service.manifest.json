@@ -246,8 +246,8 @@
 			"handler": null
 		},
 		{
-			"route": "/shared/modules/utilities.mjs",
-			"source": "/shared/modules/utilities.mjs",
+			"route": "/shared/utilities.mjs",
+			"source": "/shared/utilities.mjs",
 			"handler": null
 		},
 		{
