@@ -1,7 +1,7 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-03T00:37:57.853Z )
-	https://github.com/crosshj/fiug/editor
+	Version 0.4.6 ( 2021-11-04T22:42:34.457Z )
+	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
 const sheet$3 = new CSSStyleSheet;
@@ -55,1032 +55,6 @@ const initState = (all, current) => {
         });
     }
 };
-
-var ext = {
-    mp3: "audio",
-    wav: "audio",
-    ogg: "audio",
-    adb: "ada",
-    ads: "ada",
-    adoc: "asciidoc",
-    apl: "apl",
-    bowerrc: "bower",
-    bf: "brainfuck",
-    cs: "csharp",
-    c: "c",
-    h: "c",
-    m: "c",
-    ctp: "cake_php",
-    clj: "clojure",
-    cljc: "clojure",
-    cljs: "clojure",
-    cjsx: "react",
-    jsx: "react",
-    tmp: "clock",
-    coffee: "coffee",
-    cfc: "coldfusion",
-    cfm: "coldfusion",
-    config: "config",
-    cpp: "cpp",
-    cr: "crystal",
-    cs: "csharp",
-    css: "css",
-    dart: "dart",
-    sss: "css",
-    csv: "csv",
-    edn: "clojure",
-    editorconfig: "config",
-    ejs: "ejs",
-    elm: "elm",
-    ttf: "font",
-    woff: "font",
-    woff2: "font",
-    eot: "font",
-    gitkeep: "git",
-    gitconfig: "git",
-    gitattributes: "git",
-    gitmodules: "git",
-    gitignore: "git",
-    go: "go",
-    gradle: "gradle",
-    grails: "grails",
-    groovy: "grails",
-    hh: "hacklang",
-    haml: "haml",
-    hs: "haskell",
-    lhs: "haskell",
-    lisp: "lisp",
-    htm: "html",
-    html: "html",
-    shtml: "html",
-    dhtml: "html",
-    ai: "ai",
-    png: "image",
-    ico: "image",
-    jpg: "image",
-    bmp: "image",
-    jpeg: "image",
-    gif: "image",
-    jade: "jade",
-    java: "java",
-    mjs: "javascript",
-    js: "javascript",
-    es6: "javascript",
-    es7: "javascript",
-    erl: "erlang",
-    ex: "elixir",
-    gltf: "json",
-    ipynb: "json",
-    json: "json",
-    jl: "julia",
-    less: "less",
-    license: "license",
-    liquid: "liquid",
-    ls: "livescript",
-    lua: "lua",
-    md: "markdown",
-    mustache: "mustache",
-    handlebars: "mustache",
-    hbs: "mustache",
-    hjs: "mustache",
-    stache: "mustache",
-    npmignore: "npm",
-    ml: "ocaml",
-    mli: "ocaml",
-    cmx: "ocaml",
-    cmxa: "ocaml",
-    pdf: "pdf",
-    pl: "perl",
-    pro: "prolog",
-    psd: "photoshop",
-    php: "php",
-    "php.inc": "php",
-    pug: "pug",
-    pp: "puppet",
-    py: "python",
-    rb: "ruby",
-    "erb.html": "ruby",
-    "html.erb": "ruby",
-    rs: "rust",
-    sass: "sass",
-    scss: "sass",
-    scm: "scheme",
-    sbt: "sbt",
-    scala: "scala",
-    sql: "sql",
-    sh: "shell",
-    cmd: "shell",
-    zsh: "shell",
-    fish: "shell",
-    profile: "shell",
-    slim: "slim",
-    smarty: "smarty",
-    "smarty.tpl": "smarty",
-    styl: "stylus",
-    svg: "svg",
-    swift: "swift",
-    tf: "terraform",
-    "tf.json": "terraform",
-    tex: "tex",
-    sty: "tex",
-    cls: "tex",
-    dtx: "tex",
-    ins: "tex",
-    txt: "default",
-    twig: "twig",
-    as: "assemblyscript",
-    ts: "typescript",
-    tsx: "react",
-    direnv: "config",
-    env: "config",
-    static: "config",
-    slugignore: "config",
-    vala: "vala",
-    wmv: "video",
-    mov: "video",
-    ogv: "video",
-    webm: "video",
-    avi: "video",
-    mpg: "video",
-    mp4: "video",
-    xml: "xml",
-    yml: "yml",
-    yaml: "yml",
-    vue: "vue",
-    babelrc: "babel",
-    eslintrc: "eslint",
-    jshintrc: "jshint",
-    xcodeproj: "xcode",
-    zip: "zip",
-    rar: "zip",
-    gz: "zip",
-    iso: "zip",
-    key: "key",
-    pem: "key",
-    fs: "fsharp",
-    vimrc: "vim",
-    vim: "vim",
-    viminfo: "vim",
-    sql: "sql",
-    bat: "shell",
-    htaccess: "apache",
-    wxml: "wxml",
-    wxss: "wxss",
-    ini: "config",
-    clj: "clojure",
-    r: "r",
-    lock: "lock",
-    asp: "asp",
-    flowconfig: "flow",
-    nim: "nim",
-    kt: "kotlin",
-    ink: "ink",
-    zig: "zig",
-    pas: "pascal",
-    raku: "raku",
-    fth: "forth",
-    d: "d",
-    pony: "pony",
-    ppm: "ppm",
-    wat: "wat",
-    piskel: "image",
-    scratch: "smarty",
-    bugs: "platformio"
-};
-
-function codemirrorModeFromFileType(fileType) {
-    const conversions = {
-        assemblyscript: {
-            name: "javascript",
-            typescript: true,
-            assemblyscript: true
-        },
-        apl: "text/apl",
-        config: "text/x-properties",
-        typescript: {
-            name: "javascript",
-            typescript: true
-        },
-        react: "jsx",
-        svg: "xml",
-        html: {
-            name: "htmlmixed",
-            tags: {
-                style: [ [ "type", /^text\/(x-)?scss$/, "text/x-scss" ], [ null, null, "css" ] ],
-                custom: [ [ null, null, "customMode" ] ]
-            }
-        },
-        sass: "text/x-scss",
-        less: "text/x-less",
-        image: {
-            name: "default"
-        },
-        bat: {
-            name: "default"
-        },
-        mjs: {
-            name: "javascript"
-        },
-        json: {
-            name: "javascript",
-            json: true
-        },
-        c: "text/x-csrc",
-        cpp: "text/x-c++src",
-        ocaml: "text/x-ocaml",
-        fsharp: "text/x-fsharp",
-        csharp: "text/x-csharp",
-        java: "text/x-java",
-        kotlin: "text/x-kotlin",
-        lisp: "commonlisp",
-        raku: "perl6",
-        yml: "text/x-yaml",
-        zig: "rust",
-        sql: "text/x-pgsql"
-    };
-    //console.log({ fileType, conversions: conversions[fileType] });
-        return conversions[fileType] || fileType;
-}
-
-/*!
-	from https://cdn.jsdelivr.net/gh/jshttp/mime-db@master/src/nginx-types.json
-*/ var mimeTypes = {
-    "application/atom+xml": {
-        extensions: [ "atom" ]
-    },
-    "application/java-archive": {
-        extensions: [ "jar", "war", "ear" ]
-    },
-    "application/javascript": {
-        extensions: [ "js" ]
-    },
-    "application/json": {
-        extensions: [ "json" ]
-    },
-    "application/mac-binhex40": {
-        extensions: [ "hqx" ]
-    },
-    "application/msword": {
-        extensions: [ "doc" ]
-    },
-    "application/octet-stream": {
-        extensions: [ "bin", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm" ]
-    },
-    "application/pdf": {
-        extensions: [ "pdf" ]
-    },
-    "application/postscript": {
-        extensions: [ "ps", "eps", "ai" ]
-    },
-    "application/rss+xml": {
-        extensions: [ "rss" ]
-    },
-    "application/rtf": {
-        extensions: [ "rtf" ]
-    },
-    "application/vnd.apple.mpegurl": {
-        extensions: [ "m3u8" ]
-    },
-    "application/vnd.google-earth.kml+xml": {
-        extensions: [ "kml" ]
-    },
-    "application/vnd.google-earth.kmz": {
-        extensions: [ "kmz" ]
-    },
-    "application/vnd.ms-excel": {
-        extensions: [ "xls" ]
-    },
-    "application/vnd.ms-fontobject": {
-        extensions: [ "eot" ]
-    },
-    "application/vnd.ms-powerpoint": {
-        extensions: [ "ppt" ]
-    },
-    "application/vnd.oasis.opendocument.graphics": {
-        extensions: [ "odg" ]
-    },
-    "application/vnd.oasis.opendocument.presentation": {
-        extensions: [ "odp" ]
-    },
-    "application/vnd.oasis.opendocument.spreadsheet": {
-        extensions: [ "ods" ]
-    },
-    "application/vnd.oasis.opendocument.text": {
-        extensions: [ "odt" ]
-    },
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
-        extensions: [ "pptx" ]
-    },
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
-        extensions: [ "xlsx" ]
-    },
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
-        extensions: [ "docx" ]
-    },
-    "application/vnd.wap.wmlc": {
-        extensions: [ "wmlc" ]
-    },
-    "application/wasm": {
-        extensions: [ "wasm" ]
-    },
-    "application/x-7z-compressed": {
-        extensions: [ "7z" ]
-    },
-    "application/x-cocoa": {
-        extensions: [ "cco" ]
-    },
-    "application/x-java-archive-diff": {
-        extensions: [ "jardiff" ]
-    },
-    "application/x-java-jnlp-file": {
-        extensions: [ "jnlp" ]
-    },
-    "application/x-makeself": {
-        extensions: [ "run" ]
-    },
-    "application/x-perl": {
-        extensions: [ "pl", "pm" ]
-    },
-    "application/x-pilot": {
-        extensions: [ "prc", "pdb" ]
-    },
-    "application/x-rar-compressed": {
-        extensions: [ "rar" ]
-    },
-    "application/x-redhat-package-manager": {
-        extensions: [ "rpm" ]
-    },
-    "application/x-sea": {
-        extensions: [ "sea" ]
-    },
-    "application/x-shockwave-flash": {
-        extensions: [ "swf" ]
-    },
-    "application/x-stuffit": {
-        extensions: [ "sit" ]
-    },
-    "application/x-tcl": {
-        extensions: [ "tcl", "tk" ]
-    },
-    "application/x-x509-ca-cert": {
-        extensions: [ "der", "pem", "crt" ]
-    },
-    "application/x-xpinstall": {
-        extensions: [ "xpi" ]
-    },
-    "application/xhtml+xml": {
-        extensions: [ "xhtml" ]
-    },
-    "application/xspf+xml": {
-        extensions: [ "xspf" ]
-    },
-    "application/zip": {
-        extensions: [ "zip" ]
-    },
-    "audio/midi": {
-        extensions: [ "mid", "midi", "kar" ]
-    },
-    "audio/mpeg": {
-        extensions: [ "mp3" ]
-    },
-    "audio/ogg": {
-        extensions: [ "ogg" ]
-    },
-    "audio/x-m4a": {
-        extensions: [ "m4a" ]
-    },
-    "audio/x-realaudio": {
-        extensions: [ "ra" ]
-    },
-    "font/woff": {
-        extensions: [ "woff" ]
-    },
-    "font/woff2": {
-        extensions: [ "woff2" ]
-    },
-    "image/gif": {
-        extensions: [ "gif" ]
-    },
-    "image/jpeg": {
-        extensions: [ "jpeg", "jpg" ]
-    },
-    "image/png": {
-        extensions: [ "png" ]
-    },
-    "image/svg+xml": {
-        extensions: [ "svg", "svgz" ]
-    },
-    "image/tiff": {
-        extensions: [ "tif", "tiff" ]
-    },
-    "image/vnd.wap.wbmp": {
-        extensions: [ "wbmp" ]
-    },
-    "image/webp": {
-        extensions: [ "webp" ]
-    },
-    "image/x-icon": {
-        extensions: [ "ico" ]
-    },
-    "image/x-jng": {
-        extensions: [ "jng" ]
-    },
-    "image/x-ms-bmp": {
-        extensions: [ "bmp" ]
-    },
-    "text/css": {
-        extensions: [ "css" ]
-    },
-    "text/html": {
-        extensions: [ "html", "htm", "shtml" ]
-    },
-    "text/mathml": {
-        extensions: [ "mml" ]
-    },
-    "text/plain": {
-        extensions: [ "txt" ]
-    },
-    "text/vnd.sun.j2me.app-descriptor": {
-        extensions: [ "jad" ]
-    },
-    "text/vnd.wap.wml": {
-        extensions: [ "wml" ]
-    },
-    "text/x-component": {
-        extensions: [ "htc" ]
-    },
-    "text/xml": {
-        extensions: [ "xml" ]
-    },
-    "video/3gpp": {
-        extensions: [ "3gpp", "3gp" ]
-    },
-    "video/mp2t": {
-        extensions: [ "ts" ]
-    },
-    "video/mp4": {
-        extensions: [ "mp4" ]
-    },
-    "video/mpeg": {
-        extensions: [ "mpeg", "mpg" ]
-    },
-    "video/quicktime": {
-        extensions: [ "mov" ]
-    },
-    "video/webm": {
-        extensions: [ "webm" ]
-    },
-    "video/x-flv": {
-        extensions: [ "flv" ]
-    },
-    "video/x-m4v": {
-        extensions: [ "m4v" ]
-    },
-    "video/x-mng": {
-        extensions: [ "mng" ]
-    },
-    "video/x-ms-asf": {
-        extensions: [ "asx", "asf" ]
-    },
-    "video/x-ms-wmv": {
-        extensions: [ "wmv" ]
-    },
-    "video/x-msvideo": {
-        extensions: [ "avi" ]
-    }
-};
-
-//import mimeTypes from 'https://raw.githubusercontent.com/jshttp/mime-db/master/src/apache-types.json';
-//import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.50.0/db.json";
-// TODO: maybe use insertAdjacentHTML for this instead
-// this works like jquery append ^^^
-function htmlToElement(html) {
-    var template = document.createElement("template");
-    html = html.trim();
- // Never return a text node of whitespace as the result
-        template.innerHTML = html;
-    //also would be cool to remove indentation from all lines
-        return template.content.firstChild;
-}
-
-const xfrmMimes = m => Object.entries(m || {}).map((([contentType, rest]) => ({
-    contentType: contentType,
-    extensions: [],
-    ...rest
-})));
-
-const getMime = file => xfrmMimes(mimeTypes).find((({extensions: ext}) => ext.includes(file.split(".").pop())));
-
-const getExtension = fileName => ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(/^\./, "");
-
-function getFileType(fileName = "") {
-    const mime = getMime(fileName) || {};
-    let type = "default";
-    const extension = getExtension(fileName);
-    if (mime?.contentType) {
-        type = mime.contentType;
-    }
-    //TODO: most of this should be able to go away with addition of getExtension above...
-        if (fileName.toLowerCase() === ".git/config") {
-        type = "config";
-    }
-    if (fileName.toLowerCase() === "license") {
-        type = "license";
-    }
-    if (ext[extension]) {
-        type = ext[extension];
-    }
-    if (extension === "bat") {
-        type = "bat";
-    }
-    if (extension === "scratch") {
-        type = "markdown";
-    }
-    if (extension === "piskel") {
-        type = "application/json";
-    }
-    if (extension === "bugs") {
-        type = "markdown";
-    }
-    if (extension === "wat") {
-        type = "text/webassembly";
-    }
-    if (extension === "htm" || extension === "html") {
-        type = {
-            name: "htmlmixed",
-            mimeType: "application/x-ejs",
-            icon: "html"
-        };
-    }
-    if (extension === "hbs") {
-        type = {
-            name: "handlebars",
-            base: "text/html"
-        };
-    }
-    if (type === "markdown") {
-        type = {
-            name: "markdown",
-            icon: "info"
-        };
-    }
-    return type;
-}
-
-function friendlyModeName(type, mode) {
-    if (type.includes && type.includes("sharp")) return type.replace("sharp", "#");
-    if ("cpp" === type) return "C++";
-    if ("ocaml" === type) return {
-        name: "OCaml"
-    };
-    if ([ "bat", "cpp", "lisp", "raku", "zig" ].includes(type)) return type;
-    if (mode.includes && mode.includes("text/x-")) return type;
-    return mode;
-}
-
-// from tabs
-// function getFileType(fileName = "") {
-// 	let type = "default";
-// 	const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(
-// 		/^\./,
-// 		""
-// 	);
-// 	//console.log(extension)
-// 	if (ext[extension]) {
-// 		type = ext[extension];
-// 	}
-// 	if (extension === "md") {
-// 		type = "info";
-// 	}
-// 	return type;
-// }
-const showFileInEditor = (filename, contents) => {
-    const fileType = getFileType(filename);
-    return ![ "image", "font", "audio", "video", "zip" ].includes(fileType) && !(typeof fileType === "string" && fileType.includes("image/"));
-};
-
-const noFrontSlash = path => {
-    try {
-        if (!path) return path;
-        if (!path.includes("/")) return path;
-        if (path[0] === "/") return path.slice(1);
-        return path;
-    } catch (e) {
-        debugger;
-    }
-};
-
-const pathNoServiceName = (service, path) => {
-    if (!path.includes("/")) return path;
-    if (!path.includes(service.name)) return noFrontSlash(path);
-    return noFrontSlash(noFrontSlash(path).replace(service.name, ""));
-};
-
-const getFilePath$1 = getCurrentService => ({name: name = "", parent: parent = "", path: path = "", next: next = "", nextPath: nextPath = ""}) => {
-    const nameWithPathIfPresent = (_path, _name) => _path ? _path.endsWith(_name) ? noFrontSlash(_path) : noFrontSlash(`${_path}/${_name}`) : noFrontSlash(_name);
-    const fileNameWithPath = next ? nameWithPathIfPresent(nextPath, next) : nameWithPathIfPresent(parent || path, name);
-    const service = getCurrentService({
-        pure: true
-    });
-    return pathNoServiceName(service, fileNameWithPath);
-}
-/*
-	Example usage of flatFromProp:
-
-	const input = [{
-		one: '1',
-		two: [
-			{ three: 'a' },
-			{ three: 'b'}
-		]
-	}];
-	const output = flatFromProp(input, "two")
-	assert(output === [
-		{ one: '1', three: 'a'},
-		{ one: '1', three: 'b'},
-	])
-
-*/;
-
-const flatFromProp = (arr, prop) => arr.flatMap((({[prop]: p, ...x}) => typeof p !== "undefined" && p.length ? p.map((y => ({
-    ...x,
-    ...y
-}))) : x));
-
-const formatHandlers = (namespace, x) => Object.entries(x).reduce(((all, [key, value]) => ({
-    ...all,
-    [key]: {
-        listener: value,
-        name: namespace
-    }
-})), {});
-
-function scrollToChild(child) {
-    window.parent = child.parentNode;
-    const parentWindowMin = parent.scrollLeft;
-    const parentWindowMax = parent.scrollLeft + parent.clientWidth;
-    const parentMaxScrollLeft = parent.scrollWidth - parent.clientWidth;
-    const childMin = child.offsetLeft;
-    const childMax = child.offsetLeft + child.clientWidth;
-    const childCenter = (childMin + childMax) / 2;
-    const idealScrollLeft = childCenter - parent.clientWidth / 2;
-    const idealScrollMin = childMax > parentWindowMin && childMin < parentWindowMin ? parent.scrollLeft - (parentWindowMin - childMin) - 20 : undefined;
-    const idealScrollMax = childMax > parentWindowMax && childMin < parentWindowMax ? parent.scrollLeft + (childMax - parentWindowMax) + 20 : undefined;
-    if (childMin === 0) {
-        parent.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "smooth"
-        });
-        return;
-    }
-    if (childMax === parent.scrollWidth) {
-        parent.scrollTo({
-            top: 0,
-            left: parentMaxScrollLeft,
-            behavior: "smooth"
-        });
-        return;
-    }
-    const childVisible = childMin >= parentWindowMin && childMax <= parentWindowMax;
-    if (childVisible) return;
-    if (idealScrollMin) {
-        console.log({
-            idealScrollMin: idealScrollMin
-        });
-        parent.scrollTo({
-            top: 0,
-            left: idealScrollMin,
-            behavior: "smooth"
-        });
-        return;
-    }
-    if (idealScrollMax) {
-        console.log({
-            idealScrollMax: idealScrollMax
-        });
-        parent.scrollTo({
-            top: 0,
-            left: idealScrollMax,
-            behavior: "smooth"
-        });
-        return;
-    }
-    if (idealScrollLeft <= 0) {
-        parent.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "smooth"
-        });
-        return;
-    }
-    if (idealScrollLeft <= parentMaxScrollLeft) {
-        parent.scrollTo({
-            top: 0,
-            left: idealScrollLeft,
-            behavior: "smooth"
-        });
-        return;
-    }
-    parent.scrollTo({
-        top: 0,
-        left: parentMaxScrollLeft,
-        behavior: "smooth"
-    });
-}
-
-const createTab = (parent, container, init) => tabDef => {
-    const tab = document.createElement("div");
-    tab.id = tabDef.id;
-    tab.classList.add("tab");
-    if (!init) {
-        tab.classList.add("new");
-    } else {
-        tab.classList.remove("new");
-    }
-    tabDef.changed && tab.classList.add("changed");
-    tabDef.touched && tab.classList.add("touched");
-    let systemType, systemName, systemClass;
-    if (tabDef.name.includes("system::")) {
-        systemType = "config";
-        systemName = {
-            "add-service-folder": "Open Folder",
-            "connect-service-provider": "Connect to a Provider",
-            "open-previous-service": "Open Previous Service",
-            "open-settings-view": "Settings"
-        }[tabDef.name.replace("system::", "")];
-        systemClass = "italic";
-    }
-    tab.title = `${tabDef.parent ? tabDef.parent + "/" : ""}${tabDef.name.split("/").pop()}`;
-    const fileType = getFileType(tabDef.name);
-    const icon = systemType || fileType.icon || fileType;
-    tab.innerHTML = `\n\t\t<span style="pointer-events: none;"\n\t\t\tclass="${systemClass ? systemClass + " " : ""}icon-${icon}"\n\t\t>${systemName || tabDef.name.split("/").pop()}</span>\n\t\t<div class="tab-close">\n\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t<ul class="actions-container" role="toolbar" aria-label="Tab actions">\n\t\t\t\t\t<li class="action-item" role="presentation">\n\t\t\t\t\t\t<a class="action-label icon close-editor-action"\n\t\t\t\t\t\t\tdata-name="${tabDef.name}"\n\t\t\t\t\t\t\tdata-parent="${tabDef.parent || ""}"\n\t\t\t\t\t\t\trole="button"\n\t\t\t\t\t\t\ttitle="Close"\n\t\t\t\t\t\t>\n\t\t\t\t\t\t</a>\n\t\t\t\t\t</li>\n\t\t\t\t</ul>\n\t\t\t</div>\n\t\t</div>\n\t`;
-    parent.appendChild(tab);
-    scrollToChild(tab);
-    if (tabDef.active) {
-        tab.classList.add("active");
-        tab.classList.remove("new");
-    }
-    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
-    if (remainingTabs.length) {
-        container.classList.remove("empty");
-    } else {
-        container.classList.add("empty");
-    }
-};
-
-const updateTab = (parent, container) => tabDef => {
-    const child = parent.querySelector("#" + tabDef.id);
-    if (!child) return;
-    if (!tabDef.active && child.classList.contains("active")) {
-        child.classList.remove("active");
-    }
-    if (tabDef.active && !child.classList.contains("active")) {
-        child.classList.add("active");
-        scrollToChild(child);
-    }
-    if (tabDef.changed && !child.classList.contains("changed")) {
-        child.classList.add("changed");
-        scrollToChild(child);
-    }
-    if (!tabDef.changed && child.classList.contains("changed")) {
-        child.classList.remove("changed");
-    }
-    if (!tabDef.touched && child.classList.contains("touched")) {
-        child.classList.remove("touched");
-    }
-    if (tabDef.touched) {
-        child.classList.add("touched");
-    }
-};
-
-const removeTab = (parent, container) => async tabDef => {
-    if (!tabDef) return console.error("attempt to remove tab without a tab definition");
-    const child = parent.querySelector("#" + tabDef.id);
-    child.parentNode.removeChild(child);
-    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
-    if (!remainingTabs.length) {
-        container.classList.add("empty");
-        return;
-    }
-    //TODO: scroll parent to put newly active tab in view
-};
-
-const scrollHorizontally = el => function(e) {
-    e = window.event || e;
-    el.scrollLeft -= e.wheelDelta || -e.detail;
-};
-
-function attachWheel(el) {
-    if (!el) return;
-    if (el.addEventListener) {
-        el.addEventListener("mousewheel", scrollHorizontally(el), {
-            passive: true
-        });
-        el.addEventListener("DOMMouseScroll", scrollHorizontally(el), {
-            passive: true
-        });
-    } else {
-        el.attachEvent("onmousewheel", scrollHorizontally(el));
-    }
-}
-
-function attachDoubleClick(el, context) {
-    if (!el) return;
-    el.addEventListener("dblclick", (e => {
-        alert("TODO: something is wrong with this..");
-        return;
-    }));
-}
-
-const initTabs = (parent, container) => (tabDefArray = [], context) => {
-    const _removeTab = removeTab(parent, container);
-    const init = true;
-    const _createTab = createTab(parent, container, init);
-    Array.from(parent.querySelectorAll(".tab")).map(_removeTab);
-    tabDefArray.map(_createTab);
-    const THIS_DELAY_IS_STUPID = 1;
-    setTimeout((() => {
-        const tabs = document.querySelector("#editor-tabs");
-        attachWheel(tabs);
-        attachDoubleClick(tabs);
-        const activeTab = document.querySelector("#editor-tabs-container .active");
-        if (activeTab) {
-            activeTab.scrollIntoView();
-        }
-    }), THIS_DELAY_IS_STUPID);
-};
-
-let tabsContainer;
-
-let tabsList;
-
-function EditorTabs(tabsArray = [ {
-    name: "loading...",
-    active: true
-} ]) {
-    if (tabsContainer) {
-        tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
-        //should not be doing this, rely on event instead!!!
-        //tabsArray && initTabs(tabsList)(tabsArray);
-                return tabsContainer;
-    }
-    tabsContainer = document.createElement("div");
-    tabsContainer.id = "tabs";
-    tabsContainer.classList.add("empty");
-    tabsContainer.innerHTML = `\n\t\t<style>\n\t\t\t#editor-tabs-container .scrollbar {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 575px;\n\t\t\t\theight: 3px;\n\t\t\t\tleft: 0px;\n\t\t\t\tbottom: 0px;\n\t\t\t\tbackground: transparent;\n\t\t\t\tright: -3px;\n\t\t\t\twidth: auto;\n\t\t\t}\n\t\t\t#editor-tabs-container .slider {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0px;\n\t\t\t\tleft: 0px;\n\t\t\t\theight: 3px;\n\t\t\t\twill-change: transform;\n\t\t\t\twidth: 508px;\n\t\t\t}\n\t\t\t#editor-tabs-container:hover .slider {\n\t\t\t\tbackground: #ffffff20;\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t#editor-tabs-container .tab:not(.touched):not(.changed) > span {\n\t\t\t\tfont-style: italic;\n\t\t\t}\n\t\t\t#tabs.empty #editor-tabs-container {\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\t\t</style>\n\t\t<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">\n\t\t\t<div id="editor-tabs" class="row no-margin">\n\t\t\t</div>\n\t\t\t<div class="invisible scrollbar horizontal fade">\n\t\t\t\t<div class="slider">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
-    tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
-    /*
-
-	TODO:
-	when tabs change, update the width of slider
-	when editor tabs scroll position changes, move the slider with it
-	when this is done, change from display: none
-
-	ALSO:
-	there is something very screwed up happening with tab bar
-	for example, when I try to add padding or margin to left/right of tabs, left works and right fails
-	I have tried mulitple ways of fixing this, including first-child/last-child and wrapping in a container div
-	nothing seems to work and I don't have time for the frustration right now
-
-	one idea I have not tried is to put padding divs to the left and right of tabs list; maybe later
-	*/    const operations = {
-        initTabs: initTabs(tabsList, tabsContainer),
-        createTab: createTab(tabsList, tabsContainer),
-        updateTab: updateTab(tabsList),
-        removeTab: removeTab(tabsList, tabsContainer)
-    };
-    tabsContainer.sysDocNames = {
-        "add-service-folder": "Open Folder",
-        "connect-service-provider": "Connect to a Provider",
-        "open-previous-service": "Open Previous Service",
-        "open-settings-view": "Settings"
-    };
-    tabsContainer.operations = operations;
-    let tabs = [];
-    function clearLastTab() {
-        if (!tabs.length) return;
-        const lastTab = tabs[tabs.length - 1];
-        if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
-        tabs = tabs.filter((t => t.id !== lastTab.id));
-        operations.removeTab(lastTab);
-        //tabs.map(operations.updateTab);
-        }
-    function getTabsToUpdate(filePath) {
-        const name = filePath?.split("/").pop();
-        const tabsToUpdate = [];
-        let foundTab;
-        for (var i = 0, len = tabs.length; i < len; i++) {
-            if (name === tabs[i].name) {
-                foundTab = tabs[i];
-            }
-            // update: if tab exists and not active, activate it
-                        if (name === tabs[i].name && !tabs[i].active) {
-                tabs[i].active = true;
-                tabsToUpdate.push(tabs[i]);
-            }
-            // update: remove active state from active tab
-                        if (name !== tabs[i].name && tabs[i].active) {
-                delete tabs[i].active;
-                tabsToUpdate.push(tabs[i]);
-            }
-        }
-        return {
-            foundTab: foundTab,
-            tabsToUpdate: tabsToUpdate
-        };
-    }
-    tabsContainer.api = {
-        list: () => tabs,
-        find: x => tabs.find(x),
-        update: t => tabs = t,
-        push: t => tabs.push(t),
-        clearLast: clearLastTab,
-        toUpdate: getTabsToUpdate
-    };
-    return tabsContainer;
-}
-
-function StatusBar() {
-    const statusBar = document.createElement("div");
-    statusBar.id = "status-bar";
-    const settings = getSettings();
-    const tabSettingsElString = s => `${s.indentWithTabs ? "Tabs" : "Spaces"}: <span class="tab-size">${s.tabSize}</span>`;
-    statusBar.innerHTML = `\n\t<style>\n\t\t#status-bar {\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\theight: 22px;\n\t\t\tfont-size: 12px;\n\t\t\tpadding: 2px 10px;\n\t\t\tz-index: 10;\n\t\t\t/*\n\t\t\tborder-top: 0.5px solid #000A;\n\t\t\tbox-shadow: 0 -1px 5px #000F;\n\t\t\t*/\n\t\t}\n\t\t#status-bar .bg {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tbox-sizing: border-box;\n\t\t\tpointer-events: none;\n\t\t\tz-index: -1;\n\t\t\t/*\n\t\t\tbackground: #3333;\n\t\t\tbackground: #0006;\n\t\t\tborder-top: 1px solid #111a;\n\t\t\tbackground: #1f476b;\n\t\t\tbackground: #4f263d;\n\t\t\tbackground: rgb(var(--main-theme-highlight-color));\n\t\t\tfilter: brightness(0.6);\n\t\t\t*/\n\t\t}\n\t\t#status-bar, #status-bar * {\n\t\t\tcursor: default;\n\t\t}\n\t\t#status-bar a:hover { opacity: 1; }\n\t\t#status-bar a { color: var(--main-theme-text-color); opacity: 0.9;}\n\n\t\t/*\n\t\t#status-bar a { color: var(--main-theme-text-invert-color); }\n\t\t#status-bar a { color: white; opacity: 0.65; }\n\t\t#status-bar a:hover { color: var(--main-theme-text-color); }\n\t\t#status-bar a { color: var(--main-theme-text-color); }\n\t\t*/\n\n\t\t.statusbar-item { z-index: 1; }\n\t\t.statusbar-item.right a {\n\t\t\tmargin-left: 10px;\n\t\t}\n\t\t#status-bar .editor-status-mode {\n\t\t\ttext-transform: capitalize;\n\t\t}\n\t\t#status-bar .editor-status-mode.uppercase {\n\t\t\ttext-transform: uppercase !important;\n\t\t}\n\t</style>\n\n\t<div class="bg"></div>\n\n\t<div class="statusbar-item statusbar-entry left" statusbar-entry-priority="10000" statusbar-entry-alignment="0">\n\t</div>\n\n\t<div class="statusbar-item right">\n\t\t<div class="editor-statusbar-item">\n\t\t\t<a class="editor-status-selection" title="Go to Line" style="">\n\t\t\t\tLine <span class="line-number">--</span>,\n\t\t\t\tCol <span class="column-number">--</span>\n\t\t\t</a>\n\t\t\t<a class="editor-status-indentation" title="Select Indentation" style="">${tabSettingsElString(settings)}</a>\n\t\t\t<a class="editor-status-encoding hidden" title="Select Encoding" style="">UTF-8</a>\n\t\t\t<a class="editor-status-eol hidden" title="Select End of Line Sequence" style="">LF</a>\n\t\t\t<a class="editor-status-mode" title="Select Language Mode" style="">--</a>\n\t\t</div>\n\t</div>\n`;
-    const tabSettingsEl = statusBar.querySelector(".editor-status-indentation");
-    tabSettingsEl.addEventListener("click", (() => {
-        //console.warn('pop up menu to select tab size and indentation style');
-        settings.indentWithTabs = !settings.indentWithTabs;
-        localStorage.setItem("editorSettings", JSON.stringify(settings));
-        tabSettingsEl.innerHTML = tabSettingsElString(settings);
-        Editor.setOption("indentWithTabs", settings.indentWithTabs);
-    }));
-    function setLineNumber(number) {
-        const el = statusBar.querySelector(".editor-status-selection .line-number");
-        el.innerHTML = number;
-    }
-    function setColNumber(number) {
-        const el = statusBar.querySelector(".editor-status-selection .column-number");
-        el.innerHTML = number;
-    }
-    function setTabSize(number) {
-        const el = statusBar.querySelector(".editor-status-indentation .tab-size");
-        el.innerHTML = number;
-    }
-    function setDocType(type) {
-        const el = statusBar.querySelector(".editor-status-mode");
-        el.classList.remove("uppercase");
-        let docType = type;
-        if (type.json) {
-            docType = "json";
-        }
-        if (type.typescript) {
-            docType = "TypeScript";
-        }
-        if (type.assemblyscript) {
-            docType = "AssemblyScript";
-        }
-        if (type.name && type.name.includes("html")) {
-            docType = "html";
-        }
-        const extMap = {
-            default: "Plain Text",
-            "text/x-csrc": "C",
-            "text/x-c++src": "C++",
-            "text/webassembly": "WebAssembly",
-            wat: "WebAssembly",
-            piskel: "Piskel",
-            javascript: "JavaScript",
-            "text/apl": "APL"
-        };
-        if (extMap[type]) {
-            docType = extMap[type];
-        }
-        while (docType.toString().includes("object")) {
-            if (docType.name) {
-                docType = docType.name;
-                continue;
-            }
-            docType = "Plain Text";
-        }
-        const capThese = [ "css", "html", "json", "xml", "jsx", "php", "sql" ];
-        if (docType.toLowerCase && capThese.includes(docType.toLowerCase())) {
-            el.classList.add("uppercase");
-        }
-        el.innerHTML = docType;
-    }
-    //attachListeners({ setLineNumber, setColNumber, setTabSize, setDocType });
-        document.body.appendChild(statusBar);
-    return {
-        operations: {
-            setLineNumber: setLineNumber,
-            setColNumber: setColNumber,
-            setTabSize: setTabSize,
-            setDocType: setDocType
-        },
-        container: statusBar
-    };
-}
 
 /*!
 	CodeMirror
@@ -24347,7 +23321,7 @@ CodeMirror.defineMode("prolog", (function(t, e) {
     })), e.defineMIME("text/x-yaml", "yaml"), e.defineMIME("text/yaml", "yaml");
 }));
 
- document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$2, sheet$1, sheet ];
+document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$2, sheet$1, sheet ];
 
 // has side effects of changing opts.mode in some cases
 const getModeWithEffects = opts => {
@@ -24438,7 +23412,6 @@ const allTheEditorThings = (args, callback) => {
     callback(null, window.Editor);
 };
 
-//This is used by inlineEditor
 const Container = () => {
     const prevConatiner = document.querySelector("#full-page-container");
     if (prevConatiner) {
@@ -24463,38 +23436,904 @@ const Search = () => {
     return searchDiv;
 };
 
-function attachGutterHelper(editorGutter) {
-    const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
-    const getGutter = () => editorGutter || document.body.querySelector(".CodeMirror-gutters");
-    let gutter = getGutter();
-    let inGutter;
-    let gutterNoted;
-    const removeGutterHovered = () => {
-        const cmSizers = getSizers();
-        if (!cmSizers.length) return;
-        cmSizers.forEach((x => x.classList.remove("gutter-hovered")));
-        gutterNoted = false;
+var ext = {
+    mp3: "audio",
+    wav: "audio",
+    ogg: "audio",
+    adb: "ada",
+    ads: "ada",
+    adoc: "asciidoc",
+    apl: "apl",
+    bowerrc: "bower",
+    bf: "brainfuck",
+    cs: "csharp",
+    c: "c",
+    h: "c",
+    m: "c",
+    ctp: "cake_php",
+    clj: "clojure",
+    cljc: "clojure",
+    cljs: "clojure",
+    cjsx: "react",
+    jsx: "react",
+    tmp: "clock",
+    coffee: "coffee",
+    cfc: "coldfusion",
+    cfm: "coldfusion",
+    config: "config",
+    cpp: "cpp",
+    cr: "crystal",
+    cs: "csharp",
+    css: "css",
+    dart: "dart",
+    sss: "css",
+    csv: "csv",
+    edn: "clojure",
+    editorconfig: "config",
+    ejs: "ejs",
+    elm: "elm",
+    ttf: "font",
+    woff: "font",
+    woff2: "font",
+    eot: "font",
+    gitkeep: "git",
+    gitconfig: "git",
+    gitattributes: "git",
+    gitmodules: "git",
+    gitignore: "git",
+    go: "go",
+    gradle: "gradle",
+    grails: "grails",
+    groovy: "grails",
+    hh: "hacklang",
+    haml: "haml",
+    hs: "haskell",
+    lhs: "haskell",
+    lisp: "lisp",
+    htm: "html",
+    html: "html",
+    shtml: "html",
+    dhtml: "html",
+    ai: "ai",
+    png: "image",
+    ico: "image",
+    jpg: "image",
+    bmp: "image",
+    jpeg: "image",
+    gif: "image",
+    jade: "jade",
+    java: "java",
+    mjs: "javascript",
+    js: "javascript",
+    es6: "javascript",
+    es7: "javascript",
+    erl: "erlang",
+    ex: "elixir",
+    gltf: "json",
+    ipynb: "json",
+    json: "json",
+    jl: "julia",
+    less: "less",
+    license: "license",
+    liquid: "liquid",
+    ls: "livescript",
+    lua: "lua",
+    md: "markdown",
+    mustache: "mustache",
+    handlebars: "mustache",
+    hbs: "mustache",
+    hjs: "mustache",
+    stache: "mustache",
+    npmignore: "npm",
+    ml: "ocaml",
+    mli: "ocaml",
+    cmx: "ocaml",
+    cmxa: "ocaml",
+    pdf: "pdf",
+    pl: "perl",
+    pro: "prolog",
+    psd: "photoshop",
+    php: "php",
+    "php.inc": "php",
+    pug: "pug",
+    pp: "puppet",
+    py: "python",
+    rb: "ruby",
+    "erb.html": "ruby",
+    "html.erb": "ruby",
+    rs: "rust",
+    sass: "sass",
+    scss: "sass",
+    scm: "scheme",
+    sbt: "sbt",
+    scala: "scala",
+    sql: "sql",
+    sh: "shell",
+    cmd: "shell",
+    zsh: "shell",
+    fish: "shell",
+    profile: "shell",
+    slim: "slim",
+    smarty: "smarty",
+    "smarty.tpl": "smarty",
+    styl: "stylus",
+    svg: "svg",
+    swift: "swift",
+    tf: "terraform",
+    "tf.json": "terraform",
+    tex: "tex",
+    sty: "tex",
+    cls: "tex",
+    dtx: "tex",
+    ins: "tex",
+    txt: "default",
+    twig: "twig",
+    as: "assemblyscript",
+    ts: "typescript",
+    tsx: "react",
+    direnv: "config",
+    env: "config",
+    static: "config",
+    slugignore: "config",
+    vala: "vala",
+    wmv: "video",
+    mov: "video",
+    ogv: "video",
+    webm: "video",
+    avi: "video",
+    mpg: "video",
+    mp4: "video",
+    xml: "xml",
+    yml: "yml",
+    yaml: "yml",
+    vue: "vue",
+    babelrc: "babel",
+    eslintrc: "eslint",
+    jshintrc: "jshint",
+    xcodeproj: "xcode",
+    zip: "zip",
+    rar: "zip",
+    gz: "zip",
+    iso: "zip",
+    key: "key",
+    pem: "key",
+    fs: "fsharp",
+    vimrc: "vim",
+    vim: "vim",
+    viminfo: "vim",
+    sql: "sql",
+    bat: "shell",
+    htaccess: "apache",
+    wxml: "wxml",
+    wxss: "wxss",
+    ini: "config",
+    clj: "clojure",
+    r: "r",
+    lock: "lock",
+    asp: "asp",
+    flowconfig: "flow",
+    nim: "nim",
+    kt: "kotlin",
+    ink: "ink",
+    zig: "zig",
+    pas: "pascal",
+    raku: "raku",
+    fth: "forth",
+    d: "d",
+    pony: "pony",
+    ppm: "ppm",
+    wat: "wat",
+    piskel: "image",
+    scratch: "smarty",
+    bugs: "platformio"
+};
+
+function codemirrorModeFromFileType(fileType) {
+    const conversions = {
+        assemblyscript: {
+            name: "javascript",
+            typescript: true,
+            assemblyscript: true
+        },
+        apl: "text/apl",
+        config: "text/x-properties",
+        typescript: {
+            name: "javascript",
+            typescript: true
+        },
+        react: "jsx",
+        svg: "xml",
+        html: {
+            name: "htmlmixed",
+            tags: {
+                style: [ [ "type", /^text\/(x-)?scss$/, "text/x-scss" ], [ null, null, "css" ] ],
+                custom: [ [ null, null, "customMode" ] ]
+            }
+        },
+        sass: "text/x-scss",
+        less: "text/x-less",
+        image: {
+            name: "default"
+        },
+        bat: {
+            name: "default"
+        },
+        mjs: {
+            name: "javascript"
+        },
+        json: {
+            name: "javascript",
+            json: true
+        },
+        c: "text/x-csrc",
+        cpp: "text/x-c++src",
+        ocaml: "text/x-ocaml",
+        fsharp: "text/x-fsharp",
+        csharp: "text/x-csharp",
+        java: "text/x-java",
+        kotlin: "text/x-kotlin",
+        lisp: "commonlisp",
+        raku: "perl6",
+        yml: "text/x-yaml",
+        zig: "rust",
+        sql: "text/x-pgsql"
     };
-    const addGutterHovered = () => {
-        const cmSizers = getSizers();
-        if (!cmSizers.length) return;
-        cmSizers.forEach((x => x.classList.add("gutter-hovered")));
-        gutterNoted = true;
-    };
-    const gutterHandler = e => {
-        gutter = getGutter();
-        if (!gutter) return removeGutterHovered();
-        const {className: className = "", classList: classList} = e.target;
-        inGutter = gutter.contains(e.target) || classList.contains("CodeMirror-gutters") || classList.contains("gutter-elt") || classList.contains("guttermarker") || className.includes && className.includes("CodeMirror-guttermarker");
-        if (inGutter && !gutterNoted) return addGutterHovered();
-        if (!inGutter && gutterNoted) return removeGutterHovered();
-    };
-    const listenOpts = {
-        passive: true,
-        capture: false
-    };
-    document.body.addEventListener("mouseover", gutterHandler, listenOpts);
+    //console.log({ fileType, conversions: conversions[fileType] });
+        return conversions[fileType] || fileType;
 }
+
+/*!
+	from https://cdn.jsdelivr.net/gh/jshttp/mime-db@master/src/nginx-types.json
+*/ var mimeTypes = {
+    "application/atom+xml": {
+        extensions: [ "atom" ]
+    },
+    "application/java-archive": {
+        extensions: [ "jar", "war", "ear" ]
+    },
+    "application/javascript": {
+        extensions: [ "js" ]
+    },
+    "application/json": {
+        extensions: [ "json" ]
+    },
+    "application/mac-binhex40": {
+        extensions: [ "hqx" ]
+    },
+    "application/msword": {
+        extensions: [ "doc" ]
+    },
+    "application/octet-stream": {
+        extensions: [ "bin", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm" ]
+    },
+    "application/pdf": {
+        extensions: [ "pdf" ]
+    },
+    "application/postscript": {
+        extensions: [ "ps", "eps", "ai" ]
+    },
+    "application/rss+xml": {
+        extensions: [ "rss" ]
+    },
+    "application/rtf": {
+        extensions: [ "rtf" ]
+    },
+    "application/vnd.apple.mpegurl": {
+        extensions: [ "m3u8" ]
+    },
+    "application/vnd.google-earth.kml+xml": {
+        extensions: [ "kml" ]
+    },
+    "application/vnd.google-earth.kmz": {
+        extensions: [ "kmz" ]
+    },
+    "application/vnd.ms-excel": {
+        extensions: [ "xls" ]
+    },
+    "application/vnd.ms-fontobject": {
+        extensions: [ "eot" ]
+    },
+    "application/vnd.ms-powerpoint": {
+        extensions: [ "ppt" ]
+    },
+    "application/vnd.oasis.opendocument.graphics": {
+        extensions: [ "odg" ]
+    },
+    "application/vnd.oasis.opendocument.presentation": {
+        extensions: [ "odp" ]
+    },
+    "application/vnd.oasis.opendocument.spreadsheet": {
+        extensions: [ "ods" ]
+    },
+    "application/vnd.oasis.opendocument.text": {
+        extensions: [ "odt" ]
+    },
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
+        extensions: [ "pptx" ]
+    },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+        extensions: [ "xlsx" ]
+    },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+        extensions: [ "docx" ]
+    },
+    "application/vnd.wap.wmlc": {
+        extensions: [ "wmlc" ]
+    },
+    "application/wasm": {
+        extensions: [ "wasm" ]
+    },
+    "application/x-7z-compressed": {
+        extensions: [ "7z" ]
+    },
+    "application/x-cocoa": {
+        extensions: [ "cco" ]
+    },
+    "application/x-java-archive-diff": {
+        extensions: [ "jardiff" ]
+    },
+    "application/x-java-jnlp-file": {
+        extensions: [ "jnlp" ]
+    },
+    "application/x-makeself": {
+        extensions: [ "run" ]
+    },
+    "application/x-perl": {
+        extensions: [ "pl", "pm" ]
+    },
+    "application/x-pilot": {
+        extensions: [ "prc", "pdb" ]
+    },
+    "application/x-rar-compressed": {
+        extensions: [ "rar" ]
+    },
+    "application/x-redhat-package-manager": {
+        extensions: [ "rpm" ]
+    },
+    "application/x-sea": {
+        extensions: [ "sea" ]
+    },
+    "application/x-shockwave-flash": {
+        extensions: [ "swf" ]
+    },
+    "application/x-stuffit": {
+        extensions: [ "sit" ]
+    },
+    "application/x-tcl": {
+        extensions: [ "tcl", "tk" ]
+    },
+    "application/x-x509-ca-cert": {
+        extensions: [ "der", "pem", "crt" ]
+    },
+    "application/x-xpinstall": {
+        extensions: [ "xpi" ]
+    },
+    "application/xhtml+xml": {
+        extensions: [ "xhtml" ]
+    },
+    "application/xspf+xml": {
+        extensions: [ "xspf" ]
+    },
+    "application/zip": {
+        extensions: [ "zip" ]
+    },
+    "audio/midi": {
+        extensions: [ "mid", "midi", "kar" ]
+    },
+    "audio/mpeg": {
+        extensions: [ "mp3" ]
+    },
+    "audio/ogg": {
+        extensions: [ "ogg" ]
+    },
+    "audio/x-m4a": {
+        extensions: [ "m4a" ]
+    },
+    "audio/x-realaudio": {
+        extensions: [ "ra" ]
+    },
+    "font/woff": {
+        extensions: [ "woff" ]
+    },
+    "font/woff2": {
+        extensions: [ "woff2" ]
+    },
+    "image/gif": {
+        extensions: [ "gif" ]
+    },
+    "image/jpeg": {
+        extensions: [ "jpeg", "jpg" ]
+    },
+    "image/png": {
+        extensions: [ "png" ]
+    },
+    "image/svg+xml": {
+        extensions: [ "svg", "svgz" ]
+    },
+    "image/tiff": {
+        extensions: [ "tif", "tiff" ]
+    },
+    "image/vnd.wap.wbmp": {
+        extensions: [ "wbmp" ]
+    },
+    "image/webp": {
+        extensions: [ "webp" ]
+    },
+    "image/x-icon": {
+        extensions: [ "ico" ]
+    },
+    "image/x-jng": {
+        extensions: [ "jng" ]
+    },
+    "image/x-ms-bmp": {
+        extensions: [ "bmp" ]
+    },
+    "text/css": {
+        extensions: [ "css" ]
+    },
+    "text/html": {
+        extensions: [ "html", "htm", "shtml" ]
+    },
+    "text/mathml": {
+        extensions: [ "mml" ]
+    },
+    "text/plain": {
+        extensions: [ "txt" ]
+    },
+    "text/vnd.sun.j2me.app-descriptor": {
+        extensions: [ "jad" ]
+    },
+    "text/vnd.wap.wml": {
+        extensions: [ "wml" ]
+    },
+    "text/x-component": {
+        extensions: [ "htc" ]
+    },
+    "text/xml": {
+        extensions: [ "xml" ]
+    },
+    "video/3gpp": {
+        extensions: [ "3gpp", "3gp" ]
+    },
+    "video/mp2t": {
+        extensions: [ "ts" ]
+    },
+    "video/mp4": {
+        extensions: [ "mp4" ]
+    },
+    "video/mpeg": {
+        extensions: [ "mpeg", "mpg" ]
+    },
+    "video/quicktime": {
+        extensions: [ "mov" ]
+    },
+    "video/webm": {
+        extensions: [ "webm" ]
+    },
+    "video/x-flv": {
+        extensions: [ "flv" ]
+    },
+    "video/x-m4v": {
+        extensions: [ "m4v" ]
+    },
+    "video/x-mng": {
+        extensions: [ "mng" ]
+    },
+    "video/x-ms-asf": {
+        extensions: [ "asx", "asf" ]
+    },
+    "video/x-ms-wmv": {
+        extensions: [ "wmv" ]
+    },
+    "video/x-msvideo": {
+        extensions: [ "avi" ]
+    }
+};
+
+//import mimeTypes from 'https://raw.githubusercontent.com/jshttp/mime-db/master/src/apache-types.json';
+//import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.50.0/db.json";
+// TODO: maybe use insertAdjacentHTML for this instead
+// this works like jquery append ^^^
+function htmlToElement(html) {
+    var template = document.createElement("template");
+    html = html.trim();
+ // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+    //also would be cool to remove indentation from all lines
+        return template.content.firstChild;
+}
+
+const xfrmMimes = m => Object.entries(m || {}).map((([contentType, rest]) => ({
+    contentType: contentType,
+    extensions: [],
+    ...rest
+})));
+
+const getMime = file => xfrmMimes(mimeTypes).find((({extensions: ext}) => ext.includes(file.split(".").pop())));
+
+const getExtension = fileName => ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(/^\./, "");
+
+function getFileType(fileName = "") {
+    const mime = getMime(fileName) || {};
+    let type = "default";
+    const extension = getExtension(fileName);
+    if (mime?.contentType) {
+        type = mime.contentType;
+    }
+    //TODO: most of this should be able to go away with addition of getExtension above...
+        if (fileName.toLowerCase() === ".git/config") {
+        type = "config";
+    }
+    if (fileName.toLowerCase() === "license") {
+        type = "license";
+    }
+    if (ext[extension]) {
+        type = ext[extension];
+    }
+    if (extension === "bat") {
+        type = "bat";
+    }
+    if (extension === "scratch") {
+        type = "markdown";
+    }
+    if (extension === "piskel") {
+        type = "application/json";
+    }
+    if (extension === "bugs") {
+        type = "markdown";
+    }
+    if (extension === "wat") {
+        type = "text/webassembly";
+    }
+    if (extension === "htm" || extension === "html") {
+        type = {
+            name: "htmlmixed",
+            mimeType: "application/x-ejs",
+            icon: "html"
+        };
+    }
+    if (extension === "hbs") {
+        type = {
+            name: "handlebars",
+            base: "text/html"
+        };
+    }
+    if (type === "markdown") {
+        type = {
+            name: "markdown",
+            icon: "info"
+        };
+    }
+    return type;
+}
+
+function friendlyModeName(type, mode) {
+    if (type.includes && type.includes("sharp")) return type.replace("sharp", "#");
+    if ("cpp" === type) return "C++";
+    if ("ocaml" === type) return {
+        name: "OCaml"
+    };
+    if ([ "bat", "cpp", "lisp", "raku", "zig" ].includes(type)) return type;
+    if (mode.includes && mode.includes("text/x-")) return type;
+    return mode;
+}
+
+// from tabs
+// function getFileType(fileName = "") {
+// 	let type = "default";
+// 	const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(
+// 		/^\./,
+// 		""
+// 	);
+// 	//console.log(extension)
+// 	if (ext[extension]) {
+// 		type = ext[extension];
+// 	}
+// 	if (extension === "md") {
+// 		type = "info";
+// 	}
+// 	return type;
+// }
+const showFileInEditor = (filename, contents) => {
+    const fileType = getFileType(filename);
+    return ![ "image", "font", "audio", "video", "zip" ].includes(fileType) && !(typeof fileType === "string" && fileType.includes("image/"));
+};
+
+const noFrontSlash = path => {
+    try {
+        if (!path) return path;
+        if (!path.includes("/")) return path;
+        if (path[0] === "/") return path.slice(1);
+        return path;
+    } catch (e) {
+        debugger;
+    }
+};
+
+const pathNoServiceName = (service, path) => {
+    if (!path.includes("/")) return path;
+    if (!path.includes(service.name)) return noFrontSlash(path);
+    return noFrontSlash(noFrontSlash(path).replace(service.name, ""));
+};
+
+const getFilePath$2 = getCurrentService => ({name: name = "", parent: parent = "", path: path = "", next: next = "", nextPath: nextPath = ""}) => {
+    const nameWithPathIfPresent = (_path, _name) => _path ? _path.endsWith(_name) ? noFrontSlash(_path) : noFrontSlash(`${_path}/${_name}`) : noFrontSlash(_name);
+    const fileNameWithPath = next ? nameWithPathIfPresent(nextPath, next) : nameWithPathIfPresent(parent || path, name);
+    const service = getCurrentService({
+        pure: true
+    });
+    return pathNoServiceName(service, fileNameWithPath);
+}
+/*
+	Example usage of flatFromProp:
+
+	const input = [{
+		one: '1',
+		two: [
+			{ three: 'a' },
+			{ three: 'b'}
+		]
+	}];
+	const output = flatFromProp(input, "two")
+	assert(output === [
+		{ one: '1', three: 'a'},
+		{ one: '1', three: 'b'},
+	])
+
+*/;
+
+const flatFromProp = (arr, prop) => arr.flatMap((({[prop]: p, ...x}) => typeof p !== "undefined" && p.length ? p.map((y => ({
+    ...x,
+    ...y
+}))) : x));
+
+const formatHandlers = (namespace, x) => Object.entries(x).reduce(((all, [key, value]) => ({
+    ...all,
+    [key]: {
+        listener: value,
+        name: namespace
+    }
+})), {});
+
+let nothingOpen$2;
+
+const showNothingOpen$1 = () => {
+    try {
+        document.getElementById("file-search").style.visibility = "";
+    } catch (e) {}
+    if (!nothingOpen$2) {
+        const editorContainer = document.getElementById("editor-container");
+        nothingOpen$2 = document.createElement("div");
+        nothingOpen$2.id = "editor-empty";
+        editorContainer.appendChild(nothingOpen$2);
+    }
+    const style = `\n\t\t<style>\n\t\t\t#editor-empty {\n\t\t\t\tposition: absolute;\n\t\t\t\tleft: 0;\n\t\t\t\tright: 0;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\t/* background: #1e1e1e; */\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\toverflow: hidden;\n\t\t\t\tmin-width: 160px;\n\t\t\t\tz-index: 11;\n\t\t\t}\n\t\t\t#editor-empty-logo {\n\t\t\t\topacity: .7;\n\t\t\t\tcolor: rgb(var(--main-theme-highlight-color));\n\t\t\t\tfill: currentColor;\n\t\t\t\twidth: 18em;\n\t\t\t\tmargin-top: -14em;\n\t\t\t\tstroke: rgba(var(--main-theme-highlight-color),.4);\n\t\t\t}\n\t\t\t.editor-empty-blurb {\n\t\t\t\t/* visibility: hidden; */\n\t\t\t\tfont-variant: small-caps;\n\t\t\t\tfont-style: italic;\n\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t}\n\t\t</style>\n\t`;
+    const logo = `\n\t<svg viewBox="-4 -4 172 150" id="editor-empty-logo">\n\t\t<g>\n\t\t\t<title>Do or do not.  There is no try.</title>\n\t\t\t<path d="m0.66613,141.12654l40.94759,-22.96759l39.55286,22.95911l-80.50045,0.00848z" stroke="#000000" stroke-width="0" opacity=".3" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m81.32664,141.18317l41.77172,-23.74405l40.66986,23.45933l-82.44158,0.28472z" stroke-width="0" opacity=".1" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m-8.80672,124.5856l39.68109,-24.32103l39.94988,23.98956l-79.63097,0.33147z" stroke-width="0" transform="rotate(120.005 31.0088 112.425)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m29.8517,54.08169l40.95021,-23.76637l41.15387,23.42957l-82.10408,0.3368z" stroke-width="0" transform="rotate(120.005 70.9037 42.1985)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m50.84794,54.21713l41.14723,-23.71165l40.66986,23.126l-81.81709,0.58565z" stroke-width="0" transform="rotate(240.005 91.7565 42.3613)" opacity=".6" style="fill: black;opacity: .6;"></path>\n\t\t\t<path d="m92.34289,123.94524l40.84106,-24.40053l40.54568,23.11973l-81.38674,1.2808z" stroke-width="0" transform="rotate(240.005 133.036 111.745)" opacity=".35" style="fill: black;opacity: .67;"></path>\n\n\t\t\t<path id="border" d="m80.7229,0.44444l82.61043,140.55521l-163.22223,0.44479l80.6118,-141z" fill="none" stroke-width="1" style="fill: transparent;stroke: transparent;"></path>\n\n\t\t\t<path d="m80.63317,96.1755l0.39079,45.37696l41.8002,-23.91294l-0.6859,-46.06544l-41.50509,24.60142z" stroke-width="0" opacity=".25" style="fill: black;opacity: .41;"></path>\n\t\t\t<path d="m60.24695,60.10716l0.41626,47.48081l41.25377,-23.26463l-0.93192,-47.77411l-40.73811,23.55793z" stroke-width="0" transform="rotate(60 81.082 72.0686)" opacity=".67" style="fill: aliceblue;opacity: .01;"></path>\n\t\t\t<path d="m41.52036,94.93062l-0.5376,46.74648l39.55956,-24.26797l-0.06849,-45.66349l-38.95347,23.18498z" stroke-width="0" transform="rotate(120 60.7625 106.711)" style="fill: black;opacity: .25;"></path>\n\t\t</g>\n\t</svg>\n\t`;
+    nothingOpen$2.innerHTML = style + logo + '<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
+    return nothingOpen$2;
+};
+
+let nothingOpen$1;
+
+const showNothingOpen = () => {
+    try {
+        document.getElementById("file-search").style.visibility = "";
+    } catch (e) {}
+    if (!nothingOpen$1) {
+        const editorContainer = document.getElementById("editor-container");
+        nothingOpen$1 = document.createElement("div");
+        nothingOpen$1.id = "editor-empty";
+        editorContainer.appendChild(nothingOpen$1);
+    }
+    const style = `\n\t\t<style>\n\t\t\t#editor-empty {\n\t\t\t\tposition: absolute;\n\t\t\t\tleft: 0;\n\t\t\t\tright: 0;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\t/* background: #1e1e1e; */\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\toverflow: hidden;\n\t\t\t\tmin-width: 160px;\n\t\t\t\tz-index: 11;\n\t\t\t}\n\t\t\t#editor-empty-logo {\n\t\t\t\topacity: .7;\n\t\t\t\tcolor: rgb(var(--main-theme-highlight-color));\n\t\t\t\tfill: currentColor;\n\t\t\t\twidth: 18em;\n\t\t\t\tmargin-top: -14em;\n\t\t\t\tstroke: rgba(var(--main-theme-highlight-color),.4);\n\t\t\t}\n\t\t\t.editor-empty-blurb {\n\t\t\t\t/* visibility: hidden; */\n\t\t\t\tfont-variant: small-caps;\n\t\t\t\tfont-style: italic;\n\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t}\n\t\t</style>\n\t`;
+    const logo = `\n\t<svg viewBox="-4 -4 172 150" id="editor-empty-logo">\n\t\t<g>\n\t\t\t<title>Do or do not.  There is no try.</title>\n\t\t\t<path d="m0.66613,141.12654l40.94759,-22.96759l39.55286,22.95911l-80.50045,0.00848z" stroke="#000000" stroke-width="0" opacity=".3" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m81.32664,141.18317l41.77172,-23.74405l40.66986,23.45933l-82.44158,0.28472z" stroke-width="0" opacity=".1" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m-8.80672,124.5856l39.68109,-24.32103l39.94988,23.98956l-79.63097,0.33147z" stroke-width="0" transform="rotate(120.005 31.0088 112.425)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m29.8517,54.08169l40.95021,-23.76637l41.15387,23.42957l-82.10408,0.3368z" stroke-width="0" transform="rotate(120.005 70.9037 42.1985)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m50.84794,54.21713l41.14723,-23.71165l40.66986,23.126l-81.81709,0.58565z" stroke-width="0" transform="rotate(240.005 91.7565 42.3613)" opacity=".6" style="fill: black;opacity: .6;"></path>\n\t\t\t<path d="m92.34289,123.94524l40.84106,-24.40053l40.54568,23.11973l-81.38674,1.2808z" stroke-width="0" transform="rotate(240.005 133.036 111.745)" opacity=".35" style="fill: black;opacity: .67;"></path>\n\n\t\t\t<path id="border" d="m80.7229,0.44444l82.61043,140.55521l-163.22223,0.44479l80.6118,-141z" fill="none" stroke-width="1" style="fill: transparent;stroke: transparent;"></path>\n\n\t\t\t<path d="m80.63317,96.1755l0.39079,45.37696l41.8002,-23.91294l-0.6859,-46.06544l-41.50509,24.60142z" stroke-width="0" opacity=".25" style="fill: black;opacity: .41;"></path>\n\t\t\t<path d="m60.24695,60.10716l0.41626,47.48081l41.25377,-23.26463l-0.93192,-47.77411l-40.73811,23.55793z" stroke-width="0" transform="rotate(60 81.082 72.0686)" opacity=".67" style="fill: aliceblue;opacity: .01;"></path>\n\t\t\t<path d="m41.52036,94.93062l-0.5376,46.74648l39.55956,-24.26797l-0.06849,-45.66349l-38.95347,23.18498z" stroke-width="0" transform="rotate(120 60.7625 106.711)" style="fill: black;opacity: .25;"></path>\n\t\t</g>\n\t</svg>\n\t`;
+    nothingOpen$1.innerHTML = style + logo + '<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
+    return nothingOpen$1;
+};
+
+let binaryPreview;
+
+const showBinaryPreview = ({filename: filename, path: path = "."} = {}) => {
+    try {
+        document.getElementById("file-search").style.visibility = "";
+    } catch (e) {}
+    if (!binaryPreview) {
+        const editorContainer = document.getElementById("editor-container");
+        binaryPreview = document.createElement("div");
+        binaryPreview.id = "editor-preview";
+        editorContainer.appendChild(binaryPreview);
+    }
+    const state = getState$1();
+    let url;
+    try {
+        url = state.paths.find((x => x.name === filename)).path.replace("/welcome/", "/.welcome/").replace(/^\//, "./");
+    } catch (e) {}
+    const extension = getExtension(filename);
+    const fileType = getFileType(filename);
+    const style = `\n\t\t<style>\n\t\t\t#editor-preview {\n\t\t\t\twidth: 100%;\n\t\t\t\theight: 100%;\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\tpadding-bottom: 30%;\n\t\t\t\tfont-size: 2em;\n\t\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t\t}\n\t\t\t#editor-preview .preview-image {\n\t\t\t\tmin-width: 50%;\n\t\t\t\timage-rendering: pixelated;\n\t\t\t\tobject-fit: contain;\n\t\t\t\tmargin-bottom: -20%;\n\t\t\t\tpadding: 0.7em;\n\t\t\t}\n\t\t\taudio {\n\t\t\t\tfilter: invert(0.7) contrast(1.5);\n\t\t\t}\n\t\t\taudio:focus {\n\t\t\t\toutline: 0;\n\t\t\t\tborder: 1px solid #444;\n\t\t\t\tborder-radius: 50px;\n\t\t\t}\n\t\t\tvideo {\n\t\t\t\tmax-width: 95%;\n\t\t\t}\n\t\t\t.image-disclaim {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 40px;\n\t\t\t\tpadding: .1em 1em;\n\t\t\t\tfont-size: 0.55em;\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: start;\n\t\t\t\talign-items: start;\n\t\t\t\twidth: 100%;\n\t\t\t}\n\t\t\t#editor-preview pre {\n\t\t\t\tfont-size: 0.72em;\n\t\t\t\topacity: 0.7;\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\twhite-space: pre-line;\n\t\t\t}\n\t\t</style>\n\t`;
+    if (fileType === "audio") {
+        binaryPreview.innerHTML = style + `\n\t\t\t<figure>\n\t\t\t<audio\n\t\t\t\tcontrols\n\t\t\t\tloop\n\t\t\t\tautoplay\n\t\t\t\tcontrolsList="play timeline volume"\n\t\t\t\tsrc="${url}"\n\t\t\t>\n\t\t\t\tYour browser does not support the\n\t\t\t\t<code>audio</code> element.\n\t\t\t</audio>\n\t\t\t</figure>\n\t\t`;
+    } else if (fileType === "video") {
+        binaryPreview.innerHTML = style + `\n\t\t\t<video\n\t\t\t\tcontrols\n\t\t\t\tloop\n\t\t\t\tautoplay\n\t\t\t\tcontrolsList="play timeline volume"\n\t\t\t\tdisablePictureInPicture\n\t\t\t>\n\t\t\t\t<source\n\t\t\t\t\tsrc="${url}"\n\t\t\t\t\ttype="video/${extension}"\n\t\t\t\t>\n\t\t\t\tSorry, your browser doesn't support embedded videos.\n\t\t\t</video>\n\t\t`;
+    } else {
+        binaryPreview.innerHTML = style + `\n\t\t\t<pre>No editable text for this file type.</pre>\n\t\t`;
+    }
+    return binaryPreview;
+};
+
+const miscSystemSettings = [ {
+    name: "exit-current-service",
+    description: "Close the current project",
+    button: "close",
+    onclick: `localStorage.setItem('lastService', ''); document.location.reload()`
+} ];
+
+const SystemDocs = (section, errors) => {
+    const style = `\n\t<style>\n\t\t#editor-system-doc {\n\t\t\tfont-size: inherit;\n\t\t\tmargin: 0;\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tjustify-content: start;\n\t\t\talign-items: center;\n\t\t\theight: 100%;\n\t\t\toverflow: auto;\n\t\t\twidth: 100%;\n\t\t\tpadding-bottom: 100px;\n\t\t\tpadding-right: 1em;\n\t\t\tpadding-left: 1em;\n\t\t\tbox-sizing: border-box;\n\t\t}\n\t\t#editor-system-doc::-webkit-scrollbar { width: 5px; height: 5px; }\n\t\t#editor-system-doc::-webkit-scrollbar-corner,\n\t\t#editor-system-doc::-webkit-scrollbar-track { background: transparent; }\n\t\t#editor-system-doc:hover::-webkit-scrollbar-thumb { background: #333; }\n\t\t#editor-system-doc::-webkit-scrollbar-thumb { background: transparent; }\n\t\t#editor-system-doc ::placeholder { opacity: 0.35; }\n\n\t\t#editor-system-doc h1 {\n\t\t\tfont-size: 1.1em;\n\t\t\tfont-variant: all-petite-caps;\n\t\t\tborder-bottom: 1px solid;\n\t\t\tpadding-bottom: .4em;\n\t\t\topacity: .55;\n\t\t\tmargin: 2.2em 0 0.5em 0;\n\t\t}\n\t\t.thisSystemDoc {\n\t\t\tmax-width: 60em;\n\t\t}\n\t\t.settings-grid-2-col {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr auto;\n\t\t\tgrid-auto-rows: auto;\n\t\t\talign-items: center;\n\t\t\tmargin: 1.5em 0;\n\t\t\tgrid-gap: 1em;\n\t\t\tbackground: #8888881f;\n\t\t\tpadding: 1.1em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\t\t#editor-system-doc button {\n\t\t\tbackground: #88888847;\n\t\t\tborder: 0;\n\t\t\tpadding: 0.5em;\n\t\t\tcolor: inherit;\n\t\t\tmargin: .3em 0;\n\t\t}\n\t\t#editor-system-doc button:hover {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.4);\n\t\t}\n\t\t#editor-system-doc ul {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tjustify-content: center;\n\t\t\talign-items: center;\n\t\t}\n\t\t#editor-system-doc li {\n\t\t\tmargin: 1em;\n\t\t\twidth: 100%;\n\t\t\ttext-align: center;\n\t\t\tbackground: #88888826;\n\t\t}\n\t\t#editor-system-doc form.provider-settings {\n\t\t\tpadding: 1em;\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-top: 1em;\n\t\t}\n\t\t#editor-system-doc input {\n\t\t\tcolor: inherit;\n\t\t\tmargin-bottom: 1.5em;\n\t\t\tbackground: #88888829;\n\t\t\tmargin-top: 0.3em;\n\t\t\tpadding: 0 .5em;\n\t\t\tbox-sizing: border-box;\n\t\t}\n\t\t.provider-settings button.error {\n\t\t\toutline: 1px solid red;\n\t\t\tbackground: red;\n\t\t\tcolor: red;\n\t\t}\n\t\t#settings-all-services-list li {\n\t\t\tdisplay: flex;\n\t\t\tjustify-content: space-between;\n\t\t\tpadding: 1em;\n\t\t\talign-items: center;\n\t\t}\n\t\t#settings-all-services-list {\n\t\t\t/*min-height: 400px;*/\n\t\t\tjustify-content: flex-start;\n\t\t}\n\t</style>\n\t`;
+    if (!section) {
+        const view = htmlToElement(`\n\t\t\t<div id="editor-system-doc">\n\t\t\t\t${style}\n\t\t\t\t<div class="thisSystemDoc"></div>\n\t\t\t</div>\n\t\t`.replace(/		/g, ""));
+        return view;
+    }
+    const miscSettings = `\n\t\t<h1>Misc Settings</h1>\n\n\t\t${miscSystemSettings.map((x => `\n\t\t\t\t<div class="settings-grid-2-col">\n\t\t\t\t\t<div>${x.description}</div>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<button id="${x.name}" onclick="${x.onclick}">${x.button}</button>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t`.replace(/				/g, ""))).join("\n")}\n\t`.replace(/		/g, "");
+    const addServiceFolder = `\n\t\t<h1>Add Folder</h1>\n\t\t<p>\n\t\t\tTODO: this functionality will take back seat to service provider because it's a one-shot/one-way solution;\n\t\t\tit's useful, but not as useful.\n\t\t</p>\n\t`.replace(/		/g, "");
+    const openPreviousService = `\n\t\t<h1>Open Previous Service</h1>\n\t\t<p>\n\t\t\tShow a list of services each with button that sets lastService and does document reload\n\t\t</p>\n\t\t<ul id="settings-all-services-list">\n\t\t\t<li></li>\n\t\t</ul>\n\t`.replace(/		/g, "");
+    const connectServiceProvider = `\n\t\t<h1>Connect a Service Provider</h1>\n\t\t<p>\n\t\t\tTODO: show a list of providers and allow setup\n\t\t\tAt first, only local file server (electron), aka basic server, will be available\n\t\t\tIn the future, this could be a much long list of providers.\n\t\t\tTODO: get list of currently registered providers and show here (remove default value for basic server)\n\t\t</p>\n\t\t<ul>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Github</button>\n\t\t\t\t<form class="provider-settings" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="github-provider">\n\n\t\t\t\t\t<label>Personal Access Token</label>\n\t\t\t\t\t<input name="provider-access-token" type="text" >\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\n\t\t\t\t\t<label style="margin-top: 30px;">Repository</label>\n\t\t\t\t\t<input type="text"\n\t\t\t\t\t\tname="provider-repository"\n\t\t\t\t\t\tvalue="fiugd/welcome"\n\t\t\t\t\t\tplaceholder="{user}/{repository name}"\n\t\t\t\t\t>\n\t\t\t\t\t<input type="text"\n\t\t\t\t\t\tname="provider-repository-branch"\n\t\t\t\t\t\tvalue="main"\n\t\t\t\t\t\tplaceholder="branch name"\n\t\t\t\t\t>\n\t\t\t\t\t<button class="provider-add-service">Add Repository</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Bartok Basic Server</button>\n\t\t\t\t<form class="provider-settings" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="basic-bartok-provider">\n\n\t\t\t\t\t<label>Server URL</label>\n\t\t\t\t\t<input name="provider-url" type="text" value="http://localhost:3333/">\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\t\t\t\t\t<button class="provider-add-service">Add Folder</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Bartok Advanced Server</button>\n\t\t\t\t<form class="provider-settings hidden" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="basic-advanced-provider">\n\n\t\t\t\t\t<label>Server URL</label>\n\t\t\t\t\t<input name="provider-url" type="text" >\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\t\t\t\t\t<button class="provider-add-service">Add Folder</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t</ul>\n\t`.replace(/		/g, "");
+    const allSettings = `\n\t\t${connectServiceProvider}\n\t\t${addServiceFolder}\n\t\t${openPreviousService}\n\t\t${miscSettings}\n\t`.replace(/		/g, "");
+    const sectionText = {
+        "add-service-folder": addServiceFolder,
+        "connect-service-provider": connectServiceProvider,
+        "open-previous-service": openPreviousService,
+        "open-settings-view": allSettings
+    }[section];
+    return sectionText || "";
+};
+
+let systemDocsDOM;
+
+const showSystemDocsView = ({filename: filename = "", op: op = ""}, context) => {
+    try {
+        document.getElementById("file-search").style.visibility = "";
+    } catch (e) {}
+    if (!systemDocsDOM) {
+        const editorContainer = document.getElementById("editor-container");
+        systemDocsDOM = SystemDocs();
+        editorContainer.appendChild(systemDocsDOM);
+        context.systemDocsErrors = context.systemDocsErrors || [];
+    }
+    if (filename) {
+        systemDocsDOM.querySelector(".thisSystemDoc").innerHTML = SystemDocs(filename);
+    }
+    const allServicesList = document.getElementById("settings-all-services-list");
+    const updateServicesListDom = async () => {
+        if (!allServicesList) return;
+        allServicesList.innerHTML = "<li>loading...</li>";
+        const services = await getAllServices() || [];
+        const ServiceRowOnClick = s => [ `localStorage.setItem('lastService','${s.id}');`, `document.location.reload();` ].join(" ");
+        const ServiceRow = s => `\n\t\t<li>\n\t\t<span>[ ${s.id} ] ${s.name}</span>\n\t\t<button onclick="${ServiceRowOnClick(s)}">LOAD</button>\n\t\t</li>\n\t\t`.trim().replace(/^			/g, "");
+        allServicesList.innerHTML = services.map(ServiceRow).join("\n");
+    };
+    updateServicesListDom();
+    // TODO: this could be improved to match the button which error'ed
+        const {systemDocsErrors: errors} = context;
+    if (errors.length) {
+        errors.forEach((error => {
+            const domForError = systemDocsDOM.querySelector("." + error.op.replace("-done", ""));
+            if (domForError) {
+                domForError.classList.add("error");
+                return;
+            }
+            console.error(error);
+        }));
+    }
+    return systemDocsDOM;
+};
+
+let editorDom, editorPreview, nothingOpenDom, systemDocsView;
+
+/*
+TODO:
+	1. should probably be no distinction between switch & message
+	2. should probably delete (some/all ?) views (versus just hiding them)
+*/ const switchEditor = async (args, context) => {
+    const {editor: editor} = context;
+    const {filename: filename, mode: mode, line: line, column: column} = args;
+    //TODO: should go into loading mode first
+        if (mode === "systemDoc") {
+        const editorCallback = () => {
+            editorDom = document.querySelector(".CodeMirror");
+            editorDom && editorDom.classList.add("hidden");
+        };
+        editor({
+            code: "",
+            name: "",
+            id: "",
+            filename: filename,
+            callback: editorCallback
+        }, context);
+        systemDocsView = showSystemDocsView({
+            filename: filename
+        }, context);
+        systemDocsView && systemDocsView.classList.remove("hidden");
+        editorPreview && editorPreview.classList.add("hidden");
+        nothingOpenDom && nothingOpenDom.classList.add("hidden");
+        return;
+    }
+    if (mode === "nothingOpen") {
+        const editorCallback = () => {
+            editorDom = document.querySelector(".CodeMirror");
+            editorDom && editorDom.classList.add("hidden");
+        };
+        editor({
+            code: "",
+            name: "",
+            id: "",
+            filename: "",
+            callback: editorCallback
+        }, context);
+        nothingOpenDom = showNothingOpen();
+        nothingOpenDom && nothingOpenDom.classList.remove("hidden");
+        editorPreview && editorPreview.classList.add("hidden");
+        editorDom && editorDom.classList.add("hidden");
+        systemDocsView && systemDocsView.classList.add("hidden");
+        return;
+    }
+    setCurrentFile({
+        filePath: filename
+    });
+    const currentFile = await getCurrentFileFull();
+    const {code: code = "error", path: path, name: name, id: id, filename: defaultFile} = currentFile || {};
+    if (!currentFile || !showFileInEditor(filename)) {
+        const editorCallback = () => {
+            editorDom = document.querySelector(".CodeMirror");
+            editorDom && editorDom.classList.add("hidden");
+        };
+        editor({
+            code: "",
+            name: "",
+            id: "",
+            filename: "",
+            callback: editorCallback
+        }, context);
+        editorPreview = showBinaryPreview({
+            filename: filename,
+            code: code
+        });
+        editorPreview && editorPreview.classList.remove("hidden");
+        editorDom && editorDom.classList.add("hidden");
+        nothingOpenDom && nothingOpenDom.classList.add("hidden");
+        systemDocsView && systemDocsView.classList.add("hidden");
+        return;
+    }
+    editor({
+        code: code,
+        line: line,
+        column: column,
+        name: name,
+        id: id,
+        path: path,
+        filename: filename || defaultFile
+    }, context);
+    editorDom = document.querySelector(".CodeMirror");
+    editorDom && editorDom.classList.remove("hidden");
+    editorPreview && editorPreview.classList.add("hidden");
+    nothingOpenDom && nothingOpenDom.classList.add("hidden");
+    systemDocsView && systemDocsView.classList.add("hidden");
+};
+
+const messageEditor = (args, context) => {
+    const {op: op, result: result} = args;
+    if (!result.error) return showSystemDocsView({
+        op: op
+    });
+    context.systemDocsErrors = (context.systemDocsErrors || []).filter((x => x.op === op));
+    context.systemDocsErrors.push({
+        op: op,
+        error: result.error
+    });
+    showSystemDocsView({
+        errors: context.systemDocsErrors
+    }, context);
+};
 
 /*!
     localForage -- Offline Storage, Improved
@@ -25863,7 +25702,7 @@ const initEditor = context => {
     return editorDiv;
 };
 
-const InlineEditor = (args, context) => {
+const Editor$1 = (args, context) => {
     const triggers = context.triggers.editor;
     const {code: code = BLANK_CODE_PAGE, line: loadLine, column: loadColumn, name: name, id: id, filename: filename, path: path, callback: callback} = args || {};
     const prevEditor = document.querySelector("#editor-container");
@@ -26104,227 +25943,382 @@ const InlineEditor = (args, context) => {
     }));
 };
 
-attachGutterHelper(editorGutter);
+showNothingOpen$1();
 
-let nothingOpen$1;
+Editor$1.switchEditor = switchEditor;
 
-const showNothingOpen = () => {
-    try {
-        document.getElementById("file-search").style.visibility = "";
-    } catch (e) {}
-    if (!nothingOpen$1) {
-        const editorContainer = document.getElementById("editor-container");
-        nothingOpen$1 = document.createElement("div");
-        nothingOpen$1.id = "editor-empty";
-        editorContainer.appendChild(nothingOpen$1);
-    }
-    const style = `\n\t\t<style>\n\t\t\t#editor-empty {\n\t\t\t\tposition: absolute;\n\t\t\t\tleft: 0;\n\t\t\t\tright: 0;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\t/* background: #1e1e1e; */\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\toverflow: hidden;\n\t\t\t\tmin-width: 160px;\n\t\t\t\tz-index: 11;\n\t\t\t}\n\t\t\t#editor-empty-logo {\n\t\t\t\topacity: .7;\n\t\t\t\tcolor: rgb(var(--main-theme-highlight-color));\n\t\t\t\tfill: currentColor;\n\t\t\t\twidth: 18em;\n\t\t\t\tmargin-top: -14em;\n\t\t\t\tstroke: rgba(var(--main-theme-highlight-color),.4);\n\t\t\t}\n\t\t\t.editor-empty-blurb {\n\t\t\t\t/* visibility: hidden; */\n\t\t\t\tfont-variant: small-caps;\n\t\t\t\tfont-style: italic;\n\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t}\n\t\t</style>\n\t`;
-    const logo = `\n\t<svg viewBox="-4 -4 172 150" id="editor-empty-logo">\n\t\t<g>\n\t\t\t<title>Do or do not.  There is no try.</title>\n\t\t\t<path d="m0.66613,141.12654l40.94759,-22.96759l39.55286,22.95911l-80.50045,0.00848z" stroke="#000000" stroke-width="0" opacity=".3" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m81.32664,141.18317l41.77172,-23.74405l40.66986,23.45933l-82.44158,0.28472z" stroke-width="0" opacity=".1" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m-8.80672,124.5856l39.68109,-24.32103l39.94988,23.98956l-79.63097,0.33147z" stroke-width="0" transform="rotate(120.005 31.0088 112.425)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m29.8517,54.08169l40.95021,-23.76637l41.15387,23.42957l-82.10408,0.3368z" stroke-width="0" transform="rotate(120.005 70.9037 42.1985)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m50.84794,54.21713l41.14723,-23.71165l40.66986,23.126l-81.81709,0.58565z" stroke-width="0" transform="rotate(240.005 91.7565 42.3613)" opacity=".6" style="fill: black;opacity: .6;"></path>\n\t\t\t<path d="m92.34289,123.94524l40.84106,-24.40053l40.54568,23.11973l-81.38674,1.2808z" stroke-width="0" transform="rotate(240.005 133.036 111.745)" opacity=".35" style="fill: black;opacity: .67;"></path>\n\n\t\t\t<path id="border" d="m80.7229,0.44444l82.61043,140.55521l-163.22223,0.44479l80.6118,-141z" fill="none" stroke-width="1" style="fill: transparent;stroke: transparent;"></path>\n\n\t\t\t<path d="m80.63317,96.1755l0.39079,45.37696l41.8002,-23.91294l-0.6859,-46.06544l-41.50509,24.60142z" stroke-width="0" opacity=".25" style="fill: black;opacity: .41;"></path>\n\t\t\t<path d="m60.24695,60.10716l0.41626,47.48081l41.25377,-23.26463l-0.93192,-47.77411l-40.73811,23.55793z" stroke-width="0" transform="rotate(60 81.082 72.0686)" opacity=".67" style="fill: aliceblue;opacity: .01;"></path>\n\t\t\t<path d="m41.52036,94.93062l-0.5376,46.74648l39.55956,-24.26797l-0.06849,-45.66349l-38.95347,23.18498z" stroke-width="0" transform="rotate(120 60.7625 106.711)" style="fill: black;opacity: .25;"></path>\n\t\t</g>\n\t</svg>\n\t`;
-    nothingOpen$1.innerHTML = style + logo + '<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
-    return nothingOpen$1;
-};
+Editor$1.messageEditor = messageEditor;
 
-let binaryPreview;
-
-const showBinaryPreview = ({filename: filename, path: path = "."} = {}) => {
-    try {
-        document.getElementById("file-search").style.visibility = "";
-    } catch (e) {}
-    if (!binaryPreview) {
-        const editorContainer = document.getElementById("editor-container");
-        binaryPreview = document.createElement("div");
-        binaryPreview.id = "editor-preview";
-        editorContainer.appendChild(binaryPreview);
-    }
-    const state = getState$1();
-    let url;
-    try {
-        url = state.paths.find((x => x.name === filename)).path.replace("/welcome/", "/.welcome/").replace(/^\//, "./");
-    } catch (e) {}
-    const extension = getExtension(filename);
-    const fileType = getFileType(filename);
-    const style = `\n\t\t<style>\n\t\t\t#editor-preview {\n\t\t\t\twidth: 100%;\n\t\t\t\theight: 100%;\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\tpadding-bottom: 30%;\n\t\t\t\tfont-size: 2em;\n\t\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t\t}\n\t\t\t#editor-preview .preview-image {\n\t\t\t\tmin-width: 50%;\n\t\t\t\timage-rendering: pixelated;\n\t\t\t\tobject-fit: contain;\n\t\t\t\tmargin-bottom: -20%;\n\t\t\t\tpadding: 0.7em;\n\t\t\t}\n\t\t\taudio {\n\t\t\t\tfilter: invert(0.7) contrast(1.5);\n\t\t\t}\n\t\t\taudio:focus {\n\t\t\t\toutline: 0;\n\t\t\t\tborder: 1px solid #444;\n\t\t\t\tborder-radius: 50px;\n\t\t\t}\n\t\t\tvideo {\n\t\t\t\tmax-width: 95%;\n\t\t\t}\n\t\t\t.image-disclaim {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 40px;\n\t\t\t\tpadding: .1em 1em;\n\t\t\t\tfont-size: 0.55em;\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: start;\n\t\t\t\talign-items: start;\n\t\t\t\twidth: 100%;\n\t\t\t}\n\t\t\t#editor-preview pre {\n\t\t\t\tfont-size: 0.72em;\n\t\t\t\topacity: 0.7;\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\twhite-space: pre-line;\n\t\t\t}\n\t\t</style>\n\t`;
-    if (fileType === "audio") {
-        binaryPreview.innerHTML = style + `\n\t\t\t<figure>\n\t\t\t<audio\n\t\t\t\tcontrols\n\t\t\t\tloop\n\t\t\t\tautoplay\n\t\t\t\tcontrolsList="play timeline volume"\n\t\t\t\tsrc="${url}"\n\t\t\t>\n\t\t\t\tYour browser does not support the\n\t\t\t\t<code>audio</code> element.\n\t\t\t</audio>\n\t\t\t</figure>\n\t\t`;
-    } else if (fileType === "video") {
-        binaryPreview.innerHTML = style + `\n\t\t\t<video\n\t\t\t\tcontrols\n\t\t\t\tloop\n\t\t\t\tautoplay\n\t\t\t\tcontrolsList="play timeline volume"\n\t\t\t\tdisablePictureInPicture\n\t\t\t>\n\t\t\t\t<source\n\t\t\t\t\tsrc="${url}"\n\t\t\t\t\ttype="video/${extension}"\n\t\t\t\t>\n\t\t\t\tSorry, your browser doesn't support embedded videos.\n\t\t\t</video>\n\t\t`;
-    } else {
-        binaryPreview.innerHTML = style + `\n\t\t\t<pre>No editable text for this file type.</pre>\n\t\t`;
-    }
-    return binaryPreview;
-};
-
-const miscSystemSettings = [ {
-    name: "exit-current-service",
-    description: "Close the current project",
-    button: "close",
-    onclick: `localStorage.setItem('lastService', ''); document.location.reload()`
-} ];
-
-const SystemDocs = (section, errors) => {
-    const style = `\n\t<style>\n\t\t#editor-system-doc {\n\t\t\tfont-size: inherit;\n\t\t\tmargin: 0;\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tjustify-content: start;\n\t\t\talign-items: center;\n\t\t\theight: 100%;\n\t\t\toverflow: auto;\n\t\t\twidth: 100%;\n\t\t\tpadding-bottom: 100px;\n\t\t\tpadding-right: 1em;\n\t\t\tpadding-left: 1em;\n\t\t\tbox-sizing: border-box;\n\t\t}\n\t\t#editor-system-doc::-webkit-scrollbar { width: 5px; height: 5px; }\n\t\t#editor-system-doc::-webkit-scrollbar-corner,\n\t\t#editor-system-doc::-webkit-scrollbar-track { background: transparent; }\n\t\t#editor-system-doc:hover::-webkit-scrollbar-thumb { background: #333; }\n\t\t#editor-system-doc::-webkit-scrollbar-thumb { background: transparent; }\n\t\t#editor-system-doc ::placeholder { opacity: 0.35; }\n\n\t\t#editor-system-doc h1 {\n\t\t\tfont-size: 1.1em;\n\t\t\tfont-variant: all-petite-caps;\n\t\t\tborder-bottom: 1px solid;\n\t\t\tpadding-bottom: .4em;\n\t\t\topacity: .55;\n\t\t\tmargin: 2.2em 0 0.5em 0;\n\t\t}\n\t\t.thisSystemDoc {\n\t\t\tmax-width: 60em;\n\t\t}\n\t\t.settings-grid-2-col {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr auto;\n\t\t\tgrid-auto-rows: auto;\n\t\t\talign-items: center;\n\t\t\tmargin: 1.5em 0;\n\t\t\tgrid-gap: 1em;\n\t\t\tbackground: #8888881f;\n\t\t\tpadding: 1.1em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\t\t#editor-system-doc button {\n\t\t\tbackground: #88888847;\n\t\t\tborder: 0;\n\t\t\tpadding: 0.5em;\n\t\t\tcolor: inherit;\n\t\t\tmargin: .3em 0;\n\t\t}\n\t\t#editor-system-doc button:hover {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.4);\n\t\t}\n\t\t#editor-system-doc ul {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tjustify-content: center;\n\t\t\talign-items: center;\n\t\t}\n\t\t#editor-system-doc li {\n\t\t\tmargin: 1em;\n\t\t\twidth: 100%;\n\t\t\ttext-align: center;\n\t\t\tbackground: #88888826;\n\t\t}\n\t\t#editor-system-doc form.provider-settings {\n\t\t\tpadding: 1em;\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-top: 1em;\n\t\t}\n\t\t#editor-system-doc input {\n\t\t\tcolor: inherit;\n\t\t\tmargin-bottom: 1.5em;\n\t\t\tbackground: #88888829;\n\t\t\tmargin-top: 0.3em;\n\t\t\tpadding: 0 .5em;\n\t\t\tbox-sizing: border-box;\n\t\t}\n\t\t.provider-settings button.error {\n\t\t\toutline: 1px solid red;\n\t\t\tbackground: red;\n\t\t\tcolor: red;\n\t\t}\n\t\t#settings-all-services-list li {\n\t\t\tdisplay: flex;\n\t\t\tjustify-content: space-between;\n\t\t\tpadding: 1em;\n\t\t\talign-items: center;\n\t\t}\n\t\t#settings-all-services-list {\n\t\t\t/*min-height: 400px;*/\n\t\t\tjustify-content: flex-start;\n\t\t}\n\t</style>\n\t`;
-    if (!section) {
-        const view = htmlToElement(`\n\t\t\t<div id="editor-system-doc">\n\t\t\t\t${style}\n\t\t\t\t<div class="thisSystemDoc"></div>\n\t\t\t</div>\n\t\t`.replace(/		/g, ""));
-        return view;
-    }
-    const miscSettings = `\n\t\t<h1>Misc Settings</h1>\n\n\t\t${miscSystemSettings.map((x => `\n\t\t\t\t<div class="settings-grid-2-col">\n\t\t\t\t\t<div>${x.description}</div>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<button id="${x.name}" onclick="${x.onclick}">${x.button}</button>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t`.replace(/				/g, ""))).join("\n")}\n\t`.replace(/		/g, "");
-    const addServiceFolder = `\n\t\t<h1>Add Folder</h1>\n\t\t<p>\n\t\t\tTODO: this functionality will take back seat to service provider because it's a one-shot/one-way solution;\n\t\t\tit's useful, but not as useful.\n\t\t</p>\n\t`.replace(/		/g, "");
-    const openPreviousService = `\n\t\t<h1>Open Previous Service</h1>\n\t\t<p>\n\t\t\tShow a list of services each with button that sets lastService and does document reload\n\t\t</p>\n\t\t<ul id="settings-all-services-list">\n\t\t\t<li></li>\n\t\t</ul>\n\t`.replace(/		/g, "");
-    const connectServiceProvider = `\n\t\t<h1>Connect a Service Provider</h1>\n\t\t<p>\n\t\t\tTODO: show a list of providers and allow setup\n\t\t\tAt first, only local file server (electron), aka basic server, will be available\n\t\t\tIn the future, this could be a much long list of providers.\n\t\t\tTODO: get list of currently registered providers and show here (remove default value for basic server)\n\t\t</p>\n\t\t<ul>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Github</button>\n\t\t\t\t<form class="provider-settings" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="github-provider">\n\n\t\t\t\t\t<label>Personal Access Token</label>\n\t\t\t\t\t<input name="provider-access-token" type="text" >\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\n\t\t\t\t\t<label style="margin-top: 30px;">Repository</label>\n\t\t\t\t\t<input type="text"\n\t\t\t\t\t\tname="provider-repository"\n\t\t\t\t\t\tvalue="crosshj/fiug-welcome"\n\t\t\t\t\t\tplaceholder="{user}/{repository name}"\n\t\t\t\t\t>\n\t\t\t\t\t<input type="text"\n\t\t\t\t\t\tname="provider-repository-branch"\n\t\t\t\t\t\tvalue="main"\n\t\t\t\t\t\tplaceholder="branch name"\n\t\t\t\t\t>\n\t\t\t\t\t<button class="provider-add-service">Add Repository</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Bartok Basic Server</button>\n\t\t\t\t<form class="provider-settings" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="basic-bartok-provider">\n\n\t\t\t\t\t<label>Server URL</label>\n\t\t\t\t\t<input name="provider-url" type="text" value="http://localhost:3333/">\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\t\t\t\t\t<button class="provider-add-service">Add Folder</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<button\n\t\t\t\t\tonclick="event.target.parentNode.querySelector('.provider-settings').classList.toggle('hidden')"\n\t\t\t\t>Bartok Advanced Server</button>\n\t\t\t\t<form class="provider-settings hidden" autocomplete="off" onsubmit="return false;">\n\t\t\t\t\t<input class="hidden" autocomplete="false" name="hidden" type="text">\n\t\t\t\t\t<input name="provider-type" class="hidden" type="text" value="basic-advanced-provider">\n\n\t\t\t\t\t<label>Server URL</label>\n\t\t\t\t\t<input name="provider-url" type="text" >\n\n\t\t\t\t\t<button class="provider-test">Test Provider</button>\n\t\t\t\t\t<button class="provider-save">Save Provider</button>\n\t\t\t\t\t<button class="provider-add-service">Add Folder</button>\n\t\t\t\t</form>\n\t\t\t</li>\n\t\t</ul>\n\t`.replace(/		/g, "");
-    const allSettings = `\n\t\t${connectServiceProvider}\n\t\t${addServiceFolder}\n\t\t${openPreviousService}\n\t\t${miscSettings}\n\t`.replace(/		/g, "");
-    const sectionText = {
-        "add-service-folder": addServiceFolder,
-        "connect-service-provider": connectServiceProvider,
-        "open-previous-service": openPreviousService,
-        "open-settings-view": allSettings
-    }[section];
-    return sectionText || "";
-};
-
-let systemDocsDOM;
-
-const showSystemDocsView = ({filename: filename = "", op: op = ""}, context) => {
-    const {systemDocsErrors: errors} = context;
-    try {
-        document.getElementById("file-search").style.visibility = "";
-    } catch (e) {}
-    if (!systemDocsDOM) {
-        const editorContainer = document.getElementById("editor-container");
-        systemDocsDOM = SystemDocs();
-        editorContainer.appendChild(systemDocsDOM);
-    }
-    if (filename) {
-        systemDocsDOM.querySelector(".thisSystemDoc").innerHTML = SystemDocs(filename);
-    }
-    const allServicesList = document.getElementById("settings-all-services-list");
-    const updateServicesListDom = async () => {
-        if (!allServicesList) return;
-        allServicesList.innerHTML = "<li>loading...</li>";
-        const services = await getAllServices() || [];
-        const ServiceRowOnClick = s => [ `localStorage.setItem('lastService','${s.id}');`, `document.location.reload();` ].join(" ");
-        const ServiceRow = s => `\n\t\t\t<li>\n\t\t\t\t<span>[ ${s.id} ] ${s.name}</span>\n\t\t\t\t<button onclick="${ServiceRowOnClick(s)}">LOAD</button>\n\t\t\t</li>\n\t\t`.trim().replace(/^			/g, "");
-        allServicesList.innerHTML = services.map(ServiceRow).join("\n");
-    };
-    updateServicesListDom();
-    // TODO: this could be improved to match the button which error'ed
-        if (errors.length) {
-        errors.forEach((error => {
-            const domForError = systemDocsDOM.querySelector("." + error.op.replace("-done", ""));
-            if (domForError) {
-                domForError.classList.add("error");
-                return;
-            }
-            console.error(error);
-        }));
-    }
-    return systemDocsDOM;
-};
-
-let editorDom, editorPreview, nothingOpenDom, systemDocsView;
-
-/*
-TODO:
-	1. should probably be no distinction between switch & message
-	2. should probably delete (some/all ?) views (versus just hiding them)
-*/ const switchEditor = async (args, {editor: editor, context: context}) => {
-    const {filename: filename, mode: mode, line: line, column: column} = args;
-    //TODO: should go into loading mode first
-        if (mode === "systemDoc") {
-        const editorCallback = () => {
-            editorDom = document.querySelector(".CodeMirror");
-            editorDom && editorDom.classList.add("hidden");
-        };
-        editor({
-            code: "",
-            name: "",
-            id: "",
-            filename: filename,
-            callback: editorCallback
-        }, context);
-        systemDocsView = showSystemDocsView({
-            filename: filename
-        }, context);
-        systemDocsView && systemDocsView.classList.remove("hidden");
-        editorPreview && editorPreview.classList.add("hidden");
-        nothingOpenDom && nothingOpenDom.classList.add("hidden");
-        return;
-    }
-    if (mode === "nothingOpen") {
-        const editorCallback = () => {
-            editorDom = document.querySelector(".CodeMirror");
-            editorDom && editorDom.classList.add("hidden");
-        };
-        editor({
-            code: "",
-            name: "",
-            id: "",
-            filename: "",
-            callback: editorCallback
-        }, context);
-        nothingOpenDom = showNothingOpen();
-        nothingOpenDom && nothingOpenDom.classList.remove("hidden");
-        editorPreview && editorPreview.classList.add("hidden");
-        editorDom && editorDom.classList.add("hidden");
-        systemDocsView && systemDocsView.classList.add("hidden");
-        return;
-    }
-    setCurrentFile({
-        filePath: filename
-    });
-    const currentFile = await getCurrentFileFull();
-    const {code: code = "error", path: path, name: name, id: id, filename: defaultFile} = currentFile || {};
-    if (!currentFile || !showFileInEditor(filename)) {
-        const editorCallback = () => {
-            editorDom = document.querySelector(".CodeMirror");
-            editorDom && editorDom.classList.add("hidden");
-        };
-        editor({
-            code: "",
-            name: "",
-            id: "",
-            filename: "",
-            callback: editorCallback
-        }, context);
-        editorPreview = showBinaryPreview({
-            filename: filename,
-            code: code
+function scrollToChild(child) {
+    window.parent = child.parentNode;
+    const parentWindowMin = parent.scrollLeft;
+    const parentWindowMax = parent.scrollLeft + parent.clientWidth;
+    const parentMaxScrollLeft = parent.scrollWidth - parent.clientWidth;
+    const childMin = child.offsetLeft;
+    const childMax = child.offsetLeft + child.clientWidth;
+    const childCenter = (childMin + childMax) / 2;
+    const idealScrollLeft = childCenter - parent.clientWidth / 2;
+    const idealScrollMin = childMax > parentWindowMin && childMin < parentWindowMin ? parent.scrollLeft - (parentWindowMin - childMin) - 20 : undefined;
+    const idealScrollMax = childMax > parentWindowMax && childMin < parentWindowMax ? parent.scrollLeft + (childMax - parentWindowMax) + 20 : undefined;
+    if (childMin === 0) {
+        parent.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
         });
-        editorPreview && editorPreview.classList.remove("hidden");
-        editorDom && editorDom.classList.add("hidden");
-        nothingOpenDom && nothingOpenDom.classList.add("hidden");
-        systemDocsView && systemDocsView.classList.add("hidden");
         return;
     }
-    editor({
-        code: code,
-        line: line,
-        column: column,
-        name: name,
-        id: id,
-        path: path,
-        filename: filename || defaultFile
-    }, context);
-    editorDom = document.querySelector(".CodeMirror");
-    editorDom && editorDom.classList.remove("hidden");
-    editorPreview && editorPreview.classList.add("hidden");
-    nothingOpenDom && nothingOpenDom.classList.add("hidden");
-    systemDocsView && systemDocsView.classList.add("hidden");
+    if (childMax === parent.scrollWidth) {
+        parent.scrollTo({
+            top: 0,
+            left: parentMaxScrollLeft,
+            behavior: "smooth"
+        });
+        return;
+    }
+    const childVisible = childMin >= parentWindowMin && childMax <= parentWindowMax;
+    if (childVisible) return;
+    if (idealScrollMin) {
+        console.log({
+            idealScrollMin: idealScrollMin
+        });
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollMin,
+            behavior: "smooth"
+        });
+        return;
+    }
+    if (idealScrollMax) {
+        console.log({
+            idealScrollMax: idealScrollMax
+        });
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollMax,
+            behavior: "smooth"
+        });
+        return;
+    }
+    if (idealScrollLeft <= 0) {
+        parent.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+        return;
+    }
+    if (idealScrollLeft <= parentMaxScrollLeft) {
+        parent.scrollTo({
+            top: 0,
+            left: idealScrollLeft,
+            behavior: "smooth"
+        });
+        return;
+    }
+    parent.scrollTo({
+        top: 0,
+        left: parentMaxScrollLeft,
+        behavior: "smooth"
+    });
+}
+
+const createTab = (parent, container, init) => tabDef => {
+    const tab = document.createElement("div");
+    tab.id = tabDef.id;
+    tab.classList.add("tab");
+    if (!init) {
+        tab.classList.add("new");
+    } else {
+        tab.classList.remove("new");
+    }
+    tabDef.changed && tab.classList.add("changed");
+    tabDef.touched && tab.classList.add("touched");
+    let systemType, systemName, systemClass;
+    if (tabDef.name.includes("system::")) {
+        systemType = "config";
+        systemName = {
+            "add-service-folder": "Open Folder",
+            "connect-service-provider": "Connect to a Provider",
+            "open-previous-service": "Open Previous Service",
+            "open-settings-view": "Settings"
+        }[tabDef.name.replace("system::", "")];
+        systemClass = "italic";
+    }
+    tab.title = `${tabDef.parent ? tabDef.parent + "/" : ""}${tabDef.name.split("/").pop()}`;
+    const fileType = getFileType(tabDef.name);
+    const icon = systemType || fileType.icon || fileType;
+    tab.innerHTML = `\n\t\t<span style="pointer-events: none;"\n\t\t\tclass="${systemClass ? systemClass + " " : ""}icon-${icon}"\n\t\t>${systemName || tabDef.name.split("/").pop()}</span>\n\t\t<div class="tab-close">\n\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t<ul class="actions-container" role="toolbar" aria-label="Tab actions">\n\t\t\t\t\t<li class="action-item" role="presentation">\n\t\t\t\t\t\t<a class="action-label icon close-editor-action"\n\t\t\t\t\t\t\tdata-name="${tabDef.name}"\n\t\t\t\t\t\t\tdata-parent="${tabDef.parent || ""}"\n\t\t\t\t\t\t\trole="button"\n\t\t\t\t\t\t\ttitle="Close"\n\t\t\t\t\t\t>\n\t\t\t\t\t\t</a>\n\t\t\t\t\t</li>\n\t\t\t\t</ul>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    parent.appendChild(tab);
+    scrollToChild(tab);
+    if (tabDef.active) {
+        tab.classList.add("active");
+        tab.classList.remove("new");
+    }
+    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
+    if (remainingTabs.length) {
+        container.classList.remove("empty");
+    } else {
+        container.classList.add("empty");
+    }
 };
 
-const messageEditor = (args, {editor: editor, context: context}) => {
-    const {op: op, result: result} = args;
-    if (!result.error) return showSystemDocsView({
-        op: op
-    });
-    context.systemDocsErrors = context.systemDocsErrors.filter((x => x.op === op));
-    context.systemDocsErrors.push({
-        op: op,
-        error: result.error
-    });
-    showSystemDocsView({
-        errors: context.systemDocsErrors
-    });
+const updateTab = (parent, container) => tabDef => {
+    const child = parent.querySelector("#" + tabDef.id);
+    if (!child) return;
+    if (!tabDef.active && child.classList.contains("active")) {
+        child.classList.remove("active");
+    }
+    if (tabDef.active && !child.classList.contains("active")) {
+        child.classList.add("active");
+        scrollToChild(child);
+    }
+    if (tabDef.changed && !child.classList.contains("changed")) {
+        child.classList.add("changed");
+        scrollToChild(child);
+    }
+    if (!tabDef.changed && child.classList.contains("changed")) {
+        child.classList.remove("changed");
+    }
+    if (!tabDef.touched && child.classList.contains("touched")) {
+        child.classList.remove("touched");
+    }
+    if (tabDef.touched) {
+        child.classList.add("touched");
+    }
 };
+
+const removeTab = (parent, container) => async tabDef => {
+    if (!tabDef) return console.error("attempt to remove tab without a tab definition");
+    const child = parent.querySelector("#" + tabDef.id);
+    child.parentNode.removeChild(child);
+    const remainingTabs = Array.from(parent.querySelectorAll(".tab"));
+    if (!remainingTabs.length) {
+        container.classList.add("empty");
+        return;
+    }
+    //TODO: scroll parent to put newly active tab in view
+};
+
+const scrollHorizontally = el => function(e) {
+    e = window.event || e;
+    el.scrollLeft -= e.wheelDelta || -e.detail;
+};
+
+function attachWheel(el) {
+    if (!el) return;
+    if (el.addEventListener) {
+        el.addEventListener("mousewheel", scrollHorizontally(el), {
+            passive: true
+        });
+        el.addEventListener("DOMMouseScroll", scrollHorizontally(el), {
+            passive: true
+        });
+    } else {
+        el.attachEvent("onmousewheel", scrollHorizontally(el));
+    }
+}
+
+function attachDoubleClick(el, context) {
+    if (!el) return;
+    el.addEventListener("dblclick", (e => {
+        alert("TODO: something is wrong with this..");
+        return;
+    }));
+}
+
+const initTabs = (parent, container) => (tabDefArray = [], context) => {
+    const _removeTab = removeTab(parent, container);
+    const init = true;
+    const _createTab = createTab(parent, container, init);
+    Array.from(parent.querySelectorAll(".tab")).map(_removeTab);
+    tabDefArray.map(_createTab);
+    const THIS_DELAY_IS_STUPID = 1;
+    setTimeout((() => {
+        const tabs = document.querySelector("#editor-tabs");
+        attachWheel(tabs);
+        attachDoubleClick(tabs);
+        const activeTab = document.querySelector("#editor-tabs-container .active");
+        if (activeTab) {
+            activeTab.scrollIntoView();
+        }
+    }), THIS_DELAY_IS_STUPID);
+};
+
+let tabsContainer;
+
+let tabsList;
+
+function EditorTabs(tabsArray = [ {
+    name: "loading...",
+    active: true
+} ]) {
+    if (tabsContainer) {
+        tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+        //should not be doing this, rely on event instead!!!
+        //tabsArray && initTabs(tabsList)(tabsArray);
+                return tabsContainer;
+    }
+    tabsContainer = document.createElement("div");
+    tabsContainer.id = "tabs";
+    tabsContainer.classList.add("empty");
+    tabsContainer.innerHTML = `\n\t\t<style>\n\t\t\t#editor-tabs-container .scrollbar {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 575px;\n\t\t\t\theight: 3px;\n\t\t\t\tleft: 0px;\n\t\t\t\tbottom: 0px;\n\t\t\t\tbackground: transparent;\n\t\t\t\tright: -3px;\n\t\t\t\twidth: auto;\n\t\t\t}\n\t\t\t#editor-tabs-container .slider {\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0px;\n\t\t\t\tleft: 0px;\n\t\t\t\theight: 3px;\n\t\t\t\twill-change: transform;\n\t\t\t\twidth: 508px;\n\t\t\t}\n\t\t\t#editor-tabs-container:hover .slider {\n\t\t\t\tbackground: #ffffff20;\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t#editor-tabs-container .tab:not(.touched):not(.changed) > span {\n\t\t\t\tfont-style: italic;\n\t\t\t}\n\t\t\t#tabs.empty #editor-tabs-container {\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\t\t</style>\n\t\t<div class="scrollable hide-native-scrollbar" id="editor-tabs-container">\n\t\t\t<div id="editor-tabs" class="row no-margin">\n\t\t\t</div>\n\t\t\t<div class="invisible scrollbar horizontal fade">\n\t\t\t\t<div class="slider">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    tabsList = tabsList || tabsContainer.querySelector("#editor-tabs");
+    /*
+
+	TODO:
+	when tabs change, update the width of slider
+	when editor tabs scroll position changes, move the slider with it
+	when this is done, change from display: none
+
+	ALSO:
+	there is something very screwed up happening with tab bar
+	for example, when I try to add padding or margin to left/right of tabs, left works and right fails
+	I have tried mulitple ways of fixing this, including first-child/last-child and wrapping in a container div
+	nothing seems to work and I don't have time for the frustration right now
+
+	one idea I have not tried is to put padding divs to the left and right of tabs list; maybe later
+	*/    const operations = {
+        initTabs: initTabs(tabsList, tabsContainer),
+        createTab: createTab(tabsList, tabsContainer),
+        updateTab: updateTab(tabsList),
+        removeTab: removeTab(tabsList, tabsContainer)
+    };
+    tabsContainer.sysDocNames = {
+        "add-service-folder": "Open Folder",
+        "connect-service-provider": "Connect to a Provider",
+        "open-previous-service": "Open Previous Service",
+        "open-settings-view": "Settings"
+    };
+    tabsContainer.operations = operations;
+    let tabs = [];
+    function clearLastTab() {
+        if (!tabs.length) return;
+        const lastTab = tabs[tabs.length - 1];
+        if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
+        tabs = tabs.filter((t => t.id !== lastTab.id));
+        operations.removeTab(lastTab);
+        //tabs.map(operations.updateTab);
+        }
+    function getTabsToUpdate(filePath) {
+        const name = filePath?.split("/").pop();
+        const tabsToUpdate = [];
+        let foundTab;
+        for (var i = 0, len = tabs.length; i < len; i++) {
+            if (name === tabs[i].name) {
+                foundTab = tabs[i];
+            }
+            // update: if tab exists and not active, activate it
+                        if (name === tabs[i].name && !tabs[i].active) {
+                tabs[i].active = true;
+                tabsToUpdate.push(tabs[i]);
+            }
+            // update: remove active state from active tab
+                        if (name !== tabs[i].name && tabs[i].active) {
+                delete tabs[i].active;
+                tabsToUpdate.push(tabs[i]);
+            }
+        }
+        return {
+            foundTab: foundTab,
+            tabsToUpdate: tabsToUpdate
+        };
+    }
+    tabsContainer.api = {
+        list: () => tabs,
+        find: x => tabs.find(x),
+        update: t => tabs = t,
+        push: t => tabs.push(t),
+        clearLast: clearLastTab,
+        toUpdate: getTabsToUpdate
+    };
+    return tabsContainer;
+}
+
+var tabs = EditorTabs();
+
+function StatusBar() {
+    const statusBar = document.createElement("div");
+    statusBar.id = "status-bar";
+    const settings = getSettings();
+    const tabSettingsElString = s => `${s.indentWithTabs ? "Tabs" : "Spaces"}: <span class="tab-size">${s.tabSize}</span>`;
+    statusBar.innerHTML = `\n\t<style>\n\t\t#status-bar {\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\theight: 22px;\n\t\t\tfont-size: 12px;\n\t\t\tpadding: 2px 10px;\n\t\t\tz-index: 10;\n\t\t\t/*\n\t\t\tborder-top: 0.5px solid #000A;\n\t\t\tbox-shadow: 0 -1px 5px #000F;\n\t\t\t*/\n\t\t}\n\t\t#status-bar .bg {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tbox-sizing: border-box;\n\t\t\tpointer-events: none;\n\t\t\tz-index: -1;\n\t\t\t/*\n\t\t\tbackground: #3333;\n\t\t\tbackground: #0006;\n\t\t\tborder-top: 1px solid #111a;\n\t\t\tbackground: #1f476b;\n\t\t\tbackground: #4f263d;\n\t\t\tbackground: rgb(var(--main-theme-highlight-color));\n\t\t\tfilter: brightness(0.6);\n\t\t\t*/\n\t\t}\n\t\t#status-bar, #status-bar * {\n\t\t\tcursor: default;\n\t\t}\n\t\t#status-bar a:hover { opacity: 1; }\n\t\t#status-bar a { color: var(--main-theme-text-color); opacity: 0.9;}\n\n\t\t/*\n\t\t#status-bar a { color: var(--main-theme-text-invert-color); }\n\t\t#status-bar a { color: white; opacity: 0.65; }\n\t\t#status-bar a:hover { color: var(--main-theme-text-color); }\n\t\t#status-bar a { color: var(--main-theme-text-color); }\n\t\t*/\n\n\t\t.statusbar-item { z-index: 1; }\n\t\t.statusbar-item.right a {\n\t\t\tmargin-left: 10px;\n\t\t}\n\t\t#status-bar .editor-status-mode {\n\t\t\ttext-transform: capitalize;\n\t\t}\n\t\t#status-bar .editor-status-mode.uppercase {\n\t\t\ttext-transform: uppercase !important;\n\t\t}\n\t</style>\n\n\t<div class="bg"></div>\n\n\t<div class="statusbar-item statusbar-entry left" statusbar-entry-priority="10000" statusbar-entry-alignment="0">\n\t</div>\n\n\t<div class="statusbar-item right">\n\t\t<div class="editor-statusbar-item">\n\t\t\t<a class="editor-status-selection" title="Go to Line" style="">\n\t\t\t\tLine <span class="line-number">--</span>,\n\t\t\t\tCol <span class="column-number">--</span>\n\t\t\t</a>\n\t\t\t<a class="editor-status-indentation" title="Select Indentation" style="">${tabSettingsElString(settings)}</a>\n\t\t\t<a class="editor-status-encoding hidden" title="Select Encoding" style="">UTF-8</a>\n\t\t\t<a class="editor-status-eol hidden" title="Select End of Line Sequence" style="">LF</a>\n\t\t\t<a class="editor-status-mode" title="Select Language Mode" style="">--</a>\n\t\t</div>\n\t</div>\n`;
+    const tabSettingsEl = statusBar.querySelector(".editor-status-indentation");
+    tabSettingsEl.addEventListener("click", (() => {
+        //console.warn('pop up menu to select tab size and indentation style');
+        settings.indentWithTabs = !settings.indentWithTabs;
+        localStorage.setItem("editorSettings", JSON.stringify(settings));
+        tabSettingsEl.innerHTML = tabSettingsElString(settings);
+        Editor.setOption("indentWithTabs", settings.indentWithTabs);
+    }));
+    function setLineNumber(number) {
+        const el = statusBar.querySelector(".editor-status-selection .line-number");
+        el.innerHTML = number;
+    }
+    function setColNumber(number) {
+        const el = statusBar.querySelector(".editor-status-selection .column-number");
+        el.innerHTML = number;
+    }
+    function setTabSize(number) {
+        const el = statusBar.querySelector(".editor-status-indentation .tab-size");
+        el.innerHTML = number;
+    }
+    function setDocType(type) {
+        const el = statusBar.querySelector(".editor-status-mode");
+        el.classList.remove("uppercase");
+        let docType = type;
+        if (type.json) {
+            docType = "json";
+        }
+        if (type.typescript) {
+            docType = "TypeScript";
+        }
+        if (type.assemblyscript) {
+            docType = "AssemblyScript";
+        }
+        if (type.name && type.name.includes("html")) {
+            docType = "html";
+        }
+        const extMap = {
+            default: "Plain Text",
+            "text/x-csrc": "C",
+            "text/x-c++src": "C++",
+            "text/webassembly": "WebAssembly",
+            wat: "WebAssembly",
+            piskel: "Piskel",
+            javascript: "JavaScript",
+            "text/apl": "APL"
+        };
+        if (extMap[type]) {
+            docType = extMap[type];
+        }
+        while (docType.toString().includes("object")) {
+            if (docType.name) {
+                docType = docType.name;
+                continue;
+            }
+            docType = "Plain Text";
+        }
+        const capThese = [ "css", "html", "json", "xml", "jsx", "php", "sql" ];
+        if (docType.toLowerCase && capThese.includes(docType.toLowerCase())) {
+            el.classList.add("uppercase");
+        }
+        el.innerHTML = docType;
+    }
+    //attachListeners({ setLineNumber, setColNumber, setTabSize, setDocType });
+        document.body.appendChild(statusBar);
+    return {
+        operations: {
+            setLineNumber: setLineNumber,
+            setColNumber: setColNumber,
+            setTabSize: setTabSize,
+            setDocType: setDocType
+        },
+        container: statusBar
+    };
+}
+
+var status = StatusBar();
 
 const listeners$1 = {};
 
@@ -26543,7 +26537,10 @@ window.addEventListener("message", (function(messageEvent) {
     });
 }), useCaptue);
 
-const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor: switchEditor}) => {
+const getFilePath$1 = getFilePath$2(getCurrentService);
+
+const fileSelectHandler = async (event, context) => {
+    const {editor: {switchEditor: switchEditor}} = context;
     const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = event.detail;
     const {line: line, column: column} = event.detail;
     /*
@@ -26571,7 +26568,7 @@ const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor:
 			return;
 		}
 	}
-	*/    const fileNameWithPath = getFilePath({
+	*/    const fileNameWithPath = getFilePath$1({
         name: name,
         parent: parent,
         path: path,
@@ -26588,21 +26585,21 @@ const fileSelectHandler = async (event, {getFilePath: getFilePath, switchEditor:
         switchEditor({
             filename: filePath.replace("system::", "").replace("systemDoc::", ""),
             mode: "systemDoc"
-        });
+        }, context);
         return;
     }
     if (!name) {
         //sessionStorage.setItem("editorFile", '');
         switchEditor({
             mode: "nothingOpen"
-        });
+        }, context);
         return;
     }
     switchEditor({
         filename: filePath,
         line: line,
         column: column
-    });
+    }, context);
 };
 
 const operationDoneHandler = (e, context) => {
@@ -26634,12 +26631,15 @@ const operationDoneHandler = (e, context) => {
     }
 };
 
-const fileClose = (e, {getCurrentFile: getCurrentFile, getFilePath: getFilePath, switchEditor: switchEditor}) => {
+const getFilePath = getFilePath$2(getCurrentService);
+
+const fileClose = (e, context) => {
+    const {editor: {switchEditor: switchEditor}} = context;
     const {name: name, parent: parent, path: path, next: next, nextPath: nextPath} = e.detail;
     if (!next) {
         switchEditor({
             mode: "nothingOpen"
-        });
+        }, context);
         return;
     }
     //TODO: shouldn't this be fileSelect handler after this point?
@@ -26647,10 +26647,10 @@ const fileClose = (e, {getCurrentFile: getCurrentFile, getFilePath: getFilePath,
         switchEditor({
             filename: next.replace("system::", ""),
             mode: "systemDoc"
-        });
+        }, context);
         return;
     }
-    const currentFile = getCurrentFile();
+    const currentFile = getCurrentFile(get)();
     if (next === currentFile) return;
     const filename = getFilePath({
         name: name,
@@ -26661,7 +26661,7 @@ const fileClose = (e, {getCurrentFile: getCurrentFile, getFilePath: getFilePath,
     });
     switchEditor({
         filename: filename
-    });
+    }, context);
 };
 
 const contextMenuHandler = (e, {triggers: triggers}) => {
@@ -26745,12 +26745,10 @@ const contextMenuSelectHandler = (e, context) => {
 
 /*
 NOTE: this might just be a fileSelect in disguise...
-*/ const serviceSwitchListener = async (event, {getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, switchEditor: switchEditor}) => {
+*/ const serviceSwitchListener = async (event, {switchEditor: switchEditor}) => {
     const fileName = getCurrentFile();
     //sessionStorage.setItem("editorFile", fileName);
-        const currentService = getCurrentService({
-        pure: true
-    });
+        const currentService = getCurrentService();
     const fileBody = currentService.code.find((x => x.name === fileName));
     if (!fileBody) {
         console.error(`[editor:serviceSwitch] Current service (${currentService.id}:${currentService.name}) does not contain file: ${fileName}`);
@@ -26759,6 +26757,26 @@ NOTE: this might just be a fileSelect in disguise...
     }
     switchEditor(fileName, null, fileBody.code);
 };
+
+const nothingOpen = (e, context) => context.editor.switchEditor({
+    mode: "nothingOpen"
+}, context);
+
+const systemDocs = (e, context) => context.editor.switchEditor({
+    filename: e.type,
+    mode: "systemDoc"
+}, context);
+
+var mainListeners = formatHandlers("Editor", {
+    operationDone: operationDoneHandler,
+    fileSelect: fileSelectHandler,
+    fileClose: fileClose,
+    contextMenu: contextMenuHandler,
+    contextMenuSelect: contextMenuSelectHandler,
+    serviceSwitch: serviceSwitchListener,
+    nothingOpen: nothingOpen,
+    systemDocs: systemDocs
+});
 
 const test = {
     data: event => Array.from(event.target.parentNode.querySelectorAll('input:not([name="hidden"])')).map((({name: name, value: value}) => ({
@@ -26805,24 +26823,10 @@ const trigger = {
     data: event => event
 };
 
-const nothingOpen = (e, {switchEditor: switchEditor}) => switchEditor(null, "nothingOpen");
-
-const systemDocs = (e, {switchEditor: switchEditor}) => switchEditor(e.type, "systemDoc");
-
-var editor = {
-    ...formatHandlers("Editor", {
-        operationDone: operationDoneHandler,
-        fileSelect: fileSelectHandler,
-        fileClose: fileClose,
-        contextMenu: contextMenuHandler,
-        contextMenuSelect: contextMenuSelectHandler,
-        serviceSwitch: serviceSwitchListener,
-        nothingOpen: nothingOpen,
-        systemDocs: systemDocs
-    }),
-    provider: provider,
+var mainTriggers = {
+    cursorActivity: trigger,
     fileChange: trigger$1,
-    cursorActivity: trigger
+    provider: provider
 };
 
 const handler$e = (e, {tabs: tabs}) => {
@@ -27122,6 +27126,19 @@ const handler$5 = (event, context) => {
     handler$e(fileSelectEvent, context);
 };
 
+var tabsListeners = formatHandlers("Tabs", {
+    operations: handler$c,
+    operationDone: handler$b,
+    fileSelect: handler$e,
+    fileClose: handler$d,
+    fileChange: handler$a,
+    contextMenu: handler$9,
+    contextMenuSelect: handler$8,
+    ui: handler$7,
+    click: handler$6,
+    systemDocs: handler$5
+});
+
 /*
 	TODO: still work to be done on this
 	- reference the function above (old way)
@@ -27141,19 +27158,7 @@ var closeMultiple = {
     others: others
 };
 
-var tabs$1 = {
-    ...formatHandlers("Tabs", {
-        operations: handler$c,
-        operationDone: handler$b,
-        fileSelect: handler$e,
-        fileClose: handler$d,
-        fileChange: handler$a,
-        contextMenu: handler$9,
-        contextMenuSelect: handler$8,
-        ui: handler$7,
-        click: handler$6,
-        systemDocs: handler$5
-    }),
+var tabsTriggers = {
     closeMultiple: closeMultiple
 };
 
@@ -27246,75 +27251,73 @@ const handler = (event, context) => {
     setColNumber(1);
 };
 
-//triggers
-var status$1 = {
-    ...formatHandlers("Status", {
-        cursorActivity: handler$4,
-        fileChange: handler$3,
-        fileSelect: handler$2,
-        fileClose: handler$1,
-        operationDone: handler
-    })
-};
+var statusListeners = formatHandlers("Status", {
+    cursorActivity: handler$4,
+    fileChange: handler$3,
+    fileSelect: handler$2,
+    fileClose: handler$1,
+    operationDone: handler
+});
 
+//import statusTriggers from './status/triggers/index.js';
 const listeners = [ {
     eventName: "service-switch-notify",
-    handlers: [ editor.serviceSwitch ]
+    handlers: [ mainListeners.serviceSwitch ]
 }, {
     eventName: "cursorActivity",
-    handlers: [ status$1.cursorActivity ]
+    handlers: [ statusListeners.cursorActivity ]
 }, {
     eventName: "operationDone",
-    handlers: [ editor.operationDone, tabs$1.operationDone, status$1.operationDone ]
+    handlers: [ mainListeners.operationDone, tabsListeners.operationDone, statusListeners.operationDone ]
 }, {
     eventName: "operations",
-    handlers: [ tabs$1.operationDone ]
+    handlers: [ tabsListeners.operationDone ]
 }, {
     eventName: "open-settings-view",
-    handlers: [ editor.systemDocs, tabs$1.fileSelect ]
+    handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
     eventName: "add-service-folder",
-    handlers: [ editor.systemDocs, tabs$1.fileSelect ]
+    handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
     eventName: "open-previous-service",
-    handlers: [ editor.systemDocs, tabs$1.fileSelect ]
+    handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
     eventName: "connect-service-provider",
-    handlers: [ editor.systemDocs, tabs$1.fileSelect ]
+    handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
 }, {
     eventName: "noServiceSelected",
-    handlers: [ editor.nothingOpen ]
+    handlers: [ mainListeners.nothingOpen ]
 }, {
     eventName: "fileSelect",
-    handlers: [ editor.fileSelect, tabs$1.fileSelect, status$1.fileSelect ]
+    handlers: [ mainListeners.fileSelect, tabsListeners.fileSelect, statusListeners.fileSelect ]
 }, {
     eventName: "fileClose",
-    handlers: [ editor.fileClose, tabs$1.fileClose, status$1.fileClose ]
+    handlers: [ mainListeners.fileClose, tabsListeners.fileClose, statusListeners.fileClose ]
 }, {
     eventName: "fileChange",
-    handlers: [ tabs$1.fileChange, status$1.fileChange ]
+    handlers: [ tabsListeners.fileChange, statusListeners.fileChange ]
 }, {
     eventName: "contextmenu",
     handlers: [ {
-        ...editor.contextMenu,
+        ...mainListeners.contextMenu,
         options: {
             capture: true
         }
     }, {
-        ...tabs$1.contextMenu,
+        ...tabsListeners.contextMenu,
         options: {
             capture: true
         }
     } ]
 }, {
     eventName: "contextmenu-select",
-    handlers: [ editor.contextMenuSelect, tabs$1.contextMenuSelect ]
+    handlers: [ mainListeners.contextMenuSelect, tabsListeners.contextMenuSelect ]
 }, {
     eventName: "ui",
-    handlers: [ tabs$1.ui ]
+    handlers: [ tabsListeners.ui ]
 }, {
     eventName: "click",
-    handlers: [ tabs$1.click ]
+    handlers: [ tabsListeners.click ]
 } ];
 
 const triggers = {
@@ -27333,23 +27336,23 @@ const triggers = {
     }, {
         eventName: "fileChange",
         type: "raw",
-        handlers: [ editor.fileChange ]
+        handlers: [ mainTriggers.fileChange ]
     }, {
         eventName: "cursorActivity",
         type: "raw",
-        handlers: [ editor.cursorActivity ]
+        handlers: [ mainTriggers.cursorActivity ]
     }, {
         eventName: "provider-test",
         type: "click",
-        handlers: [ editor.provider.test ]
+        handlers: [ mainTriggers.provider.test ]
     }, {
         eventName: "provider-save",
         type: "click",
-        handlers: [ editor.provider.save ]
+        handlers: [ mainTriggers.provider.save ]
     }, {
         eventName: "provider-add-service",
         type: "click",
-        handlers: [ editor.provider.addService ]
+        handlers: [ mainTriggers.provider.addService ]
     } ],
     Tabs: [ {
         eventName: "ui",
@@ -27361,12 +27364,12 @@ const triggers = {
         name: "closeOthers",
         eventName: "fileClose",
         type: "raw",
-        handlers: [ tabs$1.closeMultiple.others ]
+        handlers: [ tabsTriggers.closeMultiple.others ]
     }, {
         name: "closeAll",
         eventName: "fileClose",
         type: "raw",
-        handlers: [ tabs$1.closeMultiple.all ]
+        handlers: [ tabsTriggers.closeMultiple.all ]
     }, {
         eventName: "fileSelect",
         type: "raw"
@@ -27402,32 +27405,11 @@ var events = {
 //import indexCSS from '../index.css';
 document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$3 ];
 
-const getFilePath = getFilePath$1(getCurrentService);
-
-const tabs = EditorTabs();
-
-const status = StatusBar();
-
-const context = {
-    getCurrentFile: getCurrentFile,
-    // << access within file instead
-    getFilePath: getFilePath,
-    // << access within file instead
-    switchEditor: x => switchEditor(x, {
-        editor: InlineEditor,
-        context: context
-    }),
-    messageEditor: x => messageEditor(x, {
-        editor: InlineEditor,
-        context: context
-    }),
-    systemDocsErrors: [],
-    editor: InlineEditor,
+attachEvents(events, {
+    editor: Editor$1,
     tabs: tabs,
     status: status
-};
-
-attachEvents(events, context);
+});
 
 const isPreview = document.location.href.includes("/::preview::/");
 

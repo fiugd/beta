@@ -1,4 +1,4 @@
-import EditorModule from "./deprecate/editorModule.js";
+import EditorModule from "./codemirror.js";
 import Container from './container.js';
 import Search from './search.js';
 import { codemirrorModeFromFileType, getFileType } from '../../utils/misc.js';
