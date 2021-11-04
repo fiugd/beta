@@ -194,11 +194,6 @@
 			"handler": null
 		},
 		{
-			"route": "./_/modules/templatesEvents.mjs",
-			"source": "modules/templatesEvents.mjs",
-			"handler": null
-		},
-		{
 			"route": "./_/modules/operationsEvents.mjs",
 			"source": "modules/operationsEvents.mjs",
 			"handler": null
@@ -208,11 +203,6 @@
 		{
 			"route": "./_/modules/Listeners.mjs",
 			"source": "modules/Listeners.mjs",
-			"handler": null
-		},
-		{
-			"route": "./_/modules/Templates.mjs",
-			"source": "modules/Templates.mjs",
 			"handler": null
 		},
 		{
