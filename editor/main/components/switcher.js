@@ -14,7 +14,8 @@ TODO:
 	2. should probably delete (some/all ?) views (versus just hiding them)
 */
 
-const switchEditor = async (args, { editor, context }) => {
+const switchEditor = async (args, context) => {
+	const { editor } = context;
 	const { filename, mode, line, column } = args;
 	//TODO: should go into loading mode first
 
@@ -107,12 +108,12 @@ const switchEditor = async (args, { editor, context }) => {
 	systemDocsView && systemDocsView.classList.add("hidden");
 };
 
-const messageEditor = (args, { editor, context }) => {
+const messageEditor = (args, context) => {
 	const { op, result } = args;
 	if (!result.error) return showSystemDocsView({ op });
-	context.systemDocsErrors = context.systemDocsErrors.filter((x) => x.op === op);
+	context.systemDocsErrors = (context.systemDocsErrors||[]).filter((x) => x.op === op);
 	context.systemDocsErrors.push({ op, error: result.error });
-	showSystemDocsView({ errors: context.systemDocsErrors });
+	showSystemDocsView({ errors: context.systemDocsErrors }, context);
 };
 
 export { switchEditor, messageEditor };

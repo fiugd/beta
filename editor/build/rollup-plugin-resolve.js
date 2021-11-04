@@ -1,4 +1,4 @@
-import {pather} from '../../shared/modules/utilities.mjs';
+import {pather} from '../../shared/utilities.mjs';
 
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 const braces = url => {

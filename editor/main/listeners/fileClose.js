@@ -3,10 +3,11 @@ import { getFilePath as gfp } from '../../utils/misc.js';
 
 const getFilePath = gfp(getCurrentService);
 
-const fileClose = (e, { switchEditor }) => {
+const fileClose = (e, context) => {
+	const { editor: { switchEditor } } = context;
 	const { name, parent, path, next, nextPath } = e.detail;
 	if(!next){
-		switchEditor({ mode: "nothingOpen" });
+		switchEditor({ mode: "nothingOpen" }, context);
 		return;
 	}
 
@@ -16,14 +17,14 @@ const fileClose = (e, { switchEditor }) => {
 		switchEditor({
 			filename: next.replace("system::", ""),
 			mode: "systemDoc"
-		});
+		}, context);
 		return;
 	}
 	const currentFile = getCurrentFile(get)();
 	if(next === currentFile) return;
 
 	const filename = getFilePath({ name, parent, path, next, nextPath });
-	switchEditor({ filename });
+	switchEditor({ filename }, context);
 };
 
 export default fileClose;

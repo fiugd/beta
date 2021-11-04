@@ -1,9 +1,11 @@
-import Editor from "./deprecate/editorModule.js";
+import EditorModule from "./deprecate/editorModule.js";
 import Container from './container.js';
 import Search from './search.js';
 import { codemirrorModeFromFileType, getFileType } from '../../utils/misc.js';
 import { getSettings, DEBUG } from "../../utils/State.js";
 import attachGutterHelper from './gutterHelper.js';
+import { switchEditor, messageEditor } from './switcher.js';
+
 import "../../vendor/localforage.min.js";
 
 const { indentWithTabs, tabSize } = getSettings();
@@ -358,7 +360,7 @@ const Editor = (args, context) => {
 
 	if(window.Editor) return loadDocument();
 
-	Editor({ ...editorOptions, text: '\n\n\n' }, (error, editor) => {
+	EditorModule({ ...editorOptions, text: '\n\n\n' }, (error, editor) => {
 		if (error) {
 			console.error(error);
 			callback && callback(error);
@@ -371,5 +373,8 @@ const Editor = (args, context) => {
 };
 
 attachGutterHelper(editorGutter);
+
+Editor.switchEditor = switchEditor;
+Editor.messageEditor = messageEditor;
 
 export default Editor;

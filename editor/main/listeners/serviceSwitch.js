@@ -1,8 +1,10 @@
+import { getCurrentFile, getCurrentService } from "../../utils/State.js";
+
 /*
 NOTE: this might just be a fileSelect in disguise...
 */
 
-const serviceSwitchListener = async (event, { getCurrentFile, getCurrentService, switchEditor }) => {
+const serviceSwitchListener = async (event, { switchEditor }) => {
 	const fileName = getCurrentFile();
 	//sessionStorage.setItem("editorFile", fileName);
 	const currentService = getCurrentService({ pure: true });

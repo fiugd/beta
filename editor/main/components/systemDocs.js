@@ -248,21 +248,21 @@ const SystemDocs = (section, errors) => {
 
 let systemDocsDOM;
 const showSystemDocsView = ({ filename='', op='' }, context) => {
-	const { systemDocsErrors : errors } = context
 	try{
 		document.getElementById('file-search').style.visibility = "";
 	}catch(e){}
-
+	
 	if (!systemDocsDOM) {
 		const editorContainer = document.getElementById("editor-container");
 		systemDocsDOM = SystemDocs();
 		editorContainer.appendChild(systemDocsDOM);
+		context.systemDocsErrors = context.systemDocsErrors || [];
 	}
 	if (filename) {
 		systemDocsDOM.querySelector(".thisSystemDoc").innerHTML = SystemDocs(filename);
 	}
 	const allServicesList = document.getElementById("settings-all-services-list");
-
+	
 	const updateServicesListDom = async () => {
 		if(!allServicesList) return;
 		allServicesList.innerHTML = "<li>loading...</li>";
@@ -272,16 +272,17 @@ const showSystemDocsView = ({ filename='', op='' }, context) => {
 			`document.location.reload();`
 		].join(' ');
 		const ServiceRow = (s) => `
-			<li>
-				<span>[ ${s.id} ] ${s.name}</span>
-				<button onclick="${ServiceRowOnClick(s)}">LOAD</button>
-			</li>
+		<li>
+		<span>[ ${s.id} ] ${s.name}</span>
+		<button onclick="${ServiceRowOnClick(s)}">LOAD</button>
+		</li>
 		`.trim().replace(/^			/g, '');
 		allServicesList.innerHTML = services.map(ServiceRow).join("\n");
 	};
 	updateServicesListDom();
-
+	
 	// TODO: this could be improved to match the button which error'ed
+	const { systemDocsErrors : errors } = context
 	if (errors.length) {
 		errors.forEach((error) => {
 			const domForError = systemDocsDOM.querySelector(

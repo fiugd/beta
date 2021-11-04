@@ -6,8 +6,8 @@ import fileClose from './fileClose.js';
 import contextMenu from './contextMenu.js';
 import contextMenuSelect from './contextSelect.js';
 import serviceSwitch from './serviceSwitch.js';
-const nothingOpen = (e, { switchEditor }) => switchEditor(null, "nothingOpen");
-const systemDocs = (e, { switchEditor }) => switchEditor(e.type, "systemDoc");
+const nothingOpen = (e, context) => context.editor.switchEditor({ mode: "nothingOpen" }, context);
+const systemDocs = (e, context) => context.editor.switchEditor({ filename: e.type, mode: "systemDoc" }, context);
 
 export default formatHandlers('Editor', {
 	operationDone,

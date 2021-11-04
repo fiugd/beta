@@ -163,4 +163,4 @@ function StatusBar(){
 		container: statusBar
 	};
 }
-export default StatusBar;
+export default StatusBar();

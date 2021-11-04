@@ -385,5 +385,5 @@ function EditorTabs(tabsArray = [{ name: "loading...", active: true }]) {
 	return tabsContainer;
 }
 
-export default EditorTabs;
+export default EditorTabs();
 

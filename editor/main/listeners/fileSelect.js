@@ -1,6 +1,12 @@
+import { getCurrentService } from "../../utils/State.js";
+import { getFilePath as gfp } from '../../utils/misc.js';
+
+const getFilePath = gfp(getCurrentService);
+
 let firstLoad = true;
 
-const fileSelectHandler = async (event, { getFilePath, switchEditor }) => {
+const fileSelectHandler = async (event, context) => {
+	const { editor: { switchEditor } } = context;
 	const { name, path, next, nextPath, parent } = event.detail;
 	const { line, column } = event.detail;
 	let savedFileName;
@@ -50,17 +56,17 @@ const fileSelectHandler = async (event, { getFilePath, switchEditor }) => {
 				.replace("system::", "")
 				.replace("systemDoc::", ""),
 			mode: "systemDoc"
-		});
+		}, context);
 		return;
 	}
 
 	if(!name){
 		//sessionStorage.setItem("editorFile", '');
-		switchEditor({ mode: "nothingOpen" });
+		switchEditor({ mode: "nothingOpen" }, context);
 		return;
 	}
 
-	switchEditor({ filename: filePath, line, column });
+	switchEditor({ filename: filePath, line, column }, context);
 };
 
 export default fileSelectHandler;

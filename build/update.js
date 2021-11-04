@@ -1,3 +1,12 @@
+/*
+
+NOTE: this is currently out-of-date
+
+this should be used to update files which are cached in service-worker
+essentially, this is a "local build" which can update the app in place to test before commiting
+
+*/
+
 const semVer = `([0-9]+(\.[0-9]+)+)`;
 const iso8601Date = `[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?`;
 const semVerDateRegex = new RegExp(`v${semVer}\$`);

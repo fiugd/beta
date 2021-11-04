@@ -5,34 +5,16 @@ document.adoptedStyleSheets = [
 	editorCSS//, indexCSS
 ];
 
-import { 
-	DEBUG, initState, getCurrentFile, getCurrentService
-} from './utils/State.js';
-
-import { getFilePath as gfp } from './utils/misc.js';
-const getFilePath = gfp(getCurrentService);
+import { DEBUG, initState } from './utils/State.js';
 
 import editor from './main/components/index.js'
-import { switchEditor, messageEditor } from './main/components/switcher.js'
-import { tabs } from './tabs/tabs.js'
-import { status } from './status/status.js'
+import tabs from './tabs/components/index.js'
+import status from './status/components/index.js'
 
 import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
 import events from './events.js';
 
-const context = {
-	getCurrentFile, // << access within file instead
-	getFilePath, // << access within file instead
-
-	switchEditor: (x) => switchEditor(x, { editor, context }),
-	messageEditor: (x) => messageEditor(x,{ editor, context }),
-	systemDocsErrors: [],
-
-	editor,
-	tabs,
-	status
-};
-attachEvents(events, context);
+attachEvents(events, { editor, tabs, status });
 
 const isPreview = document.location.href.includes("/::preview::/");
 if(isPreview){
