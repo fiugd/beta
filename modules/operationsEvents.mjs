@@ -15,7 +15,7 @@ THIS IS CONFUSING - going to kill #2
 import { getOpenedFiles, getCurrentService } from "./state.mjs";
 
 import { attach, attachTrigger } from "./Listeners.mjs";
-import { debounce } from "/shared/modules/utilities.mjs";
+import { debounce } from "/shared/utilities.mjs";
 
 const noFrontSlash = (path) => {
 	if(!path) return path;
