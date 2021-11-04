@@ -6,7 +6,7 @@ const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-const bundleName = '../addon.bundle.js';
+const bundleName = '../bundle.addon.js';
 const priority = [
 	'doc-state.js',
 
