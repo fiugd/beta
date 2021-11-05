@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T08:42:49.913Z )
+	Version 0.4.6 ( 2021-11-05T09:11:01.952Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25743,6 +25743,13 @@ const Editor$1 = (args, context) => {
     const prevEditor = document.querySelector("#editor-container");
     prevEditor || initEditor(context);
     const onChange = (cm, changeObj) => {
+        console.log({
+            code: code,
+            name: name,
+            id: id,
+            filename: filename
+        });
+        debugger;
         triggers.fileChange({
             code: cm.getValue(),
             prevCode: code,

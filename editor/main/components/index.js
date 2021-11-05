@@ -53,6 +53,8 @@ const Editor = (args, context) => {
 	const editorDiv = prevEditor || initEditor(context);
 
 	const onChange = (cm, changeObj) => {
+		console.log({ code, name, id, filename });
+		debugger;
 		triggers.fileChange({
 			code: cm.getValue(),
 			prevCode: code,
