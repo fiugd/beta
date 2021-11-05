@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.5 ( 2021-11-05T10:47:44.027Z )
+	Version 0.4.5 ( 2021-11-05T10:53:41.315Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25781,6 +25781,7 @@ const onChange = (context, cm, changeObj) => {
         filename: filename,
         filePath: filePath
     });
+    if (!triggers) return;
     triggers.fileChange({
         code: cm.getValue(),
         prevCode: prevCode,
@@ -25793,6 +25794,7 @@ const onChange = (context, cm, changeObj) => {
 
 const onCursorActivity = (context, instance) => {
     const {triggers: triggers, updateLineInfo: updateLineInfo} = context;
+    if (!triggers || !updateLineInfo) return;
     const cursor = instance.getCursor();
     const line = cursor.line + 1;
     const column = cursor.ch + 1;

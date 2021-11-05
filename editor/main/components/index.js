@@ -87,6 +87,7 @@ const onChange = (context, cm, changeObj) => {
 	} = context;
 
 	console.log({ prevCode, name, id, filename, filePath });
+	if(!triggers) return;
 
 	triggers.fileChange({
 		code: cm.getValue(),
@@ -100,6 +101,7 @@ const onChange = (context, cm, changeObj) => {
 
 const onCursorActivity = (context, instance) => {
 	const { triggers, updateLineInfo } = context;
+	if(!triggers || !updateLineInfo) return;
 	const cursor = instance.getCursor();
 	const line = cursor.line + 1;
 	const column = cursor.ch + 1;
