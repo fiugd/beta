@@ -2346,6 +2346,7 @@ notes-section.loading:after {
 	bottom: 0px;
 	top: 13px; */
 	height: 100%;
+	background: var(--main-theme-color);
 }
 
 /* Left area near gutters annoys me */
