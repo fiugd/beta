@@ -3,6 +3,36 @@ https://iamakulov.com/notes/resize-scroll/
 */
 let panes;
 
+// min-width for explorer and snap to zero to completely hide
+const snapExplorer = (() => {
+	let explorerClosed;
+	const snapDistance = 200;
+	const bufferMax = snapDistance + 50;
+	let explorerPane;
+
+	return function snapExplorer(currentX){
+		 explorerPane= explorerPane || document.getElementById("explorer");
+		const withinBufferZone = currentX > snapDistance && currentX < bufferMax;
+
+		if(!explorerClosed && withinBufferZone){
+			return bufferMax;
+		}
+
+		if(currentX > snapDistance){
+			if(explorerClosed){
+				explorerClosed = false;
+				explorerPane && explorerPane.style.visibility = '';
+			}
+			return withinBufferZone ? bufferMax : currentX;
+		}
+		if(!explorerClosed){
+			explorerClosed = true;
+			explorerPane && explorerPane.style.visibility = 'hidden';
+		}
+		return 50;
+	}
+})();
+
 function saveAllPositions(op){
 	// explorer
 	//   ----   left/right << --- pixels
@@ -65,10 +95,9 @@ function restoreAllPositions(){
 		seperator2.style.left = sep2 + '%';
 		terminalPane.style.left = sep2 + '%';
 		terminalCover.style.left = sep2 + '%';
-		
-		if(sep1 === 50){
-			editorPane.style.visibility = 'hidden';
-		}
+
+		snapExplorer(Number(sep1));
+
 		return true;
 	}catch(e){
 		console.error(e);
@@ -204,36 +233,6 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 		window.termResize && window.termResize();
 		dragging = false;
 	}
-
-	// min-width for explorer and snap to zero to completely hide
-	const snapExplorer = (() => {
-		let explorerClosed;
-		const snapDistance = 200;
-		const bufferMax = snapDistance + 50;
-		let explorerPane;
-
-		return function snapExplorer(currentX){
-			explorerPane = explorerPane || document.getElementById("explorer");
-			const withinBufferZone = currentX > snapDistance && currentX < bufferMax;
-
-			if(!explorerClosed && withinBufferZone){
-				return bufferMax;
-			}
-
-			if(currentX > snapDistance){
-				if(explorerClosed){
-					explorerClosed = false;
-					explorerPane.style.visibility = '';
-				}
-				return withinBufferZone ? bufferMax : currentX;
-			}
-			if(!explorerClosed){
-				explorerClosed = true;
-				explorerPane.style.visibility = 'hidden';
-			}
-			return 50;
-		}
-	})();
 
 	let timeout;
 	function onMouseMove(e) {
