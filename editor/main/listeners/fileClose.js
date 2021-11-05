@@ -20,7 +20,7 @@ const fileClose = (e, context) => {
 		}, context);
 		return;
 	}
-	const currentFile = getCurrentFile(get)();
+	const currentFile = getCurrentFile();
 	if(next === currentFile) return;
 
 	const filename = getFilePath({ name, parent, path, next, nextPath });

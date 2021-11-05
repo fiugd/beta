@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T07:37:14.144Z )
+	Version 0.4.6 ( 2021-11-05T08:30:44.300Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26685,7 +26685,7 @@ const fileClose = (e, context) => {
         }, context);
         return;
     }
-    const currentFile = getCurrentFile(get)();
+    const currentFile = getCurrentFile();
     if (next === currentFile) return;
     const filename = getFilePath({
         name: name,
@@ -27119,7 +27119,7 @@ function triggerCloseTab(event, fileCloseTrigger, tabs) {
 }
 
 const handler$6 = (e, context) => {
-    const {tabs: tabs, triggers: triggers} = context;
+    const {tabs: tabs, triggers: {tabs: triggers}} = context;
     const container = tabs;
     if (!container.contains(event.target)) {
         //console.log('did not click any tab container element');
@@ -27129,7 +27129,7 @@ const handler$6 = (e, context) => {
         return;
     }
     if (event.target.classList.contains("close-editor-action")) {
-        triggerCloseTab(event, triggers.tabs.fileClose, tabs.api.list());
+        triggerCloseTab(event, triggers.fileClose, tabs.api.list());
         event.preventDefault();
         return;
     }
@@ -27142,13 +27142,13 @@ const handler$6 = (e, context) => {
     // const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
     // tabsToUpdate.map(updateTab);
         const service = getCurrentService();
-    triggers.tabs.fileSelect({
-        detail: {
-            name: foundTab.name,
-            path: foundTab.parent,
-            parent: foundTab.parent,
-            service: service ? service.name : ""
-        }
+    const filePath = foundTab.parent ? `/${service.name}/${foundTab.parent}/${foundTab.name}` : `/${service.name}/${foundTab.name}`;
+    const file = service.code.find((x => x.path === filePath));
+    const detail = {
+        name: file.path.replace("/" + service.name + "/", "")
+    };
+    triggers.fileSelect({
+        detail: detail
     }, context);
 };
 

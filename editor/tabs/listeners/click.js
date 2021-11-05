@@ -32,7 +32,7 @@ function triggerCloseTab(event, fileCloseTrigger, tabs) {
 }
 
 const handler = (e, context) => {
-	const { tabs, triggers } = context;
+	const { tabs, triggers: { tabs: triggers} } = context;
 	const container = tabs;
 
 	if (!container.contains(event.target)) {
@@ -47,7 +47,7 @@ const handler = (e, context) => {
 	}
 
 	if (event.target.classList.contains("close-editor-action")) {
-		triggerCloseTab(event, triggers.tabs.fileClose, tabs.api.list());
+		triggerCloseTab(event, triggers.fileClose, tabs.api.list());
 		event.preventDefault();
 		return;
 	}
@@ -68,15 +68,16 @@ const handler = (e, context) => {
 	// const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	// tabsToUpdate.map(updateTab);
 	const service = getCurrentService({ pure: true });
-
-	triggers.tabs.fileSelect({
-		detail: {
-			name: foundTab.name,
-			path: foundTab.parent,
-			parent: foundTab.parent,
-			service: service ? service.name : '',
-		},
-	}, context);
+	const filePath = foundTab.parent
+			? `/${service.name}/${foundTab.parent}/${foundTab.name}`
+			: `/${service.name}/${foundTab.name}`;
+	const file = service.code.find(x =>
+		x.path === filePath
+	);
+	const detail = {
+		name: file.path.replace('/'+service.name+'/', ''),
+	};
+	triggers.fileSelect({ detail }, context);
 };
 
 export default handler;

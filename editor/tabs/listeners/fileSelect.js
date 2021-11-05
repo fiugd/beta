@@ -24,7 +24,7 @@ const handler = (e, { tabs }) => {
 		? `${parent}/${name}`
 		: name
 	);
-	
+
 	tabsToUpdate.map(updateTab);
 	if (foundTab) return;
 
