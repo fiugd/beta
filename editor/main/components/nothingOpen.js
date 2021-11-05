@@ -1,16 +1,22 @@
+let alreadyAppended;
+const appendToEditor = (nothingOpen) => {
+	if(alreadyAppended) return;
+	if(!nothingOpen) return;
+	const editorContainer = document.getElementById("editor-container");
+	if(!editorContainer) return;
+	alreadyAppended = editorContainer.querySelector('#editor-empty');
+	!alreadyAppended && editorContainer.appendChild(nothingOpen);
+};
+
 let nothingOpen;
 const showNothingOpen = () => {
 	try{
 		document.getElementById('file-search').style.visibility = "";
 	}catch(e){}
 
-	const editorContainer = document.getElementById("editor-container");
-	if(editorContainer){
-		const alreadyAppended = editorContainer.querySelector('#editor-empty');
-		!alreadyAppended && editorContainer.appendChild(nothingOpen);
-	}
+	appendToContainer(nothingOpen);
 
-	if(nothingOpen) return;
+	if(nothingOpen) return nothingOpen;
 
 	nothingOpen = document.createElement("div");
 	nothingOpen.id = "editor-empty";
@@ -89,6 +95,8 @@ const showNothingOpen = () => {
 		style +
 		logo +
 		'<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
+
+	appendToContainer(nothingOpen);
 	return nothingOpen;
 };
 
