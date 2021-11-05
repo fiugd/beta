@@ -52,7 +52,8 @@ https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 		}
 		.cm-sidebar .side {
 			width: 100%;
-			background: #1e1e1e;
+			/*background: #1e1e1e;*/
+			background: var(--main-theme-color);
 			position: relative;
 			height: 100%;
 			border-right: 1px solid #333;
