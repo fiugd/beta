@@ -68,16 +68,11 @@ const handler = (e, context) => {
 	// const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	// tabsToUpdate.map(updateTab);
 	const service = getCurrentService({ pure: true });
-	const filePath = foundTab.parent
+	const path = foundTab.parent
 			? `/${service.name}/${foundTab.parent}/${foundTab.name}`
 			: `/${service.name}/${foundTab.name}`;
-	const file = service.code.find(x =>
-		x.path === filePath
-	);
-	const detail = {
-		name: file.path.replace('/'+service.name+'/', ''),
-	};
-	triggers.fileSelect({ detail }, context);
+	const file = service.code.find(x => x.path === path);
+	triggers.fileSelect({ detail: file }, context);
 };
 
 export default handler;

@@ -26,5 +26,3 @@ const handler = (e, context) => {
 };
 
 export default handler;
-
-
