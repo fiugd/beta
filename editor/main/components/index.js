@@ -44,7 +44,7 @@ const attachHandlers = (() => {
 
 		_context = _context || context;
 		const withContext = (fn) => {
-			return (...args) => fold(_context || {}, ...args);
+			return (...args) => fn(_context || {}, ...args);
 		}
 
 		if(!attached){

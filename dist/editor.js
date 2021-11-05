@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T10:40:15.735Z )
+	Version 0.4.6 ( 2021-11-05T10:41:41.108Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25743,13 +25743,13 @@ const attachHandlers = (() => {
     return (editor, handlers, context) => {
         const {fold: fold, unfold: unfold, change: change, cursor: cursor, scroll: scroll} = handlers;
         _context = _context || context;
-        const withContext = fn => (...args) => fold(_context || {}, ...args);
+        const withContext = fn => (...args) => fn(_context || {}, ...args);
         if (!attached) {
-            editor.on("fold", withContext());
-            editor.on("unfold", withContext());
-            editor.on("change", withContext());
-            editor.on("cursorActivity", withContext());
-            editor.on("scrollCursorIntoView", withContext());
+            editor.on("fold", withContext(fold));
+            editor.on("unfold", withContext(unfold));
+            editor.on("change", withContext(change));
+            editor.on("cursorActivity", withContext(cursor));
+            editor.on("scrollCursorIntoView", withContext(scroll));
             attached = true;
         }
         const cleanup = () => {
