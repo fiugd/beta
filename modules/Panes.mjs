@@ -200,7 +200,7 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 		window.termResize && window.termResize();
 		dragging = false;
 	}
-	
+
 	let explorerClosed;
 	function snapExplorer(currentX){
 		// min-width for explorer and snap to zero to completely hide
@@ -216,8 +216,9 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 			console.log('explorer: close now');
 		}
 		if(currentX <= 150){
-			currentX = 50;
+			return 50;
 		}
+		return currentX;
 	}
 
 	let timeout;
