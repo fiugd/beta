@@ -53,8 +53,13 @@ const Editor = (args, context) => {
 	const editorDiv = prevEditor || initEditor(context);
 
 	const onChange = (cm, changeObj) => {
+		const { origin } = changeObj;
+		const ignoreOrigins = [
+			'setValue'
+		];
+		if(ignoreOrigins.includes(origin)) return;
+
 		console.log({ code, name, id, filename });
-		debugger;
 		triggers.fileChange({
 			code: cm.getValue(),
 			prevCode: code,
