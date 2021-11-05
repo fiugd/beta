@@ -201,16 +201,24 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 		dragging = false;
 	}
 
+	// min-width for explorer and snap to zero to completely hide
 	let explorerClosed;
-	const snapDistance = 180;
+	const snapDistance = 150;
+	const bufferMax = snapDistance + 50;
+
 	function snapExplorer(currentX){
-		// min-width for explorer and snap to zero to completely hide
+		const withinBufferZone = currentX > snapDistance && currentX < bufferMax;
+		
+		if(!explorerClosed && withinBufferZone){
+			return bufferMax;
+		}
+
 		if(currentX > snapDistance){
 			if(explorerClosed){
 				explorerClosed = false;
 				console.log('explorer: re-open now');
 			}
-			return currentX;
+			return withinBufferZone ? bufferMax : currentX;
 		}
 		if(!explorerClosed){
 			explorerClosed = true;

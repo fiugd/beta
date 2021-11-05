@@ -2498,7 +2498,8 @@ notes-section.loading:after {
 	/* width: 200px; */
 	height: 100%;
 	/* height: calc(100% + 17px); */
-	min-width: 200px;
+	/* min-width: 200px; */
+	min-width: 150px;
 	transition: background-color 2s ease-in;
 	/* margin-right: -17px; */
 	outline: none;
