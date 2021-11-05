@@ -4,12 +4,16 @@ const showNothingOpen = () => {
 		document.getElementById('file-search').style.visibility = "";
 	}catch(e){}
 
-	if (!nothingOpen) {
-		const editorContainer = document.getElementById("editor-container");
-		nothingOpen = document.createElement("div");
-		nothingOpen.id = "editor-empty";
-		editorContainer.appendChild(nothingOpen);
+	const editorContainer = document.getElementById("editor-container");
+	if(editorContainer){
+		const alreadyAppended = editorContainer.querySelector('#editor-empty');
+		!alreadyAppended && editorContainer.appendChild(nothingOpen);
 	}
+
+	if(nothingOpen) return;
+
+	nothingOpen = document.createElement("div");
+	nothingOpen.id = "editor-empty";
 	const style = `
 		<style>
 			#editor-empty {

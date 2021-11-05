@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-04T22:42:34.457Z )
+	Version 0.4.5 ( 2021-11-05T03:36:51.481Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24119,12 +24119,14 @@ const showNothingOpen = () => {
     try {
         document.getElementById("file-search").style.visibility = "";
     } catch (e) {}
-    if (!nothingOpen$1) {
-        const editorContainer = document.getElementById("editor-container");
-        nothingOpen$1 = document.createElement("div");
-        nothingOpen$1.id = "editor-empty";
-        editorContainer.appendChild(nothingOpen$1);
+    const editorContainer = document.getElementById("editor-container");
+    if (editorContainer) {
+        const alreadyAppended = editorContainer.querySelector("#editor-empty");
+        !alreadyAppended && editorContainer.appendChild(nothingOpen$1);
     }
+    if (nothingOpen$1) return;
+    nothingOpen$1 = document.createElement("div");
+    nothingOpen$1.id = "editor-empty";
     const style = `\n\t\t<style>\n\t\t\t#editor-empty {\n\t\t\t\tposition: absolute;\n\t\t\t\tleft: 0;\n\t\t\t\tright: 0;\n\t\t\t\ttop: 0;\n\t\t\t\tbottom: 0;\n\t\t\t\t/* background: #1e1e1e; */\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tjustify-content: center;\n\t\t\t\talign-items: center;\n\t\t\t\toverflow: hidden;\n\t\t\t\tmin-width: 160px;\n\t\t\t\tz-index: 11;\n\t\t\t}\n\t\t\t#editor-empty-logo {\n\t\t\t\topacity: .7;\n\t\t\t\tcolor: rgb(var(--main-theme-highlight-color));\n\t\t\t\tfill: currentColor;\n\t\t\t\twidth: 18em;\n\t\t\t\tmargin-top: -14em;\n\t\t\t\tstroke: rgba(var(--main-theme-highlight-color),.4);\n\t\t\t}\n\t\t\t.editor-empty-blurb {\n\t\t\t\t/* visibility: hidden; */\n\t\t\t\tfont-variant: small-caps;\n\t\t\t\tfont-style: italic;\n\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t}\n\t\t</style>\n\t`;
     const logo = `\n\t<svg viewBox="-4 -4 172 150" id="editor-empty-logo">\n\t\t<g>\n\t\t\t<title>Do or do not.  There is no try.</title>\n\t\t\t<path d="m0.66613,141.12654l40.94759,-22.96759l39.55286,22.95911l-80.50045,0.00848z" stroke="#000000" stroke-width="0" opacity=".3" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m81.32664,141.18317l41.77172,-23.74405l40.66986,23.45933l-82.44158,0.28472z" stroke-width="0" opacity=".1" style="fill: black;opacity: .15;"></path>\n\t\t\t<path d="m-8.80672,124.5856l39.68109,-24.32103l39.94988,23.98956l-79.63097,0.33147z" stroke-width="0" transform="rotate(120.005 31.0088 112.425)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m29.8517,54.08169l40.95021,-23.76637l41.15387,23.42957l-82.10408,0.3368z" stroke-width="0" transform="rotate(120.005 70.9037 42.1985)" opacity=".15" style="fill: black;opacity: .5;"></path>\n\t\t\t<path d="m50.84794,54.21713l41.14723,-23.71165l40.66986,23.126l-81.81709,0.58565z" stroke-width="0" transform="rotate(240.005 91.7565 42.3613)" opacity=".6" style="fill: black;opacity: .6;"></path>\n\t\t\t<path d="m92.34289,123.94524l40.84106,-24.40053l40.54568,23.11973l-81.38674,1.2808z" stroke-width="0" transform="rotate(240.005 133.036 111.745)" opacity=".35" style="fill: black;opacity: .67;"></path>\n\n\t\t\t<path id="border" d="m80.7229,0.44444l82.61043,140.55521l-163.22223,0.44479l80.6118,-141z" fill="none" stroke-width="1" style="fill: transparent;stroke: transparent;"></path>\n\n\t\t\t<path d="m80.63317,96.1755l0.39079,45.37696l41.8002,-23.91294l-0.6859,-46.06544l-41.50509,24.60142z" stroke-width="0" opacity=".25" style="fill: black;opacity: .41;"></path>\n\t\t\t<path d="m60.24695,60.10716l0.41626,47.48081l41.25377,-23.26463l-0.93192,-47.77411l-40.73811,23.55793z" stroke-width="0" transform="rotate(60 81.082 72.0686)" opacity=".67" style="fill: aliceblue;opacity: .01;"></path>\n\t\t\t<path d="m41.52036,94.93062l-0.5376,46.74648l39.55956,-24.26797l-0.06849,-45.66349l-38.95347,23.18498z" stroke-width="0" transform="rotate(120 60.7625 106.711)" style="fill: black;opacity: .25;"></path>\n\t\t</g>\n\t</svg>\n\t`;
     nothingOpen$1.innerHTML = style + logo + '<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
