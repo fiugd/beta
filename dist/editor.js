@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T11:11:13.700Z )
+	Version 0.4.6 ( 2021-11-05T11:34:31.409Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -13982,7 +13982,7 @@ this file is a bundle of many search addons
         template.innerHTML = (html || "").trim();
         return template.content.firstChild;
     };
-    document.body.append(htmlToElement(`\n\t<style>\n\t\t.cm-sidebar {\n\t\t\tposition: absolute;\n\t\t\tright: 7px;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\twidth: 100px;\n\t\t}\n\t\t.cm-sidebar .side {\n\t\t\twidth: 100%;\n\t\t\t/*background: #1e1e1e;*/\n\t\t\tbackground: var(--main-theme-color);\n\t\t\tposition: relative;\n\t\t\theight: 100%;\n\t\t\tborder-right: 1px solid #333;\n\t\t\tz-index: 9;\n\t\t}\n\t\t.cm-sidebar .overflow {\n\t\t\tbox-shadow: -2px 0px 3px 0px #0000004d;\n\t\t}\n\t\t.cm-sidebar .side {\n\t\t\toverflow-y: hidden;\n\t\t\tposition: relative;\n\t\t}\n\t\t.cm-sidebar .side canvas {\n\t\t\tposition: absolute;\n\t\t}\n\t\t.cm-sidebar .side .scroll-handle {\n\t\t\tposition: absolute;\n\t\t\ttop: 0;\n\t\t\twidth: 100%;\n\t\t\tbackground: #fff;\n\t\t\topacity: 0;\n\t\t\ttransition: opacity .2s;\n\t\t}\n\t\t.cm-sidebar .side:hover .scroll-handle,\n\t\t.cm-sidebar .scroll-handle.dragging {\n\t\t\topacity: 0.07;\n\t\t}\n\t</style>\n\t`));
+    document.body.append(htmlToElement(`\n\t<style>\n\t\t.cm-sidebar {\n\t\t\tposition: absolute;\n\t\t\tright: 7px;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\twidth: 100px;\n\t\t}\n\t\t.cm-sidebar .side {\n\t\t\twidth: 100%;\n\t\t\t/*background: #1e1e1e;*/\n\t\t\tbackground: var(--main-theme-color);\n\t\t\tposition: relative;\n\t\t\theight: 100%;\n\t\t\t/* border-right: 1px solid #333; */\n\t\t\tborder-right: 1px solid var(--theme-subdued-color);\n\t\t\tz-index: 9;\n\t\t}\n\t\t.cm-sidebar .overflow {\n\t\t\tbox-shadow: -2px 0px 3px 0px #0000004d;\n\t\t}\n\t\t.cm-sidebar .side {\n\t\t\toverflow-y: hidden;\n\t\t\tposition: relative;\n\t\t}\n\t\t.cm-sidebar .side canvas {\n\t\t\tposition: absolute;\n\t\t}\n\t\t.cm-sidebar .side .scroll-handle {\n\t\t\tposition: absolute;\n\t\t\ttop: 0;\n\t\t\twidth: 100%;\n\t\t\tbackground: #fff;\n\t\t\topacity: 0;\n\t\t\ttransition: opacity .2s;\n\t\t}\n\t\t.cm-sidebar .side:hover .scroll-handle,\n\t\t.cm-sidebar .scroll-handle.dragging {\n\t\t\topacity: 0.07;\n\t\t}\n\t</style>\n\t`));
     const getLineTokens = (line, i, editor) => {
         const lineTokens = editor.getLineTokens(i, true);
         if (!lineTokens.length) {
