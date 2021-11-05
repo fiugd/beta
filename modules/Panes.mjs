@@ -1,10 +1,7 @@
 /*
-
-
 https://iamakulov.com/notes/resize-scroll/
-
-
 */
+let panes;
 
 function saveAllPositions(op){
 	// explorer
@@ -203,19 +200,34 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 		window.termResize && window.termResize();
 		dragging = false;
 	}
+	
+	let explorerClosed;
+	function snapExplorer(currentX){
+		// min-width for explorer and snap to zero to completely hide
+		if(currentX < 250 && currentX > 150){
+			if(explorerClosed){
+				explorerClosed = false;
+				console.log('explorer: re-open now');
+			}
+			return;
+		}
+		if(!explorerClosed){
+			explorerClosed = true;
+			console.log('explorer: close now');
+		}
+		if(currentX <= 150){
+			currentX = 50;
+		}
+	}
 
 	let timeout;
 	function onMouseMove(e) {
 
 		let currentX = e.clientX;
+		const snap = snapExplorer(currentX);
 
-		// min-width for explorer and snap to zero to completely hide
-		if(currentX < 250 && currentX > 150){
-			return;
-		}
-		if(currentX <= 150){
-			currentX = 50;
-		}
+		if(!snap) return;
+		currentX = snap;
 
 		// If there's a timer, cancel it
 		if (timeout) {
@@ -332,7 +344,7 @@ function attachListeners() {
 
 // TODO: resizeStart and resizeEnd events should be triggered so contents can adjust!!
 // TODO: should also be listening to window.resize event and adjusting panes!!!
-let panes;
+
 function Panes() {
 	if (panes) {
 		return panes;
