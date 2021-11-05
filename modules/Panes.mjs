@@ -204,31 +204,24 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 	let explorerClosed;
 	function snapExplorer(currentX){
 		// min-width for explorer and snap to zero to completely hide
-		if(currentX < 250 && currentX > 150){
+		if(currentX > 150){
 			if(explorerClosed){
 				explorerClosed = false;
 				console.log('explorer: re-open now');
 			}
-			return;
+			return currentX;
 		}
 		if(!explorerClosed){
 			explorerClosed = true;
 			console.log('explorer: close now');
 		}
-		if(currentX <= 150){
-			return 50;
-		}
-		return currentX;
+		return 50;
 	}
 
 	let timeout;
 	function onMouseMove(e) {
 
-		let currentX = e.clientX;
-		const snap = snapExplorer(currentX);
-
-		if(!snap) return;
-		currentX = snap;
+		let currentX = snapExplorer(e.clientX);
 
 		// If there's a timer, cancel it
 		if (timeout) {
