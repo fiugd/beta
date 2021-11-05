@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.5 ( 2021-11-05T03:55:12.437Z )
+	Version 0.4.6 ( 2021-11-05T07:37:14.144Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -13,6 +13,8 @@ const DEBUG = false;
 let allServices;
 
 let currentService;
+
+let clientId;
 
 const dummyFunc = (fnName, returns = "") => (...args) => returns;
 
@@ -54,6 +56,14 @@ const initState = (all, current) => {
             filePath: `${currentService.name}/${currentService.state.selected}`
         });
     }
+};
+
+const createClientId = () => Math.random().toString(36).slice(2).toUpperCase().split(/(.{4})/).filter((x => x)).join("_");
+
+const getClientId = () => {
+    if (clientId) return clientId;
+    clientId = createClientId();
+    return clientId;
 };
 
 /*!
@@ -26550,17 +26560,17 @@ function attachEvents(events, context) {
 // LISTEN TO EXTERNAL EVENTS
 // TRIGGER INTERNAL EVENTS
 window.top.postMessage({
-    subscribe: "Editor"
+    subscribe: "Editor " + getClientId()
 }, location);
 
-const useCaptue = false;
+const useCapture = false;
 
 window.addEventListener("message", (function(messageEvent) {
     trigger$2({
         ...messageEvent.data,
         external: true
     });
-}), useCaptue);
+}), useCapture);
 
 const getFilePath$1 = getFilePath$2(getCurrentService);
 

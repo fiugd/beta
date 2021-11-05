@@ -1,4 +1,5 @@
 import { flatFromProp } from './misc.js';
+import { getClientId } from './State.js';
 
 const listeners = {};
 const triggers = {};
@@ -204,11 +205,13 @@ function attachEvents(events, context) {
 
 // LISTEN TO EXTERNAL EVENTS
 // TRIGGER INTERNAL EVENTS
-window.top.postMessage({ subscribe: 'Editor' }, location);
-const useCaptue = false;
+window.top.postMessage({
+	subscribe: 'Editor ' + getClientId()
+}, location);
+const useCapture = false;
 window.addEventListener('message', function(messageEvent) {
 	trigger({ ...messageEvent.data, external: true });
-}, useCaptue);
+}, useCapture);
 
 /*
 

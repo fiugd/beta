@@ -2,6 +2,7 @@ const DEBUG = false;
 
 let allServices;
 let currentService;
+let clientId;
 
 const dummyFunc = (fnName, returns='') => (...args) => {
 	DEBUG && console.log({ ...args, fnName });
@@ -64,6 +65,20 @@ const initState = (all, current) => {
 	}
 };
 
+const createClientId = () => Math.random()
+	.toString(36)
+	.slice(2)
+	.toUpperCase()
+	.split(/(.{4})/)
+	.filter(x=>x)
+	.join('_');
+
+const getClientId = () => {
+	if(clientId) return clientId;
+	clientId = createClientId();
+	return clientId;
+};
+
 export {
 	DEBUG,
 
@@ -89,4 +104,6 @@ export {
 	closeFile,
 	moveFile,
 	getOpenedFiles,
+
+	getClientId,
 };
