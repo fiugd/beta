@@ -21,13 +21,13 @@ const snapExplorer = (() => {
 		if(currentX > snapDistance){
 			if(explorerClosed){
 				explorerClosed = false;
-				explorerPane && explorerPane.style.visibility = '';
+				explorerPane && (explorerPane.style.visibility = '');
 			}
 			return withinBufferZone ? bufferMax : currentX;
 		}
 		if(!explorerClosed){
 			explorerClosed = true;
-			explorerPane && explorerPane.style.visibility = 'hidden';
+			explorerPane && (explorerPane.style.visibility = 'hidden');
 		}
 		return 50;
 	}
