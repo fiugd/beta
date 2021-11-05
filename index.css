@@ -526,7 +526,8 @@ body .CodeMirror-scrollbar-filler {
 }
 body .CodeMirror-scrollbar-filler,
 body .CodeMirror .CodeMirror-vscrollbar {
-	background:#1e1e1e !important;
+	/* background:#1e1e1e !important; */
+	background: var(--main-theme-color) !important
 	width:7px;
 }
 body .CodeMirror .CodeMirror-vscrollbar {

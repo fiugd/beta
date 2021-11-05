@@ -1776,7 +1776,8 @@ this file is a bundle of many search addons
 			background: var(--main-theme-color);
 			position: relative;
 			height: 100%;
-			border-right: 1px solid #333;
+			/* border-right: 1px solid #333; */
+			border-right: 1px solid var(--theme-subdued-color);
 			z-index: 9;
 		}
 		.cm-sidebar .overflow {
