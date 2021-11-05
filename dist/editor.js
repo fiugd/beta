@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T10:41:41.108Z )
+	Version 0.4.5 ( 2021-11-05T10:47:44.027Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25792,7 +25792,7 @@ const onChange = (context, cm, changeObj) => {
 };
 
 const onCursorActivity = (context, instance) => {
-    const {triggers: triggers} = context;
+    const {triggers: triggers, updateLineInfo: updateLineInfo} = context;
     const cursor = instance.getCursor();
     const line = cursor.line + 1;
     const column = cursor.ch + 1;
@@ -25811,6 +25811,20 @@ const Editor$1 = (args, context) => {
     const {code: code = BLANK_CODE_PAGE, line: loadLine, column: loadColumn, name: name, id: id, filename: filename, path: path, callback: callback} = args || {};
     const prevEditor = document.querySelector("#editor-container");
     prevEditor || initEditor(context);
+    let currentHandle = null;
+    let currentLine;
+    function updateLineInfo(cm, line) {
+        var handle = cm.getLineHandle(line - 1);
+        if (handle == currentHandle && line == currentLine) return;
+        if (currentHandle) {
+            cm.removeLineClass(currentHandle, null, null);
+            //cm.clearGutterMarker(currentHandle);
+                }
+        currentHandle = handle;
+        currentLine = line;
+        cm.addLineClass(currentHandle, null, "activeline");
+        //cm.setGutterMarker(currentHandle, String(line + 1));
+        }
     const fileType = getFileType(filename);
     const mode = codemirrorModeFromFileType(fileType);
     function isSelectedRange(ranges, from, to) {
@@ -25928,7 +25942,8 @@ const Editor$1 = (args, context) => {
             id: id,
             filename: filename,
             filePath: filename,
-            triggers: triggers
+            triggers: triggers,
+            updateLineInfo: updateLineInfo
         };
         editor._cleanup = attachHandlers(editor, handlers, handlersContext);
     };

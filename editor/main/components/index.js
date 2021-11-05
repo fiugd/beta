@@ -99,7 +99,7 @@ const onChange = (context, cm, changeObj) => {
 };
 
 const onCursorActivity = (context, instance) => {
-	const { triggers } = context;
+	const { triggers, updateLineInfo } = context;
 	const cursor = instance.getCursor();
 	const line = cursor.line + 1;
 	const column = cursor.ch + 1;
@@ -277,7 +277,8 @@ const Editor = (args, context) => {
 			id,
 			filename,
 			filePath: filename,
-			triggers
+			triggers,
+			updateLineInfo,
 		};
 		editor._cleanup = attachHandlers(editor, handlers, handlersContext);
 
