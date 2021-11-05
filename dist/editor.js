@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T09:19:50.126Z )
+	Version 0.4.6 ( 2021-11-05T09:58:57.764Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25737,12 +25737,31 @@ const initEditor = context => {
     return editorDiv;
 };
 
+function attachHandlers(editor, handlers) {
+    const {fold: fold, unfold: unfold, change: change, cursor: cursor, scroll: scroll} = handlers;
+    editor.on("fold", fold);
+    editor.on("unfold", unfold);
+    editor.on("change", change);
+    editor.on("cursorActivity", cursor);
+    editor.on("scrollCursorIntoView", scroll);
+    const cleanup = () => {
+        editor.off("fold", fold);
+        editor.off("unfold", unfold);
+        editor.off("change", change);
+        editor.off("cursorActivity", cursor);
+        editor.off("scrollCursorIntoView", scroll);
+        const sidebarCanvas = document.querySelector(".cm-sidebar canvas");
+        sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
+    };
+    return cleanup;
+}
+
 const Editor$1 = (args, context) => {
     const triggers = context.triggers.editor;
     const {code: code = BLANK_CODE_PAGE, line: loadLine, column: loadColumn, name: name, id: id, filename: filename, path: path, callback: callback} = args || {};
     const prevEditor = document.querySelector("#editor-container");
     prevEditor || initEditor(context);
-    const onChange = (cm, changeObj) => {
+    function onChange(cm, changeObj) {
         const {origin: origin} = changeObj;
         const ignoreOrigins = [ "setValue" ];
         if (ignoreOrigins.includes(origin)) return;
@@ -25754,13 +25773,9 @@ const Editor$1 = (args, context) => {
         });
         triggers.fileChange({
             code: cm.getValue(),
-            prevCode: code,
-            name: name,
-            id: id,
-            filename: filename,
-            filePath: filename
+            ...this
         });
-    };
+    }
     let currentHandle = null;
     let currentLine;
     function updateLineInfo(cm, line) {
@@ -25898,20 +25913,19 @@ const Editor$1 = (args, context) => {
         const unfoldHandler = (cm, from, to) => {
             cm.removeLineClass(from.line, "wrap", "folded");
         };
-        editor.on("fold", foldHandler);
-        editor.on("unfold", unfoldHandler);
-        editor.on("change", onChange);
-        editor.on("cursorActivity", onCursorActivity);
-        editor.on("scrollCursorIntoView", onScrollCursor);
-        editor._cleanup = () => {
-            editor.off("change", onChange);
-            editor.off("cursorActivity", onCursorActivity);
-            editor.off("scrollCursorIntoView", onScrollCursor);
-            editor.off("fold", foldHandler);
-            editor.off("unfold", unfoldHandler);
-            const sidebarCanvas = document.querySelector(".cm-sidebar canvas");
-            sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
-        };
+        editor._cleanup = attachHandlers(editor, {
+            fold: foldHandler,
+            unfold: unfoldHandler,
+            change: onChange.bind({
+                prevCode: code,
+                name: name,
+                id: id,
+                filename: filename,
+                filePath: filename
+            }),
+            cursor: onCursorActivity,
+            scroll: onScrollCursor
+        });
     };
     const editorOptions = {
         text: code || "",

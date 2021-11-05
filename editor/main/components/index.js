@@ -35,6 +35,29 @@ const initEditor = (context) => {
 	return editorDiv;
 }
 
+function attachHandlers(editor, handlers){
+	const { fold, unfold, change, cursor, scroll } = handlers;
+	editor.on("fold", fold);
+	editor.on("unfold", unfold);
+	editor.on("change", change);
+	editor.on("cursorActivity", cursor);
+	editor.on("scrollCursorIntoView", scroll);
+
+	const cleanup = () => {
+		editor.off("fold", fold);
+		editor.off("unfold", unfold);
+		editor.off("change", change);
+		editor.off("cursorActivity", cursor);
+		editor.off("scrollCursorIntoView", scroll);
+
+		const sidebarCanvas = document.querySelector('.cm-sidebar canvas');
+		sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
+	};
+
+	return cleanup;
+}
+
+
 const Editor = (args, context) => {
 	const triggers = context.triggers.editor;
 
@@ -52,7 +75,7 @@ const Editor = (args, context) => {
 	const prevEditor = document.querySelector("#editor-container");
 	const editorDiv = prevEditor || initEditor(context);
 
-	const onChange = (cm, changeObj) => {
+	function onChange(cm, changeObj){
 		const { origin } = changeObj;
 		const ignoreOrigins = [
 			'setValue'
@@ -62,11 +85,7 @@ const Editor = (args, context) => {
 		console.log({ code, name, id, filename });
 		triggers.fileChange({
 			code: cm.getValue(),
-			prevCode: code,
-			name,
-			id,
-			filename,
-			filePath: filename
+			...this
 		});
 	}
 	let currentHandle = null;
@@ -232,22 +251,20 @@ const Editor = (args, context) => {
 			cm.removeLineClass(from.line, "wrap", "folded");
 		};
 
-		editor.on("fold", foldHandler);
-		editor.on("unfold", unfoldHandler);
-		editor.on("change", onChange);
-		editor.on("cursorActivity", onCursorActivity);
-		editor.on("scrollCursorIntoView", onScrollCursor);
+		editor._cleanup = attachHandlers(editor, {
+			fold: foldHandler,
+			unfold: unfoldHandler,
+			change: onChange.bind({
+				prevCode: code,
+				name,
+				id,
+				filename,
+				filePath: filename
+			}),
+			cursor: onCursorActivity,
+			scroll: onScrollCursor
+		});
 
-		editor._cleanup = () => {
-			editor.off("change", onChange);
-			editor.off("cursorActivity", onCursorActivity);
-			editor.off("scrollCursorIntoView", onScrollCursor);
-			editor.off("fold", foldHandler);
-			editor.off("unfold", unfoldHandler);
-
-			const sidebarCanvas = document.querySelector('.cm-sidebar canvas');
-			sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
-		};
 
 		const MIN_DOC_FOLD_LENGTH = 150;
 		let cursor = 0;
