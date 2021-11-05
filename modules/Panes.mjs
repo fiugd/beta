@@ -237,7 +237,9 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 	let timeout;
 	function onMouseMove(e) {
 
-		let currentX = snapExplorer(e.clientX);
+		let currentX = element.id === "seperator1"
+			? snapExplorer(e.clientX)
+			: e.clientX;
 
 		// If there's a timer, cancel it
 		if (timeout) {
