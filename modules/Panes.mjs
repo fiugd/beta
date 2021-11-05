@@ -202,30 +202,34 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 	}
 
 	// min-width for explorer and snap to zero to completely hide
-	let explorerClosed;
-	const snapDistance = 200;
-	const bufferMax = snapDistance + 50;
+	const snapExplorer = (() => {
+		let explorerClosed;
+		const snapDistance = 200;
+		const bufferMax = snapDistance + 50;
+		let explorerPane;
 
-	function snapExplorer(currentX){
-		const withinBufferZone = currentX > snapDistance && currentX < bufferMax;
-		
-		if(!explorerClosed && withinBufferZone){
-			return bufferMax;
-		}
+		return function snapExplorer(currentX){
+			explorerPane = explorerPane || document.getElementById("explorer");
+			const withinBufferZone = currentX > snapDistance && currentX < bufferMax;
 
-		if(currentX > snapDistance){
-			if(explorerClosed){
-				explorerClosed = false;
-				explorerPane.style.visibility = '';
+			if(!explorerClosed && withinBufferZone){
+				return bufferMax;
 			}
-			return withinBufferZone ? bufferMax : currentX;
+
+			if(currentX > snapDistance){
+				if(explorerClosed){
+					explorerClosed = false;
+					explorerPane.style.visibility = '';
+				}
+				return withinBufferZone ? bufferMax : currentX;
+			}
+			if(!explorerClosed){
+				explorerClosed = true;
+				explorerPane.style.visibility = 'hidden';
+			}
+			return 50;
 		}
-		if(!explorerClosed){
-			explorerClosed = true;
-			explorerPane.style.visibility = 'hidden';
-		}
-		return 50;
-	}
+	})();
 
 	let timeout;
 	function onMouseMove(e) {
