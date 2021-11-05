@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-05T09:58:57.764Z )
+	Version 0.4.6 ( 2021-11-05T10:40:15.735Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25737,73 +25737,81 @@ const initEditor = context => {
     return editorDiv;
 };
 
-function attachHandlers(editor, handlers) {
-    const {fold: fold, unfold: unfold, change: change, cursor: cursor, scroll: scroll} = handlers;
-    editor.on("fold", fold);
-    editor.on("unfold", unfold);
-    editor.on("change", change);
-    editor.on("cursorActivity", cursor);
-    editor.on("scrollCursorIntoView", scroll);
-    const cleanup = () => {
-        editor.off("fold", fold);
-        editor.off("unfold", unfold);
-        editor.off("change", change);
-        editor.off("cursorActivity", cursor);
-        editor.off("scrollCursorIntoView", scroll);
-        const sidebarCanvas = document.querySelector(".cm-sidebar canvas");
-        sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
+const attachHandlers = (() => {
+    let attached = false;
+    let _context;
+    return (editor, handlers, context) => {
+        const {fold: fold, unfold: unfold, change: change, cursor: cursor, scroll: scroll} = handlers;
+        _context = _context || context;
+        const withContext = fn => (...args) => fold(_context || {}, ...args);
+        if (!attached) {
+            editor.on("fold", withContext());
+            editor.on("unfold", withContext());
+            editor.on("change", withContext());
+            editor.on("cursorActivity", withContext());
+            editor.on("scrollCursorIntoView", withContext());
+            attached = true;
+        }
+        const cleanup = () => {
+            _context = null;
+            const sidebarCanvas = document.querySelector(".cm-sidebar canvas");
+            sidebarCanvas && (sidebarCanvas.width = sidebarCanvas.width);
+        };
+        return cleanup;
     };
-    return cleanup;
-}
+})();
+
+const foldHandler = (context, cm, from, to) => {
+    cm.addLineClass(from.line, "wrap", "folded");
+};
+
+const unfoldHandler = (context, cm, from, to) => {
+    cm.removeLineClass(from.line, "wrap", "folded");
+};
+
+const onChange = (context, cm, changeObj) => {
+    const {origin: origin} = changeObj;
+    const ignoreOrigins = [ "setValue" ];
+    if (ignoreOrigins.includes(origin)) return;
+    const {prevCode: prevCode, name: name, id: id, filename: filename, filePath: filePath, triggers: triggers} = context;
+    console.log({
+        prevCode: prevCode,
+        name: name,
+        id: id,
+        filename: filename,
+        filePath: filePath
+    });
+    triggers.fileChange({
+        code: cm.getValue(),
+        prevCode: prevCode,
+        name: name,
+        id: id,
+        filename: filename,
+        filePath: filePath
+    });
+};
+
+const onCursorActivity = (context, instance) => {
+    const {triggers: triggers} = context;
+    const cursor = instance.getCursor();
+    const line = cursor.line + 1;
+    const column = cursor.ch + 1;
+    updateLineInfo(instance, line);
+    // STATUS_CURRENT_LINE.textContent = cursor.line + 1;
+        triggers.cursorActivity({
+        line: line,
+        column: column
+    });
+};
+
+const onScrollCursor = (context, instance, event) => {};
 
 const Editor$1 = (args, context) => {
     const triggers = context.triggers.editor;
     const {code: code = BLANK_CODE_PAGE, line: loadLine, column: loadColumn, name: name, id: id, filename: filename, path: path, callback: callback} = args || {};
     const prevEditor = document.querySelector("#editor-container");
     prevEditor || initEditor(context);
-    function onChange(cm, changeObj) {
-        const {origin: origin} = changeObj;
-        const ignoreOrigins = [ "setValue" ];
-        if (ignoreOrigins.includes(origin)) return;
-        console.log({
-            code: code,
-            name: name,
-            id: id,
-            filename: filename
-        });
-        triggers.fileChange({
-            code: cm.getValue(),
-            ...this
-        });
-    }
-    let currentHandle = null;
-    let currentLine;
-    function updateLineInfo(cm, line) {
-        var handle = cm.getLineHandle(line - 1);
-        if (handle == currentHandle && line == currentLine) return;
-        if (currentHandle) {
-            cm.removeLineClass(currentHandle, null, null);
-            //cm.clearGutterMarker(currentHandle);
-                }
-        currentHandle = handle;
-        currentLine = line;
-        cm.addLineClass(currentHandle, null, "activeline");
-        //cm.setGutterMarker(currentHandle, String(line + 1));
-        }
-    const onCursorActivity = instance => {
-        const cursor = instance.getCursor();
-        const line = cursor.line + 1;
-        const column = cursor.ch + 1;
-        updateLineInfo(instance, line);
-        // STATUS_CURRENT_LINE.textContent = cursor.line + 1;
-                triggers.cursorActivity({
-            line: line,
-            column: column
-        });
-    };
-    const onScrollCursor = (instance, event) => {};
-    //TODO: code should come from changeHandler if it exists
-        const fileType = getFileType(filename);
+    const fileType = getFileType(filename);
     const mode = codemirrorModeFromFileType(fileType);
     function isSelectedRange(ranges, from, to) {
         for (var i = 0; i < ranges.length; i++) if (CodeMirror.cmpPos(ranges[i].from(), from) == 0 && CodeMirror.cmpPos(ranges[i].to(), to) == 0) return true;
@@ -25907,25 +25915,22 @@ const Editor$1 = (args, context) => {
             nonEmpty: true
         });
         editor.setOption("extraKeys", extraKeys);
-        const foldHandler = (cm, from, to) => {
-            cm.addLineClass(from.line, "wrap", "folded");
-        };
-        const unfoldHandler = (cm, from, to) => {
-            cm.removeLineClass(from.line, "wrap", "folded");
-        };
-        editor._cleanup = attachHandlers(editor, {
+        const handlers = {
             fold: foldHandler,
             unfold: unfoldHandler,
-            change: onChange.bind({
-                prevCode: code,
-                name: name,
-                id: id,
-                filename: filename,
-                filePath: filename
-            }),
+            change: onChange,
             cursor: onCursorActivity,
             scroll: onScrollCursor
-        });
+        };
+        const handlersContext = {
+            prevCode: code,
+            name: name,
+            id: id,
+            filename: filename,
+            filePath: filename,
+            triggers: triggers
+        };
+        editor._cleanup = attachHandlers(editor, handlers, handlersContext);
     };
     const editorOptions = {
         text: code || "",
