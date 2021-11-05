@@ -202,9 +202,10 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 	}
 
 	let explorerClosed;
+	const snapDistance = 180;
 	function snapExplorer(currentX){
 		// min-width for explorer and snap to zero to completely hide
-		if(currentX > 150){
+		if(currentX > snapDistance){
 			if(explorerClosed){
 				explorerClosed = false;
 				console.log('explorer: re-open now');
