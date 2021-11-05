@@ -239,7 +239,7 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 
 		let currentX = element.id === "seperator1"
 			? snapExplorer(e.clientX)
-			: e.clientX > 50 : e.clientX : 50;
+			: e.clientX > 50 ? e.clientX : 50;
 
 		// If there's a timer, cancel it
 		if (timeout) {
