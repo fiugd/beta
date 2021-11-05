@@ -14,7 +14,7 @@ const showNothingOpen = () => {
 		document.getElementById('file-search').style.visibility = "";
 	}catch(e){}
 
-	appendToContainer(nothingOpen);
+	appendToEditor(nothingOpen);
 
 	if(nothingOpen) return nothingOpen;
 
@@ -96,7 +96,7 @@ const showNothingOpen = () => {
 		logo +
 		'<div class="editor-empty-blurb"><p>All models are wrong.</p><p style="margin-top:-10px;">Some models are useful.</p></div>';
 
-	appendToContainer(nothingOpen);
+	appendToEditor(nothingOpen);
 	return nothingOpen;
 };
 
