@@ -65,6 +65,10 @@ function restoreAllPositions(){
 		seperator2.style.left = sep2 + '%';
 		terminalPane.style.left = sep2 + '%';
 		terminalCover.style.left = sep2 + '%';
+		
+		if(sep1 === 50){
+			editorPane.style.visibility = 'hidden';
+		}
 		return true;
 	}catch(e){
 		console.error(e);
