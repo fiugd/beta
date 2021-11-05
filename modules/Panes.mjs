@@ -203,7 +203,7 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 
 	// min-width for explorer and snap to zero to completely hide
 	let explorerClosed;
-	const snapDistance = 150;
+	const snapDistance = 100;
 	const bufferMax = snapDistance + 50;
 
 	function snapExplorer(currentX){
