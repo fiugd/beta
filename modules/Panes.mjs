@@ -216,13 +216,13 @@ function dragElement(element, direction, handler, first, second, firstUnder, sec
 		if(currentX > snapDistance){
 			if(explorerClosed){
 				explorerClosed = false;
-				console.log('explorer: re-open now');
+				explorerPane.style.visibility = '';
 			}
 			return withinBufferZone ? bufferMax : currentX;
 		}
 		if(!explorerClosed){
 			explorerClosed = true;
-			console.log('explorer: close now');
+			explorerPane.style.visibility = 'hidden';
 		}
 		return 50;
 	}
