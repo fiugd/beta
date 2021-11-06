@@ -1,7 +1,7 @@
-import resolvePlugin from './rollup-plugin-resolve.js';
-import json from './rollup-plugin-json.js';
-import css from './rollup-plugin-css.js';
-import analyze from './rollup-plugin-analyze.js';
+import resolvePlugin from '../_common/rollup-plugin-resolve.js';
+import json from '../_common/rollup-plugin-json.js';
+import css from '../_common/rollup-plugin-css.js';
+import analyze from '../_common/rollup-plugin-analyze.js';
 
 import chalk from 'chalk';
 chalk.enabled = true;

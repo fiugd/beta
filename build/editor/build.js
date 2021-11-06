@@ -4,7 +4,7 @@ import 'rollupPluginSourceMap';
 import 'terser';
 
 import rollupConfig from './rollup.config.js';
-import terserConfig from './terser.config.js';
+import terserConfig from '../_common/terser.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
 const VERSION = `${packageJson.version}`;

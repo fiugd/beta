@@ -1,8 +1,8 @@
 /*!
 	fiug service-worker
 	Version v0.4.6
-	Build Date 2021-11-02T22:00:16.930Z
-	https://github.com/crosshj/fiug
+	Build Date 2021-11-06T03:25:18.469Z
+	https://github.com/fiugd/fiug/service-worker
 	(c) 2011-2012 Harrison Cross.
 */
 const utils = (() => {
