@@ -83,6 +83,10 @@
 			"source": "terminal/bin/node.js"
 		},
 		{
+			"route": "./_/modules/terminal/bin/node-process.js",
+			"source": "terminal/bin/node-process.js"
+		},
+		{
 			"route": "./_/modules/terminal/bin/preview.js",
 			"source": "terminal/bin/preview.js"
 		},
