@@ -1,4 +1,4 @@
-import { argv } from 'https://beta.fiug.dev/process.js';
+import { argv } from 'process.js';
 
 console.log(argv.join('\n') + '\n');
 
