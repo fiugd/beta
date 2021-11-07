@@ -1,5 +1,5 @@
-import { attach, attachTrigger } from "./Listeners.mjs";
-import { getDefaultFile, getState } from "./state.mjs";
+import { attach, attachTrigger } from "./Listeners.js";
+import { getDefaultFile, getState } from "./state.js";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
 const tryFn = (fn, _default) => {

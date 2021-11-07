@@ -1,7 +1,7 @@
-import TreeView from "/shared/modules/TreeView.mjs";
+import TreeView from "./TreeView.js";
 import ext from "/shared/icons/seti/ext.json.mjs";
 
-import { attachListener, connectTrigger } from "./treeEvents.mjs";
+import { attachListener, connectTrigger } from "./treeEvents.js";
 import "/shared/vendor/localforage.min.js";
 
 let treeView, opener, tree, triggers, _service;
