@@ -21,7 +21,23 @@
 				"/shared/css/materialize.min.css"
 			]
 		},
+
+
 		"NOTE: -- TERMINAL UI /START --",
+		{
+			"route": "./_/modules/Terminal.mjs",
+			"type": "domComponent",
+			"source": "modules/Terminal.mjs",
+			"resources": [
+				"/shared/vendor/xterm.min.js",
+				"/shared/vendor/xterm-addon-fit.js"
+			]
+		},
+		{
+			"route": "./_/modules/terminalEvents.mjs",
+			"source": "modules/terminalEvents.mjs",
+			"handler": null
+		},
 		{
 			"route": "./_/modules/terminal/terminal.html",
 			"source": "terminal/terminal.html"
@@ -96,6 +112,7 @@
 		},
 		"NOTE: -- TERMINAL UI /END --",
 
+
 		"NOTE: -- EDITOR /START --",
 		{
 			"route": "./_/modules/Editor.mjs",
@@ -112,6 +129,21 @@
 			"source": "dist/editor.js",
 		},
 		"NOTE: -- EDITOR /END --",
+
+
+		"NOTE: -- TREE /START --",
+		{
+			"route": "./_/modules/TreeView.mjs",
+			"type": "domComponent",
+			"source": "modules/TreeView.mjs",
+			"resources": ["/shared/modules/TreeView.mjs"]
+		},
+		{
+			"route": "./_/modules/treeEvents.mjs",
+			"source": "modules/treeEvents.mjs",
+			"handler": null
+		},
+		"NOTE: -- TREE /END --",
 
 
 		"NOTE: modules",
@@ -131,24 +163,9 @@
 			"source": "modules/ActionBar.mjs"
 		},
 		{
-			"route": "./_/modules/TreeView.mjs",
-			"type": "domComponent",
-			"source": "modules/TreeView.mjs",
-			"resources": ["/shared/modules/TreeView.mjs"]
-		},
-		{
 			"route": "./_/modules/LoaderBar.mjs",
 			"type": "domComponent",
 			"source": "modules/LoaderBar.mjs"
-		},
-		{
-			"route": "./_/modules/Terminal.mjs",
-			"type": "domComponent",
-			"source": "modules/Terminal.mjs",
-			"resources": [
-				"/shared/vendor/xterm.min.js",
-				"/shared/vendor/xterm-addon-fit.js"
-			]
 		},
 		{
 			"route": "./_/modules/HotKeys.mjs",
@@ -178,18 +195,8 @@
 			"handler": null
 		},
 		{
-			"route": "./_/modules/treeEvents.mjs",
-			"source": "modules/treeEvents.mjs",
-			"handler": null
-		},
-		{
 			"route": "./_/modules/loaderBarEvents.mjs",
 			"source": "modules/loaderBarEvents.mjs",
-			"handler": null
-		},
-		{
-			"route": "./_/modules/terminalEvents.mjs",
-			"source": "modules/terminalEvents.mjs",
 			"handler": null
 		},
 		{
