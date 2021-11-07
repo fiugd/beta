@@ -12,18 +12,18 @@ import packageJson from "/package.json" assert { type: "json" };
 const VERSION = `${packageJson.version}`;
 const DATE = new Date().toISOString();
 
-const AddVersion = (code) => code.replace(/{{VERSION}}/g, VERSION);
-const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
+const AddVersion = async (code) => (await code).replace(/{{VERSION}}/g, VERSION);
+const AddDate = async (code) => (await code).replace(/{{DATE}}/g, DATE);
 
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 
-const Minify = (code) => Terser.minify(code, terserConfig());
+const Minify = async (code) => Terser.minify((await code), terserConfig());
 //const Minify = (code) => ({ code });
 
 const changeUrl = '/service/change';
 const root = 'fiugd/beta';
 
-const writeFile = async ({ path, code }) => {
+const writeFile = ({ path, code }) => {
 	const body = {
 		path,
 		service: root,
@@ -41,18 +41,10 @@ const writeFile = async ({ path, code }) => {
 			mode: "cors",
 			credentials: "omit"
 	};
-	debugger
-	const response = await fetch(changeUrl, opts);
-	debugger
-	let parsed;
-	try {
-		parsed = await response.json();
-	} catch (e) {}
-
-	if (!response.ok) {
-		throw new Error(response.statusText);
-	}
-	return parsed;
+	return fetch(changeUrl, opts).then(x => {
+		if(!x.ok) throw new Error(x.statusText);
+		return x.json();
+	});
 }
 
 const copyFile = async (from, to) => {
@@ -61,17 +53,21 @@ const copyFile = async (from, to) => {
 	return await writeFile({ path, code });
 };
 
-const saveBuild =  (config) => async (args) => {
+const CreateBuild = async (config) => {
+	const generated = await rollup.rollup(config)
+		.then(x => x.generate(config.output));
+	const { code } = generated.output[0];
+	return code;
+};
+
+const SaveBuild =  (config) => async (args) => {
 	const { code, map } = await args;
 	const path =  `./${config.output.file}`;
-	const response = await writeFile({ path, code });
-
-	return response;
+	return await writeFile({ path, code });
 };
 
 const build = async (configUrl) => {
 	let error;
-
 	const rollupConfig = (await import(configUrl)).default;
 	const {
 		componentName,
@@ -84,20 +80,19 @@ const build = async (configUrl) => {
 	console.log(`\nbundling ...`);
 
 	try {
-		const generated = await rollup.rollup(config)
-			.then(x => x.generate(config.output));
-		const { code } = generated.output[0];
-		const response = await pipe(
+		let response = await pipe(
+			CreateBuild,
 			AddDate,
 			AddVersion,
 			Minify,
-			saveBuild(config)
-		)(code);
+			SaveBuild(config)
+		)(config);
 
 		for(let { from, to } of copyFiles){
 			response = await copyFile(from, to);
 			if(response.error) throw new Error(response.error);
 		}
+
 	} catch (e){
 		error = e.message + '\n' + e.stack;
 	}
