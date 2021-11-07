@@ -243,7 +243,10 @@ const GithubProvider = (() => {
 				const name = repo;
 				const tree = githubToServiceTree(githubTree);
 				const thisService = {
-					id, type, name, tree,
+					id,
+					type,
+					name,
+					tree,
 					owner: repo.split('/').slice(0,1).join(''),
 					repo: repo.split('/').pop(),
 					git: {
@@ -252,6 +255,22 @@ const GithubProvider = (() => {
 					},
 					branch
 				};
+
+				const readmeFile = Object.keys(tree[name])
+					.find(key => key.toLowerCase() === 'readme.md');
+				if(readmeFile){
+					thisService.state = {
+						changed: [],
+						opened: [{ name: readmeFile, order: 0 }],
+						selected: readmeFile
+					};
+					thisService.treeState = {
+						changed: [],
+						expand: [],
+						new: [],
+						select: readmeFile
+					};
+				}
 
 				// create or update service
 				await servicesStore.setItem(id+'', thisService);

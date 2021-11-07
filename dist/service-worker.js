@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2021-11-07T21:26:54.216Z )
+	Version 0.4.6 ( 2021-11-07T23:09:41.258Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1645,6 +1645,23 @@ const GithubProvider = (() => {
                     },
                     branch: branch
                 };
+                const readmeFile = Object.keys(tree[name]).find((key => key.toLowerCase() === "readme.md"));
+                if (readmeFile) {
+                    thisService.state = {
+                        changed: [],
+                        opened: [ {
+                            name: readmeFile,
+                            order: 0
+                        } ],
+                        selected: readmeFile
+                    };
+                    thisService.treeState = {
+                        changed: [],
+                        expand: [],
+                        new: [],
+                        select: readmeFile
+                    };
+                }
                 // create or update service
                                 await servicesStore.setItem(id + "", thisService);
                 return {
