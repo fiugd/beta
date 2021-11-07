@@ -25,8 +25,8 @@ import 'rollup';
 import 'rollupPluginSourceMap';
 import 'terser';
 
-import rollupConfig from './build/rollup.config.js';
-import terserConfig from './build/terser.config.js';
+import rollupConfig from './rollup.config.js';
+import terserConfig from '../_common/terser.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
 const VERSION = `v${packageJson.version}`;
@@ -38,11 +38,14 @@ const AddDate = (code) => code.replace(/{{DATE}}/g, DATE);
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 const Minify = (code) => Terser.minify(code, terserConfig());
 
+const changeUrl = '/service/change';
+const root = 'fiugd/beta';
+const config = rollupConfig(root);
+
 function saveBuild({ code, map }){
-	const changeUrl = '/service/change';
 	const body = {
-		path: `./${rollupConfig.output.file}`,
-		service: 'fiugd/beta',
+		path: `./${config.output.file}`,
+		service: root,
 		//command: 'upsert',
 		code: code
 	};
@@ -65,8 +68,8 @@ console.log(`bundling service-worker...`);
 const build = async () => {
 	let error;
 	try {
-		const generated = await rollup.rollup(rollupConfig)
-			.then(x => x.generate(rollupConfig.output));
+		const generated = await rollup.rollup(config)
+			.then(x => x.generate(config.output));
 		const { code } = generated.output[0];
 		const minified = await pipe(AddDate,AddVersion,Minify)(code);
 		const response = await saveBuild(minified);
@@ -81,7 +84,7 @@ const build = async () => {
 		console.log('\n' + error);
 	} else {
 		console.log(`DONE\nsee ` +
-		`${self.location.origin}/${rollupConfig.output.file}`
+		`${self.location.origin}/${config.output.file}`
 		);
 	}
 };
