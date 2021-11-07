@@ -261,11 +261,11 @@ const GithubProvider = (() => {
 					.find(key => key.toLowerCase() === 'readme.md');
 				if(readmeFile){
 					await changesStore.setItem(
-						`state-${service.name}-opened`,
+						`state-${thisService.name}-opened`,
 						[{ name: readmeFile, order: 0 }]
 					);
 					await changesStore.setItem(
-						`tree-${service.name}-expanded`,
+						`tree-${thisService.name}-expanded`,
 						readmeFile
 					);
 				}

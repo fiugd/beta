@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2021-11-07T23:20:25.917Z )
+	Version 0.4.5 ( 2021-11-07T23:24:46.931Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1648,11 +1648,11 @@ const GithubProvider = (() => {
                 };
                 const readmeFile = Object.keys(tree[name]).find((key => key.toLowerCase() === "readme.md"));
                 if (readmeFile) {
-                    await changesStore.setItem(`state-${service.name}-opened`, [ {
+                    await changesStore.setItem(`state-${thisService.name}-opened`, [ {
                         name: readmeFile,
                         order: 0
                     } ]);
-                    await changesStore.setItem(`tree-${service.name}-expanded`, readmeFile);
+                    await changesStore.setItem(`tree-${thisService.name}-expanded`, readmeFile);
                 }
                 // create or update service
                                 await servicesStore.setItem(id + "", thisService);
@@ -60083,7 +60083,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "0.4.6";
+const cacheName = "0.4.5";
 
 //TODO: next lines won't work because rollup rewrites dep due to module root level "this"
 //import "/shared/vendor/localforage.min.js";
