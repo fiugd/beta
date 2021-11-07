@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2021-11-07T21:00:07.931Z )
+	Version 0.4.6 ( 2021-11-07T21:14:26.125Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */

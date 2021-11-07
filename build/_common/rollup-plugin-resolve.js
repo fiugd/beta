@@ -2,7 +2,7 @@ import {pather} from '../../shared/utilities.mjs';
 
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
 const braces = url => {
-	const blacklist = ['jsdelivr', 'virtual-module'];
+	const blacklist = ['jsdelivr', 'skypack.dev', 'unpkg'];
 	if(blacklist.find(x => url.includes(x))) return url;
 	return `˹${url}˺`;
 };
@@ -22,8 +22,14 @@ const plugin = (root) => ({
 			const parent = importer.split('/').slice(0, -1).join('/');
 			output = pather(null, parent + '/' + source);
 		}
-		if(source.startsWith('/')){
+		if(source.startsWith('/') && !importer){
 			output = root + source;
+		}
+		if(source.startsWith('/') && importer){
+			const [scheme, path] = importer.split('//');
+			const origin = path.split('/').slice(0, 1);
+			const parent = [scheme, origin].join('//');
+			output = parent + source;
 		}
 		return output;
 	},
@@ -37,4 +43,3 @@ const plugin = (root) => ({
 });
 
 export default plugin;
-

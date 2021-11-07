@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2021-11-06T03:15:58.780Z )
+	Version 0.4.6 ( 2021-11-07T21:14:20.537Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
