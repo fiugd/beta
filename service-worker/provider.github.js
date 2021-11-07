@@ -126,6 +126,7 @@ const GithubProvider = (() => {
 			const providersStore = stores.providers;
 			const servicesStore = stores.services;
 			const filesStore = stores.files;
+			const changesStore = stores.changes;
 
 			//console.log({ payload, params });
 
@@ -259,17 +260,14 @@ const GithubProvider = (() => {
 				const readmeFile = Object.keys(tree[name])
 					.find(key => key.toLowerCase() === 'readme.md');
 				if(readmeFile){
-					thisService.state = {
-						changed: [],
-						opened: [{ name: readmeFile, order: 0 }],
-						selected: readmeFile
-					};
-					thisService.treeState = {
-						changed: [],
-						expand: [],
-						new: [],
-						select: readmeFile
-					};
+					await changesStore.setItem(
+						`state-${service.name}-opened`,
+						[{ name: readmeFile, order: 0 }]
+					);
+					await changesStore.setItem(
+						`tree-${service.name}-expanded`,
+						readmeFile
+					);
 				}
 
 				// create or update service

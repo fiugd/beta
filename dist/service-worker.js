@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2021-11-07T23:09:41.258Z )
+	Version 0.4.6 ( 2021-11-07T23:20:25.917Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1536,6 +1536,7 @@ const GithubProvider = (() => {
             const providersStore = stores.providers;
             const servicesStore = stores.services;
             const filesStore = stores.files;
+            const changesStore = stores.changes;
             //console.log({ payload, params });
                         const opts = {
                 headers: {}
@@ -1647,20 +1648,11 @@ const GithubProvider = (() => {
                 };
                 const readmeFile = Object.keys(tree[name]).find((key => key.toLowerCase() === "readme.md"));
                 if (readmeFile) {
-                    thisService.state = {
-                        changed: [],
-                        opened: [ {
-                            name: readmeFile,
-                            order: 0
-                        } ],
-                        selected: readmeFile
-                    };
-                    thisService.treeState = {
-                        changed: [],
-                        expand: [],
-                        new: [],
-                        select: readmeFile
-                    };
+                    await changesStore.setItem(`state-${service.name}-opened`, [ {
+                        name: readmeFile,
+                        order: 0
+                    } ]);
+                    await changesStore.setItem(`tree-${service.name}-expanded`, readmeFile);
                 }
                 // create or update service
                                 await servicesStore.setItem(id + "", thisService);
