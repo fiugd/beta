@@ -6,7 +6,14 @@ import 'rollup';
 import 'rollupPluginSourceMap';
 import 'terser';
 
+
+import chalk from 'chalk';
+chalk.enabled = true;
+chalk.level = 3; //levels.trueColor;
+
 import terserConfig from './_common/terser.config.js';
+import getAnalyzeConfig from './_common/analyze.config.js';
+import getOnWarn from './_common/warn.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
 const VERSION = `${packageJson.version}`;
@@ -22,6 +29,15 @@ const Minify = async (code) => Terser.minify((await code), terserConfig());
 
 const changeUrl = '/service/change';
 const root = 'fiugd/beta';
+
+const braces = url => {
+	const blacklist = ['jsdelivr', 'skypack.dev', 'unpkg'];
+	if(blacklist.find(x => url.includes(x))) return url;
+	return `˹${url}˺`;
+};
+
+const analyzeConfig = getAnalyzeConfig(root, chalk, braces);
+const onwarn = getOnWarn(root, chalk, braces);
 
 const writeFile = ({ path, code }) => {
 	const body = {
@@ -66,14 +82,18 @@ const SaveBuild =  (config) => async (args) => {
 	return await writeFile({ path, code });
 };
 
+
+
+
 const build = async (configUrl) => {
 	let error;
 	const rollupConfig = (await import(configUrl)).default;
+
 	const {
 		componentName,
 		copyFiles=[],
 		...config
-	} = rollupConfig(root);
+	} = rollupConfig(root, analyzeConfig, onwarn);
 
 	console.log(`\n${componentName} v${VERSION}`);
 	console.log(`rollup v${rollup.VERSION}`);

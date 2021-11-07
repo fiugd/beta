@@ -1,16 +1,25 @@
-import resolvePlugin from '../_common/rollup-plugin-resolve.js';
-import json from '../_common/rollup-plugin-json.js';
-import css from '../_common/rollup-plugin-css.js';
-import analyze from '../_common/rollup-plugin-analyze.js';
+import resolvePlugin from './_common/rollup-plugin-resolve.js';
+import json from './_common/rollup-plugin-json.js';
+import css from './_common/rollup-plugin-css.js';
+import analyze from './_common/rollup-plugin-analyze.js';
 
-export default (root) => ({
+const banner = `/*!
+	fiug editor component
+	Version {{VERSION}} ( {{DATE}} )
+	https://github.com/fiugd/fiug/editor
+	(c) 2020-2021 Harrison Cross, MIT License
+*/
+`;
+
+export default (root, analyzeConfig, onwarn) => ({
 	componentName: 'fiug editor component',
 	input: '/editor/editor.js',
+	onwarn,
 	plugins: [
 		resolvePlugin(location.origin + "/" + root),
 		json(),
 		css(),
-		analyze(analyzeConfig(root)),
+		analyze(analyzeConfig),
 	],
 	external: ['chalk'],
 	output: {
@@ -27,5 +36,4 @@ export default (root) => ({
 		from: `/${root}/editor/editor.html`,
 		to: `./${root}/dist/editor.html`
 	}],
-	onwarn: onwarn(root)
 });
