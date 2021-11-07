@@ -1,3 +1,11 @@
+/*
+
+word wrap:
+Editor.setOption('lineWrapping', true)
+(of course this needs to be supported in minimap as well...)
+
+*/
+
 import { getSettings } from '../../utils/State.js';
 
 const { SYSTEM_NAME } = getSettings();
