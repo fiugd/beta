@@ -90,4 +90,6 @@ const build = async () => {
 	}
 };
 
-await build();
+//await build();
+
+export default build;

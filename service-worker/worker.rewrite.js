@@ -57,14 +57,16 @@ const transpile = (content, map, cwd) => {
 
 		const processWrite = `
 const processWrite = (...args) => postMessage({ log: args });
-self.hooks = [];
+self.hooks = self.hooks || [];
+
 `.trim() + '\n\n';
 		
 		const processExit = '\n\n' + `
-setTimeout(async () => {
+!self.willExit && setTimeout(async () => {
 	await Promise.allSettled(self.hooks);
 	queueMicrotask(() => { postMessage({ exit: true }); });
 }, 1);
+self.willExit = true;
 `.trim() + '\n\n';
 
 		return processWrite + output.code + processExit;

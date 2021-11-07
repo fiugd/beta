@@ -53,6 +53,7 @@ const onwarn = (root) => (warning) => {
 }
 
 export default (root) => ({
+	componentName: 'fiug editor component',
 	input: '/editor/editor.js',
 	plugins: [
 		resolvePlugin(location.origin + "/" + root),
@@ -71,5 +72,9 @@ export default (root) => ({
 		file: root + '/dist/editor.js',
 		banner,
 	},
+	copyFiles: [{
+		from: `/${root}/editor/editor.html`,
+		to: `./${root}/dist/editor.html`
+	}],
 	onwarn: onwarn(root)
 });

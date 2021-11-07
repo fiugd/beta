@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-07T17:40:35.515Z )
+	Version 0.4.6 ( 2021-11-07T20:12:23.042Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
