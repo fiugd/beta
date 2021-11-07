@@ -1,127 +1,218 @@
 /*!
 	fiug service-worker
-	Version v0.4.6
-	Build Date 2021-11-07T20:16:27.404Z
+	Version 0.4.6 ( 2021-11-07T21:00:07.931Z )
 	https://github.com/fiugd/fiug/service-worker
-	(c) 2011-2012 Harrison Cross.
+	(c) 2020-2021 Harrison Cross, MIT License
 */
 const utils = (() => {
     let mimeTypes;
     const xfrmMimes = (() => {
         let cache;
-        return (m = {}) => Object.entries(m).length ? (cache = cache || Object.entries(m).map((([contentType, rest]) => ({
-            contentType: contentType,
-            extensions: [],
-            ...rest
-        }))), cache) : cache || [];
-    })(), getMime = filename => xfrmMimes(mimeTypes).find((m => m.extensions.includes(filename.split(".").pop()))), flattenTree = tree => {
-        const results = [], queue = [], recurse = (branch, parent = "/") => {
+        return (m = {}) => {
+            if (!Object.entries(m).length) {
+                return cache || [];
+            }
+            cache = cache || Object.entries(m).map((([contentType, rest]) => ({
+                contentType: contentType,
+                extensions: [],
+                ...rest
+            })));
+            return cache;
+        };
+    })();
+    const getMime = filename => xfrmMimes(mimeTypes).find((m => m.extensions.includes(filename.split(".").pop())))
+    // this call may not finish before mimetypes is used
+    ;
+    const initMimeTypes = async () => {
+        mimeTypes = await fetchJSON("https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json");
+    };
+    const safe = fn => {
+        try {
+            return fn();
+        } catch (e) {
+            console.error("possible issue: " + fn.toString());
+            return;
+        }
+    };
+    // this flattens tree files, not structure
+        const flattenTree = tree => {
+        const results = [];
+        const queue = [];
+        const recurse = (branch, parent = "/") => {
             Object.keys(branch).filter((x => {
                 const o = branch[x];
-                return !!o && "object" == typeof o && !Array.isArray(o);
+                return !!o && typeof o === "object" && !Array.isArray(o);
             })).forEach((key => {
                 const children = Object.keys(branch[key]);
-                children && children.length ? (branch[key], queue.push((() => recurse(branch[key], `${parent}${key}/`)))) : results.push({
-                    name: key,
-                    code: parent + key,
-                    path: parent + key
-                });
+                if (!children || !children.length) {
+                    results.push({
+                        name: key,
+                        code: parent + key,
+                        path: parent + key
+                    });
+                } else {
+                    if (!branch[key]) {
+                        debugger;
+                    }
+                    queue.push((() => recurse(branch[key], `${parent}${key}/`)));
+                }
             }));
         };
-        for (queue.push((() => recurse(tree))); queue.length > 0; ) queue.shift()();
+        queue.push((() => recurse(tree)));
+        while (queue.length > 0) queue.shift()();
         return results;
     };
-    const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json();
-    return {
-        addBase: function(html, href = "../../", target = "_blank") {
-            try {
-                const baseHref = html.includes("<base") ? "" : `\n<base href="${href}" target="${target}">\n`;
-                return html.includes("<html>") || (html = "<html>\n" + html + "\n</html>"), html = (html = html.replace("<html>", html.includes("<head>") ? "<html>" : "<html>\n\n<head></head>\n")).replace("<head>", `<head>${baseHref}`);
-            } catch (e) {
-                return html;
+    // this flattens tree structure
+    // thanks: https://lowrey.me/getting-all-paths-of-an-javascript-object/
+        const flattenObject = root => {
+        let paths = [];
+        let nodes = [ {
+            obj: root,
+            path: []
+        } ];
+        while (nodes.length > 0) {
+            const n = nodes.pop();
+            Object.keys(n.obj).forEach((k => {
+                const obj = n.obj[k];
+                if (typeof obj !== "object") return;
+                const path = n.path.concat(k);
+                paths.push(path);
+                nodes.unshift({
+                    obj: obj,
+                    path: path
+                });
+            }));
+        }
+        return paths.map((x => x.join("/")));
+    };
+    const keepHelper = (tree, code) => {
+        const treeFlat = flattenTree(tree).map((x => x.path.replace("/.keep", "")));
+        const treeFiles = code.map((x => x.path)).filter((x => !x.includes("/.keep"))).map((x => {
+            if (x[0] === "/") return x;
+            if (x.slice(0, 2) === "./") return x.replace(/^\.\//, "/");
+            return "/" + x;
+        }));
+        const addKeepFiles = treeFlat.reduce(((all, one, i, array) => {
+            const found = array.filter((x => x !== one && x.startsWith(one)));
+            if (found.length === 0 && !treeFiles.includes(one)) all.push(one);
+            return all;
+        }), []);
+        return treeFlat.map((x => addKeepFiles.includes(x) ? x + "/.keep" : treeFiles.includes(x) ? x : undefined)).filter((x => !!x));
+    };
+    // this makes a service from UI look like files got from storage
+        function getCodeAsStorage(tree, files, serviceName) {
+        const flat = flattenTree(tree);
+        for (let index = 0; index < flat.length; index++) {
+            const file = flat[index];
+            flat[index] = {
+                key: file.path,
+                value: files.find((x => x.name === file.path.split("/").pop()))
+            };
+            flat[index].value.path = flat[index].value.path || file.path;
+            flat[index].value.code = flat[index].value.code || file.code;
+        }
+        const untracked = files.filter((x => x.untracked)).map(((file, i) => ({
+            key: `/${serviceName}/${file.name}`,
+            value: {
+                code: file.code,
+                name: file.name,
+                path: `/${serviceName}/`
             }
-        },
-        fetchJSON: fetchJSON,
-        flattenTree: flattenTree,
-        flattenObject: root => {
-            let paths = [], nodes = [ {
-                obj: root,
-                path: []
-            } ];
-            for (;nodes.length > 0; ) {
-                const n = nodes.pop();
-                Object.keys(n.obj).forEach((k => {
-                    const obj = n.obj[k];
-                    if ("object" != typeof obj) return;
-                    const path = n.path.concat(k);
-                    paths.push(path), nodes.unshift({
-                        obj: obj,
-                        path: path
-                    });
-                }));
-            }
-            return paths.map((x => x.join("/")));
-        },
-        keepHelper: (tree, code) => {
-            const treeFlat = flattenTree(tree).map((x => x.path.replace("/.keep", ""))), treeFiles = code.map((x => x.path)).filter((x => !x.includes("/.keep"))).map((x => "/" === x[0] ? x : "./" === x.slice(0, 2) ? x.replace(/^\.\//, "/") : "/" + x)), addKeepFiles = treeFlat.reduce(((all, one, i, array) => (0 !== array.filter((x => x !== one && x.startsWith(one))).length || treeFiles.includes(one) || all.push(one), 
-            all)), []);
-            return treeFlat.map((x => addKeepFiles.includes(x) ? x + "/.keep" : treeFiles.includes(x) ? x : void 0)).filter((x => !!x));
-        },
-        getCodeAsStorage: function(tree, files, serviceName) {
-            const flat = flattenTree(tree);
-            for (let index = 0; index < flat.length; index++) {
-                const file = flat[index];
-                flat[index] = {
-                    key: file.path,
-                    value: files.find((x => x.name === file.path.split("/").pop()))
-                }, flat[index].value.path = flat[index].value.path || file.path, flat[index].value.code = flat[index].value.code || file.code;
-            }
-            const untracked = files.filter((x => x.untracked)).map(((file, i) => ({
-                key: `/${serviceName}/${file.name}`,
-                value: {
-                    code: file.code,
-                    name: file.name,
-                    path: `/${serviceName}/`
-                }
-            })));
-            return [ ...flat, ...untracked ];
-        },
-        getMime: getMime,
-        initMimeTypes: async () => {
-            mimeTypes = await fetchJSON("https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json");
-        },
-        notImplementedHandler: async (params, event) => (console.log("handler not implemented"), 
-        JSON.stringify({
+        })));
+        return [ ...flat, ...untracked ];
+    }
+    const treeInsertFile = (path, tree) => {
+        const splitPath = path.split("/").filter((x => !!x && x !== "."));
+        const newTree = JSON.parse(JSON.stringify(tree));
+        let currentPointer = newTree;
+        splitPath.forEach((x => {
+            currentPointer[x] = currentPointer[x] || {};
+            currentPointer = currentPointer[x];
+        }));
+        return newTree;
+    };
+    const unique = (array, fn) => {
+        const result = [];
+        const map = new Map;
+        for (const item of array) {
+            if (map.has(fn(item))) continue;
+            map.set(fn(item), true);
+            result.push(item);
+        }
+        return result;
+    };
+    const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json()
+    //TODO: ??? move to provider since fetching is a provider thing
+    ;
+    async function fetchFileContents(filename, opts) {
+        const storeAsBlob = [ "image/", "audio/", "video/", "wasm", "application/zip" ];
+        const storeAsBlobBlacklist = [ "image/svg", "image/x-portable-pixmap" ];
+        const fileNameBlacklist = [ ".ts" ];
+        const fetched = await fetch(filename, opts);
+        //getting content type like this because can't trust server's CT headers
+                const mime = getMime(filename) || {};
+        const contentType = mime.contentType || fetched.headers.get("Content-Type");
+        let _contents = storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => filename.includes(x))) ? await fetched.blob() : await fetched.text();
+        return _contents;
+    }
+    const notImplementedHandler = async (params, event) => {
+        console.log("handler not implemented");
+        return JSON.stringify({
             params: params,
             event: event,
             error: "not implemented"
-        }, null, 2)),
-        safe: fn => {
-            try {
-                return fn();
-            } catch (e) {
-                return void console.error("possible issue: " + fn.toString());
-            }
-        },
-        treeInsertFile: (path, tree) => {
-            const splitPath = path.split("/").filter((x => !!x && "." !== x)), newTree = JSON.parse(JSON.stringify(tree));
-            let currentPointer = newTree;
-            return splitPath.forEach((x => {
-                currentPointer[x] = currentPointer[x] || {}, currentPointer = currentPointer[x];
-            })), newTree;
-        },
-        unique: (array, fn) => {
-            const result = [], map = new Map;
-            for (const item of array) map.has(fn(item)) || (map.set(fn(item), !0), result.push(item));
-            return result;
-        },
-        fetchFileContents: async function(filename, opts) {
-            const fetched = await fetch(filename, opts), contentType = (getMime(filename) || {}).contentType || fetched.headers.get("Content-Type");
-            return ![ "image/", "audio/", "video/", "wasm", "application/zip" ].find((x => contentType.includes(x))) || [ "image/svg", "image/x-portable-pixmap" ].find((x => contentType.includes(x))) || [ ".ts" ].find((x => filename.includes(x))) ? await fetched.text() : await fetched.blob();
-        }
+        }, null, 2);
     };
-})(), bsConfig = () => '\n/*\n |--------------------------------------------------------------------------\n | Browser-sync config file\n |--------------------------------------------------------------------------\n |\n | For up-to-date information about the options:\n |   http://www.browsersync.io/docs/options/\n */\n\nconst path = require("path");\nconst packageJson = require(path.resolve(process.cwd(), "package.json"));\n\nmodule.exports = {\n\tport: 3322,\n\tui: {\n\t\tport: 3323,\n\t},\n\tserver: {\n\t\tdirectory: false,\n\t},\n\tfiles: ["index.*", "modules/**/*", "../shared/**/*"],\n\tignore: ["./__services/**/*", "./server/**/*"],\n\tinjectChanges: false,\n\tnotify: false,\n\tmiddleware: [\n\t\tfunction (req, res, next) {\n\t\t\t// if (req.url === "/") {\n\t\t\t// \tres.writeHead(302, { Location: "/" });\n\t\t\t// \tres.end();\n\t\t\t// \treturn;\n\t\t\t// }\n\t\t\tnext();\n\t\t},\n\t],\n\tsnippetOptions: {\n\t\tignorePaths: ["index.bootstrap.html"],\n\t\trule: {\n\t\t\tmatch: /</body>/i,\n\t\t\tfn: function (snippet, match) {\n\t\t\t\tconst customSnippet = "<script async src=\'/browser-sync/browser-sync-client.js?v=2.26.7\'><\/script>\n";\n\t\t\t\treturn customSnippet + match;\n\t\t\t},\n\t\t},\n\t},\n};\n'.trim() + "\n", editorconfig = () => "\n[*.yml]\nindent_style = space\nindent_size = 2\n".trim() + "\n", profile = () => "\n# configure prompt here\n# https://phoenixnap.com/kb/change-bash-prompt-linux\n# http://bashrcgenerator.com/\n\n# [\\033[38;2;{R};{B};{B}m <-- RGB foreground ON\n# [\\033[39m               <-- RGB foreground OFF\n# [\\033[37m[\\033[1m       <-- white, bold\n# [\\033[0m                <-- all styles off\n\n".trim() + '\nexport PS1="[\\033[38;2;60;180;190m\\h[\\033[39m [\\033[38;2;0;255;0m\\W[\\033[39m\\n[\\033[37m[\\033[1m\\$ [\\033[0m"\n', importmap = () => '\n{\n\timports: {\n\t\tansiEscapes: "https://cdn.skypack.dev/ansi-escapes",\n\t\tchalk: "https://cdn.skypack.dev/chalk",\n\t\tfileSaver: "https://cdn.skypack.dev/file-saver",\n\t\tjsZip: "https://cdn.skypack.dev/@progress/jszip-esm",\n\t\tlodash: "https://cdn.skypack.dev/lodash",\n\t\tpapaParse: "https://cdn.skypack.dev/papaparse",\n\t\trollup: "https://unpkg.com/rollup/dist/rollup.browser.js",\n\t\trollupPluginSourceMap: "https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js",\n\t\tterser: "https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js",\n\t}\n}\n'.trim() + "\n", jestConfig = () => "\nmodule.exports = {\n\tmodulePathIgnorePatterns: [\n\t\t'<rootDir>/__services'\n\t],\n\ttestPathIgnorePatterns: [\n\t\t'__services'\n\t],\n\ttransform: {\n\t\t\".*.js\": \"<rootDir>/node_modules/babel-jest\"\n\t},\n};\n".trim() + "\n", settings = () => '\n{\n// Most Commonly Used\n\n  // Controls auto save of dirty files. Accepted values:  \'off\', \'afterDelay\', \'onFocusChange\' (editor loses focus), \'onWindowChange\' (window loses focus). If set to \'afterDelay\', you can configure the delay in \'files.autoSaveDelay\'.\n  "files.autoSave": "off",\n\n  // Controls the font size in pixels.\n  "editor.fontSize": 14,\n\n  // Controls the font family.\n  "editor.fontFamily": "Consolas, \'Courier New\', monospace",\n\n  // The number of spaces a tab is equal to. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.tabSize": 4,\n\n  // Controls how the editor should render whitespace characters, possibilities are \'none\', \'boundary\', and \'all\'. The \'boundary\' option does not render single spaces between words.\n  "editor.renderWhitespace": "none",\n\n  // Controls the cursor style, accepted values are \'block\', \'block-outline\', \'line\', \'line-thin\', \'underline\' and \'underline-thin\'\n  "editor.cursorStyle": "line",\n\n  // The modifier to be used to add multiple cursors with the mouse. "ctrlCmd" maps to "Control" on Windows and Linux and to "Command" on OSX. The Go To Definition and Open Link mouse gestures will adapt such that they do not conflict with the multicursor modifier.\n  "editor.multiCursorModifier": "alt",\n\n  // Insert spaces when pressing Tab. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.insertSpaces": true,\n\n  // Controls how lines should wrap. Can be:\n  //  - \'off\' (disable wrapping),\n  //  - \'on\' (viewport wrapping),\n  //  - \'wordWrapColumn\' (wrap at "editor.wordWrapColumn") or\n  //  - \'bounded\' (wrap at minimum of viewport and "editor.wordWrapColumn").\n  "editor.wordWrap": "off",\n\n  // Configure glob patterns for excluding files and folders.\n  "files.exclude": {\n    "**/.git": true,\n    "**/.svn": true,\n    "**/.hg": true,\n    "**/CVS": true,\n    "**/.DS_Store": true\n  },\n\n  // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.\n  "files.associations": {},\n\n// Editor\n\n  // Insert snippets when their prefix matches. Works best when \'quickSuggestions\' aren\'t enabled.\n  "editor.tabCompletion": false,\n\n  // Controls the font family.\n  "editor.fontFamily": "Consolas, \'Courier New\', monospace",\n\n  // Controls the font weight.\n  "editor.fontWeight": "normal",\n\n  // Controls the font size in pixels.\n  "editor.fontSize": 14,\n\n  // Controls the line height. Use 0 to compute the lineHeight from the fontSize.\n  "editor.lineHeight": 0,\n\n  // Controls the letter spacing in pixels.\n  "editor.letterSpacing": 0,\n\n  // Controls the display of line numbers. Possible values are \'on\', \'off\', and \'relative\'. \'relative\' shows the line count from the current cursor position.\n  "editor.lineNumbers": "on",\n\n  // Columns at which to show vertical rulers\n  "editor.rulers": [],\n\n  // Characters that will be used as word separators when doing word related navigations or operations\n  "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:\'",.<>/?",\n\n  // The number of spaces a tab is equal to. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.tabSize": 4,\n\n  // Insert spaces when pressing Tab. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.insertSpaces": true,\n\n  // When opening a file, "editor.tabSize" and "editor.insertSpaces" will be detected based on the file contents.\n  "editor.detectIndentation": true,\n\n  // Controls if selections have rounded corners\n  "editor.roundedSelection": true,\n\n  // Controls if the editor will scroll beyond the last line\n  "editor.scrollBeyondLastLine": true,\n\n  // Controls if the editor will scroll using an animation\n  "editor.smoothScrolling": false,\n\n  // Controls if the minimap is shown\n  "editor.minimap.enabled": true,\n\n  // Controls whether the minimap slider is automatically hidden. Possible values are \'always\' and \'mouseover\'\n  "editor.minimap.showSlider": "mouseover",\n\n  // Render the actual characters on a line (as opposed to color blocks)\n  "editor.minimap.renderCharacters": true,\n\n  // Limit the width of the minimap to render at most a certain number of columns\n  "editor.minimap.maxColumn": 120,\n\n  // Controls if we seed the search string in Find Widget from editor selection\n  "editor.find.seedSearchStringFromSelection": true,\n\n  // Controls if Find in Selection flag is turned on when multiple characters or lines of text are selected in the editor\n  "editor.find.autoFindInSelection": false,\n\n  // Controls how lines should wrap. Can be:\n  //  - \'off\' (disable wrapping),\n  //  - \'on\' (viewport wrapping),\n  //  - \'wordWrapColumn\' (wrap at "editor.wordWrapColumn") or\n  //  - \'bounded\' (wrap at minimum of viewport and "editor.wordWrapColumn").\n  "editor.wordWrap": "off",\n\n  // Controls the wrapping column of the editor when "editor.wordWrap" is \'wordWrapColumn\' or \'bounded\'.\n  "editor.wordWrapColumn": 80,\n\n  // Controls the indentation of wrapped lines. Can be one of \'none\', \'same\' or \'indent\'.\n  "editor.wrappingIndent": "same",\n\n  // A multiplier to be used on the "deltaX" and "deltaY" of mouse wheel scroll events\n  "editor.mouseWheelScrollSensitivity": 1,\n\n  // The modifier to be used to add multiple cursors with the mouse. "ctrlCmd" maps to "Control" on Windows and Linux and to "Command" on OSX. The Go To Definition and Open Link mouse gestures will adapt such that they do not conflict with the multicursor modifier.\n  "editor.multiCursorModifier": "alt",\n\n  // Controls if suggestions should automatically show up while typing\n  "editor.quickSuggestions": {\n    "other": true,\n    "comments": false,\n    "strings": false\n  },\n\n  // Controls the delay in ms after which quick suggestions will show up\n  "editor.quickSuggestionsDelay": 10,\n\n  // Enables pop-up that shows parameter documentation and type information as you type\n  "editor.parameterHints": true,\n\n  // Controls if the editor should automatically close brackets after opening them\n  "editor.autoClosingBrackets": true,\n\n  // Controls if the editor should automatically format the line after typing\n  "editor.formatOnType": false,\n\n  // Controls if the editor should automatically format the pasted content. A formatter must be available and the formatter should be able to format a range in a document.\n  "editor.formatOnPaste": false,\n\n  // Controls if the editor should automatically adjust the indentation when users type, paste or move lines. Indentation rules of the language must be available. \n  "editor.autoIndent": true,\n\n  // Controls if suggestions should automatically show up when typing trigger characters\n  "editor.suggestOnTriggerCharacters": true,\n\n  // Controls if suggestions should be accepted on \'Enter\' - in addition to \'Tab\'. Helps to avoid ambiguity between inserting new lines or accepting suggestions. The value \'smart\' means only accept a suggestion with Enter when it makes a textual change\n  "editor.acceptSuggestionOnEnter": "on",\n\n  // Controls if suggestions should be accepted on commit characters. For instance in JavaScript the semi-colon (\';\') can be a commit character that accepts a suggestion and types that character.\n  "editor.acceptSuggestionOnCommitCharacter": true,\n\n  // Controls whether snippets are shown with other suggestions and how they are sorted.\n  "editor.snippetSuggestions": "inline",\n\n  // Controls whether copying without a selection copies the current line.\n  "editor.emptySelectionClipboard": true,\n\n  // Controls whether completions should be computed based on words in the document.\n  "editor.wordBasedSuggestions": true,\n\n  // Font size for the suggest widget\n  "editor.suggestFontSize": 0,\n\n  // Line height for the suggest widget\n  "editor.suggestLineHeight": 0,\n\n  // Controls whether the editor should highlight similar matches to the selection\n  "editor.selectionHighlight": true,\n\n  // Controls whether the editor should highlight semantic symbol occurrences\n  "editor.occurrencesHighlight": true,\n\n  // Controls the number of decorations that can show up at the same position in the overview ruler\n  "editor.overviewRulerLanes": 3,\n\n  // Controls if a border should be drawn around the overview ruler.\n  "editor.overviewRulerBorder": true,\n\n  // Control the cursor animation style, possible values are \'blink\', \'smooth\', \'phase\', \'expand\' and \'solid\'\n  "editor.cursorBlinking": "blink",\n\n  // Zoom the font of the editor when using mouse wheel and holding Ctrl\n  "editor.mouseWheelZoom": false,\n\n  // Controls the cursor style, accepted values are \'block\', \'block-outline\', \'line\', \'line-thin\', \'underline\' and \'underline-thin\'\n  "editor.cursorStyle": "line",\n\n  // Enables font ligatures\n  "editor.fontLigatures": false,\n\n  // Controls if the cursor should be hidden in the overview ruler.\n  "editor.hideCursorInOverviewRuler": false,\n\n  // Controls how the editor should render whitespace characters, possibilities are \'none\', \'boundary\', and \'all\'. The \'boundary\' option does not render single spaces between words.\n  "editor.renderWhitespace": "none",\n\n  // Controls whether the editor should render control characters\n  "editor.renderControlCharacters": false,\n\n  // Controls whether the editor should render indent guides\n  "editor.renderIndentGuides": true,\n\n  // Controls how the editor should render the current line highlight, possibilities are \'none\', \'gutter\', \'line\', and \'all\'.\n  "editor.renderLineHighlight": "line",\n\n  // Controls if the editor shows code lenses\n  "editor.codeLens": true,\n\n  // Controls whether the editor has code folding enabled\n  "editor.folding": true,\n\n  // Controls whether the fold controls on the gutter are automatically hidden.\n  "editor.showFoldingControls": "mouseover",\n\n  // Highlight matching brackets when one of them is selected.\n  "editor.matchBrackets": true,\n\n  // Controls whether the editor should render the vertical glyph margin. Glyph margin is mostly used for debugging.\n  "editor.glyphMargin": true,\n\n  // Inserting and deleting whitespace follows tab stops\n  "editor.useTabStops": true,\n\n  // Remove trailing auto inserted whitespace\n  "editor.trimAutoWhitespace": true,\n\n  // Keep peek editors open even when double clicking their content or when hitting Escape.\n  "editor.stablePeek": false,\n\n  // Controls if the editor should allow to move selections via drag and drop.\n  "editor.dragAndDrop": true,\n\n  // Controls whether the editor should run in a mode where it is optimized for screen readers.\n  "editor.accessibilitySupport": "auto",\n\n  // Controls whether the editor should detect links and make them clickable\n  "editor.links": true,\n\n  // Controls whether the editor should render the inline color decorators and color picker.\n  "editor.colorDecorators": true,\n\n  // Controls if the diff editor shows the diff side by side or inline\n  "diffEditor.renderSideBySide": true,\n\n  // Controls if the diff editor shows changes in leading or trailing whitespace as diffs\n  "diffEditor.ignoreTrimWhitespace": true,\n\n  // Controls if the diff editor shows +/- indicators for added/removed changes\n  "diffEditor.renderIndicators": true,\n\n  // Format a file on save. A formatter must be available, the file must not be auto-saved, and editor must not be shutting down.\n  "editor.formatOnSave": false,\n\n  // Overrides editor colors and font style from the currently selected color theme.\n  "editor.tokenColorCustomizations": {},\n\n\n// Workbench\n\n  // Controls if opened editors should show in tabs or not.\n  "workbench.editor.showTabs": true,\n\n  // Controls the position of the editor\'s tabs close buttons or disables them when set to \'off\'.\n  "workbench.editor.tabCloseButton": "right",\n\n  // Controls if opened editors should show with an icon or not. This requires an icon theme to be enabled as well.\n  "workbench.editor.showIcons": true,\n\n  // Controls if opened editors show as preview. Preview editors are reused until they are kept (e.g. via double click or editing).\n  "workbench.editor.enablePreview": true,\n\n  // Controls if opened editors from Quick Open show as preview. Preview editors are reused until they are kept (e.g. via double click or editing).\n  "workbench.editor.enablePreviewFromQuickOpen": true,\n\n  // Controls where editors open. Select \'left\' or \'right\' to open editors to the left or right of the current active one. Select \'first\' or \'last\' to open editors independently from the currently active one.\n  "workbench.editor.openPositioning": "right",\n\n  // Controls if an editor is revealed in any of the visible groups if opened. If disabled, an editor will prefer to open in the currently active editor group. If enabled, an already opened editor will be revealed instead of opened again in the currently active editor group. Note that there are some cases where this setting is ignored, e.g. when forcing an editor to open in a specific group or to the side of the currently active group.\n  "workbench.editor.revealIfOpen": false,\n\n  // Controls if the number of recently used commands to keep in history for the command palette. Set to 0 to disable command history.\n  "workbench.commandPalette.history": 50,\n\n  // Controls if the last typed input to the command palette should be restored when opening it the next time.\n  "workbench.commandPalette.preserveInput": false,\n\n  // Controls if Quick Open should close automatically once it loses focus.\n  "workbench.quickOpen.closeOnFocusLost": true,\n\n  // Controls if opening settings also opens an editor showing all default settings.\n  "workbench.settings.openDefaultSettings": true,\n\n  // Controls the location of the sidebar. It can either show on the left or right of the workbench.\n  "workbench.sideBar.location": "left",\n\n  // Controls the visibility of the status bar at the bottom of the workbench.\n  "workbench.statusBar.visible": true,\n\n  // Controls the visibility of the activity bar in the workbench.\n  "workbench.activityBar.visible": true,\n\n  // Controls if editors showing a file should close automatically when the file is deleted or renamed by some other process. Disabling this will keep the editor open as dirty on such an event. Note that deleting from within the application will always close the editor and that dirty files will never close to preserve your data.\n  "workbench.editor.closeOnFileDelete": true,\n\n  // When enabled, will show the watermark tips when no editor is open.\n  "workbench.tips.enabled": true,\n\n  // Controls which editor is shown at startup, if none is restored from the previous session. Select \'none\' to start without an editor, \'welcomePage\' to open the Welcome page (default), \'newUntitledFile\' to open a new untitled file (only opening an empty workspace).\n  "workbench.startupEditor": "welcomePage",\n\n  // Specifies the color theme used in the workbench.\n  "workbench.colorTheme": "Default Dark+",\n\n  // Specifies the icon theme used in the workbench or \'null\' to not show any file icons.\n  "workbench.iconTheme": "vs-seti",\n\n  // Overrides colors from the currently selected color theme.\n  "workbench.colorCustomizations": {},\n\n// Window\n\n  // Controls if files should open in a new window.\n  // - default: files will open in the window with the files\' folder open or the last active window unless opened via the dock or from finder (macOS only)\n  // - on: files will open in a new window\n  // - off: files will open in the window with the files\' folder open or the last active window\n  // Note that there can still be cases where this setting is ignored (e.g. when using the -new-window or -reuse-window command line option).\n  "window.openFilesInNewWindow": "off",\n\n  // Controls if folders should open in a new window or replace the last active window.\n  // - default: folders will open in a new window unless a folder is picked from within the application (e.g. via the File menu)\n  // - on: folders will open in a new window\n  // - off: folders will replace the last active window\n  // Note that there can still be cases where this setting is ignored (e.g. when using the -new-window or -reuse-window command line option).\n  "window.openFoldersInNewWindow": "default",\n\n  // Controls how windows are being reopened after a restart. Select \'none\' to always start with an empty workspace, \'one\' to reopen the last window you worked on, \'folders\' to reopen all windows that had folders opened or \'all\' to reopen all windows of your last session.\n  "window.restoreWindows": "one",\n\n  // Controls if a window should restore to full screen mode if it was exited in full screen mode.\n  "window.restoreFullscreen": false,\n\n  // Adjust the zoom level of the window. The original size is 0 and each increment above (e.g. 1) or below (e.g. -1) represents zooming 20% larger or smaller. You can also enter decimals to adjust the zoom level with a finer granularity.\n  "window.zoomLevel": 0,\n\n  // Controls the window title based on the active editor. Variables are substituted based on the context:\n  // ${activeEditorShort}: e.g. myFile.txt\n  // ${activeEditorMedium}: e.g. myFolder/myFile.txt\n  // ${activeEditorLong}: e.g. /Users/Development/myProject/myFolder/myFile.txt\n  // ${folderName}: e.g. myFolder\n  // ${folderPath}: e.g. /Users/Development/myFolder\n  // ${rootName}: e.g. myFolder1, myFolder2, myFolder3\n  // ${rootPath}: e.g. /Users/Development/myWorkspace\n  // ${appName}: e.g. VS Code\n  // ${dirty}: a dirty indicator if the active editor is dirty\n  // ${separator}: a conditional separator (" - ") that only shows when surrounded by variables with values\n  "window.title": `${dirty}${activeEditorShort}${separator}${rootName}${separator}${appName}`,\n\n  // Controls the dimensions of opening a new window when at least one window is already opened. By default, a new window will open in the center of the screen with small dimensions. When set to \'inherit\', the window will get the same dimensions as the last window that was active. When set to \'maximized\', the window will open maximized and fullscreen if configured to \'fullscreen\'. Note that this setting does not have an impact on the first window that is opened. The first window will always restore the size and location as you left it before closing.\n  "window.newWindowDimensions": "default",\n\n  // Controls if closing the last editor should also close the window. This setting only applies for windows that do not show folders.\n  "window.closeWhenEmpty": false,\n\n  // Control the visibility of the menu bar. A setting of \'toggle\' means that the menu bar is hidden and a single press of the Alt key will show it. By default, the menu bar will be visible, unless the window is full screen.\n  "window.menuBarVisibility": "default",\n\n  // If enabled, the main menus can be opened via Alt-key shortcuts. Disabling mnemonics allows to bind these Alt-key shortcuts to editor commands instead.\n  "window.enableMenuBarMnemonics": true,\n\n  // If enabled, will automatically change to high contrast theme if Windows is using a high contrast theme, and to dark theme when switching away from a Windows high contrast theme.\n  "window.autoDetectHighContrast": true,\n\n// Files\n\n  // Configure glob patterns for excluding files and folders.\n  "files.exclude": {\n    "**/.git": true,\n    "**/.svn": true,\n    "**/.hg": true,\n    "**/CVS": true,\n    "**/.DS_Store": true\n  },\n\n  // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.\n  "files.associations": {},\n\n  // The default character set encoding to use when reading and writing files.\n  "files.encoding": "utf8",\n\n  // When enabled, will attempt to guess the character set encoding when opening files\n  "files.autoGuessEncoding": false,\n\n  // The default end of line character. Use \n for LF and \r\n for CRLF.\n  "files.eol": "\r\n",\n\n  // When enabled, will trim trailing whitespace when saving a file.\n  "files.trimTrailingWhitespace": false,\n\n  // When enabled, insert a final new line at the end of the file when saving it.\n  "files.insertFinalNewline": false,\n\n  // Controls auto save of dirty files. Accepted values:  \'off\', \'afterDelay\', \'onFocusChange\' (editor loses focus), \'onWindowChange\' (window loses focus). If set to \'afterDelay\', you can configure the delay in \'files.autoSaveDelay\'.\n  "files.autoSave": "off",\n\n  // Controls the delay in ms after which a dirty file is saved automatically. Only applies when \'files.autoSave\' is set to \'afterDelay\'\n  "files.autoSaveDelay": 1000,\n\n  // Configure glob patterns of file paths to exclude from file watching. Patterns must match on absolute paths (i.e. prefix with ** or the full path to match properly). Changing this setting requires a restart. When you experience Code consuming lots of cpu time on startup, you can exclude large folders to reduce the initial load.\n  "files.watcherExclude": {\n    "**/.git/objects/**": true,\n    "**/.git/subtree-cache/**": true,\n    "**/node_modules/*/**": true\n  },\n\n  // Controls whether unsaved files are remembered between sessions, allowing the save prompt when exiting the editor to be skipped.\n  "files.hotExit": "onExit",\n\n  // Use the new experimental file watcher.\n  "files.useExperimentalFileWatcher": false,\n\n  // The default language mode that is assigned to new files.\n  "files.defaultLanguage": "",\n\n// File Explorer\n\n  // Number of editors shown in the Open Editors pane. Set it to 0 to hide the pane.\n  "explorer.openEditors.visible": 9,\n\n  // Controls if the height of the open editors section should adapt dynamically to the number of elements or not.\n  "explorer.openEditors.dynamicHeight": true,\n\n  // Controls if the explorer should automatically reveal and select files when opening them.\n  "explorer.autoReveal": true,\n\n  // Controls if the explorer should allow to move files and folders via drag and drop.\n  "explorer.enableDragAndDrop": true,\n\n  // Controls sorting order of files and folders in the explorer. In addition to the default sorting, you can set the order to \'mixed\' (files and folders sorted combined), \'type\' (by file type), \'modified\' (by last modified date) or \'filesFirst\' (sort files before folders).\n  "explorer.sortOrder": "default",\n\n// Search\n\n  // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the files.exclude setting.\n  "search.exclude": {\n    "**/node_modules": true,\n    "**/bower_components": true\n  },\n\n  // Controls whether to use ripgrep in text search\n  "search.useRipgrep": true,\n\n  // Controls whether to use .gitignore and .ignore files by default when searching in a new workspace.\n  "search.useIgnoreFilesByDefault": false,\n\n  // Configure to include results from a global symbol search in the file results for Quick Open.\n  "search.quickOpen.includeSymbols": false,\n\n// HTTP\n\n  // The proxy setting to use. If not set will be taken from the http_proxy and https_proxy environment variables\n  "http.proxy": "",\n\n  // Whether the proxy server certificate should be verified against the list of supplied CAs.\n  "http.proxyStrictSSL": true,\n\n  // The value to send as the \'Proxy-Authorization\' header for every network request.\n  "http.proxyAuthorization": null,\n\n// Update\n\n  // Configure whether you receive automatic updates from an update channel. Requires a restart after change.\n  "update.channel": "default",\n\n// HTML\n\n  // Enable/disable default HTML formatter\n  "html.format.enable": true,\n\n  // Maximum amount of characters per line (0 = disable).\n  "html.format.wrapLineLength": 120,\n\n  // List of tags, comma separated, that shouldn\'t be reformatted. \'null\' defaults to all tags listed at https://www.w3.org/TR/html5/dom.html#phrasing-content.\n  "html.format.unformatted": "a, abbr, acronym, b, bdo, big, br, button, cite, code, dfn, em, i, img, input, kbd, label, map, object, q, samp, select, small, span, strong, sub, sup, textarea, tt, var",\n\n  // List of tags, comma separated, where the content shouldn\'t be reformatted. \'null\' defaults to the \'pre\' tag.\n  "html.format.contentUnformatted": "pre",\n\n  // Indent <head> and <body> sections.\n  "html.format.indentInnerHtml": false,\n\n  // Whether existing line breaks before elements should be preserved. Only works before elements, not inside tags or for text.\n  "html.format.preserveNewLines": true,\n\n  // Maximum number of line breaks to be preserved in one chunk. Use \'null\' for unlimited.\n  "html.format.maxPreserveNewLines": null,\n\n  // Format and indent {{#foo}} and {{/foo}}.\n  "html.format.indentHandlebars": false,\n\n  // End with a newline.\n  "html.format.endWithNewline": false,\n\n  // List of tags, comma separated, that should have an extra newline before them. \'null\' defaults to "head, body, /html".\n  "html.format.extraLiners": "head, body, /html",\n\n  // Wrap attributes.\n  "html.format.wrapAttributes": "auto",\n\n  // Configures if the built-in HTML language support suggests Angular V1 tags and properties.\n  "html.suggest.angular1": true,\n\n  // Configures if the built-in HTML language support suggests Ionic tags, properties and values.\n  "html.suggest.ionic": true,\n\n  // Configures if the built-in HTML language support suggests HTML5 tags, properties and values.\n  "html.suggest.html5": true,\n\n  // Configures if the built-in HTML language support validates embedded scripts.\n  "html.validate.scripts": true,\n\n  // Configures if the built-in HTML language support validates embedded styles.\n  "html.validate.styles": true,\n\n  // Enable/disable autoclosing of HTML tags.\n  "html.autoClosingTags": true,\n\n  // Traces the communication between VS Code and the HTML language server.\n  "html.trace.server": "off",\n\n// JSON\n\n  // Associate schemas to JSON files in the current project\n  "json.schemas": [],\n\n  // Enable/disable default JSON formatter (requires restart)\n  "json.format.enable": true,\n\n  // Traces the communication between VS Code and the JSON language server.\n  "json.trace.server": "off",\n\n\n// Markdown\n\n  // A list of URLs or local paths to CSS style sheets to use from the markdown preview. Relative paths are interpreted relative to the folder open in the explorer. If there is no open folder, they are interpreted relative to the location of the markdown file. All \'\' need to be written as \'\\\'.\n  "markdown.styles": [],\n\n  // Sets how YAML front matter should be rendered in the markdown preview. \'hide\' removes the front matter. Otherwise, the front matter is treated as markdown content.\n  "markdown.previewFrontMatter": "hide",\n\n  // Sets how line-breaks are rendered in the markdown preview. Setting it to \'true\' creates a <br> for every newline.\n  "markdown.preview.breaks": false,\n\n  // Enable or disable conversion of URL-like text to links in the markdown preview.\n  "markdown.preview.linkify": true,\n\n  // Controls the font family used in the markdown preview.\n  "markdown.preview.fontFamily": "-apple-system, BlinkMacSystemFont, \'Segoe WPC\', \'Segoe UI\', \'HelveticaNeue-Light\', \'Ubuntu\', \'Droid Sans\', sans-serif",\n\n  // Controls the font size in pixels used in the markdown preview.\n  "markdown.preview.fontSize": 14,\n\n  // Controls the line height used in the markdown preview. This number is relative to the font size.\n  "markdown.preview.lineHeight": 1.6,\n\n  // Scrolls the markdown preview to reveal the currently selected line from the editor.\n  "markdown.preview.scrollPreviewWithEditorSelection": true,\n\n  // Mark the current editor selection in the markdown preview.\n  "markdown.preview.markEditorSelection": true,\n\n  // When the markdown preview is scrolled, update the view of the editor.\n  "markdown.preview.scrollEditorWithPreview": true,\n\n  // Double click in the markdown preview to switch to the editor.\n  "markdown.preview.doubleClickToSwitchToEditor": true,\n\n  // Enable debug logging for the markdown extension.\n  "markdown.trace": "off",\n\n// Extensions\n\n  // Automatically update extensions\n  "extensions.autoUpdate": true,\n\n  // Ignore extension recommendations\n  "extensions.ignoreRecommendations": false,\n\n// Integrated Terminal\n\n  // The path of the shell that the terminal uses on Linux.\n  "terminal.integrated.shell.linux": "sh",\n\n  // The command line arguments to use when on the Linux terminal.\n  "terminal.integrated.shellArgs.linux": [],\n\n  // The path of the shell that the terminal uses on OS X.\n  "terminal.integrated.shell.osx": "sh",\n\n  // The command line arguments to use when on the OS X terminal.\n  "terminal.integrated.shellArgs.osx": [\n    "-l"\n  ],\n\n  // The path of the shell that the terminal uses on Windows. When using shells shipped with Windows (cmd, PowerShell or Bash on Ubuntu).\n  "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",\n\n  // The command line arguments to use when on the Windows terminal.\n  "terminal.integrated.shellArgs.windows": [],\n\n  // When set, this will prevent the context menu from appearing when right clicking within the terminal, instead it will copy when there is a selection and paste when there is no selection.\n  "terminal.integrated.rightClickCopyPaste": true,\n\n  // Controls the font family of the terminal, this defaults to editor.fontFamily\'s value.\n  "terminal.integrated.fontFamily": "",\n\n  // Controls whether font ligatures are enabled in the terminal.\n  "terminal.integrated.fontLigatures": false,\n\n  // Controls the font size in pixels of the terminal.\n  "terminal.integrated.fontSize": 14,\n\n  // Controls the line height of the terminal, this number is multipled by the terminal font size to get the actual line-height in pixels.\n  "terminal.integrated.lineHeight": 1.2,\n\n  // Whether to enable bold text within the terminal, this requires support from the terminal shell.\n  "terminal.integrated.enableBold": true,\n\n  // Controls whether the terminal cursor blinks.\n  "terminal.integrated.cursorBlinking": false,\n\n  // Controls the style of terminal cursor.\n  "terminal.integrated.cursorStyle": "block",\n\n  // Controls the maximum amount of lines the terminal keeps in its buffer.\n  "terminal.integrated.scrollback": 1000,\n\n  // Controls whether locale variables are set at startup of the terminal, this defaults to true on OS X, false on other platforms.\n  "terminal.integrated.setLocaleVariables": false,\n\n  // An explicit start path where the terminal will be launched, this is used as the current working directory (cwd) for the shell process. This may be particularly useful in workspace settings if the root directory is not a convenient cwd.\n  "terminal.integrated.cwd": "",\n\n  // Whether to confirm on exit if there are active terminal sessions.\n  "terminal.integrated.confirmOnExit": false,\n\n  // A set of command IDs whose keybindings will not be sent to the shell and instead always be handled by Code. This allows the use of keybindings that would normally be consumed by the shell to act the same as when the terminal is not focused, for example ctrl+p to launch Quick Open.\n  "terminal.integrated.commandsToSkipShell": [\n    "editor.action.toggleTabFocusMode",\n    "workbench.action.debug.continue",\n    "workbench.action.debug.pause",\n    "workbench.action.debug.restart",\n    "workbench.action.debug.run",\n    "workbench.action.debug.start",\n    "workbench.action.debug.stop",\n    "workbench.action.focusActiveEditorGroup",\n    "workbench.action.focusFirstEditorGroup",\n    "workbench.action.focusSecondEditorGroup",\n    "workbench.action.focusThirdEditorGroup",\n    "workbench.action.navigateDown",\n    "workbench.action.navigateLeft",\n    "workbench.action.navigateRight",\n    "workbench.action.navigateUp",\n    "workbench.action.openNextRecentlyUsedEditorInGroup",\n    "workbench.action.openPreviousRecentlyUsedEditorInGroup",\n    "workbench.action.quickOpen",\n    "workbench.action.quickOpenView",\n    "workbench.action.showCommands",\n    "workbench.action.terminal.clear",\n    "workbench.action.terminal.copySelection",\n    "workbench.action.terminal.deleteWordLeft",\n    "workbench.action.terminal.deleteWordRight",\n    "workbench.action.terminal.findWidget.history.showNext",\n    "workbench.action.terminal.findWidget.history.showPrevious",\n    "workbench.action.terminal.focus",\n    "workbench.action.terminal.focusAtIndex1",\n    "workbench.action.terminal.focusAtIndex2",\n    "workbench.action.terminal.focusAtIndex3",\n    "workbench.action.terminal.focusAtIndex4",\n    "workbench.action.terminal.focusAtIndex5",\n    "workbench.action.terminal.focusAtIndex6",\n    "workbench.action.terminal.focusAtIndex7",\n    "workbench.action.terminal.focusAtIndex8",\n    "workbench.action.terminal.focusAtIndex9",\n    "workbench.action.terminal.focusFindWidget",\n    "workbench.action.terminal.focusNext",\n    "workbench.action.terminal.focusPrevious",\n    "workbench.action.terminal.hideFindWidget",\n    "workbench.action.terminal.kill",\n    "workbench.action.terminal.new",\n    "workbench.action.terminal.paste",\n    "workbench.action.terminal.runActiveFile",\n    "workbench.action.terminal.runSelectedText",\n    "workbench.action.terminal.scrollDown",\n    "workbench.action.terminal.scrollDownPage",\n    "workbench.action.terminal.scrollToBottom",\n    "workbench.action.terminal.scrollToTop",\n    "workbench.action.terminal.scrollUp",\n    "workbench.action.terminal.scrollUpPage",\n    "workbench.action.terminal.selectAll",\n    "workbench.action.terminal.toggleTerminal"\n  ],\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on OS X\n  "terminal.integrated.env.osx": {},\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on Linux\n  "terminal.integrated.env.linux": {},\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on Windows\n  "terminal.integrated.env.windows": {},\n\n// Emmet\n\n  // Shows expanded emmet abbreviations as suggestions.\n  // The option "inMarkupAndStylesheetFilesOnly" applies to html, haml, jade, slim, xml, xsl, css, scss, sass, less and stylus.\n  // The option "always" applies to all parts of the file regardless of markup/css.\n  "emmet.showExpandedAbbreviation": "always",\n\n  // Shows possible emmet abbreviations as suggestions. Not applicable in stylesheets or when emmet.showExpandedAbbreviation is set to "never".\n  "emmet.showAbbreviationSuggestions": true,\n\n  // Enable emmet abbreviations in languages that are not supported by default. Add a mapping here between the language and emmet supported language.\n  //  Eg: {"vue-html": "html", "javascript": "javascriptreact"}\n  "emmet.includeLanguages": {},\n\n  // Variables to be used in emmet snippets\n  "emmet.variables": {},\n\n  // Define profile for specified syntax or use your own profile with specific rules.\n  "emmet.syntaxProfiles": {},\n\n  // An array of languages where emmet abbreviations should not be expanded.\n  "emmet.excludeLanguages": [\n    "markdown"\n  ],\n\n  // Path to a folder containing emmet profiles and snippets.\'\n  "emmet.extensionsPath": null,\n\n  // When enabled, emmet abbreviations are expanded when pressing TAB.\n  "emmet.triggerExpansionOnTab": false,\n\n  // Preferences used to modify behavior of some actions and resolvers of Emmet.\n  "emmet.preferences": {},\n\n  // If true, then emmet suggestions will show up as snippets allowing you to order them as per editor.snippetSuggestions setting.\n  "emmet.showSuggestionsAsSnippets": false,\n\n// Default Configuration Overrides\n\n  // Configure editor settings to be overridden for [go] language.\n  "[go]":  {\n    "editor.insertSpaces": false\n  },\n\n  // Configure editor settings to be overridden for [json] language.\n  "[json]":  {\n    "editor.quickSuggestions": {\n        "strings": true\n    }\n  },\n\n  // Configure editor settings to be overridden for [makefile] language.\n  "[makefile]":  {\n    "editor.insertSpaces": false\n  },\n\n  // Configure editor settings to be overridden for [markdown] language.\n  "[markdown]":  {\n    "editor.wordWrap": "on",\n    "editor.quickSuggestions": false\n  },\n\n  // Configure editor settings to be overridden for [yaml] language.\n  "[yaml]":  {\n    "editor.insertSpaces": true,\n    "editor.tabSize": 2\n  },\n\n// Git\n\n  // Whether git is enabled\n  "git.enabled": true,\n\n  // Path to the git executable\n  "git.path": null,\n\n  // Whether auto refreshing is enabled\n  "git.autorefresh": true,\n\n  // Whether auto fetching is enabled\n  "git.autofetch": true,\n\n  // Confirm before synchronizing git repositories\n  "git.confirmSync": true,\n\n  // Controls the git badge counter. "all" counts all changes. "tracked" counts only the tracked changes. "off" turns it off.\n  "git.countBadge": "all",\n\n  // Controls what type of branches are listed when running "Checkout to...". "all" shows all refs, "local" shows only the local branchs, "tags" shows only tags and "remote" shows only remote branches.\n  "git.checkoutType": "all",\n\n  // Ignores the legacy Git warning\n  "git.ignoreLegacyWarning": false,\n\n  // Ignores the warning when there are too many changes in a repository\n  "git.ignoreLimitWarning": false,\n\n  // The default location where to clone a git repository\n  "git.defaultCloneDirectory": null,\n\n  // Commit all changes when there are no staged changes.\n  "git.enableSmartCommit": false,\n\n  // Enables commit signing with GPG.\n  "git.enableCommitSigning": false,\n\n// Npm\n\n  // Controls whether auto detection of npm scripts is on or off. Default is on.\n  "npm.autoDetect": "on",\n\n  // Run npm commands with the "--silent" option\n  "npm.runSilent": false,\n\n// Merge Conflict\n\n  // Enable/disable merge conflict block CodeLens within editor\n  "merge-conflict.codeLens.enabled": true,\n\n  // Enable/disable merge conflict decorators within editor\n  "merge-conflict.decorators.enabled": true,\n}\n', tsconfig = () => '\n{\n    "compilerOptions": {\n        "rootDir": "src",\n        "outDir": "dist",\n        "strict": true,\n        "noEmitOnError": false,\n        "noUnusedLocals": true,\n        "experimentalDecorators": true,\n        "emitDecoratorMetadata": true,\n        "strictPropertyInitialization": false,\n        "downlevelIteration": true,\n        "module": "commonjs",\n        "moduleResolution": "node",\n        "target": "es5",\n        "jsx": "react",\n        "lib": [\n            "es6",\n            "dom"\n        ],\n        "sourceMap": false,\n        "declaration": false,\n        "declarationMap": false,\n        "skipLibCheck": true\n    },\n    "include": [\n        "src"\n    ]\n}\n'.trim() + "\n", welcome = () => '\nWelcome to fiug!\n================\n\nTry out the terminal on the right.\n\n#### configure git:\n`git config --global user.name jaind`\n`git config --global user.email jain.day@ellery.com`\n`git config --global user.token {your github token}`\n\n#### clone a repo:\n`git clone fiugd/welcome`\n\n#### list all cloned repos:\n`git list`\n\n#### open/close a repo in editor:\n`git open fiugd/welcome`\n`git close`\n\n#### view names of changed files:\n`git status`\n\n#### view changes:\n`git diff`\n\n#### view changes in a specific file:\n`git diff README.md`\n\n#### create and push a commit to github:\n`git commit -m "message about changes"`\n\n#### download all templates (for preview):\n`git clone fiugd/plugins`\n\n#### preview files:\n`preview`\n\n#### preview a specific file:\n`preview README.md`\n\n#### quit preview\n1. click preview pane\n2. press Control\n3. click quit\n\n'.trim() + "\n", initRootService = async ({stores: stores}) => {
-    const {services: services, files: files, changes: changes} = stores, service = {
+    function addBase(html, href = "../../", target = "_blank") {
+        try {
+            const baseHref = html.includes("<base") ? "" : `\n<base href="${href}" target="${target}">\n`;
+            if (!html.includes("<html>")) {
+                html = "<html>\n" + html + "\n</html>";
+            }
+            html = html.replace("<html>", html.includes("<head>") ? "<html>" : "<html>\n\n<head></head>\n");
+            html = html.replace("<head>", `<head>${baseHref}`);
+            return html;
+        } catch (e) {
+            return html;
+        }
+    }
+    return {
+        addBase: addBase,
+        fetchJSON: fetchJSON,
+        flattenTree: flattenTree,
+        flattenObject: flattenObject,
+        keepHelper: keepHelper,
+        getCodeAsStorage: getCodeAsStorage,
+        getMime: getMime,
+        initMimeTypes: initMimeTypes,
+        notImplementedHandler: notImplementedHandler,
+        safe: safe,
+        treeInsertFile: treeInsertFile,
+        unique: unique,
+        // ugh
+        fetchFileContents: fetchFileContents
+    };
+})();
+
+const bsConfig = () => `\n/*\n |--------------------------------------------------------------------------\n | Browser-sync config file\n |--------------------------------------------------------------------------\n |\n | For up-to-date information about the options:\n |   http://www.browsersync.io/docs/options/\n */\n\nconst path = require("path");\nconst packageJson = require(path.resolve(process.cwd(), "package.json"));\n\nmodule.exports = {\n\tport: 3322,\n\tui: {\n\t\tport: 3323,\n\t},\n\tserver: {\n\t\tdirectory: false,\n\t},\n\tfiles: ["index.*", "modules/**/*", "../shared/**/*"],\n\tignore: ["./__services/**/*", "./server/**/*"],\n\tinjectChanges: false,\n\tnotify: false,\n\tmiddleware: [\n\t\tfunction (req, res, next) {\n\t\t\t// if (req.url === "/") {\n\t\t\t// \tres.writeHead(302, { Location: "/" });\n\t\t\t// \tres.end();\n\t\t\t// \treturn;\n\t\t\t// }\n\t\t\tnext();\n\t\t},\n\t],\n\tsnippetOptions: {\n\t\tignorePaths: ["index.bootstrap.html"],\n\t\trule: {\n\t\t\tmatch: /</body>/i,\n\t\t\tfn: function (snippet, match) {\n\t\t\t\tconst customSnippet = "<script async src='/browser-sync/browser-sync-client.js?v=2.26.7'><\/script>\n";\n\t\t\t\treturn customSnippet + match;\n\t\t\t},\n\t\t},\n\t},\n};\n`.trim() + "\n";
+
+const editorconfig = () => `\n[*.yml]\nindent_style = space\nindent_size = 2\n`.trim() + "\n";
+
+const profile = () => `\n# configure prompt here\n# https://phoenixnap.com/kb/change-bash-prompt-linux\n# http://bashrcgenerator.com/\n\n# [\\033[38;2;{R};{B};{B}m <-- RGB foreground ON\n# [\\033[39m               <-- RGB foreground OFF\n# [\\033[37m[\\033[1m       <-- white, bold\n# [\\033[0m                <-- all styles off\n\n`.trim() + '\nexport PS1="[\\033[38;2;60;180;190m\\h[\\033[39m [\\033[38;2;0;255;0m\\W[\\033[39m\\n[\\033[37m[\\033[1m\\$ [\\033[0m"' + "\n";
+
+const importmap = () => `\n{\n\timports: {\n\t\tansiEscapes: "https://cdn.skypack.dev/ansi-escapes",\n\t\tchalk: "https://cdn.skypack.dev/chalk",\n\t\tfileSaver: "https://cdn.skypack.dev/file-saver",\n\t\tjsZip: "https://cdn.skypack.dev/@progress/jszip-esm",\n\t\tlodash: "https://cdn.skypack.dev/lodash",\n\t\tpapaParse: "https://cdn.skypack.dev/papaparse",\n\t\trollup: "https://unpkg.com/rollup/dist/rollup.browser.js",\n\t\trollupPluginSourceMap: "https://cdn.jsdelivr.net/npm/source-map@0.7.3/dist/source-map.js",\n\t\tterser: "https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js",\n\t}\n}\n`.trim() + "\n";
+
+const jestConfig = () => `\nmodule.exports = {\n\tmodulePathIgnorePatterns: [\n\t\t'<rootDir>/__services'\n\t],\n\ttestPathIgnorePatterns: [\n\t\t'__services'\n\t],\n\ttransform: {\n\t\t".*.js": "<rootDir>/node_modules/babel-jest"\n\t},\n};\n`.trim() + "\n";
+
+const settings = () => `\n{\n// Most Commonly Used\n\n  // Controls auto save of dirty files. Accepted values:  'off', 'afterDelay', 'onFocusChange' (editor loses focus), 'onWindowChange' (window loses focus). If set to 'afterDelay', you can configure the delay in 'files.autoSaveDelay'.\n  "files.autoSave": "off",\n\n  // Controls the font size in pixels.\n  "editor.fontSize": 14,\n\n  // Controls the font family.\n  "editor.fontFamily": "Consolas, 'Courier New', monospace",\n\n  // The number of spaces a tab is equal to. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.tabSize": 4,\n\n  // Controls how the editor should render whitespace characters, possibilities are 'none', 'boundary', and 'all'. The 'boundary' option does not render single spaces between words.\n  "editor.renderWhitespace": "none",\n\n  // Controls the cursor style, accepted values are 'block', 'block-outline', 'line', 'line-thin', 'underline' and 'underline-thin'\n  "editor.cursorStyle": "line",\n\n  // The modifier to be used to add multiple cursors with the mouse. "ctrlCmd" maps to "Control" on Windows and Linux and to "Command" on OSX. The Go To Definition and Open Link mouse gestures will adapt such that they do not conflict with the multicursor modifier.\n  "editor.multiCursorModifier": "alt",\n\n  // Insert spaces when pressing Tab. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.insertSpaces": true,\n\n  // Controls how lines should wrap. Can be:\n  //  - 'off' (disable wrapping),\n  //  - 'on' (viewport wrapping),\n  //  - 'wordWrapColumn' (wrap at "editor.wordWrapColumn") or\n  //  - 'bounded' (wrap at minimum of viewport and "editor.wordWrapColumn").\n  "editor.wordWrap": "off",\n\n  // Configure glob patterns for excluding files and folders.\n  "files.exclude": {\n    "**/.git": true,\n    "**/.svn": true,\n    "**/.hg": true,\n    "**/CVS": true,\n    "**/.DS_Store": true\n  },\n\n  // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.\n  "files.associations": {},\n\n// Editor\n\n  // Insert snippets when their prefix matches. Works best when 'quickSuggestions' aren't enabled.\n  "editor.tabCompletion": false,\n\n  // Controls the font family.\n  "editor.fontFamily": "Consolas, 'Courier New', monospace",\n\n  // Controls the font weight.\n  "editor.fontWeight": "normal",\n\n  // Controls the font size in pixels.\n  "editor.fontSize": 14,\n\n  // Controls the line height. Use 0 to compute the lineHeight from the fontSize.\n  "editor.lineHeight": 0,\n\n  // Controls the letter spacing in pixels.\n  "editor.letterSpacing": 0,\n\n  // Controls the display of line numbers. Possible values are 'on', 'off', and 'relative'. 'relative' shows the line count from the current cursor position.\n  "editor.lineNumbers": "on",\n\n  // Columns at which to show vertical rulers\n  "editor.rulers": [],\n\n  // Characters that will be used as word separators when doing word related navigations or operations\n  "editor.wordSeparators": "\`~!@#$%^&*()-=+[{]}\\|;:'",.<>/?",\n\n  // The number of spaces a tab is equal to. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.tabSize": 4,\n\n  // Insert spaces when pressing Tab. This setting is overriden based on the file contents when "editor.detectIndentation" is on.\n  "editor.insertSpaces": true,\n\n  // When opening a file, "editor.tabSize" and "editor.insertSpaces" will be detected based on the file contents.\n  "editor.detectIndentation": true,\n\n  // Controls if selections have rounded corners\n  "editor.roundedSelection": true,\n\n  // Controls if the editor will scroll beyond the last line\n  "editor.scrollBeyondLastLine": true,\n\n  // Controls if the editor will scroll using an animation\n  "editor.smoothScrolling": false,\n\n  // Controls if the minimap is shown\n  "editor.minimap.enabled": true,\n\n  // Controls whether the minimap slider is automatically hidden. Possible values are 'always' and 'mouseover'\n  "editor.minimap.showSlider": "mouseover",\n\n  // Render the actual characters on a line (as opposed to color blocks)\n  "editor.minimap.renderCharacters": true,\n\n  // Limit the width of the minimap to render at most a certain number of columns\n  "editor.minimap.maxColumn": 120,\n\n  // Controls if we seed the search string in Find Widget from editor selection\n  "editor.find.seedSearchStringFromSelection": true,\n\n  // Controls if Find in Selection flag is turned on when multiple characters or lines of text are selected in the editor\n  "editor.find.autoFindInSelection": false,\n\n  // Controls how lines should wrap. Can be:\n  //  - 'off' (disable wrapping),\n  //  - 'on' (viewport wrapping),\n  //  - 'wordWrapColumn' (wrap at "editor.wordWrapColumn") or\n  //  - 'bounded' (wrap at minimum of viewport and "editor.wordWrapColumn").\n  "editor.wordWrap": "off",\n\n  // Controls the wrapping column of the editor when "editor.wordWrap" is 'wordWrapColumn' or 'bounded'.\n  "editor.wordWrapColumn": 80,\n\n  // Controls the indentation of wrapped lines. Can be one of 'none', 'same' or 'indent'.\n  "editor.wrappingIndent": "same",\n\n  // A multiplier to be used on the "deltaX" and "deltaY" of mouse wheel scroll events\n  "editor.mouseWheelScrollSensitivity": 1,\n\n  // The modifier to be used to add multiple cursors with the mouse. "ctrlCmd" maps to "Control" on Windows and Linux and to "Command" on OSX. The Go To Definition and Open Link mouse gestures will adapt such that they do not conflict with the multicursor modifier.\n  "editor.multiCursorModifier": "alt",\n\n  // Controls if suggestions should automatically show up while typing\n  "editor.quickSuggestions": {\n    "other": true,\n    "comments": false,\n    "strings": false\n  },\n\n  // Controls the delay in ms after which quick suggestions will show up\n  "editor.quickSuggestionsDelay": 10,\n\n  // Enables pop-up that shows parameter documentation and type information as you type\n  "editor.parameterHints": true,\n\n  // Controls if the editor should automatically close brackets after opening them\n  "editor.autoClosingBrackets": true,\n\n  // Controls if the editor should automatically format the line after typing\n  "editor.formatOnType": false,\n\n  // Controls if the editor should automatically format the pasted content. A formatter must be available and the formatter should be able to format a range in a document.\n  "editor.formatOnPaste": false,\n\n  // Controls if the editor should automatically adjust the indentation when users type, paste or move lines. Indentation rules of the language must be available. \n  "editor.autoIndent": true,\n\n  // Controls if suggestions should automatically show up when typing trigger characters\n  "editor.suggestOnTriggerCharacters": true,\n\n  // Controls if suggestions should be accepted on 'Enter' - in addition to 'Tab'. Helps to avoid ambiguity between inserting new lines or accepting suggestions. The value 'smart' means only accept a suggestion with Enter when it makes a textual change\n  "editor.acceptSuggestionOnEnter": "on",\n\n  // Controls if suggestions should be accepted on commit characters. For instance in JavaScript the semi-colon (';') can be a commit character that accepts a suggestion and types that character.\n  "editor.acceptSuggestionOnCommitCharacter": true,\n\n  // Controls whether snippets are shown with other suggestions and how they are sorted.\n  "editor.snippetSuggestions": "inline",\n\n  // Controls whether copying without a selection copies the current line.\n  "editor.emptySelectionClipboard": true,\n\n  // Controls whether completions should be computed based on words in the document.\n  "editor.wordBasedSuggestions": true,\n\n  // Font size for the suggest widget\n  "editor.suggestFontSize": 0,\n\n  // Line height for the suggest widget\n  "editor.suggestLineHeight": 0,\n\n  // Controls whether the editor should highlight similar matches to the selection\n  "editor.selectionHighlight": true,\n\n  // Controls whether the editor should highlight semantic symbol occurrences\n  "editor.occurrencesHighlight": true,\n\n  // Controls the number of decorations that can show up at the same position in the overview ruler\n  "editor.overviewRulerLanes": 3,\n\n  // Controls if a border should be drawn around the overview ruler.\n  "editor.overviewRulerBorder": true,\n\n  // Control the cursor animation style, possible values are 'blink', 'smooth', 'phase', 'expand' and 'solid'\n  "editor.cursorBlinking": "blink",\n\n  // Zoom the font of the editor when using mouse wheel and holding Ctrl\n  "editor.mouseWheelZoom": false,\n\n  // Controls the cursor style, accepted values are 'block', 'block-outline', 'line', 'line-thin', 'underline' and 'underline-thin'\n  "editor.cursorStyle": "line",\n\n  // Enables font ligatures\n  "editor.fontLigatures": false,\n\n  // Controls if the cursor should be hidden in the overview ruler.\n  "editor.hideCursorInOverviewRuler": false,\n\n  // Controls how the editor should render whitespace characters, possibilities are 'none', 'boundary', and 'all'. The 'boundary' option does not render single spaces between words.\n  "editor.renderWhitespace": "none",\n\n  // Controls whether the editor should render control characters\n  "editor.renderControlCharacters": false,\n\n  // Controls whether the editor should render indent guides\n  "editor.renderIndentGuides": true,\n\n  // Controls how the editor should render the current line highlight, possibilities are 'none', 'gutter', 'line', and 'all'.\n  "editor.renderLineHighlight": "line",\n\n  // Controls if the editor shows code lenses\n  "editor.codeLens": true,\n\n  // Controls whether the editor has code folding enabled\n  "editor.folding": true,\n\n  // Controls whether the fold controls on the gutter are automatically hidden.\n  "editor.showFoldingControls": "mouseover",\n\n  // Highlight matching brackets when one of them is selected.\n  "editor.matchBrackets": true,\n\n  // Controls whether the editor should render the vertical glyph margin. Glyph margin is mostly used for debugging.\n  "editor.glyphMargin": true,\n\n  // Inserting and deleting whitespace follows tab stops\n  "editor.useTabStops": true,\n\n  // Remove trailing auto inserted whitespace\n  "editor.trimAutoWhitespace": true,\n\n  // Keep peek editors open even when double clicking their content or when hitting Escape.\n  "editor.stablePeek": false,\n\n  // Controls if the editor should allow to move selections via drag and drop.\n  "editor.dragAndDrop": true,\n\n  // Controls whether the editor should run in a mode where it is optimized for screen readers.\n  "editor.accessibilitySupport": "auto",\n\n  // Controls whether the editor should detect links and make them clickable\n  "editor.links": true,\n\n  // Controls whether the editor should render the inline color decorators and color picker.\n  "editor.colorDecorators": true,\n\n  // Controls if the diff editor shows the diff side by side or inline\n  "diffEditor.renderSideBySide": true,\n\n  // Controls if the diff editor shows changes in leading or trailing whitespace as diffs\n  "diffEditor.ignoreTrimWhitespace": true,\n\n  // Controls if the diff editor shows +/- indicators for added/removed changes\n  "diffEditor.renderIndicators": true,\n\n  // Format a file on save. A formatter must be available, the file must not be auto-saved, and editor must not be shutting down.\n  "editor.formatOnSave": false,\n\n  // Overrides editor colors and font style from the currently selected color theme.\n  "editor.tokenColorCustomizations": {},\n\n\n// Workbench\n\n  // Controls if opened editors should show in tabs or not.\n  "workbench.editor.showTabs": true,\n\n  // Controls the position of the editor's tabs close buttons or disables them when set to 'off'.\n  "workbench.editor.tabCloseButton": "right",\n\n  // Controls if opened editors should show with an icon or not. This requires an icon theme to be enabled as well.\n  "workbench.editor.showIcons": true,\n\n  // Controls if opened editors show as preview. Preview editors are reused until they are kept (e.g. via double click or editing).\n  "workbench.editor.enablePreview": true,\n\n  // Controls if opened editors from Quick Open show as preview. Preview editors are reused until they are kept (e.g. via double click or editing).\n  "workbench.editor.enablePreviewFromQuickOpen": true,\n\n  // Controls where editors open. Select 'left' or 'right' to open editors to the left or right of the current active one. Select 'first' or 'last' to open editors independently from the currently active one.\n  "workbench.editor.openPositioning": "right",\n\n  // Controls if an editor is revealed in any of the visible groups if opened. If disabled, an editor will prefer to open in the currently active editor group. If enabled, an already opened editor will be revealed instead of opened again in the currently active editor group. Note that there are some cases where this setting is ignored, e.g. when forcing an editor to open in a specific group or to the side of the currently active group.\n  "workbench.editor.revealIfOpen": false,\n\n  // Controls if the number of recently used commands to keep in history for the command palette. Set to 0 to disable command history.\n  "workbench.commandPalette.history": 50,\n\n  // Controls if the last typed input to the command palette should be restored when opening it the next time.\n  "workbench.commandPalette.preserveInput": false,\n\n  // Controls if Quick Open should close automatically once it loses focus.\n  "workbench.quickOpen.closeOnFocusLost": true,\n\n  // Controls if opening settings also opens an editor showing all default settings.\n  "workbench.settings.openDefaultSettings": true,\n\n  // Controls the location of the sidebar. It can either show on the left or right of the workbench.\n  "workbench.sideBar.location": "left",\n\n  // Controls the visibility of the status bar at the bottom of the workbench.\n  "workbench.statusBar.visible": true,\n\n  // Controls the visibility of the activity bar in the workbench.\n  "workbench.activityBar.visible": true,\n\n  // Controls if editors showing a file should close automatically when the file is deleted or renamed by some other process. Disabling this will keep the editor open as dirty on such an event. Note that deleting from within the application will always close the editor and that dirty files will never close to preserve your data.\n  "workbench.editor.closeOnFileDelete": true,\n\n  // When enabled, will show the watermark tips when no editor is open.\n  "workbench.tips.enabled": true,\n\n  // Controls which editor is shown at startup, if none is restored from the previous session. Select 'none' to start without an editor, 'welcomePage' to open the Welcome page (default), 'newUntitledFile' to open a new untitled file (only opening an empty workspace).\n  "workbench.startupEditor": "welcomePage",\n\n  // Specifies the color theme used in the workbench.\n  "workbench.colorTheme": "Default Dark+",\n\n  // Specifies the icon theme used in the workbench or 'null' to not show any file icons.\n  "workbench.iconTheme": "vs-seti",\n\n  // Overrides colors from the currently selected color theme.\n  "workbench.colorCustomizations": {},\n\n// Window\n\n  // Controls if files should open in a new window.\n  // - default: files will open in the window with the files' folder open or the last active window unless opened via the dock or from finder (macOS only)\n  // - on: files will open in a new window\n  // - off: files will open in the window with the files' folder open or the last active window\n  // Note that there can still be cases where this setting is ignored (e.g. when using the -new-window or -reuse-window command line option).\n  "window.openFilesInNewWindow": "off",\n\n  // Controls if folders should open in a new window or replace the last active window.\n  // - default: folders will open in a new window unless a folder is picked from within the application (e.g. via the File menu)\n  // - on: folders will open in a new window\n  // - off: folders will replace the last active window\n  // Note that there can still be cases where this setting is ignored (e.g. when using the -new-window or -reuse-window command line option).\n  "window.openFoldersInNewWindow": "default",\n\n  // Controls how windows are being reopened after a restart. Select 'none' to always start with an empty workspace, 'one' to reopen the last window you worked on, 'folders' to reopen all windows that had folders opened or 'all' to reopen all windows of your last session.\n  "window.restoreWindows": "one",\n\n  // Controls if a window should restore to full screen mode if it was exited in full screen mode.\n  "window.restoreFullscreen": false,\n\n  // Adjust the zoom level of the window. The original size is 0 and each increment above (e.g. 1) or below (e.g. -1) represents zooming 20% larger or smaller. You can also enter decimals to adjust the zoom level with a finer granularity.\n  "window.zoomLevel": 0,\n\n  // Controls the window title based on the active editor. Variables are substituted based on the context:\n  // \${activeEditorShort}: e.g. myFile.txt\n  // \${activeEditorMedium}: e.g. myFolder/myFile.txt\n  // \${activeEditorLong}: e.g. /Users/Development/myProject/myFolder/myFile.txt\n  // \${folderName}: e.g. myFolder\n  // \${folderPath}: e.g. /Users/Development/myFolder\n  // \${rootName}: e.g. myFolder1, myFolder2, myFolder3\n  // \${rootPath}: e.g. /Users/Development/myWorkspace\n  // \${appName}: e.g. VS Code\n  // \${dirty}: a dirty indicator if the active editor is dirty\n  // \${separator}: a conditional separator (" - ") that only shows when surrounded by variables with values\n  "window.title": \`\${dirty}\${activeEditorShort}\${separator}\${rootName}\${separator}\${appName}\`,\n\n  // Controls the dimensions of opening a new window when at least one window is already opened. By default, a new window will open in the center of the screen with small dimensions. When set to 'inherit', the window will get the same dimensions as the last window that was active. When set to 'maximized', the window will open maximized and fullscreen if configured to 'fullscreen'. Note that this setting does not have an impact on the first window that is opened. The first window will always restore the size and location as you left it before closing.\n  "window.newWindowDimensions": "default",\n\n  // Controls if closing the last editor should also close the window. This setting only applies for windows that do not show folders.\n  "window.closeWhenEmpty": false,\n\n  // Control the visibility of the menu bar. A setting of 'toggle' means that the menu bar is hidden and a single press of the Alt key will show it. By default, the menu bar will be visible, unless the window is full screen.\n  "window.menuBarVisibility": "default",\n\n  // If enabled, the main menus can be opened via Alt-key shortcuts. Disabling mnemonics allows to bind these Alt-key shortcuts to editor commands instead.\n  "window.enableMenuBarMnemonics": true,\n\n  // If enabled, will automatically change to high contrast theme if Windows is using a high contrast theme, and to dark theme when switching away from a Windows high contrast theme.\n  "window.autoDetectHighContrast": true,\n\n// Files\n\n  // Configure glob patterns for excluding files and folders.\n  "files.exclude": {\n    "**/.git": true,\n    "**/.svn": true,\n    "**/.hg": true,\n    "**/CVS": true,\n    "**/.DS_Store": true\n  },\n\n  // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.\n  "files.associations": {},\n\n  // The default character set encoding to use when reading and writing files.\n  "files.encoding": "utf8",\n\n  // When enabled, will attempt to guess the character set encoding when opening files\n  "files.autoGuessEncoding": false,\n\n  // The default end of line character. Use \n for LF and \r\n for CRLF.\n  "files.eol": "\r\n",\n\n  // When enabled, will trim trailing whitespace when saving a file.\n  "files.trimTrailingWhitespace": false,\n\n  // When enabled, insert a final new line at the end of the file when saving it.\n  "files.insertFinalNewline": false,\n\n  // Controls auto save of dirty files. Accepted values:  'off', 'afterDelay', 'onFocusChange' (editor loses focus), 'onWindowChange' (window loses focus). If set to 'afterDelay', you can configure the delay in 'files.autoSaveDelay'.\n  "files.autoSave": "off",\n\n  // Controls the delay in ms after which a dirty file is saved automatically. Only applies when 'files.autoSave' is set to 'afterDelay'\n  "files.autoSaveDelay": 1000,\n\n  // Configure glob patterns of file paths to exclude from file watching. Patterns must match on absolute paths (i.e. prefix with ** or the full path to match properly). Changing this setting requires a restart. When you experience Code consuming lots of cpu time on startup, you can exclude large folders to reduce the initial load.\n  "files.watcherExclude": {\n    "**/.git/objects/**": true,\n    "**/.git/subtree-cache/**": true,\n    "**/node_modules/*/**": true\n  },\n\n  // Controls whether unsaved files are remembered between sessions, allowing the save prompt when exiting the editor to be skipped.\n  "files.hotExit": "onExit",\n\n  // Use the new experimental file watcher.\n  "files.useExperimentalFileWatcher": false,\n\n  // The default language mode that is assigned to new files.\n  "files.defaultLanguage": "",\n\n// File Explorer\n\n  // Number of editors shown in the Open Editors pane. Set it to 0 to hide the pane.\n  "explorer.openEditors.visible": 9,\n\n  // Controls if the height of the open editors section should adapt dynamically to the number of elements or not.\n  "explorer.openEditors.dynamicHeight": true,\n\n  // Controls if the explorer should automatically reveal and select files when opening them.\n  "explorer.autoReveal": true,\n\n  // Controls if the explorer should allow to move files and folders via drag and drop.\n  "explorer.enableDragAndDrop": true,\n\n  // Controls sorting order of files and folders in the explorer. In addition to the default sorting, you can set the order to 'mixed' (files and folders sorted combined), 'type' (by file type), 'modified' (by last modified date) or 'filesFirst' (sort files before folders).\n  "explorer.sortOrder": "default",\n\n// Search\n\n  // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the files.exclude setting.\n  "search.exclude": {\n    "**/node_modules": true,\n    "**/bower_components": true\n  },\n\n  // Controls whether to use ripgrep in text search\n  "search.useRipgrep": true,\n\n  // Controls whether to use .gitignore and .ignore files by default when searching in a new workspace.\n  "search.useIgnoreFilesByDefault": false,\n\n  // Configure to include results from a global symbol search in the file results for Quick Open.\n  "search.quickOpen.includeSymbols": false,\n\n// HTTP\n\n  // The proxy setting to use. If not set will be taken from the http_proxy and https_proxy environment variables\n  "http.proxy": "",\n\n  // Whether the proxy server certificate should be verified against the list of supplied CAs.\n  "http.proxyStrictSSL": true,\n\n  // The value to send as the 'Proxy-Authorization' header for every network request.\n  "http.proxyAuthorization": null,\n\n// Update\n\n  // Configure whether you receive automatic updates from an update channel. Requires a restart after change.\n  "update.channel": "default",\n\n// HTML\n\n  // Enable/disable default HTML formatter\n  "html.format.enable": true,\n\n  // Maximum amount of characters per line (0 = disable).\n  "html.format.wrapLineLength": 120,\n\n  // List of tags, comma separated, that shouldn't be reformatted. 'null' defaults to all tags listed at https://www.w3.org/TR/html5/dom.html#phrasing-content.\n  "html.format.unformatted": "a, abbr, acronym, b, bdo, big, br, button, cite, code, dfn, em, i, img, input, kbd, label, map, object, q, samp, select, small, span, strong, sub, sup, textarea, tt, var",\n\n  // List of tags, comma separated, where the content shouldn't be reformatted. 'null' defaults to the 'pre' tag.\n  "html.format.contentUnformatted": "pre",\n\n  // Indent <head> and <body> sections.\n  "html.format.indentInnerHtml": false,\n\n  // Whether existing line breaks before elements should be preserved. Only works before elements, not inside tags or for text.\n  "html.format.preserveNewLines": true,\n\n  // Maximum number of line breaks to be preserved in one chunk. Use 'null' for unlimited.\n  "html.format.maxPreserveNewLines": null,\n\n  // Format and indent {{#foo}} and {{/foo}}.\n  "html.format.indentHandlebars": false,\n\n  // End with a newline.\n  "html.format.endWithNewline": false,\n\n  // List of tags, comma separated, that should have an extra newline before them. 'null' defaults to "head, body, /html".\n  "html.format.extraLiners": "head, body, /html",\n\n  // Wrap attributes.\n  "html.format.wrapAttributes": "auto",\n\n  // Configures if the built-in HTML language support suggests Angular V1 tags and properties.\n  "html.suggest.angular1": true,\n\n  // Configures if the built-in HTML language support suggests Ionic tags, properties and values.\n  "html.suggest.ionic": true,\n\n  // Configures if the built-in HTML language support suggests HTML5 tags, properties and values.\n  "html.suggest.html5": true,\n\n  // Configures if the built-in HTML language support validates embedded scripts.\n  "html.validate.scripts": true,\n\n  // Configures if the built-in HTML language support validates embedded styles.\n  "html.validate.styles": true,\n\n  // Enable/disable autoclosing of HTML tags.\n  "html.autoClosingTags": true,\n\n  // Traces the communication between VS Code and the HTML language server.\n  "html.trace.server": "off",\n\n// JSON\n\n  // Associate schemas to JSON files in the current project\n  "json.schemas": [],\n\n  // Enable/disable default JSON formatter (requires restart)\n  "json.format.enable": true,\n\n  // Traces the communication between VS Code and the JSON language server.\n  "json.trace.server": "off",\n\n\n// Markdown\n\n  // A list of URLs or local paths to CSS style sheets to use from the markdown preview. Relative paths are interpreted relative to the folder open in the explorer. If there is no open folder, they are interpreted relative to the location of the markdown file. All '' need to be written as '\\'.\n  "markdown.styles": [],\n\n  // Sets how YAML front matter should be rendered in the markdown preview. 'hide' removes the front matter. Otherwise, the front matter is treated as markdown content.\n  "markdown.previewFrontMatter": "hide",\n\n  // Sets how line-breaks are rendered in the markdown preview. Setting it to 'true' creates a <br> for every newline.\n  "markdown.preview.breaks": false,\n\n  // Enable or disable conversion of URL-like text to links in the markdown preview.\n  "markdown.preview.linkify": true,\n\n  // Controls the font family used in the markdown preview.\n  "markdown.preview.fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'HelveticaNeue-Light', 'Ubuntu', 'Droid Sans', sans-serif",\n\n  // Controls the font size in pixels used in the markdown preview.\n  "markdown.preview.fontSize": 14,\n\n  // Controls the line height used in the markdown preview. This number is relative to the font size.\n  "markdown.preview.lineHeight": 1.6,\n\n  // Scrolls the markdown preview to reveal the currently selected line from the editor.\n  "markdown.preview.scrollPreviewWithEditorSelection": true,\n\n  // Mark the current editor selection in the markdown preview.\n  "markdown.preview.markEditorSelection": true,\n\n  // When the markdown preview is scrolled, update the view of the editor.\n  "markdown.preview.scrollEditorWithPreview": true,\n\n  // Double click in the markdown preview to switch to the editor.\n  "markdown.preview.doubleClickToSwitchToEditor": true,\n\n  // Enable debug logging for the markdown extension.\n  "markdown.trace": "off",\n\n// Extensions\n\n  // Automatically update extensions\n  "extensions.autoUpdate": true,\n\n  // Ignore extension recommendations\n  "extensions.ignoreRecommendations": false,\n\n// Integrated Terminal\n\n  // The path of the shell that the terminal uses on Linux.\n  "terminal.integrated.shell.linux": "sh",\n\n  // The command line arguments to use when on the Linux terminal.\n  "terminal.integrated.shellArgs.linux": [],\n\n  // The path of the shell that the terminal uses on OS X.\n  "terminal.integrated.shell.osx": "sh",\n\n  // The command line arguments to use when on the OS X terminal.\n  "terminal.integrated.shellArgs.osx": [\n    "-l"\n  ],\n\n  // The path of the shell that the terminal uses on Windows. When using shells shipped with Windows (cmd, PowerShell or Bash on Ubuntu).\n  "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",\n\n  // The command line arguments to use when on the Windows terminal.\n  "terminal.integrated.shellArgs.windows": [],\n\n  // When set, this will prevent the context menu from appearing when right clicking within the terminal, instead it will copy when there is a selection and paste when there is no selection.\n  "terminal.integrated.rightClickCopyPaste": true,\n\n  // Controls the font family of the terminal, this defaults to editor.fontFamily's value.\n  "terminal.integrated.fontFamily": "",\n\n  // Controls whether font ligatures are enabled in the terminal.\n  "terminal.integrated.fontLigatures": false,\n\n  // Controls the font size in pixels of the terminal.\n  "terminal.integrated.fontSize": 14,\n\n  // Controls the line height of the terminal, this number is multipled by the terminal font size to get the actual line-height in pixels.\n  "terminal.integrated.lineHeight": 1.2,\n\n  // Whether to enable bold text within the terminal, this requires support from the terminal shell.\n  "terminal.integrated.enableBold": true,\n\n  // Controls whether the terminal cursor blinks.\n  "terminal.integrated.cursorBlinking": false,\n\n  // Controls the style of terminal cursor.\n  "terminal.integrated.cursorStyle": "block",\n\n  // Controls the maximum amount of lines the terminal keeps in its buffer.\n  "terminal.integrated.scrollback": 1000,\n\n  // Controls whether locale variables are set at startup of the terminal, this defaults to true on OS X, false on other platforms.\n  "terminal.integrated.setLocaleVariables": false,\n\n  // An explicit start path where the terminal will be launched, this is used as the current working directory (cwd) for the shell process. This may be particularly useful in workspace settings if the root directory is not a convenient cwd.\n  "terminal.integrated.cwd": "",\n\n  // Whether to confirm on exit if there are active terminal sessions.\n  "terminal.integrated.confirmOnExit": false,\n\n  // A set of command IDs whose keybindings will not be sent to the shell and instead always be handled by Code. This allows the use of keybindings that would normally be consumed by the shell to act the same as when the terminal is not focused, for example ctrl+p to launch Quick Open.\n  "terminal.integrated.commandsToSkipShell": [\n    "editor.action.toggleTabFocusMode",\n    "workbench.action.debug.continue",\n    "workbench.action.debug.pause",\n    "workbench.action.debug.restart",\n    "workbench.action.debug.run",\n    "workbench.action.debug.start",\n    "workbench.action.debug.stop",\n    "workbench.action.focusActiveEditorGroup",\n    "workbench.action.focusFirstEditorGroup",\n    "workbench.action.focusSecondEditorGroup",\n    "workbench.action.focusThirdEditorGroup",\n    "workbench.action.navigateDown",\n    "workbench.action.navigateLeft",\n    "workbench.action.navigateRight",\n    "workbench.action.navigateUp",\n    "workbench.action.openNextRecentlyUsedEditorInGroup",\n    "workbench.action.openPreviousRecentlyUsedEditorInGroup",\n    "workbench.action.quickOpen",\n    "workbench.action.quickOpenView",\n    "workbench.action.showCommands",\n    "workbench.action.terminal.clear",\n    "workbench.action.terminal.copySelection",\n    "workbench.action.terminal.deleteWordLeft",\n    "workbench.action.terminal.deleteWordRight",\n    "workbench.action.terminal.findWidget.history.showNext",\n    "workbench.action.terminal.findWidget.history.showPrevious",\n    "workbench.action.terminal.focus",\n    "workbench.action.terminal.focusAtIndex1",\n    "workbench.action.terminal.focusAtIndex2",\n    "workbench.action.terminal.focusAtIndex3",\n    "workbench.action.terminal.focusAtIndex4",\n    "workbench.action.terminal.focusAtIndex5",\n    "workbench.action.terminal.focusAtIndex6",\n    "workbench.action.terminal.focusAtIndex7",\n    "workbench.action.terminal.focusAtIndex8",\n    "workbench.action.terminal.focusAtIndex9",\n    "workbench.action.terminal.focusFindWidget",\n    "workbench.action.terminal.focusNext",\n    "workbench.action.terminal.focusPrevious",\n    "workbench.action.terminal.hideFindWidget",\n    "workbench.action.terminal.kill",\n    "workbench.action.terminal.new",\n    "workbench.action.terminal.paste",\n    "workbench.action.terminal.runActiveFile",\n    "workbench.action.terminal.runSelectedText",\n    "workbench.action.terminal.scrollDown",\n    "workbench.action.terminal.scrollDownPage",\n    "workbench.action.terminal.scrollToBottom",\n    "workbench.action.terminal.scrollToTop",\n    "workbench.action.terminal.scrollUp",\n    "workbench.action.terminal.scrollUpPage",\n    "workbench.action.terminal.selectAll",\n    "workbench.action.terminal.toggleTerminal"\n  ],\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on OS X\n  "terminal.integrated.env.osx": {},\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on Linux\n  "terminal.integrated.env.linux": {},\n\n  // Object with environment variables that will be added to the VS Code process to be used by the terminal on Windows\n  "terminal.integrated.env.windows": {},\n\n// Emmet\n\n  // Shows expanded emmet abbreviations as suggestions.\n  // The option "inMarkupAndStylesheetFilesOnly" applies to html, haml, jade, slim, xml, xsl, css, scss, sass, less and stylus.\n  // The option "always" applies to all parts of the file regardless of markup/css.\n  "emmet.showExpandedAbbreviation": "always",\n\n  // Shows possible emmet abbreviations as suggestions. Not applicable in stylesheets or when emmet.showExpandedAbbreviation is set to "never".\n  "emmet.showAbbreviationSuggestions": true,\n\n  // Enable emmet abbreviations in languages that are not supported by default. Add a mapping here between the language and emmet supported language.\n  //  Eg: {"vue-html": "html", "javascript": "javascriptreact"}\n  "emmet.includeLanguages": {},\n\n  // Variables to be used in emmet snippets\n  "emmet.variables": {},\n\n  // Define profile for specified syntax or use your own profile with specific rules.\n  "emmet.syntaxProfiles": {},\n\n  // An array of languages where emmet abbreviations should not be expanded.\n  "emmet.excludeLanguages": [\n    "markdown"\n  ],\n\n  // Path to a folder containing emmet profiles and snippets.'\n  "emmet.extensionsPath": null,\n\n  // When enabled, emmet abbreviations are expanded when pressing TAB.\n  "emmet.triggerExpansionOnTab": false,\n\n  // Preferences used to modify behavior of some actions and resolvers of Emmet.\n  "emmet.preferences": {},\n\n  // If true, then emmet suggestions will show up as snippets allowing you to order them as per editor.snippetSuggestions setting.\n  "emmet.showSuggestionsAsSnippets": false,\n\n// Default Configuration Overrides\n\n  // Configure editor settings to be overridden for [go] language.\n  "[go]":  {\n    "editor.insertSpaces": false\n  },\n\n  // Configure editor settings to be overridden for [json] language.\n  "[json]":  {\n    "editor.quickSuggestions": {\n        "strings": true\n    }\n  },\n\n  // Configure editor settings to be overridden for [makefile] language.\n  "[makefile]":  {\n    "editor.insertSpaces": false\n  },\n\n  // Configure editor settings to be overridden for [markdown] language.\n  "[markdown]":  {\n    "editor.wordWrap": "on",\n    "editor.quickSuggestions": false\n  },\n\n  // Configure editor settings to be overridden for [yaml] language.\n  "[yaml]":  {\n    "editor.insertSpaces": true,\n    "editor.tabSize": 2\n  },\n\n// Git\n\n  // Whether git is enabled\n  "git.enabled": true,\n\n  // Path to the git executable\n  "git.path": null,\n\n  // Whether auto refreshing is enabled\n  "git.autorefresh": true,\n\n  // Whether auto fetching is enabled\n  "git.autofetch": true,\n\n  // Confirm before synchronizing git repositories\n  "git.confirmSync": true,\n\n  // Controls the git badge counter. "all" counts all changes. "tracked" counts only the tracked changes. "off" turns it off.\n  "git.countBadge": "all",\n\n  // Controls what type of branches are listed when running "Checkout to...". "all" shows all refs, "local" shows only the local branchs, "tags" shows only tags and "remote" shows only remote branches.\n  "git.checkoutType": "all",\n\n  // Ignores the legacy Git warning\n  "git.ignoreLegacyWarning": false,\n\n  // Ignores the warning when there are too many changes in a repository\n  "git.ignoreLimitWarning": false,\n\n  // The default location where to clone a git repository\n  "git.defaultCloneDirectory": null,\n\n  // Commit all changes when there are no staged changes.\n  "git.enableSmartCommit": false,\n\n  // Enables commit signing with GPG.\n  "git.enableCommitSigning": false,\n\n// Npm\n\n  // Controls whether auto detection of npm scripts is on or off. Default is on.\n  "npm.autoDetect": "on",\n\n  // Run npm commands with the "--silent" option\n  "npm.runSilent": false,\n\n// Merge Conflict\n\n  // Enable/disable merge conflict block CodeLens within editor\n  "merge-conflict.codeLens.enabled": true,\n\n  // Enable/disable merge conflict decorators within editor\n  "merge-conflict.decorators.enabled": true,\n}\n`;
+
+const tsconfig = () => `\n{\n    "compilerOptions": {\n        "rootDir": "src",\n        "outDir": "dist",\n        "strict": true,\n        "noEmitOnError": false,\n        "noUnusedLocals": true,\n        "experimentalDecorators": true,\n        "emitDecoratorMetadata": true,\n        "strictPropertyInitialization": false,\n        "downlevelIteration": true,\n        "module": "commonjs",\n        "moduleResolution": "node",\n        "target": "es5",\n        "jsx": "react",\n        "lib": [\n            "es6",\n            "dom"\n        ],\n        "sourceMap": false,\n        "declaration": false,\n        "declarationMap": false,\n        "skipLibCheck": true\n    },\n    "include": [\n        "src"\n    ]\n}\n`.trim() + "\n";
+
+const welcome = () => `\nWelcome to fiug!\n================\n\nTry out the terminal on the right.\n\n#### configure git:\n\`git config --global user.name jaind\`\n\`git config --global user.email jain.day@ellery.com\`\n\`git config --global user.token {your github token}\`\n\n#### clone a repo:\n\`git clone fiugd/welcome\`\n\n#### list all cloned repos:\n\`git list\`\n\n#### open/close a repo in editor:\n\`git open fiugd/welcome\`\n\`git close\`\n\n#### view names of changed files:\n\`git status\`\n\n#### view changes:\n\`git diff\`\n\n#### view changes in a specific file:\n\`git diff README.md\`\n\n#### create and push a commit to github:\n\`git commit -m "message about changes"\`\n\n#### download all templates (for preview):\n\`git clone fiugd/plugins\`\n\n#### preview files:\n\`preview\`\n\n#### preview a specific file:\n\`preview README.md\`\n\n#### quit preview\n1. click preview pane\n2. press Control\n3. click quit\n\n`.trim() + "\n";
+
+const initRootService = async ({stores: stores}) => {
+    const {services: services, files: files, changes: changes} = stores;
+    const service = {
         name: "~",
         id: 0,
         type: "default",
@@ -148,42 +239,109 @@ const utils = (() => {
             return JSON5.parse(value);
         } catch (e) {}
         return value;
-    }, rootFiles = [ [ "~/.git/config", "\n" ], [ "~/.browsersync.js", bsConfig() ], [ "~/.editorconfig", editorconfig() ], [ "~/.profile", profile() ], [ "~/importmap.json", importmap() ], [ "~/jest.config.js", jestConfig() ], [ "~/settings.json", settings() ], [ "~/tsconfig.json", tsconfig() ], [ "~/welcome.md", welcome() ] ];
+    };
+    const rootFiles = [ [ "~/.git/config", "\n" ], [ "~/.browsersync.js", bsConfig() ], [ "~/.editorconfig", editorconfig() ], [ "~/.profile", profile() ], [ "~/importmap.json", importmap() ], [ "~/jest.config.js", jestConfig() ], [ "~/settings.json", settings() ], [ "~/tsconfig.json", tsconfig() ], [ "~/welcome.md", welcome() ] ];
     for (let i = 0, len = rootFiles.length; i < len; i++) {
         const [path, defaultContent] = rootFiles[i];
-        await getFile(path) || await files.setItem(path, defaultContent);
+        const existingContent = await getFile(path);
+        if (existingContent) continue;
+        await files.setItem(path, defaultContent);
     }
-    return await changes.setItem(`state-${service.name}-opened`, [ {
+    await changes.setItem(`state-${service.name}-opened`, [ {
         name: "welcome.md",
         order: 0
-    } ]), service;
+    } ]);
+    return service;
 };
 
 class RootService {
     constructor(stores) {
-        this.stores = stores, this.init = () => initRootService(this);
+        this.stores = stores;
+        this.init = () => initRootService(this);
     }
 }
 
 const StorageManager = (() => {
+    const getStores = () => {
+        var driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
+        const files = localforage.createInstance({
+            driver: driver,
+            name: "service-worker",
+            version: 1,
+            storeName: "files",
+            description: "permanent state of contents of files across projects"
+        });
+        const services = localforage.createInstance({
+            driver: driver,
+            name: "service-worker",
+            version: 1,
+            storeName: "services",
+            description: "services directory stucture, type, etc"
+        });
+        const providers = localforage.createInstance({
+            driver: driver,
+            name: "service-worker",
+            version: 1,
+            storeName: "providers",
+            description: "connects services to outside world"
+        });
+        const changes = localforage.createInstance({
+            driver: driver,
+            name: "service-worker",
+            version: 1,
+            storeName: "changes",
+            description: "keep track of changes not pushed to provider"
+        });
+        const handlers = localforage.createInstance({
+            driver: driver,
+            name: "service-worker",
+            version: 1,
+            storeName: "handlers",
+            description: "used after app has booted when service worker is updated"
+        });
+        const editor = localforage.createInstance({
+            driver: driver,
+            name: "editorState",
+            version: 1,
+            storeName: "editor",
+            description: "scroll and cursor position, history, selection"
+        });
+        return {
+            editor: editor,
+            files: files,
+            services: services,
+            providers: providers,
+            changes: changes,
+            handlers: handlers
+        };
+    };
     const defaultServices = () => [];
     async function getCodeFromStorageUsingTree(tree, fileStore, serviceName) {
-        const files = (0, this.utils.flattenTree)(tree), allFilesFromService = {}, fileStoreKeys = await fileStore.keys();
-        for (const key of fileStoreKeys) key.startsWith(`./${serviceName}/`) && (allFilesFromService[key] = {
-            key: key,
-            untracked: !0
-        });
-        for (let index = 0; index < files.length; index++) {
-            let storedFile = allFilesFromService["." + files[index].path];
-            storedFile && (storedFile.untracked = !1);
+        const flattenTree = this.utils.flattenTree;
+        // returns array of  { name: filename, code: path, path }
+                const files = flattenTree(tree);
+        const allFilesFromService = {};
+        const fileStoreKeys = await fileStore.keys();
+        for (const key of fileStoreKeys) {
+            if (!key.startsWith(`./${serviceName}/`)) continue;
+            allFilesFromService[key] = {
+                key: key,
+                untracked: true
+            };
         }
-        const untracked = Object.entries(allFilesFromService).map((([, value]) => value)).filter((x => !0 === x.untracked)).map((x => ({
+        for (let index = 0; index < files.length; index++) {
+            const file = files[index];
+            let storedFile = allFilesFromService["." + file.path];
+            storedFile && (storedFile.untracked = false);
+        }
+        const untracked = Object.entries(allFilesFromService).map((([, value]) => value)).filter((x => x.untracked === true)).map((x => ({
             ...x,
             name: x.key.split("/").pop(),
             path: x.key
         })));
         return [ ...files, ...untracked ];
-    }
+ // aka code array
+        }
     class FileSearch {
         path;
         term;
@@ -196,25 +354,44 @@ const StorageManager = (() => {
         async load(path) {
             this.path = path;
             const file = await this.fileStore.getItem(path);
-            "string" == typeof file ? (this.lines = file.split("\n").map((x => x.toLowerCase())), 
-            this.reset()) : this.done = !0;
+            if (typeof file !== "string") {
+                this.done = true;
+                return;
+            }
+            this.lines = file.split("\n").map((x => x.toLowerCase()));
+            this.reset();
         }
         reset() {
-            this.currentLine = 0, this.currentColumn = 0, this.done = !1;
+            this.currentLine = 0;
+            this.currentColumn = 0;
+            this.done = false;
         }
         next(term) {
             if (this.done) return -1;
             if (!this.lines || !this.path) return -1;
-            for (term.toLowerCase() !== this.term && (this.term = term.toLowerCase(), this.reset()); ;) {
-                const oldIndex = this.currentColumn, newIndex = (this.lines[this.currentLine] || "").indexOf(this.term, this.currentColumn);
-                if (-1 !== newIndex) return this.currentColumn = newIndex + 1, {
+            if (term.toLowerCase() !== this.term) {
+                this.term = term.toLowerCase();
+                this.reset();
+            }
+            while (true) {
+                const oldIndex = this.currentColumn;
+                const newIndex = (this.lines[this.currentLine] || "").indexOf(this.term, this.currentColumn);
+                if (newIndex === -1) {
+                    this.currentColumn = 0;
+                    this.currentLine++;
+                    if (this.currentLine > this.lines.length - 1) {
+                        this.done = true;
+                        return -1;
+                    }
+                    continue;
+                }
+                this.currentColumn = newIndex + 1;
+                return {
                     file: this.path,
                     line: this.currentLine,
                     column: this.currentColumn - 1,
-                    text: this.lines[this.currentLine].slice(0 === oldIndex ? Math.max(0, newIndex - 30) : oldIndex + this.term.length - 1, Math.max(newIndex + 30 + this.term.length)).trim()
+                    text: this.lines[this.currentLine].slice(oldIndex === 0 ? Math.max(0, newIndex - 30) : oldIndex + this.term.length - 1, Math.max(newIndex + 30 + this.term.length)).trim()
                 };
-                if (this.currentColumn = 0, this.currentLine++, this.currentLine > this.lines.length - 1) return this.done = !0, 
-                -1;
             }
         }
     }
@@ -223,46 +400,69 @@ const StorageManager = (() => {
         encoder=new TextEncoder;
         timer;
         stream;
-        async init({term: term, include: include = "./", fileStore: fileStore}) {
+        async init({term: term, include: include = "./" /*exclude,*/ , fileStore: fileStore}) {
             this.timer = {
                 t1: performance.now()
             };
             const cache = {};
             await fileStore.iterate(((value, key) => {
-                (key.startsWith(include) || `./${key}`.startsWith(include)) && (cache[key] = value);
+                const isIncluded = key.startsWith(include) || `./${key}`.startsWith(include);
+                if (!isIncluded) return;
+                cache[key] = value;
             }));
-            const fileSearch = new FileSearch({
+            const fileStoreCache = {
                 getItem: async key => cache[key]
-            });
+            };
+            const fileSearch = new FileSearch(fileStoreCache);
             let currentFileIndex = -1;
-            const files = Object.keys(cache), thisEncoder = this.encoder;
+            const files = Object.keys(cache);
+            //console.log(`init: ${performance.now() - this.timer.t1} ms`)
+                        const thisEncoder = this.encoder;
             let streamResultCount = 0;
             this.stream = new ReadableStream({
                 start(controller) {},
+                // if it has search term, queue up search results per occurence
+                // if not, search files until one is found with search term in it
+                // when done with all files, close controller
                 async pull(controller) {
-                    for (;;) try {
-                        const result = fileSearch.next(term);
-                        if (streamResultCount >= this.MAX_RESULTS || -1 === result && currentFileIndex === files.length - 1) return void controller.close();
-                        if (-1 === result) {
-                            await fileSearch.load(files[++currentFileIndex]);
-                            continue;
+                    while (true) {
+                        try {
+                            const result = fileSearch.next(term);
+                            const doneReading = streamResultCount >= this.MAX_RESULTS || result === -1 && currentFileIndex === files.length - 1;
+                            if (doneReading) {
+                                controller.close();
+                                return;
+                            }
+                            if (result === -1) {
+                                await fileSearch.load(files[++currentFileIndex]);
+                                continue;
+                            }
+                            streamResultCount++;
+                            controller.enqueue(thisEncoder.encode(JSON.stringify(result) + "\n"));
+                        } catch (e) {
+                            console.log(e);
+                            controller.close();
+                            return;
                         }
-                        streamResultCount++, controller.enqueue(thisEncoder.encode(JSON.stringify(result) + "\n"));
-                    } catch (e) {
-                        return console.log(e), void controller.close();
                     }
                 }
             });
         }
+        // does this ever need to be awaited?
         async search(handler) {
             const reader = this.stream.getReader();
             let ct = 0;
-            for (;;) {
+            while (true) {
                 const {done: done, value: value} = await reader.read();
                 if (done) break;
-                if (handler(value), ct++, ct === this.MAX_RESULTS) break;
+                handler(value);
+                ct++;
+                if (ct === this.MAX_RESULTS) break;
             }
-            this.timer.t2 = performance.now(), handler({
+            this.timer.t2 = performance.now();
+            // should this be returned or passed to handler?
+            // or should this be avoided and result totals passed with each stream item?
+                        handler({
                 summary: {
                     timer: this.timer.t2 - this.timer.t1,
                     count: ct
@@ -273,19 +473,31 @@ const StorageManager = (() => {
     async function getFileContents({filename: filename, filesStore: filesStore, cache: cache, storagePath: storagePath, fetchFileContents: fetchFileContents}) {
         const cachedFile = await filesStore.getItem(filename);
         let contents;
-        return cachedFile && "reload" !== cache ? cachedFile : (contents = await fetchFileContents(filename), 
-        storagePath ? filesStore.setItem("." + storagePath.replace("/welcome/", "/.welcome/"), contents) : filesStore.setItem(filename, contents), 
-        contents);
+        // https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
+                if (cachedFile && cache !== "reload") {
+            return cachedFile;
+        }
+        contents = await fetchFileContents(filename);
+        if (storagePath) {
+            filesStore.setItem("." + storagePath.replace("/welcome/", "/.welcome/"), contents);
+        } else {
+            filesStore.setItem(filename, contents);
+        }
+        return contents;
     }
-    async function fileSystemTricks({result: result, filesStore: filesStore, cache: cache, servicesStore: servicesStore, fetchFileContents: fetchFileContents}) {
+    //TODO: this is intense, but save a more granular approach for future
+        async function fileSystemTricks({result: result, filesStore: filesStore, cache: cache, servicesStore: servicesStore, fetchFileContents: fetchFileContents}) {
         const {safe: safe, flattenTree: flattenTree} = this.utils;
         if (!safe((() => result.result[0].code.find))) {
             const parsed = JSON.parse(result.result[0].code);
-            return result.result[0].code = parsed.files, result.result[0].tree = parsed.tree, 
-            void console.log("will weird things ever stop happening?");
+            result.result[0].code = parsed.files;
+            result.result[0].tree = parsed.tree;
+            console.log("will weird things ever stop happening?");
+            return;
         }
-        const serviceJSONFile = result.result[0].code.find((item => "service.json" === item.name));
+        const serviceJSONFile = result.result[0].code.find((item => item.name === "service.json"));
         if (serviceJSONFile && !serviceJSONFile.code) {
+            //console.log('service.json without code');
             const filename = `./.${result.result[0].name}/service.json`;
             serviceJSONFile.code = await getFileContents({
                 filename: filename,
@@ -295,6 +507,7 @@ const StorageManager = (() => {
             });
         }
         if (serviceJSONFile) {
+            //console.log('service.json without tree');
             let serviceJSON = JSON.parse(serviceJSONFile.code);
             if (!serviceJSON.tree) {
                 const filename = `./${serviceJSON.path}/service.json`;
@@ -303,17 +516,21 @@ const StorageManager = (() => {
                     filesStore: filesStore,
                     cache: cache,
                     fetchFileContents: fetchFileContents
-                }), serviceJSON = JSON.parse(serviceJSONFile.code);
+                });
+                serviceJSON = JSON.parse(serviceJSONFile.code);
             }
-            result.result[0].code = serviceJSON.files, result.result[0].tree = {
+            result.result[0].code = serviceJSON.files;
+            result.result[0].tree = {
                 [result.result[0].name]: serviceJSON.tree
             };
         }
-        const len = safe((() => result.result[0].code.length)), flat = flattenTree(safe((() => result.result[0].tree)));
+        const len = safe((() => result.result[0].code.length));
+        const flat = flattenTree(safe((() => result.result[0].tree)));
         for (var i = 0; i < len; i++) {
             const item = result.result[0].code[i];
             if (!item.code && item.path) {
-                const filename = "./" + item.path, storagePath = (flat.find((x => x.name === item.name)) || {}).path;
+                const filename = "./" + item.path;
+                const storagePath = (flat.find((x => x.name === item.name)) || {}).path;
                 item.code = await getFileContents({
                     filename: filename,
                     filesStore: filesStore,
@@ -323,30 +540,49 @@ const StorageManager = (() => {
                 });
             }
         }
-        result.result[0].name ? await servicesStore.setItem(result.result[0].id + "", {
+        if (!result.result[0].name) {
+            console.error("cannot set services store item without name");
+            return;
+        }
+        await servicesStore.setItem(result.result[0].id + "", {
             name: result.result[0].name,
             id: result.result[0].id,
             tree: result.result[0].tree
-        }) : console.error("cannot set services store item without name");
+        });
     }
-    function cacheFn(fn, ttl) {
+    /* TODO:
+		file get runs slower here versus previous version
+		is this the problem? potential issues
+		local forage has to JSON.parse change store items to get the value
+		changes store has to be queried before file store can be checked
+		file store is huge because of policy of pulling all repo items
+	*/    function cacheFn(fn, ttl) {
         const cache = {};
+        const apply = (target, thisArg, args) => {
+            const key = target.name;
+            cache[key] = cache[key] || {};
+            const argsKey = args.toString();
+            const cachedItem = cache[key][argsKey];
+            if (cachedItem) return cachedItem;
+            cache[key][argsKey] = target.apply(thisArg, args);
+            setTimeout((() => {
+                delete cache[key][argsKey];
+            }), ttl);
+            return cache[key][argsKey];
+        };
         return new Proxy(fn, {
-            apply: (target, thisArg, args) => {
-                const key = target.name;
-                cache[key] = cache[key] || {};
-                const argsKey = args.toString(), cachedItem = cache[key][argsKey];
-                return cachedItem || (cache[key][argsKey] = target.apply(thisArg, args), setTimeout((() => {
-                    delete cache[key][argsKey];
-                }), ttl), cache[key][argsKey]);
-            }
+            apply: apply
         });
     }
     let changeCache, fileCache, servicesCache;
+    let cacheTTL = 250;
+    let serviesCacheTTL = 500;
     async function getFile(path) {
-        const changesStore = this.stores.changes, filesStore = this.stores.files, servicesStore = this.stores.services, {fetchFileContents: fetchFileContents} = this.utils;
-        changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), 250), 
-        fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), 250), servicesCache = servicesCache || cacheFn((async () => {
+        const changesStore = this.stores.changes;
+        const filesStore = this.stores.files;
+        const servicesStore = this.stores.services;
+        const {fetchFileContents: fetchFileContents} = this.utils;
+        const getAllServices = async () => {
             const keys = await servicesStore.keys();
             let services = [];
             for (let i = 0, len = keys.length; i < len; i++) {
@@ -354,34 +590,59 @@ const StorageManager = (() => {
                 services.push(thisService);
             }
             return services;
-        }), 500);
+        };
+        changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), cacheTTL);
+        fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
+        servicesCache = servicesCache || cacheFn(getAllServices, serviesCacheTTL);
         let t0 = performance.now();
         const perfNow = () => {
             const d = performance.now() - t0;
-            return t0 = performance.now(), d.toFixed(3);
-        }, changes = await changeCache(path);
-        if (console.log(`changes store: ${perfNow()}ms (${path})`), changes && "update" === changes.type) return changes.value;
+            t0 = performance.now();
+            return d.toFixed(3);
+        };
+        const changes = await changeCache(path);
+        console.log(`changes store: ${perfNow()}ms (${path})`);
+        if (changes && changes.type === "update") {
+            return changes.value;
+        }
         let file = await fileCache(path);
-        if (console.log(`file store: ${perfNow()}ms (${path})`), file && file.includes && file.includes("##PLACEHOLDER##")) {
+        console.log(`file store: ${perfNow()}ms (${path})`);
+        if (file && file.includes && file.includes("##PLACEHOLDER##")) {
             const services = await servicesCache();
-            let serviceFile;
             services.sort(((a, b) => b.name.length - a.name.length));
+            let serviceFile;
             let thisService = {};
-            for (let i = 0, len = services.length; i < len && (thisService = services[i], !("github" === thisService.type && thisService.git && thisService.git.tree && path.startsWith(thisService.name) && (serviceFile = thisService.git.tree.find((x => path === `${thisService.name}/${x.path}`)), 
-            serviceFile))); i++) ;
+            for (let i = 0, len = services.length; i < len; i++) {
+                thisService = services[i];
+                if (thisService.type !== "github" || !thisService.git || !thisService.git.tree) continue;
+                if (!path.startsWith(thisService.name)) continue;
+                serviceFile = thisService.git.tree.find((x => path === `${thisService.name}/${x.path}`));
+                if (serviceFile) break;
+            }
             if (!serviceFile) return file;
             const getFileContents = async ({path: path}) => {
                 try {
                     const contentUrl = "https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}".replace("{path}", path).replace("{owner}", thisService.owner).replace("{repo}", thisService.repo).replace("{sha}", thisService.git.sha);
-                    return await fetchFileContents(contentUrl);
+                    const contents = await fetchFileContents(contentUrl);
+                    return contents;
                 } catch (e) {
-                    return void console.error(e);
+                    console.error(e);
+                    return;
                 }
             };
-            file = await getFileContents(serviceFile), file && filesStore.setItem(path, file);
+            file = await getFileContents(serviceFile);
+            if (file) filesStore.setItem(path, file);
         }
         return file;
     }
+    const handleServiceSearch = fileStore => async (params, event) => {
+        const serviceSearch = new ServiceSearch;
+        await serviceSearch.init({
+            ...params,
+            fileStore: fileStore
+        });
+        return serviceSearch.stream;
+    };
     const handleServiceRead = (servicesStore, filesStore, fetchFileContents, changesStore) => {
         const stores = {
             files: filesStore,
@@ -389,17 +650,27 @@ const StorageManager = (() => {
             changes: changesStore
         };
         return async function(params, event) {
-            const cacheHeader = event.request.headers.get("x-cache"), defaults = [];
-            if (0 !== Number(params.id) && !params.id || "*" === params.id) {
+            //also, what if not "file service"?
+            //also, what if "offline"?
+            //THIS ENDPOINT SHOULD BE (but is not now) AS DUMB AS:
+            // - if id passed, return that id from DB
+            // - if no id passed (or * passed), return all services from DB
+            const cacheHeader = event.request.headers.get("x-cache");
+            const defaults = defaultServices();
+            //if not id, return all services
+                        const noValidId = Number(params.id) !== 0 && !params.id;
+            if (noValidId || params.id === "*") {
                 const savedServices = [];
                 await servicesStore.iterate(((value, key) => {
                     savedServices.push(value);
                 }));
                 for (var i = 0, len = savedServices.length; i < len; i++) {
-                    const service = savedServices[i], code = await this.getCodeFromStorageUsingTree(service.tree, filesStore, service.name);
+                    const service = savedServices[i];
+                    const code = await this.getCodeFromStorageUsingTree(service.tree, filesStore, service.name);
                     service.code = code;
                 }
-                const allServices = [ ...defaults, ...savedServices ].sort(((a, b) => Number(a.id) - Number(b.id))).map((x => ({
+                //console.log({ defaults, savedServices });
+                                const allServices = [ ...defaults, ...savedServices ].sort(((a, b) => Number(a.id) - Number(b.id))).map((x => ({
                     id: x.id,
                     name: x.name
                 })));
@@ -408,108 +679,76 @@ const StorageManager = (() => {
                 }, null, 2);
             }
             const addTreeState = async service => {
-                const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
+                const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1]));
+                const opened = await changesStore.getItem(`state-${service.name}-opened`) || [];
+                const selected = (opened.find((x => x.order === 0)) || {}).name || "";
                 service.state = {
                     opened: opened,
                     selected: selected,
                     changed: changed
-                }, service.treeState = {
+                };
+                service.treeState = {
                     expand: await changesStore.getItem(`tree-${service.name}-expanded`) || [],
                     select: selected,
                     changed: changed,
                     new: []
                 };
             };
-            await filesStore.setItem("lastService", params.id);
+            // if id, return that service
+            // (currently doesn't do anything since app uses localStorage version of this)
+                        await filesStore.setItem("lastService", params.id);
             let foundService = await servicesStore.getItem(params.id);
             if (!foundService && [ 0, "0" ].includes(params.id)) {
                 const root = new RootService(stores);
                 foundService = await root.init();
             }
-            if (foundService) return foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name), 
-            await addTreeState(foundService), JSON.stringify({
-                result: [ foundService ]
-            }, null, 2);
-            const lsServices = [] || [], result = {
-                result: "*" !== params.id && params.id ? lsServices.filter((x => Number(x.id) === Number(params.id))) : lsServices
+            if (foundService) {
+                foundService.code = await this.getCodeFromStorageUsingTree(foundService.tree, filesStore, foundService.name);
+                await addTreeState(foundService);
+                return JSON.stringify({
+                    result: [ foundService ]
+                }, null, 2);
+            }
+            //TODO (AND WARNING): get this from store instead!!!
+            // currently will only return fake/default services
+                        const lsServices = defaultServices() || [];
+            const result = {
+                result: params.id === "*" || !params.id ? lsServices : lsServices.filter((x => Number(x.id) === Number(params.id)))
             };
-            return await this.fileSystemTricks({
+            await this.fileSystemTricks({
                 result: result,
                 filesStore: filesStore,
                 servicesStore: servicesStore,
                 cache: cacheHeader,
                 fetchFileContents: fetchFileContents
-            }), result.forEach(addTreeState), JSON.stringify(result, null, 2);
+            });
+            result.forEach(addTreeState);
+            return JSON.stringify(result, null, 2);
         };
     };
-    return class {
-        stores=(() => {
-            var driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
-            const files = localforage.createInstance({
-                driver: driver,
-                name: "service-worker",
-                version: 1,
-                storeName: "files",
-                description: "permanent state of contents of files across projects"
-            }), services = localforage.createInstance({
-                driver: driver,
-                name: "service-worker",
-                version: 1,
-                storeName: "services",
-                description: "services directory stucture, type, etc"
-            }), providers = localforage.createInstance({
-                driver: driver,
-                name: "service-worker",
-                version: 1,
-                storeName: "providers",
-                description: "connects services to outside world"
-            }), changes = localforage.createInstance({
-                driver: driver,
-                name: "service-worker",
-                version: 1,
-                storeName: "changes",
-                description: "keep track of changes not pushed to provider"
-            }), handlers = localforage.createInstance({
-                driver: driver,
-                name: "service-worker",
-                version: 1,
-                storeName: "handlers",
-                description: "used after app has booted when service worker is updated"
-            });
-            return {
-                editor: localforage.createInstance({
-                    driver: driver,
-                    name: "editorState",
-                    version: 1,
-                    storeName: "editor",
-                    description: "scroll and cursor position, history, selection"
-                }),
-                files: files,
-                services: services,
-                providers: providers,
-                changes: changes,
-                handlers: handlers
-            };
-        })();
+    class StorageManager {
+        stores=getStores();
         defaultServices=defaultServices;
         getCodeFromStorageUsingTree=getCodeFromStorageUsingTree.bind(this);
         fileSystemTricks=fileSystemTricks.bind(this);
         getFile=getFile.bind(this);
         constructor({utils: utils}) {
-            var fileStore;
-            this.utils = utils, this.handlers = {
-                serviceSearch: (fileStore = this.stores.files, async (params, event) => {
-                    const serviceSearch = new ServiceSearch;
-                    return await serviceSearch.init({
-                        ...params,
-                        fileStore: fileStore
-                    }), serviceSearch.stream;
-                }),
+            this.utils = utils;
+            this.handlers = {
+                serviceSearch: handleServiceSearch(this.stores.files),
                 serviceRead: handleServiceRead(this.stores.services, this.stores.files, utils.fetchFileContents, this.stores.changes).bind(this)
             };
         }
-    };
-})(), Router = (() => {
+    }
+    return StorageManager;
+})();
+
+const Router = (() => {
+    // FOR NOW: instead of importing path-to-regex
+    // go here https://forbeslindesay.github.io/express-route-tester/
+    // enter path expression; include regex for base path, eg. (.*)/.welcome/:path?
+    // get the regex and add it to this
+    // DEPRECATE pathToRegex? - it's of little value, maybe, or maybe it should be moved elsewhere?
     const pathToRegex = {
         "/service/create/:id?": (() => {
             const regex = new RegExp(/^((?:.*))\/service\/create(?:\/((?:[^\/]+?)))?(?:\/(?=$))?$/i);
@@ -638,6 +877,7 @@ const StorageManager = (() => {
             };
         })(),
         "/.welcome/:path?": (() => {
+            // NOTE: this is actually the regex for (.*)/.welcome/(.*)
             const regex = new RegExp(/^((?:.*))\/\.welcome\/((?:.*))(?:\/(?=$))?$/i);
             return {
                 match: url => regex.test(url),
@@ -648,16 +888,16 @@ const StorageManager = (() => {
             };
         })(),
         "/service/search/": (() => {
+            const safeUrl = u => u[u.length - 1] === "/" ? u : u + "/";
             const regex = new RegExp(/^((?:.*))\/service\/search\/.*$/i);
             return {
-                match: url => {
-                    return regex.test("/" === (u = url)[u.length - 1] ? u : u + "/");
-                    var u;
-                },
+                match: url => regex.test(safeUrl(url)),
                 params: (url, urlFull) => Object.fromEntries(urlFull.split("?").pop().split("&").map((x => x.split("="))))
             };
         })(),
+        // worker rewriter
         "/!/:path?": (() => {
+            // NOTE: this is actually the regex for (.*)/!/(.*)
             const regex = new RegExp(/^((?:.*))\/\!\/((?:.*))(?:\/(?=$))?$/i);
             return {
                 match: url => regex.test(url),
@@ -667,11 +907,12 @@ const StorageManager = (() => {
                 })
             };
         })()
-    }, _generic = ({_handlers: _handlers}) => method => (pathString, handler) => {
+    };
+    const _generic = ({_handlers: _handlers}) => method => (pathString, handler) => {
         const path = pathToRegex[pathString];
-        let alternatePath;
-        path || (alternatePath = (pathString => {
-            const name = pathString.replace("/:path?", "").replace("/", ""), regex = new RegExp(`^((?:.*))/${name}/((?:.*))(?:/(?=$))?$`, "i");
+        const genericPath = pathString => {
+            const name = pathString.replace("/:path?", "").replace("/", "");
+            const regex = new RegExp(`^((?:.*))/${name}/((?:.*))(?:/(?=$))?$`, "i");
             return {
                 match: url => regex.test(url),
                 params: url => ({
@@ -679,105 +920,196 @@ const StorageManager = (() => {
                     query: (regex.exec(url)[2] || "").split("?")[1]
                 })
             };
-        })(pathString));
+        };
+        let alternatePath;
+        if (!path) {
+            alternatePath = genericPath(pathString);
+            //console.log({ alternatePath });
+                }
         const foundHandler = _handlers.find((x => x.pathString === pathString && x.method === method));
-        foundHandler ? foundHandler.handler = handler : _handlers.push({
+        if (foundHandler) {
+            //console.log(`Overwriting handler for ${method} : ${pathString}`);
+            foundHandler.handler = handler;
+            return;
+        }
+        _handlers.push({
             ...path || alternatePath,
             pathString: pathString,
             method: method,
             handler: handler
         });
     };
-    return class {
+    const _expressHandler = ({templates: templates, storage: storage}) => {
+        const {getFile: getFile} = storage;
+        //bind to base, ie. when a service is added
+                return async (base, msg) => {
+            await templates.refresh();
+            //handle individual network request
+                        return async (params, event) => {
+                const {path: path, query: query} = params;
+                const cleanPath = decodeURI(path.replace("/::preview::/", ""));
+                const previewMode = path.includes("/::preview::/");
+                path.includes(".templates/");
+                const filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
+                let xformedFile;
+                // if headers.event-requestor is 'editor-state': let getFile know so it can track
+                // try {
+                // 	const xRequestor = event.request.headers.get('x-requestor');
+                // 	console.log(xRequestor === 'editor-state'
+                // 		? 'TODO: keep track of files when they are got by editor!'
+                // 		: ''
+                // 	 );
+                // } catch(e){
+                // 	console.error(e);
+                // }
+                                const file = await getFile(`${base}/${cleanPath}`) || await getFile(`./${base}/${cleanPath}`);
+                let fileJSONString;
+                try {
+                    if (typeof file !== "string") {
+                        fileJSONString = file ? JSON.stringify(file, null, 2) : "";
+                    } else {
+                        fileJSONString = file;
+                    }
+                } catch (e) {}
+                if (previewMode) {
+                    xformedFile = templates.convert(filename, fileJSONString);
+                }
+                if (previewMode && !xformedFile) {
+                    return templates.NO_PREVIEW;
+                }
+                // most likely a blob
+                                if (file && file.type && file.size) {
+                    //xformedFile because there may be a template for blob type file
+                    return xformedFile || file;
+                }
+                //TODO: need to know file type so that it can be returned properly
+                                return xformedFile || fileJSONString || file;
+            };
+        };
+    };
+    const _addServiceHandler = ({storage: storage, expressHandler: expressHandler, generic: generic, swHandlers: swHandlers}) => async function({name: name, msg: msg}) {
+        const handlersStore = storage.stores.handlers;
+        const route = `^/${name}/(.*)`;
+        const handlerName = "./modules/service-worker.handler.js";
+        const foundHandler = swHandlers.find((x => x.handlerName === handlerName));
+        const type = foundHandler ? foundHandler.type : "fetch";
+        const handler = foundHandler ? foundHandler.handler : "route-handler";
+        const handlerText = foundHandler ? foundHandler.handlerText : "service-worker-handler";
+        const foundExactHandler = foundHandler && swHandlers.find((x => x.handlerName === handlerName && x.routePattern === route));
+        if (foundExactHandler) ; else {
+            swHandlers.push({
+                type: type,
+                routePattern: route,
+                route: new RegExp(route),
+                handler: handler,
+                handlerName: handlerName,
+                handlerText: handlerText
+            });
+            // question: if handler is found in SW state, should store be updated?
+                        await handlersStore.setItem(route, {
+                type: type,
+                route: route,
+                handlerName: handlerName,
+                handlerText: handlerText
+            });
+        }
+        // question: if handler is found in SW state, should service-worker.handler state be updated?
+                const expHandler = await expressHandler(name, msg);
+        generic("get")(`/${name}/:path?`, expHandler);
+        // ^^^ this should add handler to express _handlers
+        };
+    const _restorePrevious = ({storage: storage, addServiceHandler: addServiceHandler}) => async () => {
+        const servicesStore = storage.stores.services;
+        const restoreToExpress = [];
+        await servicesStore.iterate(((value, key) => {
+            let {name: name} = value;
+            restoreToExpress.push({
+                name: name
+            });
+        }));
+        for (let i = 0, len = restoreToExpress.length; i < len; i++) {
+            const {name: name} = restoreToExpress[i];
+            await addServiceHandler({
+                name: name,
+                msg: "served from reconstituted"
+            });
+        }
+        // TODO: should also add routes/paths/handlers to SW which have been created but are not there already
+        // could run in to problems with this ^^^ because those may be in the process of being added
+        };
+    const _find = ({_handlers: _handlers, restorePrevious: restorePrevious}) => async request => {
+        const {url: url, method: method} = request;
+        const query = (() => {
+            try {
+                return Object.fromEntries([ ...new URL(url).searchParams ]);
+            } catch (e) {
+                return {};
+            }
+        })();
+        let found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0])));
+        if (!found) {
+            await restorePrevious();
+            found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0])));
+            if (!found) {
+                return;
+            }
+        }
+        return {
+            exec: async event => await found.handler(found.params(url.split("?")[0], url), event, query)
+        };
+    };
+    class Router {
         _handlers=[];
         constructor({storage: storage, templates: templates, swHandlers: swHandlers}) {
-            this.swHandlers = swHandlers, this.storage = storage, this.templates = templates, 
-            this.generic = _generic(this), this.get = this.generic("get"), this.post = this.generic("post"), 
-            this.expressHandler = (({templates: templates, storage: storage}) => {
-                const {getFile: getFile} = storage;
-                return async (base, msg) => (await templates.refresh(), async (params, event) => {
-                    const {path: path, query: query} = params, cleanPath = decodeURI(path.replace("/::preview::/", "")), previewMode = path.includes("/::preview::/");
-                    path.includes(".templates/");
-                    const filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
-                    let xformedFile;
-                    const file = await getFile(`${base}/${cleanPath}`) || await getFile(`./${base}/${cleanPath}`);
-                    let fileJSONString;
-                    try {
-                        fileJSONString = "string" != typeof file ? file ? JSON.stringify(file, null, 2) : "" : file;
-                    } catch (e) {}
-                    return previewMode && (xformedFile = templates.convert(filename, fileJSONString)), 
-                    previewMode && !xformedFile ? templates.NO_PREVIEW : file && file.type && file.size ? xformedFile || file : xformedFile || fileJSONString || file;
-                });
-            })(this), this.addServiceHandler = (({storage: storage, expressHandler: expressHandler, generic: generic, swHandlers: swHandlers}) => async function({name: name, msg: msg}) {
-                const handlersStore = storage.stores.handlers, route = `^/${name}/(.*)`, handlerName = "./modules/service-worker.handler.js", foundHandler = swHandlers.find((x => x.handlerName === handlerName)), type = foundHandler ? foundHandler.type : "fetch", handler = foundHandler ? foundHandler.handler : "route-handler", handlerText = foundHandler ? foundHandler.handlerText : "service-worker-handler";
-                foundHandler && swHandlers.find((x => x.handlerName === handlerName && x.routePattern === route)) || (swHandlers.push({
-                    type: type,
-                    routePattern: route,
-                    route: new RegExp(route),
-                    handler: handler,
-                    handlerName: handlerName,
-                    handlerText: handlerText
-                }), await handlersStore.setItem(route, {
-                    type: type,
-                    route: route,
-                    handlerName: handlerName,
-                    handlerText: handlerText
-                }));
-                const expHandler = await expressHandler(name, msg);
-                generic("get")(`/${name}/:path?`, expHandler);
-            })(this), this.restorePrevious = (({storage: storage, addServiceHandler: addServiceHandler}) => async () => {
-                const servicesStore = storage.stores.services, restoreToExpress = [];
-                await servicesStore.iterate(((value, key) => {
-                    let {name: name} = value;
-                    restoreToExpress.push({
-                        name: name
-                    });
-                }));
-                for (let i = 0, len = restoreToExpress.length; i < len; i++) {
-                    const {name: name} = restoreToExpress[i];
-                    await addServiceHandler({
-                        name: name,
-                        msg: "served from reconstituted"
-                    });
-                }
-            })(this), this.find = (({_handlers: _handlers, restorePrevious: restorePrevious}) => async request => {
-                const {url: url, method: method} = request, query = (() => {
-                    try {
-                        return Object.fromEntries([ ...new URL(url).searchParams ]);
-                    } catch (e) {
-                        return {};
-                    }
-                })();
-                let found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0])));
-                if (found || (await restorePrevious(), found = _handlers.find((x => method.toLowerCase() === x.method && x.match(url.split("?")[0]))), 
-                found)) return {
-                    exec: async event => await found.handler(found.params(url.split("?")[0], url), event, query)
-                };
-            })(this), this.restorePrevious();
+            this.swHandlers = swHandlers;
+            this.storage = storage;
+            this.templates = templates;
+            this.generic = _generic(this);
+            this.get = this.generic("get");
+            this.post = this.generic("post");
+            this.expressHandler = _expressHandler(this);
+            this.addServiceHandler = _addServiceHandler(this);
+            this.restorePrevious = _restorePrevious(this);
+            this.find = _find(this);
+            this.restorePrevious();
         }
-    };
-})(), ProviderManager = (() => {
+    }
+    return Router;
+})();
+
+const ProviderManager = (() => {
     const stringify = o => JSON.stringify(o, null, 2);
     async function _fetchFileContents(url, opts) {
-        const fileNameBlacklist = [ ".ts" ].map((x => new RegExp(`${x}$`.replace(/\./, ".")))), fetched = await fetch(url, opts), contentType = fetched.headers.get("Content-Type");
-        return ![ "image/", "audio/", "video/", "wasm", "application/zip", "application/octet-stream" ].find((x => contentType.includes(x))) || [ "image/svg", "image/x-portable-pixmap" ].find((x => contentType.includes(x))) || fileNameBlacklist.find((x => x.test(url))) ? await fetched.text() : await fetched.blob();
+        const storeAsBlob = [ "image/", "audio/", "video/", "wasm", "application/zip", "application/octet-stream" ];
+        const storeAsBlobBlacklist = [ "image/svg", "image/x-portable-pixmap" ];
+        const fileNameBlacklist = [ ".ts" ].map((x => new RegExp(`${x}$`.replace(/\./, "."))));
+        const fetched = await fetch(url, opts);
+        const contentType = fetched.headers.get("Content-Type");
+        let _contents = storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => x.test(url))) ? await fetched.blob() : await fetched.text();
+        return _contents;
     }
     const handleProviderTest = ({github: github}) => async (params, event) => {
+        // in the future, will cycle through ALL providers and return repsonse from one
         const githubResponse = github && await github.handler("test", {
             params: params,
             event: event
         });
         if (githubResponse) return githubResponse;
-        const body = await event.request.json(), {providerType: providerType, providerUrl: providerUrl, providerAccessToken: providerAccessToken} = body;
-        [ "basic-bartok-provider", "github-provider" ].includes(providerType) || stringify({
+        const body = await event.request.json();
+        const {providerType: providerType, providerUrl: providerUrl, providerAccessToken: providerAccessToken} = body;
+        const isSupported = [ "basic-bartok-provider", "github-provider" ].includes(providerType);
+        if (!isSupported) stringify({
             error: `Unsupported provider type: ${providerType}`
-        }), "github-provider" === providerType && stringify({
-            success: !0,
+        });
+        if (providerType === "github-provider") stringify({
+            success: true,
             todo: "test user's access token"
         });
-        const fileUrl = (providerUrl + "/file/").replace("//file/", "/file/"), treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/");
+        const fileUrl = (providerUrl + "/file/").replace("//file/", "/file/");
+        const treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/");
         try {
-            if (200 !== (await fetch(providerUrl)).status) return stringify({
+            const baseRes = await fetch(providerUrl);
+            if (baseRes.status !== 200) return stringify({
                 error: `Failed to connect to provider at: ${providerUrl}`
             });
         } catch (e) {
@@ -786,7 +1118,8 @@ const StorageManager = (() => {
             });
         }
         try {
-            if (200 !== (await fetch(fileUrl)).status) return stringify({
+            const fileRes = await fetch(fileUrl);
+            if (fileRes.status !== 200) return stringify({
                 error: `Failed to connect to provider at: ${fileUrl}`
             });
         } catch (e) {
@@ -795,7 +1128,8 @@ const StorageManager = (() => {
             });
         }
         try {
-            if (200 !== (await fetch(treeUrl)).status) return stringify({
+            const treeRes = await fetch(treeUrl);
+            if (treeRes.status !== 200) return stringify({
                 error: `Failed to connect to provider at: ${treeUrl}`
             });
         } catch (e) {
@@ -804,17 +1138,21 @@ const StorageManager = (() => {
             });
         }
         return stringify({
-            success: !0
+            success: true
         });
-    }, handleProviderCreate = ({create: create, github: github}) => async (params, event) => {
+    };
+    const handleProviderCreate = ({create: create, github: github}) => async (params, event) => {
+        // in the future, will cycle through ALL providers and return repsonse from one
         const githubResponse = github && await github.handler("create", {
             params: params,
             event: event
         });
         if (githubResponse) return githubResponse;
         try {
-            const body = await event.request.json(), {providerType: providerType, providerUrl: providerUrl} = body;
-            [ "basic-bartok-provider" ].includes(providerType) || stringify({
+            const body = await event.request.json();
+            const {providerType: providerType, providerUrl: providerUrl} = body;
+            const isSupported = [ "basic-bartok-provider" ].includes(providerType);
+            if (!isSupported) stringify({
                 error: `Unsupported provider type: ${providerType}`
             });
             const provider = await create({
@@ -822,7 +1160,7 @@ const StorageManager = (() => {
                 url: providerUrl
             });
             return stringify({
-                success: !0,
+                success: true,
                 provider: provider
             });
         } catch (error) {
@@ -830,146 +1168,259 @@ const StorageManager = (() => {
                 error: error
             });
         }
-    }, handleCreateCommit = ({github: github}) => async (params, event) => {
+    };
+    const handleProviderRead = () => async (params, event) => {
+        console.error("not implemented: provider read.  Should return one or all saved provider details.");
+        return stringify({
+            error: "not implemented"
+        });
+    };
+    const handleProviderUpdate = () => async (params, event) => {
+        console.error("not implemented: provider update.  Should update provider details.");
+        return stringify({
+            error: "not implemented"
+        });
+    };
+    const handleProviderDelete = () => async (params, event) => {
+        console.error("not implemented: provider delete.  Should delete saved provider.");
+        return stringify({
+            error: "not implemented"
+        });
+    };
+    const handleCreateCommit = ({github: github}) => async (params, event) => {
         const githubResponse = github && await github.handler("createCommit", {
             params: params,
             event: event
         });
-        return githubResponse || stringify({
+        if (githubResponse) return githubResponse;
+        return stringify({
             error: "commits are only implemented for github repos"
         });
-    };
+    }
+    // servicesCreate
+    ;
     async function _providerCreateServiceHandler(event) {
-        const servicesStore = this.stores.services, filesStore = this.stores.files, githubResponse = this.github && await this.github.handler("servicesCreate", {
+        const servicesStore = this.stores.services;
+        const filesStore = this.stores.files;
+        // in the future, will cycle through ALL providers and return repsonse from one
+                const githubResponse = this.github && await this.github.handler("servicesCreate", {
             event: event
         });
         if (githubResponse) return githubResponse;
         try {
             const body = await event.request.json();
             let {providerType: providerType, providerUrl: providerUrl, providerAccessToken: providerAccessToken, repoName: repoName} = body;
-            if (![ "basic-bartok-provider" ].includes(providerType)) return stringify({
+            /*
+				reminder:
+					- providers create services that have provider attribute
+					- services act like servers within service worker
+					- for github this is a two step process because file system is not handling target selection as with bartok servers
+
+				if github provider and no accessToken
+					- reject
+				if github provider and repoName
+					- read repository list for logged in user (providerAccessToken
+					- return to UI for selection
+				if both of these
+					- recursively read tree
+					- add files as you go (with file contents or sync|read-one-by-one later?)
+					- create service using repository name
+			*/            const isSupported = [ "basic-bartok-provider" ].includes(providerType);
+            if (!isSupported) return stringify({
                 error: `Unsupported provider type: ${providerType}`
             });
-            if (!await this.read(providerUrl)) return stringify({
+            const provider = await this.read(providerUrl);
+            if (!provider) return stringify({
                 error: `Provider does not exist: ${providerUrl}`
             });
-            const treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/"), fileUrl = (providerUrl + "/file/").replace("//file/", "/file/"), allServices = [];
+            // TODO: treeUrl, fileUrl aka provider.getTree should be on provider at this point
+            // maybe even provider.supported should be there
+                        const treeUrl = (providerUrl + "/tree/").replace("//tree/", "/tree/");
+            const fileUrl = (providerUrl + "/file/").replace("//file/", "/file/");
+            const allServices = [];
             await servicesStore.iterate(((value, key) => {
                 allServices.push(value);
             }));
             const baseRes = await fetch(treeUrl);
-            if (200 !== baseRes.status) return stringify({
+            if (baseRes.status !== 200) return stringify({
                 error: `Failed to connect to provider at: ${providerUrl}`
             });
-            const {files: providerFiles, root: providerRoot, tree: providerTree} = await baseRes.json(), providerRootName = providerRoot.split("/").pop(), foundService = allServices.find((x => x.name === providerRootName)), id = foundService ? foundService.id : allServices.reduce(((all, one) => Number(one.id) >= all ? Number(one.id) + 1 : all), 1), service = {
+            const {files: providerFiles, root: providerRoot, tree: providerTree} = await baseRes.json();
+            const providerRootName = providerRoot.split("/").pop();
+            const foundService = allServices.find((x => x.name === providerRootName));
+            const id = foundService ? foundService.id : allServices.reduce(((all, one) => Number(one.id) >= all ? Number(one.id) + 1 : all), 1);
+            const service = {
                 name: providerRootName,
                 id: id,
                 providerRoot: providerRoot,
                 providerUrl: providerUrl,
                 tree: providerTree
             };
-            if (!service.name) return void console.error("cannot set services store item without service name");
-            await servicesStore.setItem(id + "", service), service.code = [];
+            if (!service.name) {
+                console.error("cannot set services store item without service name");
+                return;
+            }
+            await servicesStore.setItem(id + "", service);
+            service.code = [];
             for (let f = 0; f < providerFiles.length; f++) {
-                const filePath = providerFiles[f], fileContents = await this.utils.fetchFileContents(`${fileUrl}${providerRoot}/${filePath}`);
-                filesStore.setItem(`./${providerRootName}/${filePath}`, fileContents), service.code.push({
+                const filePath = providerFiles[f];
+                const fileContents = await this.utils.fetchFileContents(`${fileUrl}${providerRoot}/${filePath}`);
+                filesStore.setItem(`./${providerRootName}/${filePath}`, fileContents);
+                service.code.push({
                     name: filePath.split("/").pop(),
                     path: `./${providerRootName}/${filePath}`,
-                    code: "string" == typeof fileContents ? fileContents : ""
+                    code: typeof fileContents === "string" ? fileContents : ""
                 });
             }
-            return await this.providerUpdateServiceJson({
+            await this.providerUpdateServiceJson({
                 service: service,
                 servicesStore: servicesStore,
                 filesStore: filesStore
-            }), await this.app.addServiceHandler({
+            });
+            await this.app.addServiceHandler({
                 name: providerRootName,
                 msg: "served from fresh baked"
-            }), stringify({
+            });
+            return stringify({
                 result: {
                     services: [ service ]
                 }
             });
         } catch (error) {
-            return console.error(error), stringify({
+            console.error(error);
+            return stringify({
                 error: error
             });
         }
     }
-    const _providerUpdateServiceJson = async function({service: service, servicesStore: servicesStore, filesStore: filesStore}) {
+    // servicesRead
+    // servicesUpdate
+        const _providerUpdateServiceJson = async function({service: service, servicesStore: servicesStore, filesStore: filesStore}) {
+        // in the future, will cycle through ALL providers and return repsonse from one
         const githubResponse = this.github && await this.github.handler("servicesUpdate", {
             service: service
         });
         if (githubResponse) return githubResponse;
         const serviceJsonFile = service.code.find((x => x.path.includes("/service.json")));
         if (!serviceJsonFile) return;
-        const serviceJson = JSON.parse(serviceJsonFile.code), {code: code, ...serviceOther} = service, {providerUrl: providerUrl, providerRoot: providerRoot} = service;
-        serviceJson.tree = service.tree[service.name], serviceJson.files = service.code.map((x => ({
+        const serviceJson = JSON.parse(serviceJsonFile.code);
+        const {code: code, ...serviceOther} = service;
+        const {providerUrl: providerUrl, providerRoot: providerRoot} = service;
+        serviceJson.tree = service.tree[service.name];
+        serviceJson.files = service.code.map((x => ({
             name: x.name,
             path: x.path.replace("./", "")
-        }))).sort(((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0));
-        const filePostUrl = `${providerUrl}file/${providerRoot}${serviceJsonFile.path.replace("./" + service.name, "")}`;
-        serviceJsonFile.code = stringify(serviceJson), serviceOther.name ? (await servicesStore.setItem(service.id + "", serviceOther), 
-        await filesStore.setItem(serviceJsonFile.path, serviceJsonFile.code), await fetch(filePostUrl, {
+        }))).sort(((a, b) => {
+            if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1;
+            }
+            if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1;
+            }
+            return 0;
+        }));
+        const pathWithoutParent = serviceJsonFile.path.replace("./" + service.name, "");
+        const filePostUrl = `${providerUrl}file/${providerRoot}${pathWithoutParent}`;
+        serviceJsonFile.code = stringify(serviceJson);
+        if (!serviceOther.name) {
+            console.error("cannot set services store item without service name");
+            return;
+        }
+        await servicesStore.setItem(service.id + "", serviceOther);
+        await filesStore.setItem(serviceJsonFile.path, serviceJsonFile.code);
+        await fetch(filePostUrl, {
             method: "post",
             body: serviceJsonFile.code
-        })) : console.error("cannot set services store item without service name");
+        });
     };
-    async function _providerFileChange(args) {
+    // servicesDelete
+    // filesCreate
+    // filesRead
+    // filesUpdate
+        async function _providerFileChange(args) {
         let {path: path, code: code, parent: service, deleteFile: deleteFile} = args;
-        const githubResponse = this.github && await this.github.handler("filesUpdate", args);
+        // in the future, will cycle through ALL providers and return repsonse from one
+                const githubResponse = this.github && await this.github.handler("filesUpdate", args);
         if (githubResponse) return githubResponse;
-        if (service = service || await this.stores.services.iterate(((value, key) => {
-            if (value.name === service || value.name === service.name) return value;
-        })), !service || !service.providerUrl) throw new Error("file not saved to provider: service not associated with a provider");
-        const {providerUrl: providerUrl, providerRoot: providerRoot} = service, filePostUrl = `${providerUrl}file/${providerRoot}${path.replace("./" + service.name, "")}`, filePostRes = await this.utils.fetchJSON(filePostUrl, {
+        service = service || await this.stores.services.iterate(((value, key) => {
+            if (value.name === service || value.name === service.name) {
+                return value;
+            }
+        }));
+        if (!service || !service.providerUrl) throw new Error("file not saved to provider: service not associated with a provider");
+        const {providerUrl: providerUrl, providerRoot: providerRoot} = service;
+        const pathWithoutParent = path.replace("./" + service.name, "");
+        const filePostUrl = `${providerUrl}file/${providerRoot}${pathWithoutParent}`;
+        const filePostRes = await this.utils.fetchJSON(filePostUrl, {
             method: deleteFile ? "DELETE" : "POST",
-            body: deleteFile ? void 0 : code
+            body: deleteFile ? undefined : code
         });
         if (filePostRes.error) throw new Error(filePostRes.error);
         return filePostRes;
     }
-    return class {
+    // filesDelete
+        class ProviderManager {
         constructor({app: app, storage: storage, utils: utils, GithubProvider: GithubProvider}) {
             return new Promise((async resolve => {
                 try {
-                    this.app = app, this.storage = storage, this.utils = utils, this.fetchContents = _fetchFileContents.bind(this), 
-                    this.store = storage.stores.providers, this.stores = storage.stores, this.github = await new GithubProvider(this), 
+                    this.app = app;
+                    this.storage = storage;
+                    this.utils = utils;
+                    this.fetchContents = _fetchFileContents.bind(this);
+                    // I kinda don't like either of these (or thier usage)
+                                        this.store = storage.stores.providers;
+                    this.stores = storage.stores;
+                    this.github = await new GithubProvider(this);
                     this.handlers = {
                         testHandler: handleProviderTest(this),
                         createHandler: handleProviderCreate(this),
-                        readHandler: async (params, event) => (console.error("not implemented: provider read.  Should return one or all saved provider details."), 
-                        stringify({
-                            error: "not implemented"
-                        })),
-                        updateHandler: async (params, event) => (console.error("not implemented: provider update.  Should update provider details."), 
-                        stringify({
-                            error: "not implemented"
-                        })),
-                        deleteHandler: async (params, event) => (console.error("not implemented: provider delete.  Should delete saved provider."), 
-                        stringify({
-                            error: "not implemented"
-                        })),
+                        readHandler: handleProviderRead(this),
+                        updateHandler: handleProviderUpdate(this),
+                        deleteHandler: handleProviderDelete(this),
                         createCommit: handleCreateCommit(this)
-                    }, this.createServiceHandler = _providerCreateServiceHandler.bind(this), this.providerUpdateServiceJson = _providerUpdateServiceJson.bind(this), 
-                    this.fileChange = _providerFileChange.bind(this), resolve(this);
+                    };
+                    // servicesCreate
+                                        this.createServiceHandler = _providerCreateServiceHandler.bind(this);
+                    // servicesRead
+                    // servicesUpdate
+                                        this.providerUpdateServiceJson = _providerUpdateServiceJson.bind(this);
+                    // servicesDelete
+                    // filesCreate
+                    // filesRead
+                    // filesUpdate
+                                        this.fileChange = _providerFileChange.bind(this);
+                    // filesDelete
+                                        resolve(this);
                 } catch (error) {
                     reject(error);
                 }
             }));
         }
         create=async provider => await this.store.setItem(provider.id + "", provider);
-        read=async id => id ? await this.store.getItem(id) : await this.store.keys();
+        read=async id => {
+            if (!id) {
+                return await this.store.keys();
+            }
+            return await this.store.getItem(id);
+        };
         update=async (id, updates) => {
             const provider = await this.read(id);
-            return updates.id && updates.id !== id && await this.delete(id), await this.store.setItem((updates.id || provider.id) + "", {
+            if (updates.id && updates.id !== id) {
+                await this.delete(id);
+            }
+            return await this.store.setItem((updates.id || provider.id) + "", {
                 ...provider,
                 ...updates
             });
         };
         delete=async id => await this.store.removeItem(id);
-    };
-})(), GithubProvider = (() => {
+    }
+    return ProviderManager;
+})();
+
+const GithubProvider = (() => {
+    //https://docs.github.com/en/rest
+    const baseUrl = "https://api.github.com";
     const urls = {
         rateLimit: "/rate_limit",
         repoInfo: "/repos/{owner}/{repo}",
@@ -978,6 +1429,7 @@ const StorageManager = (() => {
         getTreeRecursive: "/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=true",
         rawBlob: "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}",
         contents: "/repos/{owner}/{repo}/contents/{path}?ref={sha}",
+        //commit
         branch: "/repos/{owner}/{repo}/branches/{branch}",
         treeRecurse: "/repos/{owner}/{repo}/git/trees/{sha}?recursive=true",
         commit: "/repos/{owner}/{repo}/git/commits/{sha}",
@@ -986,60 +1438,205 @@ const StorageManager = (() => {
         refs: "/repos/{owner}/{repo}/git/refs/heads/{branch}"
     };
     Object.entries(urls).forEach((([k, v]) => {
-        "/" === v[0] && (urls[k] = "https://api.github.com" + urls[k]);
+        if (v[0] !== "/") return;
+        urls[k] = baseUrl + urls[k];
     }));
-    const stringify = o => JSON.stringify(o, null, 2), _fetchJSON = (url, opts) => fetch(url, opts).then((x => x.json())), NOT_IMPLEMENTED_RESPONSE = () => void console.warn("Someone wants to be debugging...") || stringify({
+    const stringify = o => JSON.stringify(o, null, 2);
+    const _fetchJSON = (url, opts) => fetch(url, opts).then((x => x.json()));
+    const fill = (url, obj) => Object.keys(obj).reduce(((all, one) => all.replace(`{${one}}`, obj[one])), url)
+    //const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    ;
+    const debug = () => {
+        console.warn("Someone wants to be debugging...");
+        //debugger;
+        };
+    const NOT_IMPLEMENTED_RESPONSE = () => debug() || stringify({
         message: "not implemented"
-    }), githubDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceCreate = githubProvider => async (payload, params) => {
+    });
+    const githubRequestHandler = githubProvider => async (which, handlerArgs) => {
         try {
-            const {storage: {stores: stores}, fetchContents: fetchContents, app: app} = githubProvider, {auth: auth, repo: repo} = payload, servicesStore = (stores.providers, 
-            stores.services), filesStore = stores.files, opts = {
+            const {params: params, event: event, service: service, parent: parent} = handlerArgs;
+            const req = event && event?.request?.clone();
+            const payload = req && await (req?.json());
+            const {providerType: providerType} = payload || {};
+            if (which === "createCommit") {
+                return await githubProvider.createCommit(payload, params);
+            }
+            const isSupported = providerType ? providerType === "github-provider" : (service || parent)?.type === "github";
+            if (!isSupported) return;
+            const githubHandler = githubProvider[which];
+            if (!githubHandler) return;
+            const notANetReqHandler = [ "filesUpdate" ].includes(which);
+            return notANetReqHandler ? await githubHandler(handlerArgs) : await githubHandler(payload, params);
+        } catch (e) {}
+        return;
+    };
+    const githubTest = githubProvider => async (payload, params) => {
+        try {
+            const {storage: storage} = githubProvider;
+            const {auth: auth, repo: repo, branch: branch} = payload;
+            const opts = {
                 headers: {}
             };
-            auth && (opts.headers.authorization = `token ${auth}`), opts.headers.Accept = "application/vnd.github.v3+json";
+            if (auth) opts.headers.authorization = `token ${auth}`;
+            opts.headers.Accept = "application/vnd.github.v3+json";
+            const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
+            let {limit: limit, remaining: remaining, reset: reset} = result?.resources?.core;
+            reset = new Date(reset * 1e3).toLocaleString("sv").split(" ").reverse().join(" ");
+            console.log(stringify({
+                limit: limit,
+                remaining: remaining,
+                reset: reset
+            }));
+            return stringify({
+                success: true,
+                ...{
+                    limit: limit,
+                    remaining: remaining,
+                    reset: reset
+                }
+            });
+        } catch (error) {
+            return stringify({
+                error: error
+            });
+        }
+    };
+    const githubCreate = githubProvider => async (payload, params) => {
+        try {
+            const {storage: storage} = githubProvider;
+            const {auth: auth, repo: repo, branch: branch} = payload;
+            const providersStore = storage.stores.providers;
+            console.log({
+                payload: payload,
+                params: params
+            });
+            // check if provider exists
+            // if exists then update
+            // don't overwrite access_token if not present in payload ???
+            // if not exists then create
+            // save access_token
+            // save type = github
+            // other properties?
+                        return NOT_IMPLEMENTED_RESPONSE();
+        } catch (error) {
+            console.error(error);
+            return stringify({
+                error: error
+            });
+        }
+    };
+    const githubRead = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+    const githubDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+    const githubServiceCreate = githubProvider => async (payload, params) => {
+        try {
+            const {storage: {stores: stores}, fetchContents: fetchContents, app: app} = githubProvider;
+            // TODO: should not use auth from this call (should exist on provider)
+                        const {auth: auth, repo: repo} = payload;
+            const providersStore = stores.providers;
+            const servicesStore = stores.services;
+            const filesStore = stores.files;
+            //console.log({ payload, params });
+                        const opts = {
+                headers: {}
+            };
+            if (auth) opts.headers.authorization = `token ${auth}`;
+            opts.headers.Accept = "application/vnd.github.v3+json";
             const getDefaultBranch = async () => {
-                const repoInfoUrl = urls.repoInfo.replace("{owner}/{repo}", repo), {default_branch: default_branch} = await githubProvider.fetchJSON(repoInfoUrl, opts);
+                const repoInfoUrl = urls.repoInfo.replace("{owner}/{repo}", repo);
+                const {default_branch: default_branch} = await githubProvider.fetchJSON(repoInfoUrl, opts);
                 return default_branch;
-            }, branch = payload.branch || await getDefaultBranch(), latestCommitUrl = urls.latestCommit.replace("{owner}/{repo}", repo).replace("{branch}", branch), {commit: {sha: sha}} = await githubProvider.fetchJSON(latestCommitUrl, opts), getTreeUrl = urls.getTreeRecursive.replace("{owner}/{repo}", repo).replace("{tree_sha}", sha), {tree: tree, truncated: truncated} = await githubProvider.fetchJSON(getTreeUrl, opts);
-            truncated && console.warn("github repo tree truncated - try without recursive flag");
-            const ghFileItems = tree.filter((x => "blob" === x.type)), getOneFile = async (ghFile, commitSha) => {
-                const contents = await fetchContents((file = ghFile, urls.rawBlob.replace("{owner}/{repo}", repo).replace("{branch}", commitSha || branch).replace("{path}", file.path)));
-                var file;
+            };
+            const branch = payload.branch || await getDefaultBranch();
+            // TODO: check if provider exists, reject if not (create it, no?)
+            // pull tree (includes files info) from github
+                        const latestCommitUrl = urls.latestCommit.replace("{owner}/{repo}", repo).replace("{branch}", branch);
+            const {commit: {sha: sha}} = await githubProvider.fetchJSON(latestCommitUrl, opts);
+            const getTreeUrl = urls.getTreeRecursive.replace("{owner}/{repo}", repo).replace("{tree_sha}", sha);
+            const {tree: tree, truncated: truncated} = await githubProvider.fetchJSON(getTreeUrl, opts);
+            if (truncated) console.warn("github repo tree truncated - try without recursive flag");
+            //const ghTreeItems = tree.filter(x => x.type === 'tree');
+                        const ghFileItems = tree.filter((x => x.type === "blob"));
+            // pull files from github
+            /*
+			// does raw github access (not api) go against quota
+			// if so, warn the user that we can't do it without access token ??
+			// also, may be better to use API in the future
+			const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
+			let { remaining, reset, limit } = result?.resources?.core;
+			reset = new Date(reset*1000).toLocaleString('sv').split(' ').reverse().join(' ');
+
+			if(remaining < ghFileItems.length) {
+				const files = ghFileItems.length;
+				return stringify({
+					files, remaining, reset, limit,
+					error: 'file sync exceeds rate limit'
+				});
+			}
+			*/            const getOneFile = async (ghFile, commitSha) => {
+                const getRawUrl = file => urls.rawBlob.replace("{owner}/{repo}", repo).replace("{branch}", commitSha || branch).replace("{path}", file.path);
+                const contents = await fetchContents(getRawUrl(ghFile));
                 return {
                     ...ghFile,
                     contents: contents
                 };
             };
             for (let i = 0, len = ghFileItems.length; i < len; i++) {
-                const ghFile = ghFileItems[i], PLACEHOLDER = "##PLACEHOLDER##";
+                const ghFile = ghFileItems[i];
+                // TODO: could override JIT cache here according to some settimg/param
+                                const PLACEHOLDER = "##PLACEHOLDER##";
                 if (!ghFile.path.includes(".templates")) {
                     await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, PLACEHOLDER);
                     continue;
                 }
                 const {contents: contents} = await getOneFile(ghFile, sha);
                 await filesStore.setItem(`${repo}/${ghFileItems[i].path}`, contents);
-            }
-            let foundService = {};
+                //await sleep(50);
+                        }
+            // check if service exists
+                        let foundService = {};
             const keys = [];
             await servicesStore.iterate(((value, key) => {
-                keys.push(key), value.name === repo && (foundService = {
+                keys.push(key);
+                if (value.name === repo) foundService = {
                     key: key,
                     ...value
-                });
+                };
             }));
-            const newId = keys.length ? Math.max(...keys) + 1 : 3e3, githubToServiceTree = githubTreeItems => {
+            const newId = keys.length ? Math.max(...keys) + 1 : 3e3;
+ // this sucks
+                        const githubToServiceTree = githubTreeItems => {
                 const tree = {
                     [repo]: {}
-                }, root = tree[repo];
-                return githubTreeItems.forEach((item => {
-                    item.path.split("/").reduce(((all, one) => (all[one] = all[one] || {}, all[one])), root);
-                })), tree;
-            }, saveService = async (githubTree, commitSha) => {
-                const id = foundService.id || newId, thisService = {
+                };
+                const root = tree[repo];
+                githubTreeItems.forEach((item => {
+                    item.path.split("/").reduce(((all, one) => {
+                        all[one] = all[one] || {};
+                        return all[one];
+                    }), root);
+                }));
+                return tree;
+            };
+            /*
+				TODO: files in tree should include a url such as this
+				because blobs don't have mime types, but file contents do
+				GET https://api.github.com/repos/:owner/:repo/contents/:FILE_PATH?ref=SHA << file SHA
+				see https://stackoverflow.com/a/34460532/1627873
+
+				Also, auth for API should be handled... in some way
+
+				Also, should maybe preload .templates
+			*/            const saveService = async (githubTree, commitSha) => {
+                const id = foundService.id || newId;
+                const type = "github";
+                const name = repo;
+                const tree = githubToServiceTree(githubTree);
+                const thisService = {
                     id: id,
-                    type: "github",
-                    name: repo,
-                    tree: githubToServiceTree(githubTree),
+                    type: type,
+                    name: name,
+                    tree: tree,
                     owner: repo.split("/").slice(0, 1).join(""),
                     repo: repo.split("/").pop(),
                     git: {
@@ -1048,30 +1645,52 @@ const StorageManager = (() => {
                     },
                     branch: branch
                 };
-                return await servicesStore.setItem(id + "", thisService), {
+                // create or update service
+                                await servicesStore.setItem(id + "", thisService);
+                return {
                     id: id,
                     thisService: thisService
                 };
-            }, {id: id, thisService: thisService} = await saveService(tree, sha);
-            return await app.addServiceHandler({
+            };
+            const {id: id, thisService: thisService} = await saveService(tree, sha);
+            // may be issues with merging, but overwrite for now
+            // create files that do not exist
+            // overwrite files that already exist
+            // delete files that exist but not in github
+            //console.log({ ghTreeItems, ghFileItems });
+                        await app.addServiceHandler({
                 name: repo,
                 msg: "service added from github provider"
-            }), stringify({
+            });
+            return stringify({
                 result: {
                     services: [ thisService ]
                 }
             });
         } catch (error) {
-            return console.error(error), stringify({
+            console.error(error);
+            return stringify({
                 error: error
             });
         }
-    }, githubServiceRead = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceUpdate = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), githubServiceDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+    };
+    const githubServiceRead = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE();
+    const githubServiceUpdate = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE() // this should not return a network response
+    ;
+    const githubServiceDelete = githubProvider => async (payload, params) => NOT_IMPLEMENTED_RESPONSE()
+    /*
+		files: { path, content, operation }[], operation is one of [create, update, delete]
+		git: { owner, repo, branch }
+		auth: github authorization token,
+		message: commit message
+	*/;
     async function commit({files: files, git: git, auth: auth, message: message, fetchJSON: fetchJSON}) {
+        //TODO: message can be formatted in Title Description format by including \n\n between the two
         if (!files || !Array.isArray(files)) return {
             error: "no files were changed"
         };
-        if (!(files = files.filter((x => !x.ignore))).length) return {
+        files = files.filter((x => !x.ignore));
+        if (!files.length) return {
             error: "no files were changed"
         };
         if (!auth) return {
@@ -1095,31 +1714,22 @@ const StorageManager = (() => {
                 authorization: `token ${auth}`,
                 Accept: "application/vnd.github.v3+json"
             }
-        }, ghFetch = async (templateUrl, params = {}, extraOpts = {}) => {
-            const filledUrl = (url = templateUrl, obj = {
+        };
+        const ghFetch = async (templateUrl, params = {}, extraOpts = {}) => {
+            const filledUrl = fill(templateUrl, {
                 ...git,
                 ...params
-            }, Object.keys(obj).reduce(((all, one) => all.replace(`{${one}}`, obj[one])), url));
-            var url, obj;
+            });
             return await fetchJSON(filledUrl, {
                 ...opts,
                 ...extraOpts
             });
-        }, ghPost = async (url, params, body) => await ghFetch(url, params, {
+        };
+        const ghPost = async (url, params, body) => await ghFetch(url, params, {
             method: "POST",
             body: JSON.stringify(body)
-        }), fileToTree = ({path: path}, index) => ({
-            path: path,
-            mode: "100644",
-            type: "blob",
-            sha: blobs[index].sha
-        }), treeToTree = ({path: path, mode: mode, type: type, sha: sha}) => ({
-            path: path,
-            mode: mode,
-            type: type,
-            sha: sha
-        }), filesWithoutDeleted = files.filter((x => !x.deleteFile)), deletedFilePaths = files.filter((x => x.deleteFile)).map((x => x.path)), filePaths = filesWithoutDeleted.map((x => x.path));
-        blobs = await Promise.all(filesWithoutDeleted.map((({content: content}) => ghPost(urls.blobCreate, null, (content => {
+        });
+        const safeBase64 = content => {
             try {
                 return {
                     content: btoa(content),
@@ -1131,179 +1741,231 @@ const StorageManager = (() => {
                     encoding: "utf-8"
                 };
             }
-        })(content)))));
-        const latest = await ghFetch(urls.branch), fullTree = await ghFetch(urls.treeRecurse, {
-            sha: latest?.commit?.sha
-        }), createdTree = await ghPost(urls.tree, null, {
-            tree: (fwodel = filesWithoutDeleted, fullt = fullTree, fileps = filePaths, delfileps = deletedFilePaths, 
-            [ ...fwodel.map(fileToTree), ...fullt.tree.filter((x => "tree" !== x.type && !fileps.includes(x.path) && !delfileps.includes(x.path))).map(treeToTree) ])
+        };
+        const fileToTree = ({path: path}, index) => ({
+            path: path,
+            mode: "100644",
+            type: "blob",
+            sha: blobs[index].sha
         });
-        var fwodel, fullt, fileps, delfileps;
+        const treeToTree = ({path: path, mode: mode, type: type, sha: sha}) => ({
+            path: path,
+            mode: mode,
+            type: type,
+            sha: sha
+        });
+        const blobCreate = ({content: content}) => ghPost(urls.blobCreate, null, safeBase64(content));
+        const createNewTree = (fwodel, fullt, fileps, delfileps) => [ ...fwodel.map(fileToTree), ...fullt.tree.filter((x => x.type !== "tree" && !fileps.includes(x.path) && !delfileps.includes(x.path))).map(treeToTree) ];
+        const filesWithoutDeleted = files.filter((x => !x.deleteFile));
+        const deletedFilePaths = files.filter((x => x.deleteFile)).map((x => x.path));
+        const filePaths = filesWithoutDeleted.map((x => x.path));
+        blobs = await Promise.all(filesWithoutDeleted.map(blobCreate));
+        const latest = await ghFetch(urls.branch);
+        const fullTree = await ghFetch(urls.treeRecurse, {
+            sha: latest?.commit?.sha
+        });
+        const createdTree = await ghPost(urls.tree, null, {
+            tree: createNewTree(filesWithoutDeleted, fullTree, filePaths, deletedFilePaths)
+        });
         const newCommit = await ghPost(urls.createCommit, null, {
             message: message,
             tree: createdTree.sha,
             parents: [ latest.commit.sha ]
         });
-        return ((await ghPost(urls.refs, null, {
+        const updateRefs = await ghPost(urls.refs, null, {
             sha: newCommit.sha
-        }))?.object?.url || "no commit url available").replace("https://api.github.com/repos", "https://github.com").replace("git/commits", "commit");
+        });
+        return (updateRefs?.object?.url || "no commit url available").replace("https://api.github.com/repos", "https://github.com").replace("git/commits", "commit");
     }
-    return class {
+    /*
+	in the future:
+		this will not automatically push commit to github, but instead create a commit to be pushed later
+		auth will come from a seperate login command, not manually passed
+		cwd will not be supported and instead some other method used to get current service, etc (maybe)
+	*/    const githubCreateCommit = githubProvider => async (payload, params) => {
+        try {
+            const {message: message, auth: auth, cwd: cwd} = payload;
+            if (!message) return stringify({
+                error: "commit message is required"
+            });
+            if (!auth) return stringify({
+                error: "auth token is required for commit"
+            });
+            if (!cwd) return stringify({
+                error: "current working directory (cwd) is required for commit"
+            });
+            const {storage: {stores: stores}, utils: utils} = githubProvider;
+            const servicesStore = stores.services;
+            const changesStore = stores.changes;
+            const filesStore = stores.files;
+            const {flattenObject: flattenObject} = utils;
+            let service;
+            await servicesStore.iterate(((value, key) => {
+                const {tree: tree, name: name} = value;
+                if (cwd === `${name}/`) {
+                    service = value;
+                    return true;
+                }
+                const flattened = flattenObject(tree);
+                if (flattened.includes(cwd)) {
+                    service = value;
+                    return true;
+                }
+            }));
+            if (!service || !service.name || !service.branch || !service.repo || service?.type !== "github") {
+                throw new Error("missing or malformed service");
+            }
+            const svcRegExp = new RegExp("^" + service.name + "/", "g");
+            const {owner: owner, repo: repo, branch: branch} = service;
+            const git = {
+                owner: owner,
+                repo: repo,
+                branch: branch
+            };
+            const files = [];
+            const changes = [];
+            const changesKeys = await changesStore.keys();
+            for (let i = 0, len = changesKeys.length; i < len; i++) {
+                const key = changesKeys[i];
+                if (!svcRegExp.test(key)) continue;
+                const change = await changesStore.getItem(key);
+                if (!change?.service) continue;
+                const {type: operation, value: content, service: {name: parent}, deleteFile: deleteFile} = change;
+                if (!parent) continue;
+                if (parent !== service.name) continue;
+                const path = key.replace(svcRegExp, "");
+                const file = {
+                    path: path,
+                    content: content,
+                    operation: operation,
+                    deleteFile: deleteFile
+                };
+                if (file.path.startsWith(".git/")) file.ignore = true;
+                files.push(file);
+                changes.push({
+                    ...change,
+                    key: key
+                });
+            }
+            let commitResponse;
+            if (files.filter((x => !x.ignore)).length) {
+                commitResponse = await commit({
+                    auth: auth,
+                    files: files,
+                    git: git,
+                    message: message,
+                    fetchJSON: githubProvider.fetchJSON
+                });
+                if (!commitResponse) throw new Error("commit failed");
+                if (commitResponse.error) throw new Error(commitResponse.error);
+            } else {
+                commitResponse = {
+                    error: "no files changed"
+                };
+            }
+            for (let i = 0, len = files.length; i < len; i++) {
+                const change = changes[i];
+                if (change.deleteFile) {
+                    await filesStore.removeItem(change.key);
+                } else {
+                    await filesStore.setItem(change.key, change.value);
+                }
+                await changesStore.removeItem(change.key);
+            }
+            return stringify({
+                commitResponse: commitResponse
+            });
+        } catch (e) {
+            return stringify({
+                commitResponse: {
+                    error: e.message
+                }
+            });
+        }
+    };
+    class GithubProvider {
         constructor({storage: storage, fetchContents: fetchContents, app: app, utils: utils}) {
             return new Promise(((resolve, reject) => {
                 try {
-                    this.handler = (githubProvider = this, async (which, handlerArgs) => {
-                        try {
-                            const {params: params, event: event, service: service, parent: parent} = handlerArgs, req = event && event?.request?.clone(), payload = req && await (req?.json()), {providerType: providerType} = payload || {};
-                            if ("createCommit" === which) return await githubProvider.createCommit(payload, params);
-                            if (!(providerType ? "github-provider" === providerType : "github" === (service || parent)?.type)) return;
-                            const githubHandler = githubProvider[which];
-                            if (!githubHandler) return;
-                            return [ "filesUpdate" ].includes(which) ? await githubHandler(handlerArgs) : await githubHandler(payload, params);
-                        } catch (e) {}
-                    }), this.storage = storage, this.fetchContents = fetchContents, this.fetchJSON = _fetchJSON, 
-                    this.app = app, this.utils = utils, this.test = (githubProvider => async (payload, params) => {
-                        try {
-                            const {storage: storage} = githubProvider, {auth: auth, repo: repo, branch: branch} = payload, opts = {
-                                headers: {}
-                            };
-                            auth && (opts.headers.authorization = `token ${auth}`), opts.headers.Accept = "application/vnd.github.v3+json";
-                            const result = await githubProvider.fetchJSON(urls.rateLimit, opts);
-                            let {limit: limit, remaining: remaining, reset: reset} = result?.resources?.core;
-                            return reset = new Date(1e3 * reset).toLocaleString("sv").split(" ").reverse().join(" "), 
-                            console.log(stringify({
-                                limit: limit,
-                                remaining: remaining,
-                                reset: reset
-                            })), stringify({
-                                success: !0,
-                                limit: limit,
-                                remaining: remaining,
-                                reset: reset
-                            });
-                        } catch (error) {
-                            return stringify({
-                                error: error
-                            });
-                        }
-                    })(this), this.create = (githubProvider => async (payload, params) => {
-                        try {
-                            const {storage: storage} = githubProvider, {auth: auth, repo: repo, branch: branch} = payload;
-                            return storage.stores.providers, console.log({
-                                payload: payload,
-                                params: params
-                            }), NOT_IMPLEMENTED_RESPONSE();
-                        } catch (error) {
-                            return console.error(error), stringify({
-                                error: error
-                            });
-                        }
-                    })(this), this.read = async (payload, params) => NOT_IMPLEMENTED_RESPONSE(), this.update = githubDelete(), 
-                    this.delete = githubDelete(), this.servicesCreate = githubServiceCreate(this), this.servicesRead = githubServiceRead(), 
-                    this.servicesUpdate = githubServiceUpdate(), this.servicesDelete = githubServiceDelete(), 
-                    this.filesCreate = githubServiceCreate(this), this.filesRead = githubServiceRead(), 
-                    this.filesUpdate = githubServiceUpdate(), this.filesDelete = githubServiceDelete(), 
-                    this.createCommit = (githubProvider => async (payload, params) => {
-                        try {
-                            const {message: message, auth: auth, cwd: cwd} = payload;
-                            if (!message) return stringify({
-                                error: "commit message is required"
-                            });
-                            if (!auth) return stringify({
-                                error: "auth token is required for commit"
-                            });
-                            if (!cwd) return stringify({
-                                error: "current working directory (cwd) is required for commit"
-                            });
-                            const {storage: {stores: stores}, utils: utils} = githubProvider, servicesStore = stores.services, changesStore = stores.changes, filesStore = stores.files, {flattenObject: flattenObject} = utils;
-                            let service;
-                            if (await servicesStore.iterate(((value, key) => {
-                                const {tree: tree, name: name} = value;
-                                return cwd === `${name}/` || flattenObject(tree).includes(cwd) ? (service = value, 
-                                !0) : void 0;
-                            })), !(service && service.name && service.branch && service.repo && "github" === service?.type)) throw new Error("missing or malformed service");
-                            const svcRegExp = new RegExp("^" + service.name + "/", "g"), {owner: owner, repo: repo, branch: branch} = service, git = {
-                                owner: owner,
-                                repo: repo,
-                                branch: branch
-                            }, files = [], changes = [], changesKeys = await changesStore.keys();
-                            for (let i = 0, len = changesKeys.length; i < len; i++) {
-                                const key = changesKeys[i];
-                                if (!svcRegExp.test(key)) continue;
-                                const change = await changesStore.getItem(key);
-                                if (!change?.service) continue;
-                                const {type: operation, value: content, service: {name: parent}, deleteFile: deleteFile} = change;
-                                if (!parent) continue;
-                                if (parent !== service.name) continue;
-                                const file = {
-                                    path: key.replace(svcRegExp, ""),
-                                    content: content,
-                                    operation: operation,
-                                    deleteFile: deleteFile
-                                };
-                                file.path.startsWith(".git/") && (file.ignore = !0), files.push(file), changes.push({
-                                    ...change,
-                                    key: key
-                                });
-                            }
-                            let commitResponse;
-                            if (files.filter((x => !x.ignore)).length) {
-                                if (commitResponse = await commit({
-                                    auth: auth,
-                                    files: files,
-                                    git: git,
-                                    message: message,
-                                    fetchJSON: githubProvider.fetchJSON
-                                }), !commitResponse) throw new Error("commit failed");
-                                if (commitResponse.error) throw new Error(commitResponse.error);
-                            } else commitResponse = {
-                                error: "no files changed"
-                            };
-                            for (let i = 0, len = files.length; i < len; i++) {
-                                const change = changes[i];
-                                change.deleteFile ? await filesStore.removeItem(change.key) : await filesStore.setItem(change.key, change.value), 
-                                await changesStore.removeItem(change.key);
-                            }
-                            return stringify({
-                                commitResponse: commitResponse
-                            });
-                        } catch (e) {
-                            return stringify({
-                                commitResponse: {
-                                    error: e.message
-                                }
-                            });
-                        }
-                    })(this), resolve(this);
+                    this.handler = githubRequestHandler(this);
+                    this.storage = storage;
+                    this.fetchContents = fetchContents;
+                    this.fetchJSON = _fetchJSON;
+                    this.app = app;
+                    this.utils = utils;
+                    // the provider  user entered info <-> fiug providersStore
+                    // store details about how each service connects to github
+                                        this.test = githubTest(this);
+                    this.create = githubCreate(this);
+                    this.read = githubRead(this);
+                    this.update = githubDelete(this);
+                    this.delete = githubDelete(this);
+                    // child of the provider  gh repository <-> fiug servicesStore
+                    // get repo from github, store tree in servicesStore
+                    // modify service tree, sync github
+                                        this.servicesCreate = githubServiceCreate(this);
+                    this.servicesRead = githubServiceRead(this);
+                    this.servicesUpdate = githubServiceUpdate(this);
+                    this.servicesDelete = githubServiceDelete(this);
+                    // files from repository  gh repo files <-> fiug filesStore
+                    // change a files contents, sync to github
+                                        this.filesCreate = githubServiceCreate(this);
+                    this.filesRead = githubServiceRead(this);
+                    this.filesUpdate = githubServiceUpdate(this);
+                    this.filesDelete = githubServiceDelete(this);
+                    this.createCommit = githubCreateCommit(this);
+                    resolve(this);
                 } catch (error) {
                     reject(error);
                 }
-                var githubProvider;
             }));
         }
-    };
-})(), ServicesManager = (() => {
-    const stringify = o => JSON.stringify(o, null, 2), clone = o => {
-        if (o) try {
+    }
+    return GithubProvider;
+})();
+
+const ServicesManager = (() => {
+    const useNew = true;
+    const stringify = o => JSON.stringify(o, null, 2);
+    const clone = o => {
+        if (!o) return;
+        try {
             return JSON.parse(stringify(o));
         } catch (e) {
             return;
         }
-    }, unique = a => [ ...new Set(a) ];
+    };
+    const unique = a => [ ...new Set(a) ];
     function objectPath(obj, path) {
         var result = obj;
         try {
-            return path.split("/").every((function(prop) {
-                return "." === prop || (void 0 === result[prop] ? (result = void 0, !1) : (result = result[prop], 
-                !0));
-            })), result;
+            var props = path.split("/");
+            props.every((function propsEveryCb(prop) {
+                if (prop === ".") return true;
+                if (typeof result[prop] === "undefined") {
+                    result = undefined;
+                    return false;
+                }
+                result = result[prop];
+                return true;
+            }));
+            return result;
         } catch (e) {
             return;
         }
     }
-    const pipe = (...fns) => x => fns.reduce(((v, f) => f(v)), x), stripFrontDotSlash = x => x.replace(/^\.\//, ""), handleServiceCreate = ({app: app, storage: storage, providers: providers}) => async (params, event) => {
-        const servicesStore = storage.stores.services, filesStore = storage.stores.files, {id: id} = params;
-        if ("provider" === id) return await providers.createServiceHandler(event);
+    const pipe = (...fns) => x => fns.reduce(((v, f) => f(v)), x);
+    const stripFrontDotSlash = x => x.replace(/^\.\//, "");
+    const handleServiceCreate = ({app: app, storage: storage, providers: providers}) => async (params, event) => {
+        const servicesStore = storage.stores.services;
+        const filesStore = storage.stores.files;
+        // event.request.arrayBuffer()
+        // event.request.blob()
+        // event.request.json()
+        // event.request.text()
+        // event.request.formData()
+                const {id: id} = params;
+        if (id === "provider") return await providers.createServiceHandler(event);
         const {name: name} = await event.request.json() || {};
         if (!id) return stringify({
             params: params,
@@ -1315,7 +1977,10 @@ const StorageManager = (() => {
             event: event,
             error: "name required for service create!"
         });
-        console.log("/service/create/:id? triggered"), await servicesStore.setItem(id + "", {
+        console.log("/service/create/:id? triggered");
+        //return stringify({ params, event });
+        // create the service in store 
+                await servicesStore.setItem(id + "", {
             name: name,
             id: id,
             tree: {
@@ -1326,43 +1991,61 @@ const StorageManager = (() => {
                     "package.json": {}
                 }
             }
-        }), filesStore.setItem(`./${name}/package.json`, {
+        });
+        filesStore.setItem(`./${name}/package.json`, {
             main: "package.json",
             comment: "this is an example package.json"
-        }), filesStore.setItem(`./${name}/.templates/json.html`, "\n\t\t\t\t<html>\n\t\t\t\t\t\t<p>basic json template output</p>\n\t\t\t\t\t\t<pre>{{template_value}}</pre>\n\t\t\t\t</html>\n\t\t\t\t"), 
-        await app.addServiceHandler({
+        });
+        filesStore.setItem(`./${name}/.templates/json.html`, `\n\t\t\t\t<html>\n\t\t\t\t\t\t<p>basic json template output</p>\n\t\t\t\t\t\t<pre>{{template_value}}</pre>\n\t\t\t\t</html>\n\t\t\t\t`);
+        // make service available from service worker (via handler)
+                await app.addServiceHandler({
             name: name,
             msg: "served from fresh baked"
         });
-        const services = storage.defaultServices();
+        // return current service
+                const services = storage.defaultServices();
         return stringify({
             result: {
-                services: [ services.filter((x => 777 === Number(x.id))) ]
+                services: [ services.filter((x => Number(x.id) === 777)) ]
             }
         });
-    }, handleServiceChange = ({storage: storage, utils: utils, templates: templates}) => async (params, event) => {
+    };
+    const handleServiceChange = ({storage: storage, utils: utils, templates: templates}) => async (params, event) => {
         const servicesStore = storage.stores.services;
         storage.stores.files;
         const changesStore = storage.stores.changes;
-        let jsonData, fileData;
+        let jsonData;
         try {
             const clonedRequest = event.request.clone();
             jsonData = await clonedRequest.json();
         } catch (e) {}
+        let fileData;
         try {
             if (!jsonData) {
                 const formData = await event.request.formData();
-                jsonData = JSON.parse(formData.get("json")), fileData = formData.get("file");
+                jsonData = JSON.parse(formData.get("json"));
+                fileData = formData.get("file");
             }
         } catch (e) {}
         try {
             let {path: path, code: code, command: command, service: serviceName} = jsonData;
-            fileData && (code = fileData || "");
+            if (fileData) {
+                code = fileData || "";
+            }
             const service = await servicesStore.iterate(((value, key) => {
                 if (value.name === serviceName) return value;
+                return;
             }));
-            "github" === service.type && "./" == `${path.slice(0, 2)}` && (path = path.slice(2)), 
-            "default" === service.type && "./" == `${path.slice(0, 2)}` && (path = path.slice(2)), 
+            // github services (and default service) don't store files with ./ prepended
+            // and also this should be done through provider...
+            // also, would expect to not change the file, instead add a change in changes table
+            // ^^ and restore that on read
+                        if (service.type === "github" && `${path.slice(0, 2)}` === "./") {
+                path = path.slice(2);
+            }
+            if (service.type === "default" && `${path.slice(0, 2)}` === "./") {
+                path = path.slice(2);
+            }
             await changesStore.setItem(path, {
                 type: "update",
                 value: code,
@@ -1370,9 +2053,16 @@ const StorageManager = (() => {
                     const {tree: tree, ...rest} = service;
                     return rest;
                 })()
-            }), service && "upsert" === command && (service.tree = utils.treeInsertFile(path, service.tree), 
-            await servicesStore.setItem(service.id + "", service)), path.includes("/.templates/") && await templates.refresh();
-            const metaData = () => "";
+            });
+            if (service && command === "upsert") {
+                service.tree = utils.treeInsertFile(path, service.tree);
+                await servicesStore.setItem(service.id + "", service);
+            }
+            if (path.includes("/.templates/")) {
+                await templates.refresh();
+            }
+            const metaData = () => "" //TODO
+            ;
             return stringify({
                 result: {
                     path: path,
@@ -1384,21 +2074,35 @@ const StorageManager = (() => {
                 error: error
             });
         }
-    }, handleServiceGetChanges = ({storage: storage, utils: utils, templates: templates}) => async (params, event, query) => {
-        const {flattenObject: flattenObject} = utils, servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes, {cwd: cwd} = query;
+    };
+    const handleServiceGetChanges = ({storage: storage, utils: utils, templates: templates}) => async (params, event, query) => {
+        const {flattenObject: flattenObject} = utils;
+        const servicesStore = storage.stores.services;
+        const filesStore = storage.stores.files;
+        const changesStore = storage.stores.changes;
+        const {cwd: cwd} = query;
         let service;
         cwd && await servicesStore.iterate(((value, key) => {
             const {tree: tree} = value;
-            if (flattenObject(tree).includes(cwd)) return service = value.name, !0;
+            const flattened = flattenObject(tree);
+            if (flattened.includes(cwd)) {
+                service = value.name;
+                return true;
+            }
         }));
-        const changes = [], changesKeys = await changesStore.keys();
+        const changes = [];
+        const changesKeys = await changesStore.keys();
         for (let i = 0, len = changesKeys.length; i < len; i++) {
-            const key = changesKeys[i], value = await changesStore.getItem(key), parent = value?.service?.name;
-            parent && (service && parent !== service || changes.push({
+            const key = changesKeys[i];
+            const value = await changesStore.getItem(key);
+            const parent = value?.service?.name;
+            if (!parent) continue;
+            if (service && parent !== service) continue;
+            changes.push({
                 fileName: key,
                 ...value,
                 original: await filesStore.getItem(key)
-            }));
+            });
         }
         try {
             return stringify({
@@ -1410,14 +2114,27 @@ const StorageManager = (() => {
                 error: error
             });
         }
-    }, _operationsUpdater = (() => {
+    }
+    //smoking this right now
+    //https://medium.com/javascript-scene/reduce-composing-software-fe22f0c39a1d
+    //https://medium.com/javascript-scene/functors-categories-61e031bac53f#.4hqndcx22
+    ;
+    const _operationsUpdater = (() => {
         const getBody = operation => {
-            const convertStoreObject = (code = {}) => (Object.entries(code).forEach((([k, v]) => {
-                if ("./" !== k.slice(2)) {
-                    if ("/" === k[0]) return delete code[k], void (code["." + k] = v);
-                    delete code[k], code["./" + k] = v;
-                }
-            })), code);
+            const convertStoreObject = (code = {}) => {
+                const entries = Object.entries(code);
+                entries.forEach((([k, v]) => {
+                    if (k.slice(2) === "./") return;
+                    if (k[0] === "/") {
+                        delete code[k];
+                        code["." + k] = v;
+                        return;
+                    }
+                    delete code[k];
+                    code["./" + k] = v;
+                }));
+                return code;
+            };
             return {
                 ...operation,
                 service: operation.service.name,
@@ -1427,94 +2144,104 @@ const StorageManager = (() => {
                 filesToAdd: [],
                 filesToDelete: []
             };
-        }, adjustMoveTarget = operation => {
-            if (!(operation.name.includes("move") || operation.name.includes("copy"))) return operation;
+        };
+        const adjustMoveTarget = operation => {
+            const isMove = operation.name.includes("move") || operation.name.includes("copy");
+            if (!isMove) return operation;
             let {target: target, source: source} = operation;
-            return operation.name.includes("Folder"), target.endsWith("/") && (target += source.split("/").pop()), 
-            {
+            operation.name.includes("Folder");
+            //if(isFolder && !target.endsWith('/')) target += '/';
+                        if (target.endsWith("/")) {
+                target += source.split("/").pop();
+            }
+            return {
                 ...operation,
                 target: target
             };
-        }, adjustRenameTarget = operation => {
-            if (!operation.name.includes("rename")) return operation;
+        };
+        const adjustRenameTarget = operation => {
+            const isRename = operation.name.includes("rename");
+            if (!isRename) return operation;
             let target = operation.target;
-            return !operation.target.includes("/") && operation.source.includes("/") && (target = [ ...operation.source.split("/").slice(0, -1), target ].join("/")), 
-            {
+            if (!operation.target.includes("/") && operation.source.includes("/")) {
+                target = [ ...operation.source.split("/").slice(0, -1), target ].join("/");
+            }
+            return {
                 ...operation,
                 target: target
             };
-        }, keepHelper = operation => {
-            let {filesToAdd: filesToAdd, filesToDelete: filesToDelete} = operation;
-            const {tree: tree, code: code, utils: utils, service: service, changes: changes} = operation;
-            utils.keepHelper(tree, (() => {
-                const changesFiles = Object.entries(changes).map((([path, value]) => ({
-                    name: path.split("/").pop(),
-                    path: path
-                })));
-                return [ ...Object.entries(code).map((([path, value]) => ({
-                    name: path.split("/").pop(),
-                    path: path
-                }))), ...changesFiles ];
-            })()).filter((x => x.includes("/.keep"))).map((x => "." + x)).forEach((k => {
-                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", ""), parentInTree = objectPath(tree[service], parentPath) || {};
-                parentInTree && (parentInTree[".keep"] = {}, code[k] = " ", filesToAdd.push(k), 
-                filesToDelete = filesToDelete.filter((x => x !== k)));
-            }));
-            return Object.keys(operation.code).filter((x => x.includes("/.keep"))).forEach((k => {
-                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", ""), parentInTree = objectPath(tree[service], parentPath) || {};
-                if (0 === Object.keys(parentInTree).filter((x => ".keep" !== x)).length) return;
-                delete parentInTree[".keep"], delete code[k];
-                filesToAdd.find((x => x === k)) || filesToDelete.push(k), filesToAdd = filesToAdd.filter((x => x !== k));
-            })), {
-                ...operation,
-                filesToAdd: filesToAdd,
-                filesToDelete: filesToDelete,
-                code: code,
-                tree: tree
-            };
-        }, addSourceToTarget = pipe((operation => {
-            if (operation.name.includes("File")) return operation;
-            const sourcePath = `./${operation.service}/${operation.source}`, targetPath = `./${operation.service}/${operation.target}`, children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/"))), childrenMappedToTarget = children.map((child => {
+        };
+        const addChildrenToTarget = operation => {
+            const isFile = operation.name.includes("File");
+            if (isFile) return operation;
+            const sourcePath = `./${operation.service}/${operation.source}`;
+            const targetPath = `./${operation.service}/${operation.target}`;
+            const children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/")));
+            const childrenMappedToTarget = children.map((child => {
                 const childRelative = child.split(operation.source).pop();
                 return `${targetPath}${childRelative}`;
-            })), filesToAdd = [ ...operation.filesToAdd, ...childrenMappedToTarget ];
-            return children.forEach(((c, i) => {
+            }));
+            const filesToAdd = [ ...operation.filesToAdd, ...childrenMappedToTarget ];
+            children.forEach(((c, i) => {
                 operation.code[childrenMappedToTarget[i]] = async store => await store.getItem(c);
-            })), {
+            }));
+            return {
                 ...operation,
                 filesToAdd: filesToAdd
             };
-        }), (operation => {
-            const {service: service, source: source, target: target, tree: tree} = operation, sourceValue = objectPath(tree[service], source) || {}, targetSplit = target.split("/"), targetKey = 1 === targetSplit.length ? targetSplit[0] : targetSplit.slice(-1).join("/"), targetParentPath = 1 === targetSplit.length ? "" : targetSplit.slice(0, -1).join("/");
-            return (1 === targetSplit.length ? tree[service] : objectPath(tree[service], targetParentPath))[targetKey] = sourceValue, 
-            {
+        };
+        const addTargetToTree = operation => {
+            const {service: service, source: source, target: target, tree: tree} = operation;
+            const sourceValue = objectPath(tree[service], source) || {};
+            const targetSplit = target.split("/");
+            const targetKey = targetSplit.length === 1 ? targetSplit[0] : targetSplit.slice(-1).join("/");
+            const targetParentPath = targetSplit.length === 1 ? "" : targetSplit.slice(0, -1).join("/");
+            const targetParent = targetSplit.length === 1 ? tree[service] : objectPath(tree[service], targetParentPath);
+            targetParent[targetKey] = sourceValue;
+            return {
                 ...operation,
                 tree: tree
             };
-        }), (operation => {
-            if (!operation.name.includes("File")) return operation;
-            const path = `./${operation.service}/${operation.target}`, update = `./${operation.service}/${operation.source}`, fileGetter = "addFile" === operation.name ? async store => operation.source || "" : async store => await store.getItem(update);
+        };
+        const addTargetToFiles = operation => {
+            const isFile = operation.name.includes("File");
+            if (!isFile) return operation;
+            const path = `./${operation.service}/${operation.target}`;
+            const update = `./${operation.service}/${operation.source}`;
+            const fileGetter = operation.name === "addFile" ? async store => operation.source || "" : async store => await store.getItem(update);
             operation.code[path] = fileGetter;
             const filesToAdd = [ ...operation.filesToAdd, path ];
             return {
                 ...operation,
                 filesToAdd: filesToAdd
             };
-        })), deleteSource = pipe((operation => {
-            if (operation.name.includes("File")) return operation;
-            const sourcePath = `./${operation.service}/${operation.source}`, children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/"))), filesToDelete = [ ...operation.filesToDelete, ...children ];
-            return children.forEach((c => {
+        };
+        const deleteChildrenFromSource = operation => {
+            const isFile = operation.name.includes("File");
+            if (isFile) return operation;
+            const sourcePath = `./${operation.service}/${operation.source}`;
+            const children = unique([ ...Object.keys(operation.code), ...Object.keys(operation.changes) ]).filter((x => x.startsWith(sourcePath + "/")));
+            const filesToDelete = [ ...operation.filesToDelete, ...children ];
+            children.forEach((c => {
                 delete operation.code[c];
-            })), {
+            }));
+            return {
                 ...operation,
                 filesToDelete: filesToDelete
             };
-        }), (operation => {
-            const {service: service, source: source, tree: tree} = operation, sourceSplit = source.split("/"), sourceKey = 1 === sourceSplit.length ? sourceSplit[0] : sourceSplit.slice(-1).join("/"), sourceParentPath = 1 === sourceSplit.length ? "" : sourceSplit.slice(0, -1).join("/");
-            return delete (1 === sourceSplit.length ? tree[service] : objectPath(tree[service], sourceParentPath))[sourceKey], 
-            operation;
-        }), (operation => {
-            if (!operation.name.includes("File")) return operation;
+        };
+        const deleteSourceFromTree = operation => {
+            const {service: service, source: source, tree: tree} = operation;
+            const sourceSplit = source.split("/");
+            const sourceKey = sourceSplit.length === 1 ? sourceSplit[0] : sourceSplit.slice(-1).join("/");
+            const sourceParentPath = sourceSplit.length === 1 ? "" : sourceSplit.slice(0, -1).join("/");
+            const sourceParent = sourceSplit.length === 1 ? tree[service] : objectPath(tree[service], sourceParentPath);
+            delete sourceParent[sourceKey];
+            return operation;
+        };
+        const deleteSourceFromFiles = operation => {
+            const isFile = operation.name.includes("File");
+            if (!isFile) return operation;
             const path = `./${operation.service}/${operation.source}`;
             delete operation.code[`./${operation.service}/${operation.source}`];
             const filesToDelete = [ ...operation.filesToDelete, path ];
@@ -1522,7 +2249,60 @@ const StorageManager = (() => {
                 ...operation,
                 filesToDelete: filesToDelete
             };
-        })), init = (...fns) => pipe(getBody, adjustMoveTarget, adjustRenameTarget, ...fns, keepHelper), add = init(addSourceToTarget), copy = init(addSourceToTarget), move = init(addSourceToTarget, deleteSource), rename = init(addSourceToTarget, deleteSource), remove = init(deleteSource), operations = {
+        };
+        const keepHelper = operation => {
+            let {filesToAdd: filesToAdd, filesToDelete: filesToDelete} = operation;
+            const {tree: tree, code: code, utils: utils, service: service, changes: changes} = operation;
+            const mapCodeForHelper = () => {
+                const changesFiles = Object.entries(changes).map((([path, value]) => ({
+                    name: path.split("/").pop(),
+                    path: path
+                })));
+                const codeFiles = Object.entries(code).map((([path, value]) => ({
+                    name: path.split("/").pop(),
+                    path: path
+                })));
+                return [ ...codeFiles, ...changesFiles ];
+            };
+            const keepFilesFromHelper = utils.keepHelper(tree, mapCodeForHelper()).filter((x => x.includes("/.keep"))).map((x => "." + x));
+            keepFilesFromHelper.forEach((k => {
+                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", "");
+                const parentInTree = objectPath(tree[service], parentPath) || {};
+                if (!parentInTree) return;
+                parentInTree[".keep"] = {};
+                code[k] = " ";
+                filesToAdd.push(k);
+                filesToDelete = filesToDelete.filter((x => x !== k));
+            }));
+            const keepFilesInCode = Object.keys(operation.code).filter((x => x.includes("/.keep")));
+            keepFilesInCode.forEach((k => {
+                const parentPath = k.split("/").slice(0, -1).join("/").replace(service + "/", "");
+                const parentInTree = objectPath(tree[service], parentPath) || {};
+                const parentKeys = Object.keys(parentInTree).filter((x => x !== ".keep"));
+                if (parentKeys.length === 0) return;
+                delete parentInTree[".keep"];
+                delete code[k];
+                const keepIsAdded = filesToAdd.find((x => x === k));
+                if (!keepIsAdded) filesToDelete.push(k);
+                filesToAdd = filesToAdd.filter((x => x !== k));
+            }));
+            return {
+                ...operation,
+                filesToAdd: filesToAdd,
+                filesToDelete: filesToDelete,
+                code: code,
+                tree: tree
+            };
+        };
+        const addSourceToTarget = pipe(addChildrenToTarget, addTargetToTree, addTargetToFiles);
+        const deleteSource = pipe(deleteChildrenFromSource, deleteSourceFromTree, deleteSourceFromFiles);
+        const init = (...fns) => pipe(getBody, adjustMoveTarget, adjustRenameTarget, ...fns, keepHelper);
+        const add = init(addSourceToTarget);
+        const copy = init(addSourceToTarget);
+        const move = init(addSourceToTarget, deleteSource);
+        const rename = init(addSourceToTarget, deleteSource);
+        const remove = init(deleteSource);
+        const operations = {
             addFile: add,
             addFolder: add,
             moveFile: move,
@@ -1541,45 +2321,83 @@ const StorageManager = (() => {
             utils: utils,
             changes: changes
         });
-    })(), handleServiceUpdate = ({storage: storage, providers: providers, utils: utils}) => async (params, event) => {
-        const servicesStore = storage.stores.services, filesStore = storage.stores.files, changesStore = storage.stores.changes, editorStore = storage.stores.editor;
+    })();
+    const handleServiceUpdate = ({storage: storage, providers: providers, utils: utils}) => async (params, event) => {
+        const servicesStore = storage.stores.services;
+        const filesStore = storage.stores.files;
+        const changesStore = storage.stores.changes;
+        const editorStore = storage.stores.editor;
         try {
-            const {id: id} = params, body = await event.request.json(), {name: name, operation: operation} = body, isMoveOrRename = operation?.name?.includes("rename") || operation?.name?.includes("move"), isCopy = operation?.name?.includes("copy"), operationsUpdater = _operationsUpdater(operation);
+            const {id: id} = params;
+            const body = await event.request.json();
+            const {name: name, operation: operation} = body;
+            const isMoveOrRename = operation?.name?.includes("rename") || operation?.name?.includes("move");
+            const isCopy = operation?.name?.includes("copy");
+            const operationsUpdater = _operationsUpdater(operation);
             let update;
-            if (operationsUpdater) {
-                const _service = await servicesStore.getItem(id + ""), fileKeys = (await filesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`))), changeKeys = (await changesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`))), _code = fileKeys.reduce(((all, key) => ({
+            if (useNew && operationsUpdater) {
+                const _service = await servicesStore.getItem(id + "");
+                const fileKeys = (await filesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`)));
+                const changeKeys = (await changesStore.keys()).filter((key => key.startsWith(`./${_service.name}/`) || key.startsWith(`${_service.name}/`)));
+                const _code = fileKeys.reduce(((all, key) => ({
                     ...all,
                     [key]: ""
-                })), {}), _changed = changeKeys.reduce(((all, key) => ({
+                })), {});
+                const _changed = changeKeys.reduce(((all, key) => ({
                     ...all,
                     [key]: ""
                 })), {});
                 update = operationsUpdater(_service, _code, utils, _changed);
                 const getItem = (target, update) => async key => {
                     let formattedKey = key;
-                    "./" === key.slice(0, 2) && "github" === _service.type && (formattedKey = key.slice(2)), 
-                    "/" === key.slice(0, 1) && "github" === _service.type && (formattedKey = key.slice(1));
-                    const changed = await changesStore.getItem(formattedKey);
-                    if (changed && "update" === changed.type) return changed.value;
-                    if (changed && changed.deleteFile) {
-                        return update.filesToAdd = update.filesToAdd.filter((x => x !== target)), delete objectPath(update.tree, target.split("/").slice(0, -1).join("/"))[target.split("/").pop()], 
-                        "";
+                    if (key.slice(0, 2) === "./" && _service.type === "github") {
+                        formattedKey = key.slice(2);
                     }
-                    return await filesStore.getItem(formattedKey);
+                    if (key.slice(0, 1) === "/" && _service.type === "github") {
+                        formattedKey = key.slice(1);
+                    }
+                    const changed = await changesStore.getItem(formattedKey);
+                    if (changed && changed.type === "update") return changed.value;
+                    if (changed && changed.deleteFile) {
+                        update.filesToAdd = update.filesToAdd.filter((x => x !== target));
+                        let parent = objectPath(update.tree, target.split("/").slice(0, -1).join("/"));
+                        delete parent[target.split("/").pop()];
+                        return "";
+                    }
+                    const file = await filesStore.getItem(formattedKey);
+                    return file;
                 };
-                for (var key in update.code) "function" == typeof update.code[key] && (update.code[key] = await update.code[key]({
-                    getItem: getItem(key, update)
-                }));
+                for (var key in update.code) {
+                    if (typeof update.code[key] !== "function") continue;
+                    update.code[key] = await update.code[key]({
+                        getItem: getItem(key, update)
+                    });
+                }
             }
-            if (update && (body.code = Object.entries(update.code).map((([path, value]) => ({
-                name: path.split("/").pop(),
-                path: path.replace(/^\.\//, ""),
-                update: value
-            }))), body.tree = update.tree), !update && (isMoveOrRename || isCopy)) {
-                const service = await servicesStore.getItem(id + ""), filesFromService = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`)));
+            if (update) {
+                body.code = Object.entries(update.code).map((([path, value]) => ({
+                    name: path.split("/").pop(),
+                    path: path.replace(/^\.\//, ""),
+                    update: value
+                })));
+                body.tree = update.tree;
+            }
+            if (!update && (isMoveOrRename || isCopy)) {
+                const service = await servicesStore.getItem(id + "");
+                const filesFromService = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`)));
                 body.code = [];
                 for (var i = 0, len = filesFromService.length; i < len; i++) {
-                    const key = filesFromService[i], filename = operation.target.endsWith("/") ? operation.source.split("/").pop() : "", update = await filesStore.getItem(key), renameKey = (key, force) => isMoveOrRename || force ? key.replace(`./${service.name}/${operation.source}`, `./${service.name}/${operation.target}${filename}`) : key, copyFile = () => {
+                    const key = filesFromService[i];
+                    const filename = operation.target.endsWith("/") ? operation.source.split("/").pop() : "";
+                    const update = await filesStore.getItem(key);
+                    const renameKey = (key, force) => {
+                        if (!isMoveOrRename && !force) return key;
+                        return key.replace(
+                        //`${service.name}/${operation.source}`,
+                        //`${service.name}/${operation.target}`
+                        `./${service.name}/${operation.source}`, `./${service.name}/${operation.target}${filename}`);
+                    };
+                    const copyFile = () => {
                         if (!key.includes(`./${service.name}/${operation.source}`)) return;
                         const copiedFile = {
                             name: operation.target.split("/").pop(),
@@ -1592,60 +2410,131 @@ const StorageManager = (() => {
                         name: key.split("/").pop(),
                         update: update,
                         path: renameKey(key).replace(/^\./, "")
-                    }), isCopy && copyFile();
+                    });
+                    isCopy && copyFile();
                 }
                 body.tree = service.tree;
                 const getPosInTree = (path, tree) => ({
-                    parent: path.split("/").slice(0, -1).reduce(((all, one) => (all[one] = all[one] || {}, 
-                    all[one])), body.tree),
+                    parent: path.split("/").slice(0, -1).reduce(((all, one) => {
+                        all[one] = all[one] || {};
+                        return all[one];
+                    }), body.tree),
                     param: path.split("/").pop()
-                }), sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree), targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
-                targetPos.parent[targetPos.param || sourcePos.param] = sourcePos.parent[sourcePos.param], 
-                isMoveOrRename && delete sourcePos.parent[sourcePos.param];
+                });
+                const sourcePos = getPosInTree(`${service.name}/${operation.source}`, body.tree);
+                const targetPos = getPosInTree(`${service.name}/${operation.target}`, body.tree);
+                targetPos.parent[targetPos.param || sourcePos.param] = sourcePos.parent[sourcePos.param];
+                if (isMoveOrRename) {
+                    delete sourcePos.parent[sourcePos.param];
+                }
             }
-            const parsedCode = !Array.isArray(body.code) && utils.safe((() => JSON.parse(body.code)));
-            parsedCode && parsedCode.tree && (body.tree = parsedCode.tree, body.code = parsedCode.files);
+            //console.log(JSON.stringify(body.code, null, 2));
+            //console.log(JSON.stringify(body.tree, null, 2));
+                        const parsedCode = !Array.isArray(body.code) && utils.safe((() => JSON.parse(body.code)));
+            if (parsedCode && parsedCode.tree) {
+                body.tree = parsedCode.tree;
+                body.code = parsedCode.files;
+            }
+            const preExistingService = await servicesStore.getItem(id + "") || {};
             const service = {
-                ...await servicesStore.getItem(id + "") || {},
-                name: name,
-                tree: body.tree
+                ...preExistingService,
+                ...{
+                    name: name,
+                    tree: body.tree
+                }
             };
-            if (!service.name) return void console.error("cannot set meta store item without name");
+            if (!service.name) {
+                console.error("cannot set meta store item without name");
+                return;
+            }
             await servicesStore.setItem(id + "", service);
             const {filesToAdd: filesToAdd, filesToDelete: filesToDelete} = await (async () => {
                 if (update && update.filesToAdd && update.filesToDelete) return update;
-                const filesFromUpdateTree = utils.keepHelper(body.tree, body.code).map((x => `.${x}`)), filesInStore = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`))), filesToDelete = filesInStore.filter((file => !filesFromUpdateTree.includes(file)));
+                const filesFromUpdateTree = utils.keepHelper(body.tree, body.code).map((x => `.${x}`));
+                const filesInStore = (await filesStore.keys()).filter((key => key.startsWith(`./${service.name}/`)));
+                const filesToDelete = filesInStore.filter((file => !filesFromUpdateTree.includes(file)));
+                const filesToAdd = filesFromUpdateTree.filter((file => !filesInStore.includes(file)));
                 return {
-                    filesToAdd: filesFromUpdateTree.filter((file => !filesInStore.includes(file))),
+                    filesToAdd: filesToAdd,
                     filesToDelete: filesToDelete
                 };
             })();
+            // TODO: binary files
+                        const binaryFiles = [];
             for (let i = 0, len = filesToAdd.length; i < len; i++) {
-                const path = [ "github", "default" ].includes(service.type) ? stripFrontDotSlash(filesToAdd[i]) : filesToAdd[i], fileUpdate = body.code.find((x => `.${x.path}` === path || x.path === `/${path}` || x.path === path));
+                const path = [ "github", "default" ].includes(service.type) ? stripFrontDotSlash(filesToAdd[i]) : filesToAdd[i];
+                const fileUpdate = body.code.find((x => `.${x.path}` === path || x.path === `/${path}` || x.path === path));
+                const parent = service;
                 let fileUpdateCode;
-                fileUpdate?.update && (fileUpdateCode = fileUpdate.update, delete fileUpdate.update);
+                if (fileUpdate?.update) {
+                    fileUpdateCode = fileUpdate.update;
+                    delete fileUpdate.update;
+                }
                 const code = fileUpdateCode || "";
-                await changesStore.setItem(path, {
+ //TODO: if not in update, default for file
+                //await providers.fileChange({ path: filesToAdd[i], code, parent });
+                                await changesStore.setItem(path, {
                     type: "update",
                     value: code,
                     service: (() => {
                         const {tree: tree, ...rest} = service;
                         return rest;
                     })()
-                }), await editorStore.removeItem("/" + path);
-            }
+                });
+                await editorStore.removeItem("/" + path);
+                //TODO: I think this is a problem, not sure...
+                //files get written with blank string and dot in front of name
+                //await filesStore.setItem(path, code);
+                        }
             for (let i = 0, len = filesToDelete.length; i < len; i++) {
-                const path = "github" === service.type ? stripFrontDotSlash(filesToDelete[i]) : filesToDelete[i];
-                null !== await filesStore.getItem(path) ? await changesStore.setItem(path, {
-                    deleteFile: !0,
-                    service: (() => {
-                        const {tree: tree, ...rest} = service;
-                        return rest;
-                    })()
-                }) : await changesStore.removeItem(path);
+                const parent = service;
+                const path = service.type === "github" ? stripFrontDotSlash(filesToDelete[i]) : filesToDelete[i];
+                const existingFile = await filesStore.getItem(path);
+                if (existingFile !== null) {
+                    await changesStore.setItem(path, {
+                        deleteFile: true,
+                        service: (() => {
+                            const {tree: tree, ...rest} = service;
+                            return rest;
+                        })()
+                    });
+                    //await providers.fileChange({ path: filesToDelete[i], parent, deleteFile: true });
+                                } else {
+                    await changesStore.removeItem(path);
+                    //await providers.removeChange({ path: filesToDelete[i], parent });
+                                }
             }
-            const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1])), opened = await changesStore.getItem(`state-${service.name}-opened`) || [], selected = (opened.find((x => 0 === x.order)) || {}).name || "";
-            return stringify({
+            /*
+
+			this looks like it would:
+				erase all changes for this service
+				put those changes in file store
+
+			this is not exactly the desired behavior in current iteration...
+
+			const changedFiles = (await changesStore.keys())
+				//.filter(key => key.startsWith(`${service.name}/`));
+				.filter(key => key.startsWith(`./${service.name}/`));
+			for(let i = 0, len=changedFiles.length; i < len; i++){
+				const parent = service;
+				const path = changedFiles[i];
+				const { type, value: code } = await changesStore.getItem(path);
+				if(type !== 'update') continue;
+				await providers.fileChange({ path, code, parent });
+				await changesStore.removeItem(path);
+				await filesStore.setItem(path, code);
+			}
+
+			*/            const changed = (await changesStore.keys()).filter((x => x.startsWith(`${service.name}`))).map((x => x.split(service.name + "/")[1]));
+            const opened = await changesStore.getItem(`state-${service.name}-opened`) || [];
+            const selected = (opened.find((x => x.order === 0)) || {}).name || "";
+            /*
+				TODO:
+				addFile - select the file and show it opened
+				removeFile - remove from opened / selected
+				etc..
+				similar thing with treeState
+			*/            return stringify({
                 result: [ {
                     id: service.id,
                     name: service.name,
@@ -1678,76 +2567,126 @@ const StorageManager = (() => {
             });
         }
     };
-    return class {
+    const handleServiceDelete = () => (params, event) => {
+        console.log("/service/delete/:id? triggered");
+        return stringify({
+            params: params,
+            event: event
+        });
+    };
+    class ServicesManager {
         constructor({app: app, storage: storage, providers: providers, templates: templates, utils: utils}) {
-            this.app = app, this.storage = storage, this.providers = providers, this.templates = templates, 
-            this.utils = utils, this.handlers = {
+            this.app = app;
+            this.storage = storage;
+            this.providers = providers;
+            this.templates = templates;
+            this.utils = utils;
+            this.handlers = {
                 serviceCreate: handleServiceCreate(this),
                 serviceChange: handleServiceChange(this),
                 serviceGetChanges: handleServiceGetChanges(this),
                 serviceUpdate: handleServiceUpdate(this),
-                serviceDelete: (params, event) => (console.log("/service/delete/:id? triggered"), 
-                stringify({
-                    params: params,
-                    event: event
-                }))
+                serviceDelete: handleServiceDelete()
             };
         }
-    };
-})(), TemplateEngine = class {
-    templates=[];
-    constructor({storage: storage}) {
-        this.storage = storage, this.refresh = this.refresh.bind(this), this.NO_PREVIEW = '\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: system-ui, sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t</body>\n\t\t</html>\n\t\t'.replace(/^		/g, "");
     }
-    add(name, template) {
-        const newTemp = {
-            name: name,
-            extensions: [],
-            body: template,
-            tokens: [ "{{template_value}}", "{{markdown}}", "{{template_input}}" ],
-            matcher: () => !1
-        };
-        newTemp.extensions.push(name.split(".").shift()), newTemp.convert = contents => {
-            let xfrmed = newTemp.body + "";
-            return newTemp.tokens.forEach((t => {
-                xfrmed = xfrmed.replace(new RegExp(t, "g"), contents);
-            })), xfrmed;
-        }, this.templates.push(newTemp);
-    }
-    update(name, contents) {
-        const ext = name.split(".").shift(), matchingTemplates = this.templates.filter((t => t.extensions.includes(ext)));
-        matchingTemplates.forEach((m => m.body = contents)), matchingTemplates.length || this.add(name, contents);
-    }
-    getTemplate(filename = "", contents = "") {
-        const ext = filename.split(".").pop(), extMatch = this.templates.find((x => x.extensions.includes(ext)));
-        return extMatch || (() => {
-            if (filename.includes(".json") && contents.includes("file-type")) try {
-                const fileType = JSON.parse(contents)["file-type"];
-                if (!fileType) return;
-                return this.templates.find((x => x.extensions.includes(fileType)));
-            } catch (e) {
-                return void console.error(e);
+    return ServicesManager;
+})();
+
+const TemplateEngine = (() => {
+    const NO_PREVIEW = () => `\n\t\t<!DOCTYPE html>\n\t\t<html class="dark-enabled">\n\t\t\t<head>\n\t\t\t\t<meta charset="UTF-8">\n\t\t\t</head>\n\t\t\t<style>\n\t\t\t\t.no-preview {\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 0;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\theight: 100%;\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tjustify-content: center;\n\t\t\t\t\talign-items: center;\n\t\t\t\t\tfont-size: 1.5em;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t}\n\t\t\t\tbody {\n\t\t\t\t\tmargin: 0px;\n\t\t\t\t\tmargin-top: 40px;\n\t\t\t\t\theight: calc(100vh - 40px);\n\t\t\t\t\toverflow: hidden;\n\t\t\t\t\tcolor: var(--main-theme-text-color);\n\t\t\t\t\tbackground: var(--main-theme-color);\n\t\t\t\t\tfont-family: system-ui, sans-serif;\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<link rel="stylesheet" href="/colors.css" />\n\t\t\t<body>\n\t\t\t\t<div class="no-preview" title="No preview!">⠝⠕ ⠏⠗⠑⠧⠊⠑⠺</div>\n\t\t\t</body>\n\t\t</html>\n\t\t`.replace(/^		/g, "");
+    class TemplateEngine {
+        templates=[];
+        constructor({storage: storage}) {
+            this.storage = storage;
+            this.refresh = this.refresh.bind(this);
+            this.NO_PREVIEW = NO_PREVIEW();
+        }
+        add(name, template) {
+            const newTemp = {
+                name: name,
+                extensions: [],
+                body: template,
+                tokens: [ "{{template_value}}", "{{markdown}}", "{{template_input}}" ],
+                matcher: () => false
+ //TODO: matchers are not currently implemented
+                        };
+            newTemp.extensions.push(name.split(".").shift());
+            newTemp.convert = contents => {
+                let xfrmed = newTemp.body + "";
+                newTemp.tokens.forEach((t => {
+                    xfrmed = xfrmed.replace(new RegExp(t, "g"), contents);
+                    //xfrmed = xfrmed.replace(t, contents);
+                                }));
+                return xfrmed;
+            };
+            this.templates.push(newTemp);
+        }
+        update(name, contents) {
+            const ext = name.split(".").shift();
+            const matchingTemplates = this.templates.filter((t => t.extensions.includes(ext)));
+            matchingTemplates.forEach((m => m.body = contents));
+            if (!matchingTemplates.length) {
+                this.add(name, contents);
             }
-        })();
-    }
-    convert(filename, contents) {
-        if (filename.split(".").pop(), filename.includes(".htm")) return contents;
-        if (!this.templates.length) return !1;
-        const foundTemplate = this.getTemplate(filename, contents);
-        return foundTemplate ? foundTemplate.convert(contents) : void 0;
-    }
-    async refresh() {
-        const filesStore = this.storage.stores.files, currentTemplateNames = (await filesStore.keys()).filter((x => x.includes("/.templates/")));
-        for (var i = 0, len = currentTemplateNames.length; i < len; i++) {
-            const key = currentTemplateNames[i], value = await filesStore.getItem(key), name = key.split("/").pop();
-            this.templates.find((x => x.name === name)) ? this.update(name, value) : this.add(name, value);
+        }
+        getTemplate(filename = "", contents = "") {
+            const ext = filename.split(".").pop();
+            const extMatch = this.templates.find((x => x.extensions.includes(ext)));
+            if (extMatch) return extMatch;
+            // json files can use different templates
+                        const jsonMatch = (() => {
+                if (!filename.includes(".json")) {
+                    return;
+                }
+                if (!contents.includes("file-type")) {
+                    return;
+                }
+                try {
+                    const parsed = JSON.parse(contents);
+                    const fileType = parsed["file-type"];
+                    if (!fileType) return;
+                    const _jsonMatch = this.templates.find((x => x.extensions.includes(fileType)));
+                    return _jsonMatch;
+                } catch (e) {
+                    console.error(e);
+                    return;
+                }
+            })();
+            return jsonMatch;
+        }
+        convert(filename, contents) {
+            filename.split(".").pop();
+            if (filename.includes(".htm")) {
+                return contents;
+            }
+            if (!this.templates.length) return false;
+            const foundTemplate = this.getTemplate(filename, contents);
+            if (!foundTemplate) return;
+            return foundTemplate.convert(contents);
+        }
+        async refresh() {
+            const filesStore = this.storage.stores.files;
+            const currentTemplateNames = (await filesStore.keys()).filter((x => x.includes(`/.templates/`)));
+            for (var i = 0, len = currentTemplateNames.length; i < len; i++) {
+                const key = currentTemplateNames[i];
+                const value = await filesStore.getItem(key);
+                const name = key.split("/").pop();
+                const existing = this.templates.find((x => x.name === name));
+                if (existing) {
+                    this.update(name, value);
+                    continue;
+                }
+                this.add(name, value);
+            }
         }
     }
-};
+    return TemplateEngine;
+})();
 
 !function(e, t) {
     "object" == typeof exports && "undefined" != typeof module ? t(exports) : "function" == typeof define && define.amd ? define([ "exports" ], t) : t((e = "undefined" != typeof globalThis ? globalThis : e || self).Babel = {});
-}(void 0, (function(e) {
+}(undefined, (function(e) {
     var t = Object.freeze({
         __proto__: null,
         get version() {
@@ -2082,6 +3021,17 @@ const StorageManager = (() => {
                 for (;r < s; ) n += (t = e[r]) == (a = e[r + 1] - 1) ? N(t) : t + 1 == a ? N(t) + N(a) : N(t) + "-" + N(a), 
                 r += 2;
                 return "[" + n + "]";
+            }, U = function(e) {
+                if (1 == e.length) return e;
+                for (var t = -1, a = -1; ++t < e.length; ) {
+                    var n = e[t], r = n[1], s = r[0], i = r[1];
+                    for (a = t; ++a < e.length; ) {
+                        var o = e[a], d = o[1], u = d[0], l = d[1];
+                        s == u && i == l && 2 === d.length && (F(o[0]) ? n[0] = w(n[0], o[0][0]) : n[0] = T(n[0], o[0][0], o[0][1] - 1), 
+                        e.splice(a, 1), --a);
+                    }
+                }
+                return e;
             }, G = function(e) {
                 if (!e.length) return [];
                 for (var t, a, n, r, s, i, o = 0, d = [], u = e.length; o < u; ) {
@@ -2098,19 +3048,42 @@ const StorageManager = (() => {
                         n = (t = e[++l])[0], r = t[1], s = (a = e[l + 1]) && a[0], i = a && a[1], u = !0;
                         o.push([ n, u ? d : r ]), u = !1;
                     } else o.push(t);
-                    return function(e) {
-                        if (1 == e.length) return e;
-                        for (var t = -1, a = -1; ++t < e.length; ) {
-                            var n = e[t], r = n[1], s = r[0], i = r[1];
-                            for (a = t; ++a < e.length; ) {
-                                var o = e[a], d = o[1], u = d[0], l = d[1];
-                                s == u && i == l && 2 === d.length && (F(o[0]) ? n[0] = w(n[0], o[0][0]) : n[0] = T(n[0], o[0][0], o[0][1] - 1), 
-                                e.splice(a, 1), --a);
-                            }
-                        }
-                        return e;
-                    }(o);
+                    return U(o);
                 }(d);
+            }, W = function(e, t, a) {
+                if (a) return function(e) {
+                    var t, a, n = "", r = 0, s = e.length;
+                    if (F(e)) return L(e[0]);
+                    for (;r < s; ) n += (t = e[r]) == (a = e[r + 1] - 1) ? L(t) : t + 1 == a ? L(t) + L(a) : L(t) + "-" + L(a), 
+                    r += 2;
+                    return "[" + n + "]";
+                }(e);
+                var n = [], r = function(e) {
+                    for (var t, a, n = [], r = [], s = [], i = [], o = 0, d = e.length; o < d; ) t = e[o], 
+                    a = e[o + 1] - 1, t < u ? (a < u && s.push(t, a + 1), a >= u && a <= l && (s.push(t, u), 
+                    n.push(u, a + 1)), a >= c && a <= p && (s.push(t, u), n.push(u, 56320), r.push(c, a + 1)), 
+                    a > p && (s.push(t, u), n.push(u, 56320), r.push(c, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), 
+                    i.push(65536, a + 1)))) : t >= u && t <= l ? (a >= u && a <= l && n.push(t, a + 1), 
+                    a >= c && a <= p && (n.push(t, 56320), r.push(c, a + 1)), a > p && (n.push(t, 56320), 
+                    r.push(c, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), i.push(65536, a + 1)))) : t >= c && t <= p ? (a >= c && a <= p && r.push(t, a + 1), 
+                    a > p && (r.push(t, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), 
+                    i.push(65536, a + 1)))) : t > p && t <= 65535 ? a <= 65535 ? s.push(t, a + 1) : (s.push(t, 65536), 
+                    i.push(65536, a + 1)) : i.push(t, a + 1), o += 2;
+                    return {
+                        loneHighSurrogates: n,
+                        loneLowSurrogates: r,
+                        bmp: s,
+                        astral: i
+                    };
+                }(e), s = r.loneHighSurrogates, i = r.loneLowSurrogates, o = r.bmp, d = r.astral, g = !P(s), f = !P(i), h = G(d);
+                return t && (o = C(o, s), g = !1, o = C(o, i), f = !1), P(o) || n.push($(o)), h.length && n.push(function(e) {
+                    var t = [];
+                    return m(e, (function(e) {
+                        var a = e[0], n = e[1];
+                        t.push($(a) + $(n));
+                    })), t.join("|");
+                }(h)), g && n.push($(s) + "(?![\\uDC00-\\uDFFF])"), f && n.push("(?:[^\\uD800-\\uDBFF]|^)" + $(i)), 
+                n.join("|");
             }, V = function e(t) {
                 return arguments.length > 1 && (t = E.call(arguments)), this instanceof e ? (this.data = [], 
                 t ? this.add(t) : this) : (new e).add(t);
@@ -2169,41 +3142,7 @@ const StorageManager = (() => {
                     return e.data = this.data.slice(0), e;
                 },
                 toString: function(e) {
-                    var t = function(e, t, a) {
-                        if (a) return function(e) {
-                            var t, a, n = "", r = 0, s = e.length;
-                            if (F(e)) return L(e[0]);
-                            for (;r < s; ) n += (t = e[r]) == (a = e[r + 1] - 1) ? L(t) : t + 1 == a ? L(t) + L(a) : L(t) + "-" + L(a), 
-                            r += 2;
-                            return "[" + n + "]";
-                        }(e);
-                        var n = [], r = function(e) {
-                            for (var t, a, n = [], r = [], s = [], i = [], o = 0, d = e.length; o < d; ) t = e[o], 
-                            a = e[o + 1] - 1, t < u ? (a < u && s.push(t, a + 1), a >= u && a <= l && (s.push(t, u), 
-                            n.push(u, a + 1)), a >= c && a <= p && (s.push(t, u), n.push(u, 56320), r.push(c, a + 1)), 
-                            a > p && (s.push(t, u), n.push(u, 56320), r.push(c, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), 
-                            i.push(65536, a + 1)))) : t >= u && t <= l ? (a >= u && a <= l && n.push(t, a + 1), 
-                            a >= c && a <= p && (n.push(t, 56320), r.push(c, a + 1)), a > p && (n.push(t, 56320), 
-                            r.push(c, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), i.push(65536, a + 1)))) : t >= c && t <= p ? (a >= c && a <= p && r.push(t, a + 1), 
-                            a > p && (r.push(t, 57344), a <= 65535 ? s.push(57344, a + 1) : (s.push(57344, 65536), 
-                            i.push(65536, a + 1)))) : t > p && t <= 65535 ? a <= 65535 ? s.push(t, a + 1) : (s.push(t, 65536), 
-                            i.push(65536, a + 1)) : i.push(t, a + 1), o += 2;
-                            return {
-                                loneHighSurrogates: n,
-                                loneLowSurrogates: r,
-                                bmp: s,
-                                astral: i
-                            };
-                        }(e), s = r.loneHighSurrogates, i = r.loneLowSurrogates, o = r.bmp, d = r.astral, g = !P(s), f = !P(i), h = G(d);
-                        return t && (o = C(o, s), g = !1, o = C(o, i), f = !1), P(o) || n.push($(o)), h.length && n.push(function(e) {
-                            var t = [];
-                            return m(e, (function(e) {
-                                var a = e[0], n = e[1];
-                                t.push($(a) + $(n));
-                            })), t.join("|");
-                        }(h)), g && n.push($(s) + "(?![\\uDC00-\\uDFFF])"), f && n.push("(?:[^\\uD800-\\uDBFF]|^)" + $(i)), 
-                        n.join("|");
-                    }(this.data, !!e && e.bmpOnly, !!e && e.hasUnicodeFlag);
+                    var t = W(this.data, !!e && e.bmpOnly, !!e && e.hasUnicodeFlag);
                     return t ? t.replace(g, "\\0$1") : "[]";
                 },
                 toRegExp: function(e) {
@@ -2266,21 +3205,20 @@ const StorageManager = (() => {
             if (Array.isArray(e)) return e;
         }(e) || function(e, t) {
             var a = null == e ? null : "undefined" != typeof Symbol && e[Symbol.iterator] || e["@@iterator"];
-            if (null != a) {
-                var n, r, s = [], i = !0, o = !1;
+            if (null == a) return;
+            var n, r, s = [], i = !0, o = !1;
+            try {
+                for (a = a.call(e); !(i = (n = a.next()).done) && (s.push(n.value), !t || s.length !== t); i = !0) ;
+            } catch (e) {
+                o = !0, r = e;
+            } finally {
                 try {
-                    for (a = a.call(e); !(i = (n = a.next()).done) && (s.push(n.value), !t || s.length !== t); i = !0) ;
-                } catch (e) {
-                    o = !0, r = e;
+                    i || null == a.return || a.return();
                 } finally {
-                    try {
-                        i || null == a.return || a.return();
-                    } finally {
-                        if (o) throw r;
-                    }
+                    if (o) throw r;
                 }
-                return s;
             }
+            return s;
         }(e, t) || w(e, t) || function() {
             throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
         }();
@@ -2331,346 +3269,346 @@ const StorageManager = (() => {
         return !0;
     }
     function j(e, t) {
-        return !!e && "ArrayExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ArrayExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function P(e, t) {
-        return !!e && "AssignmentExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("AssignmentExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function F(e, t) {
-        return !!e && "BinaryExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BinaryExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function _(e, t) {
-        return !!e && "BlockStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BlockStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function k(e, t) {
-        return !!e && "BreakStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BreakStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function I(e, t) {
-        return !!e && "CallExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("CallExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function B(e, t) {
-        return !!e && "CatchClause" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("CatchClause" === e.type && (void 0 === t || T(e, t)));
     }
     function O(e, t) {
-        return !!e && "ConditionalExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ConditionalExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function N(e, t) {
-        return !!e && "ContinueStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ContinueStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function L(e, t) {
-        return !!e && "EmptyStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("EmptyStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function M(e, t) {
-        return !!e && "ExpressionStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExpressionStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function $(e, t) {
-        return !!e && "File" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("File" === e.type && (void 0 === t || T(e, t)));
     }
     function U(e, t) {
-        return !!e && "ForInStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ForInStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function G(e, t) {
-        return !!e && "ForStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ForStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function W(e, t) {
-        return !!e && "FunctionDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("FunctionDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function V(e, t) {
-        return !!e && "FunctionExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("FunctionExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function H(e, t) {
-        return !!e && "Identifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("Identifier" === e.type && (void 0 === t || T(e, t)));
     }
     function K(e, t) {
-        return !!e && "IfStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("IfStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function q(e, t) {
-        return !!e && "LabeledStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("LabeledStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function X(e, t) {
-        return !!e && "StringLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("StringLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function z(e, t) {
-        return !!e && "NumericLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("NumericLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function J(e, t) {
-        return !!e && "NullLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("NullLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function Y(e, t) {
-        return !!e && "RegExpLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("RegExpLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function Q(e, t) {
-        return !!e && "LogicalExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("LogicalExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Z(e, t) {
-        return !!e && "MemberExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("MemberExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ee(e, t) {
-        return !!e && "NewExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("NewExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function te(e, t) {
-        return !!e && "Program" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("Program" === e.type && (void 0 === t || T(e, t)));
     }
     function ae(e, t) {
-        return !!e && "ObjectExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ObjectExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ne(e, t) {
-        return !!e && "ObjectMethod" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ObjectMethod" === e.type && (void 0 === t || T(e, t)));
     }
     function re(e, t) {
-        return !!e && "ObjectProperty" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ObjectProperty" === e.type && (void 0 === t || T(e, t)));
     }
     function se(e, t) {
-        return !!e && "RestElement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("RestElement" === e.type && (void 0 === t || T(e, t)));
     }
     function ie(e, t) {
-        return !!e && "ReturnStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ReturnStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function oe(e, t) {
-        return !!e && "SequenceExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("SequenceExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function de(e, t) {
-        return !!e && "ParenthesizedExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ParenthesizedExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ue(e, t) {
-        return !!e && "SwitchStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("SwitchStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function le(e, t) {
-        return !!e && "ThisExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ThisExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ce(e, t) {
-        return !!e && "ThrowStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ThrowStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function pe(e, t) {
-        return !!e && "UnaryExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("UnaryExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ge(e, t) {
-        return !!e && "UpdateExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("UpdateExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function fe(e, t) {
-        return !!e && "VariableDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("VariableDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function he(e, t) {
-        return !!e && "VariableDeclarator" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("VariableDeclarator" === e.type && (void 0 === t || T(e, t)));
     }
     function me(e, t) {
-        return !!e && "WhileStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("WhileStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function ye(e, t) {
-        return !!e && "AssignmentPattern" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("AssignmentPattern" === e.type && (void 0 === t || T(e, t)));
     }
     function Re(e, t) {
-        return !!e && "ArrayPattern" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ArrayPattern" === e.type && (void 0 === t || T(e, t)));
     }
     function be(e, t) {
-        return !!e && "ArrowFunctionExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ArrowFunctionExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ve(e, t) {
-        return !!e && "ClassBody" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassBody" === e.type && (void 0 === t || T(e, t)));
     }
     function xe(e, t) {
-        return !!e && "ClassExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Ee(e, t) {
-        return !!e && "ClassDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function De(e, t) {
-        return !!e && "ExportAllDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportAllDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function Ae(e, t) {
-        return !!e && "ExportDefaultDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportDefaultDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function we(e, t) {
-        return !!e && "ExportNamedDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportNamedDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function Ce(e, t) {
-        return !!e && "ExportSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function Se(e, t) {
-        return !!e && "ForOfStatement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ForOfStatement" === e.type && (void 0 === t || T(e, t)));
     }
     function Te(e, t) {
-        return !!e && "ImportDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ImportDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function je(e, t) {
-        return !!e && "ImportDefaultSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ImportDefaultSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function Pe(e, t) {
-        return !!e && "ImportNamespaceSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ImportNamespaceSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function Fe(e, t) {
-        return !!e && "ImportSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ImportSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function _e(e, t) {
-        return !!e && "ClassMethod" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassMethod" === e.type && (void 0 === t || T(e, t)));
     }
     function ke(e, t) {
-        return !!e && "ObjectPattern" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ObjectPattern" === e.type && (void 0 === t || T(e, t)));
     }
     function Ie(e, t) {
-        return !!e && "SpreadElement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("SpreadElement" === e.type && (void 0 === t || T(e, t)));
     }
     function Be(e, t) {
-        return !!e && "Super" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("Super" === e.type && (void 0 === t || T(e, t)));
     }
     function Oe(e, t) {
-        return !!e && "TaggedTemplateExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TaggedTemplateExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Ne(e, t) {
-        return !!e && "TemplateLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TemplateLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function Le(e, t) {
-        return !!e && "YieldExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("YieldExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Me(e, t) {
-        return !!e && "AwaitExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("AwaitExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function $e(e, t) {
-        return !!e && "Import" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("Import" === e.type && (void 0 === t || T(e, t)));
     }
     function Ue(e, t) {
-        return !!e && "BigIntLiteral" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BigIntLiteral" === e.type && (void 0 === t || T(e, t)));
     }
     function Ge(e, t) {
-        return !!e && "ExportNamespaceSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportNamespaceSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function We(e, t) {
-        return !!e && "OptionalMemberExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("OptionalMemberExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Ve(e, t) {
-        return !!e && "OptionalCallExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("OptionalCallExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function He(e, t) {
-        return !!e && "ClassProperty" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassProperty" === e.type && (void 0 === t || T(e, t)));
     }
     function Ke(e, t) {
-        return !!e && "ClassPrivateProperty" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ClassPrivateProperty" === e.type && (void 0 === t || T(e, t)));
     }
     function qe(e, t) {
-        return !!e && "PrivateName" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("PrivateName" === e.type && (void 0 === t || T(e, t)));
     }
     function Xe(e, t) {
-        return !!e && "AnyTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("AnyTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function ze(e, t) {
-        return !!e && "ArrayTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ArrayTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function Je(e, t) {
-        return !!e && "BooleanTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BooleanTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function Ye(e, t) {
-        return !!e && "DeclareExportDeclaration" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("DeclareExportDeclaration" === e.type && (void 0 === t || T(e, t)));
     }
     function Qe(e, t) {
-        return !!e && "GenericTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("GenericTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function Ze(e, t) {
-        return !!e && "IntersectionTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("IntersectionTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function et(e, t) {
-        return !!e && "MixedTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("MixedTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function tt(e, t) {
-        return !!e && "EmptyTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("EmptyTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function at(e, t) {
-        return !!e && "NullableTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("NullableTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function nt(e, t) {
-        return !!e && "NumberTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("NumberTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function rt(e, t) {
-        return !!e && "StringTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("StringTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function st(e, t) {
-        return !!e && "TypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function it(e, t) {
-        return !!e && "TypeCastExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TypeCastExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function ot(e, t) {
-        return !!e && "UnionTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("UnionTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function dt(e, t) {
-        return !!e && "VoidTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("VoidTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function ut(e, t) {
-        return !!e && "IndexedAccessType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("IndexedAccessType" === e.type && (void 0 === t || T(e, t)));
     }
     function lt(e, t) {
-        return !!e && "JSXAttribute" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXAttribute" === e.type && (void 0 === t || T(e, t)));
     }
     function ct(e, t) {
-        return !!e && "JSXElement" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXElement" === e.type && (void 0 === t || T(e, t)));
     }
     function pt(e, t) {
-        return !!e && "JSXEmptyExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXEmptyExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function gt(e, t) {
-        return !!e && "JSXExpressionContainer" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXExpressionContainer" === e.type && (void 0 === t || T(e, t)));
     }
     function ft(e, t) {
-        return !!e && "JSXIdentifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXIdentifier" === e.type && (void 0 === t || T(e, t)));
     }
     function ht(e, t) {
-        return !!e && "JSXMemberExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXMemberExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function mt(e, t) {
-        return !!e && "JSXNamespacedName" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXNamespacedName" === e.type && (void 0 === t || T(e, t)));
     }
     function yt(e, t) {
-        return !!e && "JSXSpreadAttribute" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXSpreadAttribute" === e.type && (void 0 === t || T(e, t)));
     }
     function Rt(e, t) {
-        return !!e && "JSXText" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("JSXText" === e.type && (void 0 === t || T(e, t)));
     }
     function bt(e, t) {
-        return !!e && "Placeholder" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("Placeholder" === e.type && (void 0 === t || T(e, t)));
     }
     function vt(e, t) {
-        return !!e && "BindExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("BindExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function xt(e, t) {
-        return !!e && "ExportDefaultSpecifier" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("ExportDefaultSpecifier" === e.type && (void 0 === t || T(e, t)));
     }
     function Et(e, t) {
-        return !!e && "PipelineTopicExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("PipelineTopicExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Dt(e, t) {
-        return !!e && "TSQualifiedName" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSQualifiedName" === e.type && (void 0 === t || T(e, t)));
     }
     function At(e, t) {
-        return !!e && "TSAnyKeyword" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSAnyKeyword" === e.type && (void 0 === t || T(e, t)));
     }
     function wt(e, t) {
-        return !!e && "TSArrayType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSArrayType" === e.type && (void 0 === t || T(e, t)));
     }
     function Ct(e, t) {
-        return !!e && "TSOptionalType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSOptionalType" === e.type && (void 0 === t || T(e, t)));
     }
     function St(e, t) {
-        return !!e && "TSRestType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSRestType" === e.type && (void 0 === t || T(e, t)));
     }
     function Tt(e, t) {
-        return !!e && "TSUnionType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSUnionType" === e.type && (void 0 === t || T(e, t)));
     }
     function jt(e, t) {
-        return !!e && "TSIntersectionType" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSIntersectionType" === e.type && (void 0 === t || T(e, t)));
     }
     function Pt(e, t) {
-        return !!e && "TSAsExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSAsExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function Ft(e, t) {
-        return !!e && "TSTypeAssertion" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSTypeAssertion" === e.type && (void 0 === t || T(e, t)));
     }
     function _t(e, t) {
-        return !!e && "TSExternalModuleReference" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSExternalModuleReference" === e.type && (void 0 === t || T(e, t)));
     }
     function kt(e, t) {
-        return !!e && "TSNonNullExpression" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSNonNullExpression" === e.type && (void 0 === t || T(e, t)));
     }
     function It(e, t) {
-        return !!e && "TSTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+        return !!e && ("TSTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
     }
     function Bt(e, t) {
         if (!e) return !1;
@@ -4396,7 +5334,8 @@ const StorageManager = (() => {
     })), s("/$$rollup_base$$/node_modules/regenerate-unicode-properties/unicode-version.js", (function(e, t) {
         e.exports = "14.0.0";
     }));
-    var ia = sa("React.Component"), oa = null;
+    var ia = sa("React.Component");
+    var oa = null;
     function da(e) {
         if (null !== oa && (oa.property, 1)) {
             var t = oa;
@@ -4498,14 +5437,18 @@ const StorageManager = (() => {
         var a = rn[t];
         if (a) {
             if (a[0] === e) return !0;
-            for (var n, r = S(a); !(n = r()).done; ) if (e === n.value) return !0;
+            for (var n, r = S(a); !(n = r()).done; ) {
+                if (e === n.value) return !0;
+            }
         }
         return !1;
     }
     function pa(e, t) {
         if (e === t) return !0;
         var a = Gn[e];
-        if (a) for (var n, r = S(a); !(n = r()).done; ) if (t === n.value) return !0;
+        if (a) for (var n, r = S(a); !(n = r()).done; ) {
+            if (t === n.value) return !0;
+        }
         return !1;
     }
     function ga(e, t, a) {
@@ -4540,7 +5483,7 @@ const StorageManager = (() => {
         }
         return !t;
     }
-    var Ca = new Set([ "break", "case", "catch", "continue", "debugger", "default", "do", "else", "finally", "for", "function", "if", "return", "switch", "throw", "try", "var", "const", "while", "with", "new", "this", "super", "class", "extends", "export", "import", "null", "true", "false", "in", "instanceof", "typeof", "void", "delete" ]), Sa = new Set([ "implements", "interface", "let", "package", "private", "protected", "public", "static", "yield" ]), Ta = new Set([ "eval", "arguments" ]);
+    var Aa = [ "implements", "interface", "let", "package", "private", "protected", "public", "static", "yield" ], wa = [ "eval", "arguments" ], Ca = new Set([ "break", "case", "catch", "continue", "debugger", "default", "do", "else", "finally", "for", "function", "if", "return", "switch", "throw", "try", "var", "const", "while", "with", "new", "this", "super", "class", "extends", "export", "import", "null", "true", "false", "in", "instanceof", "typeof", "void", "delete" ]), Sa = new Set(Aa), Ta = new Set(wa);
     function ja(e, t) {
         return t && "await" === e || "enum" === e;
     }
@@ -4557,7 +5500,7 @@ const StorageManager = (() => {
         return Ca.has(e);
     }
     function Ia(e, t) {
-        return void 0 === t && (t = !0), "string" == typeof e && (!t || !ka(e) && !Pa(e, !0)) && Da(e);
+        return void 0 === t && (t = !0), "string" == typeof e && ((!t || !ka(e) && !Pa(e, !0)) && Da(e));
     }
     var Ba = [ "consequent", "body", "alternate" ], Oa = [ "leadingComments", "trailingComments", "innerComments" ], Na = [ "||", "&&", "??" ], La = [ "++", "--" ], Ma = [ ">", "<", ">=", "<=" ], $a = [ "==", "===", "!=", "!==" ], Ua = [].concat($a, [ "in", "instanceof" ]), Ga = [].concat(A(Ua), Ma), Wa = [ "-", "/", "%", "*", "**", "&", "|", ">>", ">>>", "<<", "^" ], Va = [ "+" ].concat(Wa, A(Ga)), Ha = [ "=", "+=" ].concat(A(Wa.map((function(e) {
         return e + "=";
@@ -4570,7 +5513,7 @@ const StorageManager = (() => {
     function Za(e, t, a) {
         if (e) {
             var n = sn[e.type];
-            n && (en(e, t, a, n[t]), tn(e, t, a));
+            if (n) en(e, t, a, n[t]), tn(e, t, a);
         }
     }
     function en(e, t, a, n) {
@@ -4635,7 +5578,9 @@ const StorageManager = (() => {
     function vn() {
         for (var e = arguments.length, t = new Array(e), a = 0; a < e; a++) t[a] = arguments[a];
         function n(e, a, n) {
-            for (var r, s = S(t); !(r = s()).done; ) if (ga(r.value, n)) return void tn(e, a, n);
+            for (var r, s = S(t); !(r = s()).done; ) {
+                if (ga(r.value, n)) return void tn(e, a, n);
+            }
             throw new TypeError("Property " + a + " of " + e.type + " expected node to be of a type " + JSON.stringify(t) + " but instead got " + JSON.stringify(null == n ? void 0 : n.type));
         }
         return n.oneOfNodeTypes = t, n;
@@ -4653,7 +5598,7 @@ const StorageManager = (() => {
     }
     function En(e) {
         function t(t, a, n) {
-            if (ln(n) !== e) throw new TypeError("Property " + a + " expected type of " + e + " but got " + ln(n));
+            if (!(ln(n) === e)) throw new TypeError("Property " + a + " expected type of " + e + " but got " + ln(n));
         }
         return t.type = e, t;
     }
@@ -4759,7 +5704,8 @@ const StorageManager = (() => {
             left: {
                 validate: function() {
                     var e = vn("Expression"), t = vn("Expression", "PrivateName"), a = function(a, n, r) {
-                        ("in" === a.operator ? t : e)(a, n, r);
+                        var s = "in" === a.operator ? t : e;
+                        s(a, n, r);
                     };
                     return a.oneOfNodeTypes = [ "Expression", "PrivateName" ], a;
                 }()
@@ -5162,7 +6108,8 @@ const StorageManager = (() => {
             },
             property: {
                 validate: (_n = vn("Identifier", "PrivateName"), kn = vn("Expression"), In = function(e, t, a) {
-                    (e.computed ? kn : _n)(e, t, a);
+                    var n = e.computed ? kn : _n;
+                    n(e, t, a);
                 }, In.oneOfNodeTypes = [ "Expression", "Identifier", "PrivateName" ], In)
             },
             computed: {
@@ -5223,7 +6170,8 @@ const StorageManager = (() => {
             key: {
                 validate: function() {
                     var e = vn("Identifier", "StringLiteral", "NumericLiteral"), t = vn("Expression"), a = function(a, n, r) {
-                        (a.computed ? t : e)(a, n, r);
+                        var s = a.computed ? t : e;
+                        s(a, n, r);
                     };
                     return a.oneOfNodeTypes = [ "Expression", "Identifier", "StringLiteral", "NumericLiteral" ], 
                     a;
@@ -5248,7 +6196,8 @@ const StorageManager = (() => {
             key: {
                 validate: function() {
                     var e = vn("Identifier", "StringLiteral", "NumericLiteral"), t = vn("Expression"), a = function(a, n, r) {
-                        (a.computed ? t : e)(a, n, r);
+                        var s = a.computed ? t : e;
+                        s(a, n, r);
                     };
                     return a.oneOfNodeTypes = [ "Expression", "Identifier", "StringLiteral", "NumericLiteral" ], 
                     a;
@@ -5978,7 +6927,8 @@ const StorageManager = (() => {
             property: {
                 validate: function() {
                     var e = vn("Identifier"), t = vn("Expression"), a = function(a, n, r) {
-                        (a.computed ? t : e)(a, n, r);
+                        var s = a.computed ? t : e;
+                        s(a, n, r);
                     };
                     return a.oneOfNodeTypes = [ "Expression", "Identifier" ], a;
                 }()
@@ -6904,11 +7854,13 @@ const StorageManager = (() => {
             typeAnnotation: hn("TSTypeAnnotation")
         }
     });
-    for (var Zn = 0, er = [ "TSAnyKeyword", "TSBooleanKeyword", "TSBigIntKeyword", "TSIntrinsicKeyword", "TSNeverKeyword", "TSNullKeyword", "TSNumberKeyword", "TSObjectKeyword", "TSStringKeyword", "TSSymbolKeyword", "TSUndefinedKeyword", "TSUnknownKeyword", "TSVoidKeyword" ]; Zn < er.length; Zn++) Sn(er[Zn], {
-        aliases: [ "TSType", "TSBaseType" ],
-        visitor: [],
-        fields: {}
-    });
+    for (var Zn = 0, er = [ "TSAnyKeyword", "TSBooleanKeyword", "TSBigIntKeyword", "TSIntrinsicKeyword", "TSNeverKeyword", "TSNullKeyword", "TSNumberKeyword", "TSObjectKeyword", "TSStringKeyword", "TSSymbolKeyword", "TSUndefinedKeyword", "TSUnknownKeyword", "TSVoidKeyword" ]; Zn < er.length; Zn++) {
+        Sn(er[Zn], {
+            aliases: [ "TSType", "TSBaseType" ],
+            visitor: [],
+            fields: {}
+        });
+    }
     Sn("TSThisType", {
         aliases: [ "TSType", "TSBaseType" ],
         visitor: [],
@@ -8129,8 +9081,8 @@ const StorageManager = (() => {
     function ru(e, t, a) {
         if (!a || !e) return e;
         var n, r = t + "Comments";
-        return e[r] ? "leading" === t ? e[r] = a.concat(e[r]) : (n = e[r]).push.apply(n, A(a)) : e[r] = a, 
-        e;
+        e[r] ? "leading" === t ? e[r] = a.concat(e[r]) : (n = e[r]).push.apply(n, A(a)) : e[r] = a;
+        return e;
     }
     function su(e, t, a, n) {
         return ru(e, t, [ {
@@ -8196,7 +9148,9 @@ const StorageManager = (() => {
                 t(e, a = a || {});
                 for (var r, s = S(n); !(r = s()).done; ) {
                     var i = e[r.value];
-                    if (Array.isArray(i)) for (var o, d = S(i); !(o = d()).done; ) ul(o.value, t, a); else ul(i, t, a);
+                    if (Array.isArray(i)) for (var o, d = S(i); !(o = d()).done; ) {
+                        ul(o.value, t, a);
+                    } else ul(i, t, a);
                 }
             }
         }
@@ -8212,7 +9166,9 @@ const StorageManager = (() => {
             var o = i[s];
             "_" === o[0] && null != e[o] && (e[o] = void 0);
         }
-        for (var d, u = S(Object.getOwnPropertySymbols(e)); !(d = u()).done; ) e[d.value] = null;
+        for (var d, u = S(Object.getOwnPropertySymbols(e)); !(d = u()).done; ) {
+            e[d.value] = null;
+        }
     }
     function gl(e, t) {
         return ul(e, pl, t), e;
@@ -8346,9 +9302,11 @@ const StorageManager = (() => {
         if (!0 === e || !1 === e) return _r(e);
         if (null === e) return Fr();
         if ("string" == typeof e) return jr(e);
-        var t;
-        if ("number" == typeof e) return t = Number.isFinite(e) ? Pr(Math.abs(e)) : or("/", Number.isNaN(e) ? Pr(0) : Pr(1), Pr(0)), 
-        (e < 0 || Object.is(e, -0)) && (t = Jr("-", t)), t;
+        if ("number" == typeof e) {
+            var t;
+            if (Number.isFinite(e)) t = Pr(Math.abs(e)); else t = or("/", Number.isNaN(e) ? Pr(0) : Pr(1), Pr(0));
+            return (e < 0 || Object.is(e, -0)) && (t = Jr("-", t)), t;
+        }
         if (function(e) {
             return "[object RegExp]" === bl(e);
         }(e)) return kr(e.source, e.toString().match(/\/([a-z]+|)$/)[1]);
@@ -8359,7 +9317,7 @@ const StorageManager = (() => {
             return null === t || null === Object.getPrototypeOf(t);
         }(e)) {
             for (var a = [], n = 0, r = Object.keys(e); n < r.length; n++) {
-                var i, s = r[n];
+                var s = r[n], i = void 0;
                 i = Ia(s) ? Cr(s) : jr(s), a.push($r(i, vl(e[s])));
             }
             return Lr(a);
@@ -8446,23 +9404,6 @@ const StorageManager = (() => {
             return t.body === e;
 
           case "PrivateName":
-          case "LabeledStatement":
-          case "CatchClause":
-          case "RestElement":
-          case "BreakStatement":
-          case "ContinueStatement":
-          case "FunctionDeclaration":
-          case "FunctionExpression":
-          case "ExportNamespaceSpecifier":
-          case "ExportDefaultSpecifier":
-          case "ImportDefaultSpecifier":
-          case "ImportNamespaceSpecifier":
-          case "ImportSpecifier":
-          case "ImportAttribute":
-          case "JSXAttribute":
-          case "ObjectPattern":
-          case "ArrayPattern":
-          case "MetaProperty":
             return !1;
 
           case "ClassMethod":
@@ -8474,11 +9415,9 @@ const StorageManager = (() => {
             return t.key === e ? !!t.computed : !a || "ObjectPattern" !== a.type;
 
           case "ClassProperty":
-          case "TSPropertySignature":
             return t.key !== e || !!t.computed;
 
           case "ClassPrivateProperty":
-          case "ObjectTypeProperty":
             return t.key !== e;
 
           case "ClassDeclaration":
@@ -8489,11 +9428,46 @@ const StorageManager = (() => {
           case "AssignmentPattern":
             return t.right === e;
 
+          case "LabeledStatement":
+          case "CatchClause":
+          case "RestElement":
+            return !1;
+
+          case "BreakStatement":
+          case "ContinueStatement":
+            return !1;
+
+          case "FunctionDeclaration":
+          case "FunctionExpression":
+            return !1;
+
+          case "ExportNamespaceSpecifier":
+          case "ExportDefaultSpecifier":
+            return !1;
+
           case "ExportSpecifier":
             return (null == a || !a.source) && t.local === e;
 
+          case "ImportDefaultSpecifier":
+          case "ImportNamespaceSpecifier":
+          case "ImportSpecifier":
+          case "ImportAttribute":
+          case "JSXAttribute":
+            return !1;
+
+          case "ObjectPattern":
+          case "ArrayPattern":
+          case "MetaProperty":
+            return !1;
+
+          case "ObjectTypeProperty":
+            return t.key !== e;
+
           case "TSEnumMember":
             return t.id !== e;
+
+          case "TSPropertySignature":
+            return t.key !== e || !!t.computed;
         }
         return !0;
     }
@@ -10160,13 +11134,13 @@ const StorageManager = (() => {
         isAssignmentExpression: P,
         isBinaryExpression: F,
         isInterpreterDirective: function(e, t) {
-            return !!e && "InterpreterDirective" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("InterpreterDirective" === e.type && (void 0 === t || T(e, t)));
         },
         isDirective: function(e, t) {
-            return !!e && "Directive" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("Directive" === e.type && (void 0 === t || T(e, t)));
         },
         isDirectiveLiteral: function(e, t) {
-            return !!e && "DirectiveLiteral" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DirectiveLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isBlockStatement: _,
         isBreakStatement: k,
@@ -10175,10 +11149,10 @@ const StorageManager = (() => {
         isConditionalExpression: O,
         isContinueStatement: N,
         isDebuggerStatement: function(e, t) {
-            return !!e && "DebuggerStatement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DebuggerStatement" === e.type && (void 0 === t || T(e, t)));
         },
         isDoWhileStatement: function(e, t) {
-            return !!e && "DoWhileStatement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DoWhileStatement" === e.type && (void 0 === t || T(e, t)));
         },
         isEmptyStatement: L,
         isExpressionStatement: M,
@@ -10194,7 +11168,7 @@ const StorageManager = (() => {
         isNumericLiteral: z,
         isNullLiteral: J,
         isBooleanLiteral: function(e, t) {
-            return !!e && "BooleanLiteral" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("BooleanLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isRegExpLiteral: Y,
         isLogicalExpression: Q,
@@ -10209,13 +11183,13 @@ const StorageManager = (() => {
         isSequenceExpression: oe,
         isParenthesizedExpression: de,
         isSwitchCase: function(e, t) {
-            return !!e && "SwitchCase" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("SwitchCase" === e.type && (void 0 === t || T(e, t)));
         },
         isSwitchStatement: ue,
         isThisExpression: le,
         isThrowStatement: ce,
         isTryStatement: function(e, t) {
-            return !!e && "TryStatement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TryStatement" === e.type && (void 0 === t || T(e, t)));
         },
         isUnaryExpression: pe,
         isUpdateExpression: ge,
@@ -10223,7 +11197,7 @@ const StorageManager = (() => {
         isVariableDeclarator: he,
         isWhileStatement: me,
         isWithStatement: function(e, t) {
-            return !!e && "WithStatement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("WithStatement" === e.type && (void 0 === t || T(e, t)));
         },
         isAssignmentPattern: ye,
         isArrayPattern: Re,
@@ -10241,7 +11215,7 @@ const StorageManager = (() => {
         isImportNamespaceSpecifier: Pe,
         isImportSpecifier: Fe,
         isMetaProperty: function(e, t) {
-            return !!e && "MetaProperty" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("MetaProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isClassMethod: _e,
         isObjectPattern: ke,
@@ -10249,7 +11223,7 @@ const StorageManager = (() => {
         isSuper: Be,
         isTaggedTemplateExpression: Oe,
         isTemplateElement: function(e, t) {
-            return !!e && "TemplateElement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TemplateElement" === e.type && (void 0 === t || T(e, t)));
         },
         isTemplateLiteral: Ne,
         isYieldExpression: Le,
@@ -10262,409 +11236,409 @@ const StorageManager = (() => {
         isClassProperty: He,
         isClassPrivateProperty: Ke,
         isClassPrivateMethod: function(e, t) {
-            return !!e && "ClassPrivateMethod" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ClassPrivateMethod" === e.type && (void 0 === t || T(e, t)));
         },
         isPrivateName: qe,
         isAnyTypeAnnotation: Xe,
         isArrayTypeAnnotation: ze,
         isBooleanTypeAnnotation: Je,
         isBooleanLiteralTypeAnnotation: function(e, t) {
-            return !!e && "BooleanLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("BooleanLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isNullLiteralTypeAnnotation: function(e, t) {
-            return !!e && "NullLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("NullLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isClassImplements: function(e, t) {
-            return !!e && "ClassImplements" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ClassImplements" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareClass: function(e, t) {
-            return !!e && "DeclareClass" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareClass" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareFunction: function(e, t) {
-            return !!e && "DeclareFunction" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareFunction" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareInterface: function(e, t) {
-            return !!e && "DeclareInterface" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareInterface" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareModule: function(e, t) {
-            return !!e && "DeclareModule" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareModule" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareModuleExports: function(e, t) {
-            return !!e && "DeclareModuleExports" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareModuleExports" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareTypeAlias: function(e, t) {
-            return !!e && "DeclareTypeAlias" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareTypeAlias" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareOpaqueType: function(e, t) {
-            return !!e && "DeclareOpaqueType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareOpaqueType" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareVariable: function(e, t) {
-            return !!e && "DeclareVariable" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareVariable" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclareExportDeclaration: Ye,
         isDeclareExportAllDeclaration: function(e, t) {
-            return !!e && "DeclareExportAllDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclareExportAllDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isDeclaredPredicate: function(e, t) {
-            return !!e && "DeclaredPredicate" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DeclaredPredicate" === e.type && (void 0 === t || T(e, t)));
         },
         isExistsTypeAnnotation: function(e, t) {
-            return !!e && "ExistsTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ExistsTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isFunctionTypeAnnotation: function(e, t) {
-            return !!e && "FunctionTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("FunctionTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isFunctionTypeParam: function(e, t) {
-            return !!e && "FunctionTypeParam" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("FunctionTypeParam" === e.type && (void 0 === t || T(e, t)));
         },
         isGenericTypeAnnotation: Qe,
         isInferredPredicate: function(e, t) {
-            return !!e && "InferredPredicate" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("InferredPredicate" === e.type && (void 0 === t || T(e, t)));
         },
         isInterfaceExtends: function(e, t) {
-            return !!e && "InterfaceExtends" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("InterfaceExtends" === e.type && (void 0 === t || T(e, t)));
         },
         isInterfaceDeclaration: function(e, t) {
-            return !!e && "InterfaceDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("InterfaceDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isInterfaceTypeAnnotation: function(e, t) {
-            return !!e && "InterfaceTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("InterfaceTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isIntersectionTypeAnnotation: Ze,
         isMixedTypeAnnotation: et,
         isEmptyTypeAnnotation: tt,
         isNullableTypeAnnotation: at,
         isNumberLiteralTypeAnnotation: function(e, t) {
-            return !!e && "NumberLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("NumberLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isNumberTypeAnnotation: nt,
         isObjectTypeAnnotation: function(e, t) {
-            return !!e && "ObjectTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isObjectTypeInternalSlot: function(e, t) {
-            return !!e && "ObjectTypeInternalSlot" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeInternalSlot" === e.type && (void 0 === t || T(e, t)));
         },
         isObjectTypeCallProperty: function(e, t) {
-            return !!e && "ObjectTypeCallProperty" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeCallProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isObjectTypeIndexer: function(e, t) {
-            return !!e && "ObjectTypeIndexer" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeIndexer" === e.type && (void 0 === t || T(e, t)));
         },
         isObjectTypeProperty: function(e, t) {
-            return !!e && "ObjectTypeProperty" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isObjectTypeSpreadProperty: function(e, t) {
-            return !!e && "ObjectTypeSpreadProperty" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ObjectTypeSpreadProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isOpaqueType: function(e, t) {
-            return !!e && "OpaqueType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("OpaqueType" === e.type && (void 0 === t || T(e, t)));
         },
         isQualifiedTypeIdentifier: function(e, t) {
-            return !!e && "QualifiedTypeIdentifier" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("QualifiedTypeIdentifier" === e.type && (void 0 === t || T(e, t)));
         },
         isStringLiteralTypeAnnotation: function(e, t) {
-            return !!e && "StringLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("StringLiteralTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isStringTypeAnnotation: rt,
         isSymbolTypeAnnotation: function(e, t) {
-            return !!e && "SymbolTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("SymbolTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isThisTypeAnnotation: function(e, t) {
-            return !!e && "ThisTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ThisTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isTupleTypeAnnotation: function(e, t) {
-            return !!e && "TupleTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TupleTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isTypeofTypeAnnotation: function(e, t) {
-            return !!e && "TypeofTypeAnnotation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TypeofTypeAnnotation" === e.type && (void 0 === t || T(e, t)));
         },
         isTypeAlias: function(e, t) {
-            return !!e && "TypeAlias" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TypeAlias" === e.type && (void 0 === t || T(e, t)));
         },
         isTypeAnnotation: st,
         isTypeCastExpression: it,
         isTypeParameter: function(e, t) {
-            return !!e && "TypeParameter" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TypeParameter" === e.type && (void 0 === t || T(e, t)));
         },
         isTypeParameterDeclaration: function(e, t) {
-            return !!e && "TypeParameterDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TypeParameterDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTypeParameterInstantiation: function(e, t) {
-            return !!e && "TypeParameterInstantiation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TypeParameterInstantiation" === e.type && (void 0 === t || T(e, t)));
         },
         isUnionTypeAnnotation: ot,
         isVariance: function(e, t) {
-            return !!e && "Variance" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("Variance" === e.type && (void 0 === t || T(e, t)));
         },
         isVoidTypeAnnotation: dt,
         isEnumDeclaration: function(e, t) {
-            return !!e && "EnumDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumBooleanBody: function(e, t) {
-            return !!e && "EnumBooleanBody" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumBooleanBody" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumNumberBody: function(e, t) {
-            return !!e && "EnumNumberBody" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumNumberBody" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumStringBody: function(e, t) {
-            return !!e && "EnumStringBody" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumStringBody" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumSymbolBody: function(e, t) {
-            return !!e && "EnumSymbolBody" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumSymbolBody" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumBooleanMember: function(e, t) {
-            return !!e && "EnumBooleanMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumBooleanMember" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumNumberMember: function(e, t) {
-            return !!e && "EnumNumberMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumNumberMember" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumStringMember: function(e, t) {
-            return !!e && "EnumStringMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumStringMember" === e.type && (void 0 === t || T(e, t)));
         },
         isEnumDefaultedMember: function(e, t) {
-            return !!e && "EnumDefaultedMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("EnumDefaultedMember" === e.type && (void 0 === t || T(e, t)));
         },
         isIndexedAccessType: ut,
         isOptionalIndexedAccessType: function(e, t) {
-            return !!e && "OptionalIndexedAccessType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("OptionalIndexedAccessType" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXAttribute: lt,
         isJSXClosingElement: function(e, t) {
-            return !!e && "JSXClosingElement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXClosingElement" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXElement: ct,
         isJSXEmptyExpression: pt,
         isJSXExpressionContainer: gt,
         isJSXSpreadChild: function(e, t) {
-            return !!e && "JSXSpreadChild" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXSpreadChild" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXIdentifier: ft,
         isJSXMemberExpression: ht,
         isJSXNamespacedName: mt,
         isJSXOpeningElement: function(e, t) {
-            return !!e && "JSXOpeningElement" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXOpeningElement" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXSpreadAttribute: yt,
         isJSXText: Rt,
         isJSXFragment: function(e, t) {
-            return !!e && "JSXFragment" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXFragment" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXOpeningFragment: function(e, t) {
-            return !!e && "JSXOpeningFragment" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXOpeningFragment" === e.type && (void 0 === t || T(e, t)));
         },
         isJSXClosingFragment: function(e, t) {
-            return !!e && "JSXClosingFragment" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("JSXClosingFragment" === e.type && (void 0 === t || T(e, t)));
         },
         isNoop: function(e, t) {
-            return !!e && "Noop" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("Noop" === e.type && (void 0 === t || T(e, t)));
         },
         isPlaceholder: bt,
         isV8IntrinsicIdentifier: function(e, t) {
-            return !!e && "V8IntrinsicIdentifier" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("V8IntrinsicIdentifier" === e.type && (void 0 === t || T(e, t)));
         },
         isArgumentPlaceholder: function(e, t) {
-            return !!e && "ArgumentPlaceholder" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ArgumentPlaceholder" === e.type && (void 0 === t || T(e, t)));
         },
         isBindExpression: vt,
         isImportAttribute: function(e, t) {
-            return !!e && "ImportAttribute" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ImportAttribute" === e.type && (void 0 === t || T(e, t)));
         },
         isDecorator: function(e, t) {
-            return !!e && "Decorator" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("Decorator" === e.type && (void 0 === t || T(e, t)));
         },
         isDoExpression: function(e, t) {
-            return !!e && "DoExpression" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DoExpression" === e.type && (void 0 === t || T(e, t)));
         },
         isExportDefaultSpecifier: xt,
         isRecordExpression: function(e, t) {
-            return !!e && "RecordExpression" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("RecordExpression" === e.type && (void 0 === t || T(e, t)));
         },
         isTupleExpression: function(e, t) {
-            return !!e && "TupleExpression" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TupleExpression" === e.type && (void 0 === t || T(e, t)));
         },
         isDecimalLiteral: function(e, t) {
-            return !!e && "DecimalLiteral" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("DecimalLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isStaticBlock: function(e, t) {
-            return !!e && "StaticBlock" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("StaticBlock" === e.type && (void 0 === t || T(e, t)));
         },
         isModuleExpression: function(e, t) {
-            return !!e && "ModuleExpression" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("ModuleExpression" === e.type && (void 0 === t || T(e, t)));
         },
         isTopicReference: function(e, t) {
-            return !!e && "TopicReference" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TopicReference" === e.type && (void 0 === t || T(e, t)));
         },
         isPipelineTopicExpression: Et,
         isPipelineBareFunction: function(e, t) {
-            return !!e && "PipelineBareFunction" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("PipelineBareFunction" === e.type && (void 0 === t || T(e, t)));
         },
         isPipelinePrimaryTopicReference: function(e, t) {
-            return !!e && "PipelinePrimaryTopicReference" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("PipelinePrimaryTopicReference" === e.type && (void 0 === t || T(e, t)));
         },
         isTSParameterProperty: function(e, t) {
-            return !!e && "TSParameterProperty" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSParameterProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isTSDeclareFunction: function(e, t) {
-            return !!e && "TSDeclareFunction" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSDeclareFunction" === e.type && (void 0 === t || T(e, t)));
         },
         isTSDeclareMethod: function(e, t) {
-            return !!e && "TSDeclareMethod" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSDeclareMethod" === e.type && (void 0 === t || T(e, t)));
         },
         isTSQualifiedName: Dt,
         isTSCallSignatureDeclaration: function(e, t) {
-            return !!e && "TSCallSignatureDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSCallSignatureDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSConstructSignatureDeclaration: function(e, t) {
-            return !!e && "TSConstructSignatureDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSConstructSignatureDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSPropertySignature: function(e, t) {
-            return !!e && "TSPropertySignature" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSPropertySignature" === e.type && (void 0 === t || T(e, t)));
         },
         isTSMethodSignature: function(e, t) {
-            return !!e && "TSMethodSignature" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSMethodSignature" === e.type && (void 0 === t || T(e, t)));
         },
         isTSIndexSignature: function(e, t) {
-            return !!e && "TSIndexSignature" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSIndexSignature" === e.type && (void 0 === t || T(e, t)));
         },
         isTSAnyKeyword: At,
         isTSBooleanKeyword: function(e, t) {
-            return !!e && "TSBooleanKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSBooleanKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSBigIntKeyword: function(e, t) {
-            return !!e && "TSBigIntKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSBigIntKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSIntrinsicKeyword: function(e, t) {
-            return !!e && "TSIntrinsicKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSIntrinsicKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSNeverKeyword: function(e, t) {
-            return !!e && "TSNeverKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSNeverKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSNullKeyword: function(e, t) {
-            return !!e && "TSNullKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSNullKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSNumberKeyword: function(e, t) {
-            return !!e && "TSNumberKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSNumberKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSObjectKeyword: function(e, t) {
-            return !!e && "TSObjectKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSObjectKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSStringKeyword: function(e, t) {
-            return !!e && "TSStringKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSStringKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSSymbolKeyword: function(e, t) {
-            return !!e && "TSSymbolKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSSymbolKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSUndefinedKeyword: function(e, t) {
-            return !!e && "TSUndefinedKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSUndefinedKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSUnknownKeyword: function(e, t) {
-            return !!e && "TSUnknownKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSUnknownKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSVoidKeyword: function(e, t) {
-            return !!e && "TSVoidKeyword" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSVoidKeyword" === e.type && (void 0 === t || T(e, t)));
         },
         isTSThisType: function(e, t) {
-            return !!e && "TSThisType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSThisType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSFunctionType: function(e, t) {
-            return !!e && "TSFunctionType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSFunctionType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSConstructorType: function(e, t) {
-            return !!e && "TSConstructorType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSConstructorType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeReference: function(e, t) {
-            return !!e && "TSTypeReference" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeReference" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypePredicate: function(e, t) {
-            return !!e && "TSTypePredicate" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypePredicate" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeQuery: function(e, t) {
-            return !!e && "TSTypeQuery" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeQuery" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeLiteral: function(e, t) {
-            return !!e && "TSTypeLiteral" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isTSArrayType: wt,
         isTSTupleType: function(e, t) {
-            return !!e && "TSTupleType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTupleType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSOptionalType: Ct,
         isTSRestType: St,
         isTSNamedTupleMember: function(e, t) {
-            return !!e && "TSNamedTupleMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSNamedTupleMember" === e.type && (void 0 === t || T(e, t)));
         },
         isTSUnionType: Tt,
         isTSIntersectionType: jt,
         isTSConditionalType: function(e, t) {
-            return !!e && "TSConditionalType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSConditionalType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSInferType: function(e, t) {
-            return !!e && "TSInferType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSInferType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSParenthesizedType: function(e, t) {
-            return !!e && "TSParenthesizedType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSParenthesizedType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeOperator: function(e, t) {
-            return !!e && "TSTypeOperator" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeOperator" === e.type && (void 0 === t || T(e, t)));
         },
         isTSIndexedAccessType: function(e, t) {
-            return !!e && "TSIndexedAccessType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSIndexedAccessType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSMappedType: function(e, t) {
-            return !!e && "TSMappedType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSMappedType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSLiteralType: function(e, t) {
-            return !!e && "TSLiteralType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSLiteralType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSExpressionWithTypeArguments: function(e, t) {
-            return !!e && "TSExpressionWithTypeArguments" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSExpressionWithTypeArguments" === e.type && (void 0 === t || T(e, t)));
         },
         isTSInterfaceDeclaration: function(e, t) {
-            return !!e && "TSInterfaceDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSInterfaceDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSInterfaceBody: function(e, t) {
-            return !!e && "TSInterfaceBody" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSInterfaceBody" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeAliasDeclaration: function(e, t) {
-            return !!e && "TSTypeAliasDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeAliasDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSAsExpression: Pt,
         isTSTypeAssertion: Ft,
         isTSEnumDeclaration: function(e, t) {
-            return !!e && "TSEnumDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSEnumDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSEnumMember: function(e, t) {
-            return !!e && "TSEnumMember" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSEnumMember" === e.type && (void 0 === t || T(e, t)));
         },
         isTSModuleDeclaration: function(e, t) {
-            return !!e && "TSModuleDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSModuleDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSModuleBlock: function(e, t) {
-            return !!e && "TSModuleBlock" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSModuleBlock" === e.type && (void 0 === t || T(e, t)));
         },
         isTSImportType: function(e, t) {
-            return !!e && "TSImportType" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSImportType" === e.type && (void 0 === t || T(e, t)));
         },
         isTSImportEqualsDeclaration: function(e, t) {
-            return !!e && "TSImportEqualsDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSImportEqualsDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSExternalModuleReference: _t,
         isTSNonNullExpression: kt,
         isTSExportAssignment: function(e, t) {
-            return !!e && "TSExportAssignment" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSExportAssignment" === e.type && (void 0 === t || T(e, t)));
         },
         isTSNamespaceExportDeclaration: function(e, t) {
-            return !!e && "TSNamespaceExportDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSNamespaceExportDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeAnnotation: It,
         isTSTypeParameterInstantiation: function(e, t) {
-            return !!e && "TSTypeParameterInstantiation" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeParameterInstantiation" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeParameterDeclaration: function(e, t) {
-            return !!e && "TSTypeParameterDeclaration" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeParameterDeclaration" === e.type && (void 0 === t || T(e, t)));
         },
         isTSTypeParameter: function(e, t) {
-            return !!e && "TSTypeParameter" === e.type && (void 0 === t || T(e, t));
+            return !!e && ("TSTypeParameter" === e.type && (void 0 === t || T(e, t)));
         },
         isExpression: Bt,
         isBinary: Ot,
@@ -10796,19 +11770,19 @@ const StorageManager = (() => {
         isTSBaseType: na,
         isNumberLiteral: function(e, t) {
             return console.trace("The node type NumberLiteral has been renamed to NumericLiteral"), 
-            !!e && "NumberLiteral" === e.type && (void 0 === t || T(e, t));
+            !!e && ("NumberLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isRegexLiteral: function(e, t) {
             return console.trace("The node type RegexLiteral has been renamed to RegExpLiteral"), 
-            !!e && "RegexLiteral" === e.type && (void 0 === t || T(e, t));
+            !!e && ("RegexLiteral" === e.type && (void 0 === t || T(e, t)));
         },
         isRestProperty: function(e, t) {
             return console.trace("The node type RestProperty has been renamed to RestElement"), 
-            !!e && "RestProperty" === e.type && (void 0 === t || T(e, t));
+            !!e && ("RestProperty" === e.type && (void 0 === t || T(e, t)));
         },
         isSpreadProperty: function(e, t) {
             return console.trace("The node type SpreadProperty has been renamed to SpreadElement"), 
-            !!e && "SpreadProperty" === e.type && (void 0 === t || T(e, t));
+            !!e && ("SpreadProperty" === e.type && (void 0 === t || T(e, t)));
         }
     }), Bl = wl, Ol = Sl, Nl = Zt, Ll = Bt, Ml = ta, $l = G, Ul = Gt, Gl = H, Wl = Te, Vl = Fe, Hl = ft, Kl = ht, ql = Z, Xl = Tl, zl = jl, Jl = Lt, Yl = _l, Ql = fe, Zl = kl.isCompatTag, ec = {
         types: [ "Identifier", "JSXIdentifier" ],
@@ -10876,7 +11850,7 @@ const StorageManager = (() => {
         types: [ "Flow", "ImportDeclaration", "ExportDeclaration", "ImportSpecifier" ],
         checkPath: function(e) {
             var t = e.node;
-            return !(!Ml(t) && (Wl(t) ? "type" !== t.importKind && "typeof" !== t.importKind : Nl(t) ? "type" !== t.exportKind : !Vl(t) || "type" !== t.importKind && "typeof" !== t.importKind));
+            return !!Ml(t) || (Wl(t) ? "type" === t.importKind || "typeof" === t.importKind : Nl(t) ? "type" === t.exportKind : !!Vl(t) && ("type" === t.importKind || "typeof" === t.importKind));
         }
     }, lc = Object.freeze({
         __proto__: null,
@@ -10929,72 +11903,78 @@ const StorageManager = (() => {
                 return !0 === e.node.await;
             }
         }
-    }), cc = 1e3, pc = 6e4, gc = 60 * pc, fc = 24 * gc, yc = function(e, t) {
+    }), cc = 1e3, pc = 60 * cc, gc = 60 * pc, fc = 24 * gc, hc = 7 * fc, mc = 365.25 * fc, yc = function(e, t) {
         t = t || {};
         var a = typeof e;
         if ("string" === a && e.length > 0) return function(e) {
-            if (!((e = String(e)).length > 100)) {
-                var t = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(e);
-                if (t) {
-                    var a = parseFloat(t[1]);
-                    switch ((t[2] || "ms").toLowerCase()) {
-                      case "years":
-                      case "year":
-                      case "yrs":
-                      case "yr":
-                      case "y":
-                        return 315576e5 * a;
+            if ((e = String(e)).length > 100) return;
+            var t = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(e);
+            if (!t) return;
+            var a = parseFloat(t[1]);
+            switch ((t[2] || "ms").toLowerCase()) {
+              case "years":
+              case "year":
+              case "yrs":
+              case "yr":
+              case "y":
+                return a * mc;
 
-                      case "weeks":
-                      case "week":
-                      case "w":
-                        return 6048e5 * a;
+              case "weeks":
+              case "week":
+              case "w":
+                return a * hc;
 
-                      case "days":
-                      case "day":
-                      case "d":
-                        return a * fc;
+              case "days":
+              case "day":
+              case "d":
+                return a * fc;
 
-                      case "hours":
-                      case "hour":
-                      case "hrs":
-                      case "hr":
-                      case "h":
-                        return a * gc;
+              case "hours":
+              case "hour":
+              case "hrs":
+              case "hr":
+              case "h":
+                return a * gc;
 
-                      case "minutes":
-                      case "minute":
-                      case "mins":
-                      case "min":
-                      case "m":
-                        return a * pc;
+              case "minutes":
+              case "minute":
+              case "mins":
+              case "min":
+              case "m":
+                return a * pc;
 
-                      case "seconds":
-                      case "second":
-                      case "secs":
-                      case "sec":
-                      case "s":
-                        return a * cc;
+              case "seconds":
+              case "second":
+              case "secs":
+              case "sec":
+              case "s":
+                return a * cc;
 
-                      case "milliseconds":
-                      case "millisecond":
-                      case "msecs":
-                      case "msec":
-                      case "ms":
-                        return a;
+              case "milliseconds":
+              case "millisecond":
+              case "msecs":
+              case "msec":
+              case "ms":
+                return a;
 
-                      default:
-                        return;
-                    }
-                }
+              default:
+                return;
             }
         }(e);
         if ("number" === a && isFinite(e)) return t.long ? function(e) {
             var t = Math.abs(e);
-            return t >= fc ? Rc(e, t, fc, "day") : t >= gc ? Rc(e, t, gc, "hour") : t >= pc ? Rc(e, t, pc, "minute") : t >= cc ? Rc(e, t, cc, "second") : e + " ms";
+            if (t >= fc) return Rc(e, t, fc, "day");
+            if (t >= gc) return Rc(e, t, gc, "hour");
+            if (t >= pc) return Rc(e, t, pc, "minute");
+            if (t >= cc) return Rc(e, t, cc, "second");
+            return e + " ms";
         }(e) : function(e) {
             var t = Math.abs(e);
-            return t >= fc ? Math.round(e / fc) + "d" : t >= gc ? Math.round(e / gc) + "h" : t >= pc ? Math.round(e / pc) + "m" : t >= cc ? Math.round(e / cc) + "s" : e + "ms";
+            if (t >= fc) return Math.round(e / fc) + "d";
+            if (t >= gc) return Math.round(e / gc) + "h";
+            if (t >= pc) return Math.round(e / pc) + "m";
+            if (t >= cc) return Math.round(e / cc) + "s";
+            return e + "ms";
         }(e);
         throw new Error("val is not a non-empty string or a valid number. val=" + JSON.stringify(e));
     };
@@ -11002,18 +11982,87 @@ const StorageManager = (() => {
         var r = t >= 1.5 * a;
         return Math.round(e / a) + " " + n + (r ? "s" : "");
     }
-    var vc = r((function(e, t) {
+    var bc = function(e) {
+        function t(e) {
+            var n, r, s, i = null;
+            function o() {
+                for (var e = arguments.length, a = new Array(e), r = 0; r < e; r++) a[r] = arguments[r];
+                if (o.enabled) {
+                    var s = o, i = Number(new Date), d = i - (n || i);
+                    s.diff = d, s.prev = n, s.curr = i, n = i, a[0] = t.coerce(a[0]), "string" != typeof a[0] && a.unshift("%O");
+                    var u = 0;
+                    a[0] = a[0].replace(/%([a-zA-Z%])/g, (function(e, n) {
+                        if ("%%" === e) return "%";
+                        u++;
+                        var r = t.formatters[n];
+                        if ("function" == typeof r) {
+                            var i = a[u];
+                            e = r.call(s, i), a.splice(u, 1), u--;
+                        }
+                        return e;
+                    })), t.formatArgs.call(s, a);
+                    var l = s.log || t.log;
+                    l.apply(s, a);
+                }
+            }
+            return o.namespace = e, o.useColors = t.useColors(), o.color = t.selectColor(e), 
+            o.extend = a, o.destroy = t.destroy, Object.defineProperty(o, "enabled", {
+                enumerable: !0,
+                configurable: !1,
+                get: function() {
+                    return null !== i ? i : (r !== t.namespaces && (r = t.namespaces, s = t.enabled(e)), 
+                    s);
+                },
+                set: function(e) {
+                    i = e;
+                }
+            }), "function" == typeof t.init && t.init(o), o;
+        }
+        function a(e, a) {
+            var n = t(this.namespace + (void 0 === a ? ":" : a) + e);
+            return n.log = this.log, n;
+        }
+        function n(e) {
+            return e.toString().substring(2, e.toString().length - 2).replace(/\.\*\?$/, "*");
+        }
+        return t.debug = t, t.default = t, t.coerce = function(e) {
+            if (e instanceof Error) return e.stack || e.message;
+            return e;
+        }, t.disable = function() {
+            var e = [].concat(A(t.names.map(n)), A(t.skips.map(n).map((function(e) {
+                return "-" + e;
+            })))).join(",");
+            return t.enable(""), e;
+        }, t.enable = function(e) {
+            var a;
+            t.save(e), t.namespaces = e, t.names = [], t.skips = [];
+            var n = ("string" == typeof e ? e : "").split(/[\s,]+/), r = n.length;
+            for (a = 0; a < r; a++) n[a] && ("-" === (e = n[a].replace(/\*/g, ".*?"))[0] ? t.skips.push(new RegExp("^" + e.substr(1) + "$")) : t.names.push(new RegExp("^" + e + "$")));
+        }, t.enabled = function(e) {
+            if ("*" === e[e.length - 1]) return !0;
+            var a, n;
+            for (a = 0, n = t.skips.length; a < n; a++) if (t.skips[a].test(e)) return !1;
+            for (a = 0, n = t.names.length; a < n; a++) if (t.names[a].test(e)) return !0;
+            return !1;
+        }, t.humanize = yc, t.destroy = function() {
+            console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+        }, Object.keys(e).forEach((function(a) {
+            t[a] = e[a];
+        })), t.names = [], t.skips = [], t.formatters = {}, t.selectColor = function(e) {
+            for (var a = 0, n = 0; n < e.length; n++) a = (a << 5) - a + e.charCodeAt(n), a |= 0;
+            return t.colors[Math.abs(a) % t.colors.length];
+        }, t.enable(t.load()), t;
+    }, vc = r((function(e, t) {
         var a;
         t.formatArgs = function(t) {
             if (t[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + t[0] + (this.useColors ? "%c " : " ") + "+" + e.exports.humanize(this.diff), 
-            this.useColors) {
-                var a = "color: " + this.color;
-                t.splice(1, 0, a, "color: inherit");
-                var n = 0, r = 0;
-                t[0].replace(/%[a-zA-Z%]/g, (function(e) {
-                    "%%" !== e && (n++, "%c" === e && (r = n));
-                })), t.splice(r, 0, a);
-            }
+            !this.useColors) return;
+            var a = "color: " + this.color;
+            t.splice(1, 0, a, "color: inherit");
+            var n = 0, r = 0;
+            t[0].replace(/%[a-zA-Z%]/g, (function(e) {
+                "%%" !== e && (n++, "%c" === e && (r = n));
+            })), t.splice(r, 0, a);
         }, t.save = function(e) {
             try {
                 e ? t.storage.setItem("debug", e) : t.storage.removeItem("debug");
@@ -11023,9 +12072,12 @@ const StorageManager = (() => {
             try {
                 e = t.storage.getItem("debug");
             } catch (e) {}
-            return !e && void 0 !== la && "env" in la && (e = la.env.DEBUG), e;
+            !e && void 0 !== la && "env" in la && (e = la.env.DEBUG);
+            return e;
         }, t.useColors = function() {
-            return !("undefined" == typeof window || !window.process || "renderer" !== window.process.type && !window.process.__nwjs) || ("undefined" == typeof navigator || !navigator.userAgent || !navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) && ("undefined" != typeof document && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || "undefined" != typeof window && window.console && (window.console.firebug || window.console.exception && window.console.table) || "undefined" != typeof navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || "undefined" != typeof navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
+            if ("undefined" != typeof window && window.process && ("renderer" === window.process.type || window.process.__nwjs)) return !0;
+            if ("undefined" != typeof navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) return !1;
+            return "undefined" != typeof document && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || "undefined" != typeof window && window.console && (window.console.firebug || window.console.exception && window.console.table) || "undefined" != typeof navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || "undefined" != typeof navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
         }, t.storage = function() {
             try {
                 return localStorage;
@@ -11033,74 +12085,7 @@ const StorageManager = (() => {
         }(), t.destroy = (a = !1, function() {
             a || (a = !0, console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."));
         }), t.colors = [ "#0000CC", "#0000FF", "#0033CC", "#0033FF", "#0066CC", "#0066FF", "#0099CC", "#0099FF", "#00CC00", "#00CC33", "#00CC66", "#00CC99", "#00CCCC", "#00CCFF", "#3300CC", "#3300FF", "#3333CC", "#3333FF", "#3366CC", "#3366FF", "#3399CC", "#3399FF", "#33CC00", "#33CC33", "#33CC66", "#33CC99", "#33CCCC", "#33CCFF", "#6600CC", "#6600FF", "#6633CC", "#6633FF", "#66CC00", "#66CC33", "#9900CC", "#9900FF", "#9933CC", "#9933FF", "#99CC00", "#99CC33", "#CC0000", "#CC0033", "#CC0066", "#CC0099", "#CC00CC", "#CC00FF", "#CC3300", "#CC3333", "#CC3366", "#CC3399", "#CC33CC", "#CC33FF", "#CC6600", "#CC6633", "#CC9900", "#CC9933", "#CCCC00", "#CCCC33", "#FF0000", "#FF0033", "#FF0066", "#FF0099", "#FF00CC", "#FF00FF", "#FF3300", "#FF3333", "#FF3366", "#FF3399", "#FF33CC", "#FF33FF", "#FF6600", "#FF6633", "#FF9900", "#FF9933", "#FFCC00", "#FFCC33" ], 
-        t.log = console.debug || console.log || function() {}, e.exports = function(e) {
-            function t(e) {
-                var n, r, s, i = null;
-                function o() {
-                    for (var e = arguments.length, a = new Array(e), r = 0; r < e; r++) a[r] = arguments[r];
-                    if (o.enabled) {
-                        var s = o, i = Number(new Date), d = i - (n || i);
-                        s.diff = d, s.prev = n, s.curr = i, n = i, a[0] = t.coerce(a[0]), "string" != typeof a[0] && a.unshift("%O");
-                        var u = 0;
-                        a[0] = a[0].replace(/%([a-zA-Z%])/g, (function(e, n) {
-                            if ("%%" === e) return "%";
-                            u++;
-                            var r = t.formatters[n];
-                            if ("function" == typeof r) {
-                                var i = a[u];
-                                e = r.call(s, i), a.splice(u, 1), u--;
-                            }
-                            return e;
-                        })), t.formatArgs.call(s, a), (s.log || t.log).apply(s, a);
-                    }
-                }
-                return o.namespace = e, o.useColors = t.useColors(), o.color = t.selectColor(e), 
-                o.extend = a, o.destroy = t.destroy, Object.defineProperty(o, "enabled", {
-                    enumerable: !0,
-                    configurable: !1,
-                    get: function() {
-                        return null !== i ? i : (r !== t.namespaces && (r = t.namespaces, s = t.enabled(e)), 
-                        s);
-                    },
-                    set: function(e) {
-                        i = e;
-                    }
-                }), "function" == typeof t.init && t.init(o), o;
-            }
-            function a(e, a) {
-                var n = t(this.namespace + (void 0 === a ? ":" : a) + e);
-                return n.log = this.log, n;
-            }
-            function n(e) {
-                return e.toString().substring(2, e.toString().length - 2).replace(/\.\*\?$/, "*");
-            }
-            return t.debug = t, t.default = t, t.coerce = function(e) {
-                return e instanceof Error ? e.stack || e.message : e;
-            }, t.disable = function() {
-                var e = [].concat(A(t.names.map(n)), A(t.skips.map(n).map((function(e) {
-                    return "-" + e;
-                })))).join(",");
-                return t.enable(""), e;
-            }, t.enable = function(e) {
-                var a;
-                t.save(e), t.namespaces = e, t.names = [], t.skips = [];
-                var n = ("string" == typeof e ? e : "").split(/[\s,]+/), r = n.length;
-                for (a = 0; a < r; a++) n[a] && ("-" === (e = n[a].replace(/\*/g, ".*?"))[0] ? t.skips.push(new RegExp("^" + e.substr(1) + "$")) : t.names.push(new RegExp("^" + e + "$")));
-            }, t.enabled = function(e) {
-                if ("*" === e[e.length - 1]) return !0;
-                var a, n;
-                for (a = 0, n = t.skips.length; a < n; a++) if (t.skips[a].test(e)) return !1;
-                for (a = 0, n = t.names.length; a < n; a++) if (t.names[a].test(e)) return !0;
-                return !1;
-            }, t.humanize = yc, t.destroy = function() {
-                console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-            }, Object.keys(e).forEach((function(a) {
-                t[a] = e[a];
-            })), t.names = [], t.skips = [], t.formatters = {}, t.selectColor = function(e) {
-                for (var a = 0, n = 0; n < e.length; n++) a = (a << 5) - a + e.charCodeAt(n), a |= 0;
-                return t.colors[Math.abs(a) % t.colors.length];
-            }, t.enable(t.load()), t;
-        }(t), e.exports.formatters.j = function(e) {
+        t.log = console.debug || console.log || function() {}, e.exports = bc(t), e.exports.formatters.j = function(e) {
             try {
                 return JSON.stringify(e);
             } catch (e) {
@@ -11153,10 +12138,11 @@ const StorageManager = (() => {
         },
         Scope: function(e, t) {
             e.scope.bindingIdentifierEquals(t.oldName, t.binding.identifier) || function(e) {
-                if (e.isMethod() && e.node.computed) for (var t, a = S(jc[e.type]); !(t = a()).done; ) {
+                if (!e.isMethod() || !e.node.computed) return void e.skip();
+                for (var t, a = S(jc[e.type]); !(t = a()).done; ) {
                     var n = t.value;
                     "key" !== n && e.skipKey(n);
-                } else e.skip();
+                }
             }(e);
         },
         "AssignmentExpression|Declaration|VariableDeclarator": function(e, t) {
@@ -11178,14 +12164,15 @@ const StorageManager = (() => {
             var t = this, a = this.binding, n = this.oldName, r = this.newName, s = a.scope, i = a.path.find((function(e) {
                 return e.isDeclaration() || e.isFunctionExpression() || e.isClassExpression();
             }));
-            i && i.getOuterBindingIdentifiers()[n] === a.identifier && this.maybeConvertFromExportDeclaration(i);
+            i && (i.getOuterBindingIdentifiers()[n] === a.identifier && this.maybeConvertFromExportDeclaration(i));
             var o = e || s.block;
             "SwitchStatement" === (null == o ? void 0 : o.type) ? o.cases.forEach((function(e) {
                 s.traverse(e, Pc, t);
             })) : s.traverse(o, Pc, this), e || (s.removeOwnBinding(n), s.bindings[r] = a, this.binding.identifier.name = r), 
             i && (this.maybeConvertFromClassFunctionDeclaration(i), this.maybeConvertFromClassFunctionExpression(i));
         }, e;
-    }(), _c = {
+    }();
+    var _c = {
         builtin: {
             Array: !1,
             ArrayBuffer: !1,
@@ -12771,7 +13758,9 @@ const StorageManager = (() => {
     function vp(e, t) {
         switch (null == e ? void 0 : e.type) {
           default:
-            if (ap(e)) if ((Xc(e) || Jc(e) || Zc(e)) && e.source) vp(e.source, t); else if ((Jc(e) || Zc(e)) && e.specifiers && e.specifiers.length) for (var a, n = S(e.specifiers); !(a = n()).done; ) vp(a.value, t); else (zc(e) || Jc(e)) && e.declaration && vp(e.declaration, t); else np(e) ? vp(e.local, t) : ep(e) && t.push(e.value);
+            if (ap(e)) if ((Xc(e) || Jc(e) || Zc(e)) && e.source) vp(e.source, t); else if ((Jc(e) || Zc(e)) && e.specifiers && e.specifiers.length) for (var a, n = S(e.specifiers); !(a = n()).done; ) {
+                vp(a.value, t);
+            } else (zc(e) || Jc(e)) && e.declaration && vp(e.declaration, t); else np(e) ? vp(e.local, t) : ep(e) && t.push(e.value);
             break;
 
           case "MemberExpression":
@@ -12782,7 +13771,6 @@ const StorageManager = (() => {
 
           case "Identifier":
           case "JSXIdentifier":
-          case "JSXOpeningElement":
             t.push(e.name);
             break;
 
@@ -12794,13 +13782,13 @@ const StorageManager = (() => {
 
           case "ObjectExpression":
           case "ObjectPattern":
-            for (var r, s = S(e.properties); !(r = s()).done; ) vp(r.value, t);
+            for (var r, s = S(e.properties); !(r = s()).done; ) {
+                vp(r.value, t);
+            }
             break;
 
           case "SpreadElement":
           case "RestElement":
-          case "UnaryExpression":
-          case "UpdateExpression":
             vp(e.argument, t);
             break;
 
@@ -12842,6 +13830,9 @@ const StorageManager = (() => {
             break;
 
           case "VariableDeclarator":
+            vp(e.id, t);
+            break;
+
           case "FunctionExpression":
           case "FunctionDeclaration":
           case "ClassExpression":
@@ -12854,12 +13845,21 @@ const StorageManager = (() => {
             vp(e.expression, t);
             break;
 
+          case "UnaryExpression":
+          case "UpdateExpression":
+            vp(e.argument, t);
+            break;
+
           case "MetaProperty":
             vp(e.meta, t), vp(e.property, t);
             break;
 
           case "JSXElement":
             vp(e.openingElement, t);
+            break;
+
+          case "JSXOpeningElement":
+            t.push(e.name);
             break;
 
           case "JSXFragment":
@@ -12883,7 +13883,7 @@ const StorageManager = (() => {
             }
         },
         Declaration: function(e) {
-            e.isBlockScoped() || e.isImportDeclaration() || e.isExportDeclaration() || (e.scope.getFunctionParent() || e.scope.getProgramParent()).registerDeclaration(e);
+            e.isBlockScoped() || (e.isImportDeclaration() || e.isExportDeclaration() || (e.scope.getFunctionParent() || e.scope.getProgramParent()).registerDeclaration(e));
         },
         ImportDeclaration: function(e) {
             e.scope.getBlockParent().registerDeclaration(e);
@@ -13000,7 +14000,7 @@ const StorageManager = (() => {
                 id: a
             }), $c(a));
         }, t.checkBlockScopedCollisions = function(e, t, a, n) {
-            if ("param" !== t && "local" !== e.kind && ("let" === t || "let" === e.kind || "const" === e.kind || "module" === e.kind || "param" === e.kind && ("let" === t || "const" === t))) throw this.hub.buildError(n, 'Duplicate declaration "' + a + '"', TypeError);
+            if ("param" !== t && ("local" !== e.kind && ("let" === t || "let" === e.kind || "const" === e.kind || "module" === e.kind || "param" === e.kind && ("let" === t || "const" === t)))) throw this.hub.buildError(n, 'Duplicate declaration "' + a + '"', TypeError);
         }, t.rename = function(e, t, a) {
             var n = this.getBinding(e);
             if (n) return t = t || this.generateUidIdentifier(e).name, new Fc(n, e, t).rename(a);
@@ -13125,7 +14125,7 @@ const StorageManager = (() => {
                 }
                 return !0;
             }
-            if (tp(e)) return !(e.computed && !this.isPure(e.key, t)) && "get" !== e.kind && "set" !== e.kind;
+            if (tp(e)) return !(e.computed && !this.isPure(e.key, t)) && ("get" !== e.kind && "set" !== e.kind);
             if (sp(e)) return !(e.computed && !this.isPure(e.key, t)) && this.isPure(e.value, t);
             if (cp(e)) return this.isPure(e.argument, t);
             if (dp(e)) return gp(e.tag, "String.raw") && !this.hasBinding("String", !0) && this.isPure(e.quasi, t);
@@ -13164,9 +14164,13 @@ const StorageManager = (() => {
                     assignments: []
                 };
                 if (this.crawling = !0, "Program" !== e.type && xp._exploded) {
-                    for (var n, r = S(xp.enter); !(n = r()).done; ) (0, n.value)(e, a);
+                    for (var n, r = S(xp.enter); !(n = r()).done; ) {
+                        (0, n.value)(e, a);
+                    }
                     var s = xp[e.type];
-                    if (s) for (var i, o = S(s.enter); !(i = o()).done; ) (0, i.value)(e, a);
+                    if (s) for (var i, o = S(s.enter); !(i = o()).done; ) {
+                        (0, i.value)(e, a);
+                    }
                 }
                 e.traverse(xp, a), this.crawling = !1;
                 for (var d, u = S(a.assignments); !(d = u()).done; ) {
@@ -13219,7 +14223,7 @@ const StorageManager = (() => {
             do {
                 for (var a = 0, n = Object.keys(t.bindings); a < n.length; a++) {
                     var r = n[a];
-                    r in e == 0 && (e[r] = t.bindings[r]);
+                    r in e == !1 && (e[r] = t.bindings[r]);
                 }
                 t = t.parent;
             } while (t);
@@ -13243,7 +14247,7 @@ const StorageManager = (() => {
             var t, a = this;
             do {
                 var n, r = a.getOwnBinding(e);
-                if (r && (null == (n = t) || !n.isPattern() || "param" === r.kind)) return r;
+                if (r) if (null == (n = t) || !n.isPattern() || "param" === r.kind) return r;
                 t = a.path;
             } while (a = a.parent);
         }, t.getOwnBinding = function(e) {
@@ -13257,7 +14261,7 @@ const StorageManager = (() => {
         }, t.hasOwnBinding = function(e) {
             return !!this.getOwnBinding(e);
         }, t.hasBinding = function(t, a) {
-            return !(!t || !this.hasOwnBinding(t) && !this.parentHasBinding(t, a) && !this.hasUid(t) && (a || !e.globals.includes(t)) && (a || !e.contextVariables.includes(t)));
+            return !!t && (!!this.hasOwnBinding(t) || (!!this.parentHasBinding(t, a) || (!!this.hasUid(t) || (!(a || !e.globals.includes(t)) || !(a || !e.contextVariables.includes(t))))));
         }, t.parentHasBinding = function(e, t) {
             var a;
             return null == (a = this.parent) ? void 0 : a.hasBinding(e, t);
@@ -13301,7 +14305,8 @@ const StorageManager = (() => {
         throw new TypeError("Must be between 0 and 63: " + e);
     }, Cp = function(e) {
         return 65 <= e && e <= 90 ? e - 65 : 97 <= e && e <= 122 ? e - 97 + 26 : 48 <= e && e <= 57 ? e - 48 + 52 : 43 == e ? 62 : 47 == e ? 63 : -1;
-    }, Sp = function(e) {
+    };
+    var Sp = function(e) {
         var t, a = "", n = function(e) {
             return e < 0 ? 1 + (-e << 1) : 0 + (e << 1);
         }(e);
@@ -13392,13 +14397,13 @@ const StorageManager = (() => {
             return u(e) ? e.slice(1) : e;
         }, t.compareByOriginalPositions = function(e, t, a) {
             var n = e.source - t.source;
-            return 0 !== n || 0 != (n = e.originalLine - t.originalLine) || 0 != (n = e.originalColumn - t.originalColumn) || a || 0 != (n = e.generatedColumn - t.generatedColumn) || 0 != (n = e.generatedLine - t.generatedLine) ? n : e.name - t.name;
+            return 0 !== n || 0 !== (n = e.originalLine - t.originalLine) || 0 !== (n = e.originalColumn - t.originalColumn) || a || 0 !== (n = e.generatedColumn - t.generatedColumn) || 0 !== (n = e.generatedLine - t.generatedLine) ? n : e.name - t.name;
         }, t.compareByGeneratedPositionsDeflated = function(e, t, a) {
             var n = e.generatedLine - t.generatedLine;
-            return 0 !== n || 0 != (n = e.generatedColumn - t.generatedColumn) || a || 0 != (n = e.source - t.source) || 0 != (n = e.originalLine - t.originalLine) || 0 != (n = e.originalColumn - t.originalColumn) ? n : e.name - t.name;
+            return 0 !== n || 0 !== (n = e.generatedColumn - t.generatedColumn) || a || 0 !== (n = e.source - t.source) || 0 !== (n = e.originalLine - t.originalLine) || 0 !== (n = e.originalColumn - t.originalColumn) ? n : e.name - t.name;
         }, t.compareByGeneratedPositionsInflated = function(e, t) {
             var a = e.generatedLine - t.generatedLine;
-            return 0 !== a || 0 != (a = e.generatedColumn - t.generatedColumn) || 0 !== (a = l(e.source, t.source)) || 0 != (a = e.originalLine - t.originalLine) || 0 != (a = e.originalColumn - t.originalColumn) ? a : l(e.name, t.name);
+            return 0 !== a || 0 !== (a = e.generatedColumn - t.generatedColumn) || 0 !== (a = l(e.source, t.source)) || 0 !== (a = e.originalLine - t.originalLine) || 0 !== (a = e.originalColumn - t.originalColumn) ? a : l(e.name, t.name);
         };
     }), "/$$rollup_base$$/node_modules/source-map/lib"), Pp = Object.prototype.hasOwnProperty, Fp = "undefined" != typeof Map;
     function _p() {
@@ -13431,7 +14436,9 @@ const StorageManager = (() => {
     }, _p.prototype.toArray = function() {
         return this._array.slice();
     };
-    var kp_ArraySet = _p;
+    var kp = {
+        ArraySet: _p
+    };
     function Ip() {
         this._array = [], this._sorted = !0, this._last = {
             generatedLine: -1,
@@ -13442,14 +14449,14 @@ const StorageManager = (() => {
         this._array.forEach(e, t);
     }, Ip.prototype.add = function(e) {
         var t, a, n, r, s, i;
-        a = e, n = (t = this._last).generatedLine, r = a.generatedLine, s = t.generatedColumn, 
+        t = this._last, a = e, n = t.generatedLine, r = a.generatedLine, s = t.generatedColumn, 
         i = a.generatedColumn, r > n || r == n && i >= s || jp.compareByGeneratedPositionsInflated(t, a) <= 0 ? (this._last = e, 
         this._array.push(e)) : (this._sorted = !1, this._array.push(e));
     }, Ip.prototype.toArray = function() {
         return this._sorted || (this._array.sort(jp.compareByGeneratedPositionsInflated), 
         this._sorted = !0), this._array;
     };
-    var Bp = kp_ArraySet, Op = {
+    var Bp = kp.ArraySet, Op = {
         MappingList: Ip
     }.MappingList;
     function Np(e) {
@@ -13594,7 +14601,7 @@ const StorageManager = (() => {
         }
         var d, u;
     }
-    var Gp = kp_ArraySet, Wp = function(e, t) {
+    var Gp = kp.ArraySet, Wp = function(e, t) {
         Up(e, t, 0, e.length - 1);
     };
     function Vp(e) {
@@ -13760,9 +14767,9 @@ const StorageManager = (() => {
             name: null
         };
     }, Kp.prototype.hasContentsOfAllSources = function() {
-        return !!this.sourcesContent && this.sourcesContent.length >= this._sources.size() && !this.sourcesContent.some((function(e) {
+        return !!this.sourcesContent && (this.sourcesContent.length >= this._sources.size() && !this.sourcesContent.some((function(e) {
             return null == e;
-        }));
+        })));
     }, Kp.prototype.sourceContentFor = function(e, t) {
         if (!this.sourcesContent) return null;
         if (null != this.sourceRoot && (e = jp.relative(this.sourceRoot, e)), this._sources.has(e)) return this.sourcesContent[this._sources.indexOf(e)];
@@ -13835,7 +14842,8 @@ const StorageManager = (() => {
             generatedLine: jp.getArg(e, "line"),
             generatedColumn: jp.getArg(e, "column")
         }, a = Mp.search(t, this._sections, (function(e, t) {
-            return e.generatedLine - t.generatedOffset.generatedLine || e.generatedColumn - t.generatedOffset.generatedColumn;
+            var a = e.generatedLine - t.generatedOffset.generatedLine;
+            return a || e.generatedColumn - t.generatedOffset.generatedColumn;
         })), n = this._sections[a];
         return n ? n.consumer.originalPositionFor({
             line: t.generatedLine - (n.generatedOffset.generatedLine - 1),
@@ -14120,7 +15128,9 @@ const StorageManager = (() => {
         }, t.removeLastSemicolon = function() {
             this._queue.length > 0 && ";" === this._queue[0][0] && this._queue.shift();
         }, t.getLastChar = function() {
-            return this._queue.length > 0 ? this._queue[0][0].charCodeAt(0) : this._last;
+            var e;
+            this._queue.length > 0 ? e = this._queue[0][0].charCodeAt(0) : e = this._last;
+            return e;
         }, t.endsWithCharAndNewline = function() {
             var e = this._queue;
             if (e.length > 0) {
@@ -14451,7 +15461,9 @@ const StorageManager = (() => {
         }
         for (var n = 0, r = Object.keys(e); n < r.length; n++) {
             var s = r[n], i = Tf[s];
-            if (i) for (var o, d = S(i); !(o = d()).done; ) a(o.value, e[s]); else a(s, e[s]);
+            if (i) for (var o, d = S(i); !(o = d()).done; ) {
+                a(o.value, e[s]);
+            } else a(s, e[s]);
         }
         return t;
     }
@@ -14672,7 +15684,25 @@ const StorageManager = (() => {
             this.print(e.source, e), this.printAssertions(e)), this.semicolon();
         }
     }
-    for (var Ch = [], Sh = [], Th = "undefined" != typeof Uint8Array ? Uint8Array : Array, jh = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", Ph = 0, Fh = jh.length; Ph < Fh; ++Ph) Ch[Ph] = jh[Ph], 
+    for (var Dh = function(e) {
+        var t = _h(e), a = t[0], n = t[1];
+        return 3 * (a + n) / 4 - n;
+    }, Ah = function(e) {
+        var t, a, n = _h(e), r = n[0], s = n[1], i = new Th(function(e, t, a) {
+            return 3 * (t + a) / 4 - a;
+        }(0, r, s)), o = 0, d = s > 0 ? r - 4 : r;
+        for (a = 0; a < d; a += 4) t = Sh[e.charCodeAt(a)] << 18 | Sh[e.charCodeAt(a + 1)] << 12 | Sh[e.charCodeAt(a + 2)] << 6 | Sh[e.charCodeAt(a + 3)], 
+        i[o++] = t >> 16 & 255, i[o++] = t >> 8 & 255, i[o++] = 255 & t;
+        2 === s && (t = Sh[e.charCodeAt(a)] << 2 | Sh[e.charCodeAt(a + 1)] >> 4, i[o++] = 255 & t);
+        1 === s && (t = Sh[e.charCodeAt(a)] << 10 | Sh[e.charCodeAt(a + 1)] << 4 | Sh[e.charCodeAt(a + 2)] >> 2, 
+        i[o++] = t >> 8 & 255, i[o++] = 255 & t);
+        return i;
+    }, wh = function(e) {
+        for (var t, a = e.length, n = a % 3, r = [], s = 16383, i = 0, o = a - n; i < o; i += s) r.push(kh(e, i, i + s > o ? o : i + s));
+        1 === n ? (t = e[a - 1], r.push(Ch[t >> 2] + Ch[t << 4 & 63] + "==")) : 2 === n && (t = (e[a - 2] << 8) + e[a - 1], 
+        r.push(Ch[t >> 10] + Ch[t >> 4 & 63] + Ch[t << 2 & 63] + "="));
+        return r.join("");
+    }, Ch = [], Sh = [], Th = "undefined" != typeof Uint8Array ? Uint8Array : Array, jh = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", Ph = 0, Fh = jh.length; Ph < Fh; ++Ph) Ch[Ph] = jh[Ph], 
     Sh[jh.charCodeAt(Ph)] = Ph;
     function _h(e) {
         var t = e.length;
@@ -14686,19 +15716,10 @@ const StorageManager = (() => {
         return s.join("");
     }
     Sh["-".charCodeAt(0)] = 62, Sh["_".charCodeAt(0)] = 63;
-    var Ih_toByteArray = function(e) {
-        var t, a, n = _h(e), r = n[0], s = n[1], i = new Th(function(e, t, a) {
-            return 3 * (t + a) / 4 - a;
-        }(0, r, s)), o = 0, d = s > 0 ? r - 4 : r;
-        for (a = 0; a < d; a += 4) t = Sh[e.charCodeAt(a)] << 18 | Sh[e.charCodeAt(a + 1)] << 12 | Sh[e.charCodeAt(a + 2)] << 6 | Sh[e.charCodeAt(a + 3)], 
-        i[o++] = t >> 16 & 255, i[o++] = t >> 8 & 255, i[o++] = 255 & t;
-        return 2 === s && (t = Sh[e.charCodeAt(a)] << 2 | Sh[e.charCodeAt(a + 1)] >> 4, 
-        i[o++] = 255 & t), 1 === s && (t = Sh[e.charCodeAt(a)] << 10 | Sh[e.charCodeAt(a + 1)] << 4 | Sh[e.charCodeAt(a + 2)] >> 2, 
-        i[o++] = t >> 8 & 255, i[o++] = 255 & t), i;
-    }, Ih_fromByteArray = function(e) {
-        for (var t, a = e.length, n = a % 3, r = [], s = 16383, i = 0, o = a - n; i < o; i += s) r.push(kh(e, i, i + s > o ? o : i + s));
-        return 1 === n ? (t = e[a - 1], r.push(Ch[t >> 2] + Ch[t << 4 & 63] + "==")) : 2 === n && (t = (e[a - 2] << 8) + e[a - 1], 
-        r.push(Ch[t >> 10] + Ch[t >> 4 & 63] + Ch[t << 2 & 63] + "=")), r.join("");
+    var Ih = {
+        byteLength: Dh,
+        toByteArray: Ah,
+        fromByteArray: wh
     }, Bh = function(e, t, a, n, r) {
         var s, i, o = 8 * r - n - 1, d = (1 << o) - 1, u = d >> 1, l = -7, c = a ? r - 1 : 0, p = a ? -1 : 1, g = e[t + c];
         for (c += p, s = g & (1 << -l) - 1, g >>= -l, l += o; l > 0; s = 256 * s + e[t + c], 
@@ -14721,7 +15742,8 @@ const StorageManager = (() => {
         e[a + g - f] |= 128 * h;
     }, Nh = r((function(e, t) {
         t.Buffer = r, t.SlowBuffer = function(e) {
-            return +e != e && (e = 0), r.alloc(+e);
+            +e != e && (e = 0);
+            return r.alloc(+e);
         }, t.INSPECT_MAX_BYTES = 50;
         var a = 2147483647;
         function n(e) {
@@ -14738,9 +15760,11 @@ const StorageManager = (() => {
         }
         function s(e, t, a) {
             if ("string" == typeof e) return function(e, t) {
-                if ("string" == typeof t && "" !== t || (t = "utf8"), !r.isEncoding(t)) throw new TypeError("Unknown encoding: " + t);
+                "string" == typeof t && "" !== t || (t = "utf8");
+                if (!r.isEncoding(t)) throw new TypeError("Unknown encoding: " + t);
                 var a = 0 | l(e, t), s = n(a), i = s.write(e, t);
-                return i !== a && (s = s.slice(0, i)), s;
+                i !== a && (s = s.slice(0, i));
+                return s;
             }(e, t);
             if (ArrayBuffer.isView(e)) return d(e);
             if (null == e) throw TypeError("The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type " + typeof e);
@@ -14748,8 +15772,8 @@ const StorageManager = (() => {
                 if (t < 0 || e.byteLength < t) throw new RangeError('"offset" is outside of buffer bounds');
                 if (e.byteLength < t + (a || 0)) throw new RangeError('"length" is outside of buffer bounds');
                 var n;
-                return (n = void 0 === t && void 0 === a ? new Uint8Array(e) : void 0 === a ? new Uint8Array(e, t) : new Uint8Array(e, t, a)).__proto__ = r.prototype, 
-                n;
+                n = void 0 === t && void 0 === a ? new Uint8Array(e) : void 0 === a ? new Uint8Array(e, t) : new Uint8Array(e, t, a);
+                return n.__proto__ = r.prototype, n;
             }(e, t, a);
             if ("number" == typeof e) throw new TypeError('The "value" argument must not be of type number. Received type number');
             var s = e.valueOf && e.valueOf();
@@ -14759,7 +15783,8 @@ const StorageManager = (() => {
                     var t = 0 | u(e.length), a = n(t);
                     return 0 === a.length || e.copy(a, 0, 0, t), a;
                 }
-                return void 0 !== e.length ? "number" != typeof e.length || M(e.length) ? n(0) : d(e) : "Buffer" === e.type && Array.isArray(e.data) ? d(e.data) : void 0;
+                if (void 0 !== e.length) return "number" != typeof e.length || M(e.length) ? n(0) : d(e);
+                if ("Buffer" === e.type && Array.isArray(e.data)) return d(e.data);
             }(e);
             if (i) return i;
             if ("undefined" != typeof Symbol && null != Symbol.toPrimitive && "function" == typeof e[Symbol.toPrimitive]) return r.from(e[Symbol.toPrimitive]("string"), t, a);
@@ -14924,7 +15949,7 @@ const StorageManager = (() => {
             }(t, e.length - a), e, a, n);
         }
         function x(e, t, a) {
-            return 0 === t && a === e.length ? Ih_fromByteArray(e) : Ih_fromByteArray(e.slice(t, a));
+            return 0 === t && a === e.length ? Ih.fromByteArray(e) : Ih.fromByteArray(e.slice(t, a));
         }
         function E(e, t, a) {
             a = Math.min(e.length, a);
@@ -14952,7 +15977,8 @@ const StorageManager = (() => {
             return function(e) {
                 var t = e.length;
                 if (t <= D) return String.fromCharCode.apply(String, e);
-                for (var a = "", n = 0; n < t; ) a += String.fromCharCode.apply(String, e.slice(n, n += D));
+                var a = "", n = 0;
+                for (;n < t; ) a += String.fromCharCode.apply(String, e.slice(n, n += D));
                 return a;
             }(n);
         }
@@ -15220,12 +16246,12 @@ const StorageManager = (() => {
         }, r.prototype.readDoubleBE = function(e, t) {
             return e >>>= 0, t || T(e, 8, this.length), Bh(this, e, !1, 52, 8);
         }, r.prototype.writeUIntLE = function(e, t, a, n) {
-            e = +e, t >>>= 0, a >>>= 0, n || j(this, e, t, a, Math.pow(2, 8 * a) - 1, 0);
+            (e = +e, t >>>= 0, a >>>= 0, n) || j(this, e, t, a, Math.pow(2, 8 * a) - 1, 0);
             var r = 1, s = 0;
             for (this[t] = 255 & e; ++s < a && (r *= 256); ) this[t + s] = e / r & 255;
             return t + a;
         }, r.prototype.writeUIntBE = function(e, t, a, n) {
-            e = +e, t >>>= 0, a >>>= 0, n || j(this, e, t, a, Math.pow(2, 8 * a) - 1, 0);
+            (e = +e, t >>>= 0, a >>>= 0, n) || j(this, e, t, a, Math.pow(2, 8 * a) - 1, 0);
             var r = a - 1, s = 1;
             for (this[t + r] = 255 & e; --r >= 0 && (s *= 256); ) this[t + r] = e / s & 255;
             return t + a;
@@ -15362,7 +16388,7 @@ const StorageManager = (() => {
             return s;
         }
         function O(e) {
-            return Ih_toByteArray(function(e) {
+            return Ih.toByteArray(function(e) {
                 if ((e = (e = e.split("=")[0]).trim().replace(k, "")).length < 2) return "";
                 for (;e.length % 4 != 0; ) e += "=";
                 return e;
@@ -15743,7 +16769,9 @@ const StorageManager = (() => {
         VariableDeclaration: function(e, t) {
             e.declare && (this.word("declare"), this.space()), this.word(e.kind), this.space();
             var a, n = !1;
-            if (!zf(t)) for (var r, s = S(e.declarations); !(r = s()).done; ) r.value.init && (n = !0);
+            if (!zf(t)) for (var r, s = S(e.declarations); !(r = s()).done; ) {
+                r.value.init && (n = !0);
+            }
             if (n && (a = "const" === e.kind ? uh : dh), this.printList(e.declarations, e, {
                 separator: a
             }), zf(t)) if (Jf(t)) {
@@ -15947,11 +16975,15 @@ const StorageManager = (() => {
         },
         TopicReference: function() {
             var e = this.format.topicToken;
-            if ("#" !== e) {
+            switch (e) {
+              case "#":
+                this.token("#");
+                break;
+
+              default:
                 var t = JSON.stringify(e);
                 throw new Error('The "topicToken" generator option must be "#" (' + t + " received instead).");
             }
-            this.token("#");
         },
         PipelineTopicExpression: function(e) {
             this.print(e.expression, e);
@@ -16737,8 +17769,9 @@ const StorageManager = (() => {
         }, t._printNewline = function(e, t, a, n) {
             if (!this.format.retainLines && !this.format.compact) if (this.format.concise) this.space(); else {
                 var r = 0;
-                this._buf.hasContent() && (e || r++, n.addNewlines && (r += n.addNewlines(e, t) || 0), 
-                (e ? Tm : Sm)(t, a) && r++), this.newline(Math.min(2, r));
+                if (this._buf.hasContent()) e || r++, n.addNewlines && (r += n.addNewlines(e, t) || 0), 
+                (e ? Tm : Sm)(t, a) && r++;
+                this.newline(Math.min(2, r));
             }
         }, t._getComments = function(e, t) {
             return t && (e ? t.leadingComments : t.trailingComments) || [];
@@ -16808,13 +17841,15 @@ const StorageManager = (() => {
                     recordAndTupleSyntaxType: t.recordAndTupleSyntaxType,
                     topicToken: t.topicToken
                 };
-                return a.jsonCompatibleStrings = t.jsonCompatibleStrings, a.minified ? (a.compact = !0, 
+                a.jsonCompatibleStrings = t.jsonCompatibleStrings, a.minified ? (a.compact = !0, 
                 a.shouldPrintComment = a.shouldPrintComment || function() {
                     return a.comments;
                 }) : a.shouldPrintComment = a.shouldPrintComment || function(e) {
                     return a.comments || e.indexOf("@license") >= 0 || e.indexOf("@preserve") >= 0;
-                }, "auto" === a.compact && (a.compact = e.length > 5e5, a.compact && console.error("[BABEL] Note: The code generator has deoptimised the styling of " + t.filename + " as it exceeds the max of 500KB.")), 
-                a.compact && (a.indent.adjustMultilineComment = !1), a;
+                };
+                "auto" === a.compact && (a.compact = e.length > 5e5, a.compact && console.error("[BABEL] Note: The code generator has deoptimised the styling of " + t.filename + " as it exceeds the max of 500KB."));
+                a.compact && (a.indent.adjustMultilineComment = !1);
+                return a;
             }(n, a), i = a.sourceMaps ? new ag(a, n) : null;
             return (r = e.call(this, s, i) || this).ast = void 0, r.ast = t, r;
         }
@@ -16825,7 +17860,8 @@ const StorageManager = (() => {
     function _m(e, t, a) {
         return new Fm(e, t, a).generate();
     }
-    var km = an, Im = Object.freeze({
+    var km = an;
+    var Im = Object.freeze({
         __proto__: null,
         findParent: function(e) {
             for (var t = this; t = t.parentPath; ) if (e(t)) return t;
@@ -16856,7 +17892,7 @@ const StorageManager = (() => {
             return this.getDeepestCommonAncestorFrom(e, (function(e, t, a) {
                 for (var n, r, s = km[e.type], i = S(a); !(r = i()).done; ) {
                     var o = r.value[t + 1];
-                    n ? (o.listKey && n.listKey === o.listKey && o.key < n.key || s.indexOf(n.parentKey) > s.indexOf(o.parentKey)) && (n = o) : n = o;
+                    if (n) if (o.listKey && n.listKey === o.listKey && o.key < n.key) n = o; else s.indexOf(n.parentKey) > s.indexOf(o.parentKey) && (n = o); else n = o;
                 }
                 return n;
             }));
@@ -16873,7 +17909,9 @@ const StorageManager = (() => {
                 return t.length < s && (s = t.length), t;
             })), o = i[0];
             e: for (var d = 0; d < s; d++) {
-                for (var u, l = o[d], c = S(i); !(u = c()).done; ) if (u.value[d] !== l) break e;
+                for (var u, l = o[d], c = S(i); !(u = c()).done; ) {
+                    if (u.value[d] !== l) break e;
+                }
                 n = d, r = l;
             }
             if (r) return t ? t(r, n, i) : r;
@@ -17087,11 +18125,15 @@ const StorageManager = (() => {
                             n.push(c.getTypeAnnotation());
                         }
                     }
-                    if (n.length) return $m(n[0]) && Nm ? Nm(n) : Om ? Om(n) : Mm(n);
+                    if (!n.length) return;
+                    if ($m(n[0]) && Nm) return Nm(n);
+                    if (Om) return Om(n);
+                    return Mm(n);
                 }(t, this, e.name) : "undefined" === e.name ? Gm() : "NaN" === e.name || "Infinity" === e.name ? Um() : void e.name;
             }
         }
-    }), Dy = Os, Ay = Xe, wy = Je, Cy = tt, Sy = aa, Ty = Qe, jy = H, Py = et, Fy = nt, _y = rt, ky = st, Iy = ot, By = dt, Oy = Ei, Ny = Bi, Ly = new WeakSet;
+    }), Dy = Os, Ay = Xe, wy = Je, Cy = tt, Sy = aa, Ty = Qe, jy = H, Py = et, Fy = nt, _y = rt, ky = st, Iy = ot, By = dt, Oy = Ei, Ny = Bi;
+    var Ly = new WeakSet;
     function My(e, t, a) {
         if ("string" === e) return _y(t);
         if ("number" === e) return Fy(t);
@@ -18126,7 +19168,7 @@ const StorageManager = (() => {
             r < 0 ? r += 1 : r > 1 && (r -= 1)), [ 360 * r, 100 * s, 100 * u ];
         }, n.rgb.hwb = function(e) {
             var t = e[0], a = e[1], r = e[2];
-            return [ n.rgb.hsl(e)[0], 1 / 255 * Math.min(t, Math.min(a, r)) * 100, 100 * (r = 1 - 1 / 255 * Math.max(t, Math.max(a, r))) ];
+            return [ n.rgb.hsl(e)[0], 100 * (1 / 255 * Math.min(t, Math.min(a, r))), 100 * (r = 1 - 1 / 255 * Math.max(t, Math.max(a, r))) ];
         }, n.rgb.cmyk = function(e) {
             var t, a = e[0] / 255, n = e[1] / 255, r = e[2] / 255;
             return [ 100 * ((1 - a - (t = Math.min(1 - a, 1 - n, 1 - r))) / (1 - t) || 0), 100 * ((1 - n - t) / (1 - t) || 0), 100 * ((1 - r - t) / (1 - t) || 0), 100 * t ];
@@ -18158,7 +19200,7 @@ const StorageManager = (() => {
             return r;
         }, n.hsl.hsv = function(e) {
             var t = e[0], a = e[1] / 100, n = e[2] / 100, r = a, s = Math.max(n, .01);
-            return a *= (n *= 2) <= 1 ? n : 2 - n, r *= s <= 1 ? s : 2 - s, [ t, 100 * (0 === n ? 2 * r / (s + r) : 2 * a / (n + a)), (n + a) / 2 * 100 ];
+            return a *= (n *= 2) <= 1 ? n : 2 - n, r *= s <= 1 ? s : 2 - s, [ t, 100 * (0 === n ? 2 * r / (s + r) : 2 * a / (n + a)), 100 * ((n + a) / 2) ];
         }, n.hsv.rgb = function(e) {
             var t = e[0] / 60, a = e[1] / 100, n = e[2] / 100, r = Math.floor(t) % 6, s = t - Math.floor(t), i = 255 * n * (1 - a), o = 255 * n * (1 - a * s), d = 255 * n * (1 - a * (1 - s));
             switch (n *= 255, r) {
@@ -18188,6 +19230,8 @@ const StorageManager = (() => {
             switch (c > 1 && (u /= c, l /= c), n = 6 * d - (t = Math.floor(6 * d)), 0 != (1 & t) && (n = 1 - n), 
             r = u + n * ((a = 1 - l) - u), t) {
               default:
+              case 6:
+              case 0:
                 s = a, i = r, o = u;
                 break;
 
@@ -18275,7 +19319,7 @@ const StorageManager = (() => {
             return t = o <= 0 ? 0 : s === a ? (n - r) / o % 6 : s === n ? 2 + (r - a) / o : 4 + (a - n) / o + 4, 
             t /= 6, [ 360 * (t %= 1), 100 * o, 100 * (o < 1 ? i / (1 - o) : 0) ];
         }, n.hsl.hcg = function(e) {
-            var n, t = e[1] / 100, a = e[2] / 100, r = 0;
+            var t = e[1] / 100, a = e[2] / 100, n = 1, r = 0;
             return (n = a < .5 ? 2 * t * a : 2 * t * (1 - a)) < 1 && (r = (a - .5 * n) / (1 - n)), 
             [ e[0], 100 * n, 100 * r ];
         }, n.hsv.hcg = function(e) {
@@ -18344,6 +19388,20 @@ const StorageManager = (() => {
             return [ (e[0] + e[1] + e[2]) / 3 / 255 * 100 ];
         };
     }), "/$$rollup_base$$/node_modules/color-convert");
+    function pR(e) {
+        var t = function() {
+            for (var e = {}, t = Object.keys(cR), a = t.length, n = 0; n < a; n++) e[t[n]] = {
+                distance: -1,
+                parent: null
+            };
+            return e;
+        }(), a = [ e ];
+        for (t[e].distance = 0; a.length; ) for (var n = a.pop(), r = Object.keys(cR[n]), s = r.length, i = 0; i < s; i++) {
+            var o = r[i], d = t[o];
+            -1 === d.distance && (d.distance = t[n].distance + 1, d.parent = n, a.unshift(o));
+        }
+        return t;
+    }
     function gR(e, t) {
         return function(a) {
             return t(e(a));
@@ -18362,20 +19420,7 @@ const StorageManager = (() => {
             value: cR[e].labels
         });
         var t = function(e) {
-            for (var t = function(e) {
-                var t = function() {
-                    for (var e = {}, t = Object.keys(cR), a = t.length, n = 0; n < a; n++) e[t[n]] = {
-                        distance: -1,
-                        parent: null
-                    };
-                    return e;
-                }(), a = [ e ];
-                for (t[e].distance = 0; a.length; ) for (var n = a.pop(), r = Object.keys(cR[n]), s = r.length, i = 0; i < s; i++) {
-                    var o = r[i], d = t[o];
-                    -1 === d.distance && (d.distance = t[n].distance + 1, d.parent = n, a.unshift(o));
-                }
-                return t;
-            }(e), a = {}, n = Object.keys(t), r = n.length, s = 0; s < r; s++) {
+            for (var t = pR(e), a = {}, n = Object.keys(t), r = n.length, s = 0; s < r; s++) {
                 var i = n[s];
                 null !== t[i].parent && (a[i] = fR(i, t));
             }
@@ -18517,7 +19562,7 @@ const StorageManager = (() => {
                 return r;
             }
         });
-    }), "/$$rollup_base$$/node_modules/chalk/node_modules/ansi-styles"), bR = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi, vR = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g, xR = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/, ER = /\\(u[a-f\d]{4}|x[a-f\d]{2}|.)|([^\\])/gi, DR = new Map([ [ "n", "\n" ], [ "r", "\r" ], [ "t", "\t" ], [ "b", "\b" ], [ "f", "\f" ], [ "v", "\v" ], [ "0", "\0" ], [ "\\", "\\" ], [ "e", "" ], [ "a", "" ] ]);
+    }), "/$$rollup_base$$/node_modules/chalk/node_modules/ansi-styles"), RR = !1, bR = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi, vR = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g, xR = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/, ER = /\\(u[a-f\d]{4}|x[a-f\d]{2}|.)|([^\\])/gi, DR = new Map([ [ "n", "\n" ], [ "r", "\r" ], [ "t", "\t" ], [ "b", "\b" ], [ "f", "\f" ], [ "v", "\v" ], [ "0", "\0" ], [ "\\", "\\" ], [ "e", "" ], [ "a", "" ] ]);
     function AR(e) {
         return "u" === e[0] && 5 === e.length || "x" === e[0] && 3 === e.length ? String.fromCharCode(parseInt(e.slice(1), 16)) : DR.get(e) || e;
     }
@@ -18558,7 +19603,7 @@ const StorageManager = (() => {
         }
         return u;
     }
-    var FR, TR = function(e, t) {
+    var TR = function(e, t) {
         var a = [], n = [], r = [];
         if (t.replace(bR, (function(t, s, i, o, d, u) {
             if (s) r.push(AR(s)); else if (o) {
@@ -18577,9 +19622,10 @@ const StorageManager = (() => {
         }
         return n.join("");
     }, jR = r((function(e) {
-        var a = "win32" === la.platform && !(la.env.TERM || "").toLowerCase().startsWith("xterm"), n = [ "ansi", "ansi", "ansi256", "ansi16m" ], r = new Set([ "gray" ]), s = Object.create(null);
+        var t = RR, a = "win32" === la.platform && !(la.env.TERM || "").toLowerCase().startsWith("xterm"), n = [ "ansi", "ansi", "ansi256", "ansi16m" ], r = new Set([ "gray" ]), s = Object.create(null);
         function i(e, t) {
-            t = t || {}, e.level = void 0 === t.level ? 0 : t.level, e.enabled = "enabled" in t ? t.enabled : e.level > 0;
+            t = t || {};
+            e.level = void 0 === t.level ? 0 : t.level, e.enabled = "enabled" in t ? t.enabled : e.level > 0;
         }
         function o(e) {
             if (!this || !(this instanceof o) || this.template) {
@@ -18687,9 +19733,10 @@ const StorageManager = (() => {
             n.push(String(t.raw[r]));
             return TR(e, n.join(""));
         }
-        Object.defineProperties(o.prototype, s), e.exports = o(), e.exports.supportsColor = false, 
+        Object.defineProperties(o.prototype, s), e.exports = o(), e.exports.supportsColor = t, 
         e.exports.default = e.exports;
-    }), "/$$rollup_base$$/node_modules/chalk"), PR = new Set([ "as", "async", "from", "get", "of", "set" ]), _R = /\r\n|[\n\r\u2028\u2029]/, kR = /^[()[\]{}]$/, IR = /^[a-z][\w-]*$/i, BR = function(e, t, a) {
+    }), "/$$rollup_base$$/node_modules/chalk"), PR = new Set([ "as", "async", "from", "get", "of", "set" ]);
+    var FR, _R = /\r\n|[\n\r\u2028\u2029]/, kR = /^[()[\]{}]$/, IR = /^[a-z][\w-]*$/i, BR = function(e, t, a) {
         if ("name" === e.type) {
             if (ka(e.value) || Pa(e.value, !0) || PR.has(e.value)) return "keyword";
             if (IR.test(e.value) && ("<" === a[t - 1] || "</" == a.substr(t - 2, 2))) return "jsxIdentifier";
@@ -18705,6 +19752,29 @@ const StorageManager = (() => {
             enabled: !0,
             level: 1
         }) : jR;
+    }
+    function LR(e, t) {
+        return void 0 === t && (t = {}), OR(t) ? function(e, t) {
+            for (var a, n = "", r = function() {
+                var t = a.value, r = t.type, s = t.value, i = e[r];
+                n += i ? s.split(_R).map((function(e) {
+                    return i(e);
+                })).join("\n") : s;
+            }, s = S(FR(t)); !(a = s()).done; ) r();
+            return n;
+        }(function(e) {
+            return {
+                keyword: e.cyan,
+                capitalized: e.yellow,
+                jsxIdentifier: e.yellow,
+                punctuator: e.yellow,
+                number: e.magenta,
+                string: e.green,
+                regex: e.magenta,
+                comment: e.grey,
+                invalid: e.white.bgRed.bold
+            };
+        }(NR(t)), e) : e;
     }
     FR = iR.mark((function e(t) {
         var a, n;
@@ -18763,29 +19833,7 @@ const StorageManager = (() => {
                 end: h,
                 markerLines: y
             };
-        }(t, e.split(MR), a), d = o.start, u = o.end, l = o.markerLines, c = t.start && "number" == typeof t.start.column, p = String(u).length, g = (n ? function(e, t) {
-            return void 0 === t && (t = {}), OR(t) ? function(e, t) {
-                for (var a, n = "", r = function() {
-                    var t = a.value, r = t.type, s = t.value, i = e[r];
-                    n += i ? s.split(_R).map((function(e) {
-                        return i(e);
-                    })).join("\n") : s;
-                }, s = S(FR(t)); !(a = s()).done; ) r();
-                return n;
-            }(function(e) {
-                return {
-                    keyword: e.cyan,
-                    capitalized: e.yellow,
-                    jsxIdentifier: e.yellow,
-                    punctuator: e.yellow,
-                    number: e.magenta,
-                    string: e.green,
-                    regex: e.magenta,
-                    comment: e.grey,
-                    invalid: e.white.bgRed.bold
-                };
-            }(NR(t)), e) : e;
-        }(e, a) : e).split(MR).slice(d, u).map((function(e, t) {
+        }(t, e.split(MR), a), d = o.start, u = o.end, l = o.markerLines, c = t.start && "number" == typeof t.start.column, p = String(u).length, g = (n ? LR(e, a) : e).split(MR).slice(d, u).map((function(e, t) {
             var n = d + 1 + t, r = " " + (" " + n).slice(-p) + " |", o = l[n], u = !l[n + 1];
             if (o) {
                 var c = "";
@@ -19175,7 +20223,7 @@ const StorageManager = (() => {
     }, ob = {
         brace: new ib("{"),
         template: new ib("`", !0)
-    }, db = !0, ub = !0, pb = !0, gb = function(e, t) {
+    }, db = !0, ub = !0, lb = !0, cb = !0, pb = !0, gb = function(e, t) {
         void 0 === t && (t = {}), this.label = void 0, this.keyword = void 0, this.beforeExpr = void 0, 
         this.startsExpr = void 0, this.rightAssociative = void 0, this.isLoop = void 0, 
         this.isAssign = void 0, this.prefix = void 0, this.postfix = void 0, this.binop = void 0, 
@@ -19298,19 +20346,19 @@ const StorageManager = (() => {
         interpreterDirective: Ab("#!..."),
         eq: Ab("=", {
             beforeExpr: db,
-            isAssign: true
+            isAssign: cb
         }),
         assign: Ab("_=", {
             beforeExpr: db,
-            isAssign: true
+            isAssign: cb
         }),
         slashAssign: Ab("_=", {
             beforeExpr: db,
-            isAssign: true
+            isAssign: cb
         }),
         moduloAssign: Ab("_=", {
             beforeExpr: db,
-            isAssign: true
+            isAssign: cb
         }),
         incDec: Ab("++/--", {
             prefix: pb,
@@ -19440,14 +20488,14 @@ const StorageManager = (() => {
             startsExpr: ub
         }),
         _do: hb("do", {
-            isLoop: true,
+            isLoop: lb,
             beforeExpr: db
         }),
         _for: hb("for", {
-            isLoop: true
+            isLoop: lb
         }),
         _while: hb("while", {
-            isLoop: true
+            isLoop: lb
         }),
         jsxName: Ab("jsxName"),
         jsxText: Ab("jsxText", {
@@ -19485,7 +20533,8 @@ const StorageManager = (() => {
     }, Rb[94].updateContext = function(e) {
         e.push(ob.j_expr, ob.j_oTag);
     };
-    var Fb = new Set([ "break", "case", "catch", "continue", "debugger", "default", "do", "else", "finally", "for", "function", "if", "return", "switch", "throw", "try", "var", "const", "while", "with", "new", "this", "super", "class", "extends", "export", "import", "null", "true", "false", "in", "instanceof", "typeof", "void", "delete", "implements", "interface", "let", "package", "private", "protected", "public", "static", "yield", "eval", "arguments", "enum", "await" ]), Ub = function(e) {
+    var Fb = new Set([ "break", "case", "catch", "continue", "debugger", "default", "do", "else", "finally", "for", "function", "if", "return", "switch", "throw", "try", "var", "const", "while", "with", "new", "this", "super", "class", "extends", "export", "import", "null", "true", "false", "in", "instanceof", "typeof", "void", "delete", "implements", "interface", "let", "package", "private", "protected", "public", "static", "yield", "eval", "arguments", "enum", "await" ]);
+    var _b = 64, kb = 256, Ib = 259, Bb = 128, Ob = 256, Nb = 512, Lb = 1024, Mb = 2048, $b = 1024, Ub = function(e) {
         this.var = new Set, this.lexical = new Set, this.functions = new Set, this.flags = e;
     }, Gb = function() {
         function e(e, t) {
@@ -19506,7 +20555,7 @@ const StorageManager = (() => {
             if (8 & t || 16 & t) this.checkRedeclarationInScope(n, e, t, a), 16 & t ? n.functions.add(e) : n.lexical.add(e), 
             8 & t && this.maybeExportDefined(n, e); else if (4 & t) for (var r = this.scopeStack.length - 1; r >= 0 && (n = this.scopeStack[r], 
             this.checkRedeclarationInScope(n, e, t, a), n.var.add(e), this.maybeExportDefined(n, e), 
-            !(259 & n.flags)); --r) ;
+            !(n.flags & Ib)); --r) ;
             this.inModule && 1 & n.flags && this.undefinedExports.delete(e);
         }, t.maybeExportDefined = function(e, t) {
             this.inModule && 1 & e.flags && this.undefinedExports.delete(t);
@@ -19522,7 +20571,7 @@ const StorageManager = (() => {
         }, t.currentVarScopeFlags = function() {
             for (var e = this.scopeStack.length - 1; ;e--) {
                 var t = this.scopeStack[e].flags;
-                if (259 & t) return t;
+                if (t & Ib) return t;
             }
         }, t.currentThisScopeFlags = function() {
             for (var e = this.scopeStack.length - 1; ;e--) {
@@ -19547,13 +20596,13 @@ const StorageManager = (() => {
         }, {
             key: "inClass",
             get: function() {
-                return (64 & this.currentThisScopeFlags()) > 0;
+                return (this.currentThisScopeFlags() & _b) > 0;
             }
         }, {
             key: "inClassAndNotInNonArrowFunction",
             get: function() {
                 var e = this.currentThisScopeFlags();
-                return (64 & e) > 0 && 0 == (2 & e);
+                return (e & _b) > 0 && 0 == (2 & e);
             }
         }, {
             key: "inStaticBlock",
@@ -19592,11 +20641,11 @@ const StorageManager = (() => {
             return new Wb(e);
         }, a.declareName = function(t, a, n) {
             var r = this.currentScope();
-            if (2048 & a) return this.checkRedeclarationInScope(r, t, a, n), this.maybeExportDefined(r, t), 
+            if (a & Mb) return this.checkRedeclarationInScope(r, t, a, n), this.maybeExportDefined(r, t), 
             void r.declareFunctions.add(t);
             e.prototype.declareName.apply(this, arguments);
         }, a.isRedeclaredInScope = function(t, a, n) {
-            return !!e.prototype.isRedeclaredInScope.apply(this, arguments) || !!(2048 & n) && !t.declareFunctions.has(a) && (t.lexical.has(a) || t.functions.has(a));
+            return !!e.prototype.isRedeclaredInScope.apply(this, arguments) || !!(n & Mb) && (!t.declareFunctions.has(a) && (t.lexical.has(a) || t.functions.has(a)));
         }, a.checkLocalExport = function(t) {
             this.scopeStack[0].declareFunctions.has(t.name) || e.prototype.checkLocalExport.call(this, t);
         }, t;
@@ -20231,7 +21280,7 @@ const StorageManager = (() => {
             var n = this.current(), r = n.privateNames.has(e);
             if (3 & t) {
                 var s = r && n.loneAccessors.get(e);
-                s ? (r = (3 & s) == (3 & t) || (4 & s) != (4 & t)) || n.loneAccessors.delete(e) : r || n.loneAccessors.set(e, t);
+                if (s) (r = (3 & s) === (3 & t) || (4 & s) !== (4 & t)) || n.loneAccessors.delete(e); else r || n.loneAccessors.set(e, t);
             }
             r && this.raise(a, tb.PrivateNameRedeclaration, e), n.privateNames.add(e), n.undefinedPrivateNames.delete(e);
         }, t.usePrivateName = function(e, t) {
@@ -20602,7 +21651,8 @@ const StorageManager = (() => {
         let: "declare export var",
         type: "export type",
         interface: "export interface"
-    }, Rv = /\*?\s*@((?:no)?flow)\b/, bv = {
+    };
+    var Rv = /\*?\s*@((?:no)?flow)\b/, bv = {
         quot: '"',
         amp: "&",
         apos: "'",
@@ -20892,19 +21942,19 @@ const StorageManager = (() => {
             return new wv(e);
         }, a.declareName = function(t, a, n) {
             var r = this.currentScope();
-            if (1024 & a) return this.maybeExportDefined(r, t), void r.exportOnlyBindings.add(t);
+            if (a & Lb) return this.maybeExportDefined(r, t), void r.exportOnlyBindings.add(t);
             e.prototype.declareName.apply(this, arguments), 2 & a && (1 & a || (this.checkRedeclarationInScope(r, t, a, n), 
-            this.maybeExportDefined(r, t)), r.types.add(t)), 256 & a && r.enums.add(t), 512 & a && r.constEnums.add(t), 
-            128 & a && r.classes.add(t);
+            this.maybeExportDefined(r, t)), r.types.add(t)), a & Ob && r.enums.add(t), a & Nb && r.constEnums.add(t), 
+            a & Bb && r.classes.add(t);
         }, a.isRedeclaredInScope = function(t, a, n) {
             if (t.enums.has(a)) {
-                if (256 & n) {
-                    var r = !!(512 & n), s = t.constEnums.has(a);
+                if (n & Ob) {
+                    var r = !!(n & Nb), s = t.constEnums.has(a);
                     return r !== s;
                 }
                 return !0;
             }
-            return 128 & n && t.classes.has(a) ? !!t.lexical.has(a) && !!(1 & n) : !!(2 & n && t.types.has(a)) || e.prototype.isRedeclaredInScope.apply(this, arguments);
+            return n & Bb && t.classes.has(a) ? !!t.lexical.has(a) && !!(1 & n) : !!(2 & n && t.types.has(a)) || e.prototype.isRedeclaredInScope.apply(this, arguments);
         }, a.checkLocalExport = function(t) {
             var a = this.scopeStack[0], n = t.name;
             a.types.has(n) || a.exportOnlyBindings.has(n) || e.prototype.checkLocalExport.call(this, t);
@@ -20981,7 +22031,8 @@ const StorageManager = (() => {
         }));
         return n && Array.isArray(n) ? n[1][a] : null;
     }
-    var kv = [ "minimal", "fsharp", "hack", "smart" ], Iv = [ "%", "#" ], Bv = [ "hash", "bar" ], Ov = {
+    var kv = [ "minimal", "fsharp", "hack", "smart" ], Iv = [ "%", "#" ], Bv = [ "hash", "bar" ];
+    var Ov = {
         estree: function(e) {
             return function(e) {
                 function t() {
@@ -21096,10 +22147,11 @@ const StorageManager = (() => {
                         (a = e.prototype.toAssignableObjectExpressionProp).call.apply(a, [ this, t ].concat(r));
                     }
                 }, a.finishCallExpression = function(t, a) {
-                    var n;
-                    (e.prototype.finishCallExpression.call(this, t, a), "Import" === t.callee.type) && (t.type = "ImportExpression", 
-                    t.source = t.arguments[0], this.hasPlugin("importAssertions") && (t.attributes = null != (n = t.arguments[1]) ? n : null), 
-                    delete t.arguments, delete t.callee);
+                    if (e.prototype.finishCallExpression.call(this, t, a), "Import" === t.callee.type) {
+                        var n;
+                        if (t.type = "ImportExpression", t.source = t.arguments[0], this.hasPlugin("importAssertions")) t.attributes = null != (n = t.arguments[1]) ? n : null;
+                        delete t.arguments, delete t.callee;
+                    }
                     return t;
                 }, a.toReferencedArguments = function(t) {
                     "ImportExpression" !== t.type && e.prototype.toReferencedArguments.call(this, t);
@@ -21157,6 +22209,8 @@ const StorageManager = (() => {
                             t += this.input.slice(a, this.state.pos), t += this.jsxReadEntity(), a = this.state.pos;
                             break;
 
+                          case 62:
+                          case 125:
                           default:
                             WR(n) ? (t += this.input.slice(a, this.state.pos), t += this.jsxReadNewLine(!0), 
                             a = this.state.pos) : ++this.state.pos;
@@ -21885,7 +22939,7 @@ const StorageManager = (() => {
                     return t ? (r.forEach((function(e) {
                         return a.finishArrowValidation(e);
                     })), [ r, [] ]) : function(e, t) {
-                        for (var a = [], n = [], r = 0; r < e.length; r++) (t(e[r]) ? a : n).push(e[r]);
+                        for (var a = [], n = [], r = 0; r < e.length; r++) (t(e[r], r, e) ? a : n).push(e[r]);
                         return [ a, n ];
                     }(r, (function(e) {
                         return e.params.every((function(e) {
@@ -22080,7 +23134,13 @@ const StorageManager = (() => {
                     !s || o || d || this.checkReservedWord(t.local.name, t.start, !0, !0), this.checkLVal(t.local, "import specifier", 9), 
                     e.specifiers.push(this.finishNode(t, "ImportSpecifier"));
                 }, a.parseBindingAtom = function() {
-                    return 77 === this.state.type ? this.parseIdentifier(!0) : e.prototype.parseBindingAtom.call(this);
+                    switch (this.state.type) {
+                      case 77:
+                        return this.parseIdentifier(!0);
+
+                      default:
+                        return e.prototype.parseBindingAtom.call(this);
+                    }
                 }, a.parseFunctionParams = function(t, a) {
                     var n = t.kind;
                     "get" !== n && "set" !== n && this.isRelational("<") && (t.typeParameters = this.flowParseTypeParameterDeclaration()), 
@@ -22673,8 +23733,9 @@ const StorageManager = (() => {
                         return this.next(), this.match(18) || this.isRelational("<") ? this.tsParseSignatureMember("TSConstructSignatureDeclaration", e) : (e.key = this.createIdentifier(t, "new"), 
                         this.tsParsePropertyOrMethodSignature(e, !1));
                     }
-                    return this.tsParseModifiers(e, [ "readonly" ], [ "declare", "abstract", "private", "protected", "public", "static", "override" ], Tv.InvalidModifierOnTypeMember), 
-                    this.tsTryParseIndexSignature(e) || (this.parsePropertyName(e, !1), e.computed || "Identifier" !== e.key.type || "get" !== e.key.name && "set" !== e.key.name || !this.tsTokenCanFollowModifier() || (e.kind = e.key.name, 
+                    this.tsParseModifiers(e, [ "readonly" ], [ "declare", "abstract", "private", "protected", "public", "static", "override" ], Tv.InvalidModifierOnTypeMember);
+                    var a = this.tsTryParseIndexSignature(e);
+                    return a || (this.parsePropertyName(e, !1), e.computed || "Identifier" !== e.key.type || "get" !== e.key.name && "set" !== e.key.name || !this.tsTokenCanFollowModifier() || (e.kind = e.key.name, 
                     this.parsePropertyName(e, !1)), this.tsParsePropertyOrMethodSignature(e, !!e.readonly));
                 }, a.tsParseTypeLiteral = function() {
                     var e = this.startNode();
@@ -22935,8 +23996,8 @@ const StorageManager = (() => {
                 }, a.tsParseTypePredicateAsserts = function() {
                     if (!this.match(5) || "asserts" !== this.state.value) return !1;
                     var e = this.state.containsEsc;
-                    return this.next(), !(!this.match(5) && !this.match(77) || (e && this.raise(this.state.lastTokStart, tb.InvalidEscapedReservedWord, "asserts"), 
-                    0));
+                    return this.next(), !(!this.match(5) && !this.match(77)) && (e && this.raise(this.state.lastTokStart, tb.InvalidEscapedReservedWord, "asserts"), 
+                    !0);
                 }, a.tsParseTypeAnnotation = function(e, t) {
                     var a = this;
                     return void 0 === e && (e = !0), void 0 === t && (t = this.startNode()), this.tsInType((function() {
@@ -23032,12 +24093,12 @@ const StorageManager = (() => {
                     this.eat(24)) {
                         var a = this.startNode();
                         this.tsParseModuleOrNamespaceDeclaration(a, !0), e.body = a;
-                    } else this.scope.enter(256), this.prodParam.enter(0), e.body = this.tsParseModuleBlock(), 
+                    } else this.scope.enter(kb), this.prodParam.enter(0), e.body = this.tsParseModuleBlock(), 
                     this.prodParam.exit(), this.scope.exit();
                     return this.finishNode(e, "TSModuleDeclaration");
                 }, a.tsParseAmbientExternalModuleDeclaration = function(e) {
                     return this.isContextual("global") ? (e.global = !0, e.id = this.parseIdentifier()) : this.match(4) ? e.id = this.parseExprAtom() : this.unexpected(), 
-                    this.match(13) ? (this.scope.enter(256), this.prodParam.enter(0), e.body = this.tsParseModuleBlock(), 
+                    this.match(13) ? (this.scope.enter(kb), this.prodParam.enter(0), e.body = this.tsParseModuleBlock(), 
                     this.prodParam.exit(), this.scope.exit()) : this.semicolon(), this.finishNode(e, "TSModuleDeclaration");
                 }, a.tsParseImportEqualsDeclaration = function(e, t) {
                     e.isExport = t || !1, e.id = this.parseIdentifier(), this.checkLVal(e.id, "import equals declaration", 9), 
@@ -23100,7 +24161,7 @@ const StorageManager = (() => {
 
                       case "global":
                         if (this.match(13)) {
-                            this.scope.enter(256), this.prodParam.enter(0);
+                            this.scope.enter(kb), this.prodParam.enter(0);
                             var n = e;
                             return n.global = !0, n.id = t, n.body = this.tsParseModuleBlock(), this.scope.exit(), 
                             this.prodParam.exit(), this.finishNode(n, "TSModuleDeclaration");
@@ -23197,7 +24258,7 @@ const StorageManager = (() => {
                     r && !this.match(13) && this.isLineTerminator() ? this.finishNode(t, r) : "TSDeclareFunction" === r && this.state.isAmbientContext && (this.raise(t.start, Tv.DeclareFunctionHasImplementation), 
                     t.declare) ? e.prototype.parseFunctionBodyAndFinish.call(this, t, r, n) : e.prototype.parseFunctionBodyAndFinish.call(this, t, a, n);
                 }, a.registerFunctionStatementId = function(t) {
-                    !t.body && t.id ? this.checkLVal(t.id, "function name", 1024) : e.prototype.registerFunctionStatementId.apply(this, arguments);
+                    !t.body && t.id ? this.checkLVal(t.id, "function name", $b) : e.prototype.registerFunctionStatementId.apply(this, arguments);
                 }, a.tsCheckForInvalidTypeCasts = function(e) {
                     var t = this;
                     e.forEach((function(e) {
@@ -23365,7 +24426,7 @@ const StorageManager = (() => {
                     a && s && (this.resetStartLocation(a, n, r), a.declare = !0), a;
                 }, a.parseClassId = function(t, a, n) {
                     if (a && !n || !this.isContextual("implements")) {
-                        e.prototype.parseClassId.call(this, t, a, n, t.declare ? 1024 : 139);
+                        e.prototype.parseClassId.call(this, t, a, n, t.declare ? $b : 139);
                         var r = this.tsTryParseTypeParameters();
                         r && (t.typeParameters = r);
                     }
@@ -23473,7 +24534,7 @@ const StorageManager = (() => {
                       case "TSTypeCastExpression":
                         return e.prototype.toAssignable.call(this, this.typeCastToParameter(t), a);
 
-                      default:
+                      case "TSParameterProperty":
                         return e.prototype.toAssignable.call(this, t, a);
 
                       case "ParenthesizedExpression":
@@ -23483,6 +24544,9 @@ const StorageManager = (() => {
                       case "TSNonNullExpression":
                       case "TSTypeAssertion":
                         return t.expression = this.toAssignable(t.expression, a), t;
+
+                      default:
+                        return e.prototype.toAssignable.call(this, t, a);
                     }
                 }, a.toAssignableParenthesizedExpression = function(t, a) {
                     switch (t.expression.type) {
@@ -23519,7 +24583,13 @@ const StorageManager = (() => {
                         return void (r = e.prototype.checkLVal).call.apply(r, [ this, t, a ].concat(i));
                     }
                 }, a.parseBindingAtom = function() {
-                    return 77 === this.state.type ? this.parseIdentifier(!0) : e.prototype.parseBindingAtom.call(this);
+                    switch (this.state.type) {
+                      case 77:
+                        return this.parseIdentifier(!0);
+
+                      default:
+                        return e.prototype.parseBindingAtom.call(this);
+                    }
                 }, a.parseMaybeDecoratorArguments = function(t) {
                     if (this.isRelational("<")) {
                         var a = this.tsParseTypeArguments();
@@ -23689,7 +24759,7 @@ const StorageManager = (() => {
                     return t && "Placeholder" === t.type && "Expression" === t.expectedNode ? (t.expectedNode = "Pattern", 
                     t) : e.prototype.toAssignable.apply(this, arguments);
                 }, a.isLet = function(t) {
-                    return !!e.prototype.isLet.call(this, t) || !!this.isContextual("let") && !t && 96 === this.lookahead().type;
+                    return !!e.prototype.isLet.call(this, t) || !!this.isContextual("let") && (!t && 96 === this.lookahead().type);
                 }, a.verifyBreakContinue = function(t) {
                     t.label && "Placeholder" === t.label.type || e.prototype.verifyBreakContinue.apply(this, arguments);
                 }, a.parseExpressionStatement = function(t, a) {
@@ -23771,7 +24841,8 @@ const StorageManager = (() => {
         createParenthesizedExpressions: !1,
         errorRecovery: !1,
         attachComment: !0
-    }, Mv = function e(t) {
+    };
+    var Mv = function e(t) {
         return "ParenthesizedExpression" === t.type ? e(t.expression) : t;
     }, $v = function(e) {
         function t() {
@@ -24094,24 +25165,29 @@ const StorageManager = (() => {
             return e;
         }, a.parseExprOpRightExpr = function(e, t) {
             var a = this, n = this.state.start, r = this.state.startLoc;
-            if (42 === e) switch (this.getPluginOption("pipelineOperator", "proposal")) {
-              case "hack":
-                return this.withTopicBindingContext((function() {
-                    return a.parseHackPipeBody();
-                }));
+            switch (e) {
+              case 42:
+                switch (this.getPluginOption("pipelineOperator", "proposal")) {
+                  case "hack":
+                    return this.withTopicBindingContext((function() {
+                        return a.parseHackPipeBody();
+                    }));
 
-              case "smart":
-                return this.withTopicBindingContext((function() {
-                    if (a.prodParam.hasYield && a.isContextual("yield")) throw a.raise(a.state.start, tb.PipeBodyIsTighter, a.state.value);
-                    return a.parseSmartPipelineBodyInStyle(a.parseExprOpBaseRightExpr(e, t), n, r);
-                }));
+                  case "smart":
+                    return this.withTopicBindingContext((function() {
+                        if (a.prodParam.hasYield && a.isContextual("yield")) throw a.raise(a.state.start, tb.PipeBodyIsTighter, a.state.value);
+                        return a.parseSmartPipelineBodyInStyle(a.parseExprOpBaseRightExpr(e, t), n, r);
+                    }));
 
-              case "fsharp":
-                return this.withSoloAwaitPermittingContext((function() {
-                    return a.parseFSharpPipelineBody(t);
-                }));
+                  case "fsharp":
+                    return this.withSoloAwaitPermittingContext((function() {
+                        return a.parseFSharpPipelineBody(t);
+                    }));
+                }
+
+              default:
+                return this.parseExprOpBaseRightExpr(e, t);
             }
-            return this.parseExprOpBaseRightExpr(e, t);
         }, a.parseExprOpBaseRightExpr = function(e, t) {
             var a = this.state.start, n = this.state.startLoc;
             return this.parseExprOp(this.parseMaybeUnaryOrPrivate(), a, n, 56 === e ? t - 1 : t);
@@ -24576,7 +25652,7 @@ const StorageManager = (() => {
         }, a.parseMethod = function(e, t, a, n, r, s, i) {
             void 0 === i && (i = !1), this.initFunction(e, a), e.generator = !!t;
             var o = n;
-            return this.scope.enter(18 | (i ? 64 : 0) | (r ? 32 : 0)), this.prodParam.enter(sv(a, e.generator)), 
+            return this.scope.enter(18 | (i ? _b : 0) | (r ? 32 : 0)), this.prodParam.enter(sv(a, e.generator)), 
             this.parseFunctionParams(e, o), this.parseFunctionBodyAndFinish(e, s, !0), this.prodParam.exit(), 
             this.scope.exit(), e;
         }, a.parseArrayLike = function(e, t, a, n) {
@@ -24668,7 +25744,7 @@ const StorageManager = (() => {
                     if (this.scope.inStaticBlock) return void this.raise(t, tb.AwaitBindingIdentifierInStaticBlock);
                     this.expressionScope.recordAsyncArrowParametersError(t, tb.AwaitBindingIdentifier);
                 } else if ("arguments" === e && this.scope.inClassAndNotInNonArrowFunction) return void this.raise(t, tb.ArgumentsInClass);
-                a && ka(e) ? this.raise(t, tb.UnexpectedKeyword, e) : (this.state.strict ? n ? _a : Pa : ja)(e, this.inModule) && this.raise(t, tb.UnexpectedReservedWord, e);
+                if (a && ka(e)) this.raise(t, tb.UnexpectedKeyword, e); else (this.state.strict ? n ? _a : Pa : ja)(e, this.inModule) && this.raise(t, tb.UnexpectedReservedWord, e);
             }
         }, a.isAwaitAllowed = function() {
             return !!this.prodParam.hasAwait || !(!this.options.allowAwaitOutsideFunction || this.scope.inFunction);
@@ -24805,7 +25881,8 @@ const StorageManager = (() => {
         kind: "loop"
     }, Vv = {
         kind: "switch"
-    }, Hv = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/, Kv = new RegExp("in(?:stanceof)?", "y"), qv = function(e) {
+    }, Hv = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/, Kv = new RegExp("in(?:stanceof)?", "y");
+    var qv = function(e) {
         function t(t, a) {
             var n;
             return t = function(e) {
@@ -25105,7 +26182,9 @@ const StorageManager = (() => {
         }, a.parseEmptyStatement = function(e) {
             return this.next(), this.finishNode(e, "EmptyStatement");
         }, a.parseLabeledStatement = function(e, t, a, n) {
-            for (var r = 0, s = this.state.labels; r < s.length; r++) s[r].name === t && this.raise(a.start, tb.LabelRedeclaration, t);
+            for (var r = 0, s = this.state.labels; r < s.length; r++) {
+                s[r].name === t && this.raise(a.start, tb.LabelRedeclaration, t);
+            }
             for (var i, o = (i = this.state.type) >= 89 && i <= 91 ? "loop" : this.match(70) ? "switch" : null, d = this.state.labels.length - 1; d >= 0; d--) {
                 var u = this.state.labels[d];
                 if (u.statementStart !== e.start) break;
@@ -25537,7 +26616,7 @@ const StorageManager = (() => {
     }(wb);
     function Jv(e, t) {
         var a = qv;
-        return null != e && e.plugins && (function(e) {
+        return null != e && e.plugins && (!function(e) {
             if (Fv(e, "decorators")) {
                 if (Fv(e, "decorators-legacy")) throw new Error("Cannot use the decorators and decorators-legacy plugin together");
                 var t = _v(e, "decorators", "decoratorsBeforeExport");
@@ -25594,7 +26673,8 @@ const StorageManager = (() => {
             return n;
         }(e.plugins)), new a(e, t);
     }
-    var Yv = {}, Qv = ir, Zv = vr, ex = Cr, tx = {
+    var Yv = {};
+    var Qv = ir, Zv = vr, ex = Cr, tx = {
         Scope: function(e, t) {
             "let" === t.kind && e.skip();
         },
@@ -25630,7 +26710,8 @@ const StorageManager = (() => {
             emit: t
         });
     }
-    var nx = Cu, rx = rs, sx = ir, ix = Cs, ox = cr, dx = gr, ux = tu, lx = vr, cx = Cr, px = du, gx = uu, fx = lu, hx = Bt, mx = te, yx = Lt, Rx = cu, bx = Gr, vx = yl, xx = Za, Ex = ws, Dx = Object.freeze({
+    var nx = Cu, rx = rs, sx = ir, ix = Cs, ox = cr, dx = gr, ux = tu, lx = vr, cx = Cr, px = du, gx = uu, fx = lu, hx = Bt, mx = te, yx = Lt, Rx = cu, bx = Gr, vx = yl, xx = Za, Ex = ws;
+    var Dx = Object.freeze({
         __proto__: null,
         replaceWithMultiple: function(e) {
             var t;
@@ -25731,194 +26812,193 @@ const StorageManager = (() => {
         };
         n.set(a, s);
         var i = function(e, t) {
-            if (t.confident) {
-                if (e.isSequenceExpression()) {
-                    var a = e.get("expressions");
-                    return Tx(a[a.length - 1], t);
-                }
-                if (e.isStringLiteral() || e.isNumericLiteral() || e.isBooleanLiteral()) return e.node.value;
-                if (e.isNullLiteral()) return null;
-                if (e.isTemplateLiteral()) return jx(e, e.node.quasis, t);
-                if (e.isTaggedTemplateExpression() && e.get("tag").isMemberExpression()) {
-                    var n = e.get("tag.object"), r = n.node.name, s = e.get("tag.property");
-                    if (n.isIdentifier() && "String" === r && !e.scope.getBinding(r) && s.isIdentifier() && "raw" === s.node.name) return jx(e, e.node.quasi.quasis, t, !0);
-                }
-                if (e.isConditionalExpression()) {
-                    var i = Tx(e.get("test"), t);
-                    if (!t.confident) return;
-                    return Tx(i ? e.get("consequent") : e.get("alternate"), t);
-                }
-                if (e.isExpressionWrapper()) return Tx(e.get("expression"), t);
-                if (e.isMemberExpression() && !e.parentPath.isCallExpression({
-                    callee: e.node
-                })) {
-                    var o = e.get("property"), d = e.get("object");
-                    if (d.isLiteral() && o.isIdentifier()) {
-                        var u = d.node.value, l = typeof u;
-                        if ("number" === l || "string" === l) return u[o.node.name];
-                    }
-                }
-                if (e.isReferencedIdentifier()) {
-                    var c = e.scope.getBinding(e.node.name);
-                    if (c && c.constantViolations.length > 0) return Sx(c.path, t);
-                    if (c && e.node.start < c.path.node.end) return Sx(c.path, t);
-                    if (null != c && c.hasValue) return c.value;
-                    if ("undefined" === e.node.name) return c ? Sx(c.path, t) : void 0;
-                    if ("Infinity" === e.node.name) return c ? Sx(c.path, t) : 1 / 0;
-                    if ("NaN" === e.node.name) return c ? Sx(c.path, t) : NaN;
-                    var p = e.resolve();
-                    return p === e ? Sx(e, t) : Tx(p, t);
-                }
-                if (e.isUnaryExpression({
-                    prefix: !0
-                })) {
-                    if ("void" === e.node.operator) return;
-                    var g = e.get("argument");
-                    if ("typeof" === e.node.operator && (g.isFunction() || g.isClass())) return "function";
-                    var f = Tx(g, t);
-                    if (!t.confident) return;
-                    switch (e.node.operator) {
-                      case "!":
-                        return !f;
-
-                      case "+":
-                        return +f;
-
-                      case "-":
-                        return -f;
-
-                      case "~":
-                        return ~f;
-
-                      case "typeof":
-                        return typeof f;
-                    }
-                }
-                if (e.isArrayExpression()) {
-                    for (var h, m = [], y = S(e.get("elements")); !(h = y()).done; ) {
-                        var R = h.value.evaluate();
-                        if (!R.confident) return Sx(R.deopt, t);
-                        m.push(R.value);
-                    }
-                    return m;
-                }
-                if (e.isObjectExpression()) {
-                    for (var b, v = {}, x = S(e.get("properties")); !(b = x()).done; ) {
-                        var E = b.value;
-                        if (E.isObjectMethod() || E.isSpreadElement()) return Sx(E, t);
-                        var D = E.get("key");
-                        if (E.node.computed) {
-                            if (!(D = D.evaluate()).confident) return Sx(D.deopt, t);
-                            D = D.value;
-                        } else D = D.isIdentifier() ? D.node.name : D.node.value;
-                        var A = E.get("value").evaluate();
-                        if (!A.confident) return Sx(A.deopt, t);
-                        A = A.value, v[D] = A;
-                    }
-                    return v;
-                }
-                if (e.isLogicalExpression()) {
-                    var w = t.confident, C = Tx(e.get("left"), t), T = t.confident;
-                    t.confident = w;
-                    var j = Tx(e.get("right"), t), P = t.confident;
-                    switch (e.node.operator) {
-                      case "||":
-                        if (t.confident = T && (!!C || P), !t.confident) return;
-                        return C || j;
-
-                      case "&&":
-                        if (t.confident = T && (!C || P), !t.confident) return;
-                        return C && j;
-                    }
-                }
-                if (e.isBinaryExpression()) {
-                    var F = Tx(e.get("left"), t);
-                    if (!t.confident) return;
-                    var _ = Tx(e.get("right"), t);
-                    if (!t.confident) return;
-                    switch (e.node.operator) {
-                      case "-":
-                        return F - _;
-
-                      case "+":
-                        return F + _;
-
-                      case "/":
-                        return F / _;
-
-                      case "*":
-                        return F * _;
-
-                      case "%":
-                        return F % _;
-
-                      case "**":
-                        return Math.pow(F, _);
-
-                      case "<":
-                        return F < _;
-
-                      case ">":
-                        return F > _;
-
-                      case "<=":
-                        return F <= _;
-
-                      case ">=":
-                        return F >= _;
-
-                      case "==":
-                        return F == _;
-
-                      case "!=":
-                        return F != _;
-
-                      case "===":
-                        return F === _;
-
-                      case "!==":
-                        return F !== _;
-
-                      case "|":
-                        return F | _;
-
-                      case "&":
-                        return F & _;
-
-                      case "^":
-                        return F ^ _;
-
-                      case "<<":
-                        return F << _;
-
-                      case ">>":
-                        return F >> _;
-
-                      case ">>>":
-                        return F >>> _;
-                    }
-                }
-                if (e.isCallExpression()) {
-                    var k, I, B = e.get("callee");
-                    if (B.isIdentifier() && !e.scope.getBinding(B.node.name) && wx.indexOf(B.node.name) >= 0 && (I = Ax[B.node.name]), 
-                    B.isMemberExpression()) {
-                        var O = B.get("object"), N = B.get("property");
-                        if (O.isIdentifier() && N.isIdentifier() && wx.indexOf(O.node.name) >= 0 && Cx.indexOf(N.node.name) < 0 && (I = (k = Ax[O.node.name])[N.node.name]), 
-                        O.isLiteral() && N.isIdentifier()) {
-                            var L = typeof O.node.value;
-                            "string" !== L && "number" !== L || (I = (k = O.node.value)[N.node.name]);
-                        }
-                    }
-                    if (I) {
-                        var M = e.get("arguments").map((function(e) {
-                            return Tx(e, t);
-                        }));
-                        if (!t.confident) return;
-                        return I.apply(k, M);
-                    }
-                }
-                Sx(e, t);
+            if (!t.confident) return;
+            if (e.isSequenceExpression()) {
+                var a = e.get("expressions");
+                return Tx(a[a.length - 1], t);
             }
+            if (e.isStringLiteral() || e.isNumericLiteral() || e.isBooleanLiteral()) return e.node.value;
+            if (e.isNullLiteral()) return null;
+            if (e.isTemplateLiteral()) return jx(e, e.node.quasis, t);
+            if (e.isTaggedTemplateExpression() && e.get("tag").isMemberExpression()) {
+                var n = e.get("tag.object"), r = n.node.name, s = e.get("tag.property");
+                if (n.isIdentifier() && "String" === r && !e.scope.getBinding(r) && s.isIdentifier() && "raw" === s.node.name) return jx(e, e.node.quasi.quasis, t, !0);
+            }
+            if (e.isConditionalExpression()) {
+                var i = Tx(e.get("test"), t);
+                if (!t.confident) return;
+                return Tx(i ? e.get("consequent") : e.get("alternate"), t);
+            }
+            if (e.isExpressionWrapper()) return Tx(e.get("expression"), t);
+            if (e.isMemberExpression() && !e.parentPath.isCallExpression({
+                callee: e.node
+            })) {
+                var o = e.get("property"), d = e.get("object");
+                if (d.isLiteral() && o.isIdentifier()) {
+                    var u = d.node.value, l = typeof u;
+                    if ("number" === l || "string" === l) return u[o.node.name];
+                }
+            }
+            if (e.isReferencedIdentifier()) {
+                var c = e.scope.getBinding(e.node.name);
+                if (c && c.constantViolations.length > 0) return Sx(c.path, t);
+                if (c && e.node.start < c.path.node.end) return Sx(c.path, t);
+                if (null != c && c.hasValue) return c.value;
+                if ("undefined" === e.node.name) return c ? Sx(c.path, t) : void 0;
+                if ("Infinity" === e.node.name) return c ? Sx(c.path, t) : 1 / 0;
+                if ("NaN" === e.node.name) return c ? Sx(c.path, t) : NaN;
+                var p = e.resolve();
+                return p === e ? Sx(e, t) : Tx(p, t);
+            }
+            if (e.isUnaryExpression({
+                prefix: !0
+            })) {
+                if ("void" === e.node.operator) return;
+                var g = e.get("argument");
+                if ("typeof" === e.node.operator && (g.isFunction() || g.isClass())) return "function";
+                var f = Tx(g, t);
+                if (!t.confident) return;
+                switch (e.node.operator) {
+                  case "!":
+                    return !f;
+
+                  case "+":
+                    return +f;
+
+                  case "-":
+                    return -f;
+
+                  case "~":
+                    return ~f;
+
+                  case "typeof":
+                    return typeof f;
+                }
+            }
+            if (e.isArrayExpression()) {
+                for (var h, m = [], y = S(e.get("elements")); !(h = y()).done; ) {
+                    var R = h.value.evaluate();
+                    if (!R.confident) return Sx(R.deopt, t);
+                    m.push(R.value);
+                }
+                return m;
+            }
+            if (e.isObjectExpression()) {
+                for (var b, v = {}, x = S(e.get("properties")); !(b = x()).done; ) {
+                    var E = b.value;
+                    if (E.isObjectMethod() || E.isSpreadElement()) return Sx(E, t);
+                    var D = E.get("key");
+                    if (E.node.computed) {
+                        if (!(D = D.evaluate()).confident) return Sx(D.deopt, t);
+                        D = D.value;
+                    } else D = D.isIdentifier() ? D.node.name : D.node.value;
+                    var A = E.get("value").evaluate();
+                    if (!A.confident) return Sx(A.deopt, t);
+                    A = A.value, v[D] = A;
+                }
+                return v;
+            }
+            if (e.isLogicalExpression()) {
+                var w = t.confident, C = Tx(e.get("left"), t), T = t.confident;
+                t.confident = w;
+                var j = Tx(e.get("right"), t), P = t.confident;
+                switch (e.node.operator) {
+                  case "||":
+                    if (t.confident = T && (!!C || P), !t.confident) return;
+                    return C || j;
+
+                  case "&&":
+                    if (t.confident = T && (!C || P), !t.confident) return;
+                    return C && j;
+                }
+            }
+            if (e.isBinaryExpression()) {
+                var F = Tx(e.get("left"), t);
+                if (!t.confident) return;
+                var _ = Tx(e.get("right"), t);
+                if (!t.confident) return;
+                switch (e.node.operator) {
+                  case "-":
+                    return F - _;
+
+                  case "+":
+                    return F + _;
+
+                  case "/":
+                    return F / _;
+
+                  case "*":
+                    return F * _;
+
+                  case "%":
+                    return F % _;
+
+                  case "**":
+                    return Math.pow(F, _);
+
+                  case "<":
+                    return F < _;
+
+                  case ">":
+                    return F > _;
+
+                  case "<=":
+                    return F <= _;
+
+                  case ">=":
+                    return F >= _;
+
+                  case "==":
+                    return F == _;
+
+                  case "!=":
+                    return F != _;
+
+                  case "===":
+                    return F === _;
+
+                  case "!==":
+                    return F !== _;
+
+                  case "|":
+                    return F | _;
+
+                  case "&":
+                    return F & _;
+
+                  case "^":
+                    return F ^ _;
+
+                  case "<<":
+                    return F << _;
+
+                  case ">>":
+                    return F >> _;
+
+                  case ">>>":
+                    return F >>> _;
+                }
+            }
+            if (e.isCallExpression()) {
+                var k, I, B = e.get("callee");
+                if (B.isIdentifier() && !e.scope.getBinding(B.node.name) && wx.indexOf(B.node.name) >= 0 && (I = Ax[B.node.name]), 
+                B.isMemberExpression()) {
+                    var O = B.get("object"), N = B.get("property");
+                    if (O.isIdentifier() && N.isIdentifier() && wx.indexOf(O.node.name) >= 0 && Cx.indexOf(N.node.name) < 0 && (I = (k = Ax[O.node.name])[N.node.name]), 
+                    O.isLiteral() && N.isIdentifier()) {
+                        var L = typeof O.node.value;
+                        "string" !== L && "number" !== L || (I = (k = O.node.value)[N.node.name]);
+                    }
+                }
+                if (I) {
+                    var M = e.get("arguments").map((function(e) {
+                        return Tx(e, t);
+                    }));
+                    if (!t.confident) return;
+                    return I.apply(k, M);
+                }
+            }
+            Sx(e, t);
         }(e, t);
         return t.confident && (s.resolved = !0, s.value = i), i;
     }
@@ -25951,7 +27031,8 @@ const StorageManager = (() => {
                 value: t
             };
         }
-    }), Fx = ye, _x = se, kx = Wd;
+    }), Fx = ye, _x = se;
+    var kx = Wd;
     function Ix(e) {
         return {
             code: function(e) {
@@ -26021,7 +27102,8 @@ const StorageManager = (() => {
     function tE(e, t, a) {
         var n = a.placeholderWhitelist, r = a.placeholderPattern, s = a.preserveComments, i = a.syntacticPlaceholders, o = function(e, t, a) {
             var n = (t.plugins || []).slice();
-            !1 !== a && n.push("placeholders"), t = Object.assign({
+            !1 !== a && n.push("placeholders");
+            t = Object.assign({
                 allowReturnOutsideFunction: !0,
                 allowSuperOutsideMethod: !0,
                 sourceType: "module"
@@ -26089,11 +27171,11 @@ const StorageManager = (() => {
                             var r = t[n], s = r.key, i = r.index;
                             a = void 0 === i ? a[s] : a[s][i];
                         }
-                        var o = t[t.length - 1];
+                        var o = t[t.length - 1], d = o.key, u = o.index;
                         return {
                             parent: a,
-                            key: o.key,
-                            index: o.index
+                            key: d,
+                            index: u
                         };
                     }(e, t);
                 },
@@ -26252,10 +27334,33 @@ const StorageManager = (() => {
         ast: bE.ast
     }), wE = Qa, CE = tu, SE = Cr, TE = P, jE = Wt, PE = H, FE = Kt, _E = J, kE = ne, IE = re, BE = Y, OE = Ne, NE = he, LE = il, ME = AE("\n  (function (FUNCTION_KEY) {\n    function FUNCTION_ID() {\n      return FUNCTION_KEY.apply(this, arguments);\n    }\n\n    FUNCTION_ID.toString = function () {\n      return FUNCTION_KEY.toString();\n    }\n\n    return FUNCTION_ID;\n  })(FUNCTION)\n"), $E = AE("\n  (function (FUNCTION_KEY) {\n    function* FUNCTION_ID() {\n      return yield* FUNCTION_KEY.apply(this, arguments);\n    }\n\n    FUNCTION_ID.toString = function () {\n      return FUNCTION_KEY.toString();\n    };\n\n    return FUNCTION_ID;\n  })(FUNCTION)\n"), UE = {
         "ReferencedIdentifier|BindingIdentifier": function(e, t) {
-            e.node.name === t.name && e.scope.getBindingIdentifier(t.name) === t.outerDeclar && (t.selfReference = !0, 
-            e.stop());
+            e.node.name === t.name && (e.scope.getBindingIdentifier(t.name) === t.outerDeclar && (t.selfReference = !0, 
+            e.stop()));
         }
     };
+    function GE(e, t, a, n) {
+        if (e.selfReference) {
+            if (!n.hasBinding(a.name) || n.hasGlobal(a.name)) {
+                if (!jE(t)) return;
+                var r = ME;
+                t.generator && (r = $E);
+                for (var s = r({
+                    FUNCTION: t,
+                    FUNCTION_ID: a,
+                    FUNCTION_KEY: n.generateUidIdentifier(a.name)
+                }).expression, i = s.callee.body.body[0].params, o = 0, d = function(e) {
+                    for (var t = e.params, a = 0; a < t.length; a++) {
+                        var n = t[a];
+                        if (Fx(n) || _x(n)) return a;
+                    }
+                    return t.length;
+                }(t); o < d; o++) i.push(n.generateUidIdentifier("x"));
+                return s;
+            }
+            n.rename(a.name);
+        }
+        t.id = a, n.getProgramParent().references[a.name] = !0;
+    }
     function WE(e, t) {
         var a = e.node, n = e.parent, r = e.scope, s = e.id;
         if (void 0 === t && (t = !1), !a.id) {
@@ -26277,29 +27382,7 @@ const StorageManager = (() => {
                     return e.value.raw;
                 })).join("") : void 0 !== e.value ? e.value + "" : "";
             }(s) : s && PE(s) && (o = s.name), void 0 !== o) return o = LE(o), (s = SE(o))[wE] = !0, 
-            function(e, t, a, n) {
-                if (e.selfReference) {
-                    if (!n.hasBinding(a.name) || n.hasGlobal(a.name)) {
-                        if (!jE(t)) return;
-                        var r = ME;
-                        t.generator && (r = $E);
-                        for (var s = r({
-                            FUNCTION: t,
-                            FUNCTION_ID: a,
-                            FUNCTION_KEY: n.generateUidIdentifier(a.name)
-                        }).expression, i = s.callee.body.body[0].params, o = 0, d = function(e) {
-                            for (var t = e.params, a = 0; a < t.length; a++) {
-                                var n = t[a];
-                                if (Fx(n) || _x(n)) return a;
-                            }
-                            return t.length;
-                        }(t); o < d; o++) i.push(n.generateUidIdentifier("x"));
-                        return s;
-                    }
-                    n.rename(a.name);
-                }
-                t.id = a, n.getProgramParent().references[a.name] = !0;
-            }(function(e, t, a) {
+            GE(function(e, t, a) {
                 var n = {
                     selfAssignment: !1,
                     selfReference: !1,
@@ -26551,7 +27634,6 @@ const StorageManager = (() => {
     function TD(e, t) {
         switch (e) {
           case "LogicalExpression":
-          case "AssignmentPattern":
             return "right" === t;
 
           case "ConditionalExpression":
@@ -26573,6 +27655,9 @@ const StorageManager = (() => {
           case "TryStatement":
             return "handler" === t;
 
+          case "AssignmentPattern":
+            return "right" === t;
+
           case "OptionalMemberExpression":
             return "property" === t;
 
@@ -26590,7 +27675,8 @@ const StorageManager = (() => {
         }
         return !1;
     }
-    var PD = new WeakSet, FD = Object.freeze({
+    var PD = new WeakSet;
+    var FD = Object.freeze({
         __proto__: null,
         matchesPattern: function(e, t) {
             return AD(this.node, e, t);
@@ -26640,9 +27726,9 @@ const StorageManager = (() => {
             var n = this.scope.getBinding(this.node.name);
             if (!n || "module" !== n.kind) return !1;
             var r = n.path, s = r.parentPath;
-            return !(!s.isImportDeclaration() || s.node.source.value !== e || t && (!r.isImportDefaultSpecifier() || "default" !== t) && (!r.isImportNamespaceSpecifier() || "*" !== t) && (!r.isImportSpecifier() || !vD(r.node.imported, {
+            return !!s.isImportDeclaration() && (s.node.source.value === e && (!t || (!(!r.isImportDefaultSpecifier() || "default" !== t) || (!(!r.isImportNamespaceSpecifier() || "*" !== t) || !(!r.isImportSpecifier() || !vD(r.node.imported, {
                 name: t
-            })));
+            }))))));
         },
         getSource: function() {
             var e = this.node;
@@ -26690,7 +27776,7 @@ const StorageManager = (() => {
             if (!t.references) return "before";
             for (var a, n, r = S(t.referencePaths); !(n = r()).done; ) {
                 var s = n.value;
-                if (!s.find((function(t) {
+                if (!!!s.find((function(t) {
                     return t.node === e.node;
                 }))) {
                     if ("callee" !== s.key || !s.parentPath.isCallExpression()) return "unknown";
@@ -26752,7 +27838,7 @@ const StorageManager = (() => {
             }
             return this.isLiteral() ? !this.isRegExpLiteral() && (!this.isTemplateLiteral() || this.get("expressions").every((function(e) {
                 return e.isConstantExpression();
-            }))) : this.isUnaryExpression() ? "void" === this.node.operator && this.get("argument").isConstantExpression() : !!this.isBinaryExpression() && this.get("left").isConstantExpression() && this.get("right").isConstantExpression();
+            }))) : this.isUnaryExpression() ? "void" === this.node.operator && this.get("argument").isConstantExpression() : !!this.isBinaryExpression() && (this.get("left").isConstantExpression() && this.get("right").isConstantExpression());
         },
         isInStrictMode: function() {
             return !!(this.isProgram() ? this : this.parentPath).find((function(e) {
@@ -26762,7 +27848,9 @@ const StorageManager = (() => {
                 if (e.isClass()) return !0;
                 if (!e.isProgram() && !e.isFunction()) return !1;
                 if (e.isArrowFunctionExpression() && !e.get("body").isBlockStatement()) return !1;
-                for (var t, a = S((e.isFunction() ? e.node.body : e.node).directives); !(t = a()).done; ) if ("use strict" === t.value.value.value) return !0;
+                for (var t, a = S((e.isFunction() ? e.node.body : e.node).directives); !(t = a()).done; ) {
+                    if ("use strict" === t.value.value.value) return !0;
+                }
             }));
         }
     });
@@ -26795,9 +27883,9 @@ const StorageManager = (() => {
         isDenylisted: _D,
         isBlacklisted: _D,
         visit: function() {
-            return !!this.node && !this.isDenylisted() && (!this.opts.shouldSkip || !this.opts.shouldSkip(this)) && (this.shouldSkip || this.call("enter") || this.shouldSkip ? (this.debug("Skip..."), 
+            return !!this.node && (!this.isDenylisted() && ((!this.opts.shouldSkip || !this.opts.shouldSkip(this)) && (this.shouldSkip || this.call("enter") || this.shouldSkip ? (this.debug("Skip..."), 
             this.shouldStop) : (this.debug("Recursing into..."), UA.node(this.node, this.opts, this.scope, this.state, this, this.skipKeys), 
-            this.call("exit"), this.shouldStop));
+            this.call("exit"), this.shouldStop))));
         },
         skip: function() {
             this.shouldSkip = !0;
@@ -26862,7 +27950,9 @@ const StorageManager = (() => {
             this.key = e, this.node = this.container[this.key], this.type = null == (t = this.node) ? void 0 : t.type;
         },
         requeue: function(e) {
-            if (void 0 === e && (e = this), !e.removed) for (var t, a = S(this.contexts); !(t = a()).done; ) t.value.maybeQueue(e);
+            if (void 0 === e && (e = this), !e.removed) for (var t, a = S(this.contexts); !(t = a()).done; ) {
+                t.value.maybeQueue(e);
+            }
         },
         _getQueueContexts: function() {
             for (var e = this, t = this.contexts; !t.length && (e = e.parentPath); ) t = e.contexts;
@@ -26882,7 +27972,8 @@ const StorageManager = (() => {
             type: "BlockStatement",
             body: []
         }), !0;
-    } ], BD = Object.freeze({
+    } ];
+    var BD = Object.freeze({
         __proto__: null,
         remove: function() {
             var e;
@@ -26897,7 +27988,9 @@ const StorageManager = (() => {
             }));
         },
         _callRemovalHooks: function() {
-            for (var e, t = S(ID); !(e = t()).done; ) if ((0, e.value)(this, this.parentPath)) return !0;
+            for (var e, t = S(ID); !(e = t()).done; ) {
+                if ((0, e.value)(this, this.parentPath)) return !0;
+            }
         },
         _remove: function() {
             Array.isArray(this.container) ? (this.container.splice(this.key, 1), this.updateSiblingKeys(this.key, -1)) : this._replaceWith(null);
@@ -26921,8 +28014,9 @@ const StorageManager = (() => {
                 }
                 var n = e.scope.getBinding(e.node.name);
                 if (n) {
-                    for (var r, s = S(n.constantViolations); !(r = s()).done; ) if (r.value.scope !== n.path.scope) return t.mutableBinding = !0, 
-                    void e.stop();
+                    for (var r, s = S(n.constantViolations); !(r = s()).done; ) {
+                        if (r.value.scope !== n.path.scope) return t.mutableBinding = !0, void e.stop();
+                    }
                     n === t.scope.getBinding(e.node.name) && (t.bindings[e.node.name] = n);
                 }
             }
@@ -26955,7 +28049,7 @@ const StorageManager = (() => {
                     var r = n[a];
                     if (t.hasOwnBinding(r)) {
                         var s = this.bindings[r];
-                        if ("param" !== s.kind && "params" !== s.path.parentKey && this.getAttachmentParentForPath(s.path).key >= e.key) {
+                        if ("param" !== s.kind && "params" !== s.path.parentKey) if (this.getAttachmentParentForPath(s.path).key >= e.key) {
                             this.attachAfter = !0, e = s.path;
                             for (var i, o = S(s.constantViolations); !(i = o()).done; ) {
                                 var d = i.value;
@@ -27000,7 +28094,8 @@ const StorageManager = (() => {
                 }
             }
         }, e;
-    }(), WD = rs, VD = Kd, HD = ir, KD = cr, qD = gr, XD = tu, zD = vr, JD = Bt, YD = Object.freeze({
+    }(), WD = rs, VD = Kd, HD = ir, KD = cr, qD = gr, XD = tu, zD = vr, JD = Bt;
+    var YD = Object.freeze({
         __proto__: null,
         insertBefore: function(e) {
             this._assertUnremoved();
@@ -27027,7 +28122,9 @@ const StorageManager = (() => {
             for (var o = this._getQueueContexts(), d = 0, u = n; d < u.length; d++) {
                 var l = u[d];
                 l.setScope(), l.debug("Inserted.");
-                for (var c, p = S(o); !(c = p()).done; ) c.value.maybeQueue(l, !0);
+                for (var c, p = S(o); !(c = p()).done; ) {
+                    c.value.maybeQueue(l, !0);
+                }
             }
             return n;
         },
@@ -27298,7 +28395,8 @@ const StorageManager = (() => {
         getOuterBindingIdentifierPaths: function(e) {
             return this.getBindingIdentifierPaths(e, !0);
         }
-    }), uA = su, lA = ru, cA = Object.freeze({
+    }), uA = su, lA = ru;
+    var cA = Object.freeze({
         __proto__: null,
         shareCommentsWithSiblings: function() {
             if ("string" != typeof this.key) {
@@ -27428,7 +28526,9 @@ const StorageManager = (() => {
             if (t[e.type]) return !0;
             var a = AA[e.type];
             if (null == a || !a.length) return !1;
-            for (var n, r = S(a); !(n = r()).done; ) if (e[n.value]) return !0;
+            for (var n, r = S(a); !(n = r()).done; ) {
+                if (e[n.value]) return !0;
+            }
             return !1;
         }, t.create = function(e, t, a, n) {
             return yA.get({
@@ -27466,7 +28566,9 @@ const StorageManager = (() => {
                     }
                 }
             }
-            for (var o, d = S(e); !(o = d()).done; ) o.value.popContext();
+            for (var o, d = S(e); !(o = d()).done; ) {
+                o.value.popContext();
+            }
             return this.queue = null, n;
         }, t.visit = function(e, t) {
             var a = e[t];
@@ -27483,7 +28585,9 @@ const StorageManager = (() => {
                 if (1 !== r.length) {
                     var s = e[n];
                     delete e[n];
-                    for (var i, o = S(r); !(i = o()).done; ) e[i.value] = s;
+                    for (var i, o = S(r); !(i = o()).done; ) {
+                        e[i.value] = s;
+                    }
                 }
             }
         }
@@ -27585,7 +28689,7 @@ const StorageManager = (() => {
         }, a;
     }
     function BA(e) {
-        return "_" === e[0] || "enter" === e || "exit" === e || "shouldSkip" === e || "denylist" === e || "noScope" === e || "skipKeys" === e || "blacklist" === e;
+        return "_" === e[0] || ("enter" === e || "exit" === e || "shouldSkip" === e || ("denylist" === e || "noScope" === e || "skipKeys" === e || "blacklist" === e));
     }
     function OA(e, t) {
         for (var a = 0, n = Object.keys(t); a < n.length; a++) {
@@ -27774,7 +28878,8 @@ const StorageManager = (() => {
         for (var t = []; e.parentPath; e = e.parentPath) t.push(e.key), e.inList && t.push(e.listKey);
         return t.reverse().join(".");
     }
-    var NC = void 0, LC = Object.create(null);
+    var NC = void 0;
+    var LC = Object.create(null);
     function MC(e) {
         if (!LC[e]) {
             var t = SC[e];
@@ -28036,7 +29141,9 @@ const StorageManager = (() => {
                     var a = "'" + JSON.stringify(t).replace(/^"|"$/g, "").replace(/'/g, "\\'").replace(/\\"/g, '"') + "'";
                     return e.stylize(a, "string");
                 }
-                return h(t) ? e.stylize("" + t, "number") : g(t) ? e.stylize("" + t, "boolean") : f(t) ? e.stylize("null", "null") : void 0;
+                if (h(t)) return e.stylize("" + t, "number");
+                if (g(t)) return e.stylize("" + t, "boolean");
+                if (f(t)) return e.stylize("null", "null");
             }(e, a);
             if (s) return s;
             var i = Object.keys(a), o = function(e) {
@@ -28056,8 +29163,8 @@ const StorageManager = (() => {
                 if (x(a)) return l(a);
             }
             var b, D = "", A = !1, w = [ "{", "}" ];
-            return p(a) && (A = !0, w = [ "[", "]" ]), E(a) && (D = " [Function" + (a.name ? ": " + a.name : "") + "]"), 
-            R(a) && (D = " " + RegExp.prototype.toString.call(a)), v(a) && (D = " " + Date.prototype.toUTCString.call(a)), 
+            (p(a) && (A = !0, w = [ "[", "]" ]), E(a)) && (D = " [Function" + (a.name ? ": " + a.name : "") + "]");
+            return R(a) && (D = " " + RegExp.prototype.toString.call(a)), v(a) && (D = " " + Date.prototype.toUTCString.call(a)), 
             x(a) && (D = " " + l(a)), 0 !== i.length || A && 0 != a.length ? n < 0 ? R(a) ? e.stylize(RegExp.prototype.toString.call(a), "regexp") : e.stylize("[Object]", "special") : (e.seen.push(a), 
             b = A ? function(e, t, a, n, r) {
                 for (var s = [], i = 0, o = t.length; i < o; ++i) S(t, String(i)) ? s.push(c(e, t, a, n, String(i), !0)) : s.push("");
@@ -28067,9 +29174,10 @@ const StorageManager = (() => {
             }(e, a, n, o, i) : i.map((function(t) {
                 return c(e, a, n, o, t, A);
             })), e.seen.pop(), function(e, t, a) {
-                return e.reduce((function(e, t) {
+                if (e.reduce((function(e, t) {
                     return t.indexOf("\n"), e + t.replace(/\u001b\[\d\d?m/g, "").length + 1;
-                }), 0) > 60 ? a[0] + ("" === t ? "" : t + "\n ") + " " + e.join(",\n  ") + " " + a[1] : a[0] + t + " " + e.join(", ") + " " + a[1];
+                }), 0) > 60) return a[0] + ("" === t ? "" : t + "\n ") + " " + e.join(",\n  ") + " " + a[1];
+                return a[0] + t + " " + e.join(", ") + " " + a[1];
             }(b, D, w)) : w[0] + D + w[1];
         }
         function l(e) {
@@ -28209,7 +29317,7 @@ const StorageManager = (() => {
             return Object.prototype.toString.call(e);
         }
         function d(e) {
-            return !n(e) && "function" == typeof a.ArrayBuffer && ("function" == typeof ArrayBuffer.isView ? ArrayBuffer.isView(e) : !!e && (e instanceof DataView || !!(e.buffer && e.buffer instanceof ArrayBuffer)));
+            return !n(e) && ("function" == typeof a.ArrayBuffer && ("function" == typeof ArrayBuffer.isView ? ArrayBuffer.isView(e) : !!e && (e instanceof DataView || !!(e.buffer && e.buffer instanceof ArrayBuffer))));
         }
         var u = e.exports = h, l = /\s*function\s+([^\(\s]*)\s*/;
         function c(e) {
@@ -28561,7 +29669,7 @@ const StorageManager = (() => {
                 }(e)) return;
                 var i = e.find((function(t) {
                     var a = t.node, n = t.parent;
-                    return TS(n) ? n.optional || n.object !== a : !SS(n) || a !== e.node && n.optional || n.callee !== a;
+                    return TS(n) ? n.optional || n.object !== a : !SS(n) || (a !== e.node && n.optional || n.callee !== a);
                 }));
                 if (s.path.isPattern()) return void i.replaceWith(ES(RS([], i.node), []));
                 var o = mS(i), d = i.parentPath;
@@ -28749,8 +29857,8 @@ const StorageManager = (() => {
         },
         get: function(e) {
             var t, a, n, r = this.isStatic, s = this.getSuperRef, i = e.node.computed, o = this.prop(e);
-            return t = r ? null != (a = s()) ? a : nT(aT("Function"), aT("prototype")) : nT(null != (n = s()) ? n : aT("Object"), aT("prototype")), 
-            nT(t, o, i);
+            r ? t = null != (a = s()) ? a : nT(aT("Function"), aT("prototype")) : t = nT(null != (n = s()) ? n : aT("Object"), aT("prototype"));
+            return nT(t, o, i);
         },
         set: function(e, t) {
             var a = e.node.computed, n = this.prop(e);
@@ -28858,7 +29966,8 @@ const StorageManager = (() => {
                 }
             }
         }
-    }, PT = ir, FT = gr, _T = tu, kT = vr, IT = El, BT = Cr, OT = Z, NT = fe, LT = Zi, MT = eo, $T = Br, UT = Pr, GT = Wr, WT = jr, VT = Qr, HT = Zr, KT = {
+    }, PT = ir, FT = gr, _T = tu, kT = vr, IT = El, BT = Cr, OT = Z, NT = fe, LT = Zi, MT = eo, $T = Br, UT = Pr, GT = Wr, WT = jr, VT = Qr, HT = Zr;
+    var KT = {
         Scope: function(e) {
             e.skip();
         },
@@ -29095,6 +30204,176 @@ const StorageManager = (() => {
     function fj(e, t) {
         return "function" == typeof e ? gj(e(t)) : e;
     }
+    function hj(e, t, a) {
+        var n = a.importInterop, r = a.initializeReexports, s = void 0 !== r && r, i = a.lazy, o = void 0 !== i && i, d = a.esNamespaceOnly, u = void 0 !== d && d;
+        t || (t = e.scope.generateUidIdentifier("exports").name);
+        var l = new Set;
+        !function(e) {
+            e.get("body").forEach((function(e) {
+                e.isExportDefaultDeclaration() && Tc(e);
+            }));
+        }(e);
+        var c = function(e, t, a) {
+            var n = t.lazy, r = t.initializeReexports, s = function(e, t, a) {
+                var n = new Map;
+                e.get("body").forEach((function(e) {
+                    var a;
+                    if (e.isImportDeclaration()) a = "import"; else {
+                        if (e.isExportDefaultDeclaration() && (e = e.get("declaration")), e.isExportNamedDeclaration()) if (e.node.declaration) e = e.get("declaration"); else if (t && e.node.source && e.get("source").isStringLiteral()) return void e.get("specifiers").forEach((function(e) {
+                            yj(e), n.set(e.get("local").node.name, "block");
+                        }));
+                        if (e.isFunctionDeclaration()) a = "hoisted"; else if (e.isClassDeclaration()) a = "block"; else if (e.isVariableDeclaration({
+                            kind: "var"
+                        })) a = "var"; else {
+                            if (!e.isVariableDeclaration()) return;
+                            a = "block";
+                        }
+                    }
+                    Object.keys(e.getOuterBindingIdentifiers()).forEach((function(e) {
+                        n.set(e, a);
+                    }));
+                }));
+                var r = new Map, s = function(e) {
+                    var t = e.node.name, a = r.get(t);
+                    if (!a) {
+                        var s = n.get(t);
+                        if (void 0 === s) throw e.buildCodeFrameError('Exporting local "' + t + '", which is not declared.');
+                        a = {
+                            names: [],
+                            kind: s
+                        }, r.set(t, a);
+                    }
+                    return a;
+                };
+                return e.get("body").forEach((function(e) {
+                    if (!e.isExportNamedDeclaration() || !t && e.node.source) {
+                        if (e.isExportDefaultDeclaration()) {
+                            var n = e.get("declaration");
+                            if (!n.isFunctionDeclaration() && !n.isClassDeclaration()) throw n.buildCodeFrameError("Unexpected default expression export.");
+                            s(n.get("id")).names.push("default");
+                        }
+                    } else if (e.node.declaration) {
+                        var r = e.get("declaration"), i = r.getOuterBindingIdentifierPaths();
+                        Object.keys(i).forEach((function(e) {
+                            if ("__esModule" === e) throw r.buildCodeFrameError('Illegal export "__esModule".');
+                            s(i[e]).names.push(e);
+                        }));
+                    } else e.get("specifiers").forEach((function(e) {
+                        var t = e.get("local"), n = e.get("exported"), r = s(t), i = mj(n, a);
+                        if ("__esModule" === i) throw n.buildCodeFrameError('Illegal export "__esModule".');
+                        r.names.push(i);
+                    }));
+                })), r;
+            }(e, r, a), i = new Map, o = function(t) {
+                var a = t.value, n = i.get(a);
+                return n || (n = {
+                    name: e.scope.generateUidIdentifier(sj(a, ij(a))).name,
+                    interop: "none",
+                    loc: null,
+                    imports: new Map,
+                    importsNamespace: new Set,
+                    reexports: new Map,
+                    reexportNamespace: new Set,
+                    reexportAll: null,
+                    lazy: !1,
+                    source: a
+                }, i.set(a, n)), n;
+            }, d = !1;
+            e.get("body").forEach((function(e) {
+                if (e.isImportDeclaration()) {
+                    var t = o(e.node.source);
+                    t.loc || (t.loc = e.node.loc), e.get("specifiers").forEach((function(e) {
+                        if (e.isImportDefaultSpecifier()) {
+                            var n = e.get("local").node.name;
+                            t.imports.set(n, "default");
+                            var r = s.get(n);
+                            r && (s.delete(n), r.names.forEach((function(e) {
+                                t.reexports.set(e, "default");
+                            })));
+                        } else if (e.isImportNamespaceSpecifier()) {
+                            var i = e.get("local").node.name;
+                            t.importsNamespace.add(i);
+                            var o = s.get(i);
+                            o && (s.delete(i), o.names.forEach((function(e) {
+                                t.reexportNamespace.add(e);
+                            })));
+                        } else if (e.isImportSpecifier()) {
+                            var d = mj(e.get("imported"), a), u = e.get("local").node.name;
+                            t.imports.set(u, d);
+                            var l = s.get(u);
+                            l && (s.delete(u), l.names.forEach((function(e) {
+                                t.reexports.set(e, d);
+                            })));
+                        }
+                    }));
+                } else if (e.isExportAllDeclaration()) {
+                    d = !0;
+                    var n = o(e.node.source);
+                    n.loc || (n.loc = e.node.loc), n.reexportAll = {
+                        loc: e.node.loc
+                    };
+                } else if (e.isExportNamedDeclaration() && e.node.source) {
+                    d = !0;
+                    var r = o(e.node.source);
+                    r.loc || (r.loc = e.node.loc), e.get("specifiers").forEach((function(e) {
+                        yj(e);
+                        var t = mj(e.get("local"), a), n = mj(e.get("exported"), a);
+                        if (r.reexports.set(n, t), "__esModule" === n) throw e.get("exported").buildCodeFrameError('Illegal export "__esModule".');
+                    }));
+                } else (e.isExportNamedDeclaration() || e.isExportDefaultDeclaration()) && (d = !0);
+            }));
+            for (var u, l = S(i.values()); !(u = l()).done; ) {
+                var c = u.value, p = !1, g = !1;
+                c.importsNamespace.size > 0 && (p = !0, g = !0), c.reexportAll && (g = !0);
+                for (var f, h = S(c.imports.values()); !(f = h()).done; ) {
+                    "default" === f.value ? p = !0 : g = !0;
+                }
+                for (var m, y = S(c.reexports.values()); !(m = y()).done; ) {
+                    "default" === m.value ? p = !0 : g = !0;
+                }
+                p && g ? c.interop = "namespace" : p && (c.interop = "default");
+            }
+            for (var R, b = S(i); !(R = b()).done; ) {
+                var v = D(R.value, 2), x = v[0], E = v[1];
+                if (!1 !== n && !pj(E) && !E.reexportAll) if (!0 === n) E.lazy = !/\./.test(x); else if (Array.isArray(n)) E.lazy = -1 !== n.indexOf(x); else {
+                    if ("function" != typeof n) throw new Error(".lazy must be a boolean, string array, or function");
+                    E.lazy = n(x);
+                }
+            }
+            return {
+                hasExports: d,
+                local: s,
+                source: i
+            };
+        }(e, {
+            initializeReexports: s,
+            lazy: o
+        }, l), p = c.local, g = c.source, f = c.hasExports;
+        !function(e) {
+            e.get("body").forEach((function(e) {
+                if (e.isImportDeclaration()) e.remove(); else if (e.isExportNamedDeclaration()) e.node.declaration ? (e.node.declaration._blockHoist = e.node._blockHoist, 
+                e.replaceWith(e.node.declaration)) : e.remove(); else if (e.isExportDefaultDeclaration()) {
+                    var t = e.get("declaration");
+                    if (!t.isFunctionDeclaration() && !t.isClassDeclaration()) throw t.buildCodeFrameError("Unexpected default expression export.");
+                    t._blockHoist = e.node._blockHoist, e.replaceWith(t);
+                } else e.isExportAllDeclaration() && e.remove();
+            }));
+        }(e);
+        for (var h, m = S(g); !(h = m()).done; ) {
+            var y = D(h.value, 2)[1];
+            y.importsNamespace.size > 0 && (y.name = y.importsNamespace.values().next().value);
+            var R = fj(n, y.source);
+            "none" === R ? y.interop = "none" : "node" === R && "namespace" === y.interop ? y.interop = "node-namespace" : "node" === R && "default" === y.interop ? y.interop = "node-default" : u && "namespace" === y.interop && (y.interop = "default");
+        }
+        return {
+            exportName: t,
+            exportNameListName: null,
+            hasExports: f,
+            local: p,
+            source: g,
+            stringSpecifiers: l
+        };
+    }
     function mj(e, t) {
         if (e.isIdentifier()) return e.node.name;
         if (e.isStringLiteral()) {
@@ -29131,178 +30410,13 @@ const StorageManager = (() => {
     function Kj(e, t) {
         var a = t.loose, n = t.exportName, r = t.strict, s = t.allowTopLevelThis, i = t.strictMode, o = t.noInterop, d = t.importInterop, u = void 0 === d ? o ? "none" : "babel" : d, l = t.lazy, c = t.esNamespaceOnly, p = t.constantReexports, g = void 0 === p ? a : p, f = t.enumerableModuleMeta, h = void 0 === f ? a : f, m = t.noIncompleteNsImportDetection;
         gj(u), YC(cS(e), "Cannot process module statements in a script"), e.node.sourceType = "script";
-        var y = function(e, t, a) {
-            var n = a.importInterop, r = a.initializeReexports, s = void 0 !== r && r, i = a.lazy, o = void 0 !== i && i, d = a.esNamespaceOnly, u = void 0 !== d && d;
-            t || (t = e.scope.generateUidIdentifier("exports").name);
-            var l = new Set;
-            !function(e) {
-                e.get("body").forEach((function(e) {
-                    e.isExportDefaultDeclaration() && Tc(e);
-                }));
-            }(e);
-            var c = function(e, t, a) {
-                var n = t.lazy, s = function(e, t, a) {
-                    var n = new Map;
-                    e.get("body").forEach((function(e) {
-                        var a;
-                        if (e.isImportDeclaration()) a = "import"; else {
-                            if (e.isExportDefaultDeclaration() && (e = e.get("declaration")), e.isExportNamedDeclaration()) if (e.node.declaration) e = e.get("declaration"); else if (t && e.node.source && e.get("source").isStringLiteral()) return void e.get("specifiers").forEach((function(e) {
-                                yj(e), n.set(e.get("local").node.name, "block");
-                            }));
-                            if (e.isFunctionDeclaration()) a = "hoisted"; else if (e.isClassDeclaration()) a = "block"; else if (e.isVariableDeclaration({
-                                kind: "var"
-                            })) a = "var"; else {
-                                if (!e.isVariableDeclaration()) return;
-                                a = "block";
-                            }
-                        }
-                        Object.keys(e.getOuterBindingIdentifiers()).forEach((function(e) {
-                            n.set(e, a);
-                        }));
-                    }));
-                    var r = new Map, s = function(e) {
-                        var t = e.node.name, a = r.get(t);
-                        if (!a) {
-                            var s = n.get(t);
-                            if (void 0 === s) throw e.buildCodeFrameError('Exporting local "' + t + '", which is not declared.');
-                            a = {
-                                names: [],
-                                kind: s
-                            }, r.set(t, a);
-                        }
-                        return a;
-                    };
-                    return e.get("body").forEach((function(e) {
-                        if (!e.isExportNamedDeclaration() || !t && e.node.source) {
-                            if (e.isExportDefaultDeclaration()) {
-                                var n = e.get("declaration");
-                                if (!n.isFunctionDeclaration() && !n.isClassDeclaration()) throw n.buildCodeFrameError("Unexpected default expression export.");
-                                s(n.get("id")).names.push("default");
-                            }
-                        } else if (e.node.declaration) {
-                            var r = e.get("declaration"), i = r.getOuterBindingIdentifierPaths();
-                            Object.keys(i).forEach((function(e) {
-                                if ("__esModule" === e) throw r.buildCodeFrameError('Illegal export "__esModule".');
-                                s(i[e]).names.push(e);
-                            }));
-                        } else e.get("specifiers").forEach((function(e) {
-                            var t = e.get("local"), n = e.get("exported"), r = s(t), i = mj(n, a);
-                            if ("__esModule" === i) throw n.buildCodeFrameError('Illegal export "__esModule".');
-                            r.names.push(i);
-                        }));
-                    })), r;
-                }(e, t.initializeReexports, a), i = new Map, o = function(t) {
-                    var a = t.value, n = i.get(a);
-                    return n || (n = {
-                        name: e.scope.generateUidIdentifier(sj(a, ij(a))).name,
-                        interop: "none",
-                        loc: null,
-                        imports: new Map,
-                        importsNamespace: new Set,
-                        reexports: new Map,
-                        reexportNamespace: new Set,
-                        reexportAll: null,
-                        lazy: !1,
-                        source: a
-                    }, i.set(a, n)), n;
-                }, d = !1;
-                e.get("body").forEach((function(e) {
-                    if (e.isImportDeclaration()) {
-                        var t = o(e.node.source);
-                        t.loc || (t.loc = e.node.loc), e.get("specifiers").forEach((function(e) {
-                            if (e.isImportDefaultSpecifier()) {
-                                var n = e.get("local").node.name;
-                                t.imports.set(n, "default");
-                                var r = s.get(n);
-                                r && (s.delete(n), r.names.forEach((function(e) {
-                                    t.reexports.set(e, "default");
-                                })));
-                            } else if (e.isImportNamespaceSpecifier()) {
-                                var i = e.get("local").node.name;
-                                t.importsNamespace.add(i);
-                                var o = s.get(i);
-                                o && (s.delete(i), o.names.forEach((function(e) {
-                                    t.reexportNamespace.add(e);
-                                })));
-                            } else if (e.isImportSpecifier()) {
-                                var d = mj(e.get("imported"), a), u = e.get("local").node.name;
-                                t.imports.set(u, d);
-                                var l = s.get(u);
-                                l && (s.delete(u), l.names.forEach((function(e) {
-                                    t.reexports.set(e, d);
-                                })));
-                            }
-                        }));
-                    } else if (e.isExportAllDeclaration()) {
-                        d = !0;
-                        var n = o(e.node.source);
-                        n.loc || (n.loc = e.node.loc), n.reexportAll = {
-                            loc: e.node.loc
-                        };
-                    } else if (e.isExportNamedDeclaration() && e.node.source) {
-                        d = !0;
-                        var r = o(e.node.source);
-                        r.loc || (r.loc = e.node.loc), e.get("specifiers").forEach((function(e) {
-                            yj(e);
-                            var t = mj(e.get("local"), a), n = mj(e.get("exported"), a);
-                            if (r.reexports.set(n, t), "__esModule" === n) throw e.get("exported").buildCodeFrameError('Illegal export "__esModule".');
-                        }));
-                    } else (e.isExportNamedDeclaration() || e.isExportDefaultDeclaration()) && (d = !0);
-                }));
-                for (var u, l = S(i.values()); !(u = l()).done; ) {
-                    var c = u.value, p = !1, g = !1;
-                    c.importsNamespace.size > 0 && (p = !0, g = !0), c.reexportAll && (g = !0);
-                    for (var f, h = S(c.imports.values()); !(f = h()).done; ) "default" === f.value ? p = !0 : g = !0;
-                    for (var m, y = S(c.reexports.values()); !(m = y()).done; ) "default" === m.value ? p = !0 : g = !0;
-                    p && g ? c.interop = "namespace" : p && (c.interop = "default");
-                }
-                for (var R, b = S(i); !(R = b()).done; ) {
-                    var v = D(R.value, 2), x = v[0], E = v[1];
-                    if (!1 !== n && !pj(E) && !E.reexportAll) if (!0 === n) E.lazy = !/\./.test(x); else if (Array.isArray(n)) E.lazy = -1 !== n.indexOf(x); else {
-                        if ("function" != typeof n) throw new Error(".lazy must be a boolean, string array, or function");
-                        E.lazy = n(x);
-                    }
-                }
-                return {
-                    hasExports: d,
-                    local: s,
-                    source: i
-                };
-            }(e, {
-                initializeReexports: s,
-                lazy: o
-            }, l), p = c.local, g = c.source, f = c.hasExports;
-            !function(e) {
-                e.get("body").forEach((function(e) {
-                    if (e.isImportDeclaration()) e.remove(); else if (e.isExportNamedDeclaration()) e.node.declaration ? (e.node.declaration._blockHoist = e.node._blockHoist, 
-                    e.replaceWith(e.node.declaration)) : e.remove(); else if (e.isExportDefaultDeclaration()) {
-                        var t = e.get("declaration");
-                        if (!t.isFunctionDeclaration() && !t.isClassDeclaration()) throw t.buildCodeFrameError("Unexpected default expression export.");
-                        t._blockHoist = e.node._blockHoist, e.replaceWith(t);
-                    } else e.isExportAllDeclaration() && e.remove();
-                }));
-            }(e);
-            for (var h, m = S(g); !(h = m()).done; ) {
-                var y = D(h.value, 2)[1];
-                y.importsNamespace.size > 0 && (y.name = y.importsNamespace.values().next().value);
-                var R = fj(n, y.source);
-                "none" === R ? y.interop = "none" : "node" === R && "namespace" === y.interop ? y.interop = "node-namespace" : "node" === R && "default" === y.interop ? y.interop = "node-default" : u && "namespace" === y.interop && (y.interop = "default");
-            }
-            return {
-                exportName: t,
-                exportNameListName: null,
-                hasExports: f,
-                local: p,
-                source: g,
-                stringSpecifiers: l
-            };
-        }(e, n, {
+        var y = hj(e, n, {
             importInterop: u,
             initializeReexports: g,
             lazy: l,
             esNamespaceOnly: c
         });
-        s || mT(e), function(e, t) {
+        (s || mT(e), function(e, t) {
             for (var a, n = new Map, r = new Map, s = function(t) {
                 e.requeue(t);
             }, i = S(t.source); !(a = i()).done; ) {
@@ -29343,20 +30457,27 @@ const StorageManager = (() => {
                 }
             };
             e.traverse(zT, j);
-        }(e, y), !1 !== i && (e.node.directives.some((function(e) {
+        }(e, y), !1 !== i) && (e.node.directives.some((function(e) {
             return "use strict" === e.value.value;
         })) || e.unshiftContainer("directives", Oj(Nj("use strict"))));
         var R = [];
         cj(y) && !r && R.push(function(e, t) {
-            return void 0 === t && (t = !1), (t ? AE.statement(Aj || (Aj = E([ "\n        EXPORTS.__esModule = true;\n      " ]))) : AE.statement(wj || (wj = E([ '\n        Object.defineProperty(EXPORTS, "__esModule", {\n          value: true,\n        });\n      ' ]))))({
+            void 0 === t && (t = !1);
+            return (t ? AE.statement(Aj || (Aj = E([ "\n        EXPORTS.__esModule = true;\n      " ]))) : AE.statement(wj || (wj = E([ '\n        Object.defineProperty(EXPORTS, "__esModule", {\n          value: true,\n        });\n      ' ]))))({
                 EXPORTS: e.exportName
             });
         }(y, h));
         var b = function(e, t) {
-            for (var a, n = Object.create(null), r = S(t.local.values()); !(a = r()).done; ) for (var s, i = S(a.value.names); !(s = i()).done; ) n[s.value] = !0;
+            for (var a, n = Object.create(null), r = S(t.local.values()); !(a = r()).done; ) for (var s, i = S(a.value.names); !(s = i()).done; ) {
+                n[s.value] = !0;
+            }
             for (var o, d = !1, u = S(t.source.values()); !(o = u()).done; ) {
-                for (var l, c = o.value, p = S(c.reexports.keys()); !(l = p()).done; ) n[l.value] = !0;
-                for (var g, f = S(c.reexportNamespace); !(g = f()).done; ) n[g.value] = !0;
+                for (var l, c = o.value, p = S(c.reexports.keys()); !(l = p()).done; ) {
+                    n[l.value] = !0;
+                }
+                for (var g, f = S(c.reexportNamespace); !(g = f()).done; ) {
+                    n[g.value] = !0;
+                }
                 d = d || !!c.reexportAll;
             }
             if (!d || 0 === Object.keys(n).length) return null;
@@ -29367,7 +30488,8 @@ const StorageManager = (() => {
             };
         }(e, y);
         return b && (y.exportNameListName = b.name, R.push(b.statement)), R.push.apply(R, A(function(e, t, a, n) {
-            void 0 === a && (a = !1), void 0 === n && (n = !1);
+            void 0 === a && (a = !1);
+            void 0 === n && (n = !1);
             for (var r, s = [], i = [], o = S(t.local); !(r = o()).done; ) {
                 var d = D(r.value, 2), u = d[0], l = d[1];
                 "import" === l.kind || ("hoisted" === l.kind ? s.push(Zj(t, l.names, Mj(u))) : i.push.apply(i, A(l.names)));
@@ -29380,12 +30502,13 @@ const StorageManager = (() => {
                     i.push(m);
                 }
             }
-            return n || s.push.apply(s, A(function(e, t) {
-                for (var a = [], n = 0; n < e.length; n += 100) a.push(e.slice(n, n + 100));
+            n || s.push.apply(s, A(function(e, t) {
+                for (var a = [], n = 0; n < e.length; n += t) a.push(e.slice(n, n + t));
                 return a;
-            }(i).map((function(a) {
+            }(i, 100).map((function(a) {
                 return Zj(t, a, e.scope.buildUndefinedNode());
-            })))), s;
+            }))));
+            return s;
         }(e, y, g, m))), {
             meta: y,
             headers: R
@@ -29457,7 +30580,8 @@ const StorageManager = (() => {
             };
             return a || $j(u) ? r.has(o) ? Jj.constantComputed(l) : Jj.constant(l) : Jj.spec(l);
         }));
-    }, Qj = {
+    };
+    var Qj = {
         computed: AE.expression(jj || (jj = E([ 'EXPORTS["NAME"] = VALUE' ]))),
         default: AE.expression(Pj || (Pj = E([ "EXPORTS.NAME = VALUE" ])))
     };
@@ -29518,10 +30642,10 @@ const StorageManager = (() => {
         })).reduce((function(e, t) {
             return e[t] = !0, e;
         }), {}) : {};
-    }, sP = /^[0-9]+$/, oP = function(e, t) {
+    }, sP = /^[0-9]+$/, iP = function(e, t) {
         var a = sP.test(e), n = sP.test(t);
         return a && n && (e = +e, t = +t), e === t ? 0 : a && !n ? -1 : n && !a ? 1 : e < t ? -1 : 1;
-    }, dP = eP.MAX_LENGTH, uP = eP.MAX_SAFE_INTEGER, lP = aP.re, cP = aP.t, pP = oP, gP = function() {
+    }, oP = iP, dP = eP.MAX_LENGTH, uP = eP.MAX_SAFE_INTEGER, lP = aP.re, cP = aP.t, pP = oP, gP = function() {
         function e(t, a) {
             if (a = rP(a), t instanceof e) {
                 if (t.loose === !!a.loose && t.includePrerelease === !!a.includePrerelease) return t;
@@ -29626,7 +30750,19 @@ const StorageManager = (() => {
         }, e;
     }(), fP = (aP.re, aP.t, function(e, t, a) {
         return new gP(e, a).compare(new gP(t, a));
-    }), xP = function(e, t, a, n) {
+    }), hP = function(e, t, a) {
+        return 0 === fP(e, t, a);
+    }, mP = function(e, t, a) {
+        return fP(e, t, a) > 0;
+    }, yP = function(e, t, a) {
+        return fP(e, t, a) < 0;
+    }, RP = function(e, t, a) {
+        return 0 !== fP(e, t, a);
+    }, bP = function(e, t, a) {
+        return fP(e, t, a) >= 0;
+    }, vP = function(e, t, a) {
+        return fP(e, t, a) <= 0;
+    }, xP = function(e, t, a, n) {
         switch (t) {
           case "===":
             return "object" == typeof e && (e = e.version), "object" == typeof a && (a = a.version), 
@@ -29639,34 +30775,22 @@ const StorageManager = (() => {
           case "":
           case "=":
           case "==":
-            return function(e, t, a) {
-                return 0 === fP(e, t, a);
-            }(e, a, n);
+            return hP(e, a, n);
 
           case "!=":
-            return function(e, t, a) {
-                return 0 !== fP(e, t, a);
-            }(e, a, n);
+            return RP(e, a, n);
 
           case ">":
-            return function(e, t, a) {
-                return fP(e, t, a) > 0;
-            }(e, a, n);
+            return mP(e, a, n);
 
           case ">=":
-            return function(e, t, a) {
-                return fP(e, t, a) >= 0;
-            }(e, a, n);
+            return bP(e, a, n);
 
           case "<":
-            return function(e, t, a) {
-                return fP(e, t, a) < 0;
-            }(e, a, n);
+            return yP(e, a, n);
 
           case "<=":
-            return function(e, t, a) {
-                return fP(e, t, a) <= 0;
-            }(e, a, n);
+            return vP(e, a, n);
 
           default:
             throw new TypeError("Invalid operator: " + t);
@@ -29802,8 +30926,8 @@ const StorageManager = (() => {
         for (var a = 0, n = this.head; null !== n && a < e; a++) n = n.next;
         var r = [];
         for (a = 0; n && a < t; a++) r.push(n.value), n = this.removeNode(n);
-        for (null === n && (n = this.tail), n !== this.head && n !== this.tail && (n = n.prev), 
-        a = 0; a < (arguments.length <= 2 ? 0 : arguments.length - 2); a++) n = AP(this, n, a + 2 < 2 || arguments.length <= a + 2 ? void 0 : arguments[a + 2]);
+        null === n && (n = this.tail), n !== this.head && n !== this.tail && (n = n.prev);
+        for (a = 0; a < (arguments.length <= 2 ? 0 : arguments.length - 2); a++) n = AP(this, n, a + 2 < 2 || arguments.length <= a + 2 ? void 0 : arguments[a + 2]);
         return r;
     }, DP.prototype.reverse = function() {
         for (var e = this.head, t = this.tail, a = e; null !== a; a = a.prev) {
@@ -30238,16 +31362,18 @@ const StorageManager = (() => {
         s[i.XRANGELOOSE] = "^" + s[i.GTLT] + "\\s*" + s[i.XRANGEPLAINLOOSE] + "$", d("COERCE"), 
         s[i.COERCE] = "(^|[^\\d])(\\d{1,16})(?:\\.(\\d{1,16}))?(?:\\.(\\d{1,16}))?(?:$|[^\\d])", 
         d("COERCERTL"), r[i.COERCERTL] = new RegExp(s[i.COERCE], "g"), d("LONETILDE"), s[i.LONETILDE] = "(?:~>?)", 
-        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g"), 
+        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g");
         d("TILDE"), s[i.TILDE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAIN] + "$", d("TILDELOOSE"), 
         s[i.TILDELOOSE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAINLOOSE] + "$", d("LONECARET"), 
         s[i.LONECARET] = "(?:\\^)", d("CARETTRIM"), s[i.CARETTRIM] = "(\\s*)" + s[i.LONECARET] + "\\s+", 
-        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g"), d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", 
-        d("CARETLOOSE"), s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", 
-        d("COMPARATORLOOSE"), s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", 
-        d("COMPARATOR"), s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", 
-        d("COMPARATORTRIM"), s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
-        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g"), d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
+        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g");
+        d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", d("CARETLOOSE"), 
+        s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", d("COMPARATORLOOSE"), 
+        s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", d("COMPARATOR"), 
+        s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", d("COMPARATORTRIM"), 
+        s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
+        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g");
+        d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
         d("HYPHENRANGELOOSE"), s[i.HYPHENRANGELOOSE] = "^\\s*(" + s[i.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + s[i.XRANGEPLAINLOOSE] + ")\\s*$", 
         d("STAR"), s[i.STAR] = "(<|>)?=?\\s*\\*";
         for (var u = 0; u < o; u++) a(u, s[u]), r[u] || (r[u] = new RegExp(s[u]));
@@ -30645,7 +31771,7 @@ const StorageManager = (() => {
             }), this).join(" ").split(/\s+/);
             return this.options.loose && (o = o.filter((function(e) {
                 return !!e.match(s);
-            }))), o.map((function(e) {
+            }))), o = o.map((function(e) {
                 return new E(e, this.options);
             }), this);
         }, A.prototype.intersects = function(e, t) {
@@ -30700,26 +31826,29 @@ const StorageManager = (() => {
             if (e.test(a)) return a;
             if (a = new c("0.0.0-0"), e.test(a)) return a;
             a = null;
-            for (var n = 0; n < e.set.length; ++n) e.set[n].forEach((function(e) {
-                var t = new c(e.semver.version);
-                switch (e.operator) {
-                  case ">":
-                    0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
+            for (var n = 0; n < e.set.length; ++n) {
+                e.set[n].forEach((function(e) {
+                    var t = new c(e.semver.version);
+                    switch (e.operator) {
+                      case ">":
+                        0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
 
-                  case "":
-                  case ">=":
-                    a && !h(a, t) || (a = t);
-                    break;
+                      case "":
+                      case ">=":
+                        a && !h(a, t) || (a = t);
+                        break;
 
-                  case "<":
-                  case "<=":
-                    break;
+                      case "<":
+                      case "<=":
+                        break;
 
-                  default:
-                    throw new Error("Unexpected operation: " + e.operator);
-                }
-            }));
-            return a && e.test(a) ? a : null;
+                      default:
+                        throw new Error("Unexpected operation: " + e.operator);
+                    }
+                }));
+            }
+            if (a && e.test(a)) return a;
+            return null;
         }, t.validRange = function(e, t) {
             try {
                 return new A(e, t).range || "*";
@@ -30737,14 +31866,16 @@ const StorageManager = (() => {
             return e = new A(e, a), t = new A(t, a), e.intersects(t);
         }, t.coerce = function(e, t) {
             if (e instanceof c) return e;
-            if ("number" == typeof e && (e = String(e)), "string" != typeof e) return null;
+            "number" == typeof e && (e = String(e));
+            if ("string" != typeof e) return null;
             var a = null;
             if ((t = t || {}).rtl) {
                 for (var n; (n = r[i.COERCERTL].exec(e)) && (!a || a.index + a[0].length !== e.length); ) a && n.index + n[0].length === a.index + a[0].length || (a = n), 
                 r[i.COERCERTL].lastIndex = n.index + n[1].length + n[2].length;
                 r[i.COERCERTL].lastIndex = -1;
             } else a = e.match(r[i.COERCE]);
-            return null === a ? null : l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
+            if (null === a) return null;
+            return l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
         };
     }), "/$$rollup_base$$/node_modules/semver-BABEL_8_BREAKING-false"), xF = tu, EF = dr, DF = {
         enter: function(e, t) {
@@ -30999,15 +32130,19 @@ const StorageManager = (() => {
     function c_(e) {
         return void 0 === e && (e = "development"), la.env.BABEL_ENV || e;
     }
-    var p_ = Symbol.for("gensync:v1:start"), g_ = Symbol.for("gensync:v1:suspend"), h_ = "GENSYNC_OPTIONS_ERROR", m_ = "GENSYNC_RACE_NONEMPTY", y_ = "GENSYNC_ERRBACK_NO_CALLBACK", R_ = Object.assign((function(e) {
-        var t;
+    var p_ = Symbol.for("gensync:v1:start"), g_ = Symbol.for("gensync:v1:suspend"), f_ = "GENSYNC_EXPECTED_SUSPEND", h_ = "GENSYNC_OPTIONS_ERROR", m_ = "GENSYNC_RACE_NONEMPTY", y_ = "GENSYNC_ERRBACK_NO_CALLBACK", R_ = Object.assign((function(e) {
+        var t = e;
         return t = "function" != typeof e ? function(e) {
-            var i, t = e.name, a = e.arity, n = e.sync, r = e.async, s = e.errback;
+            var t = e.name, a = e.arity, n = e.sync, r = e.async, s = e.errback;
             if (b_("string", "name", t, !0), b_("number", "arity", a, !0), b_("function", "sync", n), 
             b_("function", "async", r, !0), b_("function", "errback", s, !0), r && s) throw v_("Expected one of either opts.async or opts.errback, but got _both_.", h_);
-            "string" != typeof t && (s && s.name && "errback" !== s.name && (i = s.name), r && r.name && "async" !== r.name && (i = r.name.replace(/Async$/, "")), 
-            n && n.name && "sync" !== n.name && (i = n.name.replace(/Sync$/, "")), "string" == typeof i && (t = i));
-            return "number" != typeof a && (a = n.length), x_({
+            if ("string" != typeof t) {
+                var i;
+                s && s.name && "errback" !== s.name && (i = s.name), r && r.name && "async" !== r.name && (i = r.name.replace(/Async$/, "")), 
+                n && n.name && "sync" !== n.name && (i = n.name.replace(/Sync$/, "")), "string" == typeof i && (t = i);
+            }
+            "number" != typeof a && (a = n.length);
+            return x_({
                 name: t,
                 arity: a,
                 sync: function(e) {
@@ -31087,7 +32222,9 @@ const StorageManager = (() => {
             async: function(e, t, a) {
                 var n = Array.from(e[0]);
                 if (0 === n.length) throw v_("Must race at least 1 item", m_);
-                for (var r = 0, s = n; r < s.length; r++) D_(s[r], t, a);
+                for (var r = 0, s = n; r < s.length; r++) {
+                    D_(s[r], t, a);
+                }
             }
         })
     });
@@ -31168,7 +32305,8 @@ const StorageManager = (() => {
                     }));
                     if (t = !1, function(e, t) {
                         var a = e.value, n = e.done;
-                        (n || a !== g_) && w_(t, v_(n ? "Unexpected generator completion. If you get this, it is probably a gensync bug." : "Expected GENSYNC_SUSPEND, got " + JSON.stringify(a) + ". If you get this, it is probably a gensync bug.", "GENSYNC_EXPECTED_SUSPEND"));
+                        if (!n && a === g_) return;
+                        w_(t, v_(n ? "Unexpected generator completion. If you get this, it is probably a gensync bug." : "Expected GENSYNC_SUSPEND, got " + JSON.stringify(a) + ". If you get this, it is probably a gensync bug.", f_));
                     }(s, e), !a) return {
                         v: void 0
                     };
@@ -33789,181 +34927,185 @@ const StorageManager = (() => {
             }
         }
     }, sk = {
-        A: "ie",
-        B: "edge",
-        C: "firefox",
-        D: "chrome",
-        E: "safari",
-        F: "opera",
-        G: "ios_saf",
-        H: "op_mini",
-        I: "android",
-        J: "bb",
-        K: "op_mob",
-        L: "and_chr",
-        M: "and_ff",
-        N: "ie_mob",
-        O: "and_uc",
-        P: "samsung",
-        Q: "and_qq",
-        R: "baidu",
-        S: "kaios"
-    }, ik = {
-        0: "43",
-        1: "44",
-        2: "45",
-        3: "46",
-        4: "47",
-        5: "48",
-        6: "49",
-        7: "50",
-        8: "51",
-        9: "52",
-        A: "10",
-        B: "11",
-        C: "12",
-        D: "7",
-        E: "8",
-        F: "9",
-        G: "90",
-        H: "4",
-        I: "6",
-        J: "13",
-        K: "14",
-        L: "15",
-        M: "16",
-        N: "17",
-        O: "18",
-        P: "87",
-        Q: "62",
-        R: "79",
-        S: "80",
-        T: "81",
-        U: "83",
-        V: "84",
-        W: "85",
-        X: "86",
-        Y: "88",
-        Z: "89",
-        a: "91",
-        b: "5",
-        c: "19",
-        d: "20",
-        e: "21",
-        f: "22",
-        g: "23",
-        h: "24",
-        i: "25",
-        j: "26",
-        k: "27",
-        l: "28",
-        m: "29",
-        n: "30",
-        o: "31",
-        p: "32",
-        q: "33",
-        r: "34",
-        s: "35",
-        t: "36",
-        u: "37",
-        v: "38",
-        w: "39",
-        x: "40",
-        y: "41",
-        z: "42",
-        AB: "53",
-        BB: "54",
-        CB: "55",
-        DB: "56",
-        EB: "57",
-        FB: "58",
-        GB: "60",
-        HB: "63",
-        IB: "64",
-        JB: "65",
-        KB: "66",
-        LB: "67",
-        MB: "68",
-        NB: "69",
-        OB: "70",
-        PB: "71",
-        QB: "72",
-        RB: "73",
-        SB: "74",
-        TB: "75",
-        UB: "76",
-        VB: "11.1",
-        WB: "12.1",
-        XB: "3",
-        YB: "59",
-        ZB: "61",
-        aB: "77",
-        bB: "78",
-        cB: "3.2",
-        dB: "10.1",
-        eB: "11.5",
-        fB: "4.2-4.3",
-        gB: "5.5",
-        hB: "2",
-        iB: "82",
-        jB: "3.5",
-        kB: "3.6",
-        lB: "92",
-        mB: "93",
-        nB: "94",
-        oB: "3.1",
-        pB: "5.1",
-        qB: "6.1",
-        rB: "7.1",
-        sB: "9.1",
-        tB: "13.1",
-        uB: "14.1",
-        vB: "TP",
-        wB: "9.5-9.6",
-        xB: "10.0-10.1",
-        yB: "10.5",
-        zB: "10.6",
-        "0B": "11.6",
-        "1B": "4.0-4.1",
-        "2B": "5.0-5.1",
-        "3B": "6.0-6.1",
-        "4B": "7.0-7.1",
-        "5B": "8.1-8.4",
-        "6B": "9.0-9.2",
-        "7B": "9.3",
-        "8B": "10.0-10.2",
-        "9B": "10.3",
-        AC: "11.0-11.2",
-        BC: "11.3-11.4",
-        CC: "12.0-12.1",
-        DC: "12.2-12.4",
-        EC: "13.0-13.1",
-        FC: "13.2",
-        GC: "13.3",
-        HC: "13.4-13.7",
-        IC: "14.0-14.4",
-        JC: "14.5-14.6",
-        KC: "all",
-        LC: "2.1",
-        MC: "2.2",
-        NC: "2.3",
-        OC: "4.1",
-        PC: "4.4",
-        QC: "4.4.3-4.4.4",
-        RC: "12.12",
-        SC: "5.0-5.4",
-        TC: "6.2-6.4",
-        UC: "7.2-7.4",
-        VC: "8.2",
-        WC: "9.2",
-        XC: "11.1-11.2",
-        YC: "12.0",
-        ZC: "13.0",
-        aC: "14.0",
-        bC: "10.4",
-        cC: "7.12",
-        dC: "2.5"
-    };
+        browsers: {
+            A: "ie",
+            B: "edge",
+            C: "firefox",
+            D: "chrome",
+            E: "safari",
+            F: "opera",
+            G: "ios_saf",
+            H: "op_mini",
+            I: "android",
+            J: "bb",
+            K: "op_mob",
+            L: "and_chr",
+            M: "and_ff",
+            N: "ie_mob",
+            O: "and_uc",
+            P: "samsung",
+            Q: "and_qq",
+            R: "baidu",
+            S: "kaios"
+        }
+    }.browsers, ik = {
+        browserVersions: {
+            0: "43",
+            1: "44",
+            2: "45",
+            3: "46",
+            4: "47",
+            5: "48",
+            6: "49",
+            7: "50",
+            8: "51",
+            9: "52",
+            A: "10",
+            B: "11",
+            C: "12",
+            D: "7",
+            E: "8",
+            F: "9",
+            G: "90",
+            H: "4",
+            I: "6",
+            J: "13",
+            K: "14",
+            L: "15",
+            M: "16",
+            N: "17",
+            O: "18",
+            P: "87",
+            Q: "62",
+            R: "79",
+            S: "80",
+            T: "81",
+            U: "83",
+            V: "84",
+            W: "85",
+            X: "86",
+            Y: "88",
+            Z: "89",
+            a: "91",
+            b: "5",
+            c: "19",
+            d: "20",
+            e: "21",
+            f: "22",
+            g: "23",
+            h: "24",
+            i: "25",
+            j: "26",
+            k: "27",
+            l: "28",
+            m: "29",
+            n: "30",
+            o: "31",
+            p: "32",
+            q: "33",
+            r: "34",
+            s: "35",
+            t: "36",
+            u: "37",
+            v: "38",
+            w: "39",
+            x: "40",
+            y: "41",
+            z: "42",
+            AB: "53",
+            BB: "54",
+            CB: "55",
+            DB: "56",
+            EB: "57",
+            FB: "58",
+            GB: "60",
+            HB: "63",
+            IB: "64",
+            JB: "65",
+            KB: "66",
+            LB: "67",
+            MB: "68",
+            NB: "69",
+            OB: "70",
+            PB: "71",
+            QB: "72",
+            RB: "73",
+            SB: "74",
+            TB: "75",
+            UB: "76",
+            VB: "11.1",
+            WB: "12.1",
+            XB: "3",
+            YB: "59",
+            ZB: "61",
+            aB: "77",
+            bB: "78",
+            cB: "3.2",
+            dB: "10.1",
+            eB: "11.5",
+            fB: "4.2-4.3",
+            gB: "5.5",
+            hB: "2",
+            iB: "82",
+            jB: "3.5",
+            kB: "3.6",
+            lB: "92",
+            mB: "93",
+            nB: "94",
+            oB: "3.1",
+            pB: "5.1",
+            qB: "6.1",
+            rB: "7.1",
+            sB: "9.1",
+            tB: "13.1",
+            uB: "14.1",
+            vB: "TP",
+            wB: "9.5-9.6",
+            xB: "10.0-10.1",
+            yB: "10.5",
+            zB: "10.6",
+            "0B": "11.6",
+            "1B": "4.0-4.1",
+            "2B": "5.0-5.1",
+            "3B": "6.0-6.1",
+            "4B": "7.0-7.1",
+            "5B": "8.1-8.4",
+            "6B": "9.0-9.2",
+            "7B": "9.3",
+            "8B": "10.0-10.2",
+            "9B": "10.3",
+            AC: "11.0-11.2",
+            BC: "11.3-11.4",
+            CC: "12.0-12.1",
+            DC: "12.2-12.4",
+            EC: "13.0-13.1",
+            FC: "13.2",
+            GC: "13.3",
+            HC: "13.4-13.7",
+            IC: "14.0-14.4",
+            JC: "14.5-14.6",
+            KC: "all",
+            LC: "2.1",
+            MC: "2.2",
+            NC: "2.3",
+            OC: "4.1",
+            PC: "4.4",
+            QC: "4.4.3-4.4.4",
+            RC: "12.12",
+            SC: "5.0-5.4",
+            TC: "6.2-6.4",
+            UC: "7.2-7.4",
+            VC: "8.2",
+            WC: "9.2",
+            XC: "11.1-11.2",
+            YC: "12.0",
+            ZC: "13.0",
+            aC: "14.0",
+            bC: "10.4",
+            cC: "7.12",
+            dC: "2.5"
+        }
+    }.browserVersions;
     function ok(e) {
         return Object.keys(e).reduce((function(t, a) {
             return t[ik[a]] = e[a], t;
@@ -34229,11 +35371,18 @@ const StorageManager = (() => {
         return Tk(parseInt(e[0]), parseInt(t[0])) || Tk(parseInt(e[1] || "0"), parseInt(t[1] || "0")) || Tk(parseInt(e[2] || "0"), parseInt(t[2] || "0"));
     }
     function Pk(e, t) {
-        return "<=" === (void 0 === (t = t.split(".").map(Sk))[1] && (t[1] = "x"), e) ? function(e) {
-            return Fk(e = e.split(".").map(Sk), t) <= 0;
-        } : function(e) {
-            return Fk(e = e.split(".").map(Sk), t) >= 0;
-        };
+        switch (void 0 === (t = t.split(".").map(Sk))[1] && (t[1] = "x"), e) {
+          case "<=":
+            return function(e) {
+                return Fk(e = e.split(".").map(Sk), t) <= 0;
+            };
+
+          default:
+          case ">=":
+            return function(e) {
+                return Fk(e = e.split(".").map(Sk), t) >= 0;
+            };
+        }
     }
     function Fk(e, t) {
         return e[0] !== t[0] ? e[0] < t[0] ? -1 : 1 : "x" === t[1] ? 0 : e[1] !== t[1] ? e[1] < t[1] ? -1 : 1 : 0;
@@ -34265,7 +35414,7 @@ const StorageManager = (() => {
     function Bk(e, t) {
         if (e = e.toLowerCase(), e = Gk.aliases[e] || e, t.mobileToDesktop && Gk.desktopNames[e]) {
             var a = Gk.data[Gk.desktopNames[e]];
-            if ("android" === e) return s = a, (r = Ik(Gk.data[e])).released = Ok(r.released, s.released), 
+            if ("android" === e) return r = Ik(Gk.data[e]), s = a, r.released = Ok(r.released, s.released), 
             r.versions = Ok(r.versions, s.versions), r;
             var n = Ik(a);
             return n.name = e, "op_mob" === e && (n = function(e, t) {
@@ -34317,20 +35466,26 @@ const StorageManager = (() => {
                         var a = e.split(" ");
                         return "0" === a[1] ? a[0] + " " + Bk(a[0], t).versions[0] : e;
                     }));
-                    if (2 === a.type) return s ? e.filter((function(e) {
-                        return -1 === l.indexOf(e);
-                    })) : e.filter((function(e) {
-                        return -1 !== l.indexOf(e);
-                    }));
-                    if (s) {
-                        var c = {};
-                        return l.forEach((function(e) {
-                            c[e] = !0;
-                        })), e.filter((function(e) {
-                            return !c[e];
+                    switch (a.type) {
+                      case 2:
+                        return s ? e.filter((function(e) {
+                            return -1 === l.indexOf(e);
+                        })) : e.filter((function(e) {
+                            return -1 !== l.indexOf(e);
                         }));
+
+                      case 1:
+                      default:
+                        if (s) {
+                            var c = {};
+                            return l.forEach((function(e) {
+                                c[e] = !0;
+                            })), e.filter((function(e) {
+                                return !c[e];
+                            }));
+                        }
+                        return e.concat(l);
                     }
-                    return e.concat(l);
                 }
             }
             throw Lk(r);
@@ -34338,8 +35493,11 @@ const StorageManager = (() => {
     }
     var Uk = {};
     function Gk(e, t) {
-        (void 0 === t && (t = {}), void 0 === t.path && (t.path = mk.resolve ? mk.resolve(".") : "."), 
-        null == e) && (e = Gk.loadConfig(t) || Gk.defaults);
+        if (void 0 === t && (t = {}), void 0 === t.path && (t.path = mk.resolve ? mk.resolve(".") : "."), 
+        null == e) {
+            var a = Gk.loadConfig(t);
+            e = a || Gk.defaults;
+        }
         if ("string" != typeof e && !Array.isArray(e)) throw new gk("Browser queries must be an array or string. Got " + typeof e + ".");
         var n = {
             ignoreUnknownVersions: t.ignoreUnknownVersions,
@@ -34370,7 +35528,9 @@ const StorageManager = (() => {
     function Vk(e, t) {
         var a = /^(?:,\s*|\s+or\s+)(.*)/i, n = /^\s+and\s+(.*)/i;
         return function(e, t) {
-            for (var a = 1, n = e.length; a <= n; a++) if (t(e.substr(-a, a), a, n)) return e.slice(0, -a);
+            for (var a = 1, n = e.length; a <= n; a++) {
+                if (t(e.substr(-a, a), a, n)) return e.slice(0, -a);
+            }
             return "";
         }(e, (function(e, r, s) {
             return n.test(e) ? (t.unshift({
@@ -34826,7 +35986,24 @@ const StorageManager = (() => {
         }, t.formatMessage = function(e) {
             return this.descriptor + ": " + e;
         }, e;
-    }(), tI = {
+    }(), eI = {
+        "es6.module": {
+            chrome: "61",
+            and_chr: "61",
+            edge: "16",
+            firefox: "60",
+            and_ff: "60",
+            node: "13.2.0",
+            opera: "48",
+            op_mob: "48",
+            safari: "10.1",
+            ios: "10.3",
+            samsung: "8.2",
+            android: "61",
+            electron: "2.0",
+            ios_saf: "10.3"
+        }
+    }, tI = {
         safari: "tp"
     }, aI = {
         and_chr: "chrome",
@@ -35363,8 +36540,8 @@ const StorageManager = (() => {
     };
     function hI(e, t, a) {
         var n, r, s, i = void 0 === a ? {} : a, o = i.compatData, d = void 0 === o ? fI : o, u = i.includes, l = i.excludes;
-        return !(null != l && l.has(e) || (null == u || !u.has(e)) && (n = t, r = d[e], 
-        0 !== (s = Object.keys(n)).length && 0 === s.filter((function(e) {
+        return (null == l || !l.has(e)) && (!(null == u || !u.has(e)) || (n = t, r = d[e], 
+        !(0 !== (s = Object.keys(n)).length && 0 === s.filter((function(e) {
             var t = uI(r, e);
             if (!t) return !0;
             var a = n[e];
@@ -35372,24 +36549,9 @@ const StorageManager = (() => {
             if (oI(t, e)) return !0;
             if (!vF.valid(a.toString())) throw new Error('Invalid version passed for target "' + e + '": "' + a + '". Versions must be in semver format (major.minor.patch)');
             return vF.gt(iI(t), a.toString());
-        })).length));
+        })).length)));
     }
-    var mI = {
-        chrome: "61",
-        and_chr: "61",
-        edge: "16",
-        firefox: "60",
-        and_ff: "60",
-        node: "13.2.0",
-        opera: "48",
-        op_mob: "48",
-        safari: "10.1",
-        ios: "10.3",
-        samsung: "8.2",
-        android: "61",
-        electron: "2.0",
-        ios_saf: "10.3"
-    }, yI = new Zk("@babel/helper-compilation-targets");
+    var mI = eI["es6.module"], yI = new Zk("@babel/helper-compilation-targets");
     function RI(e) {
         return "string" == typeof e || Array.isArray(e) && e.every((function(e) {
             return "string" == typeof e;
@@ -35410,6 +36572,27 @@ const StorageManager = (() => {
             return [ e, !0 === t || "current" === t ? la.versions.node : bI(e, t) ];
         }
     };
+    function xI(e, t) {
+        return function(e) {
+            return e.reduce((function(e, t) {
+                var a = D(t.split(" "), 2), n = a[0], r = a[1], s = aI[n];
+                if (!s) return e;
+                try {
+                    var i = r.split("-")[0].toLowerCase(), o = oI(i, n);
+                    if (!e[s]) return e[s] = o ? i : iI(i), e;
+                    var d = e[s], u = oI(d, n);
+                    if (u && o) e[s] = dI(d, i, n); else if (u) e[s] = iI(i); else if (!u && !o) {
+                        var l = iI(i);
+                        e[s] = sI(d, l);
+                    }
+                } catch (e) {}
+                return e;
+            }), {});
+        }(Jk(e, {
+            mobileToDesktop: !0,
+            env: t
+        }));
+    }
     function EI(e, t) {
         var a;
         void 0 === e && (e = {}), void 0 === t && (t = {});
@@ -35434,30 +36617,10 @@ const StorageManager = (() => {
         })) && (r = []), !s || "intersect" === s && null != (a = r) && a.length || (r = Object.keys(mI).map((function(e) {
             return e + " >= " + mI[e];
         })).join(", "), s = !1), r) {
-            var g = function(e, t) {
-                return function(e) {
-                    return e.reduce((function(e, t) {
-                        var a = D(t.split(" "), 2), n = a[0], r = a[1], s = aI[n];
-                        if (!s) return e;
-                        try {
-                            var i = r.split("-")[0].toLowerCase(), o = oI(i, n);
-                            if (!e[s]) return e[s] = o ? i : iI(i), e;
-                            var d = e[s], u = oI(d, n);
-                            if (u && o) e[s] = dI(d, i, n); else if (u) e[s] = iI(i); else if (!u && !o) {
-                                var l = iI(i);
-                                e[s] = sI(d, l);
-                            }
-                        } catch (e) {}
-                        return e;
-                    }), {});
-                }(Jk(e, {
-                    mobileToDesktop: !0,
-                    env: t
-                }));
-            }(r, t.browserslistEnv);
+            var g = xI(r, t.browserslistEnv);
             if ("intersect" === s) for (var f = 0, h = Object.keys(g); f < h.length; f++) {
                 var m = h[f], y = g[m];
-                mI[m] ? g[m] = dI(d = y, u = iI(mI[m]), m) === d ? u : d : delete g[m];
+                mI[m] ? g[m] = (d = y, u = iI(mI[m]), dI(d, u, m) === d ? u : d) : delete g[m];
             }
             l = Object.assign(g, l);
         }
@@ -36076,7 +37239,7 @@ const StorageManager = (() => {
             var a = e.parent, n = nB(e, t);
             if (n) for (var r = 0, s = Object.keys(n); r < s.length; r++) {
                 var i = s[r], o = nB(QI(e, i), n[i]);
-                o && vB({
+                if (o) vB({
                     type: "env",
                     name: i,
                     parent: a
@@ -36189,10 +37352,10 @@ const StorageManager = (() => {
             return "**" === e ? n ? PB : jB : "*" === e ? n ? TB : SB : 0 === e.indexOf("*.") ? CB + FB(e.slice(1)) + (n ? wB : AB) : FB(e) + (n ? wB : AB);
         })))).join(""));
     }
-    var BB = {
+    var kB = 0, IB = 1, BB = {
         title: function(e, t, a) {
             var n = "";
-            return 0 === e ? (n = "programmatic options", t && (n += " from " + t)) : n = "config " + a, 
+            return e === kB ? (n = "programmatic options", t && (n += " from " + t)) : n = "config " + a, 
             n;
         },
         loc: function(e, t) {
@@ -36523,9 +37686,10 @@ const StorageManager = (() => {
         createLogger: function(e, t, a) {
             return function(e, t, a) {
                 var n;
-                return a ? a.configure(t.showConfig, 0, {
+                if (!a) return function() {};
+                return a.configure(t.showConfig, kB, {
                     callerName: null == (n = t.caller) ? void 0 : n.name
-                }) : function() {};
+                });
             }(0, t, a);
         }
     }), aO = pO({
@@ -36543,9 +37707,10 @@ const StorageManager = (() => {
         },
         createLogger: function(e, t, a) {
             return function(e, t, a) {
-                return a ? a.configure(t.showConfig, 1, {
+                if (!a) return function() {};
+                return a.configure(t.showConfig, IB, {
                     filepath: e
-                }) : function() {};
+                });
             }(e.filepath, t, a);
         }
     });
@@ -36904,6 +38069,8 @@ const StorageManager = (() => {
     function PO(e, t) {
         switch (t) {
           case "root":
+            return e;
+
           case "upward-optional":
             return e;
 
@@ -37941,7 +39108,7 @@ const StorageManager = (() => {
             var s = r.syntax, i = r.transform;
             if (s) {
                 var o = mN(s);
-                n += i ? "\n\nAdd " + mN(i) + " to the '" + (i.name.startsWith("@babel/plugin") ? "plugins" : "presets") + "' section of your Babel config to enable transformation.\nIf you want to leave it as-is, add " + o + " to the 'plugins' section to enable parsing." : "\n\nAdd " + o + " to the 'plugins' section of your Babel config to enable parsing.";
+                if (i) n += "\n\nAdd " + mN(i) + " to the '" + (i.name.startsWith("@babel/plugin") ? "plugins" : "presets") + "' section of your Babel config to enable transformation.\nIf you want to leave it as-is, add " + o + " to the 'plugins' section to enable parsing."; else n += "\n\nAdd " + o + " to the 'plugins' section of your Babel config to enable parsing.";
             }
         }
         return n;
@@ -38087,6 +39254,82 @@ const StorageManager = (() => {
             t.trailingComments = s[0], a = s[1];
         })), a;
     }
+    function _N(e, t) {
+        for (var a, n = IN(e), r = IN(t), s = new tg.SourceMapGenerator, i = S(n.sources); !(a = i()).done; ) {
+            var o = a.value.source;
+            "string" == typeof o.content && s.setSourceContent(o.path, o.content);
+        }
+        if (1 === r.sources.length) {
+            var d = r.sources[0], u = new Map;
+            !function(e, t) {
+                for (var a, n = S(e.sources); !(a = n()).done; ) for (var r, s = a.value, i = s.source, o = S(s.mappings); !(r = o()).done; ) for (var d, u = r.value, l = u.original, c = S(u.generated); !(d = c()).done; ) {
+                    t(d.value, l, i);
+                }
+            }(n, (function(e, t, a) {
+                !function(e, t, a) {
+                    for (var n, r = S(function(e, t) {
+                        var a = e.mappings, n = t.line, r = t.columnStart, s = t.columnEnd;
+                        return function(e, t) {
+                            for (var a = function(e, t) {
+                                var a = 0, n = e.length;
+                                for (;a < n; ) {
+                                    var r = Math.floor((a + n) / 2), s = t(e[r]);
+                                    if (0 === s) {
+                                        a = r;
+                                        break;
+                                    }
+                                    s >= 0 ? n = r : a = r + 1;
+                                }
+                                var i = a;
+                                if (i < e.length) {
+                                    for (;i >= 0 && t(e[i]) >= 0; ) i--;
+                                    return i + 1;
+                                }
+                                return i;
+                            }(e, t), n = [], r = a; r < e.length && 0 === t(e[r]); r++) n.push(e[r]);
+                            return n;
+                        }(a, (function(e) {
+                            var t = e.original;
+                            return n > t.line ? -1 : n < t.line ? 1 : r >= t.columnEnd ? -1 : s <= t.columnStart ? 1 : 0;
+                        }));
+                    }(e, t)); !(n = r()).done; ) for (var s, i = S(n.value.generated); !(s = i()).done; ) {
+                        a(s.value);
+                    }
+                }(d, e, (function(e) {
+                    var n = kN(e);
+                    u.has(n) || (u.set(n, e), s.addMapping({
+                        source: a.path,
+                        original: {
+                            line: t.line,
+                            column: t.columnStart
+                        },
+                        generated: {
+                            line: e.line,
+                            column: e.columnStart
+                        },
+                        name: t.name
+                    }));
+                }));
+            }));
+            for (var l, c = S(u.values()); !(l = c()).done; ) {
+                var p = l.value;
+                if (p.columnEnd !== 1 / 0) {
+                    var g = {
+                        line: p.line,
+                        columnStart: p.columnEnd
+                    }, f = kN(g);
+                    u.has(f) || s.addMapping({
+                        generated: {
+                            line: g.line,
+                            column: g.columnStart
+                        }
+                    });
+                }
+            }
+        }
+        var h = s.toJSON();
+        return "string" == typeof n.sourceRoot && (h.sourceRoot = n.sourceRoot), h;
+    }
     function kN(e) {
         return e.line + "/" + e.columnStart;
     }
@@ -38150,77 +39393,7 @@ const StorageManager = (() => {
             if ("function" == typeof (n = d[0]).then) throw new Error("You appear to be using an async codegen plugin, which your current version of Babel does not support. If you're using a published plugin, you may need to upgrade your @babel/core version.");
         }
         var f = n, h = f.code, m = f.map;
-        return m && o && (m = function(e, t) {
-            for (var a, n = IN(e), r = IN(t), s = new tg.SourceMapGenerator, i = S(n.sources); !(a = i()).done; ) {
-                var o = a.value.source;
-                "string" == typeof o.content && s.setSourceContent(o.path, o.content);
-            }
-            if (1 === r.sources.length) {
-                var d = r.sources[0], u = new Map;
-                !function(e, t) {
-                    for (var a, n = S(e.sources); !(a = n()).done; ) for (var r, s = a.value, i = s.source, o = S(s.mappings); !(r = o()).done; ) for (var d, u = r.value, l = u.original, c = S(u.generated); !(d = c()).done; ) t(d.value, l, i);
-                }(n, (function(e, t, a) {
-                    !function(e, t, a) {
-                        for (var n, r = S(function(e, t) {
-                            var a = e.mappings, n = t.line, r = t.columnStart, s = t.columnEnd;
-                            return function(e, t) {
-                                for (var a = function(e, t) {
-                                    for (var a = 0, n = e.length; a < n; ) {
-                                        var r = Math.floor((a + n) / 2), s = t(e[r]);
-                                        if (0 === s) {
-                                            a = r;
-                                            break;
-                                        }
-                                        s >= 0 ? n = r : a = r + 1;
-                                    }
-                                    var i = a;
-                                    if (i < e.length) {
-                                        for (;i >= 0 && t(e[i]) >= 0; ) i--;
-                                        return i + 1;
-                                    }
-                                    return i;
-                                }(e, t), n = [], r = a; r < e.length && 0 === t(e[r]); r++) n.push(e[r]);
-                                return n;
-                            }(a, (function(e) {
-                                var t = e.original;
-                                return n > t.line ? -1 : n < t.line ? 1 : r >= t.columnEnd ? -1 : s <= t.columnStart ? 1 : 0;
-                            }));
-                        }(e, t)); !(n = r()).done; ) for (var s, i = S(n.value.generated); !(s = i()).done; ) a(s.value);
-                    }(d, e, (function(e) {
-                        var n = kN(e);
-                        u.has(n) || (u.set(n, e), s.addMapping({
-                            source: a.path,
-                            original: {
-                                line: t.line,
-                                column: t.columnStart
-                            },
-                            generated: {
-                                line: e.line,
-                                column: e.columnStart
-                            },
-                            name: t.name
-                        }));
-                    }));
-                }));
-                for (var l, c = S(u.values()); !(l = c()).done; ) {
-                    var p = l.value;
-                    if (p.columnEnd !== 1 / 0) {
-                        var g = {
-                            line: p.line,
-                            columnStart: p.columnEnd
-                        }, f = kN(g);
-                        u.has(f) || s.addMapping({
-                            generated: {
-                                line: g.line,
-                                column: g.columnStart
-                            }
-                        });
-                    }
-                }
-            }
-            var h = s.toJSON();
-            return "string" == typeof n.sourceRoot && (h.sourceRoot = n.sourceRoot), h;
-        }(o.toObject(), m)), "inline" !== r.sourceMaps && "both" !== r.sourceMaps || (h += "\n" + fN.fromObject(m).toComment()), 
+        return m && o && (m = _N(o.toObject(), m)), "inline" !== r.sourceMaps && "both" !== r.sourceMaps || (h += "\n" + fN.fromObject(m).toComment()), 
         "inline" === r.sourceMaps && (m = null), {
             outputCode: h,
             outputMap: m
@@ -38477,8 +39650,10 @@ const StorageManager = (() => {
                     }
                     if ("string" != typeof e) throw new Error("Expected string or integer value.");
                     var a, n = Error.stackTraceLimit;
-                    throw "number" == typeof n && n < 25 && (Error.stackTraceLimit = 25), a = "7." === t.slice(0, 2) ? new Error('Requires Babel "^7.0.0-beta.41", but was loaded with "' + t + "\". You'll need to update your @babel/core version.") : new Error('Requires Babel "' + e + '", but was loaded with "' + t + '". If you are sure you have a compatible version of @babel/core, it is likely that something in your build process is loading the wrong version. Inspect the stack trace of this error to look for the first entry that doesn\'t mention "@babel/core" or "babel-core" to see what is calling Babel.'), 
-                    "number" == typeof n && (Error.stackTraceLimit = n), Object.assign(a, {
+                    "number" == typeof n && n < 25 && (Error.stackTraceLimit = 25);
+                    a = "7." === t.slice(0, 2) ? new Error('Requires Babel "^7.0.0-beta.41", but was loaded with "' + t + "\". You'll need to update your @babel/core version.") : new Error('Requires Babel "' + e + '", but was loaded with "' + t + '". If you are sure you have a compatible version of @babel/core, it is likely that something in your build process is loading the wrong version. Inspect the stack trace of this error to look for the first entry that doesn\'t mention "@babel/core" or "babel-core" to see what is calling Babel.');
+                    "number" == typeof n && (Error.stackTraceLimit = n);
+                    throw Object.assign(a, {
                         code: "BABEL_VERSION_UNSUPPORTED",
                         version: t,
                         range: e
@@ -38830,7 +40005,7 @@ const StorageManager = (() => {
         }(e);
         e.node.async = !1, e.node.generator = !0, KL(e, JL(t.wrapAsync), a), e.isObjectMethod() || e.isClassMethod() || e.parentPath.isObjectProperty() || e.parentPath.isClassProperty() || n || !e.isExpression() || XL(e);
     }
-    var rM, sM, iM, oM, dM, uM, lM, cM, pM, gM, fM, hM, mM, yM, RM, bM, vM, xM, EM, aM = r((function(e, t) {
+    var aM = r((function(e, t) {
         Object.defineProperty(t, "__esModule", {
             value: !0
         }), t.default = void 0;
@@ -38843,7 +40018,8 @@ const StorageManager = (() => {
             };
         }));
         t.default = a;
-    }), "/$$rollup_base$$/packages/babel-plugin-proposal-async-generator-functions/node_modules/@babel/plugin-syntax-async-generators/lib"), nM = AE("\n  async function wrapper() {\n    var ITERATOR_ABRUPT_COMPLETION = false;\n    var ITERATOR_HAD_ERROR_KEY = false;\n    var ITERATOR_ERROR_KEY;\n    try {\n      for (\n        var ITERATOR_KEY = GET_ITERATOR(OBJECT), STEP_KEY;\n        ITERATOR_ABRUPT_COMPLETION = !(STEP_KEY = await ITERATOR_KEY.next()).done;\n        ITERATOR_ABRUPT_COMPLETION = false\n      ) {\n      }\n    } catch (err) {\n      ITERATOR_HAD_ERROR_KEY = true;\n      ITERATOR_ERROR_KEY = err;\n    } finally {\n      try {\n        if (ITERATOR_ABRUPT_COMPLETION && ITERATOR_KEY.return != null) {\n          await ITERATOR_KEY.return();\n        }\n      } finally {\n        if (ITERATOR_HAD_ERROR_KEY) {\n          throw ITERATOR_ERROR_KEY;\n        }\n      }\n    }\n  }\n"), DM = iL((function(e) {
+    }), "/$$rollup_base$$/packages/babel-plugin-proposal-async-generator-functions/node_modules/@babel/plugin-syntax-async-generators/lib"), nM = AE("\n  async function wrapper() {\n    var ITERATOR_ABRUPT_COMPLETION = false;\n    var ITERATOR_HAD_ERROR_KEY = false;\n    var ITERATOR_ERROR_KEY;\n    try {\n      for (\n        var ITERATOR_KEY = GET_ITERATOR(OBJECT), STEP_KEY;\n        ITERATOR_ABRUPT_COMPLETION = !(STEP_KEY = await ITERATOR_KEY.next()).done;\n        ITERATOR_ABRUPT_COMPLETION = false\n      ) {\n      }\n    } catch (err) {\n      ITERATOR_HAD_ERROR_KEY = true;\n      ITERATOR_ERROR_KEY = err;\n    } finally {\n      try {\n        if (ITERATOR_ABRUPT_COMPLETION && ITERATOR_KEY.return != null) {\n          await ITERATOR_KEY.return();\n        }\n      } finally {\n        if (ITERATOR_HAD_ERROR_KEY) {\n          throw ITERATOR_ERROR_KEY;\n        }\n      }\n    }\n  }\n");
+    var rM, sM, iM, oM, dM, uM, lM, cM, pM, gM, fM, hM, mM, yM, RM, bM, vM, xM, EM, DM = iL((function(e) {
         e.assertVersion(7);
         var t = {
             Function: function(e) {
@@ -38997,7 +40173,7 @@ const StorageManager = (() => {
         set: function(e, t) {
             var a = this.classRef, n = this.privateNamesMap, r = this.file, s = e.node.property.id.name, i = n.get(s), o = i.id, d = i.static, u = i.method, l = i.setId, c = i.getId;
             if (d) {
-                var p = !u || c || l ? "classStaticPrivateFieldSpecSet" : "classStaticPrivateMethodSet";
+                var p = u && !(c || l) ? "classStaticPrivateMethodSet" : "classStaticPrivateFieldSpecSet";
                 return gr(r.addHelper(p), [ this.receiver(e), tu(a), tu(o), t ]);
             }
             return u ? l ? gr(r.addHelper("classPrivateFieldSet"), [ this.receiver(e), tu(o), t ]) : Wr([ this.receiver(e), t, gr(r.addHelper("readOnlyError"), [ jr("#" + s) ]) ]) : gr(r.addHelper("classPrivateFieldSet"), [ this.receiver(e), tu(o), t ]);
@@ -39184,7 +40360,7 @@ const StorageManager = (() => {
             file: this,
             refToPreserve: e
         }).replace();
-        var o, d = [ JM("kind", jr(_e(n) ? n.kind : "field")), JM("decorators", YM(n)), JM("static", n.static && _r(!0)), JM("key", QM(n)) ].filter(Boolean);
+        var i, o, d = [ JM("kind", jr(_e(n) ? n.kind : "field")), JM("decorators", YM(n)), JM("static", n.static && _r(!0)), JM("key", QM(n)) ].filter(Boolean);
         if (_e(n)) {
             var u = n.computed ? null : n.key;
             dl(n), d.push(JM("value", WE({
@@ -39192,8 +40368,8 @@ const StorageManager = (() => {
                 id: u,
                 scope: r
             }) || n));
-        } else He(n) && n.value ? d.push(("value", o = AE.statements.ast($M || ($M = E([ "return ", "" ])), n.value), 
-        Mr("method", Cr("value"), [], cr(o)))) : d.push(JM("value", r.buildUndefinedNode()));
+        } else He(n) && n.value ? d.push((i = "value", o = AE.statements.ast($M || ($M = E([ "return ", "" ])), n.value), 
+        Mr("method", Cr(i), [], cr(o)))) : d.push(JM("value", r.buildUndefinedNode()));
         return a.remove(), Lr(d);
     }
     var e$ = UA.visitors.merge([ {
@@ -40245,6 +41421,73 @@ const StorageManager = (() => {
             OFFSET: Pr(a)
         })) : e.replaceWith(t);
     }
+    function mU(e) {
+        var t, a = e.node, n = e.scope;
+        if (!function(e) {
+            var t = e.params.length;
+            return t > 0 && se(e.params[t - 1]);
+        }(a)) return !1;
+        var r = a.params.pop().argument, s = Cr("arguments");
+        if (Jt(r)) {
+            var i = Qr("let", [ Zr(r, r = n.generateUidIdentifier("ref")) ]);
+            a.body.body.unshift(i);
+        }
+        var o = function(e) {
+            var t = e.params.length;
+            return t > 0 && H(e.params[0], {
+                name: "this"
+            }) && (t -= 1), t;
+        }(a), d = {
+            references: [],
+            offset: o,
+            argumentsNode: s,
+            outerBinding: n.getBindingIdentifier(r.name),
+            candidates: [],
+            name: r.name,
+            deopted: !1
+        };
+        if (e.traverse(gU, d), !d.deopted && !d.references.length) {
+            for (var u = 0, l = d.candidates; u < l.length; u++) {
+                var c = l[u], p = c.path, g = c.cause, f = tu(s);
+                switch (g) {
+                  case "indexGetter":
+                    fU(p, f, d.offset);
+                    break;
+
+                  case "lengthGetter":
+                    hU(p, f, d.offset);
+                    break;
+
+                  default:
+                    p.replaceWith(f);
+                }
+            }
+            return !0;
+        }
+        (t = d.references).push.apply(t, A(d.candidates.map((function(e) {
+            return e.path;
+        }))));
+        var h, m, y = Pr(o), R = n.generateUidIdentifier("key"), b = n.generateUidIdentifier("len");
+        o ? (h = or("-", tu(R), tu(y)), m = hr(or(">", tu(b), tu(y)), or("-", tu(b), tu(y)), Pr(0))) : (h = Cr(R.name), 
+        m = Cr(b.name));
+        var v = dU({
+            ARGUMENTS: s,
+            ARRAY_KEY: h,
+            ARRAY_LEN: m,
+            START: y,
+            ARRAY: r,
+            KEY: R,
+            LEN: b
+        });
+        if (d.deopted) a.body.body.unshift(v); else {
+            var x = e.getEarliestCommonAncestorFrom(d.references).getStatementParent();
+            x.findParent((function(e) {
+                if (!e.isLoop()) return e.isFunction();
+                x = e;
+            })), x.insertBefore(v);
+        }
+        return !0;
+    }
     var yU = iL((function(e, t) {
         var a;
         e.assertVersion(7);
@@ -40258,73 +41501,7 @@ const StorageManager = (() => {
                     })) && e.arrowFunctionToExpression({
                         noNewArrows: r
                     });
-                    var t = function(e) {
-                        var t, a = e.node, n = e.scope;
-                        if (!function(e) {
-                            var t = e.params.length;
-                            return t > 0 && se(e.params[t - 1]);
-                        }(a)) return !1;
-                        var r = a.params.pop().argument, s = Cr("arguments");
-                        if (Jt(r)) {
-                            var i = Qr("let", [ Zr(r, r = n.generateUidIdentifier("ref")) ]);
-                            a.body.body.unshift(i);
-                        }
-                        var o = function(e) {
-                            var t = e.params.length;
-                            return t > 0 && H(e.params[0], {
-                                name: "this"
-                            }) && (t -= 1), t;
-                        }(a), d = {
-                            references: [],
-                            offset: o,
-                            argumentsNode: s,
-                            outerBinding: n.getBindingIdentifier(r.name),
-                            candidates: [],
-                            name: r.name,
-                            deopted: !1
-                        };
-                        if (e.traverse(gU, d), !d.deopted && !d.references.length) {
-                            for (var u = 0, l = d.candidates; u < l.length; u++) {
-                                var c = l[u], p = c.path, g = c.cause, f = tu(s);
-                                switch (g) {
-                                  case "indexGetter":
-                                    fU(p, f, d.offset);
-                                    break;
-
-                                  case "lengthGetter":
-                                    hU(p, f, d.offset);
-                                    break;
-
-                                  default:
-                                    p.replaceWith(f);
-                                }
-                            }
-                            return !0;
-                        }
-                        (t = d.references).push.apply(t, A(d.candidates.map((function(e) {
-                            return e.path;
-                        }))));
-                        var h, m, y = Pr(o), R = n.generateUidIdentifier("key"), b = n.generateUidIdentifier("len");
-                        o ? (h = or("-", tu(R), tu(y)), m = hr(or(">", tu(b), tu(y)), or("-", tu(b), tu(y)), Pr(0))) : (h = Cr(R.name), 
-                        m = Cr(b.name));
-                        var v = dU({
-                            ARGUMENTS: s,
-                            ARRAY_KEY: h,
-                            ARRAY_LEN: m,
-                            START: y,
-                            ARRAY: r,
-                            KEY: R,
-                            LEN: b
-                        });
-                        if (d.deopted) a.body.body.unshift(v); else {
-                            var x = e.getEarliestCommonAncestorFrom(d.references).getStatementParent();
-                            x.findParent((function(e) {
-                                if (!e.isLoop()) return e.isFunction();
-                                x = e;
-                            })), x.insertBefore(v);
-                        }
-                        return !0;
-                    }(e), a = oU(e, n);
+                    var t = mU(e), a = oU(e, n);
                     (t || a) && e.scope.crawl();
                 }
             }
@@ -42222,9 +43399,11 @@ const StorageManager = (() => {
                             "ReferencedIdentifier|BindingIdentifier": p
                         }, e.scope));
                     }
-                    if (l) oU(e, c, (function(e) {
-                        return e >= u - 1 || a.has(e);
-                    }), x); else for (var f = 0; f < t.length; ++f) {
+                    if (l) {
+                        oU(e, c, (function(e) {
+                            return e >= u - 1 || a.has(e);
+                        }), x);
+                    } else for (var f = 0; f < t.length; ++f) {
                         var h = t[f];
                         a.has(f) && x(h.parentPath, h);
                     }
@@ -43105,7 +44284,7 @@ const StorageManager = (() => {
                         }
                         if (J && m("-")) return d("singleEscape", 45, "\\-");
                     }
-                    return P() || _();
+                    return t = P() || _();
                 }
                 function P() {
                     var e;
@@ -43721,9 +44900,10 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), zG = AE('\n  if (typeof RETURN === "object") return RETURN.v;\n');
+    }));
+    var zG = AE('\n  if (typeof RETURN === "object") return RETURN.v;\n');
     function JG(e) {
-        return !(!fe(e) || !e[Ya] && "let" !== e.kind && "const" !== e.kind);
+        return !!fe(e) && (!!e[Ya] || ("let" === e.kind || "const" === e.kind));
     }
     function YG(e) {
         var t = e.find((function(e) {
@@ -43793,7 +44973,8 @@ const StorageManager = (() => {
                 t.outsideReferences.get(r) === e.scope.getBindingIdentifier(r) && (t.reassignments[r] = !0);
             } else e.isReturnStatement() && t.returnStatements.push(e);
         }
-    }, sW = {
+    };
+    var sW = {
         Loop: function(e, t) {
             var a = t.ignoreLabeless;
             t.ignoreLabeless = !0, e.traverse(sW, t), t.ignoreLabeless = a, e.skip();
@@ -44042,6 +45223,290 @@ const StorageManager = (() => {
         var n = Ar(tu(e), [], t);
         return xl(n, a), n;
     }
+    function fW(e, t, a, n, r) {
+        var s = {
+            parent: void 0,
+            scope: void 0,
+            node: void 0,
+            path: void 0,
+            file: void 0,
+            classId: void 0,
+            classRef: void 0,
+            superFnId: void 0,
+            superName: void 0,
+            superReturns: [],
+            isDerived: !1,
+            extendsNative: !1,
+            construct: void 0,
+            constructorBody: void 0,
+            userConstructor: void 0,
+            userConstructorPath: void 0,
+            hasConstructor: !1,
+            staticPropBody: [],
+            body: [],
+            superThises: [],
+            pushedConstructor: !1,
+            pushedInherits: !1,
+            protoAlias: null,
+            isLoose: !1,
+            dynamicKeys: new Map,
+            methods: {
+                instance: {
+                    hasComputed: !1,
+                    list: [],
+                    map: new Map
+                },
+                static: {
+                    hasComputed: !1,
+                    list: [],
+                    map: new Map
+                }
+            }
+        }, i = function(e) {
+            Object.assign(s, e);
+        }, o = UA.visitors.merge([ dT, {
+            ThisExpression: function(e) {
+                s.superThises.push(e);
+            }
+        } ]);
+        function d() {
+            if (function() {
+                for (var e, t = !1, a = S(s.path.get("body.body")); !(e = a()).done && !(t = e.value.equals("kind", "constructor")); ) ;
+                if (!t) {
+                    var n, r;
+                    if (s.isDerived) {
+                        var i = AE.expression.ast(cW || (cW = E([ "\n        (function () {\n          super(...arguments);\n        })\n      " ])));
+                        n = i.params, r = i.body;
+                    } else n = [], r = cr([]);
+                    s.path.get("body").unshiftContainer("body", Rs("constructor", Cr("constructor"), n, r));
+                }
+            }(), function() {
+                for (var e, t = S(s.path.get("body.body")); !(e = t()).done; ) {
+                    var a = e.value, n = a.node;
+                    if (a.isClassProperty()) throw a.buildCodeFrameError("Missing class properties transform.");
+                    if (n.decorators) throw a.buildCodeFrameError("Method has decorators, put the decorator plugin before the classes one.");
+                    _e(n) && function() {
+                        var e = "constructor" === n.kind;
+                        new gT({
+                            methodPath: a,
+                            objectRef: s.classRef,
+                            superRef: s.superName,
+                            constantSuper: r.constantSuper,
+                            file: s.file,
+                            refToPreserve: s.classRef
+                        }).replace();
+                        var t = [];
+                        a.traverse(UA.visitors.merge([ dT, {
+                            ReturnStatement: function(e) {
+                                e.getFunctionParent().isArrowFunctionExpression() || t.push(e);
+                            }
+                        } ])), e ? p(t, n, a) : c(n, a);
+                    }();
+                }
+            }(), function() {
+                if (!s.isDerived) return;
+                var e = s.userConstructorPath, t = e.get("body");
+                e.traverse(o);
+                for (var a, n = function() {
+                    var t = e.scope.generateDeclaredUidIdentifier("this");
+                    return n = function() {
+                        return tu(t);
+                    }, t;
+                }, r = S(s.superThises); !(a = r()).done; ) {
+                    var i = a.value, d = i.node;
+                    i.parentPath.isMemberExpression({
+                        object: d
+                    }) ? i.replaceWith(n()) : i.replaceWith(gr(s.file.addHelper("assertThisInitialized"), [ n() ]));
+                }
+                var u = new Set;
+                e.traverse(UA.visitors.merge([ dT, {
+                    Super: function(e) {
+                        var t = e.node, a = e.parentPath;
+                        a.isCallExpression({
+                            callee: t
+                        }) && u.add(a);
+                    }
+                } ]));
+                for (var c, p, g = !!u.size, f = S(u); !(c = f()).done; ) {
+                    var h = c.value;
+                    l(h, s.superName, n, t), g && h.find((function(t) {
+                        return t === e || (t.isLoop() || t.isConditional() || t.isArrowFunctionExpression() ? (g = !1, 
+                        !0) : void 0);
+                    }));
+                }
+                p = s.isLoose ? function(e) {
+                    var t = gr(s.file.addHelper("assertThisInitialized"), [ n() ]);
+                    return e ? Ir("||", e, t) : t;
+                } : function(e) {
+                    return gr(s.file.addHelper("possibleConstructorReturn"), [ n() ].concat(e || []));
+                };
+                var m = t.get("body");
+                m.length && m.pop().isReturnStatement() || t.pushContainer("body", Gr(g ? n() : p()));
+                for (var y, R = S(s.superReturns); !(y = R()).done; ) {
+                    var b = y.value;
+                    b.get("argument").replaceWith(p(b.node.argument));
+                }
+            }(), s.userConstructor) {
+                var e, t = s.constructorBody, a = s.userConstructor, n = s.construct;
+                (e = t.body).push.apply(e, A(a.body.body)), xl(n, a), xl(t, a.body);
+            }
+            u();
+        }
+        function u() {
+            g();
+            for (var e = s.body, t = {
+                instance: null,
+                static: null
+            }, a = 0, n = [ "static", "instance" ]; a < n.length; a++) {
+                var r = n[a];
+                s.methods[r].list.length && (t[r] = s.methods[r].list.map((function(e) {
+                    for (var t = Lr([ $r(Cr("key"), e.key) ]), a = 0, n = [ "get", "set", "value" ]; a < n.length; a++) {
+                        var r = n[a];
+                        null != e[r] && t.properties.push($r(Cr(r), e[r]));
+                    }
+                    return t;
+                })));
+            }
+            if (t.instance || t.static) {
+                for (var i = [ tu(s.classRef), t.instance ? sr(t.instance) : Fr(), t.static ? sr(t.static) : Fr() ], o = 0, d = 0; d < i.length; d++) J(i[d]) || (o = d);
+                i = i.slice(0, o + 1), e.push(vr(gr(s.file.addHelper("createClass"), i)));
+            }
+        }
+        function l(e, t, a, n) {
+            var i, o = e.node;
+            r.superIsCallableConstructor ? (o.arguments.unshift(qr()), 2 === o.arguments.length && Ie(o.arguments[1]) && H(o.arguments[1].argument, {
+                name: "arguments"
+            }) ? (o.arguments[1] = o.arguments[1].argument, o.callee = Br(tu(t), Cr("apply"))) : o.callee = Br(tu(t), Cr("call")), 
+            i = Ir("||", o, qr())) : i = JS(tu(s.superFnId), qr(), o.arguments, !1), e.parentPath.isExpressionStatement() && e.parentPath.container === n.node.body && n.node.body.length - 1 === e.parentPath.key ? (s.superThises.length && (i = ir("=", a(), i)), 
+            e.parentPath.replaceWith(Gr(i))) : e.replaceWith(ir("=", a(), i));
+        }
+        function c(e, t) {
+            var a = t ? t.scope : s.scope;
+            if ("method" !== e.kind || !function(e, t) {
+                if (r.setClassMethods && !e.decorators) {
+                    var a = s.classRef;
+                    e.static || (!function() {
+                        if (null === s.protoAlias) {
+                            i({
+                                protoAlias: s.scope.generateUidIdentifier("proto")
+                            });
+                            var e = Br(s.classRef, Cr("prototype")), t = Qr("var", [ Zr(s.protoAlias, e) ]);
+                            s.body.push(t);
+                        }
+                    }(), a = s.protoAlias);
+                    var n = Br(tu(a), e.key, e.computed || Kt(e.key)), o = wr(null, e.params, e.body, e.generator, e.async);
+                    xl(o, e);
+                    var d = ol(e, e.key);
+                    X(d) && (o = WE({
+                        node: o,
+                        id: d,
+                        scope: t
+                    }));
+                    var u = vr(ir("=", n, o));
+                    return lu(u, e), s.body.push(u), !0;
+                }
+                return !1;
+            }(e, a)) {
+                var n, o, d = e.static ? "static" : "instance", u = s.methods[d], l = "method" === e.kind ? "value" : e.kind, c = z(e.key) || Ue(e.key) ? jr(String(e.key.value)) : ol(e), p = dl(e);
+                if (X(c) ? "method" === e.kind && (p = WE({
+                    id: c,
+                    node: e,
+                    scope: a
+                })) : u.hasComputed = !0, !u.hasComputed && u.map.has(c.value)) (n = u.map.get(c.value))[l] = p, 
+                "value" === l ? (n.get = null, n.set = null) : n.value = null; else (o = {
+                    key: c
+                })[l] = p, n = o, u.list.push(n), u.hasComputed || u.map.set(c.value, n);
+            }
+        }
+        function p(e, t, a) {
+            i({
+                userConstructorPath: a,
+                userConstructor: t,
+                hasConstructor: !0,
+                superReturns: e
+            });
+            var n = s.construct;
+            lu(n, t), n.params = t.params, xl(n.body, t.body), n.body.directives = t.body.directives, 
+            function() {
+                if (s.pushedConstructor) return;
+                s.pushedConstructor = !0, (s.hasInstanceDescriptors || s.hasStaticDescriptors) && u();
+                s.body.push(s.construct), g();
+            }();
+        }
+        function g() {
+            if (s.isDerived && !s.pushedInherits) {
+                var t = e.scope.generateUidIdentifier("super");
+                i({
+                    pushedInherits: !0,
+                    superFnId: t
+                }), r.superIsCallableConstructor || s.body.unshift(Qr("var", [ Zr(t, gr(lW(s.file), [ tu(s.classRef) ])) ])), 
+                s.body.unshift(vr(gr(s.file.addHelper(s.isLoose ? "inheritsLoose" : "inherits"), [ tu(s.classRef), tu(s.superName) ])));
+            }
+        }
+        return function(e, t, a, n) {
+            i({
+                parent: e.parent,
+                scope: e.scope,
+                node: e.node,
+                path: e,
+                file: t,
+                isLoose: n
+            }), i({
+                classId: s.node.id,
+                classRef: s.node.id ? Cr(s.node.id.name) : s.scope.generateUidIdentifier("class"),
+                superName: s.node.superClass,
+                isDerived: !!s.node.superClass,
+                constructorBody: cr([])
+            }), i({
+                extendsNative: s.isDerived && a.has(s.superName.name) && !s.scope.hasBinding(s.superName.name, !0)
+            });
+            var o = s.classRef, u = s.node, l = s.constructorBody;
+            i({
+                construct: gW(o, l, u)
+            }), function() {
+                for (var e, t = s, a = t.dynamicKeys, n = t.node, r = t.scope, i = S(n.body.body); !(e = i()).done; ) {
+                    var o = e.value;
+                    if (_e(o) && o.computed && !r.isPure(o.key, !0)) {
+                        var d = r.generateUidIdentifierBasedOnNode(o.key);
+                        a.set(d.name, o.key), o.key = d;
+                    }
+                }
+            }();
+            var c = s.body, p = function() {
+                var e = s.superName, t = s.dynamicKeys, a = [], n = [];
+                if (s.isDerived) {
+                    var r = tu(e);
+                    s.extendsNative && XL(r = gr(s.file.addHelper("wrapNativeSuper"), [ r ]));
+                    var o = s.scope.generateUidIdentifierBasedOnNode(e);
+                    a.push(o), n.push(r), i({
+                        superName: tu(o)
+                    });
+                }
+                for (var d, u = S(t); !(d = u()).done; ) {
+                    var l = D(d.value, 2), c = l[0], p = l[1];
+                    a.push(Cr(c)), n.push(p);
+                }
+                return {
+                    closureParams: a,
+                    closureArgs: n
+                };
+            }(), g = p.closureParams, f = p.closureArgs;
+            d(), r.noClassCalls || l.body.unshift(vr(gr(s.file.addHelper("classCallCheck"), [ qr(), tu(s.classRef) ]))), 
+            c.push.apply(c, A(s.staticPropBody.map((function(e) {
+                return e(tu(s.classRef));
+            }))));
+            var h = e.isInStrictMode(), m = s.classId && 1 === c.length;
+            if (m && !h) for (var y, R = S(s.construct.params); !(y = R()).done; ) {
+                if (!H(y.value)) {
+                    m = !1;
+                    break;
+                }
+            }
+            var b = m ? c[0].body.directives : [];
+            return h || b.push(ur(lr("use strict"))), m ? dl(c[0]) : (c.push(Gr(tu(s.classRef))), 
+            gr(rs(g, cr(c, b)), f));
+        }(e, t, a, n);
+    }
     var hW = function(e) {
         return Object.keys(_c[e]).filter((function(e) {
             return /^[A-Z]/.test(e);
@@ -44064,286 +45529,7 @@ const StorageManager = (() => {
                     var a = e.node;
                     if (!a[c]) {
                         var n = WE(e);
-                        if (n && n !== a) e.replaceWith(n); else if (a[c] = !0, e.replaceWith(function(e, t, a, n, r) {
-                            var s = {
-                                parent: void 0,
-                                scope: void 0,
-                                node: void 0,
-                                path: void 0,
-                                file: void 0,
-                                classId: void 0,
-                                classRef: void 0,
-                                superFnId: void 0,
-                                superName: void 0,
-                                superReturns: [],
-                                isDerived: !1,
-                                extendsNative: !1,
-                                construct: void 0,
-                                constructorBody: void 0,
-                                userConstructor: void 0,
-                                userConstructorPath: void 0,
-                                hasConstructor: !1,
-                                staticPropBody: [],
-                                body: [],
-                                superThises: [],
-                                pushedConstructor: !1,
-                                pushedInherits: !1,
-                                protoAlias: null,
-                                isLoose: !1,
-                                dynamicKeys: new Map,
-                                methods: {
-                                    instance: {
-                                        hasComputed: !1,
-                                        list: [],
-                                        map: new Map
-                                    },
-                                    static: {
-                                        hasComputed: !1,
-                                        list: [],
-                                        map: new Map
-                                    }
-                                }
-                            }, i = function(e) {
-                                Object.assign(s, e);
-                            }, o = UA.visitors.merge([ dT, {
-                                ThisExpression: function(e) {
-                                    s.superThises.push(e);
-                                }
-                            } ]);
-                            function d() {
-                                if (function() {
-                                    for (var e, t = !1, a = S(s.path.get("body.body")); !(e = a()).done && !(t = e.value.equals("kind", "constructor")); ) ;
-                                    if (!t) {
-                                        var n, r;
-                                        if (s.isDerived) {
-                                            var i = AE.expression.ast(cW || (cW = E([ "\n        (function () {\n          super(...arguments);\n        })\n      " ])));
-                                            n = i.params, r = i.body;
-                                        } else n = [], r = cr([]);
-                                        s.path.get("body").unshiftContainer("body", Rs("constructor", Cr("constructor"), n, r));
-                                    }
-                                }(), function() {
-                                    for (var e, t = S(s.path.get("body.body")); !(e = t()).done; ) {
-                                        var a = e.value, n = a.node;
-                                        if (a.isClassProperty()) throw a.buildCodeFrameError("Missing class properties transform.");
-                                        if (n.decorators) throw a.buildCodeFrameError("Method has decorators, put the decorator plugin before the classes one.");
-                                        _e(n) && function() {
-                                            var e = "constructor" === n.kind;
-                                            new gT({
-                                                methodPath: a,
-                                                objectRef: s.classRef,
-                                                superRef: s.superName,
-                                                constantSuper: r.constantSuper,
-                                                file: s.file,
-                                                refToPreserve: s.classRef
-                                            }).replace();
-                                            var t = [];
-                                            a.traverse(UA.visitors.merge([ dT, {
-                                                ReturnStatement: function(e) {
-                                                    e.getFunctionParent().isArrowFunctionExpression() || t.push(e);
-                                                }
-                                            } ])), e ? p(t, n, a) : c(n, a);
-                                        }();
-                                    }
-                                }(), function() {
-                                    if (s.isDerived) {
-                                        var e = s.userConstructorPath, t = e.get("body");
-                                        e.traverse(o);
-                                        for (var a, n = function() {
-                                            var t = e.scope.generateDeclaredUidIdentifier("this");
-                                            return n = function() {
-                                                return tu(t);
-                                            }, t;
-                                        }, r = S(s.superThises); !(a = r()).done; ) {
-                                            var i = a.value, d = i.node;
-                                            i.parentPath.isMemberExpression({
-                                                object: d
-                                            }) ? i.replaceWith(n()) : i.replaceWith(gr(s.file.addHelper("assertThisInitialized"), [ n() ]));
-                                        }
-                                        var u = new Set;
-                                        e.traverse(UA.visitors.merge([ dT, {
-                                            Super: function(e) {
-                                                var t = e.node, a = e.parentPath;
-                                                a.isCallExpression({
-                                                    callee: t
-                                                }) && u.add(a);
-                                            }
-                                        } ]));
-                                        for (var c, p, g = !!u.size, f = S(u); !(c = f()).done; ) {
-                                            var h = c.value;
-                                            l(h, s.superName, n, t), g && h.find((function(t) {
-                                                return t === e || (t.isLoop() || t.isConditional() || t.isArrowFunctionExpression() ? (g = !1, 
-                                                !0) : void 0);
-                                            }));
-                                        }
-                                        p = s.isLoose ? function(e) {
-                                            var t = gr(s.file.addHelper("assertThisInitialized"), [ n() ]);
-                                            return e ? Ir("||", e, t) : t;
-                                        } : function(e) {
-                                            return gr(s.file.addHelper("possibleConstructorReturn"), [ n() ].concat(e || []));
-                                        };
-                                        var m = t.get("body");
-                                        m.length && m.pop().isReturnStatement() || t.pushContainer("body", Gr(g ? n() : p()));
-                                        for (var y, R = S(s.superReturns); !(y = R()).done; ) {
-                                            var b = y.value;
-                                            b.get("argument").replaceWith(p(b.node.argument));
-                                        }
-                                    }
-                                }(), s.userConstructor) {
-                                    var e, t = s.constructorBody, a = s.userConstructor, n = s.construct;
-                                    (e = t.body).push.apply(e, A(a.body.body)), xl(n, a), xl(t, a.body);
-                                }
-                                u();
-                            }
-                            function u() {
-                                g();
-                                for (var e = s.body, t = {
-                                    instance: null,
-                                    static: null
-                                }, a = 0, n = [ "static", "instance" ]; a < n.length; a++) {
-                                    var r = n[a];
-                                    s.methods[r].list.length && (t[r] = s.methods[r].list.map((function(e) {
-                                        for (var t = Lr([ $r(Cr("key"), e.key) ]), a = 0, n = [ "get", "set", "value" ]; a < n.length; a++) {
-                                            var r = n[a];
-                                            null != e[r] && t.properties.push($r(Cr(r), e[r]));
-                                        }
-                                        return t;
-                                    })));
-                                }
-                                if (t.instance || t.static) {
-                                    for (var i = [ tu(s.classRef), t.instance ? sr(t.instance) : Fr(), t.static ? sr(t.static) : Fr() ], o = 0, d = 0; d < i.length; d++) J(i[d]) || (o = d);
-                                    i = i.slice(0, o + 1), e.push(vr(gr(s.file.addHelper("createClass"), i)));
-                                }
-                            }
-                            function l(e, t, a, n) {
-                                var i, o = e.node;
-                                r.superIsCallableConstructor ? (o.arguments.unshift(qr()), 2 === o.arguments.length && Ie(o.arguments[1]) && H(o.arguments[1].argument, {
-                                    name: "arguments"
-                                }) ? (o.arguments[1] = o.arguments[1].argument, o.callee = Br(tu(t), Cr("apply"))) : o.callee = Br(tu(t), Cr("call")), 
-                                i = Ir("||", o, qr())) : i = JS(tu(s.superFnId), qr(), o.arguments, !1), e.parentPath.isExpressionStatement() && e.parentPath.container === n.node.body && n.node.body.length - 1 === e.parentPath.key ? (s.superThises.length && (i = ir("=", a(), i)), 
-                                e.parentPath.replaceWith(Gr(i))) : e.replaceWith(ir("=", a(), i));
-                            }
-                            function c(e, t) {
-                                var a = t ? t.scope : s.scope;
-                                if ("method" !== e.kind || !function(e, t) {
-                                    if (r.setClassMethods && !e.decorators) {
-                                        var a = s.classRef;
-                                        e.static || (function() {
-                                            if (null === s.protoAlias) {
-                                                i({
-                                                    protoAlias: s.scope.generateUidIdentifier("proto")
-                                                });
-                                                var e = Br(s.classRef, Cr("prototype")), t = Qr("var", [ Zr(s.protoAlias, e) ]);
-                                                s.body.push(t);
-                                            }
-                                        }(), a = s.protoAlias);
-                                        var n = Br(tu(a), e.key, e.computed || Kt(e.key)), o = wr(null, e.params, e.body, e.generator, e.async);
-                                        xl(o, e);
-                                        var d = ol(e, e.key);
-                                        X(d) && (o = WE({
-                                            node: o,
-                                            id: d,
-                                            scope: t
-                                        }));
-                                        var u = vr(ir("=", n, o));
-                                        return lu(u, e), s.body.push(u), !0;
-                                    }
-                                    return !1;
-                                }(e, a)) {
-                                    var n, o, d = e.static ? "static" : "instance", u = s.methods[d], l = "method" === e.kind ? "value" : e.kind, c = z(e.key) || Ue(e.key) ? jr(String(e.key.value)) : ol(e), p = dl(e);
-                                    X(c) ? "method" === e.kind && (p = WE({
-                                        id: c,
-                                        node: e,
-                                        scope: a
-                                    })) : u.hasComputed = !0, !u.hasComputed && u.map.has(c.value) ? ((n = u.map.get(c.value))[l] = p, 
-                                    "value" === l ? (n.get = null, n.set = null) : n.value = null) : ((o = {
-                                        key: c
-                                    })[l] = p, n = o, u.list.push(n), u.hasComputed || u.map.set(c.value, n));
-                                }
-                            }
-                            function p(e, t, a) {
-                                i({
-                                    userConstructorPath: a,
-                                    userConstructor: t,
-                                    hasConstructor: !0,
-                                    superReturns: e
-                                });
-                                var n = s.construct;
-                                lu(n, t), n.params = t.params, xl(n.body, t.body), n.body.directives = t.body.directives, 
-                                s.pushedConstructor || (s.pushedConstructor = !0, (s.hasInstanceDescriptors || s.hasStaticDescriptors) && u(), 
-                                s.body.push(s.construct), g());
-                            }
-                            function g() {
-                                if (s.isDerived && !s.pushedInherits) {
-                                    var t = e.scope.generateUidIdentifier("super");
-                                    i({
-                                        pushedInherits: !0,
-                                        superFnId: t
-                                    }), r.superIsCallableConstructor || s.body.unshift(Qr("var", [ Zr(t, gr(lW(s.file), [ tu(s.classRef) ])) ])), 
-                                    s.body.unshift(vr(gr(s.file.addHelper(s.isLoose ? "inheritsLoose" : "inherits"), [ tu(s.classRef), tu(s.superName) ])));
-                                }
-                            }
-                            return function(e, t, a, n) {
-                                i({
-                                    parent: e.parent,
-                                    scope: e.scope,
-                                    node: e.node,
-                                    path: e,
-                                    file: t,
-                                    isLoose: n
-                                }), i({
-                                    classId: s.node.id,
-                                    classRef: s.node.id ? Cr(s.node.id.name) : s.scope.generateUidIdentifier("class"),
-                                    superName: s.node.superClass,
-                                    isDerived: !!s.node.superClass,
-                                    constructorBody: cr([])
-                                }), i({
-                                    extendsNative: s.isDerived && a.has(s.superName.name) && !s.scope.hasBinding(s.superName.name, !0)
-                                });
-                                var o = s.classRef, u = s.node, l = s.constructorBody;
-                                i({
-                                    construct: gW(o, l, u)
-                                }), function() {
-                                    for (var e, t = s, a = t.dynamicKeys, n = t.node, r = t.scope, i = S(n.body.body); !(e = i()).done; ) {
-                                        var o = e.value;
-                                        if (_e(o) && o.computed && !r.isPure(o.key, !0)) {
-                                            var d = r.generateUidIdentifierBasedOnNode(o.key);
-                                            a.set(d.name, o.key), o.key = d;
-                                        }
-                                    }
-                                }();
-                                var c = s.body, p = function() {
-                                    var e = s.superName, t = s.dynamicKeys, a = [], n = [];
-                                    if (s.isDerived) {
-                                        var r = tu(e);
-                                        s.extendsNative && XL(r = gr(s.file.addHelper("wrapNativeSuper"), [ r ]));
-                                        var o = s.scope.generateUidIdentifierBasedOnNode(e);
-                                        a.push(o), n.push(r), i({
-                                            superName: tu(o)
-                                        });
-                                    }
-                                    for (var d, u = S(t); !(d = u()).done; ) {
-                                        var l = D(d.value, 2), c = l[0], p = l[1];
-                                        a.push(Cr(c)), n.push(p);
-                                    }
-                                    return {
-                                        closureParams: a,
-                                        closureArgs: n
-                                    };
-                                }(), g = p.closureParams, f = p.closureArgs;
-                                d(), r.noClassCalls || l.body.unshift(vr(gr(s.file.addHelper("classCallCheck"), [ qr(), tu(s.classRef) ]))), 
-                                c.push.apply(c, A(s.staticPropBody.map((function(e) {
-                                    return e(tu(s.classRef));
-                                }))));
-                                var h = e.isInStrictMode(), m = s.classId && 1 === c.length;
-                                if (m && !h) for (var y, R = S(s.construct.params); !(y = R()).done; ) if (!H(y.value)) {
-                                    m = !1;
-                                    break;
-                                }
-                                var b = m ? c[0].body.directives : [];
-                                return h || b.push(ur(lr("use strict"))), m ? dl(c[0]) : (c.push(Gr(tu(s.classRef))), 
-                                gr(rs(g, cr(c, b)), f));
-                            }(e, t, a, n);
-                        }(e, t.file, mW, i, {
+                        if (n && n !== a) e.replaceWith(n); else if (a[c] = !0, e.replaceWith(fW(e, t.file, mW, i, {
                             setClassMethods: o,
                             constantSuper: d,
                             superIsCallableConstructor: u,
@@ -44394,7 +45580,9 @@ const StorageManager = (() => {
             visitor: {
                 ObjectExpression: {
                     exit: function(e, t) {
-                        for (var a = e.node, r = e.parent, s = e.scope, i = !1, o = 0, d = a.properties; o < d.length && !(i = !0 === d[o].computed); o++) ;
+                        for (var a = e.node, r = e.parent, s = e.scope, i = !1, o = 0, d = a.properties; o < d.length; o++) {
+                            if (i = !0 === d[o].computed) break;
+                        }
                         if (i) {
                             for (var u, l = [], c = [], p = !1, g = S(a.properties); !(u = g()).done; ) {
                                 var f = u.value;
@@ -44426,11 +45614,15 @@ const StorageManager = (() => {
         e.assertVersion(7);
         var s = t.useBuiltIns, i = void 0 !== s && s, o = null != (a = e.assumption("iterableIsArray")) ? a : t.loose, d = null != (n = t.allowArrayLike) ? n : e.assumption("arrayLikeIsIterable"), u = null != (r = e.assumption("objectRestNoSymbols")) ? r : t.loose;
         function l(e) {
-            for (var t = 0, a = e.declarations; t < a.length; t++) if (Jt(a[t].id)) return !0;
+            for (var t = 0, a = e.declarations; t < a.length; t++) {
+                if (Jt(a[t].id)) return !0;
+            }
             return !1;
         }
         function c(e) {
-            for (var t = 0, a = e.elements; t < a.length; t++) if (se(a[t])) return !0;
+            for (var t = 0, a = e.elements; t < a.length; t++) {
+                if (se(a[t])) return !0;
+            }
             return !1;
         }
         var p = {}, g = function(e, t, a) {
@@ -44672,8 +45864,8 @@ const StorageManager = (() => {
                         }
                         for (var y = null, R = [], b = 0, v = c; b < v.length; b++) {
                             var x, E = v[b];
-                            null !== y && fe(E) ? (x = y.declarations).push.apply(x, A(E.declarations)) : (E.kind = i, 
-                            E.loc || (E.loc = u), R.push(E), y = fe(E) ? E : null);
+                            if (null !== y && fe(E)) (x = y.declarations).push.apply(x, A(E.declarations)); else E.kind = i, 
+                            E.loc || (E.loc = u), R.push(E), y = fe(E) ? E : null;
                         }
                         for (var D = 0, w = R; D < w.length; D++) {
                             var C = w[D];
@@ -44692,7 +45884,8 @@ const StorageManager = (() => {
             name: "transform-dotall-regex",
             feature: "dotAllFlag"
         });
-    })), xW = iL((function(e) {
+    }));
+    var xW = iL((function(e) {
         return e.assertVersion(7), {
             name: "transform-duplicate-keys",
             visitor: {
@@ -44719,6 +45912,39 @@ const StorageManager = (() => {
             }
         };
     })), EW = ir, DW = tu, AW = H, wW = Kt, CW = Z, SW = qe, TW = Vt, jW = Be, PW = Br, FW = ol;
+    function _W(e, t, a, n, r) {
+        var s, i, o;
+        if (s = AW(e) && r ? e : function(e, t, a) {
+            var n;
+            if (AW(e)) {
+                if (a.hasBinding(e.name)) return e;
+                n = e;
+            } else {
+                if (!CW(e)) throw new Error("We can't explode this node type " + e.type);
+                if (n = e.object, jW(n) || AW(n) && a.hasBinding(n.name)) return n;
+            }
+            var r = a.generateUidIdentifierBasedOnNode(n);
+            return a.push({
+                id: r
+            }), t.push(EW("=", DW(r), DW(n))), r;
+        }(e, t, n), AW(e)) i = DW(e), o = s; else {
+            var d = function(e, t, a) {
+                var n = e.property;
+                if (SW(n)) throw new Error("We can't generate property ref for private name, please install `@babel/plugin-proposal-class-properties`");
+                var r = FW(e, n);
+                if (wW(r) && TW(r)) return r;
+                var s = a.generateUidIdentifierBasedOnNode(n);
+                return a.push({
+                    id: s
+                }), t.push(EW("=", DW(s), DW(n))), s;
+            }(e, t, n), u = e.computed || wW(d);
+            o = PW(DW(s), DW(d), u), i = PW(DW(s), DW(d), u);
+        }
+        return {
+            uid: o,
+            ref: i
+        };
+    }
     var kW = ir, IW = Wr;
     function BW(e) {
         var t = e.build, a = e.operator;
@@ -44726,39 +45952,7 @@ const StorageManager = (() => {
             AssignmentExpression: function(e) {
                 var n = e.node, r = e.scope;
                 if (n.operator === a + "=") {
-                    var s = [], i = function(e, t, a, n, r) {
-                        var s, i, o;
-                        if (s = AW(e) && r ? e : function(e, t, a) {
-                            var n;
-                            if (AW(e)) {
-                                if (a.hasBinding(e.name)) return e;
-                                n = e;
-                            } else {
-                                if (!CW(e)) throw new Error("We can't explode this node type " + e.type);
-                                if (n = e.object, jW(n) || AW(n) && a.hasBinding(n.name)) return n;
-                            }
-                            var r = a.generateUidIdentifierBasedOnNode(n);
-                            return a.push({
-                                id: r
-                            }), t.push(EW("=", DW(r), DW(n))), r;
-                        }(e, t, n), AW(e)) i = DW(e), o = s; else {
-                            var d = function(e, t, a) {
-                                var n = e.property;
-                                if (SW(n)) throw new Error("We can't generate property ref for private name, please install `@babel/plugin-proposal-class-properties`");
-                                var r = FW(e, n);
-                                if (wW(r) && TW(r)) return r;
-                                var s = a.generateUidIdentifierBasedOnNode(n);
-                                return a.push({
-                                    id: s
-                                }), t.push(EW("=", DW(s), DW(n))), s;
-                            }(e, t, n), u = e.computed || wW(d);
-                            o = PW(DW(s), DW(d), u), i = PW(DW(s), DW(d), u);
-                        }
-                        return {
-                            uid: o,
-                            ref: i
-                        };
-                    }(n.left, s, 0, r);
+                    var s = [], i = _W(n.left, s, 0, r);
                     s.push(kW("=", i.ref, t(i.uid, n.right))), e.replaceWith(IW(s));
                 }
             },
@@ -44768,7 +45962,7 @@ const StorageManager = (() => {
             }
         };
     }
-    var MW, $W, UW, OW = iL((function(e) {
+    var OW = iL((function(e) {
         return e.assertVersion(7), {
             name: "transform-exponentiation-operator",
             visitor: BW({
@@ -44904,7 +46098,8 @@ const StorageManager = (() => {
                         var s = e.get("typeParameters");
                         n.push(r(s, t.typeParameters.optional));
                         var i, o = t.typeParameters.trailingComments;
-                        o && (i = n).push.apply(i, A(o)), s.remove();
+                        if (o) (i = n).push.apply(i, A(o));
+                        s.remove();
                     }
                     if (t.superClass && (n.length > 0 && (a({
                         toPath: e.get("id"),
@@ -45010,7 +46205,8 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), GW = AE("\n  for (var LOOP_OBJECT = OBJECT,\n          IS_ARRAY = Array.isArray(LOOP_OBJECT),\n          INDEX = 0,\n          LOOP_OBJECT = IS_ARRAY ? LOOP_OBJECT : LOOP_OBJECT[Symbol.iterator]();;) {\n    INTERMEDIATE;\n    if (IS_ARRAY) {\n      if (INDEX >= LOOP_OBJECT.length) break;\n      ID = LOOP_OBJECT[INDEX++];\n    } else {\n      INDEX = LOOP_OBJECT.next();\n      if (INDEX.done) break;\n      ID = INDEX.value;\n    }\n  }\n"), WW = AE("\n  var ITERATOR_COMPLETION = true;\n  var ITERATOR_HAD_ERROR_KEY = false;\n  var ITERATOR_ERROR_KEY = undefined;\n  try {\n    for (\n      var ITERATOR_KEY = OBJECT[Symbol.iterator](), STEP_KEY;\n      !(ITERATOR_COMPLETION = (STEP_KEY = ITERATOR_KEY.next()).done);\n      ITERATOR_COMPLETION = true\n    ) {}\n  } catch (err) {\n    ITERATOR_HAD_ERROR_KEY = true;\n    ITERATOR_ERROR_KEY = err;\n  } finally {\n    try {\n      if (!ITERATOR_COMPLETION && ITERATOR_KEY.return != null) {\n        ITERATOR_KEY.return();\n      }\n    } finally {\n      if (ITERATOR_HAD_ERROR_KEY) {\n        throw ITERATOR_ERROR_KEY;\n      }\n    }\n  }\n");
+    }));
+    var MW, $W, UW, GW = AE("\n  for (var LOOP_OBJECT = OBJECT,\n          IS_ARRAY = Array.isArray(LOOP_OBJECT),\n          INDEX = 0,\n          LOOP_OBJECT = IS_ARRAY ? LOOP_OBJECT : LOOP_OBJECT[Symbol.iterator]();;) {\n    INTERMEDIATE;\n    if (IS_ARRAY) {\n      if (INDEX >= LOOP_OBJECT.length) break;\n      ID = LOOP_OBJECT[INDEX++];\n    } else {\n      INDEX = LOOP_OBJECT.next();\n      if (INDEX.done) break;\n      ID = INDEX.value;\n    }\n  }\n"), WW = AE("\n  var ITERATOR_COMPLETION = true;\n  var ITERATOR_HAD_ERROR_KEY = false;\n  var ITERATOR_ERROR_KEY = undefined;\n  try {\n    for (\n      var ITERATOR_KEY = OBJECT[Symbol.iterator](), STEP_KEY;\n      !(ITERATOR_COMPLETION = (STEP_KEY = ITERATOR_KEY.next()).done);\n      ITERATOR_COMPLETION = true\n    ) {}\n  } catch (err) {\n    ITERATOR_HAD_ERROR_KEY = true;\n    ITERATOR_ERROR_KEY = err;\n  } finally {\n    try {\n      if (!ITERATOR_COMPLETION && ITERATOR_KEY.return != null) {\n        ITERATOR_KEY.return();\n      }\n    } finally {\n      if (ITERATOR_HAD_ERROR_KEY) {\n        throw ITERATOR_ERROR_KEY;\n      }\n    }\n  }\n");
     function VW(e, t) {
         var a, n, r, s = e.node, i = e.scope, o = e.parent, d = s.left;
         if (H(d) || Jt(d) || Z(d)) n = d, r = null; else {
@@ -45208,28 +46404,54 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), ZW = tV;
-    function tV(e, t) {
-        var a = t.arguments, n = function(e, t) {
-            if (Array.isArray(e)) return e;
-            if (Symbol.iterator in Object(e)) return function(e, t) {
-                var a = [], n = !0, r = !1, s = void 0;
+    })), QW = function(e, t) {
+        if (Array.isArray(e)) return e;
+        if (Symbol.iterator in Object(e)) return function(e, t) {
+            var a = [], n = !0, r = !1, s = void 0;
+            try {
+                for (var i, o = e[Symbol.iterator](); !(n = (i = o.next()).done) && (a.push(i.value), 
+                !t || a.length !== t); n = !0) ;
+            } catch (e) {
+                r = !0, s = e;
+            } finally {
                 try {
-                    for (var i, o = e[Symbol.iterator](); !(n = (i = o.next()).done) && (a.push(i.value), 
-                    !t || a.length !== t); n = !0) ;
-                } catch (e) {
-                    r = !0, s = e;
+                    !n && o.return && o.return();
                 } finally {
-                    try {
-                        !n && o.return && o.return();
-                    } finally {
-                        if (r) throw s;
-                    }
+                    if (r) throw s;
                 }
-                return a;
-            }(e, t);
-            throw new TypeError("Invalid attempt to destructure non-iterable instance");
-        }(a, 1)[0];
+            }
+            return a;
+        }(e, t);
+        throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }, ZW = tV, eV = function(e) {
+        var t = e.template, a = e.types, n = {
+            static: {
+                interop: t("Promise.resolve().then(() => INTEROP(require(SOURCE)))"),
+                noInterop: t("Promise.resolve().then(() => require(SOURCE))")
+            },
+            dynamic: {
+                interop: t("Promise.resolve(SOURCE).then(s => INTEROP(require(s)))"),
+                noInterop: t("Promise.resolve(SOURCE).then(s => require(s))")
+            }
+        }, r = "function" == typeof WeakSet && new WeakSet;
+        return function(e, t) {
+            if (r) {
+                if (r.has(t)) return;
+                r.add(t);
+            }
+            var s = tV(a, t.parent), i = function(e) {
+                return a.isStringLiteral(e) || a.isTemplateLiteral(e) && 0 === e.expressions.length;
+            }(s) ? n.static : n.dynamic, o = e.opts.noInterop ? i.noInterop({
+                SOURCE: s
+            }) : i.interop({
+                SOURCE: s,
+                INTEROP: e.addHelper("interopRequireWildcard")
+            });
+            t.parentPath.replaceWith(o);
+        };
+    };
+    function tV(e, t) {
+        var a = t.arguments, n = QW(a, 1)[0];
         return e.isStringLiteral(n) || e.isTemplateLiteral(n) ? (e.removeComments(n), n) : e.templateLiteral([ e.templateElement({
             raw: "",
             cooked: ""
@@ -45240,33 +46462,7 @@ const StorageManager = (() => {
     }
     var aV, nV = Object.defineProperty({
         getImportSource: ZW,
-        createDynamicImportTransform: function(e) {
-            var t = e.template, a = e.types, n = {
-                static: {
-                    interop: t("Promise.resolve().then(() => INTEROP(require(SOURCE)))"),
-                    noInterop: t("Promise.resolve().then(() => require(SOURCE))")
-                },
-                dynamic: {
-                    interop: t("Promise.resolve(SOURCE).then(s => INTEROP(require(s)))"),
-                    noInterop: t("Promise.resolve(SOURCE).then(s => require(s))")
-                }
-            }, r = "function" == typeof WeakSet && new WeakSet;
-            return function(e, t) {
-                if (r) {
-                    if (r.has(t)) return;
-                    r.add(t);
-                }
-                var s = tV(a, t.parent), i = function(e) {
-                    return a.isStringLiteral(e) || a.isTemplateLiteral(e) && 0 === e.expressions.length;
-                }(s) ? n.static : n.dynamic, o = e.opts.noInterop ? i.noInterop({
-                    SOURCE: s
-                }) : i.interop({
-                    SOURCE: s,
-                    INTEROP: e.addHelper("interopRequireWildcard")
-                });
-                t.parentPath.replaceWith(o);
-            };
-        }
+        createDynamicImportTransform: eV
     }, "__esModule", {
         value: !0
     }), rV = AE("\n  define(MODULE_NAME, AMD_ARGUMENTS, function(IMPORT_NAMES) {\n  })\n"), sV = AE('\n  define(["require"], function(REQUIRE) {\n  })\n');
@@ -45623,7 +46819,9 @@ const StorageManager = (() => {
                             buildCall: R,
                             scope: r
                         });
-                        for (var J = 0, Y = h; J < Y.length; J++) Y[J].remove();
+                        for (var J = 0, Y = h; J < Y.length; J++) {
+                            Y[J].remove();
+                        }
                         var Q = !1;
                         e.traverse({
                             AwaitExpression: function(e) {
@@ -45778,7 +46976,8 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), DV = iL((function(e) {
+    }));
+    var DV = iL((function(e) {
         return e.assertVersion(7), {
             name: "transform-object-super",
             visitor: {
@@ -45821,7 +47020,25 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), CV = sr, SV = _r, TV = wr, jV = Cr, PV = lu, FV = _e, _V = V, kV = ne, IV = re, BV = Xt, OV = X, NV = Lr, LV = $r, MV = cu, $V = ol, UV = fl, GV = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+    })), CV = sr, SV = _r, TV = wr, jV = Cr, PV = lu, FV = _e, _V = V, kV = ne, IV = re, BV = Xt, OV = X, NV = Lr, LV = $r, MV = cu, $V = ol, UV = fl;
+    var GV = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+    function WV(e, t, a, n, r) {
+        var s, i, o, d = UV(t), u = {};
+        (GV(e, d) && (u = e[d]), e[d] = u, u._inherits = u._inherits || [], u._inherits.push(t), 
+        u._key = t.key, t.computed && (u._computed = !0), t.decorators) && (s = (u.decorators = u.decorators || CV([])).elements).push.apply(s, A(t.decorators.map((function(e) {
+            return e.expression;
+        })).reverse()));
+        if (u.value || u.initializer) throw n.buildCodeFrameError(t, "Key conflict with sibling node");
+        (IV(t) || kV(t) || FV(t)) && (i = $V(t, t.key)), BV(t) ? o = t.value : (kV(t) || FV(t)) && ((o = TV(null, t.params, t.body, t.generator, t.async)).returnType = t.returnType);
+        var l = function(e) {
+            return !FV(e) && !kV(e) || "get" !== e.kind && "set" !== e.kind ? "value" : e.kind;
+        }(t);
+        return a && "value" === l || (a = l), r && OV(i) && ("value" === a || "initializer" === a) && _V(o) && (o = WE({
+            id: i,
+            node: o,
+            scope: r
+        })), o && (PV(o, t), u[a] = o), u;
+    }
     function VV(e) {
         return Object.keys(e).forEach((function(t) {
             var a = e[t];
@@ -45855,22 +47072,8 @@ const StorageManager = (() => {
                     if (n) {
                         var o = {};
                         a.properties = a.properties.filter((function(e) {
-                            return !!(e.computed || "get" !== e.kind && "set" !== e.kind) || (function(e, t, a, n, r) {
-                                var s, i, o, d = UV(t), u = {};
-                                if (GV(e, d) && (u = e[d]), e[d] = u, u._inherits = u._inherits || [], u._inherits.push(t), 
-                                u._key = t.key, t.computed && (u._computed = !0), t.decorators && (s = (u.decorators = u.decorators || CV([])).elements).push.apply(s, A(t.decorators.map((function(e) {
-                                    return e.expression;
-                                })).reverse())), u.value || u.initializer) throw n.buildCodeFrameError(t, "Key conflict with sibling node");
-                                (IV(t) || kV(t) || FV(t)) && (i = $V(t, t.key)), BV(t) ? o = t.value : (kV(t) || FV(t)) && ((o = TV(null, t.params, t.body, t.generator, t.async)).returnType = t.returnType);
-                                var l = function(e) {
-                                    return !FV(e) && !kV(e) || "get" !== e.kind && "set" !== e.kind ? "value" : e.kind;
-                                }(t);
-                                a && "value" === l || (a = l), r && OV(i) && ("value" === a || "initializer" === a) && _V(o) && (o = WE({
-                                    id: i,
-                                    node: o,
-                                    scope: r
-                                })), o && (PV(o, t), u[a] = o);
-                            }(o, e, null, t), !1);
+                            return !!(e.computed || "get" !== e.kind && "set" !== e.kind) || (WV(o, e, null, t), 
+                            !1);
                         })), e.replaceWith(gr(Br(Cr("Object"), Cr("defineProperties")), [ a, VV(o) ]));
                     }
                 }
@@ -45971,7 +47174,7 @@ const StorageManager = (() => {
                                 var r = e.evaluate();
                                 if (r.confident) {
                                     var s = r.value;
-                                    if ((t.mutablePropsAllowed || !s || "object" != typeof s) && "function" != typeof s) return void e.skip();
+                                    if (!(!t.mutablePropsAllowed && s && "object" == typeof s || "function" == typeof s)) return void e.skip();
                                 } else if (H(r.deopt)) return;
                             }
                             a();
@@ -46024,11 +47227,13 @@ const StorageManager = (() => {
         };
     })), zV = iL((function(e) {
         function t(e, t) {
-            for (var a = t.arguments[0].properties, n = !0, r = 0; r < a.length; r++) if (Kt(ol(a[r]), {
-                value: "displayName"
-            })) {
-                n = !1;
-                break;
+            for (var a = t.arguments[0].properties, n = !0, r = 0; r < a.length; r++) {
+                if (Kt(ol(a[r]), {
+                    value: "displayName"
+                })) {
+                    n = !1;
+                    break;
+                }
             }
             n && a.unshift($r(Cr("displayName"), jr(e)));
         }
@@ -46072,43 +47277,44 @@ const StorageManager = (() => {
         return t.JSXElement = {
             exit: function(t, s) {
                 var i = function(t, s) {
-                    if (!e.filter || e.filter(t.node, s)) {
-                        var i = t.get("openingElement");
-                        i.parent.children = hH.buildChildren(i.parent);
-                        var o, d = a(i.node.name, i.node), u = [];
-                        eH(d) ? o = d.name : iH(d) && (o = d.value);
-                        var l = {
-                            tagExpr: d,
-                            tagName: o,
-                            args: u,
-                            pure: !1
-                        };
-                        e.pre && e.pre(l, s);
-                        var c = i.node.attributes;
-                        c = c.length ? function(e, t) {
-                            var a = [], s = [], i = t.opts.useSpread, o = void 0 !== i && i;
-                            if ("boolean" != typeof o) throw new Error("transform-react-jsx currently only accepts a boolean option for useSpread (defaults to false)");
-                            var d = t.opts.useBuiltIns || !1;
-                            if ("boolean" != typeof d) throw new Error("transform-react-jsx currently only accepts a boolean option for useBuiltIns (defaults to false)");
-                            if (o && d) throw new Error("transform-react-jsx currently only accepts useBuiltIns or useSpread but not both");
-                            if (o) {
-                                var u = e.map(n);
-                                return gH(u);
-                            }
-                            for (;e.length; ) {
-                                var l = e.shift();
-                                sH(l) ? (a = r(a, s), s.push(l.argument)) : a.push(n(l));
-                            }
-                            if (r(a, s), 1 === s.length) e = s[0]; else {
-                                oH(s[0]) || s.unshift(gH([]));
-                                var c = d ? cH(QV("Object"), QV("assign")) : t.addHelper("extends");
-                                e = YV(c, s);
-                            }
-                            return e;
-                        }(c, s) : pH(), u.push.apply(u, [ c ].concat(A(t.node.children))), e.post && e.post(l, s);
-                        var p = l.call || YV(l.callee, u);
-                        return l.pure && XL(p), p;
-                    }
+                    if (e.filter && !e.filter(t.node, s)) return;
+                    var i = t.get("openingElement");
+                    i.parent.children = hH.buildChildren(i.parent);
+                    var o, d = a(i.node.name, i.node), u = [];
+                    eH(d) ? o = d.name : iH(d) && (o = d.value);
+                    var l = {
+                        tagExpr: d,
+                        tagName: o,
+                        args: u,
+                        pure: !1
+                    };
+                    e.pre && e.pre(l, s);
+                    var c = i.node.attributes;
+                    c = c.length ? function(e, t) {
+                        var a = [], s = [], i = t.opts.useSpread, o = void 0 !== i && i;
+                        if ("boolean" != typeof o) throw new Error("transform-react-jsx currently only accepts a boolean option for useSpread (defaults to false)");
+                        var d = t.opts.useBuiltIns || !1;
+                        if ("boolean" != typeof d) throw new Error("transform-react-jsx currently only accepts a boolean option for useBuiltIns (defaults to false)");
+                        if (o && d) throw new Error("transform-react-jsx currently only accepts useBuiltIns or useSpread but not both");
+                        if (o) {
+                            var u = e.map(n);
+                            return gH(u);
+                        }
+                        for (;e.length; ) {
+                            var l = e.shift();
+                            sH(l) ? (a = r(a, s), s.push(l.argument)) : a.push(n(l));
+                        }
+                        if (r(a, s), 1 === s.length) e = s[0]; else {
+                            oH(s[0]) || s.unshift(gH([]));
+                            var c = d ? cH(QV("Object"), QV("assign")) : t.addHelper("extends");
+                            e = YV(c, s);
+                        }
+                        return e;
+                    }(c, s) : pH();
+                    u.push.apply(u, [ c ].concat(A(t.node.children))), e.post && e.post(l, s);
+                    var p = l.call || YV(l.callee, u);
+                    l.pure && XL(p);
+                    return p;
                 }(t, s);
                 i && t.replaceWith(ZV(i, t.node));
             }
@@ -46116,20 +47322,21 @@ const StorageManager = (() => {
             exit: function(t, a) {
                 if (e.compat) throw t.buildCodeFrameError("Fragment tags are only supported in React 16 and up.");
                 var n = function(t, a) {
-                    if (!e.filter || e.filter(t.node, a)) {
-                        var n = t.get("openingElement");
-                        n.parent.children = hH.buildChildren(n.parent);
-                        var r = [], i = {
-                            tagExpr: a.get("jsxFragIdentifier")(),
-                            tagName: null,
-                            args: r,
-                            pure: !1
-                        };
-                        e.pre && e.pre(i, a), r.push.apply(r, [ pH() ].concat(A(t.node.children))), e.post && e.post(i, a), 
-                        a.set("usedFragment", !0);
-                        var o = i.call || YV(i.callee, r);
-                        return i.pure && XL(o), o;
-                    }
+                    if (e.filter && !e.filter(t.node, a)) return;
+                    var n = t.get("openingElement");
+                    n.parent.children = hH.buildChildren(n.parent);
+                    var r = [], s = null, i = {
+                        tagExpr: a.get("jsxFragIdentifier")(),
+                        tagName: s,
+                        args: r,
+                        pure: !1
+                    };
+                    e.pre && e.pre(i, a);
+                    r.push.apply(r, [ pH() ].concat(A(t.node.children))), e.post && e.post(i, a);
+                    a.set("usedFragment", !0);
+                    var o = i.call || YV(i.callee, r);
+                    i.pure && XL(o);
+                    return o;
                 }(t, a);
                 n && t.replaceWith(ZV(n, t.node));
             }
@@ -46149,9 +47356,10 @@ const StorageManager = (() => {
             var t, a = function(e) {
                 return tH(e) ? e.expression : e;
             }(e.value || JV(!0));
-            return sH(e) ? mH(e.argument) : (uH(a) && !tH(e.value) && (a.value = a.value.replace(/\n\s+/g, " "), 
-            null == (t = a.extra) || delete t.raw), rH(e.name) ? e.name = yH(e.name.namespace.name + ":" + e.name.name.name) : lH(e.name.name, !1) ? e.name.type = "Identifier" : e.name = yH(e.name.name), 
-            ZV(fH(e.name, a), e));
+            if (sH(e)) return mH(e.argument);
+            uH(a) && !tH(e.value) && (a.value = a.value.replace(/\n\s+/g, " "), null == (t = a.extra) || delete t.raw);
+            return rH(e.name) ? e.name = yH(e.name.namespace.name + ":" + e.name.name.name) : lH(e.name.name, !1) ? e.name.type = "Identifier" : e.name = yH(e.name.name), 
+            ZV(fH(e.name, a), e);
         }
         function r(e, t) {
             return e.length ? (t.push(gH(e)), []) : e;
@@ -46196,7 +47404,7 @@ const StorageManager = (() => {
                 }
             })
         };
-    })), EH = "React.createElement", AH = /\*?\s*@jsxImportSource\s+([^\s]+)/, wH = /\*?\s*@jsxRuntime\s+([^\s]+)/, CH = /\*?\s*@jsx\s+([^\s]+)/, SH = /\*?\s*@jsxFrag\s+([^\s]+)/, TH = function(e, t) {
+    })), xH = "react", EH = "React.createElement", DH = "React.Fragment", AH = /\*?\s*@jsxImportSource\s+([^\s]+)/, wH = /\*?\s*@jsxRuntime\s+([^\s]+)/, CH = /\*?\s*@jsx\s+([^\s]+)/, SH = /\*?\s*@jsxFrag\s+([^\s]+)/, TH = function(e, t) {
         return e.get("@babel/plugin-react-jsx/" + t);
     }, jH = function(e, t, a) {
         return e.set("@babel/plugin-react-jsx/" + t, a);
@@ -46204,7 +47412,7 @@ const StorageManager = (() => {
     function PH(e) {
         var t = e.name, a = e.development;
         return iL((function(e, n) {
-            var r = n.pure, s = n.throwIfNamespace, i = void 0 === s || s, o = n.filter, d = n.runtime, u = void 0 === d ? a ? "automatic" : "classic" : d, l = n.importSource, c = void 0 === l ? "react" : l, p = n.pragma, g = void 0 === p ? EH : p, f = n.pragmaFrag, h = void 0 === f ? "React.Fragment" : f, m = n.useSpread, y = void 0 !== m && m, R = n.useBuiltIns, b = void 0 !== R && R;
+            var r = n.pure, s = n.throwIfNamespace, i = void 0 === s || s, o = n.filter, d = n.runtime, u = void 0 === d ? a ? "automatic" : "classic" : d, l = n.importSource, c = void 0 === l ? xH : l, p = n.pragma, g = void 0 === p ? EH : p, f = n.pragmaFrag, h = void 0 === f ? DH : f, m = n.useSpread, y = void 0 !== m && m, R = n.useBuiltIns, b = void 0 !== R && R;
             if ("classic" === u) {
                 if ("boolean" != typeof y) throw new Error("transform-react-jsx currently only accepts a boolean option for useSpread (defaults to false)");
                 if ("boolean" != typeof b) throw new Error("transform-react-jsx currently only accepts a boolean option for useBuiltIns (defaults to false)");
@@ -46228,7 +47436,11 @@ const StorageManager = (() => {
                             } while (t = t.parent);
                             return null;
                         }(e);
-                        return null === t || (!t.isMethod() || ("constructor" !== t.node.kind || !(null !== t.parentPath.parentPath.node.superClass)));
+                        if (null === t) return !0;
+                        if (!t.isMethod()) return !0;
+                        if ("constructor" !== t.node.kind) return !0;
+                        return a = t.parentPath.parentPath, !(null !== a.node.superClass);
+                        var a;
                     })(e) && i.push(qi(Zi("__self"), Yi(qr()))), i.push(qi(Zi("__source"), Yi(function(e, t) {
                         var a = e.node.loc;
                         if (!a) return e.scope.buildUndefinedNode();
@@ -46240,8 +47452,8 @@ const StorageManager = (() => {
                             }), t.fileNameIdentifier = s;
                         }
                         return function(e, t, a) {
-                            var n = null != t ? Pr(t) : Fr(), r = null != a ? Pr(a + 1) : Fr();
-                            return Lr([ $r(Cr("fileName"), e), $r(Cr("lineNumber"), n), $r(Cr("columnNumber"), r) ]);
+                            var n = null != t ? Pr(t) : Fr(), r = null != a ? Pr(a + 1) : Fr(), s = $r(Cr("fileName"), e), i = $r(Cr("lineNumber"), n), o = $r(Cr("columnNumber"), r);
+                            return Lr([ s, i, o ]);
                         }(tu(t.fileNameIdentifier), a.start.line, a.start.column);
                     }(e, t)))), e.pushContainer("attributes", i);
                 }
@@ -46308,15 +47520,15 @@ const StorageManager = (() => {
                                             }
                                             var o = TH(e, "requires/" + s);
                                             return o ? o = tu(o) : (o = function(e, t, a) {
-                                                return new fS(e).addNamespace(t, {
-                                                    importedInterop: "uncompiled"
-                                                });
-                                            }(t, s), jH(e, "requires/" + s, o)), Br(o, Cr(n));
+                                                return new fS(e).addNamespace(t, a);
+                                            }(t, s, {
+                                                importedInterop: "uncompiled"
+                                            }), jH(e, "requires/" + s, o)), Br(o, Cr(n));
                                         };
                                     }(t, e, r, i));
                                 };
                                 C("id/jsx", a ? "jsxDEV" : "jsx"), C("id/jsxs", a ? "jsxDEV" : "jsxs"), C("id/createElement", "createElement"), 
-                                C("id/fragment", "Fragment"), jH(t, "defaultPure", "react" === i);
+                                C("id/fragment", "Fragment"), jH(t, "defaultPure", i === xH);
                             }
                             a && e.traverse(v, t);
                         }
@@ -46356,11 +47568,13 @@ const StorageManager = (() => {
                                     } else i.push(u);
                                 }
                                 var p, g, f, h, m = kl.buildChildren(e.node);
-                                return p = i.length || m.length ? function(e, t, a) {
+                                p = i.length || m.length ? function(e, t, a) {
                                     var n = e.reduce(w, []);
-                                    return (null == a ? void 0 : a.length) > 0 && n.push(C(a)), Lr(n);
-                                }(i, 0, m) : Lr([]), s.push(p), a ? s.push(null != (g = o.key) ? g : e.scope.buildUndefinedNode(), _r(m.length > 1), null != (f = o.__source) ? f : e.scope.buildUndefinedNode(), null != (h = o.__self) ? h : e.scope.buildUndefinedNode()) : void 0 !== o.key && s.push(o.key), 
-                                x(t, m.length > 1 ? "jsxs" : "jsx", s);
+                                    (null == a ? void 0 : a.length) > 0 && n.push(C(a));
+                                    return Lr(n);
+                                }(i, 0, m) : Lr([]);
+                                s.push(p), a ? s.push(null != (g = o.key) ? g : e.scope.buildUndefinedNode(), _r(m.length > 1), null != (f = o.__source) ? f : e.scope.buildUndefinedNode(), null != (h = o.__self) ? h : e.scope.buildUndefinedNode()) : void 0 !== o.key && s.push(o.key);
+                                return x(t, m.length > 1 ? "jsxs" : "jsx", s);
                             }(e, t), e.replaceWith(xl(n, e.node));
                         }
                     },
@@ -46368,11 +47582,12 @@ const StorageManager = (() => {
                         exit: function(e, t) {
                             var n;
                             n = "classic" === TH(t, "runtime") ? function(e, t) {
-                                if (!o || o(e.node, t)) return x(t, "createElement", [ TH(t, "id/fragment")(), Fr() ].concat(A(kl.buildChildren(e.node))));
+                                if (o && !o(e.node, t)) return;
+                                return x(t, "createElement", [ TH(t, "id/fragment")(), Fr() ].concat(A(kl.buildChildren(e.node))));
                             }(e, t) : function(e, t) {
                                 var n = [ TH(t, "id/fragment")() ], r = kl.buildChildren(e.node);
-                                return n.push(Lr(r.length > 0 ? [ C(r) ] : [])), a && n.push(e.scope.buildUndefinedNode(), _r(r.length > 1)), 
-                                x(t, r.length > 1 ? "jsxs" : "jsx", n);
+                                n.push(Lr(r.length > 0 ? [ C(r) ] : [])), a && n.push(e.scope.buildUndefinedNode(), _r(r.length > 1));
+                                return x(t, r.length > 1 ? "jsxs" : "jsx", n);
                             }(e, t), e.replaceWith(xl(n, e.node));
                         }
                     },
@@ -46406,8 +47621,8 @@ const StorageManager = (() => {
                 }
                 var n, r = D("key" !== t.node.name.name ? t.node.value || _r(!0) : t.node.value);
                 if ("key" === t.node.name.name && null === r) throw t.buildCodeFrameError('Please provide an explicit key value. Using "key" as a shorthand for "key={true}" is not allowed.');
-                return X(r) && !gt(t.node.value) && (r.value = r.value.replace(/\n\s+/g, " "), null == (n = r.extra) || delete n.raw), 
-                mt(t.node.name) ? t.node.name = jr(t.node.name.namespace.name + ":" + t.node.name.name.name) : Ia(t.node.name.name, !1) ? t.node.name.type = "Identifier" : t.node.name = jr(t.node.name.name), 
+                X(r) && !gt(t.node.value) && (r.value = r.value.replace(/\n\s+/g, " "), null == (n = r.extra) || delete n.raw);
+                return mt(t.node.name) ? t.node.name = jr(t.node.name.namespace.name + ":" + t.node.name.name.name) : Ia(t.node.name.name, !1) ? t.node.name.type = "Identifier" : t.node.name = jr(t.node.name.name), 
                 e.push(xl($r(t.node.name, r), t.node)), e;
             }
             function C(e) {
@@ -46479,7 +47694,8 @@ const StorageManager = (() => {
     })), BH = PH({
         name: "transform-react-jsx/development",
         development: !0
-    }), OH = iL((function(e) {
+    });
+    var OH = iL((function(e) {
         e.assertVersion(7);
         var t = {
             JSXOpeningElement: function(e) {
@@ -46571,39 +47787,89 @@ const StorageManager = (() => {
                 default: e
             };
         }, e.exports.default = e.exports, e.exports.__esModule = !0;
-    }), "/$$rollup_base$$/node_modules/@babel/runtime/helpers"), WH = XH, qH = null;
+    }), "/$$rollup_base$$/node_modules/@babel/runtime/helpers"), GH = function(e, t) {
+        return function() {
+            var a = qH;
+            qH = e;
+            try {
+                for (var n = arguments.length, r = new Array(n), s = 0; s < n; s++) r[s] = arguments[s];
+                return t.apply(this, r);
+            } finally {
+                qH = a;
+            }
+        };
+    }, WH = XH, VH = function(e) {
+        var t = XH();
+        return t.memberExpression(t.identifier("regeneratorRuntime"), t.identifier(e), !1);
+    }, HH = function(e) {
+        return e.isReferenced() || e.parentPath.isAssignmentExpression({
+            left: e.node
+        });
+    }, KH = function(e, t) {
+        t ? e.replaceWith(t) : e.remove();
+    }, qH = null;
     function XH() {
         return qH;
     }
     var zH = Object.defineProperty({
-        wrapWithTypes: function(e, t) {
-            return function() {
-                var a = qH;
-                qH = e;
-                try {
-                    for (var n = arguments.length, r = new Array(n), s = 0; s < n; s++) r[s] = arguments[s];
-                    return t.apply(this, r);
-                } finally {
-                    qH = a;
-                }
-            };
-        },
+        wrapWithTypes: GH,
         getTypes: WH,
-        runtimeProperty: function(e) {
-            var t = XH();
-            return t.memberExpression(t.identifier("regeneratorRuntime"), t.identifier(e), !1);
-        },
-        isReference: function(e) {
-            return e.isReferenced() || e.parentPath.isAssignmentExpression({
-                left: e.node
-            });
-        },
-        replaceWithOrRemove: function(e, t) {
-            t ? e.replaceWith(t) : e.remove();
-        }
+        runtimeProperty: VH,
+        isReference: HH,
+        replaceWithOrRemove: KH
     }, "__esModule", {
         value: !0
-    }), JH = $H(zH), YH = Object.prototype.hasOwnProperty, ZH = UH(YC);
+    }), JH = $H(zH), YH = Object.prototype.hasOwnProperty, QH = function(e) {
+        var t = JH.getTypes();
+        t.assertFunction(e.node);
+        var a = {};
+        function n(e, n) {
+            var r = e.node, s = e.scope;
+            t.assertVariableDeclaration(r);
+            var i = [];
+            return r.declarations.forEach((function(e) {
+                a[e.id.name] = t.identifier(e.id.name), s.removeBinding(e.id.name), e.init ? i.push(t.assignmentExpression("=", e.id, e.init)) : n && i.push(e.id);
+            })), 0 === i.length ? null : 1 === i.length ? i[0] : t.sequenceExpression(i);
+        }
+        e.get("body").traverse({
+            VariableDeclaration: {
+                exit: function(e) {
+                    var a = n(e, !1);
+                    null === a ? e.remove() : JH.replaceWithOrRemove(e, t.expressionStatement(a)), e.skip();
+                }
+            },
+            ForStatement: function(e) {
+                var t = e.get("init");
+                t.isVariableDeclaration() && JH.replaceWithOrRemove(t, n(t, !1));
+            },
+            ForXStatement: function(e) {
+                var t = e.get("left");
+                t.isVariableDeclaration() && JH.replaceWithOrRemove(t, n(t, !0));
+            },
+            FunctionDeclaration: function(e) {
+                var n = e.node;
+                a[n.id.name] = n.id;
+                var r = t.expressionStatement(t.assignmentExpression("=", t.clone(n.id), t.functionExpression(e.scope.generateUidIdentifierBasedOnNode(n), n.params, n.body, n.generator, n.expression)));
+                e.parentPath.isBlockStatement() ? (e.parentPath.unshiftContainer("body", r), e.remove()) : JH.replaceWithOrRemove(e, r), 
+                e.scope.removeBinding(n.id.name), e.skip();
+            },
+            FunctionExpression: function(e) {
+                e.skip();
+            },
+            ArrowFunctionExpression: function(e) {
+                e.skip();
+            }
+        });
+        var r = {};
+        e.get("params").forEach((function(e) {
+            var a = e.node;
+            t.isIdentifier(a) && (r[a.name] = a);
+        }));
+        var s = [];
+        return Object.keys(a).forEach((function(e) {
+            YH.call(r, e) || s.push(t.variableDeclarator(a[e], null));
+        })), 0 === s.length ? null : t.variableDeclaration("var", s);
+    }, ZH = UH(YC);
     function eK() {
         ZH.default.ok(this instanceof eK);
     }
@@ -46707,6 +47973,12 @@ const StorageManager = (() => {
         return xK ? xK.call(bK, e) : (SK.prototype = e || null, new SK);
     }
     var jK = Math.random, PK = TK(null);
+    function FK() {
+        do {
+            var e = _K(CK.call(wK.call(jK(), 36), 2));
+        } while (AK.call(PK, e));
+        return PK[e] = e;
+    }
     function _K(e) {
         var t = {};
         return t[e] = !0, Object.keys(t)[0];
@@ -46721,12 +47993,7 @@ const StorageManager = (() => {
         return t.length = n, t;
     };
     var BK = function(e) {
-        var t = function() {
-            do {
-                var e = _K(CK.call(wK.call(jK(), 36), 2));
-            } while (AK.call(PK, e));
-            return PK[e] = e;
-        }(), a = TK(null);
+        var t = FK(), a = TK(null);
         function n(n) {
             return AK.call(n, t) || function(n) {
                 var r;
@@ -46749,7 +48016,9 @@ const StorageManager = (() => {
                 a = n(e))), a;
             }
             var s = t.VISITOR_KEYS[e.type];
-            if (s) for (var i = 0; i < s.length; i++) r(e[s[i]]);
+            if (s) for (var i = 0; i < s.length; i++) {
+                r(e[s[i]]);
+            }
             return a;
         }
         function n(n) {
@@ -47018,7 +48287,10 @@ const StorageManager = (() => {
     YK.emitAbruptCompletion = function(e) {
         (function(e) {
             var t = e.type;
-            return "normal" === t ? !zK.call(e, "target") : "break" === t || "continue" === t ? !zK.call(e, "value") && XK.getTypes().isLiteral(e.target) : ("return" === t || "throw" === t) && (zK.call(e, "value") && !zK.call(e, "target"));
+            if ("normal" === t) return !zK.call(e, "target");
+            if ("break" === t || "continue" === t) return !zK.call(e, "value") && XK.getTypes().isLiteral(e.target);
+            if ("return" === t || "throw" === t) return zK.call(e, "value") && !zK.call(e, "target");
+            return !1;
         })(e) || HK.default.ok(!1, "invalid completion record: " + JSON.stringify(e)), HK.default.notStrictEqual(e.type, "normal", "normal completions are not abrupt");
         var t = XK.getTypes(), a = [ t.stringLiteral(e.type) ];
         "break" === e.type || "continue" === e.type ? (t.assertLiteral(e.target), a[1] = this.insertedLocs.has(e.target) ? e.target : t.cloneDeep(e.target)) : "return" !== e.type && "throw" !== e.type || e.value && (t.assertExpression(e.value), 
@@ -47146,7 +48418,8 @@ const StorageManager = (() => {
     function iq(e, t) {
         return e.generator ? e.async ? !1 !== t.opts.asyncGenerators : !1 !== t.opts.generators : !!e.async && !1 !== t.opts.async;
     }
-    var fq, hq, mq, oq = BK(), dq = {
+    var oq = BK();
+    var dq = {
         "FunctionExpression|FunctionDeclaration|Method": function(e) {
             e.skip();
         },
@@ -47202,8 +48475,8 @@ const StorageManager = (() => {
                         })), o.length > 0 && (i.node.body = d);
                         var u = function(e) {
                             var t = sq.getTypes(), a = e.node;
-                            return t.assertFunction(a), a.id || (a.id = e.scope.parent.generateUidIdentifier("callee")), 
-                            a.generator && t.isFunctionDeclaration(a) ? function(e) {
+                            t.assertFunction(a), a.id || (a.id = e.scope.parent.generateUidIdentifier("callee"));
+                            if (a.generator && t.isFunctionDeclaration(a)) return function(e) {
                                 var t = sq.getTypes(), a = e.node;
                                 t.assertIdentifier(a.id);
                                 var n = e.findParent((function(e) {
@@ -47214,64 +48487,16 @@ const StorageManager = (() => {
                                 nq.default.ok(Array.isArray(r.body));
                                 var s = oq(r);
                                 s.decl || (s.decl = t.variableDeclaration("var", []), n.unshiftContainer("body", s.decl), 
-                                s.declPath = n.get("body.0")), nq.default.strictEqual(s.declPath.node, s.decl);
+                                s.declPath = n.get("body.0"));
+                                nq.default.strictEqual(s.declPath.node, s.decl);
                                 var i = n.scope.generateUidIdentifier("marked"), o = t.callExpression(sq.runtimeProperty("mark"), [ t.clone(a.id) ]), d = s.decl.declarations.push(t.variableDeclarator(i, o)) - 1, u = s.declPath.get("declarations." + d + ".init");
                                 return nq.default.strictEqual(u.node, o), u.addComment("leading", "#__PURE__"), 
                                 t.clone(i);
-                            }(e) : t.clone(a.id);
+                            }(e);
+                            return t.clone(a.id);
                         }(e);
                         t.assertIdentifier(n.id);
-                        var l = t.identifier(n.id.name + "$"), c = function(e) {
-                            var t = JH.getTypes();
-                            t.assertFunction(e.node);
-                            var a = {};
-                            function n(e, n) {
-                                var r = e.node, s = e.scope;
-                                t.assertVariableDeclaration(r);
-                                var i = [];
-                                return r.declarations.forEach((function(e) {
-                                    a[e.id.name] = t.identifier(e.id.name), s.removeBinding(e.id.name), e.init ? i.push(t.assignmentExpression("=", e.id, e.init)) : n && i.push(e.id);
-                                })), 0 === i.length ? null : 1 === i.length ? i[0] : t.sequenceExpression(i);
-                            }
-                            e.get("body").traverse({
-                                VariableDeclaration: {
-                                    exit: function(e) {
-                                        var a = n(e, !1);
-                                        null === a ? e.remove() : JH.replaceWithOrRemove(e, t.expressionStatement(a)), e.skip();
-                                    }
-                                },
-                                ForStatement: function(e) {
-                                    var t = e.get("init");
-                                    t.isVariableDeclaration() && JH.replaceWithOrRemove(t, n(t, !1));
-                                },
-                                ForXStatement: function(e) {
-                                    var t = e.get("left");
-                                    t.isVariableDeclaration() && JH.replaceWithOrRemove(t, n(t, !0));
-                                },
-                                FunctionDeclaration: function(e) {
-                                    var n = e.node;
-                                    a[n.id.name] = n.id;
-                                    var r = t.expressionStatement(t.assignmentExpression("=", t.clone(n.id), t.functionExpression(e.scope.generateUidIdentifierBasedOnNode(n), n.params, n.body, n.generator, n.expression)));
-                                    e.parentPath.isBlockStatement() ? (e.parentPath.unshiftContainer("body", r), e.remove()) : JH.replaceWithOrRemove(e, r), 
-                                    e.scope.removeBinding(n.id.name), e.skip();
-                                },
-                                FunctionExpression: function(e) {
-                                    e.skip();
-                                },
-                                ArrowFunctionExpression: function(e) {
-                                    e.skip();
-                                }
-                            });
-                            var r = {};
-                            e.get("params").forEach((function(e) {
-                                var a = e.node;
-                                t.isIdentifier(a) && (r[a.name] = a);
-                            }));
-                            var s = [];
-                            return Object.keys(a).forEach((function(e) {
-                                YH.call(r, e) || s.push(t.variableDeclarator(a[e], null));
-                            })), 0 === s.length ? null : t.variableDeclaration("var", s);
-                        }(e), p = {
+                        var l = t.identifier(n.id.name + "$"), c = QH(e), p = {
                             usesThis: !1,
                             usesArguments: !1,
                             getArgsId: function() {
@@ -47319,7 +48544,8 @@ const StorageManager = (() => {
             var t = {
                 visitor: cq(e)
             }, a = e && e.version;
-            return a && parseInt(a, 10) >= 7 && (t.name = "regenerator-transform"), t;
+            a && parseInt(a, 10) >= 7 && (t.name = "regenerator-transform");
+            return t;
         };
     }), "/$$rollup_base$$/node_modules/regenerator-transform/lib").default, gq = iL((function(e) {
         return e.assertVersion(7), {
@@ -47330,7 +48556,8 @@ const StorageManager = (() => {
                 }
             }
         };
-    })), yq = r((function(e, t) {
+    }));
+    var fq, hq, mq, yq = r((function(e, t) {
         var a;
         t = e.exports = c, a = "object" == typeof la && la.env && la.env.NODE_DEBUG && /\bsemver\b/i.test(la.env.NODE_DEBUG) ? function() {
             var e = Array.prototype.slice.call(arguments, 0);
@@ -47360,16 +48587,18 @@ const StorageManager = (() => {
         s[i.XRANGELOOSE] = "^" + s[i.GTLT] + "\\s*" + s[i.XRANGEPLAINLOOSE] + "$", d("COERCE"), 
         s[i.COERCE] = "(^|[^\\d])(\\d{1,16})(?:\\.(\\d{1,16}))?(?:\\.(\\d{1,16}))?(?:$|[^\\d])", 
         d("COERCERTL"), r[i.COERCERTL] = new RegExp(s[i.COERCE], "g"), d("LONETILDE"), s[i.LONETILDE] = "(?:~>?)", 
-        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g"), 
+        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g");
         d("TILDE"), s[i.TILDE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAIN] + "$", d("TILDELOOSE"), 
         s[i.TILDELOOSE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAINLOOSE] + "$", d("LONECARET"), 
         s[i.LONECARET] = "(?:\\^)", d("CARETTRIM"), s[i.CARETTRIM] = "(\\s*)" + s[i.LONECARET] + "\\s+", 
-        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g"), d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", 
-        d("CARETLOOSE"), s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", 
-        d("COMPARATORLOOSE"), s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", 
-        d("COMPARATOR"), s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", 
-        d("COMPARATORTRIM"), s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
-        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g"), d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
+        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g");
+        d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", d("CARETLOOSE"), 
+        s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", d("COMPARATORLOOSE"), 
+        s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", d("COMPARATOR"), 
+        s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", d("COMPARATORTRIM"), 
+        s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
+        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g");
+        d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
         d("HYPHENRANGELOOSE"), s[i.HYPHENRANGELOOSE] = "^\\s*(" + s[i.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + s[i.XRANGEPLAINLOOSE] + ")\\s*$", 
         d("STAR"), s[i.STAR] = "(<|>)?=?\\s*\\*";
         for (var u = 0; u < o; u++) a(u, s[u]), r[u] || (r[u] = new RegExp(s[u]));
@@ -47767,7 +48996,7 @@ const StorageManager = (() => {
             }), this).join(" ").split(/\s+/);
             return this.options.loose && (o = o.filter((function(e) {
                 return !!e.match(s);
-            }))), o.map((function(e) {
+            }))), o = o.map((function(e) {
                 return new E(e, this.options);
             }), this);
         }, A.prototype.intersects = function(e, t) {
@@ -47822,26 +49051,29 @@ const StorageManager = (() => {
             if (e.test(a)) return a;
             if (a = new c("0.0.0-0"), e.test(a)) return a;
             a = null;
-            for (var n = 0; n < e.set.length; ++n) e.set[n].forEach((function(e) {
-                var t = new c(e.semver.version);
-                switch (e.operator) {
-                  case ">":
-                    0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
+            for (var n = 0; n < e.set.length; ++n) {
+                e.set[n].forEach((function(e) {
+                    var t = new c(e.semver.version);
+                    switch (e.operator) {
+                      case ">":
+                        0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
 
-                  case "":
-                  case ">=":
-                    a && !h(a, t) || (a = t);
-                    break;
+                      case "":
+                      case ">=":
+                        a && !h(a, t) || (a = t);
+                        break;
 
-                  case "<":
-                  case "<=":
-                    break;
+                      case "<":
+                      case "<=":
+                        break;
 
-                  default:
-                    throw new Error("Unexpected operation: " + e.operator);
-                }
-            }));
-            return a && e.test(a) ? a : null;
+                      default:
+                        throw new Error("Unexpected operation: " + e.operator);
+                    }
+                }));
+            }
+            if (a && e.test(a)) return a;
+            return null;
         }, t.validRange = function(e, t) {
             try {
                 return new A(e, t).range || "*";
@@ -47859,14 +49091,16 @@ const StorageManager = (() => {
             return e = new A(e, a), t = new A(t, a), e.intersects(t);
         }, t.coerce = function(e, t) {
             if (e instanceof c) return e;
-            if ("number" == typeof e && (e = String(e)), "string" != typeof e) return null;
+            "number" == typeof e && (e = String(e));
+            if ("string" != typeof e) return null;
             var a = null;
             if ((t = t || {}).rtl) {
                 for (var n; (n = r[i.COERCERTL].exec(e)) && (!a || a.index + a[0].length !== e.length); ) a && n.index + n[0].length === a.index + a[0].length || (a = n), 
                 r[i.COERCERTL].lastIndex = n.index + n[1].length + n[2].length;
                 r[i.COERCERTL].lastIndex = -1;
             } else a = e.match(r[i.COERCE]);
-            return null === a ? null : l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
+            if (null === a) return null;
+            return l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
         };
     }), "/$$rollup_base$$/packages/babel-plugin-transform-runtime/node_modules/babel-plugin-polyfill-corejs2/node_modules/semver"), Rq = [ "method", "targets", "ignoreBrowserslistConfig", "configPath", "debug", "shouldInjectPolyfill", "absoluteImports" ], bq = t, vq = bq.types, xq = bq.template;
     function Eq(e, t) {
@@ -47967,6 +49201,36 @@ const StorageManager = (() => {
             return "    " + String(e) + "\n";
         })).join("") : "";
     }
+    function Pq(e, t, a, n) {
+        var r, s, i, o, d = function(e) {
+            var a = function(e) {
+                if (e instanceof RegExp) return e;
+                try {
+                    return new RegExp("^" + e + "$");
+                } catch (e) {
+                    return null;
+                }
+            }(e);
+            if (!a) return !1;
+            for (var n, s = !1, i = S(t); !(n = i()).done; ) {
+                var o = n.value;
+                a.test(o) && (s = !0, r.add(o));
+            }
+            return !s;
+        }, u = r = new Set, l = Array.from(a).filter(d), c = r = new Set, p = Array.from(n).filter(d), g = (s = u, 
+        i = c, o = new Set, s.forEach((function(e) {
+            return i.has(e) && o.add(e);
+        })), o);
+        if (g.size > 0 || l.length > 0 || p.length > 0) throw new Error('Error while validating the "' + e + '" provider options:\n' + jq("include", l) + jq("exclude", p) + function(e) {
+            return e.size ? '  - The following polyfills were matched both by "include" and "exclude" patterns:\n' + Array.from(e, (function(e) {
+                return "    " + e + "\n";
+            })).join("") : "";
+        }(g));
+        return {
+            include: u,
+            exclude: c
+        };
+    }
     var Fq = function(e) {
         function t(t, a, n, r) {
             return e({
@@ -48053,7 +49317,8 @@ const StorageManager = (() => {
                 }));
             }
         };
-    }, kq = new Set([ "global", "globalThis", "self", "window" ]);
+    };
+    var kq = new Set([ "global", "globalThis", "self", "window" ]);
     function Iq(e) {
         var t = e.static, a = e.instance, n = e.global;
         return function(e) {
@@ -48176,44 +49441,18 @@ const StorageManager = (() => {
                     var s = "*" === t ? e : e + "@^" + t;
                     !a.all && function(e, t, a) {
                         var n = e.get(t);
-                        return void 0 === n && (n = !0, e.set(t, n)), n;
-                    }(v, e + " :: " + n) || r().missingDeps.add(s);
+                        void 0 === n && (n = a(), e.set(t, n));
+                        return n;
+                    }(v, e + " :: " + n, (function() {
+                        return !0;
+                    })) || r().missingDeps.add(s);
                 }
             }
         }, A = e(D, y, n);
         if ("function" != typeof A[g]) throw new Error('The "' + (A.name || e.name) + '" provider doesn\'t support the "' + p + '" polyfilling method.');
         Array.isArray(A.polyfills) ? (u = new Set(A.polyfills), l = A.filterPolyfills) : A.polyfills ? (u = new Set(Object.keys(A.polyfills)), 
         d = A.polyfills, l = A.filterPolyfills) : u = new Set;
-        var w = function(e, t, a, n) {
-            var r, s, i, o, d = function(e) {
-                var a = function(e) {
-                    if (e instanceof RegExp) return e;
-                    try {
-                        return new RegExp("^" + e + "$");
-                    } catch (e) {
-                        return null;
-                    }
-                }(e);
-                if (!a) return !1;
-                for (var n, s = !1, i = S(t); !(n = i()).done; ) {
-                    var o = n.value;
-                    a.test(o) && (s = !0, r.add(o));
-                }
-                return !s;
-            }, u = r = new Set, l = Array.from(a).filter(d), c = r = new Set, p = Array.from(n).filter(d), g = (s = u, 
-            i = c, o = new Set, s.forEach((function(e) {
-                return i.has(e) && o.add(e);
-            })), o);
-            if (g.size > 0 || l.length > 0 || p.length > 0) throw new Error('Error while validating the "' + e + '" provider options:\n' + jq("include", l) + jq("exclude", p) + function(e) {
-                return e.size ? '  - The following polyfills were matched both by "include" and "exclude" patterns:\n' + Array.from(e, (function(e) {
-                    return "    " + e + "\n";
-                })).join("") : "";
-            }(g));
-            return {
-                include: u,
-                exclude: c
-            };
-        }(A.name || e.name, u, y.include || [], y.exclude || []);
+        var w = Pq(A.name || e.name, u, y.include || [], y.exclude || []);
         return i = w.include, o = w.exclude, {
             debug: h,
             method: p,
@@ -48485,7 +49724,8 @@ const StorageManager = (() => {
         "es6.parse-float": {},
         "es6.parse-int": {},
         "es7.string.at": {}
-    }, Jq = t.types, Yq = Function.call.bind(Object.hasOwnProperty), Qq = Nq((function(e, t) {
+    };
+    var Jq = t.types, Yq = Function.call.bind(Object.hasOwnProperty), Qq = Nq((function(e, t) {
         var a = t["#__secret_key__@babel/preset-env__compatibility"], n = (a = void 0 === a ? {} : a).entryInjectRegenerator, r = t["#__secret_key__@babel/runtime__compatibility"], s = (r = void 0 === r ? {} : r).useBabelRuntime, i = r.runtimeVersion, o = r.ext, d = void 0 === o ? ".js" : o, u = e.createMetaResolver({
             global: Hq,
             static: qq,
@@ -48500,6 +49740,12 @@ const StorageManager = (() => {
             "string" != typeof e ? e.forEach((function(e) {
                 return h(e, t);
             })) : Yq(g, e) && c(e) && (l(e), t.injectGlobalImport(f + "/" + e + ".js"));
+        }
+        function m(e, t, a) {
+            var n = e.pure, r = e.meta, s = e.name;
+            if (n && c(s) && (!(i && r && r.minRuntimeVersion) || function(e, t) {
+                return !(t && e && (yq.valid(t) && (t = "^" + t), yq.intersects("<" + e, t) || yq.intersects(">=8.0.0", t)));
+            }(r && r.minRuntimeVersion, i))) return a.injectDefaultImport(f + "/" + n + d, t);
         }
         return {
             name: "corejs2",
@@ -48536,12 +49782,7 @@ const StorageManager = (() => {
                         }
                         var n = u(e);
                         if (n) {
-                            var r = function(e, t, a) {
-                                var n = e.pure, r = e.meta, s = e.name;
-                                if (n && c(s) && (!(i && r && r.minRuntimeVersion) || function(e, t) {
-                                    return !(t && e && (yq.valid(t) && (t = "^" + t), yq.intersects("<" + e, t) || yq.intersects(">=8.0.0", t)));
-                                }(r && r.minRuntimeVersion, i))) return a.injectDefaultImport(f + "/" + n + d, t);
-                            }(n.desc, n.name, t);
+                            var r = m(n.desc, n.name, t);
                             r && a.replaceWith(r);
                         }
                     }
@@ -52160,10 +53401,10 @@ const StorageManager = (() => {
         t.comparatorTrimReplace = "$1$2$3", o("HYPHENRANGE", "^\\s*(" + r[s.XRANGEPLAIN] + ")\\s+-\\s+(" + r[s.XRANGEPLAIN] + ")\\s*$"), 
         o("HYPHENRANGELOOSE", "^\\s*(" + r[s.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + r[s.XRANGEPLAINLOOSE] + ")\\s*$"), 
         o("STAR", "(<|>)?=?\\s*\\*");
-    }), "/$$rollup_base$$/node_modules/core-js-compat/node_modules/semver/internal"), rX = /^[0-9]+$/, iX = function(e, t) {
+    }), "/$$rollup_base$$/node_modules/core-js-compat/node_modules/semver/internal"), rX = /^[0-9]+$/, sX = function(e, t) {
         var a = rX.test(e), n = rX.test(t);
         return a && n && (e = +e, t = +t), e === t ? 0 : a && !n ? -1 : n && !a ? 1 : e < t ? -1 : 1;
-    }, oX = aX.MAX_LENGTH, dX = aX.MAX_SAFE_INTEGER, uX = nX.re, lX = nX.t, cX = iX, pX = function() {
+    }, iX = sX, oX = aX.MAX_LENGTH, dX = aX.MAX_SAFE_INTEGER, uX = nX.re, lX = nX.t, cX = iX, pX = function() {
         function e(t, a) {
             if (a && "object" == typeof a || (a = {
                 loose: !!a,
@@ -52271,6 +53512,18 @@ const StorageManager = (() => {
         }, e;
     }(), gX = function(e, t, a) {
         return new pX(e, a).compare(new pX(t, a));
+    }, fX = function(e, t, a) {
+        return 0 === gX(e, t, a);
+    }, hX = function(e, t, a) {
+        return 0 !== gX(e, t, a);
+    }, mX = function(e, t, a) {
+        return gX(e, t, a) > 0;
+    }, yX = function(e, t, a) {
+        return gX(e, t, a) >= 0;
+    }, RX = function(e, t, a) {
+        return gX(e, t, a) < 0;
+    }, bX = function(e, t, a) {
+        return gX(e, t, a) <= 0;
     }, vX = function(e, t, a, n) {
         switch (t) {
           case "===":
@@ -52284,39 +53537,40 @@ const StorageManager = (() => {
           case "":
           case "=":
           case "==":
-            return function(e, t, a) {
-                return 0 === gX(e, t, a);
-            }(e, a, n);
+            return fX(e, a, n);
 
           case "!=":
-            return function(e, t, a) {
-                return 0 !== gX(e, t, a);
-            }(e, a, n);
+            return hX(e, a, n);
 
           case ">":
-            return function(e, t, a) {
-                return gX(e, t, a) > 0;
-            }(e, a, n);
+            return mX(e, a, n);
 
           case ">=":
-            return function(e, t, a) {
-                return gX(e, t, a) >= 0;
-            }(e, a, n);
+            return yX(e, a, n);
 
           case "<":
-            return function(e, t, a) {
-                return gX(e, t, a) < 0;
-            }(e, a, n);
+            return RX(e, a, n);
 
           case "<=":
-            return function(e, t, a) {
-                return gX(e, t, a) <= 0;
-            }(e, a, n);
+            return bX(e, a, n);
 
           default:
             throw new TypeError("Invalid operator: " + t);
         }
-    }, xX = aX.MAX_LENGTH, EX = nX.re, DX = nX.t, wX = nX.re, CX = nX.t, SX = function(e, t) {
+    }, xX = aX.MAX_LENGTH, EX = nX.re, DX = nX.t, AX = function(e, t) {
+        if (t && "object" == typeof t || (t = {
+            loose: !!t,
+            includePrerelease: !1
+        }), e instanceof pX) return e;
+        if ("string" != typeof e) return null;
+        if (e.length > xX) return null;
+        if (!(t.loose ? EX[DX.LOOSE] : EX[DX.FULL]).test(e)) return null;
+        try {
+            return new pX(e, t);
+        } catch (e) {
+            return null;
+        }
+    }, wX = nX.re, CX = nX.t, SX = function(e, t) {
         if (e instanceof pX) return e;
         if ("number" == typeof e && (e = String(e)), "string" != typeof e) return null;
         var a = null;
@@ -52325,28 +53579,26 @@ const StorageManager = (() => {
             wX[CX.COERCERTL].lastIndex = n.index + n[1].length + n[2].length;
             wX[CX.COERCERTL].lastIndex = -1;
         } else a = e.match(wX[CX.COERCE]);
-        return null === a ? null : function(e, t) {
-            if (t && "object" == typeof t || (t = {
-                loose: !!t,
-                includePrerelease: !1
-            }), e instanceof pX) return e;
-            if ("string" != typeof e) return null;
-            if (e.length > xX) return null;
-            if (!(t.loose ? EX[DX.LOOSE] : EX[DX.FULL]).test(e)) return null;
-            try {
-                return new pX(e, t);
-            } catch (e) {
-                return null;
-            }
-        }(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
-    }, TX_compare = function(e, t, a) {
-        return vX(SX(e), t, SX(a));
-    }, TX_intersection = (Function.call.bind({}.hasOwnProperty), function(e, t) {
-        var a = e instanceof Set ? e : new Set(e);
-        return t.filter((function(e) {
-            return a.has(e);
-        }));
-    }), jX = {
+        return null === a ? null : AX(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
+    };
+    var TX = {
+        compare: function(e, t, a) {
+            return vX(SX(e), t, SX(a));
+        },
+        has: Function.call.bind({}.hasOwnProperty),
+        intersection: function(e, t) {
+            var a = e instanceof Set ? e : new Set(e);
+            return t.filter((function(e) {
+                return a.has(e);
+            }));
+        },
+        semver: SX,
+        sortObjectByKey: function(e, t) {
+            return Object.keys(e).sort(t).reduce((function(t, a) {
+                return t[a] = e[a], t;
+            }), {});
+        }
+    }, jX = {
         "3.0": [ "es.symbol", "es.symbol.description", "es.symbol.async-iterator", "es.symbol.has-instance", "es.symbol.is-concat-spreadable", "es.symbol.iterator", "es.symbol.match", "es.symbol.replace", "es.symbol.search", "es.symbol.species", "es.symbol.split", "es.symbol.to-primitive", "es.symbol.to-string-tag", "es.symbol.unscopables", "es.array.concat", "es.array.copy-within", "es.array.every", "es.array.fill", "es.array.filter", "es.array.find", "es.array.find-index", "es.array.flat", "es.array.flat-map", "es.array.for-each", "es.array.from", "es.array.includes", "es.array.index-of", "es.array.is-array", "es.array.iterator", "es.array.join", "es.array.last-index-of", "es.array.map", "es.array.of", "es.array.reduce", "es.array.reduce-right", "es.array.reverse", "es.array.slice", "es.array.some", "es.array.sort", "es.array.species", "es.array.splice", "es.array.unscopables.flat", "es.array.unscopables.flat-map", "es.array-buffer.constructor", "es.array-buffer.is-view", "es.array-buffer.slice", "es.data-view", "es.date.now", "es.date.to-iso-string", "es.date.to-json", "es.date.to-primitive", "es.date.to-string", "es.function.bind", "es.function.has-instance", "es.function.name", "es.json.to-string-tag", "es.map", "es.math.acosh", "es.math.asinh", "es.math.atanh", "es.math.cbrt", "es.math.clz32", "es.math.cosh", "es.math.expm1", "es.math.fround", "es.math.hypot", "es.math.imul", "es.math.log10", "es.math.log1p", "es.math.log2", "es.math.sign", "es.math.sinh", "es.math.tanh", "es.math.to-string-tag", "es.math.trunc", "es.number.constructor", "es.number.epsilon", "es.number.is-finite", "es.number.is-integer", "es.number.is-nan", "es.number.is-safe-integer", "es.number.max-safe-integer", "es.number.min-safe-integer", "es.number.parse-float", "es.number.parse-int", "es.number.to-fixed", "es.number.to-precision", "es.object.assign", "es.object.create", "es.object.define-getter", "es.object.define-properties", "es.object.define-property", "es.object.define-setter", "es.object.entries", "es.object.freeze", "es.object.from-entries", "es.object.get-own-property-descriptor", "es.object.get-own-property-descriptors", "es.object.get-own-property-names", "es.object.get-prototype-of", "es.object.is", "es.object.is-extensible", "es.object.is-frozen", "es.object.is-sealed", "es.object.keys", "es.object.lookup-getter", "es.object.lookup-setter", "es.object.prevent-extensions", "es.object.seal", "es.object.set-prototype-of", "es.object.to-string", "es.object.values", "es.parse-float", "es.parse-int", "es.promise", "es.promise.finally", "es.reflect.apply", "es.reflect.construct", "es.reflect.define-property", "es.reflect.delete-property", "es.reflect.get", "es.reflect.get-own-property-descriptor", "es.reflect.get-prototype-of", "es.reflect.has", "es.reflect.is-extensible", "es.reflect.own-keys", "es.reflect.prevent-extensions", "es.reflect.set", "es.reflect.set-prototype-of", "es.regexp.constructor", "es.regexp.exec", "es.regexp.flags", "es.regexp.to-string", "es.set", "es.string.code-point-at", "es.string.ends-with", "es.string.from-code-point", "es.string.includes", "es.string.iterator", "es.string.match", "es.string.pad-end", "es.string.pad-start", "es.string.raw", "es.string.repeat", "es.string.replace", "es.string.search", "es.string.split", "es.string.starts-with", "es.string.trim", "es.string.trim-end", "es.string.trim-start", "es.string.anchor", "es.string.big", "es.string.blink", "es.string.bold", "es.string.fixed", "es.string.fontcolor", "es.string.fontsize", "es.string.italics", "es.string.link", "es.string.small", "es.string.strike", "es.string.sub", "es.string.sup", "es.typed-array.float32-array", "es.typed-array.float64-array", "es.typed-array.int8-array", "es.typed-array.int16-array", "es.typed-array.int32-array", "es.typed-array.uint8-array", "es.typed-array.uint8-clamped-array", "es.typed-array.uint16-array", "es.typed-array.uint32-array", "es.typed-array.copy-within", "es.typed-array.every", "es.typed-array.fill", "es.typed-array.filter", "es.typed-array.find", "es.typed-array.find-index", "es.typed-array.for-each", "es.typed-array.from", "es.typed-array.includes", "es.typed-array.index-of", "es.typed-array.iterator", "es.typed-array.join", "es.typed-array.last-index-of", "es.typed-array.map", "es.typed-array.of", "es.typed-array.reduce", "es.typed-array.reduce-right", "es.typed-array.reverse", "es.typed-array.set", "es.typed-array.slice", "es.typed-array.some", "es.typed-array.sort", "es.typed-array.subarray", "es.typed-array.to-locale-string", "es.typed-array.to-string", "es.weak-map", "es.weak-set", "esnext.aggregate-error", "esnext.array.last-index", "esnext.array.last-item", "esnext.composite-key", "esnext.composite-symbol", "esnext.global-this", "esnext.map.delete-all", "esnext.map.every", "esnext.map.filter", "esnext.map.find", "esnext.map.find-key", "esnext.map.from", "esnext.map.group-by", "esnext.map.includes", "esnext.map.key-by", "esnext.map.key-of", "esnext.map.map-keys", "esnext.map.map-values", "esnext.map.merge", "esnext.map.of", "esnext.map.reduce", "esnext.map.some", "esnext.map.update", "esnext.math.clamp", "esnext.math.deg-per-rad", "esnext.math.degrees", "esnext.math.fscale", "esnext.math.iaddh", "esnext.math.imulh", "esnext.math.isubh", "esnext.math.rad-per-deg", "esnext.math.radians", "esnext.math.scale", "esnext.math.seeded-prng", "esnext.math.signbit", "esnext.math.umulh", "esnext.number.from-string", "esnext.observable", "esnext.promise.all-settled", "esnext.promise.any", "esnext.promise.try", "esnext.reflect.define-metadata", "esnext.reflect.delete-metadata", "esnext.reflect.get-metadata", "esnext.reflect.get-metadata-keys", "esnext.reflect.get-own-metadata", "esnext.reflect.get-own-metadata-keys", "esnext.reflect.has-metadata", "esnext.reflect.has-own-metadata", "esnext.reflect.metadata", "esnext.set.add-all", "esnext.set.delete-all", "esnext.set.difference", "esnext.set.every", "esnext.set.filter", "esnext.set.find", "esnext.set.from", "esnext.set.intersection", "esnext.set.is-disjoint-from", "esnext.set.is-subset-of", "esnext.set.is-superset-of", "esnext.set.join", "esnext.set.map", "esnext.set.of", "esnext.set.reduce", "esnext.set.some", "esnext.set.symmetric-difference", "esnext.set.union", "esnext.string.at", "esnext.string.code-points", "esnext.string.match-all", "esnext.string.replace-all", "esnext.symbol.dispose", "esnext.symbol.observable", "esnext.symbol.pattern-match", "esnext.weak-map.delete-all", "esnext.weak-map.from", "esnext.weak-map.of", "esnext.weak-set.add-all", "esnext.weak-set.delete-all", "esnext.weak-set.from", "esnext.weak-set.of", "web.dom-collections.for-each", "web.dom-collections.iterator", "web.immediate", "web.queue-microtask", "web.timers", "web.url", "web.url.to-json", "web.url-search-params" ],
         3.1: [ "es.string.match-all", "es.symbol.match-all", "esnext.symbol.replace-all" ],
         3.2: [ "es.promise.all-settled", "esnext.array.is-template-object", "esnext.map.update-or-insert", "esnext.symbol.async-dispose" ],
@@ -52361,7 +53613,7 @@ const StorageManager = (() => {
         3.12: [ "esnext.symbol.matcher", "esnext.symbol.metadata" ],
         3.15: [ "es.date.get-year", "es.date.set-year", "es.date.to-gmt-string", "es.escape", "es.regexp.dot-all", "es.string.substr", "es.unescape" ],
         3.16: [ "esnext.array.filter-reject", "esnext.array.group-by", "esnext.typed-array.filter-reject", "esnext.typed-array.group-by" ]
-    }, PX = [ "es.symbol", "es.symbol.description", "es.symbol.async-iterator", "es.symbol.has-instance", "es.symbol.is-concat-spreadable", "es.symbol.iterator", "es.symbol.match", "es.symbol.match-all", "es.symbol.replace", "es.symbol.search", "es.symbol.species", "es.symbol.split", "es.symbol.to-primitive", "es.symbol.to-string-tag", "es.symbol.unscopables", "es.aggregate-error", "es.array.concat", "es.array.copy-within", "es.array.every", "es.array.fill", "es.array.filter", "es.array.find", "es.array.find-index", "es.array.flat", "es.array.flat-map", "es.array.for-each", "es.array.from", "es.array.includes", "es.array.index-of", "es.array.is-array", "es.array.iterator", "es.array.join", "es.array.last-index-of", "es.array.map", "es.array.of", "es.array.reduce", "es.array.reduce-right", "es.array.reverse", "es.array.slice", "es.array.some", "es.array.sort", "es.array.species", "es.array.splice", "es.array.unscopables.flat", "es.array.unscopables.flat-map", "es.array-buffer.constructor", "es.array-buffer.is-view", "es.array-buffer.slice", "es.data-view", "es.date.get-year", "es.date.now", "es.date.set-year", "es.date.to-gmt-string", "es.date.to-iso-string", "es.date.to-json", "es.date.to-primitive", "es.date.to-string", "es.escape", "es.function.bind", "es.function.has-instance", "es.function.name", "es.global-this", "es.json.stringify", "es.json.to-string-tag", "es.map", "es.math.acosh", "es.math.asinh", "es.math.atanh", "es.math.cbrt", "es.math.clz32", "es.math.cosh", "es.math.expm1", "es.math.fround", "es.math.hypot", "es.math.imul", "es.math.log10", "es.math.log1p", "es.math.log2", "es.math.sign", "es.math.sinh", "es.math.tanh", "es.math.to-string-tag", "es.math.trunc", "es.number.constructor", "es.number.epsilon", "es.number.is-finite", "es.number.is-integer", "es.number.is-nan", "es.number.is-safe-integer", "es.number.max-safe-integer", "es.number.min-safe-integer", "es.number.parse-float", "es.number.parse-int", "es.number.to-fixed", "es.number.to-precision", "es.object.assign", "es.object.create", "es.object.define-getter", "es.object.define-properties", "es.object.define-property", "es.object.define-setter", "es.object.entries", "es.object.freeze", "es.object.from-entries", "es.object.get-own-property-descriptor", "es.object.get-own-property-descriptors", "es.object.get-own-property-names", "es.object.get-prototype-of", "es.object.is", "es.object.is-extensible", "es.object.is-frozen", "es.object.is-sealed", "es.object.keys", "es.object.lookup-getter", "es.object.lookup-setter", "es.object.prevent-extensions", "es.object.seal", "es.object.set-prototype-of", "es.object.to-string", "es.object.values", "es.parse-float", "es.parse-int", "es.promise", "es.promise.all-settled", "es.promise.any", "es.promise.finally", "es.reflect.apply", "es.reflect.construct", "es.reflect.define-property", "es.reflect.delete-property", "es.reflect.get", "es.reflect.get-own-property-descriptor", "es.reflect.get-prototype-of", "es.reflect.has", "es.reflect.is-extensible", "es.reflect.own-keys", "es.reflect.prevent-extensions", "es.reflect.set", "es.reflect.set-prototype-of", "es.reflect.to-string-tag", "es.regexp.constructor", "es.regexp.dot-all", "es.regexp.exec", "es.regexp.flags", "es.regexp.sticky", "es.regexp.test", "es.regexp.to-string", "es.set", "es.string.code-point-at", "es.string.ends-with", "es.string.from-code-point", "es.string.includes", "es.string.iterator", "es.string.match", "es.string.match-all", "es.string.pad-end", "es.string.pad-start", "es.string.raw", "es.string.repeat", "es.string.replace", "es.string.replace-all", "es.string.search", "es.string.split", "es.string.starts-with", "es.string.substr", "es.string.trim", "es.string.trim-end", "es.string.trim-start", "es.string.anchor", "es.string.big", "es.string.blink", "es.string.bold", "es.string.fixed", "es.string.fontcolor", "es.string.fontsize", "es.string.italics", "es.string.link", "es.string.small", "es.string.strike", "es.string.sub", "es.string.sup", "es.typed-array.float32-array", "es.typed-array.float64-array", "es.typed-array.int8-array", "es.typed-array.int16-array", "es.typed-array.int32-array", "es.typed-array.uint8-array", "es.typed-array.uint8-clamped-array", "es.typed-array.uint16-array", "es.typed-array.uint32-array", "es.typed-array.copy-within", "es.typed-array.every", "es.typed-array.fill", "es.typed-array.filter", "es.typed-array.find", "es.typed-array.find-index", "es.typed-array.for-each", "es.typed-array.from", "es.typed-array.includes", "es.typed-array.index-of", "es.typed-array.iterator", "es.typed-array.join", "es.typed-array.last-index-of", "es.typed-array.map", "es.typed-array.of", "es.typed-array.reduce", "es.typed-array.reduce-right", "es.typed-array.reverse", "es.typed-array.set", "es.typed-array.slice", "es.typed-array.some", "es.typed-array.sort", "es.typed-array.subarray", "es.typed-array.to-locale-string", "es.typed-array.to-string", "es.unescape", "es.weak-map", "es.weak-set", "esnext.aggregate-error", "esnext.array.at", "esnext.array.filter-out", "esnext.array.filter-reject", "esnext.array.find-last", "esnext.array.find-last-index", "esnext.array.group-by", "esnext.array.is-template-object", "esnext.array.last-index", "esnext.array.last-item", "esnext.array.unique-by", "esnext.async-iterator.constructor", "esnext.async-iterator.as-indexed-pairs", "esnext.async-iterator.drop", "esnext.async-iterator.every", "esnext.async-iterator.filter", "esnext.async-iterator.find", "esnext.async-iterator.flat-map", "esnext.async-iterator.for-each", "esnext.async-iterator.from", "esnext.async-iterator.map", "esnext.async-iterator.reduce", "esnext.async-iterator.some", "esnext.async-iterator.take", "esnext.async-iterator.to-array", "esnext.bigint.range", "esnext.composite-key", "esnext.composite-symbol", "esnext.global-this", "esnext.iterator.constructor", "esnext.iterator.as-indexed-pairs", "esnext.iterator.drop", "esnext.iterator.every", "esnext.iterator.filter", "esnext.iterator.find", "esnext.iterator.flat-map", "esnext.iterator.for-each", "esnext.iterator.from", "esnext.iterator.map", "esnext.iterator.reduce", "esnext.iterator.some", "esnext.iterator.take", "esnext.iterator.to-array", "esnext.map.delete-all", "esnext.map.emplace", "esnext.map.every", "esnext.map.filter", "esnext.map.find", "esnext.map.find-key", "esnext.map.from", "esnext.map.group-by", "esnext.map.includes", "esnext.map.key-by", "esnext.map.key-of", "esnext.map.map-keys", "esnext.map.map-values", "esnext.map.merge", "esnext.map.of", "esnext.map.reduce", "esnext.map.some", "esnext.map.update", "esnext.map.update-or-insert", "esnext.map.upsert", "esnext.math.clamp", "esnext.math.deg-per-rad", "esnext.math.degrees", "esnext.math.fscale", "esnext.math.iaddh", "esnext.math.imulh", "esnext.math.isubh", "esnext.math.rad-per-deg", "esnext.math.radians", "esnext.math.scale", "esnext.math.seeded-prng", "esnext.math.signbit", "esnext.math.umulh", "esnext.number.from-string", "esnext.number.range", "esnext.object.has-own", "esnext.object.iterate-entries", "esnext.object.iterate-keys", "esnext.object.iterate-values", "esnext.observable", "esnext.promise.all-settled", "esnext.promise.any", "esnext.promise.try", "esnext.reflect.define-metadata", "esnext.reflect.delete-metadata", "esnext.reflect.get-metadata", "esnext.reflect.get-metadata-keys", "esnext.reflect.get-own-metadata", "esnext.reflect.get-own-metadata-keys", "esnext.reflect.has-metadata", "esnext.reflect.has-own-metadata", "esnext.reflect.metadata", "esnext.set.add-all", "esnext.set.delete-all", "esnext.set.difference", "esnext.set.every", "esnext.set.filter", "esnext.set.find", "esnext.set.from", "esnext.set.intersection", "esnext.set.is-disjoint-from", "esnext.set.is-subset-of", "esnext.set.is-superset-of", "esnext.set.join", "esnext.set.map", "esnext.set.of", "esnext.set.reduce", "esnext.set.some", "esnext.set.symmetric-difference", "esnext.set.union", "esnext.string.at", "esnext.string.code-points", "esnext.string.match-all", "esnext.string.replace-all", "esnext.symbol.async-dispose", "esnext.symbol.dispose", "esnext.symbol.matcher", "esnext.symbol.metadata", "esnext.symbol.observable", "esnext.symbol.pattern-match", "esnext.symbol.replace-all", "esnext.typed-array.at", "esnext.typed-array.filter-out", "esnext.typed-array.filter-reject", "esnext.typed-array.find-last", "esnext.typed-array.find-last-index", "esnext.typed-array.group-by", "esnext.typed-array.unique-by", "esnext.weak-map.delete-all", "esnext.weak-map.from", "esnext.weak-map.of", "esnext.weak-map.emplace", "esnext.weak-map.upsert", "esnext.weak-set.add-all", "esnext.weak-set.delete-all", "esnext.weak-set.from", "esnext.weak-set.of", "web.dom-collections.for-each", "web.dom-collections.iterator", "web.immediate", "web.queue-microtask", "web.timers", "web.url", "web.url.to-json", "web.url-search-params" ], FX = TX_compare, _X = TX_intersection, kX = SX, IX = function(e) {
+    }, PX = [ "es.symbol", "es.symbol.description", "es.symbol.async-iterator", "es.symbol.has-instance", "es.symbol.is-concat-spreadable", "es.symbol.iterator", "es.symbol.match", "es.symbol.match-all", "es.symbol.replace", "es.symbol.search", "es.symbol.species", "es.symbol.split", "es.symbol.to-primitive", "es.symbol.to-string-tag", "es.symbol.unscopables", "es.aggregate-error", "es.array.concat", "es.array.copy-within", "es.array.every", "es.array.fill", "es.array.filter", "es.array.find", "es.array.find-index", "es.array.flat", "es.array.flat-map", "es.array.for-each", "es.array.from", "es.array.includes", "es.array.index-of", "es.array.is-array", "es.array.iterator", "es.array.join", "es.array.last-index-of", "es.array.map", "es.array.of", "es.array.reduce", "es.array.reduce-right", "es.array.reverse", "es.array.slice", "es.array.some", "es.array.sort", "es.array.species", "es.array.splice", "es.array.unscopables.flat", "es.array.unscopables.flat-map", "es.array-buffer.constructor", "es.array-buffer.is-view", "es.array-buffer.slice", "es.data-view", "es.date.get-year", "es.date.now", "es.date.set-year", "es.date.to-gmt-string", "es.date.to-iso-string", "es.date.to-json", "es.date.to-primitive", "es.date.to-string", "es.escape", "es.function.bind", "es.function.has-instance", "es.function.name", "es.global-this", "es.json.stringify", "es.json.to-string-tag", "es.map", "es.math.acosh", "es.math.asinh", "es.math.atanh", "es.math.cbrt", "es.math.clz32", "es.math.cosh", "es.math.expm1", "es.math.fround", "es.math.hypot", "es.math.imul", "es.math.log10", "es.math.log1p", "es.math.log2", "es.math.sign", "es.math.sinh", "es.math.tanh", "es.math.to-string-tag", "es.math.trunc", "es.number.constructor", "es.number.epsilon", "es.number.is-finite", "es.number.is-integer", "es.number.is-nan", "es.number.is-safe-integer", "es.number.max-safe-integer", "es.number.min-safe-integer", "es.number.parse-float", "es.number.parse-int", "es.number.to-fixed", "es.number.to-precision", "es.object.assign", "es.object.create", "es.object.define-getter", "es.object.define-properties", "es.object.define-property", "es.object.define-setter", "es.object.entries", "es.object.freeze", "es.object.from-entries", "es.object.get-own-property-descriptor", "es.object.get-own-property-descriptors", "es.object.get-own-property-names", "es.object.get-prototype-of", "es.object.is", "es.object.is-extensible", "es.object.is-frozen", "es.object.is-sealed", "es.object.keys", "es.object.lookup-getter", "es.object.lookup-setter", "es.object.prevent-extensions", "es.object.seal", "es.object.set-prototype-of", "es.object.to-string", "es.object.values", "es.parse-float", "es.parse-int", "es.promise", "es.promise.all-settled", "es.promise.any", "es.promise.finally", "es.reflect.apply", "es.reflect.construct", "es.reflect.define-property", "es.reflect.delete-property", "es.reflect.get", "es.reflect.get-own-property-descriptor", "es.reflect.get-prototype-of", "es.reflect.has", "es.reflect.is-extensible", "es.reflect.own-keys", "es.reflect.prevent-extensions", "es.reflect.set", "es.reflect.set-prototype-of", "es.reflect.to-string-tag", "es.regexp.constructor", "es.regexp.dot-all", "es.regexp.exec", "es.regexp.flags", "es.regexp.sticky", "es.regexp.test", "es.regexp.to-string", "es.set", "es.string.code-point-at", "es.string.ends-with", "es.string.from-code-point", "es.string.includes", "es.string.iterator", "es.string.match", "es.string.match-all", "es.string.pad-end", "es.string.pad-start", "es.string.raw", "es.string.repeat", "es.string.replace", "es.string.replace-all", "es.string.search", "es.string.split", "es.string.starts-with", "es.string.substr", "es.string.trim", "es.string.trim-end", "es.string.trim-start", "es.string.anchor", "es.string.big", "es.string.blink", "es.string.bold", "es.string.fixed", "es.string.fontcolor", "es.string.fontsize", "es.string.italics", "es.string.link", "es.string.small", "es.string.strike", "es.string.sub", "es.string.sup", "es.typed-array.float32-array", "es.typed-array.float64-array", "es.typed-array.int8-array", "es.typed-array.int16-array", "es.typed-array.int32-array", "es.typed-array.uint8-array", "es.typed-array.uint8-clamped-array", "es.typed-array.uint16-array", "es.typed-array.uint32-array", "es.typed-array.copy-within", "es.typed-array.every", "es.typed-array.fill", "es.typed-array.filter", "es.typed-array.find", "es.typed-array.find-index", "es.typed-array.for-each", "es.typed-array.from", "es.typed-array.includes", "es.typed-array.index-of", "es.typed-array.iterator", "es.typed-array.join", "es.typed-array.last-index-of", "es.typed-array.map", "es.typed-array.of", "es.typed-array.reduce", "es.typed-array.reduce-right", "es.typed-array.reverse", "es.typed-array.set", "es.typed-array.slice", "es.typed-array.some", "es.typed-array.sort", "es.typed-array.subarray", "es.typed-array.to-locale-string", "es.typed-array.to-string", "es.unescape", "es.weak-map", "es.weak-set", "esnext.aggregate-error", "esnext.array.at", "esnext.array.filter-out", "esnext.array.filter-reject", "esnext.array.find-last", "esnext.array.find-last-index", "esnext.array.group-by", "esnext.array.is-template-object", "esnext.array.last-index", "esnext.array.last-item", "esnext.array.unique-by", "esnext.async-iterator.constructor", "esnext.async-iterator.as-indexed-pairs", "esnext.async-iterator.drop", "esnext.async-iterator.every", "esnext.async-iterator.filter", "esnext.async-iterator.find", "esnext.async-iterator.flat-map", "esnext.async-iterator.for-each", "esnext.async-iterator.from", "esnext.async-iterator.map", "esnext.async-iterator.reduce", "esnext.async-iterator.some", "esnext.async-iterator.take", "esnext.async-iterator.to-array", "esnext.bigint.range", "esnext.composite-key", "esnext.composite-symbol", "esnext.global-this", "esnext.iterator.constructor", "esnext.iterator.as-indexed-pairs", "esnext.iterator.drop", "esnext.iterator.every", "esnext.iterator.filter", "esnext.iterator.find", "esnext.iterator.flat-map", "esnext.iterator.for-each", "esnext.iterator.from", "esnext.iterator.map", "esnext.iterator.reduce", "esnext.iterator.some", "esnext.iterator.take", "esnext.iterator.to-array", "esnext.map.delete-all", "esnext.map.emplace", "esnext.map.every", "esnext.map.filter", "esnext.map.find", "esnext.map.find-key", "esnext.map.from", "esnext.map.group-by", "esnext.map.includes", "esnext.map.key-by", "esnext.map.key-of", "esnext.map.map-keys", "esnext.map.map-values", "esnext.map.merge", "esnext.map.of", "esnext.map.reduce", "esnext.map.some", "esnext.map.update", "esnext.map.update-or-insert", "esnext.map.upsert", "esnext.math.clamp", "esnext.math.deg-per-rad", "esnext.math.degrees", "esnext.math.fscale", "esnext.math.iaddh", "esnext.math.imulh", "esnext.math.isubh", "esnext.math.rad-per-deg", "esnext.math.radians", "esnext.math.scale", "esnext.math.seeded-prng", "esnext.math.signbit", "esnext.math.umulh", "esnext.number.from-string", "esnext.number.range", "esnext.object.has-own", "esnext.object.iterate-entries", "esnext.object.iterate-keys", "esnext.object.iterate-values", "esnext.observable", "esnext.promise.all-settled", "esnext.promise.any", "esnext.promise.try", "esnext.reflect.define-metadata", "esnext.reflect.delete-metadata", "esnext.reflect.get-metadata", "esnext.reflect.get-metadata-keys", "esnext.reflect.get-own-metadata", "esnext.reflect.get-own-metadata-keys", "esnext.reflect.has-metadata", "esnext.reflect.has-own-metadata", "esnext.reflect.metadata", "esnext.set.add-all", "esnext.set.delete-all", "esnext.set.difference", "esnext.set.every", "esnext.set.filter", "esnext.set.find", "esnext.set.from", "esnext.set.intersection", "esnext.set.is-disjoint-from", "esnext.set.is-subset-of", "esnext.set.is-superset-of", "esnext.set.join", "esnext.set.map", "esnext.set.of", "esnext.set.reduce", "esnext.set.some", "esnext.set.symmetric-difference", "esnext.set.union", "esnext.string.at", "esnext.string.code-points", "esnext.string.match-all", "esnext.string.replace-all", "esnext.symbol.async-dispose", "esnext.symbol.dispose", "esnext.symbol.matcher", "esnext.symbol.metadata", "esnext.symbol.observable", "esnext.symbol.pattern-match", "esnext.symbol.replace-all", "esnext.typed-array.at", "esnext.typed-array.filter-out", "esnext.typed-array.filter-reject", "esnext.typed-array.find-last", "esnext.typed-array.find-last-index", "esnext.typed-array.group-by", "esnext.typed-array.unique-by", "esnext.weak-map.delete-all", "esnext.weak-map.from", "esnext.weak-map.of", "esnext.weak-map.emplace", "esnext.weak-map.upsert", "esnext.weak-set.add-all", "esnext.weak-set.delete-all", "esnext.weak-set.from", "esnext.weak-set.of", "web.dom-collections.for-each", "web.dom-collections.iterator", "web.immediate", "web.queue-microtask", "web.timers", "web.url", "web.url.to-json", "web.url-search-params" ], FX = TX.compare, _X = TX.intersection, kX = TX.semver, IX = function(e) {
         var t = kX(e);
         if (3 !== t.major) throw RangeError("This version of `core-js-compat` works only with `core-js@3`.");
         for (var a = [], n = 0, r = Object.keys(jX); n < r.length; n++) {
@@ -54333,7 +55585,7 @@ const StorageManager = (() => {
             name: "corejs3",
             polyfills: eX,
             filterPolyfills: function(e) {
-                return !(!R.has(e) || !l && "entry-global" !== n && (!c || !LX.has(e)) && e.startsWith("esnext."));
+                return !!R.has(e) && (!(!l && "entry-global" !== n) || (!(!c || !LX.has(e)) || !e.startsWith("esnext.")));
             },
             entryGlobal: function(e, t, a) {
                 if ("import" === e.kind) {
@@ -54445,8 +55697,8 @@ const StorageManager = (() => {
         if ("boolean" != typeof b && "string" != typeof b) throw new Error("The 'absoluteRuntime' option must be undefined, a boolean, or a string.");
         if ("string" != typeof y) throw new Error("The 'version' option must be a version string.");
         var E = function(e, t) {
-            return !t || (vF.valid(t) && (t = "^" + t), !vF.intersects("<7.13.0", t) && !vF.intersects(">=8.0.0", t));
-        }(0, y);
+            return !t || (vF.valid(t) && (t = "^" + t), !vF.intersects("<" + e, t) && !vF.intersects(">=8.0.0", t));
+        }("7.13.0", y);
         function D(e, t) {
             return Object.prototype.hasOwnProperty.call(e, t);
         }
@@ -54502,17 +55754,18 @@ const StorageManager = (() => {
                 if (c) {
                     e.set("helperGenerator", (function(a) {
                         if (!e.availableHelper || e.availableHelper(a, y)) {
-                            var n = -1 === S.indexOf(a) || cS(e.path) ? void 0 : 4, r = A && "module" === e.path.node.sourceType ? "helpers/esm" : "helpers";
+                            var n = -1 !== S.indexOf(a) && !cS(e.path) ? 4 : void 0, r = A && "module" === e.path.node.sourceType ? "helpers/esm" : "helpers";
                             return function(a, n, r, s) {
                                 void 0 === s && (s = !1);
-                                var o = a + ":" + n + ":" + (cS(e.path) || ""), d = t.get(o);
-                                return d ? d = tu(d) : (d = function(e, t, a) {
+                                var i = cS(e.path), o = a + ":" + n + ":" + (i || ""), d = t.get(o);
+                                d ? d = tu(d) : (d = function(e, t, a) {
                                     return new fS(e).addDefault(t, a);
                                 }(e.path, a, {
                                     importedInterop: s && E ? "compiled" : "uncompiled",
                                     nameHint: n,
                                     blockHoist: r
-                                }), t.set(o, d)), d;
+                                }), t.set(o, d));
+                                return d;
                             }(T + "/" + r + "/" + a, a, n, !0);
                         }
                     }));
@@ -54626,7 +55879,9 @@ const StorageManager = (() => {
             name: "transform-strict-mode",
             visitor: {
                 Program: function(e) {
-                    for (var t = 0, a = e.node.directives; t < a.length; t++) if ("use strict" === a[t].value.value) return;
+                    for (var t = 0, a = e.node.directives; t < a.length; t++) {
+                        if ("use strict" === a[t].value.value) return;
+                    }
                     e.unshiftContainer("directives", ur(lr("use strict")));
                 }
             }
@@ -54707,6 +55962,45 @@ const StorageManager = (() => {
             }
         };
     }));
+    function Sz(e, t) {
+        var a = e.node;
+        if (a.declare) e.remove(); else {
+            var n = a.id.name, r = function(e, t, a) {
+                var n = Iz(e, t).map((function(e) {
+                    var n = D(e, 2), r = n[0], s = n[1];
+                    return function(e, t) {
+                        return (e ? _z : kz)(t);
+                    }(t.isStringLiteral(s), {
+                        ENUM: t.cloneNode(a),
+                        NAME: r,
+                        VALUE: s
+                    });
+                }));
+                return Fz({
+                    ID: t.cloneNode(a),
+                    ASSIGNMENTS: n
+                });
+            }(e, t, a.id);
+            switch (e.parent.type) {
+              case "BlockStatement":
+              case "ExportNamedDeclaration":
+              case "Program":
+                if (e.insertAfter(r), function e(t) {
+                    if (t.isExportDeclaration()) return e(t.parentPath);
+                    return !!t.getData(n) || (t.setData(n, !0), !1);
+                }(e.parentPath)) e.remove(); else {
+                    var s = t.isProgram(e.parent);
+                    e.scope.registerDeclaration(e.replaceWith(function(e, t, a) {
+                        return t.variableDeclaration(a, [ t.variableDeclarator(e) ]);
+                    }(a.id, t, s ? "var" : "let"))[0]);
+                }
+                break;
+
+              default:
+                throw new Error("Unexpected enum parent '" + e.parent.type);
+            }
+        }
+    }
     var Tz, jz, Pz, Fz = AE("\n  (function (ID) {\n    ASSIGNMENTS;\n  })(ID || (ID = {}));\n"), _z = AE('\n  ENUM["NAME"] = VALUE;\n'), kz = AE('\n  ENUM[ENUM["NAME"] = VALUE] = "NAME";\n');
     function Iz(e, t) {
         var a = Object.create(null), n = -1;
@@ -54721,67 +56015,10 @@ const StorageManager = (() => {
                             return e.value;
 
                           case "UnaryExpression":
-                            return function(e) {
-                                var t = e.argument, n = e.operator, r = a(t);
-                                if (void 0 !== r) switch (n) {
-                                  case "+":
-                                    return r;
-
-                                  case "-":
-                                    return -r;
-
-                                  case "~":
-                                    return ~r;
-
-                                  default:
-                                    return;
-                                }
-                            }(e);
+                            return n(e);
 
                           case "BinaryExpression":
-                            return function(e) {
-                                var t = a(e.left);
-                                if (void 0 !== t) {
-                                    var n = a(e.right);
-                                    if (void 0 !== n) switch (e.operator) {
-                                      case "|":
-                                        return t | n;
-
-                                      case "&":
-                                        return t & n;
-
-                                      case ">>":
-                                        return t >> n;
-
-                                      case ">>>":
-                                        return t >>> n;
-
-                                      case "<<":
-                                        return t << n;
-
-                                      case "^":
-                                        return t ^ n;
-
-                                      case "*":
-                                        return t * n;
-
-                                      case "/":
-                                        return t / n;
-
-                                      case "+":
-                                        return t + n;
-
-                                      case "-":
-                                        return t - n;
-
-                                      case "%":
-                                        return t % n;
-
-                                      default:
-                                        return;
-                                    }
-                                }
-                            }(e);
+                            return r(e);
 
                           case "NumericLiteral":
                             return e.value;
@@ -54797,6 +56034,65 @@ const StorageManager = (() => {
 
                           default:
                             return;
+                        }
+                    }
+                    function n(e) {
+                        var t = e.argument, n = e.operator, r = a(t);
+                        if (void 0 !== r) switch (n) {
+                          case "+":
+                            return r;
+
+                          case "-":
+                            return -r;
+
+                          case "~":
+                            return ~r;
+
+                          default:
+                            return;
+                        }
+                    }
+                    function r(e) {
+                        var t = a(e.left);
+                        if (void 0 !== t) {
+                            var n = a(e.right);
+                            if (void 0 !== n) switch (e.operator) {
+                              case "|":
+                                return t | n;
+
+                              case "&":
+                                return t & n;
+
+                              case ">>":
+                                return t >> n;
+
+                              case ">>>":
+                                return t >>> n;
+
+                              case "<<":
+                                return t << n;
+
+                              case "^":
+                                return t ^ n;
+
+                              case "*":
+                                return t * n;
+
+                              case "/":
+                                return t / n;
+
+                              case "+":
+                                return t + n;
+
+                              case "-":
+                                return t - n;
+
+                              case "%":
+                                return t % n;
+
+                              default:
+                                return;
+                            }
                         }
                     }
                 }(o, a);
@@ -54915,15 +56211,50 @@ const StorageManager = (() => {
         var a = e.find((function(e) {
             return e.isProgram();
         })).node;
-        return !(e.scope.hasOwnBinding(t) || !Gz.get(a).has(t) && (console.warn('The exported identifier "' + t + '" is not declared in Babel\'s scope tracker\nas a JavaScript value binding, and "@babel/plugin-transform-typescript"\nnever encountered it as a TypeScript type declaration.\nIt will be treated as a JavaScript value.\n\nThis problem is likely caused by another plugin injecting\n"' + t + '" without registering it in the scope tracker. If you are the author\n of that plugin, please use "scope.registerDeclaration(declarationPath)".'), 
-        1));
+        return !e.scope.hasOwnBinding(t) && (!!Gz.get(a).has(t) || (console.warn('The exported identifier "' + t + '" is not declared in Babel\'s scope tracker\nas a JavaScript value binding, and "@babel/plugin-transform-typescript"\nnever encountered it as a TypeScript type declaration.\nIt will be treated as a JavaScript value.\n\nThis problem is likely caused by another plugin injecting\n"' + t + '" without registering it in the scope tracker. If you are the author\n of that plugin, please use "scope.registerDeclaration(declarationPath)".'), 
+        !1));
     }
     function Kz(e, t) {
         Gz.get(e.path.node).add(t);
     }
-    for (var qz = iL((function(e, t) {
+    var qz = iL((function(e, t) {
         e.assertVersion(7);
-        var a = /\*?\s*@jsx((?:Frag)?)\s+([^\s]+)/, n = t.allowNamespaces, r = void 0 === n || n, s = t.jsxPragma, i = void 0 === s ? "React.createElement" : s, o = t.jsxPragmaFrag, d = void 0 === o ? "React.Fragment" : o, u = t.onlyRemoveTypeImports, l = void 0 !== u && u, c = t.optimizeConstEnums, p = void 0 !== c && c, g = t.allowDeclareFields, f = void 0 !== g && g;
+        var a = /\*?\s*@jsx((?:Frag)?)\s+([^\s]+)/, n = t.allowNamespaces, r = void 0 === n || n, s = t.jsxPragma, i = void 0 === s ? "React.createElement" : s, o = t.jsxPragmaFrag, d = void 0 === o ? "React.Fragment" : o, u = t.onlyRemoveTypeImports, l = void 0 !== u && u, c = t.optimizeConstEnums, p = void 0 !== c && c, g = t.allowDeclareFields, f = void 0 !== g && g, h = function(e) {
+            var t = e.node;
+            if (!f && t.declare) throw e.buildCodeFrameError("The 'declare' modifier is only allowed when the 'allowDeclareFields' option of @babel/plugin-transform-typescript or @babel/preset-typescript is enabled.");
+            if (t.declare) {
+                if (t.value) throw e.buildCodeFrameError("Fields with the 'declare' modifier cannot be initialized here, but only in the constructor");
+                t.decorators || e.remove();
+            } else if (t.definite) {
+                if (t.value) throw e.buildCodeFrameError("Definitely assigned fields cannot be initialized here, but only in the constructor");
+                f || t.decorators || e.remove();
+            } else f || t.value || t.decorators || Ke(t) || e.remove();
+            t.accessibility && (t.accessibility = null), t.abstract && (t.abstract = null), 
+            t.readonly && (t.readonly = null), t.optional && (t.optional = null), t.typeAnnotation && (t.typeAnnotation = null), 
+            t.definite && (t.definite = null), t.declare && (t.declare = null), t.override && (t.override = null);
+        }, m = function(e) {
+            var t = e.node;
+            t.accessibility && (t.accessibility = null), t.abstract && (t.abstract = null), 
+            t.optional && (t.optional = null), t.override && (t.override = null);
+        }, y = function(e, t) {
+            e.node.accessibility && (e.node.accessibility = null);
+            for (var a, n = [], r = S(e.node.params); !(a = r()).done; ) {
+                var s = a.value;
+                "TSParameterProperty" !== s.type || Vz.has(s.parameter) || (Vz.add(s.parameter), 
+                n.push(s.parameter));
+            }
+            if (n.length) {
+                var i = n.map((function(t) {
+                    var a;
+                    if (H(t)) a = t; else {
+                        if (!ye(t) || !H(t.left)) throw e.buildCodeFrameError("Parameter properties can not be destructuring patterns.");
+                        a = t.left;
+                    }
+                    return AE.statement.ast(Pz || (Pz = E([ "\n              this.", " = ", "" ])), tu(a), tu(a));
+                }));
+                r$(t, e, i);
+            }
+        };
         return {
             name: "transform-typescript",
             inherits: OL,
@@ -54969,7 +56300,9 @@ const StorageManager = (() => {
                                             pragmaFragImportName: h
                                         }) ? A.push(T.path) : (E = !1, Wz.set(e.node, !1));
                                     }
-                                    if (E) b.remove(); else for (var j, P = S(A); !(j = P()).done; ) j.value.remove();
+                                    if (E) b.remove(); else for (var j, P = S(A); !(j = P()).done; ) {
+                                        j.value.remove();
+                                    }
                                 }
                             } else if (b.isExportDeclaration() && (b = b.get("declaration")), b.isVariableDeclaration({
                                 declare: !0
@@ -55024,42 +56357,7 @@ const StorageManager = (() => {
                     var t = e.node;
                     t.typeParameters && (t.typeParameters = null), t.superTypeParameters && (t.superTypeParameters = null), 
                     t.implements && (t.implements = null), t.abstract && (t.abstract = null), e.get("body.body").forEach((function(t) {
-                        t.isClassMethod() || t.isClassPrivateMethod() ? "constructor" === t.node.kind ? function(e, t) {
-                            e.node.accessibility && (e.node.accessibility = null);
-                            for (var a, n = [], r = S(e.node.params); !(a = r()).done; ) {
-                                var s = a.value;
-                                "TSParameterProperty" !== s.type || Vz.has(s.parameter) || (Vz.add(s.parameter), 
-                                n.push(s.parameter));
-                            }
-                            if (n.length) {
-                                var i = n.map((function(t) {
-                                    var a;
-                                    if (H(t)) a = t; else {
-                                        if (!ye(t) || !H(t.left)) throw e.buildCodeFrameError("Parameter properties can not be destructuring patterns.");
-                                        a = t.left;
-                                    }
-                                    return AE.statement.ast(Pz || (Pz = E([ "\n              this.", " = ", "" ])), tu(a), tu(a));
-                                }));
-                                r$(t, e, i);
-                            }
-                        }(t, e) : function(e) {
-                            var t = e.node;
-                            t.accessibility && (t.accessibility = null), t.abstract && (t.abstract = null), 
-                            t.optional && (t.optional = null), t.override && (t.override = null);
-                        }(t) : (t.isClassProperty() || t.isClassPrivateProperty()) && function(e) {
-                            var t = e.node;
-                            if (!f && t.declare) throw e.buildCodeFrameError("The 'declare' modifier is only allowed when the 'allowDeclareFields' option of @babel/plugin-transform-typescript or @babel/preset-typescript is enabled.");
-                            if (t.declare) {
-                                if (t.value) throw e.buildCodeFrameError("Fields with the 'declare' modifier cannot be initialized here, but only in the constructor");
-                                t.decorators || e.remove();
-                            } else if (t.definite) {
-                                if (t.value) throw e.buildCodeFrameError("Definitely assigned fields cannot be initialized here, but only in the constructor");
-                                f || t.decorators || e.remove();
-                            } else f || t.value || t.decorators || Ke(t) || e.remove();
-                            t.accessibility && (t.accessibility = null), t.abstract && (t.abstract = null), 
-                            t.readonly && (t.readonly = null), t.optional && (t.optional = null), t.typeAnnotation && (t.typeAnnotation = null), 
-                            t.definite && (t.definite = null), t.declare && (t.declare = null), t.override && (t.override = null);
-                        }(t);
+                        t.isClassMethod() || t.isClassPrivateMethod() ? "constructor" === t.node.kind ? y(t, e) : m(t) : (t.isClassProperty() || t.isClassPrivateProperty()) && h(t);
                     }));
                 },
                 Function: function(e) {
@@ -55122,45 +56420,7 @@ const StorageManager = (() => {
                                 }
                             }), e.remove();
                         }
-                    }(e, Il) : function(e, t) {
-                        var a = e.node;
-                        if (a.declare) e.remove(); else {
-                            var n = a.id.name, r = function(e, t, a) {
-                                var n = Iz(e, t).map((function(e) {
-                                    var n = D(e, 2), r = n[0], s = n[1];
-                                    return function(e, t) {
-                                        return (e ? _z : kz)(t);
-                                    }(t.isStringLiteral(s), {
-                                        ENUM: t.cloneNode(a),
-                                        NAME: r,
-                                        VALUE: s
-                                    });
-                                }));
-                                return Fz({
-                                    ID: t.cloneNode(a),
-                                    ASSIGNMENTS: n
-                                });
-                            }(e, t, a.id);
-                            switch (e.parent.type) {
-                              case "BlockStatement":
-                              case "ExportNamedDeclaration":
-                              case "Program":
-                                if (e.insertAfter(r), function e(t) {
-                                    return t.isExportDeclaration() ? e(t.parentPath) : !!t.getData(n) || (t.setData(n, !0), 
-                                    !1);
-                                }(e.parentPath)) e.remove(); else {
-                                    var s = t.isProgram(e.parent);
-                                    e.scope.registerDeclaration(e.replaceWith(function(e, t, a) {
-                                        return t.variableDeclaration(a, [ t.variableDeclarator(e) ]);
-                                    }(a.id, t, s ? "var" : "let"))[0]);
-                                }
-                                break;
-
-                              default:
-                                throw new Error("Unexpected enum parent '" + e.parent.type);
-                            }
-                        }
-                    }(e, Il);
+                    }(e, Il) : Sz(e, Il);
                 },
                 TSImportEqualsDeclaration: function(e) {
                     function t(t) {
@@ -55214,7 +56474,9 @@ const StorageManager = (() => {
             t.typeAnnotation && (t.typeAnnotation = null), H(t) && t.optional && (t.optional = null);
         }
         function v(e) {
-            for (var t, a = e.binding, n = e.programPath, r = e.pragmaImportName, s = e.pragmaFragImportName, i = S(a.referencePaths); !(t = i()).done; ) if (!Uz(t.value)) return !1;
+            for (var t, a = e.binding, n = e.programPath, r = e.pragmaImportName, s = e.pragmaFragImportName, i = S(a.referencePaths); !(t = i()).done; ) {
+                if (!Uz(t.value)) return !1;
+            }
             if (a.identifier.name !== r && a.identifier.name !== s) return !0;
             var o = !1;
             return n.traverse({
@@ -55443,7 +56705,8 @@ const StorageManager = (() => {
             } ] ],
             plugins: [ mL, U$, N$ ]
         };
-    }, tJ = [ "transform-typeof-symbol" ], aJ = r((function(e, t) {
+    }, tJ = [ "transform-typeof-symbol" ];
+    var aJ = r((function(e, t) {
         Object.defineProperty(t, "__esModule", {
             value: !0
         }), t.default = void 0;
@@ -55643,7 +56906,8 @@ const StorageManager = (() => {
             };
         }, e.exports = t.default;
     }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/@babel/preset-modules/lib/plugins/transform-async-arrows-in-class"), yJ = r((function(e, t) {
-        t.__esModule = !0, t.default = void 0, t.default = function(e) {
+        t.__esModule = !0, t.default = void 0;
+        t.default = function(e) {
             var t = e.types, a = function(e) {
                 return "params" === e.parentKey && e.parentPath && t.isArrowFunctionExpression(e.parentPath);
             };
@@ -55658,7 +56922,8 @@ const StorageManager = (() => {
             };
         }, e.exports = t.default;
     }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/@babel/preset-modules/lib/plugins/transform-edge-default-parameters"), RJ = r((function(e, t) {
-        t.__esModule = !0, t.default = void 0, t.default = function(e) {
+        t.__esModule = !0, t.default = void 0;
+        t.default = function(e) {
             var t = e.types;
             return {
                 name: "transform-edge-function-name",
@@ -55675,7 +56940,8 @@ const StorageManager = (() => {
             };
         }, e.exports = t.default;
     }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/@babel/preset-modules/lib/plugins/transform-edge-function-name"), bJ = r((function(e, t) {
-        t.__esModule = !0, t.default = void 0, t.default = function(e) {
+        t.__esModule = !0, t.default = void 0;
+        t.default = function(e) {
             var t = e.types;
             return {
                 name: "transform-tagged-template-caching",
@@ -55730,7 +56996,8 @@ const StorageManager = (() => {
                 t && t.scope.hasOwnBinding(a) && "param" === t.scope.getOwnBinding(a).kind && e.scope.rename(a);
             }
         }
-        t.__esModule = !0, t.default = void 0, t.default = function() {
+        t.__esModule = !0, t.default = void 0;
+        t.default = function() {
             return {
                 name: "transform-safari-for-shadowing",
                 visitor: {
@@ -55743,7 +57010,8 @@ const StorageManager = (() => {
                 }
             };
         }, e.exports = t.default;
-    }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/@babel/preset-modules/lib/plugins/transform-safari-for-shadowing"), EJ = iL((function(e) {
+    }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/@babel/preset-modules/lib/plugins/transform-safari-for-shadowing");
+    var EJ = iL((function(e) {
         e.assertVersion(7);
         var t = e.assumption("noDocumentAll"), a = e.assumption("pureGetters");
         return {
@@ -55757,7 +57025,7 @@ const StorageManager = (() => {
                         }
                         for (var i = 0; i < r.length; i++) {
                             var o = r[i];
-                            if (Ve(o) && (void 0, (a = (t = o.arguments).findIndex((function(e) {
+                            if (Ve(o) && (a = void 0, (a = (t = o.arguments).findIndex((function(e) {
                                 return Ie(e);
                             }))) >= 0 && a !== t.length - 1)) {
                                 if (o.optional) return !0;
@@ -55982,7 +57250,8 @@ const StorageManager = (() => {
     }, AJ = {
         "proposal-class-static-block": "7.12.0",
         "proposal-private-property-in-object": "7.10.0"
-    }, wJ = Function.call.bind(Object.hasOwnProperty), CJ = {
+    }, wJ = Function.call.bind(Object.hasOwnProperty);
+    for (var CJ = {
         auto: "transform-modules-commonjs",
         amd: "transform-modules-amd",
         commonjs: "transform-modules-commonjs",
@@ -56169,16 +57438,16 @@ const StorageManager = (() => {
         usage: "usage"
     }, MJ = [ "web.timers", "web.immediate", "web.dom.iterable" ], $J = new Zk("@babel/preset-env"), UJ = Object.keys(TJ), GJ = [ "proposal-dynamic-import" ].concat(A(Object.keys(CJ).map((function(e) {
         return CJ[e];
-    })))), VJ = function(e, t, a) {
+    })))), WJ = function(e, t, a) {
+        return Array.from(function(e, t) {
+            return new Set([].concat(A(UJ), A("exclude" === e ? GJ : []), A(t ? 2 == t ? [].concat(A(Object.keys(RU)), MJ) : Object.keys(Zq) : [])));
+        }(t, a)).filter((function(t) {
+            return e instanceof RegExp && e.test(t);
+        }));
+    }, VJ = function(e, t, a) {
         if (void 0 === e && (e = []), 0 === e.length) return [];
         var n = e.map((function(e) {
-            return function(e, t, a) {
-                return Array.from(function(e, t) {
-                    return new Set([].concat(A(UJ), A("exclude" === e ? GJ : []), A(t ? 2 == t ? [].concat(A(Object.keys(RU)), MJ) : Object.keys(Zq) : [])));
-                }(t, a)).filter((function(t) {
-                    return e instanceof RegExp && e.test(t);
-                }));
-            }(function(e) {
+            return WJ(function(e) {
                 if (e instanceof RegExp) return e;
                 try {
                     return new RegExp("^" + HJ(e) + "$");
@@ -56197,6 +57466,48 @@ const StorageManager = (() => {
     }, HJ = function(e) {
         return e.replace(/^(@babel\/|babel-)(plugin-)?/, "");
     };
+    function KJ(e) {
+        $J.validateTopLevelOptions(e, OJ);
+        var t, a, n, r = (void 0 === (t = e.useBuiltIns) && (t = !1), $J.invariant(LJ[t.toString()] || t === LJ.false, "The 'useBuiltIns' option must be either\n    'false' (default) to indicate no polyfill,\n    '\"entry\"' to indicate replacing the entry polyfill, or\n    '\"usage\"' to import only used polyfills per file"), 
+        t), s = function(e, t) {
+            var a, n = !1;
+            t && void 0 === e ? (a = 2, console.warn("\nWARNING (@babel/preset-env): We noticed you're using the `useBuiltIns` option without declaring a core-js version. Currently, we assume version 2.x when no version is passed. Since this default version will likely change in future versions of Babel, we recommend explicitly setting the core-js version you are using via the `corejs` option.\n\nYou should also be sure that the version you pass to the `corejs` option matches the version specified in your `package.json`'s `dependencies` section. If it doesn't, you need to run one of the following commands:\n\n  npm install --save core-js@2    npm install --save core-js@3\n  yarn add core-js@2              yarn add core-js@3\n\nMore info about useBuiltIns: https://babeljs.io/docs/en/babel-preset-env#usebuiltins\nMore info about core-js: https://babeljs.io/docs/en/babel-preset-env#corejs")) : "object" == typeof e && null !== e ? (a = e.version, 
+            n = Boolean(e.proposals)) : a = e;
+            var r = !!a && vF.coerce(String(a));
+            if (!t && r && console.warn("\nWARNING (@babel/preset-env): The `corejs` option only has an effect when the `useBuiltIns` option is not `false`\n"), 
+            t && (!r || r.major < 2 || r.major > 3)) throw new RangeError("Invalid Option: The version passed to `corejs` is invalid. Currently, only core-js@2 and core-js@3 are supported.");
+            return {
+                version: r,
+                proposals: n
+            };
+        }(e.corejs, r), i = VJ(e.include, OJ.include, !!s.version && s.version.major), o = VJ(e.exclude, OJ.exclude, !!s.version && s.version.major);
+        return function(e, t) {
+            void 0 === e && (e = []), void 0 === t && (t = []);
+            var a = e.filter((function(e) {
+                return t.indexOf(e) >= 0;
+            }));
+            $J.invariant(0 === a.length, "The plugins/built-ins '" + a.join(", ") + '\' were found in both the "include" and\n    "exclude" options.');
+        }(i, o), {
+            bugfixes: $J.validateBooleanOption(OJ.bugfixes, e.bugfixes, !1),
+            configPath: $J.validateStringOption(OJ.configPath, e.configPath, la.cwd()),
+            corejs: s,
+            debug: $J.validateBooleanOption(OJ.debug, e.debug, !1),
+            include: i,
+            exclude: o,
+            forceAllTransforms: $J.validateBooleanOption(OJ.forceAllTransforms, e.forceAllTransforms, !1),
+            ignoreBrowserslistConfig: $J.validateBooleanOption(OJ.ignoreBrowserslistConfig, e.ignoreBrowserslistConfig, !1),
+            loose: $J.validateBooleanOption(OJ.loose, e.loose),
+            modules: (n = e.modules, void 0 === n && (n = NJ.auto), $J.invariant(NJ[n.toString()] || n === NJ.false, "The 'modules' option must be one of \n - 'false' to indicate no module processing\n - a specific module type: 'commonjs', 'amd', 'umd', 'systemjs' - 'auto' (default) which will automatically select 'false' if the current\n   process is known to support ES module syntax, or \"commonjs\" otherwise\n"), 
+            n),
+            shippedProposals: $J.validateBooleanOption(OJ.shippedProposals, e.shippedProposals, !1),
+            spec: $J.validateBooleanOption(OJ.spec, e.spec, !1),
+            targets: (a = e.targets, "string" == typeof a || Array.isArray(a) ? {
+                browsers: a
+            } : Object.assign({}, a)),
+            useBuiltIns: r,
+            browserslistEnv: $J.validateStringOption(OJ.browserslistEnv, e.browserslistEnv)
+        };
+    }
     var qJ, XJ, zJ, JJ, YJ = new Set([ "proposal-class-static-block" ]), QJ = {
         "proposal-async-generator-functions": "syntax-async-generators",
         "proposal-class-properties": "syntax-class-properties",
@@ -56328,16 +57639,18 @@ const StorageManager = (() => {
         s[i.XRANGELOOSE] = "^" + s[i.GTLT] + "\\s*" + s[i.XRANGEPLAINLOOSE] + "$", d("COERCE"), 
         s[i.COERCE] = "(^|[^\\d])(\\d{1,16})(?:\\.(\\d{1,16}))?(?:\\.(\\d{1,16}))?(?:$|[^\\d])", 
         d("COERCERTL"), r[i.COERCERTL] = new RegExp(s[i.COERCE], "g"), d("LONETILDE"), s[i.LONETILDE] = "(?:~>?)", 
-        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g"), 
+        d("TILDETRIM"), s[i.TILDETRIM] = "(\\s*)" + s[i.LONETILDE] + "\\s+", r[i.TILDETRIM] = new RegExp(s[i.TILDETRIM], "g");
         d("TILDE"), s[i.TILDE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAIN] + "$", d("TILDELOOSE"), 
         s[i.TILDELOOSE] = "^" + s[i.LONETILDE] + s[i.XRANGEPLAINLOOSE] + "$", d("LONECARET"), 
         s[i.LONECARET] = "(?:\\^)", d("CARETTRIM"), s[i.CARETTRIM] = "(\\s*)" + s[i.LONECARET] + "\\s+", 
-        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g"), d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", 
-        d("CARETLOOSE"), s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", 
-        d("COMPARATORLOOSE"), s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", 
-        d("COMPARATOR"), s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", 
-        d("COMPARATORTRIM"), s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
-        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g"), d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
+        r[i.CARETTRIM] = new RegExp(s[i.CARETTRIM], "g");
+        d("CARET"), s[i.CARET] = "^" + s[i.LONECARET] + s[i.XRANGEPLAIN] + "$", d("CARETLOOSE"), 
+        s[i.CARETLOOSE] = "^" + s[i.LONECARET] + s[i.XRANGEPLAINLOOSE] + "$", d("COMPARATORLOOSE"), 
+        s[i.COMPARATORLOOSE] = "^" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + ")$|^$", d("COMPARATOR"), 
+        s[i.COMPARATOR] = "^" + s[i.GTLT] + "\\s*(" + s[i.FULLPLAIN] + ")$|^$", d("COMPARATORTRIM"), 
+        s[i.COMPARATORTRIM] = "(\\s*)" + s[i.GTLT] + "\\s*(" + s[i.LOOSEPLAIN] + "|" + s[i.XRANGEPLAIN] + ")", 
+        r[i.COMPARATORTRIM] = new RegExp(s[i.COMPARATORTRIM], "g");
+        d("HYPHENRANGE"), s[i.HYPHENRANGE] = "^\\s*(" + s[i.XRANGEPLAIN] + ")\\s+-\\s+(" + s[i.XRANGEPLAIN] + ")\\s*$", 
         d("HYPHENRANGELOOSE"), s[i.HYPHENRANGELOOSE] = "^\\s*(" + s[i.XRANGEPLAINLOOSE] + ")\\s+-\\s+(" + s[i.XRANGEPLAINLOOSE] + ")\\s*$", 
         d("STAR"), s[i.STAR] = "(<|>)?=?\\s*\\*";
         for (var u = 0; u < o; u++) a(u, s[u]), r[u] || (r[u] = new RegExp(s[u]));
@@ -56735,7 +58048,7 @@ const StorageManager = (() => {
             }), this).join(" ").split(/\s+/);
             return this.options.loose && (o = o.filter((function(e) {
                 return !!e.match(s);
-            }))), o.map((function(e) {
+            }))), o = o.map((function(e) {
                 return new E(e, this.options);
             }), this);
         }, A.prototype.intersects = function(e, t) {
@@ -56790,26 +58103,29 @@ const StorageManager = (() => {
             if (e.test(a)) return a;
             if (a = new c("0.0.0-0"), e.test(a)) return a;
             a = null;
-            for (var n = 0; n < e.set.length; ++n) e.set[n].forEach((function(e) {
-                var t = new c(e.semver.version);
-                switch (e.operator) {
-                  case ">":
-                    0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
+            for (var n = 0; n < e.set.length; ++n) {
+                e.set[n].forEach((function(e) {
+                    var t = new c(e.semver.version);
+                    switch (e.operator) {
+                      case ">":
+                        0 === t.prerelease.length ? t.patch++ : t.prerelease.push(0), t.raw = t.format();
 
-                  case "":
-                  case ">=":
-                    a && !h(a, t) || (a = t);
-                    break;
+                      case "":
+                      case ">=":
+                        a && !h(a, t) || (a = t);
+                        break;
 
-                  case "<":
-                  case "<=":
-                    break;
+                      case "<":
+                      case "<=":
+                        break;
 
-                  default:
-                    throw new Error("Unexpected operation: " + e.operator);
-                }
-            }));
-            return a && e.test(a) ? a : null;
+                      default:
+                        throw new Error("Unexpected operation: " + e.operator);
+                    }
+                }));
+            }
+            if (a && e.test(a)) return a;
+            return null;
         }, t.validRange = function(e, t) {
             try {
                 return new A(e, t).range || "*";
@@ -56827,14 +58143,16 @@ const StorageManager = (() => {
             return e = new A(e, a), t = new A(t, a), e.intersects(t);
         }, t.coerce = function(e, t) {
             if (e instanceof c) return e;
-            if ("number" == typeof e && (e = String(e)), "string" != typeof e) return null;
+            "number" == typeof e && (e = String(e));
+            if ("string" != typeof e) return null;
             var a = null;
             if ((t = t || {}).rtl) {
                 for (var n; (n = r[i.COERCERTL].exec(e)) && (!a || a.index + a[0].length !== e.length); ) a && n.index + n[0].length === a.index + a[0].length || (a = n), 
                 r[i.COERCERTL].lastIndex = n.index + n[1].length + n[2].length;
                 r[i.COERCERTL].lastIndex = -1;
             } else a = e.match(r[i.COERCE]);
-            return null === a ? null : l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
+            if (null === a) return null;
+            return l(a[2] + "." + (a[3] || "0") + "." + (a[4] || "0"), t);
         };
     }), "/$$rollup_base$$/packages/babel-preset-env/node_modules/babel-plugin-polyfill-corejs2/node_modules/semver"), RY = [ "method", "targets", "ignoreBrowserslistConfig", "configPath", "debug", "shouldInjectPolyfill", "absoluteImports" ], bY = t, vY = bY.types, xY = bY.template;
     function EY(e, t) {
@@ -56935,6 +58253,36 @@ const StorageManager = (() => {
             return "    " + String(e) + "\n";
         })).join("") : "";
     }
+    function PY(e, t, a, n) {
+        var r, s, i, o, d = function(e) {
+            var a = function(e) {
+                if (e instanceof RegExp) return e;
+                try {
+                    return new RegExp("^" + e + "$");
+                } catch (e) {
+                    return null;
+                }
+            }(e);
+            if (!a) return !1;
+            for (var n, s = !1, i = S(t); !(n = i()).done; ) {
+                var o = n.value;
+                a.test(o) && (s = !0, r.add(o));
+            }
+            return !s;
+        }, u = r = new Set, l = Array.from(a).filter(d), c = r = new Set, p = Array.from(n).filter(d), g = (s = u, 
+        i = c, o = new Set, s.forEach((function(e) {
+            return i.has(e) && o.add(e);
+        })), o);
+        if (g.size > 0 || l.length > 0 || p.length > 0) throw new Error('Error while validating the "' + e + '" provider options:\n' + jY("include", l) + jY("exclude", p) + function(e) {
+            return e.size ? '  - The following polyfills were matched both by "include" and "exclude" patterns:\n' + Array.from(e, (function(e) {
+                return "    " + e + "\n";
+            })).join("") : "";
+        }(g));
+        return {
+            include: u,
+            exclude: c
+        };
+    }
     var FY = function(e) {
         function t(t, a, n, r) {
             return e({
@@ -57021,7 +58369,8 @@ const StorageManager = (() => {
                 }));
             }
         };
-    }, kY = new Set([ "global", "globalThis", "self", "window" ]);
+    };
+    var kY = new Set([ "global", "globalThis", "self", "window" ]);
     function IY(e) {
         var t = e.static, a = e.instance, n = e.global;
         return function(e) {
@@ -57144,44 +58493,18 @@ const StorageManager = (() => {
                     var s = "*" === t ? e : e + "@^" + t;
                     !a.all && function(e, t, a) {
                         var n = e.get(t);
-                        return void 0 === n && (n = !0, e.set(t, n)), n;
-                    }(v, e + " :: " + n) || r().missingDeps.add(s);
+                        void 0 === n && (n = a(), e.set(t, n));
+                        return n;
+                    }(v, e + " :: " + n, (function() {
+                        return !0;
+                    })) || r().missingDeps.add(s);
                 }
             }
         }, A = e(D, y, n);
         if ("function" != typeof A[g]) throw new Error('The "' + (A.name || e.name) + '" provider doesn\'t support the "' + p + '" polyfilling method.');
         Array.isArray(A.polyfills) ? (u = new Set(A.polyfills), l = A.filterPolyfills) : A.polyfills ? (u = new Set(Object.keys(A.polyfills)), 
         d = A.polyfills, l = A.filterPolyfills) : u = new Set;
-        var w = function(e, t, a, n) {
-            var r, s, i, o, d = function(e) {
-                var a = function(e) {
-                    if (e instanceof RegExp) return e;
-                    try {
-                        return new RegExp("^" + e + "$");
-                    } catch (e) {
-                        return null;
-                    }
-                }(e);
-                if (!a) return !1;
-                for (var n, s = !1, i = S(t); !(n = i()).done; ) {
-                    var o = n.value;
-                    a.test(o) && (s = !0, r.add(o));
-                }
-                return !s;
-            }, u = r = new Set, l = Array.from(a).filter(d), c = r = new Set, p = Array.from(n).filter(d), g = (s = u, 
-            i = c, o = new Set, s.forEach((function(e) {
-                return i.has(e) && o.add(e);
-            })), o);
-            if (g.size > 0 || l.length > 0 || p.length > 0) throw new Error('Error while validating the "' + e + '" provider options:\n' + jY("include", l) + jY("exclude", p) + function(e) {
-                return e.size ? '  - The following polyfills were matched both by "include" and "exclude" patterns:\n' + Array.from(e, (function(e) {
-                    return "    " + e + "\n";
-                })).join("") : "";
-            }(g));
-            return {
-                include: u,
-                exclude: c
-            };
-        }(A.name || e.name, u, y.include || [], y.exclude || []);
+        var w = PY(A.name || e.name, u, y.include || [], y.exclude || []);
         return i = w.include, o = w.exclude, {
             debug: h,
             method: p,
@@ -57453,7 +58776,8 @@ const StorageManager = (() => {
         "es6.parse-float": {},
         "es6.parse-int": {},
         "es7.string.at": {}
-    }, JY = t.types, YY = Function.call.bind(Object.hasOwnProperty), QY = NY((function(e, t) {
+    };
+    var JY = t.types, YY = Function.call.bind(Object.hasOwnProperty), QY = NY((function(e, t) {
         var a = t["#__secret_key__@babel/preset-env__compatibility"], n = (a = void 0 === a ? {} : a).entryInjectRegenerator, r = t["#__secret_key__@babel/runtime__compatibility"], s = (r = void 0 === r ? {} : r).useBabelRuntime, i = r.runtimeVersion, o = r.ext, d = void 0 === o ? ".js" : o, u = e.createMetaResolver({
             global: HY,
             static: qY,
@@ -57468,6 +58792,12 @@ const StorageManager = (() => {
             "string" != typeof e ? e.forEach((function(e) {
                 return h(e, t);
             })) : YY(g, e) && c(e) && (l(e), t.injectGlobalImport(f + "/" + e + ".js"));
+        }
+        function m(e, t, a) {
+            var n = e.pure, r = e.meta, s = e.name;
+            if (n && c(s) && (!(i && r && r.minRuntimeVersion) || function(e, t) {
+                return !(t && e && (yY.valid(t) && (t = "^" + t), yY.intersects("<" + e, t) || yY.intersects(">=8.0.0", t)));
+            }(r && r.minRuntimeVersion, i))) return a.injectDefaultImport(f + "/" + n + d, t);
         }
         return {
             name: "corejs2",
@@ -57504,12 +58834,7 @@ const StorageManager = (() => {
                         }
                         var n = u(e);
                         if (n) {
-                            var r = function(e, t, a) {
-                                var n = e.pure, r = e.meta, s = e.name;
-                                if (n && c(s) && (!(i && r && r.minRuntimeVersion) || function(e, t) {
-                                    return !(t && e && (yY.valid(t) && (t = "^" + t), yY.intersects("<" + e, t) || yY.intersects(">=8.0.0", t)));
-                                }(r && r.minRuntimeVersion, i))) return a.injectDefaultImport(f + "/" + n + d, t);
-                            }(n.desc, n.name, t);
+                            var r = m(n.desc, n.name, t);
                             r && a.replaceWith(r);
                         }
                     }
@@ -57863,7 +59188,7 @@ const StorageManager = (() => {
             name: "corejs3",
             polyfills: ZY,
             filterPolyfills: function(e) {
-                return !(!R.has(e) || !l && "entry-global" !== n && (!c || !aQ.has(e)) && e.startsWith("esnext."));
+                return !!R.has(e) && (!(!l && "entry-global" !== n) || (!(!c || !aQ.has(e)) || !e.startsWith("esnext.")));
             },
             entryGlobal: function(e, t, a) {
                 if ("import" === e.kind) {
@@ -57972,7 +59297,8 @@ const StorageManager = (() => {
             withoutBugfixes: BQ(TJ, eY.proposalPlugins),
             withBugfixes: BQ(Object.assign({}, TJ, jJ), eY.proposalPlugins)
         }
-    }, NQ = function(e) {
+    };
+    var NQ = function(e) {
         var t = DJ[e]();
         if (!t) throw new Error('Could not find plugin "' + e + '". Ensure there is an entry in ./available-plugins.js for it.');
         return t;
@@ -58000,48 +59326,7 @@ const StorageManager = (() => {
     }
     var WQ = iL((function(e, t) {
         e.assertVersion(7);
-        var a = e.targets(), n = function(e) {
-            $J.validateTopLevelOptions(e, OJ);
-            var t, a, n, r = (void 0 === (t = e.useBuiltIns) && (t = !1), $J.invariant(LJ[t.toString()] || t === LJ.false, "The 'useBuiltIns' option must be either\n    'false' (default) to indicate no polyfill,\n    '\"entry\"' to indicate replacing the entry polyfill, or\n    '\"usage\"' to import only used polyfills per file"), 
-            t), s = function(e, t) {
-                var a, n = !1;
-                t && void 0 === e ? (a = 2, console.warn("\nWARNING (@babel/preset-env): We noticed you're using the `useBuiltIns` option without declaring a core-js version. Currently, we assume version 2.x when no version is passed. Since this default version will likely change in future versions of Babel, we recommend explicitly setting the core-js version you are using via the `corejs` option.\n\nYou should also be sure that the version you pass to the `corejs` option matches the version specified in your `package.json`'s `dependencies` section. If it doesn't, you need to run one of the following commands:\n\n  npm install --save core-js@2    npm install --save core-js@3\n  yarn add core-js@2              yarn add core-js@3\n\nMore info about useBuiltIns: https://babeljs.io/docs/en/babel-preset-env#usebuiltins\nMore info about core-js: https://babeljs.io/docs/en/babel-preset-env#corejs")) : "object" == typeof e && null !== e ? (a = e.version, 
-                n = Boolean(e.proposals)) : a = e;
-                var r = !!a && vF.coerce(String(a));
-                if (!t && r && console.warn("\nWARNING (@babel/preset-env): The `corejs` option only has an effect when the `useBuiltIns` option is not `false`\n"), 
-                t && (!r || r.major < 2 || r.major > 3)) throw new RangeError("Invalid Option: The version passed to `corejs` is invalid. Currently, only core-js@2 and core-js@3 are supported.");
-                return {
-                    version: r,
-                    proposals: n
-                };
-            }(e.corejs, r), i = VJ(e.include, OJ.include, !!s.version && s.version.major), o = VJ(e.exclude, OJ.exclude, !!s.version && s.version.major);
-            return function(e, t) {
-                void 0 === e && (e = []), void 0 === t && (t = []);
-                var a = e.filter((function(e) {
-                    return t.indexOf(e) >= 0;
-                }));
-                $J.invariant(0 === a.length, "The plugins/built-ins '" + a.join(", ") + '\' were found in both the "include" and\n    "exclude" options.');
-            }(i, o), {
-                bugfixes: $J.validateBooleanOption(OJ.bugfixes, e.bugfixes, !1),
-                configPath: $J.validateStringOption(OJ.configPath, e.configPath, la.cwd()),
-                corejs: s,
-                debug: $J.validateBooleanOption(OJ.debug, e.debug, !1),
-                include: i,
-                exclude: o,
-                forceAllTransforms: $J.validateBooleanOption(OJ.forceAllTransforms, e.forceAllTransforms, !1),
-                ignoreBrowserslistConfig: $J.validateBooleanOption(OJ.ignoreBrowserslistConfig, e.ignoreBrowserslistConfig, !1),
-                loose: $J.validateBooleanOption(OJ.loose, e.loose),
-                modules: (n = e.modules, void 0 === n && (n = NJ.auto), $J.invariant(NJ[n.toString()] || n === NJ.false, "The 'modules' option must be one of \n - 'false' to indicate no module processing\n - a specific module type: 'commonjs', 'amd', 'umd', 'systemjs' - 'auto' (default) which will automatically select 'false' if the current\n   process is known to support ES module syntax, or \"commonjs\" otherwise\n"), 
-                n),
-                shippedProposals: $J.validateBooleanOption(OJ.shippedProposals, e.shippedProposals, !1),
-                spec: $J.validateBooleanOption(OJ.spec, e.spec, !1),
-                targets: (a = e.targets, "string" == typeof a || Array.isArray(a) ? {
-                    browsers: a
-                } : Object.assign({}, a)),
-                useBuiltIns: r,
-                browserslistEnv: $J.validateStringOption(OJ.browserslistEnv, e.browserslistEnv)
-            };
-        }(t), r = n.bugfixes, s = n.configPath, i = n.debug, o = n.exclude, d = n.forceAllTransforms, u = n.ignoreBrowserslistConfig, l = n.include, c = n.loose, p = n.modules, g = n.shippedProposals, f = n.spec, h = n.targets, m = n.useBuiltIns, y = n.corejs, R = y.version, b = y.proposals, v = n.browserslistEnv, x = a;
+        var a = e.targets(), n = KJ(t), r = n.bugfixes, s = n.configPath, i = n.debug, o = n.exclude, d = n.forceAllTransforms, u = n.ignoreBrowserslistConfig, l = n.include, c = n.loose, p = n.modules, g = n.shippedProposals, f = n.spec, h = n.targets, m = n.useBuiltIns, y = n.corejs, R = y.version, b = y.proposals, v = n.browserslistEnv, x = a;
         if (vF.lt(e.version, "7.13.0") || t.targets || t.configPath || t.browserslistEnv || t.ignoreBrowserslistConfig) {
             var E = !1;
             null != h && h.uglify && (E = !0, delete h.uglify, console.warn("\nThe uglify target has been deprecated. Set the top level\noption `forceAllTransforms: true` instead.\n")), 
@@ -58212,7 +59497,7 @@ const StorageManager = (() => {
         };
     }));
     new Zk("@babel/preset-react");
-    var zQ, JQ, qQ = iL((function(e, t) {
+    var qQ = iL((function(e, t) {
         e.assertVersion(7);
         var a = function(e) {
             void 0 === e && (e = {});
@@ -58242,11 +59527,12 @@ const StorageManager = (() => {
                 useSpread: t.useSpread
             } ], zV, !1 !== o && KQ ].filter(Boolean)
         };
-    })), XQ = new Zk("@babel/preset-typescript"), YQ = iL((function(e, t) {
+    })), XQ = new Zk("@babel/preset-typescript");
+    var zQ, JQ, YQ = iL((function(e, t) {
         e.assertVersion(7);
         var a = function(e) {
             void 0 === e && (e = {});
-            var t = e, a = t.allowNamespaces, n = void 0 === a || a, r = t.jsxPragma, s = t.onlyRemoveTypeImports, l = XQ.validateStringOption("jsxPragmaFrag", e.jsxPragmaFrag, "React.Fragment"), c = XQ.validateBooleanOption("allExtensions", e.allExtensions, !1), p = XQ.validateBooleanOption("isTSX", e.isTSX, !1);
+            var t = e, a = t.allowNamespaces, n = void 0 === a || a, r = t.jsxPragma, s = t.onlyRemoveTypeImports, i = "allExtensions", o = "isTSX", d = "jsxPragmaFrag", u = "optimizeConstEnums", l = XQ.validateStringOption(d, e.jsxPragmaFrag, "React.Fragment"), c = XQ.validateBooleanOption(i, e.allExtensions, !1), p = XQ.validateBooleanOption(o, e.isTSX, !1);
             return p && XQ.invariant(c, "isTSX:true requires allExtensions:true"), {
                 allExtensions: c,
                 allowNamespaces: n,
@@ -58254,7 +59540,7 @@ const StorageManager = (() => {
                 jsxPragma: r,
                 jsxPragmaFrag: l,
                 onlyRemoveTypeImports: s,
-                optimizeConstEnums: XQ.validateBooleanOption("optimizeConstEnums", e.optimizeConstEnums, !1)
+                optimizeConstEnums: XQ.validateBooleanOption(u, e.optimizeConstEnums, !1)
             };
         }(t), n = a.allExtensions, r = a.allowNamespaces, s = a.isTSX, i = a.jsxPragma, o = a.jsxPragmaFrag, d = a.onlyRemoveTypeImports, u = a.optimizeConstEnums, l = function(e) {
             return {
@@ -58307,6 +59593,42 @@ const StorageManager = (() => {
             return e.trim();
         })) : null;
     }
+    function aZ(e, t) {
+        var a = [], n = t.length;
+        function r() {
+            var t, r;
+            for (r = 0; r < n; r++) if ((t = a[r]).loaded && !t.executed) t.executed = !0, eZ(e, t); else if (!t.loaded && !t.error && !t.async) break;
+        }
+        t.forEach((function(e, t) {
+            var n, s, i, o, d = {
+                async: e.hasAttribute("async"),
+                type: e.getAttribute("data-type"),
+                error: !1,
+                executed: !1,
+                plugins: tZ(e, "data-plugins"),
+                presets: tZ(e, "data-presets")
+            };
+            e.src ? (a[t] = Object.assign({}, d, {
+                content: null,
+                loaded: !1,
+                url: e.src
+            }), n = e.src, s = function(e) {
+                a[t].loaded = !0, a[t].content = e, r();
+            }, i = function() {
+                a[t].error = !0, r();
+            }, (o = new XMLHttpRequest).open("GET", n, !0), "overrideMimeType" in o && o.overrideMimeType("text/plain"), 
+            o.onreadystatechange = function() {
+                if (4 === o.readyState) {
+                    if (0 !== o.status && 200 !== o.status) throw i(), new Error("Could not load " + n);
+                    s(o.responseText);
+                }
+            }, o.send(null)) : a[t] = Object.assign({}, d, {
+                content: e.innerHTML,
+                loaded: !0,
+                url: e.getAttribute("data-module") || null
+            });
+        })), r();
+    }
     var nZ = Array.isArray || function(e) {
         return "[object Array]" === Object.prototype.toString.call(e);
     };
@@ -58354,55 +59676,6 @@ const StorageManager = (() => {
             return pZ(t, e[t]);
         }));
     }
-    function fZ() {
-        hZ();
-    }
-    function hZ(e) {
-        !function(e, t) {
-            zQ = document.getElementsByTagName("head")[0], t || (t = document.getElementsByTagName("script"));
-            for (var a = [], n = 0; n < t.length; n++) {
-                var r = t.item(n), s = r.type.split(";")[0];
-                -1 !== QQ.indexOf(s) && a.push(r);
-            }
-            0 !== a.length && (console.warn("You are using the in-browser Babel transformer. Be sure to precompile your scripts for production - https://babeljs.io/docs/setup/"), 
-            function(e, t) {
-                var a = [], n = t.length;
-                function r() {
-                    var t, r;
-                    for (r = 0; r < n; r++) if ((t = a[r]).loaded && !t.executed) t.executed = !0, eZ(e, t); else if (!t.loaded && !t.error && !t.async) break;
-                }
-                t.forEach((function(e, t) {
-                    var n, s, i, o, d = {
-                        async: e.hasAttribute("async"),
-                        type: e.getAttribute("data-type"),
-                        error: !1,
-                        executed: !1,
-                        plugins: tZ(e, "data-plugins"),
-                        presets: tZ(e, "data-presets")
-                    };
-                    e.src ? (a[t] = Object.assign({}, d, {
-                        content: null,
-                        loaded: !1,
-                        url: e.src
-                    }), n = e.src, s = function(e) {
-                        a[t].loaded = !0, a[t].content = e, r();
-                    }, i = function() {
-                        a[t].error = !0, r();
-                    }, (o = new XMLHttpRequest).open("GET", n, !0), "overrideMimeType" in o && o.overrideMimeType("text/plain"), 
-                    o.onreadystatechange = function() {
-                        if (4 === o.readyState) {
-                            if (0 !== o.status && 200 !== o.status) throw i(), new Error("Could not load " + n);
-                            s(o.responseText);
-                        }
-                    }, o.send(null)) : a[t] = Object.assign({}, d, {
-                        content: e.innerHTML,
-                        loaded: !0,
-                        url: e.getAttribute("data-module") || null
-                    });
-                })), r();
-            }(e, a));
-        }(iZ, e);
-    }
     cZ(Jz), gZ({
         env: WQ,
         es2015: Yz,
@@ -58448,7 +59721,22 @@ const StorageManager = (() => {
         },
         typescript: YQ,
         flow: VQ
-    }), "undefined" != typeof window && null != (JQ = window) && JQ.addEventListener && window.addEventListener("DOMContentLoaded", fZ, !1), 
+    });
+    function fZ() {
+        hZ();
+    }
+    function hZ(e) {
+        !function(e, t) {
+            zQ = document.getElementsByTagName("head")[0], t || (t = document.getElementsByTagName("script"));
+            for (var a = [], n = 0; n < t.length; n++) {
+                var r = t.item(n), s = r.type.split(";")[0];
+                -1 !== QQ.indexOf(s) && a.push(r);
+            }
+            0 !== a.length && (console.warn("You are using the in-browser Babel transformer. Be sure to precompile your scripts for production - https://babeljs.io/docs/setup/"), 
+            aZ(e, a));
+        }(iZ, e);
+    }
+    "undefined" != typeof window && null != (JQ = window) && JQ.addEventListener && window.addEventListener("DOMContentLoaded", fZ, !1), 
     e.availablePlugins = oZ, e.availablePresets = dZ, e.buildExternalHelpers = uZ, e.disableScriptTags = function() {
         window.removeEventListener("DOMContentLoaded", fZ);
     }, e.registerPlugin = lZ, e.registerPlugins = cZ, e.registerPreset = pZ, e.registerPresets = gZ, 
@@ -58459,15 +59747,37 @@ const StorageManager = (() => {
     });
 }));
 
+//import "https://unpkg.com/@babel/standalone/babel.min.js";
 var Babel$1 = Babel;
 
 function consolePlugin({types: t}) {
     return {
         visitor: {
+            // Identifier(path) {
+            // 	console.log(path.node.name+'\n')
+            // 	path.node.name = 'IDENT';
+            // },
             CallExpression(path) {
-                path.node.callee.property && "console" === path.node.callee.object.name && "log" === path.node.callee.property.name && path.replaceWith(t.callExpression(t.identifier("processWrite"), path.node.arguments));
-            },
-            MemberExpression(path) {}
+                if (!path.node.callee.property) return;
+                //path.node.callee.property && (path.node.callee.property.name = 'CALLEE');
+                                if (path.node.callee.object.name !== "console" || path.node.callee.property.name !== "log") return;
+                path.replaceWith(t.callExpression(t.identifier("processWrite"), path.node.arguments));
+                //path.node.arguments = path.node.arguments.map(x => t.stringLiteral('ARGS'));
+                        },
+            // ExpressionStatement(path){
+            // 	path.node.name && (path.node.name = 'EXP');
+            // },
+            MemberExpression(path) {
+                // if(t.isAssignmentExpression(path.parent)) return;
+                // if(t.isIdentifier(path.node.property)) {
+                // 	path.node.property = t.stringLiteral(path.node.property.name);
+                // }
+                // if(path.node.property.value !== 'log') return;
+                // path.replaceWith(t.identifier('mori'));
+                // path.replaceWith(
+                // 	t.memberExpression(t.identifier('mori'), t.identifier('hashMap'))
+                // );
+            }
         }
     };
 }
@@ -58477,8 +59787,26 @@ function importsPlugin() {
         visitor: {
             ImportDeclaration(path, state) {
                 const {map: map, cwd: cwd} = state.opts;
-                map.imports[path.node.source.value] ? path.node.source.value = map.imports[path.node.source.value] : (path.node.source.value.startsWith("./") && (path.node.source.value = `/${cwd}${path.node.source.value.slice(1)}`), 
-                path.node.source.value.startsWith("/") && path.node.source.value.endsWith(".js") ? path.node.source.value = `${self.location.origin}/!${path.node.source.value}` : !path.node.source.value.startsWith("/") || path.node.source.value.endsWith(".js") || (path.node.source.value = `${self.location.origin}${path.node.source.value}`));
+                // if first char is a / then prepend self.location.origin
+                // otherwise suss out? ../ or ./ etc?
+                // "node" is doing this
+                // keep in mind that we may want those modules to use SW worker transform
+                                if (map.imports[path.node.source.value]) {
+                    path.node.source.value = map.imports[path.node.source.value];
+                    return;
+                }
+                if (path.node.source.value.startsWith("./")) {
+                    path.node.source.value = `/${cwd}${path.node.source.value.slice(1)}`;
+                }
+                if (path.node.source.value.startsWith("/") && path.node.source.value.endsWith(".js")) {
+                    path.node.source.value = `${self.location.origin}/!${path.node.source.value}`;
+                    return;
+                }
+                if (path.node.source.value.startsWith("/") && !path.node.source.value.endsWith(".js")) {
+                    path.node.source.value = `${self.location.origin}${path.node.source.value}`;
+                    return;
+                }
+                return;
             }
         }
     };
@@ -58488,24 +59816,27 @@ function processExitPlugin({types: t}) {
     return {
         visitor: {
             AwaitExpression(path) {
-                const selfHooks = t.memberExpression(t.identifier("self"), t.identifier("hooks")), selfHookCount = t.memberExpression(selfHooks, t.identifier("length")), hookBlock = t.blockStatement([ t.expressionStatement(t.assignmentExpression("=", t.memberExpression(selfHooks, selfHookCount, !0), path.node.argument)), t.returnStatement(t.memberExpression(selfHooks, t.binaryExpression("-", selfHookCount, t.numericLiteral(1)), !0)) ]);
+                const selfHooks = t.memberExpression(t.identifier("self"), t.identifier("hooks"));
+                const selfHookCount = t.memberExpression(selfHooks, t.identifier("length"));
+                const hookBlock = t.blockStatement([ t.expressionStatement(t.assignmentExpression("=", t.memberExpression(selfHooks, selfHookCount, true), path.node.argument)), t.returnStatement(t.memberExpression(selfHooks, t.binaryExpression("-", selfHookCount, t.numericLiteral(1)), true)) ]);
                 path.node.argument = t.callExpression(t.arrowFunctionExpression([], hookBlock), []);
             },
             FunctionDeclaration(path) {
-                path.node.async;
-            }
+                if (!path.node.async) return;
+                //console.log('found an async function')
+                        }
         }
     };
 }
 
 function createCommonjsModule(fn, basedir, module) {
-    return fn(module = {
+    return module = {
         path: basedir,
         exports: {},
         require: function(path, base) {
-            return commonjsRequire(path, null == base ? module.path : base);
+            return commonjsRequire(path, base === void 0 || base === null ? module.path : base);
         }
-    }, module.exports), module.exports;
+    }, fn(module, module.exports), module.exports;
 }
 
 function commonjsRequire() {
@@ -58514,63 +59845,109 @@ function commonjsRequire() {
 
 var lib = createCommonjsModule((function(module, exports) {
     Object.defineProperty(exports, "__esModule", {
-        value: !0
-    }), exports.declare = function(builder) {
+        value: true
+    });
+    exports.declare = declare2;
+    function declare2(builder) {
         return (api, options, dirname) => {
             var _clonedApi2;
             let clonedApi;
             for (const name of Object.keys(apiPolyfills)) {
                 var _clonedApi;
-                api[name] || (clonedApi = null != (_clonedApi = clonedApi) ? _clonedApi : copyApiObject(api), 
-                clonedApi[name] = apiPolyfills[name](clonedApi));
+                if (api[name]) continue;
+                clonedApi = (_clonedApi = clonedApi) != null ? _clonedApi : copyApiObject(api);
+                clonedApi[name] = apiPolyfills[name](clonedApi);
             }
-            return builder(null != (_clonedApi2 = clonedApi) ? _clonedApi2 : api, options || {}, dirname);
+            return builder((_clonedApi2 = clonedApi) != null ? _clonedApi2 : api, options || {}, dirname);
         };
-    };
+    }
     const apiPolyfills = {
         assertVersion: api => range => {
-            !function(range, version) {
-                if ("number" == typeof range) {
-                    if (!Number.isInteger(range)) throw new Error("Expected string or integer value.");
-                    range = `^${range}.0.0-0`;
-                }
-                if ("string" != typeof range) throw new Error("Expected string or integer value.");
-                const limit = Error.stackTraceLimit;
-                "number" == typeof limit && limit < 25 && (Error.stackTraceLimit = 25);
-                let err;
-                err = "7." === version.slice(0, 2) ? new Error(`Requires Babel "^7.0.0-beta.41", but was loaded with "${version}". You'll need to update your @babel/core version.`) : new Error(`Requires Babel "${range}", but was loaded with "${version}". If you are sure you have a compatible version of @babel/core, it is likely that something in your build process is loading the wrong version. Inspect the stack trace of this error to look for the first entry that doesn't mention "@babel/core" or "babel-core" to see what is calling Babel.`);
-                "number" == typeof limit && (Error.stackTraceLimit = limit);
-                throw Object.assign(err, {
-                    code: "BABEL_VERSION_UNSUPPORTED",
-                    version: version,
-                    range: range
-                });
-            }(range, api.version);
+            throwVersionError(range, api.version);
         },
         targets: () => () => ({}),
         assumption: () => () => {}
     };
     function copyApiObject(api) {
         let proto = null;
-        return "string" == typeof api.version && /^7\./.test(api.version) && (proto = Object.getPrototypeOf(api), 
-        !proto || has(proto, "version") && has(proto, "transform") && has(proto, "template") && has(proto, "types") || (proto = null)), 
-        Object.assign({}, proto, api);
+        if (typeof api.version === "string" && /^7\./.test(api.version)) {
+            proto = Object.getPrototypeOf(api);
+            if (proto && (!has(proto, "version") || !has(proto, "transform") || !has(proto, "template") || !has(proto, "types"))) {
+                proto = null;
+            }
+        }
+        return Object.assign({}, proto, api);
     }
     function has(obj, key) {
         return Object.prototype.hasOwnProperty.call(obj, key);
     }
-})), declare = lib.declare, importAssertions = declare((api => (api.assertVersion(7), 
-{
-    name: "syntax-import-assertions",
-    manipulateOptions(opts, parserOpts) {
-        parserOpts.plugins.push([ "importAssertions" ]);
+    function throwVersionError(range, version) {
+        if (typeof range === "number") {
+            if (!Number.isInteger(range)) {
+                throw new Error("Expected string or integer value.");
+            }
+            range = `^${range}.0.0-0`;
+        }
+        if (typeof range !== "string") {
+            throw new Error("Expected string or integer value.");
+        }
+        const limit = Error.stackTraceLimit;
+        if (typeof limit === "number" && limit < 25) {
+            Error.stackTraceLimit = 25;
+        }
+        let err;
+        if (version.slice(0, 2) === "7.") {
+            err = new Error(`Requires Babel "^7.0.0-beta.41", but was loaded with "${version}". You'll need to update your @babel/core version.`);
+        } else {
+            err = new Error(`Requires Babel "${range}", but was loaded with "${version}". If you are sure you have a compatible version of @babel/core, it is likely that something in your build process is loading the wrong version. Inspect the stack trace of this error to look for the first entry that doesn't mention "@babel/core" or "babel-core" to see what is calling Babel.`);
+        }
+        if (typeof limit === "number") {
+            Error.stackTraceLimit = limit;
+        }
+        throw Object.assign(err, {
+            code: "BABEL_VERSION_UNSUPPORTED",
+            version: version,
+            range: range
+        });
     }
-})));
+}));
 
-Babel$1.registerPlugin("console", consolePlugin), Babel$1.registerPlugin("importMap", importsPlugin), 
-Babel$1.registerPlugin("processExit", processExitPlugin), Babel$1.registerPlugin("@babel/syntax-import-assertions", importAssertions);
+var declare = lib.declare;
 
-const transpile = (content, map, cwd) => {
+//import { declare } from "@babel/helper-plugin-utils";
+var importAssertions = declare((api => {
+    api.assertVersion(7);
+    return {
+        name: "syntax-import-assertions",
+        manipulateOptions(opts, parserOpts) {
+            parserOpts.plugins.push([ "importAssertions" ]);
+        }
+    };
+}));
+
+Babel$1.registerPlugin("console", consolePlugin);
+
+Babel$1.registerPlugin("importMap", importsPlugin);
+
+Babel$1.registerPlugin("processExit", processExitPlugin);
+
+Babel$1.registerPlugin("@babel/syntax-import-assertions", importAssertions);
+
+/*
+TODO: babelrc, eg.:
+
+// Comments are allowed as opposed to regular JSON files
+{
+	presets: [
+		// Use the preset-env babel plugins
+		'@babel/preset-env'
+	],
+	plugins: [
+		// Besides the presets, use this plugin
+		'@babel/plugin-proposal-class-properties'
+	]
+}
+*/ const transpile = (content, map, cwd) => {
     try {
         var output = Babel$1.transform(content, {
             plugins: [ [ "importMap", {
@@ -58578,7 +59955,8 @@ const transpile = (content, map, cwd) => {
                 cwd: cwd
             } ], "console", "processExit", "@babel/syntax-import-assertions" ]
         });
-        const processWrite = "\nconst processWrite = (...args) => postMessage({ log: args });\nself.hooks = self.hooks || [];\n\n".trim() + "\n\n", processExit = "\n\n" + "\n!self.willExit && setTimeout(async () => {\n\tawait Promise.allSettled(self.hooks);\n\tqueueMicrotask(() => { postMessage({ exit: true }); });\n}, 1);\nself.willExit = true;\n".trim() + "\n\n";
+        const processWrite = `\nconst processWrite = (...args) => postMessage({ log: args });\nself.hooks = self.hooks || [];\n\n`.trim() + "\n\n";
+        const processExit = "\n\n" + `\n!self.willExit && setTimeout(async () => {\n\tawait Promise.allSettled(self.hooks);\n\tqueueMicrotask(() => { postMessage({ exit: true }); });\n}, 1);\nself.willExit = true;\n`.trim() + "\n\n";
         return processWrite + output.code + processExit;
     } catch (e) {
         return `/*\n${e.message}\n*/\n\n${content}`;
@@ -58586,23 +59964,30 @@ const transpile = (content, map, cwd) => {
 };
 
 async function getHandler$1(args) {
-    const {stores: stores, getFile: getStoredFile} = this, {path: path, query: query} = args, cwd = path.split("/").slice(0, -1).join("/"), getFile = async (filePath, raw) => {
+    const {stores: stores, getFile: getStoredFile} = this;
+    const {path: path, query: query} = args;
+    const cwd = path.split("/").slice(0, -1).join("/");
+    const isJS = x => new RegExp(".js$").test(x);
+    const getFile = async (filePath, raw) => {
         const value = await getStoredFile(filePath);
         if (raw) return value;
         try {
             return JSON5.parse(value);
         } catch (e) {}
         return value;
-    }, content = await getFile(path);
-    if (x = path, !new RegExp(".js$").test(x)) return await getFile(path, "!raw");
-    var x;
-    const map = await getFile("~/importmap.json");
+    };
+    const content = await getFile(path);
+    if (!isJS(path)) return await getFile(path, "!raw");
+    //TODO: get importmap from other places besides the root dir
+        const map = await getFile("~/importmap.json");
     return transpile(content, map, cwd);
 }
 
 class WorkerRewrite {
     constructor({storage: storage}) {
-        this.stores = storage.stores, this.getFile = storage.getFile, this.handlers = {
+        this.stores = storage.stores;
+        this.getFile = storage.getFile;
+        this.handlers = {
             get: getHandler$1.bind(this)
         };
     }
@@ -58613,49 +59998,75 @@ const init = async ({cacheName: cacheName}) => {
     await utils.initMimeTypes();
     const storage = new StorageManager({
         utils: utils
-    }), templates = new TemplateEngine({
+    });
+    const templates = new TemplateEngine({
         storage: storage
-    }), app = new Router({
+    });
+    const app = new Router({
         storage: storage,
         templates: templates,
         swHandlers: swHandlers
-    }), providers = await new ProviderManager({
+    });
+    const providers = await new ProviderManager({
         app: app,
         storage: storage,
         utils: utils,
         GithubProvider: GithubProvider
-    }), services = new ServicesManager({
+    });
+    const services = new ServicesManager({
         app: app,
         storage: storage,
         providers: providers,
         utils: utils,
         templates: templates
-    }), workerRewrite = new WorkerRewrite({
+    });
+    const workerRewrite = new WorkerRewrite({
         storage: storage
     });
-    return app.get("/service/search/", storage.handlers.serviceSearch), app.get("/service/read/:id?", storage.handlers.serviceRead), 
-    app.post("/service/create/:id?", services.handlers.serviceCreate), app.get("/service/change", services.handlers.serviceGetChanges), 
-    app.post("/service/change", services.handlers.serviceChange), app.post("/service/commit", providers.handlers.createCommit), 
-    app.post("/service/update/:id?", services.handlers.serviceUpdate), app.post("/service/provider/delete/:id?", services.handlers.serviceDelete), 
-    app.post("/service/provider/test/:id?", providers.handlers.testHandler), app.post("/service/provider/create", providers.handlers.createHandler), 
-    app.post("/service/provider/read/:id?", providers.handlers.readHandler), app.post("/service/provider/update/:id?", providers.handlers.updateHandler), 
-    app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler), app.get("/manage/:id?", utils.notImplementedHandler), 
-    app.get("/monitor/:id?", utils.notImplementedHandler), app.get("/persist/:id?", utils.notImplementedHandler), 
-    app.get("/!/:path?", workerRewrite.handlers.get), async event => {
-        const serviceAPIMatch = await app.find(event.request), res = serviceAPIMatch ? await serviceAPIMatch.exec(event) : "no match in service request listener!";
+    app.get("/service/search/", storage.handlers.serviceSearch);
+ // move handler to services
+        app.get("/service/read/:id?", storage.handlers.serviceRead);
+ // move handler to services
+        app.post("/service/create/:id?", services.handlers.serviceCreate);
+    app.get("/service/change", services.handlers.serviceGetChanges);
+    app.post("/service/change", services.handlers.serviceChange);
+    app.post("/service/commit", providers.handlers.createCommit);
+    app.post("/service/update/:id?", services.handlers.serviceUpdate);
+    app.post("/service/provider/delete/:id?", services.handlers.serviceDelete);
+    app.post("/service/provider/test/:id?", providers.handlers.testHandler);
+    app.post("/service/provider/create", providers.handlers.createHandler);
+    app.post("/service/provider/read/:id?", providers.handlers.readHandler);
+    app.post("/service/provider/update/:id?", providers.handlers.updateHandler);
+    app.post("/service/provider/delete/:id?", providers.handlers.deleteHandler);
+    app.get("/manage/:id?", utils.notImplementedHandler);
+    app.get("/monitor/:id?", utils.notImplementedHandler);
+    app.get("/persist/:id?", utils.notImplementedHandler);
+    app.get("/!/:path?", workerRewrite.handlers.get);
+    return async event => {
+        const serviceAPIMatch = await app.find(event.request);
+        const res = serviceAPIMatch ? await serviceAPIMatch.exec(event) : "no match in service request listener!";
         let response;
-        if (event.request.url.includes("/::preview::/")) return response = new Response(utils.addBase(res), {
-            headers: {
-                "Content-Type": "text/html"
-            }
-        }), response;
+        if (event.request.url.includes("/::preview::/")) {
+            response = new Response(utils.addBase(res), {
+                headers: {
+                    "Content-Type": "text/html"
+                }
+            });
+            return response;
+        }
         let {contentType: contentType} = utils.getMime(event.request.url) || {};
-        return contentType || !serviceAPIMatch || res?.type || ({contentType: contentType} = utils.getMime(".json")), 
-        contentType ? (response = new Response(res, {
-            headers: {
-                "Content-Type": contentType || res.type
-            }
-        }), response) : new Response(res);
+        if (!contentType && serviceAPIMatch && !res?.type) {
+            ({contentType: contentType} = utils.getMime(".json"));
+        }
+        if (contentType) {
+            response = new Response(res, {
+                headers: {
+                    "Content-Type": contentType || res.type
+                }
+            });
+            return response;
+        }
+        return new Response(res);
     };
 };
 
@@ -58663,17 +60074,35 @@ var Handler = {
     init: init
 };
 
-const cacheName = "v0.4.6";
+const cacheName = "0.4.6";
 
-importScripts("/shared/vendor/localforage.min.js"), importScripts("/shared/vendor/json5v-2.0.0.min.js"), 
-self.addEventListener("install", installHandler), self.addEventListener("activate", activateHandler), 
-self.addEventListener("fetch", asyncFetchHandler), self.addEventListener("foreignfetch", asyncFetchHandler), 
-self.addEventListener("message", messageHandler), self.addEventListener("sync", syncHandler), 
-self.addEventListener("push", pushHandler), self.handlers = [];
+//TODO: next lines won't work because rollup rewrites dep due to module root level "this"
+//import "/shared/vendor/localforage.min.js";
+//import "/shared/vendor/json5v-2.0.0.min.js";
+// use this for now
+importScripts("/shared/vendor/localforage.min.js");
+
+importScripts("/shared/vendor/json5v-2.0.0.min.js");
+
+self.addEventListener("install", installHandler);
+
+self.addEventListener("activate", activateHandler);
+
+self.addEventListener("fetch", asyncFetchHandler);
+
+self.addEventListener("foreignfetch", asyncFetchHandler);
+
+self.addEventListener("message", messageHandler);
+
+self.addEventListener("sync", syncHandler);
+
+self.addEventListener("push", pushHandler);
+
+self.handlers = [];
 
 const driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
 
-let handlerStore, handler;
+let handlerStore;
 
 function getHandlerStore() {
     return handlerStore || localforage.createInstance({
@@ -58685,30 +60114,43 @@ function getHandlerStore() {
     });
 }
 
-async function getHandler() {
-    return handler = handler || await Handler.init({
-        cacheName: cacheName
-    }), handler;
-}
-
 handlerStore = getHandlerStore();
+
+let handler;
+
+async function getHandler() {
+    handler = handler || await Handler.init({
+        cacheName: cacheName
+    });
+    return handler;
+}
 
 const activateHandlers = async () => {
     handlerStore = getHandlerStore();
-    const genericHandler = await getHandler(), eachHandlerStoreItem = (value, key) => {
-        const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value, foundHandler = self.handlers.find((x => x.handlerName === handlerName)), foundExactHandler = foundHandler && self.handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
-        if (foundExactHandler) return;
-        let handlerFunction;
-        if (!foundHandler) try {
-            handlerFunction = eval(handlerText);
-        } catch (e) {
-            handlerFunction = genericHandler;
+    const genericHandler = await getHandler();
+    const eachHandlerStoreItem = (value, key) => {
+        const {type: type, route: route, handlerName: handlerName, handlerText: handlerText} = value;
+        //this (and the fact that all handlers currently use it) ensures that ./modules/serviceRequestHandler.js is a singleton
+                const foundHandler = self.handlers.find((x => x.handlerName === handlerName));
+        const foundExactHandler = foundHandler && self.handlers.find((x => x.handlerName === handlerName && x.routePattern === route));
+        if (foundExactHandler) {
+            //console.log(`handler was already installed for ${foundExactHandler.routePattern}`);
+            return;
         }
-        self.handlers.push({
+        let handlerFunction;
+        if (!foundHandler) {
+            try {
+                handlerFunction = eval(handlerText);
+            } catch (e) {
+                handlerFunction = genericHandler;
+            }
+        }
+        //console.log(`handler installed for ${route} (from indexDB handlerStore)`);
+                self.handlers.push({
             type: type,
             routePattern: route,
-            route: "fetch" === type ? new RegExp(route) : route,
-            handler: handlerFunction || (foundHandler ? foundHandler.handler : void 0),
+            route: type === "fetch" ? new RegExp(route) : route,
+            handler: handlerFunction || (foundHandler ? foundHandler.handler : undefined),
             handlerName: handlerName,
             handlerText: handlerText
         });
@@ -58717,66 +60159,151 @@ const activateHandlers = async () => {
 };
 
 async function installHandler(event) {
-    return console.log("service worker install event"), self.skipWaiting();
+    console.log("service worker install event");
+    return self.skipWaiting();
 }
 
 function activateHandler(event) {
-    console.log("service worker activate event"), event.waitUntil((async () => (await self.clients.claim(), 
-    await activateHandlers()))());
+    console.log("service worker activate event");
+    event.waitUntil((async () => {
+        await self.clients.claim();
+        return await activateHandlers();
+    })());
+    // cause clients to reload?
+    //self.clients.matchAll({ type: 'window' })
+    // 	.then(clients => {
+    // 		for (const client of clients) {
+    // 			client.navigate(client.url);
+    // 		}
+    // 	});
 }
 
 function asyncFetchHandler(event) {
-    if (!(event.request.url.includes("https://crosshj.auth0.com") || event.request.url.includes("index.bootstrap") || event.request.url.includes("localhost:3333") || event.request.url.includes("allorigins") || event.request.url.includes("browser-sync/socket.io") || event.request.url.includes("browser-sync/browser-sync-client") || event.request.url.includes("?browsersync=") || "no-store" === event.request.cache || "no-cache" === event.request.headers.get("pragma") && "no-cache" === event.request.headers.get("cache-control"))) if (event.request.url.includes("unpkg") || event.request.url.includes("cdn.jsdelivr") || event.request.url.includes("rawgit.com") || event.request.url.includes("cdn.skypack.dev")) {
+    if (event.request.url.includes("https://crosshj.auth0.com") || event.request.url.includes("index.bootstrap") || event.request.url.includes("localhost:3333") || event.request.url.includes("allorigins")) {
+        return;
+    }
+    if (event.request.url.includes("browser-sync/socket.io") || event.request.url.includes("browser-sync/browser-sync-client") || event.request.url.includes("?browsersync=")) {
+        return;
+    }
+    // do not use or update cache
+        if (event.request.cache === "no-store" || event.request.headers.get("pragma") === "no-cache" && event.request.headers.get("cache-control") === "no-cache") {
+        return;
+    }
+    // if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+    // 	debugger;
+    // 	return;
+    // }
+    // if (
+    // 	!event.request.url.includes('/bartok/') &&
+    // 	!event.request.url.includes('/shared/')
+    // ) {
+    // 	return;
+    // }
+        if (event.request.url.includes("unpkg") || event.request.url.includes("cdn.jsdelivr") || event.request.url.includes("rawgit.com") || event.request.url.includes("cdn.skypack.dev")) {
         const response = async () => {
-            const cache = await caches.open(cacheName), cacheResponse = await cache.match(event.request);
+            const cache = await caches.open(cacheName);
+            const cacheResponse = await cache.match(event.request);
             if (cacheResponse) return cacheResponse;
             const networkResponse = await fetch(event.request);
-            return cache.put(event.request, networkResponse.clone()), networkResponse;
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
         };
         event.respondWith(response());
-    } else event.request.url.includes("https://webtorrent.io/torrents/") || event.request.url.includes("api.github.com") || event.respondWith(async function() {
-        self.handlers.length || await activateHandlers();
-        return await fetchHandler(event);
+        return;
+    }
+    if (event.request.url.includes("https://webtorrent.io/torrents/") || event.request.url.includes("api.github.com")) {
+        return;
+    }
+    event.respondWith(async function() {
+        if (!self.handlers.length) {
+            await activateHandlers();
+        }
+        const res = await fetchHandler(event);
+        // if(!res){
+        // 	return new Response('error handling this request!  see service-worker.js', {headers:{'Content-Type': 'text/html'}});
+        // }
+                return res;
     }());
 }
 
 async function fetchHandler(event) {
-    const genericHandler = await getHandler(), routeHandlerBlacklist = [ "//(.*)" ], path = event.request.url.replace(location.origin, "");
-    if (event.request.url.includes(location.origin + "/~/")) return genericHandler(event);
-    if (event.request.url.includes(location.origin + "/!/")) return genericHandler(event);
-    if (self.handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern))).find((x => "fetch" === x.type && x.route.test(path)))) return genericHandler(event);
+    const genericHandler = await getHandler();
+    const routeHandlerBlacklist = [ "//(.*)" ];
+    const path = event.request.url.replace(location.origin, "");
+    // root service
+        if (event.request.url.includes(location.origin + "/~/")) {
+        return genericHandler(event);
+    }
+    // worker rewrite
+        if (event.request.url.includes(location.origin + "/!/")) {
+        return genericHandler(event);
+    }
+    const safeHandlers = self.handlers.filter((x => !routeHandlerBlacklist.includes(x.routePattern)));
+    const foundHandler = safeHandlers.find((x => x.type === "fetch" && x.route.test(path)));
+    if (foundHandler) {
+        //console.log(foundHandler)
+        //TODO: check if the handler returns a response object, otherwise don't use it??
+        //return foundHandler.handler(event);
+        return genericHandler(event);
+    }
     const cacheMatch = await caches.match(event.request);
-    return cacheMatch || await fetch(event.request);
+    if (cacheMatch) return cacheMatch;
+    return await fetch(event.request);
 }
 
 function messageHandler(event) {
-    const {data: data} = event, {bootstrap: bootstrap} = data || {};
-    bootstrap ? (async () => {
-        try {
-            console.log("booting");
-            const bootstrapMessageEach = module => {
+    /*
+		all events should be sent through here
+
+		an event handler can be registered here
+
+		handlers can be listed (for service map)
+	*/
+    const {data: data} = event;
+    const {bootstrap: bootstrap} = data || {};
+    if (bootstrap) {
+        (async () => {
+            try {
+                console.log("booting");
+                const bootstrapMessageEach = module => {
+                    const client = event.source;
+                    if (!client) {
+                        console.error("failed to notify client on boot complete");
+                        return;
+                    }
+                    client.postMessage({
+                        module: module,
+                        msg: "module-loaded"
+                    });
+                };
+                const modules = await bootstrapHandler(bootstrap, bootstrapMessageEach);
                 const client = event.source;
-                client ? client.postMessage({
-                    module: module,
-                    msg: "module-loaded"
-                }) : console.error("failed to notify client on boot complete");
-            }, modules = await bootstrapHandler(bootstrap, bootstrapMessageEach), client = event.source;
-            if (!client) return void console.error("failed to notify client on boot complete");
-            client.postMessage({
-                modules: modules.filter((x => !x.includes || !x.includes("NOTE:"))),
-                msg: "boot complete"
-            });
-        } catch (e) {
-            console.log(e);
-            const client = event.source;
-            if (!client) return void console.error("failed to notify client on boot complete");
-            client.postMessage({
-                msg: "boot error - you offline?"
-            });
-        }
-    })() : (console.log("service worker message event"), console.log({
+                if (!client) {
+                    console.error("failed to notify client on boot complete");
+                    return;
+                }
+                client.postMessage({
+                    modules: modules.filter((x => !x.includes || !x.includes("NOTE:"))),
+                    msg: "boot complete"
+                });
+            } catch (e) {
+                console.log(e);
+                const client = event.source;
+                if (!client) {
+                    console.error("failed to notify client on boot complete");
+                    return;
+                }
+                client.postMessage({
+                    msg: "boot error - you offline?"
+                });
+            }
+        })();
+        return;
+    }
+    console.log("service worker message event");
+    console.log({
         data: data
-    }));
+    });
 }
 
 function syncHandler(event) {
@@ -58787,8 +60314,12 @@ function pushHandler(event) {
     console.log("service worker push event");
 }
 
+// ----
 async function bootstrapHandler({manifest: manifest}, bootstrapMessageEach) {
-    const manifestResponse = await fetch(manifest), _manifest = JSON5.parse(await manifestResponse.text()), _source = new Response(JSON.stringify(_manifest, null, 2), {
+    //console.log({ manifest});
+    const manifestResponse = await fetch(manifest);
+    const _manifest = JSON5.parse(await manifestResponse.text());
+    const _source = new Response(JSON.stringify(_manifest, null, 2), {
         status: manifestResponse.status,
         statusText: manifestResponse.statusText,
         headers: manifestResponse.headers
@@ -58797,54 +60328,88 @@ async function bootstrapHandler({manifest: manifest}, bootstrapMessageEach) {
         cache.put(manifest, _source);
     }));
     const {modules: modules} = _manifest || {};
-    if (modules && Array.isArray(modules)) {
-        for (var i = 0, len = modules.length; i < len; i++) await registerModule(modules[i]), 
-        bootstrapMessageEach(modules[i]);
-        return modules;
+    if (!modules || !Array.isArray(modules)) {
+        console.error("Unable to find modules in service manifest");
+        return;
     }
-    console.error("Unable to find modules in service manifest");
+    //should only register modules that are not in cache
+    //await Promise.all(modules.map(registerModule));
+        for (var i = 0, len = modules.length; i < len; i++) {
+        await registerModule(modules[i]);
+        bootstrapMessageEach(modules[i]);
+    }
+    return modules;
 }
 
 async function registerModule(module) {
     try {
-        if (module.includes && module.includes("NOTE:")) return;
+        if (module.includes && module.includes("NOTE:")) {
+            return;
+        }
         const {source: source, include: include, route: route, handler: handler, resources: resources, type: type} = module;
-        if (!route && !resources) return void console.error("module must be registered with a route or array of resources!");
-        if (handler) {
+        if (!route && !resources) {
+            console.error("module must be registered with a route or array of resources!");
+            return;
+        }
+        /*
+	if handler is defined, matching routes will be handled by this function
+	(optionally, the handler could listen to messages - not sure how that works right now)
+	should instantiate this function and add it to handlers, but also add to DB
+	*/        if (handler) {
             const genericHandler = await getHandler();
-            let foundHandler = self.handlers.find((x => x.handlerName === handler)), handlerFunction, handlerText;
-            "./modules/service-worker.handler.js" === handler && genericHandler && (handlerText = "service-worker-handler-register-module", 
-            handlerFunction = genericHandler, foundHandler = {
-                handler: handler,
-                handlerText: handlerText
-            }), foundHandler && foundHandler.handler || (handlerText = await (await fetch(handler)).text(), 
-            handlerFunction = eval(handlerText));
+            let foundHandler = self.handlers.find((x => x.handlerName === handler));
+            let handlerFunction, handlerText;
+            if (handler === "./modules/service-worker.handler.js" && genericHandler) {
+                handlerText = "service-worker-handler-register-module";
+                handlerFunction = genericHandler;
+                foundHandler = {
+                    handler: handler,
+                    handlerText: handlerText
+                };
+            }
+            if (!foundHandler || !foundHandler.handler) {
+                handlerText = await (await fetch(handler)).text();
+                handlerFunction = eval(handlerText);
+            }
             const foundExactHandler = foundHandler && self.handlers.find((x => x.handlerName === handler && x.routePattern === route));
-            if (foundExactHandler) return;
-            return await handlerStore.setItem(route, {
+            if (foundExactHandler) {
+                //console.log(`handler was already installed for ${foundExactHandler.routePattern} (boot)`);
+                return;
+            }
+            await handlerStore.setItem(route, {
                 type: type,
                 route: route,
                 handlerName: handler,
                 handlerText: handlerText || foundHandler.handlerText
-            }), void self.handlers.push({
+            });
+            //console.log(`handler installed for ${route} (boot)`);
+                        self.handlers.push({
                 type: type,
                 routePattern: route,
-                route: "fetch" === type ? new RegExp(route) : route,
+                route: type === "fetch" ? new RegExp(route) : route,
                 handler: handlerFunction || foundHandler.handler,
                 handlerName: handler,
                 handlerText: handlerText || foundHandler.handlerText
             });
+            return;
         }
-        if (resources && await Promise.all(resources.map((async resourceUrl => {
-            const opts = {};
-            resourceUrl.includes(".htm") && (opts.headers = opts.headers || {}, opts.headers.Accept = opts.headers.Accept || "", 
-            opts.headers.Accept = "text/html," + opts.headers.Accept);
-            const response = await fetch(resourceUrl, opts);
-            return await caches.open(cacheName).then((function(cache) {
-                cache.put(resourceUrl, response);
-            }));
-        }))), include) {
-            const response = await fetch(source), extra = [];
+        if (resources) {
+            await Promise.all(resources.map((async resourceUrl => {
+                const opts = {};
+                if (resourceUrl.includes(".htm")) {
+                    opts.headers = opts.headers || {};
+                    opts.headers["Accept"] = opts.headers["Accept"] || "";
+                    opts.headers["Accept"] = "text/html," + opts.headers["Accept"];
+                }
+                const response = await fetch(resourceUrl, opts);
+                return await caches.open(cacheName).then((function(cache) {
+                    cache.put(resourceUrl, response);
+                }));
+            })));
+        }
+        if (include) {
+            const response = await fetch(source);
+            const extra = [];
             await Promise.all(include.map((async x => {
                 const text = await (await fetch(x)).text();
                 extra.push(`\n\n/*\n\n${x}\n\n*/ \n ${text}`);
@@ -58859,13 +60424,21 @@ async function registerModule(module) {
                 cache.put(route, _source);
             }));
         }
-        if (source) {
+        /*
+	if source is defined, service worker will respond to matching routes with this
+	(which means this is pretty much a script? resource being registered)
+	should fetch this resource and add to cache & DB
+	*/
+        //console.log({ source, route, handler });
+                if (source) {
             const _source = await fetch(source);
             return caches.open(cacheName).then((function(cache) {
                 cache.put(route, _source);
             }));
         }
     } catch (e) {
-        console.error("failed to register module"), console.log(module), console.log(e);
+        console.error("failed to register module");
+        console.log(module);
+        console.log(e);
     }
 }
