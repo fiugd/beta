@@ -1,4 +1,7 @@
-export default (root, chalk, braces) => ({
+import braces from './braces.js';
+import chalk from './chalk.js';
+
+export default (root) => ({
 	//root: location.origin+'/',
 	root: ' ', // << so that externals are not filtered out, and process.env does not exist...
 	summaryOnly: true,

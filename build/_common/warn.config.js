@@ -1,4 +1,7 @@
-export default (root, chalk, braces) => (warning) => {
+import braces from './braces.js';
+import chalk from './chalk.js';
+
+export default (root) => (warning) => {
 	//if (warning.code === 'EVAL') return
 	//if (warning.code === 'THIS_IS_UNDEFINED') return;
 	//console.log(JSON.stringify(warning, null, 2))

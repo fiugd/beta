@@ -21,7 +21,7 @@ export default (root, analyzeConfig, onwarn) => ({
 		css(),
 		analyze(analyzeConfig),
 	],
-	external: ['chalk'],
+	external: [],
 	output: {
 		format: 'es',
 		//sourcemap: true

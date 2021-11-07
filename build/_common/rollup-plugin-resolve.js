@@ -1,12 +1,5 @@
+import braces from './braces.js';
 import {pather} from '../../shared/utilities.mjs';
-
-const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
-const braces = url => {
-	const blacklist = ['jsdelivr', 'skypack.dev', 'unpkg'];
-	if(blacklist.find(x => url.includes(x))) return url;
-	return `˹${url}˺`;
-};
-const noOrigin = x => x.replace(new RegExp(location.origin+'/'), '');
 
 const plugin = (root) => ({
 	name: 'file resolver',

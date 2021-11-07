@@ -6,38 +6,24 @@ import 'rollup';
 import 'rollupPluginSourceMap';
 import 'terser';
 
-
-import chalk from 'chalk';
-chalk.enabled = true;
-chalk.level = 3; //levels.trueColor;
-
 import terserConfig from './_common/terser.config.js';
 import getAnalyzeConfig from './_common/analyze.config.js';
 import getOnWarn from './_common/warn.config.js';
 import packageJson from "/package.json" assert { type: "json" };
 
-const VERSION = `${packageJson.version}`;
-const DATE = new Date().toISOString();
-
-const AddVersion = async (code) => (await code).replace(/{{VERSION}}/g, VERSION);
-const AddDate = async (code) => (await code).replace(/{{DATE}}/g, DATE);
-
-const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
-
-const Minify = async (code) => Terser.minify((await code), terserConfig());
-//const Minify = (code) => ({ code });
-
 const changeUrl = '/service/change';
 const root = 'fiugd/beta';
 
-const braces = url => {
-	const blacklist = ['jsdelivr', 'skypack.dev', 'unpkg'];
-	if(blacklist.find(x => url.includes(x))) return url;
-	return `˹${url}˺`;
-};
+const analyzeConfig = getAnalyzeConfig(root);
+const onwarn = getOnWarn(root);
 
-const analyzeConfig = getAnalyzeConfig(root, chalk, braces);
-const onwarn = getOnWarn(root, chalk, braces);
+const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
+
+const VERSION = `${packageJson.version}`;
+const DATE = new Date().toISOString();
+const AddVersion = async (code) => (await code).replace(/{{VERSION}}/g, VERSION);
+const AddDate = async (code) => (await code).replace(/{{DATE}}/g, DATE);
+const Minify = async (code) => Terser.minify((await code), terserConfig());
 
 const writeFile = ({ path, code }) => {
 	const body = {
@@ -81,9 +67,6 @@ const SaveBuild =  (config) => async (args) => {
 	const path =  `./${config.output.file}`;
 	return await writeFile({ path, code });
 };
-
-
-
 
 const build = async (configUrl) => {
 	let error;
