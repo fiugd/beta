@@ -93,6 +93,14 @@ function friendlyModeName(type, mode){
 	return mode;
 }
 
+const extensionMapper = (extension) => {
+	const override = {
+		md: "info",
+	};
+	const _ext = extension.toLowerCase();
+	return "icon-" + (override[_ext] || ext[_ext] || "default");
+};
+
 // from tabs
 // function getFileType(fileName = "") {
 // 	let type = "default";
@@ -181,11 +189,87 @@ const formatHandlers = (namespace, x) => Object.entries(x)
 		};
 	}, {});
 
+const utils = (() => {
+	const unique = (arr) => Array.from(new Set(arr));
+	const htmlEscape = (html) =>
+		[
+			[/&/g, "&amp;"], //must be first
+			[/</g, "&lt;"],
+			[/>/g, "&gt;"],
+			[/"/g, "&quot;"],
+			[/'/g, "&#039;"],
+		].reduce((a, o) => a.replace(...o), html);
+	const highlight = (term = "", str = "", limit) => {
+		const caseMap = str
+			.split("")
+			.map((x) => (x.toLowerCase() === x ? "lower" : "upper"));
+
+		const splitstring = str.toLowerCase().split(term.toLowerCase());
+		let html =
+			"<span>" +
+			(limit === 1
+				? splitstring[0] +
+					`</span><span class="highlight">${term.toLowerCase()}</span><span>` +
+					splitstring.slice(1).join(term.toLowerCase())
+				: splitstring.join(
+						`</span><span class="highlight">${term.toLowerCase()}</span><span>`
+					)) +
+			"</span>";
+		if ((limit = 1)) {
+		}
+		html = html.split("");
+
+		let intag = false;
+		for (let char = 0, i = 0; i < html.length; i++) {
+			const thisChar = html[i];
+			if (thisChar === "<") {
+				intag = true;
+				continue;
+			}
+			if (thisChar === ">") {
+				intag = false;
+				continue;
+			}
+			if (intag) continue;
+			if (caseMap[char] === "upper") {
+				html[i] = html[i].toUpperCase();
+			}
+			char++;
+		}
+		return html.join("");
+	};
+	const debounce = (func, wait, immediate) => {
+		var timeout;
+		return async function () {
+			var context = this,
+				args = arguments;
+			var later = function () {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
+		};
+	};
+
+	return {
+		unique,
+		htmlEscape,
+		highlight,
+		debounce,
+	};
+})();
+
+
 export {
+	utils,
 	flatFromProp,
 	formatHandlers,
 	htmlToElement,
 	getExtension, getFileType, codemirrorModeFromFileType, friendlyModeName,
+	extensionMapper,
 	noFrontSlash, pathNoServiceName, getFilePath,
 	showFileInEditor
 };

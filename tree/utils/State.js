@@ -1,8 +1,17 @@
-const DEBUG = false;
+const DEBUG = true;
 
 let allServices;
 let currentService;
 let clientId;
+
+const state = {};
+const getState = (key) => {
+	if(key) return state[key];
+	return state;
+}
+const setState = (key, value) => state[key] = value;
+
+// -----------------
 
 const dummyFunc = (fnName, returns='') => (...args) => {
 	DEBUG && console.log({ ...args, fnName });
@@ -38,8 +47,7 @@ const setCurrentService = dummyFunc('setCurrentService', {
 const getCurrentFolder = dummyFunc('getCurrentFolder');
 const setCurrentFolder = dummyFunc('setCurrentFolder');
 
-const getState = dummyFunc('getState');
-const setState = dummyFunc('setState');
+
 const resetState = dummyFunc('resetState');
 
 const getSettings = dummyFunc('getSettings', { indentWithTabs: true, tabSize: 2 });
