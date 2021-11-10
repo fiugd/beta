@@ -5,7 +5,7 @@
 		{
 			"resources": [
 				"./",
-				"./index.service.test.html",
+				"./test/index.service.test.html",
 				"./index.boot.html",
 				"./index.html",
 				"./service.manifest.json",
