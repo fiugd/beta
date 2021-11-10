@@ -1,9 +1,967 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-07T21:45:18.250Z )
+	Version 0.4.6 ( 2021-11-10T05:06:23.603Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
+const sheet = new CSSStyleSheet;
+
+sheet.replaceSync(`body { height: 100vh; width: 100vw; }\n\n::-webkit-scrollbar { width: 8px; height: 5px; }\n::-webkit-scrollbar-corner,\n::-webkit-scrollbar-track { background: transparent; }\n::-webkit-scrollbar-thumb { background-color: #2a2a2a; }\n::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }\n`);
+
+let currentService;
+
+let clientId;
+
+const state = {};
+
+const getState = key => {
+    if (key) return state[key];
+    return state;
+};
+
+const setState = (key, value) => state[key] = value;
+
+const setCurrentFile = ({filePath: filePath}) => {
+    const found = currentService.code.find((x => x.name === filePath || x.path === "/" + filePath || x.path === "/" + currentService.name + "/" + filePath));
+    if (found) {
+        currentService.state.selected = found;
+        currentService.state.selected.filename = found.name;
+        return;
+    }
+    console.error(`could not find ${filePath}`);
+};
+
+const initState = (all, current) => {
+    currentService = current;
+    // TODO: this is UGLY - service worker should be consistent with how it returns files...
+        currentService.code.forEach((x => {
+        if (x.path.startsWith("/")) return;
+        x.path = "/" + x.path;
+    }));
+    if (typeof currentService.state.selected === "string" && currentService.state.selected) {
+        setCurrentFile({
+            filePath: `${currentService.name}/${currentService.state.selected}`
+        });
+    }
+};
+
+const createClientId = () => Math.random().toString(36).slice(2).toUpperCase().split(/(.{4})/).filter((x => x)).join("_");
+
+const getClientId = () => {
+    if (clientId) return clientId;
+    clientId = createClientId();
+    return clientId;
+};
+
+var ext = {
+    mp3: "audio",
+    wav: "audio",
+    ogg: "audio",
+    adb: "ada",
+    ads: "ada",
+    adoc: "asciidoc",
+    apl: "apl",
+    bowerrc: "bower",
+    bf: "brainfuck",
+    cs: "csharp",
+    c: "c",
+    h: "c",
+    m: "c",
+    ctp: "cake_php",
+    clj: "clojure",
+    cljc: "clojure",
+    cljs: "clojure",
+    cjsx: "react",
+    jsx: "react",
+    tmp: "clock",
+    coffee: "coffee",
+    cfc: "coldfusion",
+    cfm: "coldfusion",
+    config: "config",
+    cpp: "cpp",
+    cr: "crystal",
+    cs: "csharp",
+    css: "css",
+    dart: "dart",
+    sss: "css",
+    csv: "csv",
+    edn: "clojure",
+    editorconfig: "config",
+    ejs: "ejs",
+    elm: "elm",
+    ttf: "font",
+    woff: "font",
+    woff2: "font",
+    eot: "font",
+    gitkeep: "git",
+    gitconfig: "git",
+    gitattributes: "git",
+    gitmodules: "git",
+    gitignore: "git",
+    go: "go",
+    gradle: "gradle",
+    grails: "grails",
+    groovy: "grails",
+    hh: "hacklang",
+    haml: "haml",
+    hs: "haskell",
+    lhs: "haskell",
+    lisp: "lisp",
+    htm: "html",
+    html: "html",
+    shtml: "html",
+    dhtml: "html",
+    ai: "ai",
+    png: "image",
+    ico: "image",
+    jpg: "image",
+    bmp: "image",
+    jpeg: "image",
+    gif: "image",
+    jade: "jade",
+    java: "java",
+    mjs: "javascript",
+    js: "javascript",
+    es6: "javascript",
+    es7: "javascript",
+    erl: "erlang",
+    ex: "elixir",
+    gltf: "json",
+    ipynb: "json",
+    json: "json",
+    jl: "julia",
+    less: "less",
+    license: "license",
+    liquid: "liquid",
+    ls: "livescript",
+    lua: "lua",
+    md: "markdown",
+    mustache: "mustache",
+    handlebars: "mustache",
+    hbs: "mustache",
+    hjs: "mustache",
+    stache: "mustache",
+    npmignore: "npm",
+    ml: "ocaml",
+    mli: "ocaml",
+    cmx: "ocaml",
+    cmxa: "ocaml",
+    pdf: "pdf",
+    pl: "perl",
+    pro: "prolog",
+    psd: "photoshop",
+    php: "php",
+    "php.inc": "php",
+    pug: "pug",
+    pp: "puppet",
+    py: "python",
+    rb: "ruby",
+    "erb.html": "ruby",
+    "html.erb": "ruby",
+    rs: "rust",
+    sass: "sass",
+    scss: "sass",
+    scm: "scheme",
+    sbt: "sbt",
+    scala: "scala",
+    sql: "sql",
+    sh: "shell",
+    cmd: "shell",
+    zsh: "shell",
+    fish: "shell",
+    profile: "shell",
+    slim: "slim",
+    smarty: "smarty",
+    "smarty.tpl": "smarty",
+    styl: "stylus",
+    svg: "svg",
+    swift: "swift",
+    tf: "terraform",
+    "tf.json": "terraform",
+    tex: "tex",
+    sty: "tex",
+    cls: "tex",
+    dtx: "tex",
+    ins: "tex",
+    txt: "default",
+    twig: "twig",
+    as: "assemblyscript",
+    ts: "typescript",
+    tsx: "react",
+    direnv: "config",
+    env: "config",
+    static: "config",
+    slugignore: "config",
+    vala: "vala",
+    wmv: "video",
+    mov: "video",
+    ogv: "video",
+    webm: "video",
+    avi: "video",
+    mpg: "video",
+    mp4: "video",
+    xml: "xml",
+    yml: "yml",
+    yaml: "yml",
+    vue: "vue",
+    babelrc: "babel",
+    eslintrc: "eslint",
+    jshintrc: "jshint",
+    xcodeproj: "xcode",
+    zip: "zip",
+    rar: "zip",
+    gz: "zip",
+    iso: "zip",
+    key: "key",
+    pem: "key",
+    fs: "fsharp",
+    vimrc: "vim",
+    vim: "vim",
+    viminfo: "vim",
+    sql: "sql",
+    bat: "shell",
+    htaccess: "apache",
+    wxml: "wxml",
+    wxss: "wxss",
+    ini: "config",
+    clj: "clojure",
+    r: "r",
+    lock: "lock",
+    asp: "asp",
+    flowconfig: "flow",
+    nim: "nim",
+    kt: "kotlin",
+    ink: "ink",
+    zig: "zig",
+    pas: "pascal",
+    raku: "raku",
+    fth: "forth",
+    d: "d",
+    pony: "pony",
+    ppm: "ppm",
+    wat: "wat",
+    piskel: "image",
+    scratch: "smarty",
+    bugs: "platformio"
+};
+
+//import mimeTypes from 'https://raw.githubusercontent.com/jshttp/mime-db/master/src/apache-types.json';
+//import mimeTypes from "https://cdn.jsdelivr.net/npm/mime-db@1.50.0/db.json";
+// TODO: maybe use insertAdjacentHTML for this instead
+// this works like jquery append ^^^
+function htmlToElement$2(html) {
+    var template = document.createElement("template");
+    html = html.trim();
+ // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+    //also would be cool to remove indentation from all lines
+        return template.content.firstChild;
+}
+
+const extensionMapper = extension => {
+    const override = {
+        md: "info"
+    };
+    const _ext = extension.toLowerCase();
+    return "icon-" + (override[_ext] || ext[_ext] || "default");
+};
+
+const noFrontSlash = path => {
+    try {
+        if (!path) return path;
+        if (!path.includes("/")) return path;
+        if (path[0] === "/") return path.slice(1);
+        return path;
+    } catch (e) {
+        debugger;
+    }
+};
+
+/*
+	Example usage of flatFromProp:
+
+	const input = [{
+		one: '1',
+		two: [
+			{ three: 'a' },
+			{ three: 'b'}
+		]
+	}];
+	const output = flatFromProp(input, "two")
+	assert(output === [
+		{ one: '1', three: 'a'},
+		{ one: '1', three: 'b'},
+	])
+
+*/ const flatFromProp = (arr, prop) => arr.flatMap((({[prop]: p, ...x}) => typeof p !== "undefined" && p.length ? p.map((y => ({
+    ...x,
+    ...y
+}))) : x));
+
+const formatHandlers = (namespace, x) => Object.entries(x).reduce(((all, [key, value]) => ({
+    ...all,
+    [key]: {
+        listener: value,
+        name: namespace
+    }
+})), {});
+
+const utils = (() => {
+    const unique = arr => Array.from(new Set(arr));
+    const htmlEscape = html => [ [ /&/g, "&amp;" ], //must be first
+    [ /</g, "&lt;" ], [ />/g, "&gt;" ], [ /"/g, "&quot;" ], [ /'/g, "&#039;" ] ].reduce(((a, o) => a.replace(...o)), html);
+    const highlight = (term = "", str = "", limit) => {
+        const caseMap = str.split("").map((x => x.toLowerCase() === x ? "lower" : "upper"));
+        const splitstring = str.toLowerCase().split(term.toLowerCase());
+        let html = "<span>" + (limit === 1 ? splitstring[0] + `</span><span class="highlight">${term.toLowerCase()}</span><span>` + splitstring.slice(1).join(term.toLowerCase()) : splitstring.join(`</span><span class="highlight">${term.toLowerCase()}</span><span>`)) + "</span>";
+        if (limit = 1) ;
+        html = html.split("");
+        let intag = false;
+        for (let char = 0, i = 0; i < html.length; i++) {
+            const thisChar = html[i];
+            if (thisChar === "<") {
+                intag = true;
+                continue;
+            }
+            if (thisChar === ">") {
+                intag = false;
+                continue;
+            }
+            if (intag) continue;
+            if (caseMap[char] === "upper") {
+                html[i] = html[i].toUpperCase();
+            }
+            char++;
+        }
+        return html.join("");
+    };
+    const debounce = (func, wait, immediate) => {
+        var timeout;
+        return async function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+    return {
+        unique: unique,
+        htmlEscape: htmlEscape,
+        highlight: highlight,
+        debounce: debounce
+    };
+})();
+
+const listeners$1 = {};
+
+const triggers$2 = {};
+
+function attach({name: name, listener: listener, eventName: eventName, options: options, key: key, context: context}) {
+    if (!name || !listener || !eventName) {
+        console.error("Attempt to improperly attach an event listener");
+        console.error({
+            name: name,
+            listener: listener,
+            eventName: eventName
+        });
+        return;
+    }
+    const listenerName = `${eventName}__${name}`;
+    if (listeners$1[listenerName]) return;
+    // TODO: alter this approach, instead use ONE event listener attached to window (?)
+    // this approach kinda sucks because a lot of listeners get added to window
+    // also there is less control over events as they are handled
+        const _listener = e => listener(e, context || {});
+    window.addEventListener(eventName, _listener, options);
+    listeners$1[listenerName] = listener;
+    if (key) {
+        listeners$1[listenerName]._meta = {
+            key: key,
+            name: name,
+            eventName: eventName,
+            options: options
+        };
+    }
+}
+
+function list() {
+    return Object.keys(listeners$1);
+}
+
+/*
+future todo:
+
+- when an event is triggered, don't create a custom event if event listeners exist already for that event
+- instead, just trigger those
+
+- there should be an uber listener instead of a bunch of click listeners added
+
+*/
+// this thing is used too many ways... SIGH
+function trigger(args) {
+    const {e: e, type: type, params: params, source: source, data: data, detail: detail, external: external} = args;
+    const _data = typeof data === "function" ? data(e) : data || (detail || {}).data || {};
+    //console.log(`triggering event: ${type}`);
+        const defaultDetail = {
+        ..._data,
+        ...params,
+        ...{
+            source: source
+        },
+        data: _data
+    };
+    const _detail = detail ? {
+        ...defaultDetail,
+        ...detail,
+        data: _data
+    } : defaultDetail;
+    const event = new CustomEvent(type, {
+        bubbles: true,
+        detail: _detail
+    });
+    window.dispatchEvent(event);
+    // SEND INTERNAL EVENTS TO EXTERNAL
+        if (external) return;
+    const blackList = [ "operationDone" ];
+    const triggerEvent = {
+        type: type,
+        detail: _detail
+    };
+    if (!blackList.includes(type)) {
+        window.top.postMessage({
+            triggerEvent: triggerEvent
+        }, location);
+    }
+}
+
+let triggerClickListener;
+
+const attachTrigger = function attachTrigger({name: name, type: // the module that is attaching the listener
+type = "click", data: // the input event name, eg. "click"
+data, eventName: // an object or function to get data to include with fired event
+eventName, filter: // the name of the event(s) that triggers are attached for (can also be a function or an array)
+filter}) {
+    if (type === "raw") {
+        const triggerName = `${eventName}__${name}`;
+        const _trigger = args => {
+            trigger({
+                ...args,
+                e: args,
+                data: data,
+                type: eventName,
+                source: name
+            });
+        };
+        triggers$2[triggerName] = {
+            eventName: eventName,
+            type: type,
+            trigger: _trigger
+        };
+        return _trigger;
+    }
+    if (type !== "click") {
+        console.error(`triggering based on ${type} not currently supported`);
+        return;
+    }
+    const listener = triggerClickListener || (event => {
+        const foundTrigger = Object.keys(triggers$2).map((key => ({
+            key: key,
+            ...triggers$2[key]
+        }))).find((t => {
+            if (t.type === "raw") {
+                return false;
+            }
+            //this won't work if only one global listener
+            //if(t.key !== triggerName) return false;
+                        const filterOkay = t.filter && typeof t.filter === "function" && t.filter(event);
+            return filterOkay;
+        }));
+        if (!foundTrigger) return true;
+ //true so event will propagate, etc
+                event.preventDefault();
+        event.stopPropagation();
+        const {eventName: type, data: data} = foundTrigger;
+        const params = {};
+        const source = {};
+        const _data = typeof data === "function" ? data(event) : data || {};
+        trigger({
+            type: type,
+            params: params,
+            source: source,
+            data: _data,
+            detail: (_data || {}).detail
+        });
+        return false;
+    });
+    const options = {};
+    if (!triggerClickListener) {
+        window.addEventListener(type, listener, options);
+    }
+    const triggerName = `${eventName}__${name}`;
+    triggers$2[triggerName] = {
+        eventName: eventName,
+        filter: filter,
+        data: data,
+        type: type
+    };
+    triggerClickListener = triggerClickListener || listener;
+};
+
+function listTriggers$1() {
+    return Object.keys(triggers$2);
+}
+
+window.listTriggers = listTriggers$1;
+
+window.listListeners = list;
+
+function attachEvents(events, context) {
+    const listenersConfig = flatFromProp(events.listeners, "handlers");
+    for (const handler of listenersConfig) {
+        attach({
+            ...handler,
+            context: context
+        });
+    }
+    context.triggers = {};
+    context.triggerEvent = {};
+    const connectTriggers = ([namespace, _triggers]) => {
+        const _name = namespace.toLowerCase();
+        const triggersConfig = flatFromProp(_triggers, "handlers");
+        const triggers = triggersConfig.reduce(((acc, {name: name, eventName: eventName, ...item}) => {
+            const trigger = attachTrigger({
+                ...item,
+                name: namespace,
+                eventName: eventName
+            });
+            if (!trigger) return acc;
+            return {
+                ...acc,
+                [name || eventName]: trigger
+            };
+        }), {});
+        context.triggers[_name] = triggers;
+        context.triggerEvent[_name] = (eventName, operation) => {
+            context.triggers[_name][eventName]({
+                detail: {
+                    operation: operation,
+                    done: () => {},
+                    body: {}
+                }
+            });
+        };
+    };
+    Object.entries(events.triggers).map(connectTriggers);
+}
+
+// LISTEN TO EXTERNAL EVENTS
+// TRIGGER INTERNAL EVENTS
+window.top.postMessage({
+    subscribe: "Editor " + getClientId()
+}, location);
+
+const useCapture = false;
+
+window.addEventListener("message", (function(messageEvent) {
+    trigger({
+        ...messageEvent.data,
+        external: true
+    });
+}), useCapture);
+
+/*
+
+this code is useful when testing and developing, but less so otherwise
+
+*/ const module$1 = async () => {
+    const isRunningAsModule = document.location.href.includes("_/modules");
+    if (!isRunningAsModule) {
+        const ROOT_SERVICE_ID = 0;
+        const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;
+        const serviceUrl = `/service/read/${currentServiceId}`;
+        const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
+        console.log(service);
+        initState([ service ], service);
+        trigger({
+            e: {},
+            type: "operationDone",
+            params: {},
+            source: {},
+            data: {},
+            detail: {
+                op: "read",
+                id: service.id,
+                result: [ service ]
+            }
+        });
+        console.log("Listeners:\n" + list().map((x => x.split("__").reverse().join(": "))).sort().join("\n"));
+        console.log("Triggers:\n" + listTriggers().map((x => x.split("__").reverse().join(": "))).sort().join("\n"));
+    }
+};
+
+var devHelper = {
+    module: module$1
+};
+
+const ProjectOpener = () => {
+    let _opener = htmlToElement$2(`\n\t\t<div class="service-opener">\n\t\t\t<style>\n\t\t\t\t.service-opener > div {\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tflex-direction: column;\n\t\t\t\t\tpadding: 0px 20px;\n\t\t\t\t\tmargin-right: 17px;\n\t\t\t\t}\n\t\t\t\t.service-opener button {\n\t\t\t\t\tcolor: inherit;\n\t\t\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.4);\n\t\t\t\t\tfont-size: 1.1em;\n\t\t\t\t\tborder: 0;\n\t\t\t\t\tpadding: 10px;\n\t\t\t\t\tmargin-top: 3em;\n\t\t\t\t\tcursor: pointer;\n\t\t\t\t}\n\t\t\t\t.service-opener  p {\n\t\t\t\t\twhite-space: normal;\n\t\t\t\t\tmargin-bottom: 0;\n\t\t\t\t}\n\t\t\t\t.service-opener .opener-note {\n\t\t\t\t\tfont-style: italic;\n\t\t\t\t\topacity: 0.8;\n\t\t\t\t}\n\t\t\t\t.service-opener .opener-note:before {\n\t\t\t\t\tcontent: 'NOTE: '\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<div class="service-opener-actions">\n\t\t\t\t<p>You have nothing to edit. Pick an option below to get started.</p>\n\t\t\t\t<p class="opener-note">Your work will stay in this browser unless you arrange otherwise.</p>\n\n\t\t\t\t<button id="add-service-folder">Open Folder</button>\n\t\t\t\t<p>Upload from your computer into local browser memory.</p>\n\n\t\t\t\t<button id="connect-service-provider">Connect to a Provider</button>\n\t\t\t\t<p>Specify a service to read from and write to.</p>\n\n\t\t\t\t<button id="open-previous-service">Load Service</button>\n\t\t\t\t<p>Select a previously-loaded service.</p>\n\t\t\t</div>\n\t\t</div>\n\t`);
+    _opener.querySelector(".service-opener-actions");
+    // connectTrigger({
+    // 	eventName: "add-service-folder",
+    // 	filter: (e) =>
+    // 		openerActions.contains(e.target) &&
+    // 		e.target.tagName === "BUTTON" &&
+    // 		e.target.id === "add-service-folder",
+    // });
+    // connectTrigger({
+    // 	eventName: "connect-service-provider",
+    // 	filter: (e) =>
+    // 		openerActions.contains(e.target) &&
+    // 		e.target.tagName === "BUTTON" &&
+    // 		e.target.id === "connect-service-provider",
+    // });
+    // connectTrigger({
+    // 	eventName: "open-previous-service",
+    // 	filter: (e) =>
+    // 		openerActions.contains(e.target) &&
+    // 		e.target.tagName === "BUTTON" &&
+    // 		e.target.id === "open-previous-service",
+    // });
+        return _opener;
+};
+
+let projectName;
+
+const updateTreeMenu = ({title: title, project: project}) => {
+    const treeMenu = document.querySelector("#explorer #tree-menu");
+    const titleEl = treeMenu.querySelector(".title-label h2");
+    const explorerActions = document.querySelector("#explorer .actions-container");
+    if (title && title.toLowerCase() === "search") {
+        explorerActions.style.display = "none";
+    } else {
+        explorerActions.style.display = "";
+    }
+    if (title) {
+        titleEl.setAttribute("title", title);
+        titleEl.innerText = title;
+        return;
+    }
+    titleEl.setAttribute("title", project || projectName || "");
+    titleEl.innerText = project || projectName || "";
+    if (project) {
+        projectName = project;
+    }
+};
+
+const TreeMenu = () => {
+    const _treeMenu = document.createElement("div");
+    _treeMenu.id = "tree-menu";
+    _treeMenu.classList.add("row", "no-margin");
+    const menuInnerHTML = `\n\t\t<style>\n\t\t\t#tree-menu .title-actions .action-item a {\n\t\t\t\tcolor: inherit;\n\t\t\t\toutline: none;\n\t\t\t}\n\t\t</style>\n\t\t<div class="title-label">\n\t\t\t<h2 title=""></h2>\n\t\t</div>\n\t\t<div class="title-actions">\n\t\t\t<div class="monaco-toolbar">\n\t\t\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t\t\t<ul class="actions-container">\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-file" role="button" title="New File">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-folder" role="button" title="New Folder">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action refresh-explorer" role="button" title="Refresh Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action collapse-explorer" role="button" title="Collapse Folders in Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<div class="monaco-dropdown">\n\t\t\t\t\t\t\t\t\t\t<div class="dropdown-label">\n\t\t\t\t\t\t\t\t\t\t\t<a class="action-label codicon codicon-toolbar-more" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" title="Views and More Actions..."></a>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
+    _treeMenu.addEventListener("click", (e => {
+        if (!_treeMenu.contains(e.target)) return;
+        if (e.target.tagName === "A" && e.target.className.includes("codicon-toolbar-more")) {
+            console.warn("toolbar-more: not implemented");
+            e.preventDefault();
+            return false;
+        }
+    }), {
+        passive: false
+    });
+    // connectTrigger({
+    // 	eventName: "new-file",
+    // 	filter: (e) =>
+    // 		_treeMenu.contains(e.target) &&
+    // 		e.target.tagName === "A" &&
+    // 		e.target.title === "New File",
+    // });
+    // connectTrigger({
+    // 	eventName: "new-folder",
+    // 	filter: (e) =>
+    // 		_treeMenu.contains(e.target) &&
+    // 		e.target.tagName === "A" &&
+    // 		e.target.title === "New Folder",
+    // });
+        _treeMenu.innerHTML = menuInnerHTML;
+    _treeMenu.update = updateTreeMenu;
+    return _treeMenu;
+};
+
+const SearchBoxHTML = () => {
+    const style = `\n\t<style>\n\t\t.tree-search {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-right: 0;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.tree-search p {\n\t\t\twhite-space: normal;\n\t\t}\n\t\t.tree-search input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.tree-search input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.tree-search ::placeholder,\n\t\t.project-search-results {\n\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t}\n\t\t.tree-search > div {\n\t\t\tpadding: 2px 0px;\n\t\t\tbox-sizing: content-box;\n\t\t}\n\t\t.tree-search .field-container {\n\t\t\tmargin-left: 17px;\n\t\t\tmargin-right: 10px;\n\t\t}\n\t\t.tree-search .highlight {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\t\t\tpadding-top: 4px;\n\t\t\tpadding-bottom: 4px;\n\t\t\tfilter: contrast(1.5);\n\t\t\tborder-radius: 3px;\n\t\t}\n\t\t.form-container {\n\t\t\tposition: absolute;\n\t\t\ttop: 40px;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tbottom: 0;\n\t\t\toverflow: hidden;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\tdisplay: none;\n\t\t}\n\t\t.search-results:hover::-webkit-scrollbar {\n\t\t\tdisplay: block !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\twidth:0.5em !important;\n\t\t\theight:0.5em !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-thumb{\n\t\t\tbackground: #ffffff10;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-track{\n\t\t\tbackground:none !important;\n\t\t}\n\t\t.search-results {\n\t\t\tpadding-bottom: 15em;\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\ttop: 155px;\n\t\t\toverflow-y: auto;\n\t\t\toverflow-x: hidden;\n\t\t\tbox-sizing: border-box;\n\t\t\tmargin: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tfont-size: 0.9em;\n\t\t\tpadding-right: 0;\n\t\t}\n\t\t.search-results > li { list-style: none; }\n\n\t\t.search-results > li > div {\n\t\t\tpadding-left: 1em;\n\t\t\tpadding-bottom: 0.2em;\n\t\t\tpadding-top: 0.2em;\n\t\t}\n\t\t.search-results > li ul > li {\n\t\t\twhite-space: nowrap;\n\t\t\tpadding-left: 3em;\n\t\t\tpadding-top: .2em;\n\t\t\tpadding-bottom: .2em;\n\t\t}\n\n\t\t.search-results > li > div,\n\t\t.search-results > li ul > li,\n\t\t.search-results > li > div span,\n\t\t.search-results > li ul > li span {\n\t\t\tposition: relative;\n\t\t\twhite-space: nowrap;\n\t\t}\n\t\t.search-results ul.line-results > li > span,\n\t\t.search-results ul.line-results > li > div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.search-results > li > div .hover-highlight,\n\t\t.search-results > li ul > li .hover-highlight {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tvisibility: hidden;\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n\t\t}\n\t\t.search-results > li > div:hover .hover-highlight,\n\t\t.search-results > li ul > li:hover .hover-highlight {\n\t\t\tvisibility: visible;\n\t\t}\n\n\t\t.search-summary {\n\t\t\tfont-size: .85em;\n\t\t\topacity: 0.7;\n\t\t}\n\t\t.search-results .foldable {\n\t\t\tcursor: pointer;\n\t\t}\n\t\t.search-results span.doc-path {\n\t\t\topacity: .5;\n\t\t}\n\t\t.search-results .foldable ul { display: none; }\n\t\t.search-results .foldable > div span {\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.search-results .foldable > div:before {\n\t\t\tmargin-left: 4px;\n\t\t\tmargin-right: 3px;\n\t\t\tcontent: '>';\n\t\t\tfont-family: consolas, monospace;\n\t\t\tdisplay: inline-block;\n\t\t}\n\t\t.search-results .foldable.open ul { display: block; }\n\t\t.search-results .foldable.open > div:before {\n\t\t\tmargin-left: 2px;\n\t\t\tmargin-right: 5px;\n\t\t\tcontent: '>';\n\t\t\ttransform-origin: 5px 8.5px;\n\t\t\ttransform: rotateZ(90deg);\n\t\t}\n\t\t.field-container label { font-size: .75em; }\n\n\t</style>\n\t`;
+    const html = `\n\t<div class="form-container tree-search">\n\t\t${style}\n\n\t\t<div class="field-container">\n\t\t\t<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>include</label>\n\t\t\t<input type="text" class="search-include"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>exclude</label>\n\t\t\t<input type="text" class="search-exclude"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<span class="search-summary"></span>\n\t\t</div>\n\n\t\t<ul class="search-results"></ul>\n\t</div>\n\t`;
+    return html;
+};
+
+class SearchBox {
+    dom;
+    constructor(parent, include) {
+        const main = htmlToElement$2(SearchBoxHTML());
+        this.dom = {
+            main: main,
+            term: main.querySelector(".search-term"),
+            include: main.querySelector(".search-include"),
+            exclude: main.querySelector(".search-exclude"),
+            summary: main.querySelector(".search-summary"),
+            results: main.querySelector(".search-results")
+        };
+        this.dom.include.value = include || "./";
+        this.attachListeners();
+        (parent || document.body).appendChild(main);
+    }
+    attachListeners() {
+        const debouncedInputListener = utils.debounce((event => {
+            const term = this.dom.term.value;
+            const include = this.dom.include.value;
+            const exclude = this.dom.exclude.value;
+            this.updateResults([], "");
+            this.updateSummary({});
+            this.searchStream({
+                term: term,
+                include: include,
+                exclude: exclude
+            });
+        }), 250, false);
+        this.dom.term.addEventListener("input", (e => {
+            const term = this.dom.term.value;
+            if (!term) {
+                this.term = "";
+                this.updateSummary({});
+                this.dom.results.innerHTML = "";
+                this.updateResults([], "");
+                return;
+            }
+            this.updateSummary({
+                loading: true
+            });
+            this.updateResults({
+                loading: true
+            });
+            debouncedInputListener(e);
+        }));
+        this.dom.include.addEventListener("input", (e => {
+            this.updateSummary({
+                loading: true
+            });
+            this.updateResults({
+                loading: true
+            });
+            debouncedInputListener(e);
+        }));
+        this.dom.exclude.addEventListener("input", (e => {
+            this.updateSummary({
+                loading: true
+            });
+            this.updateResults({
+                loading: true
+            });
+            debouncedInputListener(e);
+        }));
+        this.dom.results.addEventListener("click", (e => {
+            const handler = {
+                "DIV foldable": () => e.target.parentNode.classList.add("open"),
+                "DIV foldable open": () => e.target.parentNode.classList.remove("open"),
+                "LI line-results": e => triggers.fileSelect(e.target.dataset)
+            }[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
+            if (handler) return handler(e);
+        }));
+    }
+    async searchStream({term: term, include: include, exclude: exclude}) {
+        this.dom.results.innerHTML = "";
+        this.updateSummary({});
+        const base = new URL("../../service/search", location.href).href;
+        const res = await fetch(`${base}/?term=${term}&include=${include || ""}&exclude=${exclude || ""}`);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        const timer = {
+            t1: performance.now()
+        };
+        let allMatches = [];
+        let malformed;
+        this.resultsInDom = false;
+        while (true) {
+            const {done: done, value: value} = await reader.read();
+            if (done) break;
+            let results = decoder.decode(value, {
+                stream: true
+            });
+            if (malformed) {
+                results = malformed.trim() + results.trim();
+                malformed = "";
+            }
+            if (results.trim()[results.trim().length - 1] !== "}") {
+                results = results.split("\n");
+                malformed = results.pop();
+                results = results.join("\n");
+            }
+            results = results.split("\n").filter((x => !!x));
+            this.updateResults(results, allMatches, term);
+            this.updateSummary({
+                allMatches: allMatches,
+                time: performance.now() - timer.t1,
+                searchTerm: term
+            });
+        }
+    }
+    updateTerm(term) {
+        this.dom.term.value = term;
+    }
+    updateInclude(path) {
+        this.dom.include.value = path;
+    }
+    hide() {
+        this.dom.main.style.visibility = "hidden";
+    }
+    show() {
+        this.dom.main.style.visibility = "visible";
+    }
+    async updateResults(results, allMatches, term) {
+        const addFileResultsLineEl = result => {
+            const limit = 1;
+ //only highlight one occurence
+                        const listItemEl = (Array.isArray(result) ? result : [ result ]).map(((r, i) => `\n\t\t\t\t\t<li data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">\n\t\t\t\t\t\t<div class="hover-highlight"></div>\n\t\t\t\t\t\t${utils.highlight(term, utils.htmlEscape(r.text.trim()), limit)}\n\t\t\t\t\t</li>\n\t\t\t\t`));
+            return listItemEl;
+        };
+        const createFileResultsEl = (result, index) => {
+            const items = [ "html", "json", "info" ];
+            const iconClass = "icon-" + items[Math.floor(Math.random() * items.length)];
+            const open = term.length > 1 || !this.resultsInDom ? "open" : "";
+            const fileResultsEl = htmlToElement$2(`\n\t\t\t\t<li class="foldable ${open}" data-path="${result.file}">\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<div class="hover-highlight"></div>\n\t\t\t\t\t\t<span class="${iconClass}">${result.docName}</span>\n\t\t\t\t\t\t<span class="doc-path">${result.path}</span>\n\t\t\t\t\t</div>\n\t\t\t\t\t<ul class="line-results">\n\t\t\t\t\t\t${addFileResultsLineEl(result).join("\n")}\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t`);
+            return fileResultsEl;
+        };
+        for (var rindex = 0; rindex < results.length; rindex++) {
+            const x = results[rindex];
+            try {
+                const parsed = JSON.parse(x);
+                parsed.docName = parsed.file.split("/").pop();
+                parsed.path = parsed.file.replace("/" + parsed.docName, "").replace(/^\.\//, "");
+                allMatches.push(parsed);
+                window.requestAnimationFrame((() => {
+                    const existingFileResultsEl = this.dom.results.querySelector(`li[data-path="${parsed.file}"] ul`);
+                    let newLineItems;
+                    if (existingFileResultsEl) {
+                        newLineItems = addFileResultsLineEl(parsed);
+                    }
+                    if (newLineItems) {
+                        const elementItems = newLineItems.map(htmlToElement$2);
+                        existingFileResultsEl.append(...elementItems);
+                        return;
+                    }
+                    const fileResultsEl = createFileResultsEl(parsed, rindex);
+                    this.dom.results.appendChild(fileResultsEl);
+                    this.resultsInDom = true;
+                }));
+            } catch (e) {
+                console.warn(`trouble parsing: ${x}, ${e}`);
+            }
+        }
+    }
+    updateSummary({allMatches: allMatches, time: time, searchTerm: searchTerm, loading: loading}) {
+        if (loading) {
+            this.dom.summary.innerHTML = "";
+            return;
+        }
+        if (!allMatches || !allMatches.length) {
+            this.dom.summary.innerHTML = "No results";
+            return;
+        }
+        const totalFiles = utils.unique(allMatches.map((x => x.docName))).map((x => ({
+            filename: x,
+            results: []
+        })));
+        const pluralRes = allMatches.length > 1 ? "s" : "";
+        const pluralFile = totalFiles.length > 1 ? "s" : "";
+        this.dom.summary.innerHTML = `${allMatches.length} result${pluralRes} in ${totalFiles.length} file${pluralFile}, ${time.toFixed(2)} ms`;
+    }
+}
+
+let searchBox;
+
+const Search = parent => {
+    searchBox = searchBox || new SearchBox(parent);
+    searchBox.hide();
+    /*
+	searchBox.updateTerm(searchTerm);
+	searchBox.updateInclude(path)
+	searchBox.searchStream({ term: searchTerm, include: path })
+*/    return searchBox;
+};
+
+let treeView, opener;
+
+const ScrollShadow = () => {
+    let scrollShadow = htmlToElement$2(`\n\t\t<div class="scroll-shadow">\n\t\t\t<style>\n\t\t\t\t.scroll-shadow {\n\t\t\t\t\tbox-shadow: #000000 0 6px 6px -6px inset;\n\t\t\t\t\theight: 6px;\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 35px;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\tright: 0;\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style>\n\t\t</div>\n\t`);
+    treeView.addEventListener("scroll", (event => {
+        try {
+            event.target.scrollTop > 0 ? scrollShadow.style.display = "block" : scrollShadow.style.display = "none";
+        } catch (e) {
+            scrollShadow.style.display = "none";
+        }
+    }));
+    return scrollShadow;
+};
+
+const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
+    if (opener && showOpenService) {
+        opener.classList.remove("hidden");
+        const treeMenuLabel = document.querySelector("#tree-menu .title-label h2");
+        treeMenuLabel.innerText = "NO FOLDER OPENED";
+        treeView && treeView.classList.add("nothing-open");
+    } else if (opener) {
+        opener.classList.add("hidden");
+        treeView && treeView.classList.remove("nothing-open");
+    }
+    if (treeView) {
+        return treeView;
+    }
+    treeView = document.createElement("div");
+    treeView.id = "tree-view";
+    opener = ProjectOpener();
+    if (showOpenService) {
+        const treeMenuLabel = document.querySelector("#tree-menu .title-label h2");
+        treeMenuLabel.innerText = "NO FOLDER OPENED";
+        treeView.classList.add("nothing-open");
+    } else {
+        treeView.classList.remove("nothing-open");
+        opener.classList.add("hidden");
+    }
+    treeView.appendChild(opener);
+    const explorerPane = document.body.querySelector("#explorer");
+    const menu = TreeMenu();
+    explorerPane.appendChild(menu);
+    Search(explorerPane);
+    explorerPane.appendChild(ScrollShadow());
+    explorerPane.appendChild(treeView);
+    explorerPane.classList.remove("pane-loading");
+    treeView.menu = menu;
+    return treeView;
+};
+
+function _TreeView(op) {
+    if (op === "hide") {
+        const prevTreeView = document.querySelector("#tree-view");
+        if (prevTreeView) {
+            prevTreeView.style.display = "none";
+        }
+        return;
+    }
+    //OH WELL?: feels kinda dirty in some senses, very reasonable in others
+    //TODO: do this with stylus??
+        const treeDepthStyles = (rootId, depth, ems) => new Array(depth).fill().reduce(((all, one, i) => [ all, `/* NESTING LEVEL ${i + 1} */\n`, `#${rootId}>.tree-leaf>.tree-child-leaves`, ...new Array(i).fill(">.tree-leaf>.tree-child-leaves"), ">.tree-leaf>.tree-leaf-content\n", `{ padding-left:${(i + 2) * ems}em; }\n\n` ].join("")), `\n\t\t\t#${rootId}>.tree-leaf>.tree-leaf-content { padding-left:${ems}em; }\n\t\t`);
+    treeView = getTreeViewDOM();
+    treeView.style.display = "";
+    const treeViewStyle = htmlToElement$2(`\n\t\t<style>\n\t\t\t#tree-view {\n\t\t\t\tpadding-top: 0.1em;\n\t\t\t}\n\n\t\t\t/* tree view dimming*/\n\t\t\t/*\n\t\t\t#tree-view {\n\t\t\t\topacity: .7;\n\t\t\t\ttransition: opacity 25s;\n\t\t\t\tpadding-top: 0.1em;\n\t\t\t}\n\t\t\t#tree-view:hover, #tree-view.nothing-open {\n\t\t\t\topacity: 1;\n\t\t\t\ttransition: opacity 0.3s;\n\t\t\t}\n\t\t\t*/\n\n\t\t\t#tree-view .tree-expando:not(.hidden) + .tree-leaf-text:before {\n\t\t\t\tfont-family: codicon;\n\t\t\t\tcontent: "\\eab4";\n\t\t\t\tfont-size: 1.1em;\n\t\t\t\tmargin-right: 0.4em;\n\t\t\t\tmargin-left: 0;\n\t\t\t\ttransform: rotate(0deg);\n\t\t\t}\n\t\t\t#tree-view .tree-expando:not(.expanded, .hidden) + .tree-leaf-text:before {\n\t\t\t\ttransform: rotate(-90deg);\n\t\t\t}\n\t\t\t#tree-view .tree-leaf.file div[class*='icon-'] {\n\t\t\t\tmargin-left: -0.3em;\n\t\t\t}\n\t\t\t#tree-view.dragover .tree-leaf,\n\t\t\t.tree-leaf.folder.dragover {\n\t\t\t\tbackground: #4d5254;\n\t\t\t}\n\t\t\t.tree-leaf {\n\t\t\t\tuser-select: none;\n\t\t\t}\n\t\t\t.tree-leaf.hidden-leaf {\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t${treeDepthStyles("tree-view", 20, .9)}\n\t\t</style>\n\t`);
+    treeView.parentNode.append(treeViewStyle);
+    return treeView;
+}
+
+var TreeView$1 = _TreeView();
+
 let TREE_ROOT_ID;
 
 const loop = (MAX, fn) => {
@@ -819,214 +1777,12 @@ class ServiceTree {
     }
 }
 
-var ext = {
-    mp3: "audio",
-    wav: "audio",
-    ogg: "audio",
-    adb: "ada",
-    ads: "ada",
-    adoc: "asciidoc",
-    apl: "apl",
-    bowerrc: "bower",
-    bf: "brainfuck",
-    cs: "csharp",
-    c: "c",
-    h: "c",
-    m: "c",
-    ctp: "cake_php",
-    clj: "clojure",
-    cljc: "clojure",
-    cljs: "clojure",
-    cjsx: "react",
-    jsx: "react",
-    tmp: "clock",
-    coffee: "coffee",
-    cfc: "coldfusion",
-    cfm: "coldfusion",
-    config: "config",
-    cpp: "cpp",
-    cr: "crystal",
-    cs: "csharp",
-    css: "css",
-    dart: "dart",
-    sss: "css",
-    csv: "csv",
-    edn: "clojure",
-    editorconfig: "config",
-    ejs: "ejs",
-    elm: "elm",
-    ttf: "font",
-    woff: "font",
-    woff2: "font",
-    eot: "font",
-    gitkeep: "git",
-    gitconfig: "git",
-    gitattributes: "git",
-    gitmodules: "git",
-    gitignore: "git",
-    go: "go",
-    gradle: "gradle",
-    grails: "grails",
-    groovy: "grails",
-    hh: "hacklang",
-    haml: "haml",
-    hs: "haskell",
-    lhs: "haskell",
-    lisp: "lisp",
-    htm: "html",
-    html: "html",
-    shtml: "html",
-    dhtml: "html",
-    ai: "ai",
-    png: "image",
-    ico: "image",
-    jpg: "image",
-    bmp: "image",
-    jpeg: "image",
-    gif: "image",
-    jade: "jade",
-    java: "java",
-    mjs: "javascript",
-    js: "javascript",
-    es6: "javascript",
-    es7: "javascript",
-    erl: "erlang",
-    ex: "elixir",
-    gltf: "json",
-    ipynb: "json",
-    json: "json",
-    jl: "julia",
-    less: "less",
-    license: "license",
-    liquid: "liquid",
-    ls: "livescript",
-    lua: "lua",
-    md: "markdown",
-    mustache: "mustache",
-    handlebars: "mustache",
-    hbs: "mustache",
-    hjs: "mustache",
-    stache: "mustache",
-    npmignore: "npm",
-    ml: "ocaml",
-    mli: "ocaml",
-    cmx: "ocaml",
-    cmxa: "ocaml",
-    pdf: "pdf",
-    pl: "perl",
-    pro: "prolog",
-    psd: "photoshop",
-    php: "php",
-    "php.inc": "php",
-    pug: "pug",
-    pp: "puppet",
-    py: "python",
-    rb: "ruby",
-    "erb.html": "ruby",
-    "html.erb": "ruby",
-    rs: "rust",
-    sass: "sass",
-    scss: "sass",
-    scm: "scheme",
-    sbt: "sbt",
-    scala: "scala",
-    sql: "sql",
-    sh: "shell",
-    cmd: "shell",
-    zsh: "shell",
-    fish: "shell",
-    profile: "shell",
-    slim: "slim",
-    smarty: "smarty",
-    "smarty.tpl": "smarty",
-    styl: "stylus",
-    svg: "svg",
-    swift: "swift",
-    tf: "terraform",
-    "tf.json": "terraform",
-    tex: "tex",
-    sty: "tex",
-    cls: "tex",
-    dtx: "tex",
-    ins: "tex",
-    txt: "default",
-    twig: "twig",
-    as: "assemblyscript",
-    ts: "typescript",
-    tsx: "react",
-    direnv: "config",
-    env: "config",
-    static: "config",
-    slugignore: "config",
-    vala: "vala",
-    wmv: "video",
-    mov: "video",
-    ogv: "video",
-    webm: "video",
-    avi: "video",
-    mpg: "video",
-    mp4: "video",
-    xml: "xml",
-    yml: "yml",
-    yaml: "yml",
-    vue: "vue",
-    babelrc: "babel",
-    eslintrc: "eslint",
-    jshintrc: "jshint",
-    xcodeproj: "xcode",
-    zip: "zip",
-    rar: "zip",
-    gz: "zip",
-    iso: "zip",
-    key: "key",
-    pem: "key",
-    fs: "fsharp",
-    vimrc: "vim",
-    vim: "vim",
-    viminfo: "vim",
-    sql: "sql",
-    bat: "shell",
-    htaccess: "apache",
-    wxml: "wxml",
-    wxss: "wxss",
-    ini: "config",
-    clj: "clojure",
-    r: "r",
-    lock: "lock",
-    asp: "asp",
-    flowconfig: "flow",
-    nim: "nim",
-    kt: "kotlin",
-    ink: "ink",
-    zig: "zig",
-    pas: "pascal",
-    raku: "raku",
-    fth: "forth",
-    d: "d",
-    pony: "pony",
-    ppm: "ppm",
-    wat: "wat",
-    piskel: "image",
-    scratch: "smarty",
-    bugs: "platformio"
-};
-
-const attachTrigger = () => {};
-
-function newAttachListener(UpdateTree, {treeAdd: treeAdd, treeDelete: treeDelete, treeSelect: treeSelect, treeMove: treeMove, treeRename: treeRename, treeContext: treeContext, treeChange: treeChange, treeClearChanged: treeClearChanged, showSearch: showSearch, updateTreeMenu: updateTreeMenu, showServiceChooser: showServiceChooser}) {}
-
-const connectTrigger = args => attachTrigger({
-    ...args,
-    name: "Explorer"
-})
 /*!
     localForage -- Offline Storage, Improved
     Version 1.7.4
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
-*/;
-
-!function(a) {
+*/ !function(a) {
     if ("object" == typeof exports && "undefined" != typeof module) module.exports = a(); else if ("function" == typeof define && define.amd) define([], a); else {
         var b;
         b = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self ? self : this, 
@@ -2364,8 +3120,6 @@ const connectTrigger = args => attachTrigger({
     }, {}, [ 4 ])(4);
 }));
 
-let treeView, opener, tree, triggers, _service;
-
 const driver = [ localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE ];
 
 const changesStore = localforage.createInstance({
@@ -2381,15 +3135,15 @@ const treeMemory = (service, tree, action) => (...args) => {
         expand: async args => {
             const expanded = tree.context(args[0].target).path;
             const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
-            const newExpanded = oldExpanded.includes(expanded) ? oldExpanded : [ ...oldExpanded, expanded ];
-            await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-        },
+            oldExpanded.includes(expanded) ? oldExpanded : [ ...oldExpanded, expanded ];
+            //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+                },
         collapse: async args => {
             const collapsed = tree.context(args[0].target).path;
             const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
-            const newExpanded = oldExpanded.filter((x => x !== collapsed));
-            await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-        },
+            oldExpanded.filter((x => x !== collapsed));
+            //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+                },
         select: async args => {
             tree.context(args[0].target).path;
             //await changesStore.setItem(`tree-${service.name}-selected`, selected);
@@ -2399,358 +3153,24 @@ const treeMemory = (service, tree, action) => (...args) => {
     handlers[action](args);
 };
 
-function htmlToElement(html) {
-    var template = document.createElement("template");
-    html = html.trim();
- // Never return a text node of whitespace as the result
-        template.innerHTML = html;
-    //also would be cool to remove indentation from all lines
-        return template.content.firstChild;
-}
-
-const utils = (() => {
-    const unique = arr => Array.from(new Set(arr));
-    const htmlEscape = html => [ [ /&/g, "&amp;" ], //must be first
-    [ /</g, "&lt;" ], [ />/g, "&gt;" ], [ /"/g, "&quot;" ], [ /'/g, "&#039;" ] ].reduce(((a, o) => a.replace(...o)), html);
-    const highlight = (term = "", str = "", limit) => {
-        const caseMap = str.split("").map((x => x.toLowerCase() === x ? "lower" : "upper"));
-        const splitstring = str.toLowerCase().split(term.toLowerCase());
-        let html = "<span>" + (limit === 1 ? splitstring[0] + `</span><span class="highlight">${term.toLowerCase()}</span><span>` + splitstring.slice(1).join(term.toLowerCase()) : splitstring.join(`</span><span class="highlight">${term.toLowerCase()}</span><span>`)) + "</span>";
-        if (limit = 1) ;
-        html = html.split("");
-        let intag = false;
-        for (let char = 0, i = 0; i < html.length; i++) {
-            const thisChar = html[i];
-            if (thisChar === "<") {
-                intag = true;
-                continue;
-            }
-            if (thisChar === ">") {
-                intag = false;
-                continue;
-            }
-            if (intag) continue;
-            if (caseMap[char] === "upper") {
-                html[i] = html[i].toUpperCase();
-            }
-            char++;
-        }
-        return html.join("");
-    };
-    const debounce = (func, wait, immediate) => {
-        var timeout;
-        return async function() {
-            var context = this, args = arguments;
-            var later = function() {
-                timeout = null;
-                if (!immediate) func.apply(context, args);
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-        };
-    };
-    return {
-        unique: unique,
-        htmlEscape: htmlEscape,
-        highlight: highlight,
-        debounce: debounce
-    };
-})();
-
-const ProjectOpener = () => {
-    let _opener = htmlToElement(`\n\t\t<div class="service-opener">\n\t\t\t<style>\n\t\t\t\t.service-opener > div {\n\t\t\t\t\tdisplay: flex;\n\t\t\t\t\tflex-direction: column;\n\t\t\t\t\tpadding: 0px 20px;\n\t\t\t\t\tmargin-right: 17px;\n\t\t\t\t}\n\t\t\t\t.service-opener button {\n\t\t\t\t\tcolor: inherit;\n\t\t\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.4);\n\t\t\t\t\tfont-size: 1.1em;\n\t\t\t\t\tborder: 0;\n\t\t\t\t\tpadding: 10px;\n\t\t\t\t\tmargin-top: 3em;\n\t\t\t\t\tcursor: pointer;\n\t\t\t\t}\n\t\t\t\t.service-opener  p {\n\t\t\t\t\twhite-space: normal;\n\t\t\t\t\tmargin-bottom: 0;\n\t\t\t\t}\n\t\t\t\t.service-opener .opener-note {\n\t\t\t\t\tfont-style: italic;\n\t\t\t\t\topacity: 0.8;\n\t\t\t\t}\n\t\t\t\t.service-opener .opener-note:before {\n\t\t\t\t\tcontent: 'NOTE: '\n\t\t\t\t}\n\t\t\t</style>\n\t\t\t<div class="service-opener-actions">\n\t\t\t\t<p>You have nothing to edit. Pick an option below to get started.</p>\n\t\t\t\t<p class="opener-note">Your work will stay in this browser unless you arrange otherwise.</p>\n\n\t\t\t\t<button id="add-service-folder">Open Folder</button>\n\t\t\t\t<p>Upload from your computer into local browser memory.</p>\n\n\t\t\t\t<button id="connect-service-provider">Connect to a Provider</button>\n\t\t\t\t<p>Specify a service to read from and write to.</p>\n\n\t\t\t\t<button id="open-previous-service">Load Service</button>\n\t\t\t\t<p>Select a previously-loaded service.</p>\n\t\t\t</div>\n\t\t</div>\n\t`);
-    const openerActions = _opener.querySelector(".service-opener-actions");
-    connectTrigger({
-        eventName: "add-service-folder",
-        filter: e => openerActions.contains(e.target) && e.target.tagName === "BUTTON" && e.target.id === "add-service-folder"
+const newTree = ({service: service, treeState: treeState}, context) => {
+    const {triggers: {tree: triggers}} = context;
+    //_service = service ? service.name : '';
+        const treeRootId = "tree-view";
+    // TODO: clear old tree if exists?
+        const tree = new ServiceTree(service, treeRootId, treeState, extensionMapper);
+    setState("tree", tree);
+    const memoryHandler = action => treeMemory(service, tree, action);
+    tree.on("expand", memoryHandler("expand"));
+    tree.on("collapse", memoryHandler("collapse"));
+    tree.on("select", memoryHandler("select"));
+    Object.entries(triggers).forEach((([event, handler]) => tree.on(event, handler)));
+    TreeView$1.menu.update({
+        project: service.name
     });
-    connectTrigger({
-        eventName: "connect-service-provider",
-        filter: e => openerActions.contains(e.target) && e.target.tagName === "BUTTON" && e.target.id === "connect-service-provider"
-    });
-    connectTrigger({
-        eventName: "open-previous-service",
-        filter: e => openerActions.contains(e.target) && e.target.tagName === "BUTTON" && e.target.id === "open-previous-service"
-    });
-    return _opener;
 };
 
-const ScrollShadow = () => {
-    let scrollShadow = htmlToElement(`\n\t\t<div class="scroll-shadow">\n\t\t\t<style>\n\t\t\t\t.scroll-shadow {\n\t\t\t\t\tbox-shadow: #000000 0 6px 6px -6px inset;\n\t\t\t\t\theight: 6px;\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 35px;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\tright: 0;\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style>\n\t\t</div>\n\t`);
-    treeView.addEventListener("scroll", (event => {
-        try {
-            event.target.scrollTop > 0 ? scrollShadow.style.display = "block" : scrollShadow.style.display = "none";
-        } catch (e) {
-            scrollShadow.style.display = "none";
-        }
-    }));
-    return scrollShadow;
-};
-
-const TreeMenu = () => {
-    const _treeMenu = document.createElement("div");
-    _treeMenu.id = "tree-menu";
-    _treeMenu.classList.add("row", "no-margin");
-    const menuInnerHTML = `\n\t\t<style>\n\t\t\t#tree-menu .title-actions .action-item a {\n\t\t\t\tcolor: inherit;\n\t\t\t\toutline: none;\n\t\t\t}\n\t\t</style>\n\t\t<div class="title-label">\n\t\t\t<h2 title=""></h2>\n\t\t</div>\n\t\t<div class="title-actions">\n\t\t\t<div class="monaco-toolbar">\n\t\t\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t\t\t<ul class="actions-container">\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-file" role="button" title="New File">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-folder" role="button" title="New Folder">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action refresh-explorer" role="button" title="Refresh Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action collapse-explorer" role="button" title="Collapse Folders in Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<div class="monaco-dropdown">\n\t\t\t\t\t\t\t\t\t\t<div class="dropdown-label">\n\t\t\t\t\t\t\t\t\t\t\t<a class="action-label codicon codicon-toolbar-more" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" title="Views and More Actions..."></a>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
-    _treeMenu.addEventListener("click", (e => {
-        if (!_treeMenu.contains(e.target)) return;
-        if (e.target.tagName === "A" && e.target.className.includes("codicon-toolbar-more")) {
-            console.warn("toolbar-more: not implemented");
-            e.preventDefault();
-            return false;
-        }
-    }), {
-        passive: false
-    });
-    connectTrigger({
-        eventName: "new-file",
-        filter: e => _treeMenu.contains(e.target) && e.target.tagName === "A" && e.target.title === "New File"
-    });
-    connectTrigger({
-        eventName: "new-folder",
-        filter: e => _treeMenu.contains(e.target) && e.target.tagName === "A" && e.target.title === "New Folder"
-    });
-    _treeMenu.innerHTML = menuInnerHTML;
-    return _treeMenu;
-};
-
-const SearchBoxHTML = () => {
-    const style = `\n\t<style>\n\t\t.tree-search {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-right: 0;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.tree-search p {\n\t\t\twhite-space: normal;\n\t\t}\n\t\t.tree-search input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.tree-search input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.tree-search ::placeholder,\n\t\t.project-search-results {\n\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t}\n\t\t.tree-search > div {\n\t\t\tpadding: 2px 0px;\n\t\t\tbox-sizing: content-box;\n\t\t}\n\t\t.tree-search .field-container {\n\t\t\tmargin-left: 17px;\n\t\t\tmargin-right: 10px;\n\t\t}\n\t\t.tree-search .highlight {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\t\t\tpadding-top: 4px;\n\t\t\tpadding-bottom: 4px;\n\t\t\tfilter: contrast(1.5);\n\t\t\tborder-radius: 3px;\n\t\t}\n\t\t.form-container {\n\t\t\tposition: absolute;\n\t\t\ttop: 40px;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tbottom: 0;\n\t\t\toverflow: hidden;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\tdisplay: none;\n\t\t}\n\t\t.search-results:hover::-webkit-scrollbar {\n\t\t\tdisplay: block !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\twidth:0.5em !important;\n\t\t\theight:0.5em !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-thumb{\n\t\t\tbackground: #ffffff10;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-track{\n\t\t\tbackground:none !important;\n\t\t}\n\t\t.search-results {\n\t\t\tpadding-bottom: 15em;\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\ttop: 155px;\n\t\t\toverflow-y: auto;\n\t\t\toverflow-x: hidden;\n\t\t\tbox-sizing: border-box;\n\t\t\tmargin: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tfont-size: 0.9em;\n\t\t\tpadding-right: 0;\n\t\t}\n\t\t.search-results > li { list-style: none; }\n\n\t\t.search-results > li > div {\n\t\t\tpadding-left: 1em;\n\t\t\tpadding-bottom: 0.2em;\n\t\t\tpadding-top: 0.2em;\n\t\t}\n\t\t.search-results > li ul > li {\n\t\t\twhite-space: nowrap;\n\t\t\tpadding-left: 3em;\n\t\t\tpadding-top: .2em;\n\t\t\tpadding-bottom: .2em;\n\t\t}\n\n\t\t.search-results > li > div,\n\t\t.search-results > li ul > li,\n\t\t.search-results > li > div span,\n\t\t.search-results > li ul > li span {\n\t\t\tposition: relative;\n\t\t\twhite-space: nowrap;\n\t\t}\n\t\t.search-results ul.line-results > li > span,\n\t\t.search-results ul.line-results > li > div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.search-results > li > div .hover-highlight,\n\t\t.search-results > li ul > li .hover-highlight {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tvisibility: hidden;\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n\t\t}\n\t\t.search-results > li > div:hover .hover-highlight,\n\t\t.search-results > li ul > li:hover .hover-highlight {\n\t\t\tvisibility: visible;\n\t\t}\n\n\t\t.search-summary {\n\t\t\tfont-size: .85em;\n\t\t\topacity: 0.7;\n\t\t}\n\t\t.search-results .foldable {\n\t\t\tcursor: pointer;\n\t\t}\n\t\t.search-results span.doc-path {\n\t\t\topacity: .5;\n\t\t}\n\t\t.search-results .foldable ul { display: none; }\n\t\t.search-results .foldable > div span {\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.search-results .foldable > div:before {\n\t\t\tmargin-left: 4px;\n\t\t\tmargin-right: 3px;\n\t\t\tcontent: '>';\n\t\t\tfont-family: consolas, monospace;\n\t\t\tdisplay: inline-block;\n\t\t}\n\t\t.search-results .foldable.open ul { display: block; }\n\t\t.search-results .foldable.open > div:before {\n\t\t\tmargin-left: 2px;\n\t\t\tmargin-right: 5px;\n\t\t\tcontent: '>';\n\t\t\ttransform-origin: 5px 8.5px;\n\t\t\ttransform: rotateZ(90deg);\n\t\t}\n\t\t.field-container label { font-size: .75em; }\n\n\t</style>\n\t`;
-    const html = `\n\t<div class="form-container tree-search">\n\t\t${style}\n\n\t\t<div class="field-container">\n\t\t\t<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>include</label>\n\t\t\t<input type="text" class="search-include"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>exclude</label>\n\t\t\t<input type="text" class="search-exclude"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<span class="search-summary"></span>\n\t\t</div>\n\n\t\t<ul class="search-results"></ul>\n\t</div>\n\t`;
-    return html;
-};
-
-class SearchBox {
-    dom;
-    constructor(parent, include) {
-        const main = htmlToElement(SearchBoxHTML());
-        this.dom = {
-            main: main,
-            term: main.querySelector(".search-term"),
-            include: main.querySelector(".search-include"),
-            exclude: main.querySelector(".search-exclude"),
-            summary: main.querySelector(".search-summary"),
-            results: main.querySelector(".search-results")
-        };
-        this.dom.include.value = include || "./";
-        this.attachListeners();
-        (parent || document.body).appendChild(main);
-    }
-    attachListeners() {
-        const debouncedInputListener = utils.debounce((event => {
-            const term = this.dom.term.value;
-            const include = this.dom.include.value;
-            const exclude = this.dom.exclude.value;
-            this.updateResults([], "");
-            this.updateSummary({});
-            this.searchStream({
-                term: term,
-                include: include,
-                exclude: exclude
-            });
-        }), 250, false);
-        this.dom.term.addEventListener("input", (e => {
-            const term = this.dom.term.value;
-            if (!term) {
-                this.term = "";
-                this.updateSummary({});
-                this.dom.results.innerHTML = "";
-                this.updateResults([], "");
-                return;
-            }
-            this.updateSummary({
-                loading: true
-            });
-            this.updateResults({
-                loading: true
-            });
-            debouncedInputListener(e);
-        }));
-        this.dom.include.addEventListener("input", (e => {
-            this.updateSummary({
-                loading: true
-            });
-            this.updateResults({
-                loading: true
-            });
-            debouncedInputListener(e);
-        }));
-        this.dom.exclude.addEventListener("input", (e => {
-            this.updateSummary({
-                loading: true
-            });
-            this.updateResults({
-                loading: true
-            });
-            debouncedInputListener(e);
-        }));
-        this.dom.results.addEventListener("click", (e => {
-            const handler = {
-                "DIV foldable": () => e.target.parentNode.classList.add("open"),
-                "DIV foldable open": () => e.target.parentNode.classList.remove("open"),
-                "LI line-results": e => triggers.fileSelect(e.target.dataset)
-            }[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
-            if (handler) return handler(e);
-        }));
-    }
-    async searchStream({term: term, include: include, exclude: exclude}) {
-        this.dom.results.innerHTML = "";
-        this.updateSummary({});
-        const base = new URL("../../service/search", location.href).href;
-        const res = await fetch(`${base}/?term=${term}&include=${include || ""}&exclude=${exclude || ""}`);
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        const timer = {
-            t1: performance.now()
-        };
-        let allMatches = [];
-        let malformed;
-        this.resultsInDom = false;
-        while (true) {
-            const {done: done, value: value} = await reader.read();
-            if (done) break;
-            let results = decoder.decode(value, {
-                stream: true
-            });
-            if (malformed) {
-                results = malformed.trim() + results.trim();
-                malformed = "";
-            }
-            if (results.trim()[results.trim().length - 1] !== "}") {
-                results = results.split("\n");
-                malformed = results.pop();
-                results = results.join("\n");
-            }
-            results = results.split("\n").filter((x => !!x));
-            this.updateResults(results, allMatches, term);
-            this.updateSummary({
-                allMatches: allMatches,
-                time: performance.now() - timer.t1,
-                searchTerm: term
-            });
-        }
-    }
-    updateTerm(term) {
-        this.dom.term.value = term;
-    }
-    updateInclude(path) {
-        this.dom.include.value = path;
-    }
-    hide() {
-        this.dom.main.style.visibility = "hidden";
-    }
-    show() {
-        this.dom.main.style.visibility = "visible";
-    }
-    async updateResults(results, allMatches, term) {
-        const addFileResultsLineEl = result => {
-            const limit = 1;
- //only highlight one occurence
-                        const listItemEl = (Array.isArray(result) ? result : [ result ]).map(((r, i) => `\n\t\t\t\t\t<li data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">\n\t\t\t\t\t\t<div class="hover-highlight"></div>\n\t\t\t\t\t\t${utils.highlight(term, utils.htmlEscape(r.text.trim()), limit)}\n\t\t\t\t\t</li>\n\t\t\t\t`));
-            return listItemEl;
-        };
-        const createFileResultsEl = (result, index) => {
-            const items = [ "html", "json", "info" ];
-            const iconClass = "icon-" + items[Math.floor(Math.random() * items.length)];
-            const open = term.length > 1 || !this.resultsInDom ? "open" : "";
-            const fileResultsEl = htmlToElement(`\n\t\t\t\t<li class="foldable ${open}" data-path="${result.file}">\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<div class="hover-highlight"></div>\n\t\t\t\t\t\t<span class="${iconClass}">${result.docName}</span>\n\t\t\t\t\t\t<span class="doc-path">${result.path}</span>\n\t\t\t\t\t</div>\n\t\t\t\t\t<ul class="line-results">\n\t\t\t\t\t\t${addFileResultsLineEl(result).join("\n")}\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t`);
-            return fileResultsEl;
-        };
-        for (var rindex = 0; rindex < results.length; rindex++) {
-            const x = results[rindex];
-            try {
-                const parsed = JSON.parse(x);
-                parsed.docName = parsed.file.split("/").pop();
-                parsed.path = parsed.file.replace("/" + parsed.docName, "").replace(/^\.\//, "");
-                allMatches.push(parsed);
-                window.requestAnimationFrame((() => {
-                    const existingFileResultsEl = this.dom.results.querySelector(`li[data-path="${parsed.file}"] ul`);
-                    let newLineItems;
-                    if (existingFileResultsEl) {
-                        newLineItems = addFileResultsLineEl(parsed);
-                    }
-                    if (newLineItems) {
-                        const elementItems = newLineItems.map(htmlToElement);
-                        existingFileResultsEl.append(...elementItems);
-                        return;
-                    }
-                    const fileResultsEl = createFileResultsEl(parsed, rindex);
-                    this.dom.results.appendChild(fileResultsEl);
-                    this.resultsInDom = true;
-                }));
-            } catch (e) {
-                console.warn(`trouble parsing: ${x}, ${e}`);
-            }
-        }
-    }
-    updateSummary({allMatches: allMatches, time: time, searchTerm: searchTerm, loading: loading}) {
-        if (loading) {
-            this.dom.summary.innerHTML = "";
-            return;
-        }
-        if (!allMatches || !allMatches.length) {
-            this.dom.summary.innerHTML = "No results";
-            return;
-        }
-        const totalFiles = utils.unique(allMatches.map((x => x.docName))).map((x => ({
-            filename: x,
-            results: []
-        })));
-        const pluralRes = allMatches.length > 1 ? "s" : "";
-        const pluralFile = totalFiles.length > 1 ? "s" : "";
-        this.dom.summary.innerHTML = `${allMatches.length} result${pluralRes} in ${totalFiles.length} file${pluralFile}, ${time.toFixed(2)} ms`;
-    }
-}
-
-let searchBox;
-
-const Search = parent => {
-    searchBox = searchBox || new SearchBox(parent);
-    searchBox.hide();
-    /*
-	searchBox.updateTerm(searchTerm);
-	searchBox.updateInclude(path)
-	searchBox.searchStream({ term: searchTerm, include: path })
-*/    return searchBox;
-};
-
-const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
-    if (opener && showOpenService) {
-        opener.classList.remove("hidden");
-        const treeMenuLabel = document.querySelector("#tree-menu .title-label h2");
-        treeMenuLabel.innerText = "NO FOLDER OPENED";
-        treeView && treeView.classList.add("nothing-open");
-    } else if (opener) {
-        opener.classList.add("hidden");
-        treeView && treeView.classList.remove("nothing-open");
-    }
-    if (treeView) {
-        return treeView;
-    }
-    treeView = document.createElement("div");
-    treeView.id = "tree-view";
-    opener = ProjectOpener();
-    if (showOpenService) {
-        const treeMenuLabel = document.querySelector("#tree-menu .title-label h2");
-        treeMenuLabel.innerText = "NO FOLDER OPENED";
-        treeView.classList.add("nothing-open");
-    } else {
-        treeView.classList.remove("nothing-open");
-        opener.classList.add("hidden");
-    }
-    treeView.appendChild(opener);
-    const explorerPane = document.body.querySelector("#explorer");
-    explorerPane.appendChild(TreeMenu());
-    Search(explorerPane);
-    explorerPane.appendChild(ScrollShadow());
-    explorerPane.appendChild(treeView);
-    explorerPane.classList.remove("pane-loading");
-    return treeView;
-};
-
-const updateTree = treeView => (change, {name: name, id: id, file: file}) => {};
+TreeView$1.newTree = newTree;
 
 function treeDomNodeFromPath(path) {
     if (!path) {
@@ -2809,173 +3229,526 @@ function newFile({parent: parent, onDone: onDone}) {
     fileNameInput.focus();
 }
 
-window.newFile = newFile;
+TreeView$1.newFile = newFile;
 
- //TODO: kill this some day
-function showServiceChooser(treeview) {
-    return () => {
-        getTreeViewDOM({
-            showOpenService: true
-        });
+function newFolder({parent: parent, onDone: onDone}) {
+    if (!onDone) {
+        return console.error("newFolder requires an onDone event handler");
+    }
+    const parentDOM = treeDomNodeFromPath(parent);
+    const expando = parentDOM.querySelector(".tree-expando");
+    expando.classList.remove("closed");
+    expando.classList.add("expanded", "open");
+    const childLeaves = parentDOM.parentNode.querySelector(".tree-child-leaves");
+    childLeaves.classList.remove("hidden");
+    const nearbySibling = childLeaves.querySelector(".tree-leaf");
+    const paddingLeft = nearbySibling.querySelector(".tree-leaf-content").style.paddingLeft;
+    const newFolderNode = htmlToElement(`\n\t\t<div class="tree-leaf new">\n\t\t\t<div class="tree-leaf-content" style="padding-left: ${paddingLeft};">\n\t\t\t\t<div class="tree-leaf-text icon-default">\n\t\t\t\t\t<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`);
+    const folderNameInput = newFolderNode.querySelector("input");
+    const finishInput = event => {
+        if (event.key && event.key !== "Enter") {
+            return;
+        }
+        const foldername = folderNameInput.value;
+        folderNameInput.removeEventListener("blur", finishInput);
+        folderNameInput.removeEventListener("keyup", finishInput);
+        newFolderNode.parentNode.removeChild(newFolderNode);
+        if (!foldername) {
+            return;
+        }
+        onDone(foldername, parent);
     };
+    folderNameInput.addEventListener("blur", finishInput);
+    folderNameInput.addEventListener("keyup", finishInput);
+    //TODO: focus input, when input loses focus create real folder
+    //TODO: when ENTER is pressed, create real folder (or add a cool error box)
+        nearbySibling.parentNode.insertBefore(newFolderNode, nearbySibling);
+    folderNameInput.focus();
 }
 
-let projectName;
+TreeView$1.newFolder = newFolder;
 
-const updateTreeMenu = ({title: title, project: project}) => {
-    const treeMenu = document.querySelector("#explorer #tree-menu");
-    const titleEl = treeMenu.querySelector(".title-label h2");
-    const explorerActions = document.querySelector("#explorer .actions-container");
-    if (title && title.toLowerCase() === "search") {
-        explorerActions.style.display = "none";
-    } else {
-        explorerActions.style.display = "";
-    }
-    if (title) {
-        titleEl.setAttribute("title", title);
-        titleEl.innerText = title;
-        return;
-    }
-    titleEl.setAttribute("title", project || projectName || "");
-    titleEl.innerText = project || projectName || "";
-    if (project) {
-        projectName = project;
-    }
-};
-
-const showSearch = treeView => {
-    const treeSearch = treeView.parentNode.querySelector(".tree-search");
-    const searchInput = document.querySelector(".project-search-input");
-    return ({show: show, include: include}) => {
-        if (show) {
-            treeView.style.visibility = "hidden";
-            treeSearch.style.visibility = "visible";
-            treeSearch.style.height = "";
-            updateTreeMenu({
-                title: "search"
-            });
-            include && searchBox.updateInclude(include);
-            setTimeout((() => {
-                searchInput.focus();
-                searchInput.select();
-            }), 1);
-        } else {
-            treeView.style.visibility = "visible";
-            treeSearch.style.visibility = "hidden";
-            updateTreeMenu({});
-        }
-    };
-};
-
-function _TreeView(op) {
-    if (op === "hide") {
-        const prevTreeView = document.querySelector("#tree-view");
-        if (prevTreeView) {
-            prevTreeView.style.display = "none";
-        }
-        return;
-    }
-    //OH WELL?: feels kinda dirty in some senses, very reasonable in others
-    //TODO: do this with stylus??
-        const treeDepthStyles = (rootId, depth, ems) => new Array(depth).fill().reduce(((all, one, i) => [ all, `/* NESTING LEVEL ${i + 1} */\n`, `#${rootId}>.tree-leaf>.tree-child-leaves`, ...new Array(i).fill(">.tree-leaf>.tree-child-leaves"), ">.tree-leaf>.tree-leaf-content\n", `{ padding-left:${(i + 2) * ems}em; }\n\n` ].join("")), `\n\t\t\t#${rootId}>.tree-leaf>.tree-leaf-content { padding-left:${ems}em; }\n\t\t`);
-    treeView = getTreeViewDOM();
-    treeView.style.display = "";
-    const treeViewStyle = htmlToElement(`\n\t\t<style>\n\t\t\t#tree-view {\n\t\t\t\tpadding-top: 0.1em;\n\t\t\t}\n\n\t\t\t/* tree view dimming*/\n\t\t\t/*\n\t\t\t#tree-view {\n\t\t\t\topacity: .7;\n\t\t\t\ttransition: opacity 25s;\n\t\t\t\tpadding-top: 0.1em;\n\t\t\t}\n\t\t\t#tree-view:hover, #tree-view.nothing-open {\n\t\t\t\topacity: 1;\n\t\t\t\ttransition: opacity 0.3s;\n\t\t\t}\n\t\t\t*/\n\n\t\t\t#tree-view .tree-expando:not(.hidden) + .tree-leaf-text:before {\n\t\t\t\tfont-family: codicon;\n\t\t\t\tcontent: "\\eab4";\n\t\t\t\tfont-size: 1.1em;\n\t\t\t\tmargin-right: 0.4em;\n\t\t\t\tmargin-left: 0;\n\t\t\t\ttransform: rotate(0deg);\n\t\t\t}\n\t\t\t#tree-view .tree-expando:not(.expanded, .hidden) + .tree-leaf-text:before {\n\t\t\t\ttransform: rotate(-90deg);\n\t\t\t}\n\t\t\t#tree-view .tree-leaf.file div[class*='icon-'] {\n\t\t\t\tmargin-left: -0.3em;\n\t\t\t}\n\t\t\t#tree-view.dragover .tree-leaf,\n\t\t\t.tree-leaf.folder.dragover {\n\t\t\t\tbackground: #4d5254;\n\t\t\t}\n\t\t\t.tree-leaf {\n\t\t\t\tuser-select: none;\n\t\t\t}\n\t\t\t.tree-leaf.hidden-leaf {\n\t\t\t\tdisplay: none;\n\t\t\t}\n\t\t\t${treeDepthStyles("tree-view", 20, .9)}\n\t\t</style>\n\t`);
-    treeView.parentNode.append(treeViewStyle);
-    const newTree = ({service: service, treeState: treeState}) => {
-        _service = service ? service.name : "";
-        const treeRootId = "tree-view";
-        // TODO: clear old tree if exists?
-                const extensionMapper = extension => {
-            const override = {
-                md: "info"
-            };
-            const _ext = extension.toLowerCase();
-            return "icon-" + (override[_ext] || ext[_ext] || "default");
-        };
-        tree = new ServiceTree(service, treeRootId, treeState, extensionMapper);
-        const memoryHandler = action => treeMemory(service, tree, action);
-        tree.on("expand", memoryHandler("expand"));
-        tree.on("collapse", memoryHandler("collapse"));
-        tree.on("select", memoryHandler("select"));
-        Object.entries(triggers).forEach((([event, handler]) => tree.on(event, handler)));
-        updateTreeMenu({
-            project: service.name
-        });
-    };
-    const Update = {
-        updateTree: updateTree(),
-        newTree: newTree,
-        treeView: treeView
-    };
-    const treeMethods = [ "Add", "Delete", "Select", "Move", "Rename", "Context", "Change", "ClearChanged" ].reduce(((all, one) => {
-        all["tree" + one] = (...args) => {
-            try {
-                if (!tree) return;
+const treeMethods = [ "Add", "Delete", "Select", "Move", "Rename", "Context", "Change", "ClearChanged" ].reduce(((all, one) => {
+    all["tree" + one] = (...args) => {
+        try {
+            if (!tree) return;
  //should keep track of this instead of blindly returning
-                                if (one === "Add" && typeof args[2] === "undefined") {
-                    return tree.add(args[0], null, tree.currentFolder || "");
-                }
-                if (one === "ClearChanged") {
-                    return tree.clearChanged();
-                }
-                return tree[one.toLowerCase()](...args);
-            } catch (e) {
-                console.warn(e);
+                        if (one === "Add" && typeof args[2] === "undefined") {
+                return tree.add(args[0], null, tree.currentFolder || "");
+            }
+            if (one === "ClearChanged") {
+                return tree.clearChanged();
+            }
+            return tree[one.toLowerCase()](...args);
+        } catch (e) {
+            console.warn(e);
+        }
+    };
+    return all;
+}), {});
+
+const attachListener = () => {};
+
+const connectTrigger = () => {};
+
+const Update = () => {};
+
+attachListener(Update, {
+    ...treeMethods,
+    newFile: ({parent: parent}) => tree.add("file", null, parent),
+    newFolder: ({parent: parent}) => tree.add("folder", null, parent)
+    //showSearch: showSearch(treeView),
+    //updateTreeMenu,
+    //showServiceChooser: showServiceChooser(treeView),
+});
+
+// these get attached each newly created tree module
+[ "fileSelect", "fileAdd", "fileRename", "fileMove", "fileDelete", "folderSelect", "folderAdd", "folderRename", "folderMove", "folderDelete" ].reduce(((all, operation) => {
+    const handler = connectTrigger({
+        eventName: operation.includes("Select") ? operation : "operations",
+        type: "raw"
+    });
+    const operationAdapt = {
+        fileAdd: "addFile",
+        fileDelete: "deleteFile",
+        fileRename: "renameFile",
+        fileMove: "moveFile",
+        folderAdd: "addFolder",
+        folderDelete: "deleteFolder",
+        folderRename: "renameFolder",
+        folderMove: "moveFolder"
+    };
+    const treeEventHandler = args => {
+        const {source: source, target: target, line: line, column: column} = args;
+        const name = (target || source).split("/").pop();
+        const parent = (target || source).split("/").slice(0, -1).join("/");
+        const handlerMessage = {
+            detail: {
+                name: name,
+                oldName: source,
+                newName: target,
+                src: source,
+                tgt: target,
+                parent: parent,
+                operation: operationAdapt[operation] || operation,
+                filename: name,
+                folderName: name,
+                line: line,
+                column: column,
+                body: {},
+                service: _service || ""
             }
         };
-        return all;
-    }), {});
-    newAttachListener(Update, {
-        ...treeMethods,
-        newFile: ({parent: parent}) => tree.add("file", null, parent),
-        newFolder: ({parent: parent}) => tree.add("folder", null, parent),
-        showSearch: showSearch(treeView),
-        updateTreeMenu: updateTreeMenu,
-        showServiceChooser: showServiceChooser()
-    });
-    // these get attached each newly created tree module
-        triggers = [ "fileSelect", "fileAdd", "fileRename", "fileMove", "fileDelete", "folderSelect", "folderAdd", "folderRename", "folderMove", "folderDelete" ].reduce(((all, operation) => {
-        const handler = connectTrigger({
-            eventName: operation.includes("Select") ? operation : "operations",
-            type: "raw"
-        });
-        const operationAdapt = {
-            fileAdd: "addFile",
-            fileDelete: "deleteFile",
-            fileRename: "renameFile",
-            fileMove: "moveFile",
-            folderAdd: "addFolder",
-            folderDelete: "deleteFolder",
-            folderRename: "renameFolder",
-            folderMove: "moveFolder"
-        };
-        const treeEventHandler = args => {
-            const {source: source, target: target, line: line, column: column} = args;
-            const name = (target || source).split("/").pop();
-            const parent = (target || source).split("/").slice(0, -1).join("/");
-            const handlerMessage = {
-                detail: {
-                    name: name,
-                    oldName: source,
-                    newName: target,
-                    src: source,
-                    tgt: target,
-                    parent: parent,
-                    operation: operationAdapt[operation] || operation,
-                    filename: name,
-                    folderName: name,
-                    line: line,
-                    column: column,
-                    body: {},
-                    service: _service || ""
-                }
-            };
-            return handler(handlerMessage);
-        };
-        all[operation] = treeEventHandler;
-        return all;
-    }), {});
-}
+        return handler(handlerMessage);
+    };
+    all[operation] = treeEventHandler;
+    return all;
+}), {});
 
-export { _TreeView as default };
+const contextMenuHandler = (e, listenerContext) => {
+    const {treeView: treeView, treeContext: treeContext, showMenu: showMenu} = listenerContext.tree;
+    /*
+		TreeView module should have a right click listener
+		it should call handler with info about the thing that was clicked
+		
+		this should be wired up in UI, each menu item should contain trigger
+	*/    if (!treeView.contains(e.target)) {
+        return true;
+    }
+    e.preventDefault();
+    const context = treeContext(e.target);
+    const listItems = [ {
+        name: "New File"
+    }, {
+        name: "New Folder"
+    }, context.type === "file" ? "seperator" : "", {
+        name: "Open in Preview",
+        hidden: context.type === "folder"
+    }, {
+        name: "Open in New Window",
+        hidden: context.type === "folder"
+    }, {
+        name: "Open in Terminal",
+        hidden: true
+    }, "seperator", {
+        name: "Cut"
+    }, {
+        name: "Copy"
+    }, {
+        name: "Paste",
+        hidden: !clipboard || context.type === "file"
+    }, "seperator", {
+        name: "Copy Path"
+    }, {
+        name: "Copy Relative Path"
+    }, "seperator", {
+        name: "Rename"
+    }, {
+        name: "Delete"
+    } ].filter((x => !!x && !x.hidden));
+    showMenu()({
+        x: e.clientX,
+        y: e.clientY,
+        list: listItems,
+        parent: "TreeView",
+        data: context
+    });
+    return false;
+};
+
+const listener$8 = (e, context) => {
+    const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context;
+    const {which: which, parent: parent, data: data} = e.detail || {};
+    if (parent !== "TreeView") {
+        //console.log('TreeView ignored a context-select event');
+        return;
+    }
+    // this should in a listener for 'addFile'
+        if ([ "New File", "New Folder" ].includes(which)) {
+        const parent = data.type === "file" ? data.parent.path : data.path;
+        const typeToAdd = which === "New File" ? "file" : "folder";
+        return treeAdd(typeToAdd, null, parent);
+    }
+    if (which === "Delete") return treeDelete(data.path);
+    if (which === "Rename") return treeRename(data.path);
+    if (which === "Cut") {
+        clipboard = {
+            operation: "cut",
+            data: data
+        };
+    }
+    if (which === "Copy") {
+        clipboard = {
+            operation: "copy",
+            data: data
+        };
+    }
+    if (which === "Paste") {
+        const isMove = clipboard.operation === "cut";
+        const target = data;
+        const source = clipboard.data;
+        clipboard = undefined;
+        isMove ? console.log(`paste should be a move`) : console.log(`paste should be an add`);
+        console.log({
+            clipboard: clipboard,
+            data: data
+        });
+        // TODO: should update tree, but...
+        // really should trigger file and folder copy/move
+                if (isMove) {
+            treeMove(clipboard.data.type, source, target);
+        } else {
+            treeAdd(clipboard.data.type, source, target);
+        }
+    }
+    if ([ "Copy Path", "Copy Relative Path" ].includes(which)) {
+        const path = which.includes("Relative") ? data.path : new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+        navigator.clipboard.writeText(path).then((x => console.log(`Wrote path to clipboard: ${path}`))).catch((e => {
+            console.error(`Error writing path to clipboard: ${path}`);
+            console.error(e);
+        }));
+    }
+    if (which === "Open in New Window") {
+        const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+        const shouldNotPreview = [ ".svg", ".less", ".scss", ".css", ".json", ".txt", ".mjs" ].find((x => path.includes(x)));
+        // overrides shouldNotPreview
+                const shouldPreview = [ ".jsx" ].find((x => path.includes(x)));
+        const query = shouldNotPreview && !shouldPreview ? "" : "/::preview::/";
+        window.open(path + query);
+    }
+    if (which === "Open in Preview") {
+        const event = new CustomEvent("previewSelect", {
+            bubbles: true,
+            detail: data
+        });
+        document.body.dispatchEvent(event);
+    }
+};
+
+const listener$7 = treeChange => event => {
+    const {filePath: filePath} = event.detail;
+    treeChange(filePath);
+};
+
+const listener$6 = (e, context) => {
+    const {type: type = ""} = e;
+    const {treeSelect: treeSelect} = context;
+    if (e?.detail?.source === "Explorer") return;
+    const {name: name, path: path, next: next, nextPath: nextPath} = e.detail;
+    if (type === "close" && !next) {
+        return;
+    }
+    const nameWithPathIfPresent = (_path, _name) => _path ? noFrontSlash(`${_path}/${_name}`) : noFrontSlash(_name);
+    const fileNameWithPath = next ? nameWithPathIfPresent(nextPath, next) : nameWithPathIfPresent(path, name);
+    treeSelect(fileNameWithPath, null, "noSelect");
+    /* TODO: add this to TreeView module
+	if (found.scrollIntoViewIfNeeded) {
+		const opt_center = true;
+		found.scrollIntoViewIfNeeded(opt_center);
+	} else {
+		found.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		});
+	}
+	*/};
+
+const listener$5 = (e, context) => {
+    listener$6({
+        type: "close",
+        ...e
+    }, context);
+};
+
+const listener$4 = (e, context) => {
+    let {name: name, next: next, collapse: collapse} = e.detail;
+    if (collapse) {
+        return;
+    }
+    let split;
+    if ((name || next).includes("/")) {
+        console.log(`tree path: ${name || next}`);
+        console.error("should be opening all parent folders");
+        split = (name || next).split("/").filter((x => !!x));
+        //name = split[split.length-1];
+        } else {
+        split = [ name || next ];
+    }
+    // Array.from(
+    // 	document.querySelectorAll('#tree-view .selected')||[]
+    // )
+    // 	.forEach(x => x.classList.remove('selected'));
+        const leaves = Array.from(document.querySelectorAll("#tree-view .tree-leaf-content") || []);
+    split.forEach(((spl, i) => {
+        const found = leaves.find((x => x.innerText.includes(spl)));
+        if (!found) {
+            return;
+        }
+        if (i === split.length - 1) {
+            tree.selected = spl;
+            //found.classList.add('selected');
+                }
+        const expando = found.querySelector(".tree-expando");
+        expando && expando.classList.remove("closed");
+        expando && expando.classList.add("expanded", "open");
+        const childLeaves = found.parentNode.querySelector(".tree-child-leaves");
+        childLeaves && childLeaves.classList.remove("hidden");
+    }));
+};
+
+var noServiceSelected = (event, context) => {
+    const {tree: {showServiceChooser: showServiceChooser}} = context;
+    showServiceChooser();
+};
+
+const listener$3 = (e, context) => {
+    const {newTree: newTree} = context.tree;
+    const {id: id, result: result, op: op} = e.detail;
+    const {selected: selected, expanded: expanded = [], tree: tree} = getState();
+    if (!id) {
+        //console.log(`No ID for: ${e.type} - ${op}`);
+        return;
+    }
+    //console.log(e.detail);
+        if (e.type === "operationDone" && op === "update") {
+        //TODO: maybe pay attention to what branches are expanded/selected?
+        setState("selected", tree ? tree.selected : undefined);
+        setState("expanded", (tree ? tree.expanded : undefined) || expanded);
+        tree && tree.off();
+        setState("tree", undefined);
+    }
+    if (result.length > 1) {
+        return;
+ // TODO: this is right???
+        }
+    /*
+		when operationDone, probably means service has been loaded
+
+		get newTree method from UpdateTree to create tree
+			- requires tree state and service
+			- those are safe to get here
+	*/    setState("currentService", result[0]);
+    newTree({
+        service: result[0],
+        treeState: result[0].treeState
+    }, context);
+};
+
+const listener$2 = (event, context) => {
+    const {searchProject: searchProject} = context.tree;
+    searchProject({
+        hideSearch: false
+    }, context);
+};
+
+const listener$1 = (event, context) => {
+    const {searchProject: searchProject} = context.tree;
+    searchProject({
+        hideSearch: true
+    }, context);
+};
+
+const listener = (event, context) => {
+    const {searchProject: searchProject} = context.tree;
+    const {detail: detail = {}} = event;
+    const {operation: operation} = detail;
+    if (operation !== "searchProject") {
+        return;
+    }
+    searchProject({
+        showSearch: showSearch
+    });
+};
+
+var mainListeners = formatHandlers("Tree", {
+    contextMenu: contextMenuHandler,
+    contextSelect: listener$8,
+    fileChange: listener$7,
+    fileClose: listener$5,
+    fileSelect: listener$6,
+    folderSelect: listener$4,
+    noServiceSelected: noServiceSelected,
+    operationDone: listener$3,
+    showSearch: listener$2,
+    showServiceCode: listener$1,
+    ui: listener
+});
+
+/*
+
+also see event handling in:
+	tree/main/components/ProjectOpener.js
+	tree/main/components/TreeMenu.js
+
+*/
+// import mainTriggers from './main/triggers/index.js';
+// import tabsListeners from './tabs/listeners/index.js';
+// import tabsTriggers from './tabs/triggers/index.js';
+// import statusListeners from './status/listeners/index.js';
+// //import statusTriggers from './status/triggers/index.js';
+const listeners = [ {
+    // 	eventName: "service-switch-notify",
+    // 	handlers: [ mainListeners.serviceSwitch ]
+    // }, {
+    // 	eventName: "cursorActivity",
+    // 	handlers: [ statusListeners.cursorActivity ]
+    // }, {
+    eventName: "operationDone",
+    handlers: [ mainListeners.operationDone ]
+}, {
+    // 	eventName: "operations",
+    // 	handlers: [ tabsListeners.operationDone ]
+    // }, {
+    // 	eventName: "open-settings-view",
+    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
+    // }, {
+    // 	eventName: "add-service-folder",
+    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
+    // }, {
+    // 	eventName: "open-previous-service",
+    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
+    // }, {
+    // 	eventName: "connect-service-provider",
+    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
+    // }, {
+    // 	eventName: "noServiceSelected",
+    // 	handlers: [ mainListeners.nothingOpen ]
+    // }, {
+    eventName: "fileSelect",
+    handlers: [ mainListeners.fileSelect ]
+} ];
+
+// const triggers = {
+// 	Editor: [{
+// 			eventName: "ui",
+// 			type: "raw",
+// 		}, {
+// 			eventName: "fileClose",
+// 			type: 'raw',
+// 		}, {
+// 			eventName: "fileSelect",
+// 			type: 'raw',
+// 		}, {
+// 			eventName: "contextMenuShow",
+// 			type: 'raw',
+// 		}, {
+// 			eventName: "fileChange",
+// 			type: 'raw',
+// 			handlers: [ mainTriggers.fileChange ]
+// 		}, {
+// 			eventName: "cursorActivity",
+// 			type: 'raw',
+// 			handlers: [ mainTriggers.cursorActivity ]
+// 		}, {
+// 			eventName: "provider-test",
+// 			type: 'click',
+// 			handlers: [ mainTriggers.provider.test ]
+// 		}, {
+// 			eventName: "provider-save",
+// 			type: 'click',
+// 			handlers: [ mainTriggers.provider.save ]
+// 		}, {
+// 			eventName: "provider-add-service",
+// 			type: 'click',
+// 			handlers: [ mainTriggers.provider.addService ]
+// 		}], 
+// 	Tabs: [{
+// 			eventName: "ui",
+// 			type: "raw",
+// 		}, {
+// 			eventName: "fileClose",
+// 			type: 'raw',
+// 		}, {
+// 			name: "closeOthers",
+// 			eventName: "fileClose",
+// 			type: 'raw',
+// 			handlers: [ tabsTriggers.closeMultiple.others ]
+// 		}, {
+// 			name: "closeAll",
+// 			eventName: "fileClose",
+// 			type: 'raw',
+// 			handlers: [ tabsTriggers.closeMultiple.all ]
+// 		}, {
+// 			eventName: "fileSelect",
+// 			type: 'raw',
+// 		}, {
+// 			eventName: "contextMenuShow",
+// 			type: 'raw',
+// 		}, {
+// 			name: "addFileUntracked",
+// 			eventName: "operations",
+// 			type: 'raw',
+// 			data: {
+// 				operation: "addFile",
+// 				untracked: true,
+// 			},
+// 		}],
+// 	Status: [{
+// 			eventName: "ui",
+// 			type: "raw",
+// 		}, {
+// 			eventName: "fileClose",
+// 			type: 'raw',
+// 		}, {
+// 			eventName: "fileSelect",
+// 			type: 'raw',
+// 		}],
+// };
+// export default { listeners, triggers };
+const triggers$1 = {
+    Tree: []
+};
+
+var events = {
+    listeners: listeners,
+    triggers: triggers$1
+};
+
+//import indexCSS from '../index.css';
+document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet ];
+
+attachEvents(events, {
+    tree: TreeView$1
+});
+
+devHelper.module();

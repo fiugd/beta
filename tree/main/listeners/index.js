@@ -1,21 +1,35 @@
 import { formatHandlers } from '../../utils/misc.js';
 
-import operationDone from './operationDone.js';
+import contextMenu from './contextMenu.js';
+import contextSelect from './contextSelect.js';
+import fileChange from './fileChange.js';
+import fileClose from './fileClose.js';
 import fileSelect from './fileSelect.js';
-// import fileClose from './fileClose.js';
-// import contextMenu from './contextMenu.js';
-// import contextMenuSelect from './contextSelect.js';
-// import serviceSwitch from './serviceSwitch.js';
-// const nothingOpen = (e, context) => context.editor.switchEditor({ mode: "nothingOpen" }, context);
-// const systemDocs = (e, context) => context.editor.switchEditor({ filename: e.type, mode: "systemDoc" }, context);
+import folderSelect from './folderSelect.js';
+import noServiceSelected from './noServiceSelected.js';
+import operationDone from './operationDone.js';
+import showSearch from './showSearch.js';
+import showServiceCode from './showServiceCode.js';
+import ui from './ui.js';
 
 export default formatHandlers('Tree', {
-	operationDone,
+	contextMenu,
+	contextSelect,
+	fileChange,
+	fileClose,
 	fileSelect,
-	// fileClose,
-	// contextMenu,
-	// contextMenuSelect,
-	// serviceSwitch,
-	// nothingOpen,
-	// systemDocs,
+	folderSelect,
+	noServiceSelected,
+	operationDone,
+	showSearch,
+	showServiceCode,
+	ui,
 });
+
+/*
+
+also see event handling in:
+	tree/main/components/ProjectOpener.js
+	tree/main/components/TreeMenu.js
+
+*/

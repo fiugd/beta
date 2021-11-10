@@ -1,7 +1,8 @@
 import { noFrontSlash } from '../../utils/misc.js';
 
 const listener = (e, context) => {
-	const { treeSelect, type='' } = context;
+	const { type='' } = e;
+	const { treeSelect } = context;
 	if(e?.detail?.source === 'Explorer') return;
 
 	const { name, path, next, nextPath } = e.detail;
