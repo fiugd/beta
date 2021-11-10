@@ -30,9 +30,6 @@ export default (root, analyzeConfig, onwarn) => ({
 	copyFiles: [{
 		from: `/${root}/tree/tree.html`,
 		to: `./${root}/dist/tree.html`
-	}, {
-		from: `/${root}/tree/tree.css`,
-		to: `./${root}/dist/tree.css`
 	}]
 });
 
