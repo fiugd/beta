@@ -6,10 +6,14 @@
 
 ![image](https://user-images.githubusercontent.com/1816471/93670856-78e66b00-fa6c-11ea-9ee3-2d35db13c030.png)
 
-This is fiug, a web-based editor and development platform aimed at making you faster.
+This is fiug, a web-based editor and development platform aimed at making you faster.   
 
-Try it out at [fiug.dev](https://fiug.dev)!
+Try it out at [fiug.dev](https://fiug.dev)!   
 
-Since fiug is hosted with github pages, you can fork and make it your own.
+Since fiug is hosted with github pages, you can fork and make it your own.   
 
-Check out more at [fiug youtube](https://www.youtube.com/playlist?list=PLzxw4c2I_GGe6q7XHWH2lXsc9VBfzsNB_) or [fiug twitter](https://twitter.com/fiugdev) or [fiug blog](https://blog.fiug.dev)
+[fiug youtube](https://www.youtube.com/playlist?list=PLzxw4c2I_GGe6q7XHWH2lXsc9VBfzsNB_)   
+
+[fiug twitter](https://twitter.com/fiugdev)   
+
+[fiug blog](https://blog.fiug.dev)   
