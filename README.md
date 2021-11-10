@@ -4,7 +4,7 @@
 [![Discord Channel](https://img.shields.io/discord/887775860881514557?color=%237289DA&logo=Discord&logoColor=white)](https://discord.com/channels/887775860881514557)
 [![Discord Invite](https://img.shields.io/badge/discord-invite-yall?color=%237289DA&logo=Discord&logoColor=white)](https://discord.gg/pdYZvsUexX)
 
-![image](https://user-images.githubusercontent.com/1816471/93670856-78e66b00-fa6c-11ea-9ee3-2d35db13c030.png)
+![image](https://user-images.githubusercontent.com/1816471/141070675-b27d408c-ef02-4cf3-803f-860a569624e2.png)
 
 This is fiug, a web-based editor and development platform aimed at making you faster.   
 
