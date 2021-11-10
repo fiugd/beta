@@ -1,2 +1,5 @@
+import operations from './operations.js';
 
-export default {};
+export default {
+	operations
+};

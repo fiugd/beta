@@ -1,22 +1,29 @@
+import { getCurrentService } from "../../utils/State.js";
+import { getFilePath as gfp } from '../../utils/misc.js';
 import { noFrontSlash } from '../../utils/misc.js';
+
+const getFilePath = gfp(getCurrentService);
 
 const listener = (e, context) => {
 	const { type='' } = e;
-	const { treeSelect } = context;
-	if(e?.detail?.source === 'Explorer') return;
+	const { treeSelect } = context.tree.api;
+	if(e?.detail?.source === 'Tree') return;
 
-	const { name, path, next, nextPath } = e.detail;
+	const { name, parent, path, next, nextPath } = e.detail;
 	if(type === 'close' && !next){
 		return;
 	}
-	const nameWithPathIfPresent = (_path, _name) => _path
-		? noFrontSlash(`${_path}/${_name}`)
-		: noFrontSlash(_name);
-	const fileNameWithPath = next
-		? nameWithPathIfPresent(nextPath, next)
-		: nameWithPathIfPresent(path, name);
+	// const nameWithPathIfPresent = (_path, _name) => _path
+	// 	? noFrontSlash(`${_path}/${_name}`)
+	// 	: noFrontSlash(_name);
+	// const fileNameWithPath = next
+	// 	? nameWithPathIfPresent(nextPath, next)
+	// 	: nameWithPathIfPresent(path, name);
+	
+	const fileNameWithPath = getFilePath({ name, parent, path, next, nextPath });
+	const filePath = fileNameWithPath;
 
-	treeSelect(fileNameWithPath, null, 'noSelect');
+	treeSelect(filePath, null, 'noSelect');
 
 	/* TODO: add this to TreeView module
 	if (found.scrollIntoViewIfNeeded) {

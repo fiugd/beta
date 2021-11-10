@@ -4,4 +4,3 @@ const listener = (event, context) => {
 };
 
 export default listener;
-

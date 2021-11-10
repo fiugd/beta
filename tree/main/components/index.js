@@ -44,20 +44,40 @@ const treeMemory = (service, tree, action) => (...args) => {
 };
 
 const newTree = ({ service, treeState }, context) => {
-	const { triggers: { tree: triggers }} = context;
+	const { events: triggers } = context.tree;
 	//_service = service ? service.name : '';
 	const treeRootId = "tree-view";
 	// TODO: clear old tree if exists?
 
 	const tree = new TreeModule(service, treeRootId, treeState, extensionMapper);
 	setState("tree", tree);
+	const methods = [
+		'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
+	].reduce((all, one) => {
+			all['tree'+one] = (...args) => {
+				try {
+					if(!tree) return; //should keep track of this instead of blindly returning
+					if(one === 'Add' && typeof args[2] === 'undefined'){
+						return tree.add(args[0], null, tree.currentFolder || '');
+					}
+					if(one === 'ClearChanged'){
+						return tree.clearChanged();
+					}
+					return tree[one.toLowerCase()](...args);
+				} catch(e){
+					console.warn(e);
+				}
+			}
+			return all;
+	}, {});
+	context.tree.api = methods; 
 
 	const memoryHandler = (action) => treeMemory(service, tree, action);
 	tree.on('expand', memoryHandler('expand'));
 	tree.on('collapse', memoryHandler('collapse'));
 	tree.on('select', memoryHandler('select'));
 	Object.entries(triggers)
-		.forEach( ([event, handler]) => tree.on(event, handler) )
+		.forEach( ([event, handler]) => tree.on(event, handler(context)) )
 	TreeView.menu.update({ project: service.name });
 };
 
@@ -189,41 +209,32 @@ function newFolder({ parent, onDone }) {
 }
 TreeView.newFolder = newFolder;
 
-const treeMethods = [
-	'Add', 'Delete', 'Select', 'Move', 'Rename', 'Context', 'Change', 'ClearChanged'
-].reduce((all, one) => {
-		all['tree'+one] = (...args) => {
-			try {
-				if(!tree) return; //should keep track of this instead of blindly returning
-				if(one === 'Add' && typeof args[2] === 'undefined'){
-					return tree.add(args[0], null, tree.currentFolder || '');
-				}
-				if(one === 'ClearChanged'){
-					return tree.clearChanged();
-				}
-				return tree[one.toLowerCase()](...args);
-			} catch(e){
-				console.warn(e);
-			}
-		}
-		return all;
-}, {});
-
 const attachListener = () => {};
-const connectTrigger = () => {};
+const connectTrigger = (args) => {
+	const {eventName} = args;
+	return (body, context) => {
+		const thisTrigger = context.triggers.tree[eventName];
+		if(!thisTrigger) {
+			console.log(`trigger not registered for ${eventName}`)
+			return;
+		}
+		thisTrigger(body);
+		//console.log({eventName, body});
+	}
+};
 const Update = () => {};
 
-attachListener(Update, {
-	...treeMethods,
-	newFile: ({ parent }) => tree.add('file', null, parent),
-	newFolder: ({ parent }) => tree.add('folder', null, parent),
-	//showSearch: showSearch(treeView),
-	//updateTreeMenu,
-	//showServiceChooser: showServiceChooser(treeView),
-});
+// attachListener(Update, {
+// 	...treeMethods,
+// 	newFile: ({ parent }) => tree.add('file', null, parent),
+// 	newFolder: ({ parent }) => tree.add('folder', null, parent),
+// 	//showSearch: showSearch(treeView),
+// 	//updateTreeMenu,
+// 	//showServiceChooser: showServiceChooser(treeView),
+// });
 
 // these get attached each newly created tree module
-const triggers = [
+const treeEvents = [
 	'fileSelect',
 	'fileAdd',
 	'fileRename',
@@ -235,7 +246,8 @@ const triggers = [
 	'folderRename',
 	'folderMove',
 	'folderDelete'
-].reduce((all, operation) => {
+];
+const triggers = treeEvents.reduce((all, operation) => {
 	const handler = connectTrigger({
 		eventName: operation.includes('Select')
 			? operation
@@ -253,10 +265,12 @@ const triggers = [
 		folderRename: 'renameFolder',
 		folderMove: 'moveFolder',
 	};
-	const treeEventHandler = (args) => {
+	const treeEventHandler = (context) => (args) => {
+		console.log({ context, args });
 		const { source, target, line, column } = args;
 		const name = (target || source).split('/').pop();
 		const parent = (target || source).split('/').slice(0,-1).join('/');
+		const _service = 'TODO';
 		const handlerMessage = {
 			detail: {
 				name,
@@ -273,11 +287,13 @@ const triggers = [
 				service: _service || '',
 			}
 		};
-		return handler(handlerMessage);
+		return handler(handlerMessage, context);
 	};
 
 	all[operation] = treeEventHandler;
 	return all;
 }, {});
+
+TreeView.events = triggers;
 
 export default TreeView;

@@ -1,5 +1,5 @@
 import mainListeners from './main/listeners/index.js';
-// import mainTriggers from './main/triggers/index.js';
+import mainTriggers from './main/triggers/index.js';
 
 // import tabsListeners from './tabs/listeners/index.js';
 // import tabsTriggers from './tabs/triggers/index.js';
@@ -149,7 +149,14 @@ const listeners = [{
 
 
 const triggers = {
-	Tree: []
+	Tree: [{
+		eventName: "operations",
+		type: 'raw',
+		handlers: [ mainTriggers.operations ]
+	}, {
+		eventName: "fileSelect",
+		type: 'raw',
+	}]
 };
 
 export default { listeners, triggers };

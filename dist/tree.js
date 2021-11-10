@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-10T05:06:23.603Z )
+	Version 0.4.6 ( 2021-11-10T06:59:19.838Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -30,6 +30,8 @@ const setCurrentFile = ({filePath: filePath}) => {
     }
     console.error(`could not find ${filePath}`);
 };
+
+const getCurrentService = () => currentService;
 
 const initState = (all, current) => {
     currentService = current;
@@ -277,6 +279,20 @@ const noFrontSlash = path => {
     }
 };
 
+const pathNoServiceName = (service, path) => {
+    if (!path.includes("/")) return path;
+    if (!path.includes(service.name)) return noFrontSlash(path);
+    return noFrontSlash(noFrontSlash(path).replace(service.name, ""));
+};
+
+const getFilePath$1 = getCurrentService => ({name: name = "", parent: parent = "", path: path = "", next: next = "", nextPath: nextPath = ""}) => {
+    const nameWithPathIfPresent = (_path, _name) => _path ? _path.endsWith(_name) ? noFrontSlash(_path) : noFrontSlash(`${_path}/${_name}`) : noFrontSlash(_name);
+    const fileNameWithPath = next ? nameWithPathIfPresent(nextPath, next) : nameWithPathIfPresent(parent || path, name);
+    const service = getCurrentService({
+        pure: true
+    });
+    return pathNoServiceName(service, fileNameWithPath);
+}
 /*
 	Example usage of flatFromProp:
 
@@ -293,7 +309,9 @@ const noFrontSlash = path => {
 		{ one: '1', three: 'b'},
 	])
 
-*/ const flatFromProp = (arr, prop) => arr.flatMap((({[prop]: p, ...x}) => typeof p !== "undefined" && p.length ? p.map((y => ({
+*/;
+
+const flatFromProp = (arr, prop) => arr.flatMap((({[prop]: p, ...x}) => typeof p !== "undefined" && p.length ? p.map((y => ({
     ...x,
     ...y
 }))) : x));
@@ -359,7 +377,7 @@ const utils = (() => {
 
 const listeners$1 = {};
 
-const triggers$2 = {};
+const triggers$3 = {};
 
 function attach({name: name, listener: listener, eventName: eventName, options: options, key: key, context: context}) {
     if (!name || !listener || !eventName) {
@@ -403,7 +421,7 @@ future todo:
 
 */
 // this thing is used too many ways... SIGH
-function trigger(args) {
+function trigger$1(args) {
     const {e: e, type: type, params: params, source: source, data: data, detail: detail, external: external} = args;
     const _data = typeof data === "function" ? data(e) : data || (detail || {}).data || {};
     //console.log(`triggering event: ${type}`);
@@ -449,7 +467,7 @@ filter}) {
     if (type === "raw") {
         const triggerName = `${eventName}__${name}`;
         const _trigger = args => {
-            trigger({
+            trigger$1({
                 ...args,
                 e: args,
                 data: data,
@@ -457,7 +475,7 @@ filter}) {
                 source: name
             });
         };
-        triggers$2[triggerName] = {
+        triggers$3[triggerName] = {
             eventName: eventName,
             type: type,
             trigger: _trigger
@@ -469,9 +487,9 @@ filter}) {
         return;
     }
     const listener = triggerClickListener || (event => {
-        const foundTrigger = Object.keys(triggers$2).map((key => ({
+        const foundTrigger = Object.keys(triggers$3).map((key => ({
             key: key,
-            ...triggers$2[key]
+            ...triggers$3[key]
         }))).find((t => {
             if (t.type === "raw") {
                 return false;
@@ -489,7 +507,7 @@ filter}) {
         const params = {};
         const source = {};
         const _data = typeof data === "function" ? data(event) : data || {};
-        trigger({
+        trigger$1({
             type: type,
             params: params,
             source: source,
@@ -503,7 +521,7 @@ filter}) {
         window.addEventListener(type, listener, options);
     }
     const triggerName = `${eventName}__${name}`;
-    triggers$2[triggerName] = {
+    triggers$3[triggerName] = {
         eventName: eventName,
         filter: filter,
         data: data,
@@ -513,7 +531,7 @@ filter}) {
 };
 
 function listTriggers$1() {
-    return Object.keys(triggers$2);
+    return Object.keys(triggers$3);
 }
 
 window.listTriggers = listTriggers$1;
@@ -568,7 +586,7 @@ window.top.postMessage({
 const useCapture = false;
 
 window.addEventListener("message", (function(messageEvent) {
-    trigger({
+    trigger$1({
         ...messageEvent.data,
         external: true
     });
@@ -587,7 +605,7 @@ this code is useful when testing and developing, but less so otherwise
         const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
         console.log(service);
         initState([ service ], service);
-        trigger({
+        trigger$1({
             e: {},
             type: "operationDone",
             params: {},
@@ -3154,17 +3172,36 @@ const treeMemory = (service, tree, action) => (...args) => {
 };
 
 const newTree = ({service: service, treeState: treeState}, context) => {
-    const {triggers: {tree: triggers}} = context;
+    const {events: triggers} = context.tree;
     //_service = service ? service.name : '';
         const treeRootId = "tree-view";
     // TODO: clear old tree if exists?
         const tree = new ServiceTree(service, treeRootId, treeState, extensionMapper);
     setState("tree", tree);
+    const methods = [ "Add", "Delete", "Select", "Move", "Rename", "Context", "Change", "ClearChanged" ].reduce(((all, one) => {
+        all["tree" + one] = (...args) => {
+            try {
+                if (!tree) return;
+ //should keep track of this instead of blindly returning
+                                if (one === "Add" && typeof args[2] === "undefined") {
+                    return tree.add(args[0], null, tree.currentFolder || "");
+                }
+                if (one === "ClearChanged") {
+                    return tree.clearChanged();
+                }
+                return tree[one.toLowerCase()](...args);
+            } catch (e) {
+                console.warn(e);
+            }
+        };
+        return all;
+    }), {});
+    context.tree.api = methods;
     const memoryHandler = action => treeMemory(service, tree, action);
     tree.on("expand", memoryHandler("expand"));
     tree.on("collapse", memoryHandler("collapse"));
     tree.on("select", memoryHandler("select"));
-    Object.entries(triggers).forEach((([event, handler]) => tree.on(event, handler)));
+    Object.entries(triggers).forEach((([event, handler]) => tree.on(event, handler(context))));
     TreeView$1.menu.update({
         project: service.name
     });
@@ -3268,42 +3305,31 @@ function newFolder({parent: parent, onDone: onDone}) {
 
 TreeView$1.newFolder = newFolder;
 
-const treeMethods = [ "Add", "Delete", "Select", "Move", "Rename", "Context", "Change", "ClearChanged" ].reduce(((all, one) => {
-    all["tree" + one] = (...args) => {
-        try {
-            if (!tree) return;
- //should keep track of this instead of blindly returning
-                        if (one === "Add" && typeof args[2] === "undefined") {
-                return tree.add(args[0], null, tree.currentFolder || "");
-            }
-            if (one === "ClearChanged") {
-                return tree.clearChanged();
-            }
-            return tree[one.toLowerCase()](...args);
-        } catch (e) {
-            console.warn(e);
+const connectTrigger = args => {
+    const {eventName: eventName} = args;
+    return (body, context) => {
+        const thisTrigger = context.triggers.tree[eventName];
+        if (!thisTrigger) {
+            console.log(`trigger not registered for ${eventName}`);
+            return;
         }
-    };
-    return all;
-}), {});
+        thisTrigger(body);
+        //console.log({eventName, body});
+        };
+};
 
-const attachListener = () => {};
-
-const connectTrigger = () => {};
-
-const Update = () => {};
-
-attachListener(Update, {
-    ...treeMethods,
-    newFile: ({parent: parent}) => tree.add("file", null, parent),
-    newFolder: ({parent: parent}) => tree.add("folder", null, parent)
-    //showSearch: showSearch(treeView),
-    //updateTreeMenu,
-    //showServiceChooser: showServiceChooser(treeView),
-});
-
+// attachListener(Update, {
+// 	...treeMethods,
+// 	newFile: ({ parent }) => tree.add('file', null, parent),
+// 	newFolder: ({ parent }) => tree.add('folder', null, parent),
+// 	//showSearch: showSearch(treeView),
+// 	//updateTreeMenu,
+// 	//showServiceChooser: showServiceChooser(treeView),
+// });
 // these get attached each newly created tree module
-[ "fileSelect", "fileAdd", "fileRename", "fileMove", "fileDelete", "folderSelect", "folderAdd", "folderRename", "folderMove", "folderDelete" ].reduce(((all, operation) => {
+const treeEvents = [ "fileSelect", "fileAdd", "fileRename", "fileMove", "fileDelete", "folderSelect", "folderAdd", "folderRename", "folderMove", "folderDelete" ];
+
+const triggers$2 = treeEvents.reduce(((all, operation) => {
     const handler = connectTrigger({
         eventName: operation.includes("Select") ? operation : "operations",
         type: "raw"
@@ -3318,10 +3344,15 @@ attachListener(Update, {
         folderRename: "renameFolder",
         folderMove: "moveFolder"
     };
-    const treeEventHandler = args => {
+    const treeEventHandler = context => args => {
+        console.log({
+            context: context,
+            args: args
+        });
         const {source: source, target: target, line: line, column: column} = args;
         const name = (target || source).split("/").pop();
         const parent = (target || source).split("/").slice(0, -1).join("/");
+        const _service = "TODO";
         const handlerMessage = {
             detail: {
                 name: name,
@@ -3336,14 +3367,16 @@ attachListener(Update, {
                 line: line,
                 column: column,
                 body: {},
-                service: _service || ""
+                service: _service
             }
         };
-        return handler(handlerMessage);
+        return handler(handlerMessage, context);
     };
     all[operation] = treeEventHandler;
     return all;
 }), {});
+
+TreeView$1.events = triggers$2;
 
 const contextMenuHandler = (e, listenerContext) => {
     const {treeView: treeView, treeContext: treeContext, showMenu: showMenu} = listenerContext.tree;
@@ -3470,17 +3503,31 @@ const listener$7 = treeChange => event => {
     treeChange(filePath);
 };
 
+const getFilePath = getFilePath$1(getCurrentService);
+
 const listener$6 = (e, context) => {
     const {type: type = ""} = e;
-    const {treeSelect: treeSelect} = context;
-    if (e?.detail?.source === "Explorer") return;
-    const {name: name, path: path, next: next, nextPath: nextPath} = e.detail;
+    const {treeSelect: treeSelect} = context.tree.api;
+    if (e?.detail?.source === "Tree") return;
+    const {name: name, parent: parent, path: path, next: next, nextPath: nextPath} = e.detail;
     if (type === "close" && !next) {
         return;
     }
-    const nameWithPathIfPresent = (_path, _name) => _path ? noFrontSlash(`${_path}/${_name}`) : noFrontSlash(_name);
-    const fileNameWithPath = next ? nameWithPathIfPresent(nextPath, next) : nameWithPathIfPresent(path, name);
-    treeSelect(fileNameWithPath, null, "noSelect");
+    // const nameWithPathIfPresent = (_path, _name) => _path
+    // 	? noFrontSlash(`${_path}/${_name}`)
+    // 	: noFrontSlash(_name);
+    // const fileNameWithPath = next
+    // 	? nameWithPathIfPresent(nextPath, next)
+    // 	: nameWithPathIfPresent(path, name);
+        const fileNameWithPath = getFilePath({
+        name: name,
+        parent: parent,
+        path: path,
+        next: next,
+        nextPath: nextPath
+    });
+    const filePath = fileNameWithPath;
+    treeSelect(filePath, null, "noSelect");
     /* TODO: add this to TreeView module
 	if (found.scrollIntoViewIfNeeded) {
 		const opt_center = true;
@@ -3620,8 +3667,17 @@ also see event handling in:
 	tree/main/components/ProjectOpener.js
 	tree/main/components/TreeMenu.js
 
-*/
-// import mainTriggers from './main/triggers/index.js';
+*/ const trigger = {
+    data: (event, context) => {
+        console.log(event);
+        return event;
+    }
+};
+
+var mainTriggers = {
+    operations: trigger
+};
+
 // import tabsListeners from './tabs/listeners/index.js';
 // import tabsTriggers from './tabs/triggers/index.js';
 // import statusListeners from './status/listeners/index.js';
@@ -3736,7 +3792,14 @@ const listeners = [ {
 // };
 // export default { listeners, triggers };
 const triggers$1 = {
-    Tree: []
+    Tree: [ {
+        eventName: "operations",
+        type: "raw",
+        handlers: [ mainTriggers.operations ]
+    }, {
+        eventName: "fileSelect",
+        type: "raw"
+    } ]
 };
 
 var events = {
