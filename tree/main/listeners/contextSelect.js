@@ -1,4 +1,7 @@
+import { setState } from '../../utils/State.js';
+
 const listener = (e, context) => {
+	let clipboard;
 	const {
 		treeAdd, treeRename, treeDelete, treeMove
 	} = context;
@@ -88,6 +91,8 @@ const listener = (e, context) => {
 		});
 		document.body.dispatchEvent(event);
 	}
+
+	setState('clipboard', clipboard);
 };
 
 export default listener;

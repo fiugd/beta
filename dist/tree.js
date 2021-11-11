@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-11T10:28:24.029Z )
+	Version 0.4.6 ( 2021-11-11T10:57:31.080Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -580,7 +580,7 @@ function attachEvents(events, context) {
 // LISTEN TO EXTERNAL EVENTS
 // TRIGGER INTERNAL EVENTS
 window.top.postMessage({
-    subscribe: "Editor " + getClientId()
+    subscribe: "Tree " + getClientId()
 }, location);
 
 const useCapture = false;
@@ -3394,13 +3394,15 @@ const triggers$2 = treeEvents.reduce(((all, operation) => {
 TreeView$1.events = triggers$2;
 
 const contextMenuHandler = (e, listenerContext) => {
-    const {treeView: treeView, treeContext: treeContext, showMenu: showMenu} = listenerContext.tree;
+    const {tree: tree, triggers: triggers} = listenerContext;
+    const {treeContext: treeContext} = tree.api;
+    const clipboard = getState("clipboard");
     /*
 		TreeView module should have a right click listener
 		it should call handler with info about the thing that was clicked
 		
 		this should be wired up in UI, each menu item should contain trigger
-	*/    if (!treeView.contains(e.target)) {
+	*/    if (!tree.contains(e.target)) {
         return true;
     }
     e.preventDefault();
@@ -3434,17 +3436,27 @@ const contextMenuHandler = (e, listenerContext) => {
     }, {
         name: "Delete"
     } ].filter((x => !!x && !x.hidden));
-    showMenu()({
-        x: e.clientX,
-        y: e.clientY,
-        list: listItems,
-        parent: "TreeView",
-        data: context
+    // showMenu()({
+    // 	x: e.clientX,
+    // 	y: e.clientY,
+    // 	list: listItems,
+    // 	parent: "TreeView",
+    // 	data: context,
+    // });
+    // return false;
+        triggers.tree.contextMenuShow({
+        detail: {
+            x: e.clientX,
+            y: e.clientY,
+            list: listItems,
+            parent: "Tree"
+        }
     });
     return false;
 };
 
 const listener$8 = (e, context) => {
+    let clipboard;
     const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context;
     const {which: which, parent: parent, data: data} = e.detail || {};
     if (parent !== "TreeView") {
@@ -3511,6 +3523,7 @@ const listener$8 = (e, context) => {
         });
         document.body.dispatchEvent(event);
     }
+    setState("clipboard", clipboard);
 };
 
 const listener$7 = treeChange => event => {
@@ -3698,114 +3711,21 @@ var mainTriggers = {
 // import statusListeners from './status/listeners/index.js';
 // //import statusTriggers from './status/triggers/index.js';
 const listeners = [ {
-    // 	eventName: "service-switch-notify",
-    // 	handlers: [ mainListeners.serviceSwitch ]
-    // }, {
-    // 	eventName: "cursorActivity",
-    // 	handlers: [ statusListeners.cursorActivity ]
-    // }, {
     eventName: "operationDone",
     handlers: [ mainListeners.operationDone ]
 }, {
-    // 	eventName: "operations",
-    // 	handlers: [ tabsListeners.operationDone ]
-    // }, {
-    // 	eventName: "open-settings-view",
-    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
-    // }, {
-    // 	eventName: "add-service-folder",
-    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
-    // }, {
-    // 	eventName: "open-previous-service",
-    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
-    // }, {
-    // 	eventName: "connect-service-provider",
-    // 	handlers: [ mainListeners.systemDocs, tabsListeners.fileSelect ]
-    // }, {
-    // 	eventName: "noServiceSelected",
-    // 	handlers: [ mainListeners.nothingOpen ]
-    // }, {
+    eventName: "contextmenu",
+    handlers: [ {
+        ...mainListeners.contextMenu,
+        options: {
+            capture: true
+        }
+    } ]
+}, {
     eventName: "fileSelect",
     handlers: [ mainListeners.fileSelect ]
 } ];
 
-// const triggers = {
-// 	Editor: [{
-// 			eventName: "ui",
-// 			type: "raw",
-// 		}, {
-// 			eventName: "fileClose",
-// 			type: 'raw',
-// 		}, {
-// 			eventName: "fileSelect",
-// 			type: 'raw',
-// 		}, {
-// 			eventName: "contextMenuShow",
-// 			type: 'raw',
-// 		}, {
-// 			eventName: "fileChange",
-// 			type: 'raw',
-// 			handlers: [ mainTriggers.fileChange ]
-// 		}, {
-// 			eventName: "cursorActivity",
-// 			type: 'raw',
-// 			handlers: [ mainTriggers.cursorActivity ]
-// 		}, {
-// 			eventName: "provider-test",
-// 			type: 'click',
-// 			handlers: [ mainTriggers.provider.test ]
-// 		}, {
-// 			eventName: "provider-save",
-// 			type: 'click',
-// 			handlers: [ mainTriggers.provider.save ]
-// 		}, {
-// 			eventName: "provider-add-service",
-// 			type: 'click',
-// 			handlers: [ mainTriggers.provider.addService ]
-// 		}], 
-// 	Tabs: [{
-// 			eventName: "ui",
-// 			type: "raw",
-// 		}, {
-// 			eventName: "fileClose",
-// 			type: 'raw',
-// 		}, {
-// 			name: "closeOthers",
-// 			eventName: "fileClose",
-// 			type: 'raw',
-// 			handlers: [ tabsTriggers.closeMultiple.others ]
-// 		}, {
-// 			name: "closeAll",
-// 			eventName: "fileClose",
-// 			type: 'raw',
-// 			handlers: [ tabsTriggers.closeMultiple.all ]
-// 		}, {
-// 			eventName: "fileSelect",
-// 			type: 'raw',
-// 		}, {
-// 			eventName: "contextMenuShow",
-// 			type: 'raw',
-// 		}, {
-// 			name: "addFileUntracked",
-// 			eventName: "operations",
-// 			type: 'raw',
-// 			data: {
-// 				operation: "addFile",
-// 				untracked: true,
-// 			},
-// 		}],
-// 	Status: [{
-// 			eventName: "ui",
-// 			type: "raw",
-// 		}, {
-// 			eventName: "fileClose",
-// 			type: 'raw',
-// 		}, {
-// 			eventName: "fileSelect",
-// 			type: 'raw',
-// 		}],
-// };
-// export default { listeners, triggers };
 const triggers$1 = {
     Tree: [ {
         eventName: "operations",
@@ -3813,6 +3733,9 @@ const triggers$1 = {
         handlers: [ mainTriggers.operations ]
     }, {
         eventName: "fileSelect",
+        type: "raw"
+    }, {
+        eventName: "contextMenuShow",
         type: "raw"
     } ]
 };

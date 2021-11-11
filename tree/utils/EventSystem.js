@@ -206,7 +206,7 @@ function attachEvents(events, context) {
 // LISTEN TO EXTERNAL EVENTS
 // TRIGGER INTERNAL EVENTS
 window.top.postMessage({
-	subscribe: 'Editor ' + getClientId()
+	subscribe: 'Tree ' + getClientId()
 }, location);
 const useCapture = false;
 window.addEventListener('message', function(messageEvent) {

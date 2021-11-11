@@ -1,5 +1,9 @@
+import { getState } from '../../utils/State.js';
+
 const contextMenuHandler = (e, listenerContext) => {
-	const { treeView, treeContext, showMenu } = listenerContext.tree;
+	const { tree, triggers } = listenerContext;
+	const { treeContext } = tree.api;
+	const clipboard = getState('clipboard');
 
 	/*
 		TreeView module should have a right click listener
@@ -7,7 +11,7 @@ const contextMenuHandler = (e, listenerContext) => {
 		
 		this should be wired up in UI, each menu item should contain trigger
 	*/
-	if (!treeView.contains(e.target)) {
+	if (!tree.contains(e.target)) {
 		return true;
 	}
 	e.preventDefault();
@@ -63,13 +67,23 @@ const contextMenuHandler = (e, listenerContext) => {
 		},
 	].filter(x => !!x && !x.hidden);
 
-	showMenu()({
-		x: e.clientX,
-		y: e.clientY,
-		list: listItems,
-		parent: "TreeView",
-		data: context,
-	});
+	// showMenu()({
+	// 	x: e.clientX,
+	// 	y: e.clientY,
+	// 	list: listItems,
+	// 	parent: "TreeView",
+	// 	data: context,
+	// });
+	// return false;
+	
+	triggers.tree.contextMenuShow({
+		detail: {
+			x: e.clientX,
+			y: e.clientY,
+			list: listItems,
+			parent: "Tree",
+			// data,
+	}});
 	return false;
 };
 
