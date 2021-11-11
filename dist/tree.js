@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-11T10:02:09.946Z )
+	Version 0.4.6 ( 2021-11-11T10:28:24.029Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3158,8 +3158,8 @@ const treeMemory = (service, tree, action) => (...args) => {
                 const expanded = tree.context(args[0].target).path;
                 const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
                 const newExpanded = oldExpanded.includes(expanded) ? oldExpanded : [ ...oldExpanded, expanded ];
-                //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-                        } catch (e) {
+                await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+            } catch (e) {
                 debugger;
             }
         },
@@ -3168,16 +3168,16 @@ const treeMemory = (service, tree, action) => (...args) => {
                 const collapsed = tree.context(args[0].target).path;
                 const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
                 const newExpanded = oldExpanded.filter((x => x !== collapsed));
-                //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-                        } catch (e) {
+                await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+            } catch (e) {
                 debugger;
             }
         },
         select: async args => {
             try {
                 const selected = tree.context(args[0].target).path;
-                //await changesStore.setItem(`tree-${service.name}-selected`, selected);
-                        } catch (e) {
+                await changesStore.setItem(`tree-${service.name}-selected`, selected);
+            } catch (e) {
                 debugger;
             }
         }
