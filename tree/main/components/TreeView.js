@@ -14,7 +14,7 @@ const ScrollShadow = () => {
 					box-shadow: #000000 0 6px 6px -6px inset;
 					height: 6px;
 					position: absolute;
-					top: 35px;
+					/* top: 35px; */
 					left: 0;
 					right: 0;
 					display: none;
@@ -68,7 +68,7 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 	explorerPane.appendChild(ScrollShadow(treeView));
 	explorerPane.appendChild(treeView);
 	explorerPane.classList.remove("pane-loading");
-	
+
 	treeView.menu = menu;
 
 	return treeView;

@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-11T09:09:02.386Z )
+	Version 0.4.6 ( 2021-11-11T09:52:29.323Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -676,8 +676,11 @@ const updateTreeMenu = ({title: title, project: project}) => {
     }
 };
 
+let _treeMenu;
+
 const TreeMenu = () => {
-    const _treeMenu = document.createElement("div");
+    if (_treeMenu) return _treeMenu;
+    _treeMenu = document.createElement("div");
     _treeMenu.id = "tree-menu";
     _treeMenu.classList.add("row", "no-margin");
     const menuInnerHTML = `\n\t\t<style>\n\t\t\t#tree-menu .title-actions .action-item a {\n\t\t\t\tcolor: inherit;\n\t\t\t\toutline: none;\n\t\t\t}\n\t\t</style>\n\t\t<div class="title-label">\n\t\t\t<h2 title=""></h2>\n\t\t</div>\n\t\t<div class="title-actions">\n\t\t\t<div class="monaco-toolbar">\n\t\t\t\t\t<div class="monaco-action-bar animated">\n\t\t\t\t\t\t<ul class="actions-container">\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-file" role="button" title="New File">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item">\n\t\t\t\t\t\t\t\t\t<a class="action-label codicon explorer-action codicon-new-folder" role="button" title="New Folder">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action refresh-explorer" role="button" title="Refresh Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<a class="action-label icon explorer-action collapse-explorer" role="button" title="Collapse Folders in Explorer">\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t\t\t<li class="action-item hidden">\n\t\t\t\t\t\t\t\t\t<div class="monaco-dropdown">\n\t\t\t\t\t\t\t\t\t\t<div class="dropdown-label">\n\t\t\t\t\t\t\t\t\t\t\t<a class="action-label codicon codicon-toolbar-more" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" title="Views and More Actions..."></a>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`;
@@ -913,7 +916,7 @@ const Search = parent => {
 let treeView, opener;
 
 const ScrollShadow = () => {
-    let scrollShadow = htmlToElement$2(`\n\t\t<div class="scroll-shadow">\n\t\t\t<style>\n\t\t\t\t.scroll-shadow {\n\t\t\t\t\tbox-shadow: #000000 0 6px 6px -6px inset;\n\t\t\t\t\theight: 6px;\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\ttop: 35px;\n\t\t\t\t\tleft: 0;\n\t\t\t\t\tright: 0;\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style>\n\t\t</div>\n\t`);
+    let scrollShadow = htmlToElement$2(`\n\t\t<div class="scroll-shadow">\n\t\t\t<style>\n\t\t\t\t.scroll-shadow {\n\t\t\t\t\tbox-shadow: #000000 0 6px 6px -6px inset;\n\t\t\t\t\theight: 6px;\n\t\t\t\t\tposition: absolute;\n\t\t\t\t\t/* top: 35px; */\n\t\t\t\t\tleft: 0;\n\t\t\t\t\tright: 0;\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style>\n\t\t</div>\n\t`);
     treeView.addEventListener("scroll", (event => {
         try {
             event.target.scrollTop > 0 ? scrollShadow.style.display = "block" : scrollShadow.style.display = "none";
@@ -3151,21 +3154,33 @@ const changesStore = localforage.createInstance({
 const treeMemory = (service, tree, action) => (...args) => {
     const handlers = {
         expand: async args => {
-            const expanded = tree.context(args[0].target).path;
-            const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
-            oldExpanded.includes(expanded) ? oldExpanded : [ ...oldExpanded, expanded ];
-            //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-                },
+            try {
+                const expanded = tree.context(args[0].target).path;
+                const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
+                const newExpanded = oldExpanded.includes(expanded) ? oldExpanded : [ ...oldExpanded, expanded ];
+                //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+                        } catch (e) {
+                debugger;
+            }
+        },
         collapse: async args => {
-            const collapsed = tree.context(args[0].target).path;
-            const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
-            oldExpanded.filter((x => x !== collapsed));
-            //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-                },
+            try {
+                const collapsed = tree.context(args[0].target).path;
+                const oldExpanded = await changesStore.getItem(`tree-${service.name}-expanded`) || [];
+                const newExpanded = oldExpanded.filter((x => x !== collapsed));
+                //await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
+                        } catch (e) {
+                debugger;
+            }
+        },
         select: async args => {
-            tree.context(args[0].target).path;
-            //await changesStore.setItem(`tree-${service.name}-selected`, selected);
-                }
+            try {
+                const selected = tree.context(args[0].target).path;
+                //await changesStore.setItem(`tree-${service.name}-selected`, selected);
+                        } catch (e) {
+                debugger;
+            }
+        }
     };
     if (!handlers[action]) return;
     handlers[action](args);

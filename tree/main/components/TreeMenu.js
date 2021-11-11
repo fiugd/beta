@@ -22,8 +22,11 @@ const updateTreeMenu = ({ title, project }) => {
 	}
 };
 
+let _treeMenu;
 const TreeMenu = () => {
-	const _treeMenu = document.createElement("div");
+	if (_treeMenu) return _treeMenu;
+
+	_treeMenu = document.createElement("div");
 	_treeMenu.id = "tree-menu";
 	_treeMenu.classList.add("row", "no-margin");
 	const menuInnerHTML = `
@@ -101,7 +104,5 @@ const TreeMenu = () => {
 	_treeMenu.update = updateTreeMenu;
 	return _treeMenu;
 };
-
-
 
 export default TreeMenu;

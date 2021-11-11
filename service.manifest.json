@@ -139,10 +139,6 @@
 			"resources": ["/shared/modules/TreeView.mjs"]
 		},
 		{
-			"route": "./_/modules/treeEvents.mjs",
-			"source": "modules/treeEvents.mjs",
-		},
-		{
 			"route": "./_/modules/tree/tree.html",
 			"source": "dist/tree.html",
 		},
