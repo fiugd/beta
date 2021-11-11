@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-07T21:27:00.874Z )
+	Version 0.4.6 ( 2021-11-10T07:46:46.097Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23848,6 +23848,9 @@ function codemirrorModeFromFileType(fileType) {
     "font/woff2": {
         extensions: [ "woff2" ]
     },
+    "image/avif": {
+        extensions: [ "avif" ]
+    },
     "image/gif": {
         extensions: [ "gif" ]
     },
@@ -26317,7 +26320,13 @@ function EditorTabs(tabsArray = [ {
 
 var tabs = EditorTabs();
 
-function StatusBar() {
+/*
+
+word wrap:
+Editor.setOption('lineWrapping', true)
+(of course this needs to be supported in minimap as well...)
+
+*/ function StatusBar() {
     const statusBar = document.createElement("div");
     statusBar.id = "status-bar";
     const settings = getSettings();
