@@ -1,12 +1,6 @@
 import mainListeners from './main/listeners/index.js';
 import mainTriggers from './main/triggers/index.js';
 
-// import tabsListeners from './tabs/listeners/index.js';
-// import tabsTriggers from './tabs/triggers/index.js';
-
-// import statusListeners from './status/listeners/index.js';
-// //import statusTriggers from './status/triggers/index.js';
-
 const listeners = [{
 	eventName: "operationDone",
 	handlers: [
@@ -18,9 +12,39 @@ const listeners = [{
 		{ ...mainListeners.contextMenu, options: { capture: true } },
 	]
 }, {
+	eventName: "contextmenu-select",
+	handlers: [
+		mainListeners.contextMenuSelect
+	]
+}, {
 	eventName: "fileSelect",
 	handlers: [
 		mainListeners.fileSelect,
+	]
+}, {
+	eventName: "fileChange",
+	handlers: [ 
+		mainListeners.fileChange,
+	]
+}, {
+	eventName: "fileClose",
+	handlers: [
+		mainListeners.fileClose,
+	]
+}, {
+	eventName: "showSearch",
+	handlers: [
+		mainListeners.showSearch,
+	]
+}, {
+	eventName: "showServiceCode",
+	handlers: [
+		mainListeners.showServiceCode,
+	]
+}, {
+	eventName: "noServiceSelected",
+	handlers: [
+		mainListeners.noServiceSelected
 	]
 }];
 

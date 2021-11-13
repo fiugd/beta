@@ -70,15 +70,12 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 	explorerPane.classList.remove("pane-loading");
 
 	treeView.menu = menu;
+	treeView.showServiceChooser = () => {
+		return getTreeViewDOM({ showOpenService: true });
+	};
 
 	return treeView;
 };
-
-function showServiceChooser(treeview) {
-	return () => {
-		getTreeViewDOM({ showOpenService: true });
-	};
-}
 
 function _TreeView(op) {
 	if (op === "hide") {

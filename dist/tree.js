@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-11T10:57:31.080Z )
+	Version 0.4.6 ( 2021-11-13T21:38:09.077Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -960,6 +960,9 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
     explorerPane.appendChild(treeView);
     explorerPane.classList.remove("pane-loading");
     treeView.menu = menu;
+    treeView.showServiceChooser = () => getTreeViewDOM({
+        showOpenService: true
+    });
     return treeView;
 };
 
@@ -3706,10 +3709,6 @@ var mainTriggers = {
     operations: trigger
 };
 
-// import tabsListeners from './tabs/listeners/index.js';
-// import tabsTriggers from './tabs/triggers/index.js';
-// import statusListeners from './status/listeners/index.js';
-// //import statusTriggers from './status/triggers/index.js';
 const listeners = [ {
     eventName: "operationDone",
     handlers: [ mainListeners.operationDone ]
@@ -3722,8 +3721,26 @@ const listeners = [ {
         }
     } ]
 }, {
+    eventName: "contextmenu-select",
+    handlers: [ mainListeners.contextMenuSelect ]
+}, {
     eventName: "fileSelect",
     handlers: [ mainListeners.fileSelect ]
+}, {
+    eventName: "fileChange",
+    handlers: [ mainListeners.fileChange ]
+}, {
+    eventName: "fileClose",
+    handlers: [ mainListeners.fileClose ]
+}, {
+    eventName: "showSearch",
+    handlers: [ mainListeners.showSearch ]
+}, {
+    eventName: "showServiceCode",
+    handlers: [ mainListeners.showServiceCode ]
+}, {
+    eventName: "noServiceSelected",
+    handlers: [ mainListeners.noServiceSelected ]
 } ];
 
 const triggers$1 = {
