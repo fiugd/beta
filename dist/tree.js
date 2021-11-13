@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-13T23:02:07.234Z )
+	Version 0.4.6 ( 2021-11-13T23:03:44.139Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3686,7 +3686,8 @@ const listener$3 = (e, context) => {
 
 const listener$2 = (event, context) => {
     const {searchProject: searchProject} = context.tree;
-    const include = `./${currentServiceName}/`;
+    const service = getCurrentService();
+    const include = `./${service.name}/`;
     searchProject({
         hideSearch: false,
         include: include
