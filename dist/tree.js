@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-13T21:38:09.077Z )
+	Version 0.4.6 ( 2021-11-13T21:59:35.211Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3722,7 +3722,7 @@ const listeners = [ {
     } ]
 }, {
     eventName: "contextmenu-select",
-    handlers: [ mainListeners.contextMenuSelect ]
+    handlers: [ mainListeners.contextSelect ]
 }, {
     eventName: "fileSelect",
     handlers: [ mainListeners.fileSelect ]
