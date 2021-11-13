@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-13T21:59:35.211Z )
+	Version 0.4.6 ( 2021-11-13T23:02:07.234Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -901,16 +901,16 @@ class SearchBox {
     }
 }
 
-let searchBox;
+let searchBox$1;
 
 const Search = parent => {
-    searchBox = searchBox || new SearchBox(parent);
-    searchBox.hide();
+    searchBox$1 = searchBox$1 || new SearchBox(parent);
+    searchBox$1.hide();
     /*
 	searchBox.updateTerm(searchTerm);
 	searchBox.updateInclude(path)
 	searchBox.searchStream({ term: searchTerm, include: path })
-*/    return searchBox;
+*/    return searchBox$1;
 };
 
 let treeView, opener;
@@ -925,6 +925,30 @@ const ScrollShadow = () => {
         }
     }));
     return scrollShadow;
+};
+
+const showSearch$1 = (treeView, treeMenu) => {
+    const treeSearch = treeView.parentNode.querySelector(".tree-search");
+    const searchInput = document.querySelector(".project-search-input");
+    return ({show: show, include: include}) => {
+        if (show) {
+            treeView.style.visibility = "hidden";
+            treeSearch.style.visibility = "visible";
+            treeSearch.style.height = "";
+            treeMenu.update({
+                title: "search"
+            });
+            include && searchBox.updateInclude(include);
+            setTimeout((() => {
+                searchInput.focus();
+                searchInput.select();
+            }), 1);
+        } else {
+            treeView.style.visibility = "visible";
+            treeSearch.style.visibility = "hidden";
+            treeMenu.update({});
+        }
+    };
 };
 
 const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
@@ -963,6 +987,14 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
     treeView.showServiceChooser = () => getTreeViewDOM({
         showOpenService: true
     });
+    const _showSearch = showSearch$1(treeView, menu);
+    treeView.searchProject = ({hideSearch: hideSearch, include: include}) => {
+        //TODO: keep track of search state
+        _showSearch({
+            show: !hideSearch,
+            include: include
+        });
+    };
     return treeView;
 };
 
@@ -3654,8 +3686,10 @@ const listener$3 = (e, context) => {
 
 const listener$2 = (event, context) => {
     const {searchProject: searchProject} = context.tree;
+    const include = `./${currentServiceName}/`;
     searchProject({
-        hideSearch: false
+        hideSearch: false,
+        include: include
     }, context);
 };
 
@@ -3722,7 +3756,7 @@ const listeners = [ {
     } ]
 }, {
     eventName: "contextmenu-select",
-    handlers: [ mainListeners.contextSelect ]
+    handlers: [ mainListeners.contextMenuSelect ]
 }, {
     eventName: "fileSelect",
     handlers: [ mainListeners.fileSelect ]

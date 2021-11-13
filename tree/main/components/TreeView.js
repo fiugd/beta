@@ -34,6 +34,30 @@ const ScrollShadow = () => {
 	return scrollShadow;
 };
 
+const showSearch = (treeView, treeMenu) => {
+	const treeSearch = treeView.parentNode.querySelector(".tree-search");
+	const searchInput = document.querySelector(".project-search-input");
+
+	return ({ show, include }) => {
+		if (show) {
+			treeView.style.visibility = "hidden";
+			treeSearch.style.visibility = "visible";
+			treeSearch.style.height = "";
+			treeMenu.update({ title: "search" });
+			include && searchBox.updateInclude(include);
+
+			setTimeout(() => {
+				searchInput.focus();
+				searchInput.select();
+			}, 1);
+		} else {
+			treeView.style.visibility = "visible";
+			treeSearch.style.visibility = "hidden";
+			treeMenu.update({});
+		}
+	};
+};
+
 const getTreeViewDOM = ({ showOpenService } = {}) => {
 	if (opener && showOpenService) {
 		opener.classList.remove("hidden");
@@ -72,6 +96,12 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 	treeView.menu = menu;
 	treeView.showServiceChooser = () => {
 		return getTreeViewDOM({ showOpenService: true });
+	};
+	
+	const _showSearch = showSearch(treeView, menu);
+	treeView.searchProject = ({ hideSearch, include }) => {
+		//TODO: keep track of search state
+		_showSearch({ show: !hideSearch, include });
 	};
 
 	return treeView;
