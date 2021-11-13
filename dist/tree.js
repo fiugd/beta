@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-13T23:20:54.977Z )
+	Version 0.4.6 ( 2021-11-13T23:41:56.903Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -19,7 +19,12 @@ const getState = key => {
     return state;
 };
 
-const setState = (key, value) => state[key] = value;
+const setState = (key, value) => {
+    if (key === "currentService") {
+        currentService = value;
+    }
+    state[key] = value;
+};
 
 const setCurrentFile = ({filePath: filePath}) => {
     const found = currentService.code.find((x => x.name === filePath || x.path === "/" + filePath || x.path === "/" + currentService.name + "/" + filePath));

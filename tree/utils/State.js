@@ -9,7 +9,12 @@ const getState = (key) => {
 	if(key) return state[key];
 	return state;
 }
-const setState = (key, value) => state[key] = value;
+const setState = (key, value) => {
+	if(key === 'currentService'){
+		currentService = value;
+	}
+	state[key] = value;
+};
 
 // -----------------
 
