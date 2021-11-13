@@ -14,7 +14,7 @@ const listeners = [{
 }, {
 	eventName: "contextmenu-select",
 	handlers: [
-		mainListeners.contextMenuSelect
+		mainListeners.contextSelect
 	]
 }, {
 	eventName: "fileSelect",
