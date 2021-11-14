@@ -423,13 +423,16 @@ const StorageManager = (() => {
 		fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
 		servicesCache = servicesCache || cacheFn(getAllServices, serviesCacheTTL);
 
-		let t0 = performance.now();
-		const perfNow = () => {
-			if(!DEBUG) return '---';
-			const d = performance.now() - t0;
-			t0 = performance.now();
-			return d.toFixed(3);
-		};
+		const perfNow = (() => {
+			if(!DEBUG) return () => '---';
+			let t0 = performance.now();
+
+			return () => {
+				const d = performance.now() - t0;
+				t0 = performance.now();
+				return d.toFixed(3);
+			};
+		})();
 
 		const changes = await changeCache(path);
 		DEBUG && console.log(`changes store: ${perfNow()}ms (${path})`);

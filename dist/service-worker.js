@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2021-11-14T21:12:08.497Z )
+	Version 0.4.6 ( 2021-11-14T21:15:41.770Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -594,7 +594,6 @@ const StorageManager = (() => {
         changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), cacheTTL);
         fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
         servicesCache = servicesCache || cacheFn(getAllServices, serviesCacheTTL);
-        performance.now();
         const changes = await changeCache(path);
         if (changes && changes.type === "update") {
             return changes.value;
