@@ -1,4 +1,4 @@
-import { flatFromProp } from './misc.js';
+import { flatFromProp, clone } from './misc.js';
 import { getClientId } from './State.js';
 
 const listeners = {};
@@ -78,7 +78,7 @@ function trigger(args){
 	const blackList = [
 		'operationDone'
 	];
-	const triggerEvent = { type, detail: _detail };
+	const triggerEvent = clone({ type, detail: _detail });
 	if(!blackList.includes(type)){
 		window.top.postMessage({ triggerEvent }, location);
 	}

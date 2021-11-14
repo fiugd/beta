@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:15:47.716Z )
+	Version 0.4.6 ( 2021-11-14T05:20:59.731Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -380,6 +380,12 @@ const utils = (() => {
     };
 })();
 
+const clone = x => {
+    try {
+        return JSON.parse(JSON.stringify(x));
+    } catch (e) {}
+};
+
 const listeners$1 = {};
 
 const triggers$3 = {};
@@ -451,10 +457,10 @@ function trigger$1(args) {
     // SEND INTERNAL EVENTS TO EXTERNAL
         if (external) return;
     const blackList = [ "operationDone" ];
-    const triggerEvent = {
+    const triggerEvent = clone({
         type: type,
         detail: _detail
-    };
+    });
     if (!blackList.includes(type)) {
         window.top.postMessage({
             triggerEvent: triggerEvent

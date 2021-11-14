@@ -262,8 +262,15 @@ const utils = (() => {
 	};
 })();
 
+const clone = (x) => {
+	try {
+		return JSON.parse(JSON.stringify(x));
+	} catch(e){}
+};
+
 
 export {
+	clone,
 	utils,
 	flatFromProp,
 	formatHandlers,
