@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-13T23:41:56.903Z )
+	Version 0.4.6 ( 2021-11-14T00:08:47.930Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -906,16 +906,16 @@ class SearchBox {
     }
 }
 
-let searchBox$1;
+let searchBox;
 
 const Search = parent => {
-    searchBox$1 = searchBox$1 || new SearchBox(parent);
-    searchBox$1.hide();
+    searchBox = searchBox || new SearchBox(parent);
+    searchBox.hide();
     /*
 	searchBox.updateTerm(searchTerm);
 	searchBox.updateInclude(path)
 	searchBox.searchStream({ term: searchTerm, include: path })
-*/    return searchBox$1;
+*/    return searchBox;
 };
 
 let treeView, opener;
@@ -932,7 +932,7 @@ const ScrollShadow = () => {
     return scrollShadow;
 };
 
-const showSearch$1 = (treeView, treeMenu) => {
+const showSearch$1 = (treeView, treeMenu, searchBox) => {
     const treeSearch = treeView.parentNode.querySelector(".tree-search");
     const searchInput = document.querySelector(".project-search-input");
     return ({show: show, include: include}) => {
@@ -984,7 +984,7 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
     const explorerPane = document.body.querySelector("#explorer");
     const menu = TreeMenu();
     explorerPane.appendChild(menu);
-    Search(explorerPane);
+    const searchBox = Search(explorerPane);
     explorerPane.appendChild(ScrollShadow());
     explorerPane.appendChild(treeView);
     explorerPane.classList.remove("pane-loading");
@@ -992,7 +992,7 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
     treeView.showServiceChooser = () => getTreeViewDOM({
         showOpenService: true
     });
-    const _showSearch = showSearch$1(treeView, menu);
+    const _showSearch = showSearch$1(treeView, menu, searchBox);
     treeView.searchProject = ({hideSearch: hideSearch, include: include}) => {
         //TODO: keep track of search state
         _showSearch({

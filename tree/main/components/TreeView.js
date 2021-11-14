@@ -34,7 +34,7 @@ const ScrollShadow = () => {
 	return scrollShadow;
 };
 
-const showSearch = (treeView, treeMenu) => {
+const showSearch = (treeView, treeMenu, searchBox) => {
 	const treeSearch = treeView.parentNode.querySelector(".tree-search");
 	const searchInput = document.querySelector(".project-search-input");
 
@@ -88,7 +88,7 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 	const explorerPane = document.body.querySelector("#explorer");
 	const menu = TreeMenu();
 	explorerPane.appendChild(menu);
-	Search(explorerPane);
+	const searchBox = Search(explorerPane);
 	explorerPane.appendChild(ScrollShadow(treeView));
 	explorerPane.appendChild(treeView);
 	explorerPane.classList.remove("pane-loading");
@@ -98,7 +98,7 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 		return getTreeViewDOM({ showOpenService: true });
 	};
 	
-	const _showSearch = showSearch(treeView, menu);
+	const _showSearch = showSearch(treeView, menu, searchBox);
 	treeView.searchProject = ({ hideSearch, include }) => {
 		//TODO: keep track of search state
 		_showSearch({ show: !hideSearch, include });
