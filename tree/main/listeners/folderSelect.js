@@ -1,3 +1,8 @@
+/*
+TODO: it's possible that this is useless
+tree module should be doing all of this already
+*/
+
 const folderSelectListener = (e, context) => {
 	let { name, next, collapse } = e.detail;
 

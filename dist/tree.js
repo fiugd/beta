@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T06:46:11.015Z )
+	Version 0.4.6 ( 2021-11-14T07:06:19.498Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3571,13 +3571,9 @@ const fileChangeListener = treeChange => event => {
 const getFilePath = getFilePath$1(getCurrentService);
 
 const fileSelectListener = (e, context) => {
-    const {type: type = ""} = e;
     const {treeSelect: treeSelect} = context.tree.api;
     if (e?.detail?.source === "Tree") return;
     const {name: name, parent: parent, path: path, next: next, nextPath: nextPath} = e.detail;
-    if (type === "close" && !next) {
-        return;
-    }
     // const nameWithPathIfPresent = (_path, _name) => _path
     // 	? noFrontSlash(`${_path}/${_name}`)
     // 	: noFrontSlash(_name);
@@ -3606,13 +3602,17 @@ const fileSelectListener = (e, context) => {
 	*/};
 
 const fileCloseListener = (e, context) => {
-    fileSelectListener({
-        type: "close",
-        ...e
-    }, context);
+    if (!e?.detail?.next) {
+        //TODO: should be triggering a deselect with tree
+        return;
+    }
+    fileSelectListener(e, context);
 };
 
-const folderSelectListener = (e, context) => {
+/*
+TODO: it's possible that this is useless
+tree module should be doing all of this already
+*/ const folderSelectListener = (e, context) => {
     let {name: name, next: next, collapse: collapse} = e.detail;
     if (collapse) {
         return;

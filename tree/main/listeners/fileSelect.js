@@ -10,9 +10,7 @@ const fileSelectListener = (e, context) => {
 	if(e?.detail?.source === 'Tree') return;
 
 	const { name, parent, path, next, nextPath } = e.detail;
-	if(type === 'close' && !next){
-		return;
-	}
+
 	// const nameWithPathIfPresent = (_path, _name) => _path
 	// 	? noFrontSlash(`${_path}/${_name}`)
 	// 	: noFrontSlash(_name);
@@ -36,7 +34,6 @@ const fileSelectListener = (e, context) => {
 		});
 	}
 	*/
-
 };
 
 export default fileSelectListener;
