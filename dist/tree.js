@@ -1,12 +1,12 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T21:41:32.841Z )
+	Version 0.4.6 ( 2021-11-14T21:59:52.034Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
 const sheet = new CSSStyleSheet;
 
-sheet.replaceSync(`body { height: 100vh; width: 100vw; }\n\n::-webkit-scrollbar { width: 8px; height: 5px; }\n::-webkit-scrollbar-corner,\n::-webkit-scrollbar-track { background: transparent; }\n::-webkit-scrollbar-thumb { background-color: #2a2a2a; }\n::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }\n`);
+sheet.replaceSync(`body { height: 100vh; width: 100vw; }\n\n::-webkit-scrollbar { width: 8px; height: 5px; }\n::-webkit-scrollbar-corner,\n::-webkit-scrollbar-track { background: transparent; }\n::-webkit-scrollbar-thumb { background-color: #2a2a2a; }\n::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }\n\n/* SEARCH START */\n.tree-search {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmargin-right: 0;\n\tuser-select: none;\n}\n.tree-search p {\n\twhite-space: normal;\n}\n.tree-search input {\n\tbackground: var(--main-theme-background-color) !important;\n\tmargin: 0 !important;\n\tborder: 0 !important;\n\tcolor: var(--main-theme-text-color);\n\tpadding-left: .5em !important;\n\tpadding-right: .5em !important;\n\tfont-size: 1.1em !important;\n\tbox-sizing: border-box !important;\n\tpadding-top: .25em !important;\n\tpadding-bottom: .25em !important;\n\theight: unset !important;\n\ttransition: unset !important;\n\tborder: 1px solid !important;\n\tborder-color: transparent !important;\n}\n.tree-search input:focus {\n\tbox-shadow: none !important;\n\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n}\n.tree-search ::placeholder,\n.project-search-results {\n\tcolor: var(--main-theme-text-invert-color);\n}\n.tree-search > div {\n\tpadding: 2px 0px;\n\tbox-sizing: content-box;\n}\n.tree-search .field-container {\n\tmargin-left: 17px;\n\tmargin-right: 10px;\n}\n.tree-search .highlight {\n\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\tpadding-top: 4px;\n\tpadding-bottom: 4px;\n\tfilter: contrast(1.5);\n\tborder-radius: 3px;\n}\n.form-container {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tbottom: 0;\n\toverflow: hidden;\n\tpadding-top: 1em;\n}\n.search-results::-webkit-scrollbar {\n\tdisplay: none;\n}\n.search-results:hover::-webkit-scrollbar {\n\tdisplay: block !important;\n}\n.search-results::-webkit-scrollbar {\n\twidth:0.5em !important;\n\theight:0.5em !important;\n}\n.search-results::-webkit-scrollbar-thumb{\n\tbackground: #ffffff10;\n}\n.search-results::-webkit-scrollbar-track{\n\tbackground:none !important;\n}\n.search-results {\n\tpadding-bottom: 15em;\n\tposition: absolute;\n\tbottom: 0;\n\ttop: 155px;\n\toverflow-y: auto;\n\toverflow-x: hidden;\n\tbox-sizing: border-box;\n\tmargin: 0;\n\tleft: 0;\n\tright: 0;\n\tfont-size: 0.9em;\n\tpadding-right: 0;\n}\n.search-results > li { list-style: none; }\n\n.search-results > li > div {\n\tpadding-left: 1em;\n\tpadding-bottom: 0.2em;\n\tpadding-top: 0.2em;\n}\n.search-results > li ul > li {\n\twhite-space: nowrap;\n\tpadding-left: 3em;\n\tpadding-top: .2em;\n\tpadding-bottom: .2em;\n}\n\n.search-results > li > div,\n.search-results > li ul > li,\n.search-results > li > div span,\n.search-results > li ul > li span {\n\tposition: relative;\n\twhite-space: nowrap;\n}\n.search-results ul.line-results > li > span,\n.search-results ul.line-results > li > div {\n\tuser-select: none;\n\tpointer-events: none;\n}\n.search-results > li > div .hover-highlight,\n.search-results > li ul > li .hover-highlight {\n\tposition: absolute;\n\tleft: 0;\n\tright: 0;\n\ttop: 0;\n\tbottom: 0;\n\tvisibility: hidden;\n\tpointer-events: none;\n\tuser-select: none;\n\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n}\n.search-results > li > div:hover .hover-highlight,\n.search-results > li ul > li:hover .hover-highlight {\n\tvisibility: visible;\n}\n\n.search-summary {\n\tfont-size: .85em;\n\topacity: 0.7;\n}\n.search-results .foldable {\n\tcursor: pointer;\n}\n.search-results span.doc-path {\n\topacity: .5;\n}\n.search-results .foldable ul { display: none; }\n.search-results .foldable > div span {\n\tpointer-events: none;\n\tuser-select: none;\n}\n.search-results .foldable > div:before {\n\tmargin-left: 4px;\n\tmargin-right: 3px;\n\tcontent: '>';\n\tfont-family: consolas, monospace;\n\tdisplay: inline-block;\n}\n.search-results .foldable.open ul { display: block; }\n.search-results .foldable.open > div:before {\n\tmargin-left: 2px;\n\tmargin-right: 5px;\n\tcontent: '>';\n\ttransform-origin: 5px 8.5px;\n\ttransform: rotateZ(90deg);\n}\n.field-container label { font-size: .75em; }\n/* SEARCH END */`);
 
 /*!
     localForage -- Offline Storage, Improved
@@ -1943,8 +1943,7 @@ const TreeMenu = () => {
 };
 
 const SearchBoxHTML = () => {
-    const style = `\n\t<style>\n\t\t.tree-search {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-right: 0;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.tree-search p {\n\t\t\twhite-space: normal;\n\t\t}\n\t\t.tree-search input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.tree-search input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.tree-search ::placeholder,\n\t\t.project-search-results {\n\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t}\n\t\t.tree-search > div {\n\t\t\tpadding: 2px 0px;\n\t\t\tbox-sizing: content-box;\n\t\t}\n\t\t.tree-search .field-container {\n\t\t\tmargin-left: 17px;\n\t\t\tmargin-right: 10px;\n\t\t}\n\t\t.tree-search .highlight {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\t\t\tpadding-top: 4px;\n\t\t\tpadding-bottom: 4px;\n\t\t\tfilter: contrast(1.5);\n\t\t\tborder-radius: 3px;\n\t\t}\n\t\t.form-container {\n\t\t\tposition: absolute;\n\t\t\ttop: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tbottom: 0;\n\t\t\toverflow: hidden;\n\t\t\tpadding-top: 1em;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\tdisplay: none;\n\t\t}\n\t\t.search-results:hover::-webkit-scrollbar {\n\t\t\tdisplay: block !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\twidth:0.5em !important;\n\t\t\theight:0.5em !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-thumb{\n\t\t\tbackground: #ffffff10;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-track{\n\t\t\tbackground:none !important;\n\t\t}\n\t\t.search-results {\n\t\t\tpadding-bottom: 15em;\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\ttop: 155px;\n\t\t\toverflow-y: auto;\n\t\t\toverflow-x: hidden;\n\t\t\tbox-sizing: border-box;\n\t\t\tmargin: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tfont-size: 0.9em;\n\t\t\tpadding-right: 0;\n\t\t}\n\t\t.search-results > li { list-style: none; }\n\n\t\t.search-results > li > div {\n\t\t\tpadding-left: 1em;\n\t\t\tpadding-bottom: 0.2em;\n\t\t\tpadding-top: 0.2em;\n\t\t}\n\t\t.search-results > li ul > li {\n\t\t\twhite-space: nowrap;\n\t\t\tpadding-left: 3em;\n\t\t\tpadding-top: .2em;\n\t\t\tpadding-bottom: .2em;\n\t\t}\n\n\t\t.search-results > li > div,\n\t\t.search-results > li ul > li,\n\t\t.search-results > li > div span,\n\t\t.search-results > li ul > li span {\n\t\t\tposition: relative;\n\t\t\twhite-space: nowrap;\n\t\t}\n\t\t.search-results ul.line-results > li > span,\n\t\t.search-results ul.line-results > li > div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.search-results > li > div .hover-highlight,\n\t\t.search-results > li ul > li .hover-highlight {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tvisibility: hidden;\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n\t\t}\n\t\t.search-results > li > div:hover .hover-highlight,\n\t\t.search-results > li ul > li:hover .hover-highlight {\n\t\t\tvisibility: visible;\n\t\t}\n\n\t\t.search-summary {\n\t\t\tfont-size: .85em;\n\t\t\topacity: 0.7;\n\t\t}\n\t\t.search-results .foldable {\n\t\t\tcursor: pointer;\n\t\t}\n\t\t.search-results span.doc-path {\n\t\t\topacity: .5;\n\t\t}\n\t\t.search-results .foldable ul { display: none; }\n\t\t.search-results .foldable > div span {\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.search-results .foldable > div:before {\n\t\t\tmargin-left: 4px;\n\t\t\tmargin-right: 3px;\n\t\t\tcontent: '>';\n\t\t\tfont-family: consolas, monospace;\n\t\t\tdisplay: inline-block;\n\t\t}\n\t\t.search-results .foldable.open ul { display: block; }\n\t\t.search-results .foldable.open > div:before {\n\t\t\tmargin-left: 2px;\n\t\t\tmargin-right: 5px;\n\t\t\tcontent: '>';\n\t\t\ttransform-origin: 5px 8.5px;\n\t\t\ttransform: rotateZ(90deg);\n\t\t}\n\t\t.field-container label { font-size: .75em; }\n\n\t</style>\n\t`;
-    const html = `\n\t<div class="form-container tree-search">\n\t\t${style}\n\n\t\t<div class="field-container">\n\t\t\t<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>include</label>\n\t\t\t<input type="text" class="search-include"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>exclude</label>\n\t\t\t<input type="text" class="search-exclude"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<span class="search-summary"></span>\n\t\t</div>\n\n\t\t<ul class="search-results"></ul>\n\t</div>\n\t`;
+    const html = `\n\t<div class="form-container tree-search">\n\n\t\t<div class="field-container">\n\t\t\t<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>include</label>\n\t\t\t<input type="text" class="search-include"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>exclude</label>\n\t\t\t<input type="text" class="search-exclude"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<span class="search-summary"></span>\n\t\t</div>\n\n\t\t<ul class="search-results"></ul>\n\t</div>\n\t`;
     return html;
 };
 
@@ -1960,21 +1959,24 @@ class SearchBox {
             summary: main.querySelector(".search-summary"),
             results: main.querySelector(".search-results")
         };
-        this.context = {
-            triggers: {
-                tree: {
-                    fileSelect: () => {
-                        console.error("search: file select trigger not attached!");
-                    }
-                }
-            }
-        };
         this.dom.include.value = include || "./";
         this.attachListeners();
         (parent || document.body).appendChild(main);
     }
     attachListeners() {
-        const {triggers: {tree: triggers}} = this.context;
+        const clickHandlers = {
+            "DIV foldable": e => e.target.parentNode.classList.add("open"),
+            "DIV foldable open": e => e.target.parentNode.classList.remove("open"),
+            "LI line-results": e => {
+                try {
+                    const {triggers: {tree: {fileSelect: fileSelect}}} = this.context;
+                    fileSelect(e.target.dataset);
+                } catch (error) {
+                    console.error("unable to trigger file select from search results");
+                    console.error(error);
+                }
+            }
+        };
         const debouncedInputListener = utils.debounce((event => {
             const term = this.dom.term.value;
             const include = this.dom.include.value;
@@ -2023,11 +2025,7 @@ class SearchBox {
             debouncedInputListener(e);
         }));
         this.dom.results.addEventListener("click", (e => {
-            const handler = {
-                "DIV foldable": () => e.target.parentNode.classList.add("open"),
-                "DIV foldable open": () => e.target.parentNode.classList.remove("open"),
-                "LI line-results": e => triggers.fileSelect(e.target.dataset)
-            }[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
+            const handler = clickHandlers[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
             if (handler) return handler(e);
         }));
     }

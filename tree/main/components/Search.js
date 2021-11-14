@@ -1,176 +1,8 @@
 import { htmlToElement, utils } from '../../utils/misc.js';
 
 const SearchBoxHTML = () => {
-	const style = `
-	<style>
-		.tree-search {
-			display: flex;
-			flex-direction: column;
-			margin-right: 0;
-			user-select: none;
-		}
-		.tree-search p {
-			white-space: normal;
-		}
-		.tree-search input {
-			background: var(--main-theme-background-color) !important;
-			margin: 0 !important;
-			border: 0 !important;
-			color: var(--main-theme-text-color);
-			padding-left: .5em !important;
-			padding-right: .5em !important;
-			font-size: 1.1em !important;
-			box-sizing: border-box !important;
-			padding-top: .25em !important;
-			padding-bottom: .25em !important;
-			height: unset !important;
-			transition: unset !important;
-			border: 1px solid !important;
-			border-color: transparent !important;
-		}
-		.tree-search input:focus {
-			box-shadow: none !important;
-			border-color: rgb(var(--main-theme-highlight-color)) !important;
-		}
-		.tree-search ::placeholder,
-		.project-search-results {
-			color: var(--main-theme-text-invert-color);
-		}
-		.tree-search > div {
-			padding: 2px 0px;
-			box-sizing: content-box;
-		}
-		.tree-search .field-container {
-			margin-left: 17px;
-			margin-right: 10px;
-		}
-		.tree-search .highlight {
-			background: rgba(var(--main-theme-highlight-color), 0.25);
-			padding-top: 4px;
-			padding-bottom: 4px;
-			filter: contrast(1.5);
-			border-radius: 3px;
-		}
-		.form-container {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			overflow: hidden;
-			padding-top: 1em;
-		}
-		.search-results::-webkit-scrollbar {
-			display: none;
-		}
-		.search-results:hover::-webkit-scrollbar {
-			display: block !important;
-		}
-		.search-results::-webkit-scrollbar {
-			width:0.5em !important;
-			height:0.5em !important;
-		}
-		.search-results::-webkit-scrollbar-thumb{
-			background: #ffffff10;
-		}
-		.search-results::-webkit-scrollbar-track{
-			background:none !important;
-		}
-		.search-results {
-			padding-bottom: 15em;
-			position: absolute;
-			bottom: 0;
-			top: 155px;
-			overflow-y: auto;
-			overflow-x: hidden;
-			box-sizing: border-box;
-			margin: 0;
-			left: 0;
-			right: 0;
-			font-size: 0.9em;
-			padding-right: 0;
-		}
-		.search-results > li { list-style: none; }
-
-		.search-results > li > div {
-			padding-left: 1em;
-			padding-bottom: 0.2em;
-			padding-top: 0.2em;
-		}
-		.search-results > li ul > li {
-			white-space: nowrap;
-			padding-left: 3em;
-			padding-top: .2em;
-			padding-bottom: .2em;
-		}
-
-		.search-results > li > div,
-		.search-results > li ul > li,
-		.search-results > li > div span,
-		.search-results > li ul > li span {
-			position: relative;
-			white-space: nowrap;
-		}
-		.search-results ul.line-results > li > span,
-		.search-results ul.line-results > li > div {
-			user-select: none;
-			pointer-events: none;
-		}
-		.search-results > li > div .hover-highlight,
-		.search-results > li ul > li .hover-highlight {
-			position: absolute;
-			left: 0;
-			right: 0;
-			top: 0;
-			bottom: 0;
-			visibility: hidden;
-			pointer-events: none;
-			user-select: none;
-			background: rgba(var(--main-theme-highlight-color), 0.15);
-		}
-		.search-results > li > div:hover .hover-highlight,
-		.search-results > li ul > li:hover .hover-highlight {
-			visibility: visible;
-		}
-
-		.search-summary {
-			font-size: .85em;
-			opacity: 0.7;
-		}
-		.search-results .foldable {
-			cursor: pointer;
-		}
-		.search-results span.doc-path {
-			opacity: .5;
-		}
-		.search-results .foldable ul { display: none; }
-		.search-results .foldable > div span {
-			pointer-events: none;
-			user-select: none;
-		}
-		.search-results .foldable > div:before {
-			margin-left: 4px;
-			margin-right: 3px;
-			content: '>';
-			font-family: consolas, monospace;
-			display: inline-block;
-		}
-		.search-results .foldable.open ul { display: block; }
-		.search-results .foldable.open > div:before {
-			margin-left: 2px;
-			margin-right: 5px;
-			content: '>';
-			transform-origin: 5px 8.5px;
-			transform: rotateZ(90deg);
-		}
-		.field-container label { font-size: .75em; }
-
-	</style>
-	`;
-
 	const html = `
 	<div class="form-container tree-search">
-		${style}
 
 		<div class="field-container">
 			<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>
@@ -193,7 +25,6 @@ const SearchBoxHTML = () => {
 		<ul class="search-results"></ul>
 	</div>
 	`;
-
 	return html;
 };
 
@@ -210,22 +41,25 @@ class SearchBox {
 			summary: main.querySelector(".search-summary"),
 			results: main.querySelector(".search-results"),
 		};
-		this.context = {
-			triggers: {
-				tree: {
-					fileSelect: () => {
-						console.error('search: file select trigger not attached!')
-					}
-				}
-			}
-		}
 		this.dom.include.value = include || "./";
 		this.attachListeners();
 		(parent || document.body).appendChild(main);
 	}
 
 	attachListeners() {
-		const { triggers: { tree: triggers } } = this.context;
+		const clickHandlers = {
+				"DIV foldable": (e) => e.target.parentNode.classList.add("open"),
+				"DIV foldable open": (e) => e.target.parentNode.classList.remove("open"),
+				"LI line-results": (e) => {
+					try {
+						const { triggers: { tree: { fileSelect } } } = this.context;
+						fileSelect(e.target.dataset);
+					} catch(error){
+						console.error('unable to trigger file select from search results');
+						console.error(error);
+					}
+				},
+		};
 		const debouncedInputListener = utils.debounce(
 			(event) => {
 				const term = this.dom.term.value;
@@ -262,12 +96,9 @@ class SearchBox {
 			debouncedInputListener(e);
 		});
 		this.dom.results.addEventListener("click", (e) => {
-			const handler = {
-				"DIV foldable": () => e.target.parentNode.classList.add("open"),
-				"DIV foldable open": () => e.target.parentNode.classList.remove("open"),
-				"LI line-results": (e) => triggers.fileSelect(e.target.dataset),
-			}[`${e.target.tagName} ${e.target.parentNode.className.trim()}`];
-
+			const handler = clickHandlers[
+				`${e.target.tagName} ${e.target.parentNode.className.trim()}`
+			];
 			if (handler) return handler(e);
 		});
 	}
