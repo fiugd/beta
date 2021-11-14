@@ -1,8 +1,8 @@
-import { setState } from '../../utils/State.js';
+import { setState, getState } from '../../utils/State.js';
 import { getCurrentService } from "../../utils/State.js";
 
 const contextSelectListener = (e, context) => {
-	let clipboard;
+	let clipboard = getState('clipboard');
 	const {
 		treeAdd, treeRename, treeDelete, treeMove
 	} = context.tree.api;

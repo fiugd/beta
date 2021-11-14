@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:43:39.204Z )
+	Version 0.4.6 ( 2021-11-14T05:49:03.775Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3492,7 +3492,7 @@ const contextMenuHandler = (e, listenerContext) => {
 };
 
 const contextSelectListener = (e, context) => {
-    let clipboard;
+    let clipboard = getState("clipboard");
     const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context.tree.api;
     const {triggers: {tree: triggers}} = context;
     const {which: which, parent: parent, data: data} = e.detail || {};
