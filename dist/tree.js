@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T00:55:25.029Z )
+	Version 0.4.6 ( 2021-11-14T05:03:08.092Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3492,7 +3492,7 @@ const contextMenuHandler = (e, listenerContext) => {
     return false;
 };
 
-const listener$8 = (e, context) => {
+const contextSelectListener = (e, context) => {
     let clipboard;
     const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context.tree.api;
     const {which: which, parent: parent, data: data} = e.detail || {};
@@ -3539,7 +3539,9 @@ const listener$8 = (e, context) => {
         }
     }
     if ([ "Copy Path", "Copy Relative Path" ].includes(which)) {
-        const path = which.includes("Relative") ? data.path : new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+        const service = getCurrentService();
+        const path = which.includes("Relative") ? data.path : new URL(`${service.name}/${data.path}`, document.baseURI).href;
+        window.focus();
         navigator.clipboard.writeText(path).then((x => console.log(`Wrote path to clipboard: ${path}`))).catch((e => {
             console.error(`Error writing path to clipboard: ${path}`);
             console.error(e);
@@ -3717,7 +3719,7 @@ const listener = (event, context) => {
 
 var mainListeners = formatHandlers("Tree", {
     contextMenu: contextMenuHandler,
-    contextSelect: listener$8,
+    contextSelect: contextSelectListener,
     fileChange: listener$7,
     fileClose: listener$5,
     fileSelect: listener$6,

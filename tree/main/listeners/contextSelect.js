@@ -1,6 +1,7 @@
 import { setState } from '../../utils/State.js';
+import { getCurrentService } from "../../utils/State.js";
 
-const listener = (e, context) => {
+const contextSelectListener = (e, context) => {
 	let clipboard;
 	const {
 		treeAdd, treeRename, treeDelete, treeMove
@@ -51,9 +52,11 @@ const listener = (e, context) => {
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
+		const service = getCurrentService();
 		const path = which.includes('Relative')
 			? data.path
-			: new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+			: new URL(`${service.name}/${data.path}`, document.baseURI).href;
+		window.focus();
 		navigator.clipboard
 			.writeText(path)
 			.then((x) => console.log(`Wrote path to clipboard: ${path}`))
@@ -95,4 +98,4 @@ const listener = (e, context) => {
 	setState('clipboard', clipboard);
 };
 
-export default listener;
+export default contextSelectListener;
