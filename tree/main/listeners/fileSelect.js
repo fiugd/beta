@@ -4,7 +4,7 @@ import { noFrontSlash } from '../../utils/misc.js';
 
 const getFilePath = gfp(getCurrentService);
 
-const listener = (e, context) => {
+const fileSelectListener = (e, context) => {
 	const { type='' } = e;
 	const { treeSelect } = context.tree.api;
 	if(e?.detail?.source === 'Tree') return;
@@ -39,4 +39,4 @@ const listener = (e, context) => {
 
 };
 
-export default listener;
+export default fileSelectListener;

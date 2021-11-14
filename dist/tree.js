@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:36:52.356Z )
+	Version 0.4.6 ( 2021-11-14T05:43:39.204Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -938,7 +938,7 @@ const ScrollShadow = () => {
     return scrollShadow;
 };
 
-const showSearch$1 = (treeView, treeMenu, searchBox) => {
+const showSearch = (treeView, treeMenu, searchBox) => {
     const treeSearch = treeView.parentNode.querySelector(".tree-search");
     const searchInput = document.querySelector(".project-search-input");
     return ({show: show, include: include}) => {
@@ -998,7 +998,7 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
     treeView.showServiceChooser = () => getTreeViewDOM({
         showOpenService: true
     });
-    const _showSearch = showSearch$1(treeView, menu, searchBox);
+    const _showSearch = showSearch(treeView, menu, searchBox);
     treeView.searchProject = ({hideSearch: hideSearch, include: include}) => {
         //TODO: keep track of search state
         _showSearch({
@@ -3479,15 +3479,7 @@ const contextMenuHandler = (e, listenerContext) => {
     }, {
         name: "Delete"
     } ].filter((x => !!x && !x.hidden));
-    // showMenu()({
-    // 	x: e.clientX,
-    // 	y: e.clientY,
-    // 	list: listItems,
-    // 	parent: "TreeView",
-    // 	data: context,
-    // });
-    // return false;
-        triggers.contextMenuShow({
+    triggers.contextMenuShow({
         detail: {
             x: e.clientX,
             y: e.clientY,
@@ -3571,14 +3563,14 @@ const contextSelectListener = (e, context) => {
     setState("clipboard", clipboard);
 };
 
-const listener$7 = treeChange => event => {
+const fileChangeListener = treeChange => event => {
     const {filePath: filePath} = event.detail;
     treeChange(filePath);
 };
 
 const getFilePath = getFilePath$1(getCurrentService);
 
-const listener$6 = (e, context) => {
+const fileSelectListener = (e, context) => {
     const {type: type = ""} = e;
     const {treeSelect: treeSelect} = context.tree.api;
     if (e?.detail?.source === "Tree") return;
@@ -3613,14 +3605,14 @@ const listener$6 = (e, context) => {
 	}
 	*/};
 
-const listener$5 = (e, context) => {
-    listener$6({
+const fileCloseListener = (e, context) => {
+    fileSelectListener({
         type: "close",
         ...e
     }, context);
 };
 
-const listener$4 = (e, context) => {
+const folderSelectListener = (e, context) => {
     let {name: name, next: next, collapse: collapse} = e.detail;
     if (collapse) {
         return;
@@ -3656,12 +3648,12 @@ const listener$4 = (e, context) => {
     }));
 };
 
-var noServiceSelected = (event, context) => {
+const noServiceSelectedListener = (event, context) => {
     const {tree: {showServiceChooser: showServiceChooser}} = context;
     showServiceChooser();
 };
 
-const listener$3 = (e, context) => {
+const operationDoneListener = (e, context) => {
     const {newTree: newTree} = context.tree;
     const {id: id, result: result, op: op} = e.detail;
     const {selected: selected, expanded: expanded = [], tree: tree} = getState();
@@ -3694,7 +3686,7 @@ const listener$3 = (e, context) => {
     }, context);
 };
 
-const listener$2 = (event, context) => {
+const showSearchListener = (event, context) => {
     const {searchProject: searchProject} = context.tree;
     const service = getCurrentService();
     const include = `./${service.name}/`;
@@ -3704,37 +3696,35 @@ const listener$2 = (event, context) => {
     }, context);
 };
 
-const listener$1 = (event, context) => {
+const showServiceCodeListener = (event, context) => {
     const {searchProject: searchProject} = context.tree;
     searchProject({
         hideSearch: true
     }, context);
 };
 
-const listener = (event, context) => {
-    const {searchProject: searchProject} = context.tree;
+const uiListener = (event, context) => {
+    context.tree;
     const {detail: detail = {}} = event;
     const {operation: operation} = detail;
-    if (operation !== "searchProject") {
-        return;
+    if (operation === "searchProject") {
+        return showSearchListener(event, context);
     }
-    searchProject({
-        showSearch: showSearch
-    });
+    return;
 };
 
 var mainListeners = formatHandlers("Tree", {
     contextMenu: contextMenuHandler,
     contextSelect: contextSelectListener,
-    fileChange: listener$7,
-    fileClose: listener$5,
-    fileSelect: listener$6,
-    folderSelect: listener$4,
-    noServiceSelected: noServiceSelected,
-    operationDone: listener$3,
-    showSearch: listener$2,
-    showServiceCode: listener$1,
-    ui: listener
+    fileChange: fileChangeListener,
+    fileClose: fileCloseListener,
+    fileSelect: fileSelectListener,
+    folderSelect: folderSelectListener,
+    noServiceSelected: noServiceSelectedListener,
+    operationDone: operationDoneListener,
+    showSearch: showSearchListener,
+    showServiceCode: showServiceCodeListener,
+    ui: uiListener
 });
 
 /*

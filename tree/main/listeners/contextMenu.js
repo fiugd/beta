@@ -70,15 +70,6 @@ const contextMenuHandler = (e, listenerContext) => {
 		},
 	].filter(x => !!x && !x.hidden);
 
-	// showMenu()({
-	// 	x: e.clientX,
-	// 	y: e.clientY,
-	// 	list: listItems,
-	// 	parent: "TreeView",
-	// 	data: context,
-	// });
-	// return false;
-
 	triggers.contextMenuShow({
 		detail: {
 			x: e.clientX,

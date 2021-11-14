@@ -1,4 +1,4 @@
-const listener = (e, context) => {
+const folderSelectListener = (e, context) => {
 	let { name, next, collapse } = e.detail;
 
 	if (collapse) {
@@ -44,4 +44,4 @@ const listener = (e, context) => {
 	});
 };
 
-export default listener;
+export default folderSelectListener;

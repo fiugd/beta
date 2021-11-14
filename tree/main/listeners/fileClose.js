@@ -1,7 +1,7 @@
 import fileSelectHandler from './fileSelect.js';
 
-const listener = (e, context) => {
+const fileCloseListener = (e, context) => {
 	fileSelectHandler({ type: 'close', ...e}, context);
 };
 
-export default listener;
+export default fileCloseListener;

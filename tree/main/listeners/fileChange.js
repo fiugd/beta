@@ -1,5 +1,5 @@
-const listener = (treeChange) => (event) => {
+const fileChangeListener = (treeChange) => (event) => {
 	const { filePath } = event.detail;
 	treeChange(filePath);
 };
-export default listener;
+export default fileChangeListener;

@@ -1,6 +1,6 @@
 import { setState, getState } from '../../utils/State.js';
 
-const listener = (e, context) => {
+const operationDoneListener = (e, context) => {
 	const { newTree } = context.tree;
 	const { id, result, op } = e.detail;
 	const { selected, expanded=[], tree } = getState();
@@ -39,4 +39,4 @@ const listener = (e, context) => {
 	}, context);
 };
 
-export default listener;
+export default operationDoneListener;
