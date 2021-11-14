@@ -3,6 +3,12 @@ const triggers = {};
 
 const clients = {};
 
+const clone = (x) => {
+	try {
+		return JSON.parse(JSON.stringify(x));
+	} catch(e){}
+};
+
 function attach({
 	name, listener, eventName, options, key
 }){
@@ -73,7 +79,10 @@ function trigger({ e, type, params, source, data, detail }){
 	for(const [clientid, { source, origin }] of Object.entries(clients)){
 		//console.log(`client: ${clientid}, event: ${type}`);
 		let { callback, ...safeDetail } = _detail;
-		source.postMessage({ type, detail: safeDetail }, origin);
+		source.postMessage({
+			type,
+			detail: clone(safeDetail)
+		}, origin);
 	}
 }
 
