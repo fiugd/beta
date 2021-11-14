@@ -181,7 +181,14 @@ const formatHandlers = (namespace, x) => Object.entries(x)
 		};
 	}, {});
 
+const clone = (x) => {
+	try {
+		return JSON.parse(JSON.stringify(x));
+	} catch(e){}
+};
+
 export {
+	clone,
 	flatFromProp,
 	formatHandlers,
 	htmlToElement,

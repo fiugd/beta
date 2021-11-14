@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-10T07:46:46.097Z )
+	Version 0.4.6 ( 2021-11-14T05:24:52.420Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24108,6 +24108,12 @@ const formatHandlers = (namespace, x) => Object.entries(x).reduce(((all, [key, v
     }
 })), {});
 
+const clone = x => {
+    try {
+        return JSON.parse(JSON.stringify(x));
+    } catch (e) {}
+};
+
 function attachGutterHelper(editorGutter) {
     const getSizers = () => Array.from(document.querySelectorAll(".CodeMirror-sizer"));
     const getGutter = () => editorGutter || document.body.querySelector(".CodeMirror-gutters");
@@ -26480,10 +26486,10 @@ function trigger$2(args) {
     // SEND INTERNAL EVENTS TO EXTERNAL
         if (external) return;
     const blackList = [ "operationDone" ];
-    const triggerEvent = {
+    const triggerEvent = clone({
         type: type,
         detail: _detail
-    };
+    });
     if (!blackList.includes(type)) {
         window.top.postMessage({
             triggerEvent: triggerEvent

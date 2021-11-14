@@ -268,7 +268,6 @@ const clone = (x) => {
 	} catch(e){}
 };
 
-
 export {
 	clone,
 	utils,
