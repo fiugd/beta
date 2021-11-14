@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T00:08:47.930Z )
+	Version 0.4.6 ( 2021-11-14T00:37:14.598Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3497,7 +3497,7 @@ const contextMenuHandler = (e, listenerContext) => {
 
 const listener$8 = (e, context) => {
     let clipboard;
-    const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context;
+    const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context.tree.api;
     const {which: which, parent: parent, data: data} = e.detail || {};
     if (parent !== "TreeView") {
         //console.log('TreeView ignored a context-select event');

@@ -4,7 +4,7 @@ const listener = (e, context) => {
 	let clipboard;
 	const {
 		treeAdd, treeRename, treeDelete, treeMove
-	} = context;
+	} = context.tree.api;
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "TreeView") {
 		//console.log('TreeView ignored a context-select event');
