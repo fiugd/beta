@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:49:03.775Z )
+	Version 0.4.6 ( 2021-11-14T05:59:18.906Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3525,7 +3525,6 @@ const contextSelectListener = (e, context) => {
         const isMove = clipboard.operation === "cut";
         const target = data;
         const source = clipboard.data;
-        clipboard = undefined;
         isMove ? console.log(`paste should be a move`) : console.log(`paste should be an add`);
         console.log({
             clipboard: clipboard,
@@ -3538,6 +3537,7 @@ const contextSelectListener = (e, context) => {
         } else {
             treeAdd(clipboard.data.type, source, target);
         }
+        clipboard = undefined;
     }
     if ([ "Copy Path", "Copy Relative Path" ].includes(which)) {
         const path = which.includes("Relative") ? data.path : new URL(`${service.name}/${data.path}`, document.referrer).href;

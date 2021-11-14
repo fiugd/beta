@@ -38,7 +38,6 @@ const contextSelectListener = (e, context) => {
 		const isMove = clipboard.operation === 'cut';
 		const target = data;
 		const source = clipboard.data;
-		clipboard = undefined;
 
 		isMove
 			? console.log(`paste should be a move`)
@@ -52,6 +51,7 @@ const contextSelectListener = (e, context) => {
 		} else {
 			treeAdd(clipboard.data.type, source, target);
 		}
+		clipboard = undefined;
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
