@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T21:00:57.099Z )
+	Version 0.4.6 ( 2021-11-14T21:41:32.841Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1607,7 +1607,7 @@ const clone = x => {
 
 const listeners$1 = {};
 
-const triggers$3 = {};
+const triggers$2 = {};
 
 function attach({name: name, listener: listener, eventName: eventName, options: options, key: key, context: context}) {
     if (!name || !listener || !eventName) {
@@ -1705,7 +1705,7 @@ filter}) {
                 source: name
             });
         };
-        triggers$3[triggerName] = {
+        triggers$2[triggerName] = {
             eventName: eventName,
             type: type,
             trigger: _trigger
@@ -1717,9 +1717,9 @@ filter}) {
         return;
     }
     const listener = triggerClickListener || (event => {
-        const foundTrigger = Object.keys(triggers$3).map((key => ({
+        const foundTrigger = Object.keys(triggers$2).map((key => ({
             key: key,
-            ...triggers$3[key]
+            ...triggers$2[key]
         }))).find((t => {
             if (t.type === "raw") {
                 return false;
@@ -1751,7 +1751,7 @@ filter}) {
         window.addEventListener(type, listener, options);
     }
     const triggerName = `${eventName}__${name}`;
-    triggers$3[triggerName] = {
+    triggers$2[triggerName] = {
         eventName: eventName,
         filter: filter,
         data: data,
@@ -1761,7 +1761,7 @@ filter}) {
 };
 
 function listTriggers$1() {
-    return Object.keys(triggers$3);
+    return Object.keys(triggers$2);
 }
 
 window.listTriggers = listTriggers$1;
@@ -1943,7 +1943,7 @@ const TreeMenu = () => {
 };
 
 const SearchBoxHTML = () => {
-    const style = `\n\t<style>\n\t\t.tree-search {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-right: 0;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.tree-search p {\n\t\t\twhite-space: normal;\n\t\t}\n\t\t.tree-search input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.tree-search input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.tree-search ::placeholder,\n\t\t.project-search-results {\n\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t}\n\t\t.tree-search > div {\n\t\t\tpadding: 2px 0px;\n\t\t\tbox-sizing: content-box;\n\t\t}\n\t\t.tree-search .field-container {\n\t\t\tmargin-left: 17px;\n\t\t\tmargin-right: 10px;\n\t\t}\n\t\t.tree-search .highlight {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\t\t\tpadding-top: 4px;\n\t\t\tpadding-bottom: 4px;\n\t\t\tfilter: contrast(1.5);\n\t\t\tborder-radius: 3px;\n\t\t}\n\t\t.form-container {\n\t\t\tposition: absolute;\n\t\t\ttop: 40px;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tbottom: 0;\n\t\t\toverflow: hidden;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\tdisplay: none;\n\t\t}\n\t\t.search-results:hover::-webkit-scrollbar {\n\t\t\tdisplay: block !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\twidth:0.5em !important;\n\t\t\theight:0.5em !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-thumb{\n\t\t\tbackground: #ffffff10;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-track{\n\t\t\tbackground:none !important;\n\t\t}\n\t\t.search-results {\n\t\t\tpadding-bottom: 15em;\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\ttop: 155px;\n\t\t\toverflow-y: auto;\n\t\t\toverflow-x: hidden;\n\t\t\tbox-sizing: border-box;\n\t\t\tmargin: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tfont-size: 0.9em;\n\t\t\tpadding-right: 0;\n\t\t}\n\t\t.search-results > li { list-style: none; }\n\n\t\t.search-results > li > div {\n\t\t\tpadding-left: 1em;\n\t\t\tpadding-bottom: 0.2em;\n\t\t\tpadding-top: 0.2em;\n\t\t}\n\t\t.search-results > li ul > li {\n\t\t\twhite-space: nowrap;\n\t\t\tpadding-left: 3em;\n\t\t\tpadding-top: .2em;\n\t\t\tpadding-bottom: .2em;\n\t\t}\n\n\t\t.search-results > li > div,\n\t\t.search-results > li ul > li,\n\t\t.search-results > li > div span,\n\t\t.search-results > li ul > li span {\n\t\t\tposition: relative;\n\t\t\twhite-space: nowrap;\n\t\t}\n\t\t.search-results ul.line-results > li > span,\n\t\t.search-results ul.line-results > li > div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.search-results > li > div .hover-highlight,\n\t\t.search-results > li ul > li .hover-highlight {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tvisibility: hidden;\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n\t\t}\n\t\t.search-results > li > div:hover .hover-highlight,\n\t\t.search-results > li ul > li:hover .hover-highlight {\n\t\t\tvisibility: visible;\n\t\t}\n\n\t\t.search-summary {\n\t\t\tfont-size: .85em;\n\t\t\topacity: 0.7;\n\t\t}\n\t\t.search-results .foldable {\n\t\t\tcursor: pointer;\n\t\t}\n\t\t.search-results span.doc-path {\n\t\t\topacity: .5;\n\t\t}\n\t\t.search-results .foldable ul { display: none; }\n\t\t.search-results .foldable > div span {\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.search-results .foldable > div:before {\n\t\t\tmargin-left: 4px;\n\t\t\tmargin-right: 3px;\n\t\t\tcontent: '>';\n\t\t\tfont-family: consolas, monospace;\n\t\t\tdisplay: inline-block;\n\t\t}\n\t\t.search-results .foldable.open ul { display: block; }\n\t\t.search-results .foldable.open > div:before {\n\t\t\tmargin-left: 2px;\n\t\t\tmargin-right: 5px;\n\t\t\tcontent: '>';\n\t\t\ttransform-origin: 5px 8.5px;\n\t\t\ttransform: rotateZ(90deg);\n\t\t}\n\t\t.field-container label { font-size: .75em; }\n\n\t</style>\n\t`;
+    const style = `\n\t<style>\n\t\t.tree-search {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tmargin-right: 0;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.tree-search p {\n\t\t\twhite-space: normal;\n\t\t}\n\t\t.tree-search input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.tree-search input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.tree-search ::placeholder,\n\t\t.project-search-results {\n\t\t\tcolor: var(--main-theme-text-invert-color);\n\t\t}\n\t\t.tree-search > div {\n\t\t\tpadding: 2px 0px;\n\t\t\tbox-sizing: content-box;\n\t\t}\n\t\t.tree-search .field-container {\n\t\t\tmargin-left: 17px;\n\t\t\tmargin-right: 10px;\n\t\t}\n\t\t.tree-search .highlight {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.25);\n\t\t\tpadding-top: 4px;\n\t\t\tpadding-bottom: 4px;\n\t\t\tfilter: contrast(1.5);\n\t\t\tborder-radius: 3px;\n\t\t}\n\t\t.form-container {\n\t\t\tposition: absolute;\n\t\t\ttop: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tbottom: 0;\n\t\t\toverflow: hidden;\n\t\t\tpadding-top: 1em;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\tdisplay: none;\n\t\t}\n\t\t.search-results:hover::-webkit-scrollbar {\n\t\t\tdisplay: block !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar {\n\t\t\twidth:0.5em !important;\n\t\t\theight:0.5em !important;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-thumb{\n\t\t\tbackground: #ffffff10;\n\t\t}\n\t\t.search-results::-webkit-scrollbar-track{\n\t\t\tbackground:none !important;\n\t\t}\n\t\t.search-results {\n\t\t\tpadding-bottom: 15em;\n\t\t\tposition: absolute;\n\t\t\tbottom: 0;\n\t\t\ttop: 155px;\n\t\t\toverflow-y: auto;\n\t\t\toverflow-x: hidden;\n\t\t\tbox-sizing: border-box;\n\t\t\tmargin: 0;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\tfont-size: 0.9em;\n\t\t\tpadding-right: 0;\n\t\t}\n\t\t.search-results > li { list-style: none; }\n\n\t\t.search-results > li > div {\n\t\t\tpadding-left: 1em;\n\t\t\tpadding-bottom: 0.2em;\n\t\t\tpadding-top: 0.2em;\n\t\t}\n\t\t.search-results > li ul > li {\n\t\t\twhite-space: nowrap;\n\t\t\tpadding-left: 3em;\n\t\t\tpadding-top: .2em;\n\t\t\tpadding-bottom: .2em;\n\t\t}\n\n\t\t.search-results > li > div,\n\t\t.search-results > li ul > li,\n\t\t.search-results > li > div span,\n\t\t.search-results > li ul > li span {\n\t\t\tposition: relative;\n\t\t\twhite-space: nowrap;\n\t\t}\n\t\t.search-results ul.line-results > li > span,\n\t\t.search-results ul.line-results > li > div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.search-results > li > div .hover-highlight,\n\t\t.search-results > li ul > li .hover-highlight {\n\t\t\tposition: absolute;\n\t\t\tleft: 0;\n\t\t\tright: 0;\n\t\t\ttop: 0;\n\t\t\tbottom: 0;\n\t\t\tvisibility: hidden;\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.15);\n\t\t}\n\t\t.search-results > li > div:hover .hover-highlight,\n\t\t.search-results > li ul > li:hover .hover-highlight {\n\t\t\tvisibility: visible;\n\t\t}\n\n\t\t.search-summary {\n\t\t\tfont-size: .85em;\n\t\t\topacity: 0.7;\n\t\t}\n\t\t.search-results .foldable {\n\t\t\tcursor: pointer;\n\t\t}\n\t\t.search-results span.doc-path {\n\t\t\topacity: .5;\n\t\t}\n\t\t.search-results .foldable ul { display: none; }\n\t\t.search-results .foldable > div span {\n\t\t\tpointer-events: none;\n\t\t\tuser-select: none;\n\t\t}\n\t\t.search-results .foldable > div:before {\n\t\t\tmargin-left: 4px;\n\t\t\tmargin-right: 3px;\n\t\t\tcontent: '>';\n\t\t\tfont-family: consolas, monospace;\n\t\t\tdisplay: inline-block;\n\t\t}\n\t\t.search-results .foldable.open ul { display: block; }\n\t\t.search-results .foldable.open > div:before {\n\t\t\tmargin-left: 2px;\n\t\t\tmargin-right: 5px;\n\t\t\tcontent: '>';\n\t\t\ttransform-origin: 5px 8.5px;\n\t\t\ttransform: rotateZ(90deg);\n\t\t}\n\t\t.field-container label { font-size: .75em; }\n\n\t</style>\n\t`;
     const html = `\n\t<div class="form-container tree-search">\n\t\t${style}\n\n\t\t<div class="field-container">\n\t\t\t<input type="text" placeholder="Search" class="search-term project-search-input" spellcheck="false"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>include</label>\n\t\t\t<input type="text" class="search-include"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<label>exclude</label>\n\t\t\t<input type="text" class="search-exclude"/>\n\t\t</div>\n\n\t\t<div class="field-container">\n\t\t\t<span class="search-summary"></span>\n\t\t</div>\n\n\t\t<ul class="search-results"></ul>\n\t</div>\n\t`;
     return html;
 };
@@ -1960,11 +1960,21 @@ class SearchBox {
             summary: main.querySelector(".search-summary"),
             results: main.querySelector(".search-results")
         };
+        this.context = {
+            triggers: {
+                tree: {
+                    fileSelect: () => {
+                        console.error("search: file select trigger not attached!");
+                    }
+                }
+            }
+        };
         this.dom.include.value = include || "./";
         this.attachListeners();
         (parent || document.body).appendChild(main);
     }
     attachListeners() {
+        const {triggers: {tree: triggers}} = this.context;
         const debouncedInputListener = utils.debounce((event => {
             const term = this.dom.term.value;
             const include = this.dom.include.value;
@@ -2070,6 +2080,9 @@ class SearchBox {
     show() {
         this.dom.main.style.visibility = "visible";
     }
+    attachContext(context) {
+        this.context = context;
+    }
     async updateResults(results, allMatches, term) {
         const addFileResultsLineEl = result => {
             const limit = 1;
@@ -2159,8 +2172,9 @@ const ScrollShadow = () => {
 const showSearch = (treeView, treeMenu, searchBox) => {
     const treeSearch = treeView.parentNode.querySelector(".tree-search");
     const searchInput = document.querySelector(".project-search-input");
-    return ({show: show, include: include}) => {
+    return ({show: show, include: include}, context) => {
         if (show) {
+            searchBox.attachContext(context);
             treeView.style.visibility = "hidden";
             treeSearch.style.visibility = "visible";
             treeSearch.style.height = "";
@@ -2217,12 +2231,12 @@ const getTreeViewDOM = ({showOpenService: showOpenService} = {}) => {
         showOpenService: true
     });
     const _showSearch = showSearch(treeView, menu, searchBox);
-    treeView.searchProject = ({hideSearch: hideSearch, include: include}) => {
+    treeView.searchProject = ({hideSearch: hideSearch, include: include}, context) => {
         //TODO: keep track of search state
         _showSearch({
             show: !hideSearch,
             include: include
-        });
+        }, context);
     };
     return treeView;
 };
@@ -3226,7 +3240,7 @@ const connectTrigger = args => {
 // these get attached each newly created tree module
 const treeEvents = [ "fileSelect", "fileAdd", "fileRename", "fileMove", "fileDelete", "folderSelect", "folderAdd", "folderRename", "folderMove", "folderDelete" ];
 
-const triggers$2 = treeEvents.reduce(((all, operation) => {
+const triggers$1 = treeEvents.reduce(((all, operation) => {
     const handler = connectTrigger({
         eventName: operation.includes("Select") ? operation : "operations",
         type: "raw"
@@ -3270,7 +3284,7 @@ const triggers$2 = treeEvents.reduce(((all, operation) => {
     return all;
 }), {});
 
-TreeView$1.events = triggers$2;
+TreeView$1.events = triggers$1;
 
 const contextMenuHandler = (e, listenerContext) => {
     const {tree: tree, triggers: {tree: triggers}} = listenerContext;
@@ -3616,7 +3630,7 @@ const listeners = [ {
     handlers: [ mainListeners.noServiceSelected ]
 } ];
 
-const triggers$1 = {
+const triggers = {
     Tree: [ {
         eventName: "operations",
         type: "raw",
@@ -3635,7 +3649,7 @@ const triggers$1 = {
 
 var events = {
     listeners: listeners,
-    triggers: triggers$1
+    triggers: triggers
 };
 
 //import indexCSS from '../index.css';

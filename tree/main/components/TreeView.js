@@ -38,8 +38,9 @@ const showSearch = (treeView, treeMenu, searchBox) => {
 	const treeSearch = treeView.parentNode.querySelector(".tree-search");
 	const searchInput = document.querySelector(".project-search-input");
 
-	return ({ show, include }) => {
+	return ({ show, include }, context) => {
 		if (show) {
+			searchBox.attachContext(context);
 			treeView.style.visibility = "hidden";
 			treeSearch.style.visibility = "visible";
 			treeSearch.style.height = "";
@@ -99,9 +100,9 @@ const getTreeViewDOM = ({ showOpenService } = {}) => {
 	};
 	
 	const _showSearch = showSearch(treeView, menu, searchBox);
-	treeView.searchProject = ({ hideSearch, include }) => {
+	treeView.searchProject = ({ hideSearch, include }, context) => {
 		//TODO: keep track of search state
-		_showSearch({ show: !hideSearch, include });
+		_showSearch({ show: !hideSearch, include }, context);
 	};
 
 	return treeView;

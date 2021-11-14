@@ -53,11 +53,12 @@ const SearchBoxHTML = () => {
 		}
 		.form-container {
 			position: absolute;
-			top: 40px;
+			top: 0;
 			left: 0;
 			right: 0;
 			bottom: 0;
 			overflow: hidden;
+			padding-top: 1em;
 		}
 		.search-results::-webkit-scrollbar {
 			display: none;
@@ -209,12 +210,22 @@ class SearchBox {
 			summary: main.querySelector(".search-summary"),
 			results: main.querySelector(".search-results"),
 		};
+		this.context = {
+			triggers: {
+				tree: {
+					fileSelect: () => {
+						console.error('search: file select trigger not attached!')
+					}
+				}
+			}
+		}
 		this.dom.include.value = include || "./";
 		this.attachListeners();
 		(parent || document.body).appendChild(main);
 	}
 
 	attachListeners() {
+		const { triggers: { tree: triggers } } = this.context;
 		const debouncedInputListener = utils.debounce(
 			(event) => {
 				const term = this.dom.term.value;
@@ -312,6 +323,10 @@ class SearchBox {
 
 	show() {
 		this.dom.main.style.visibility = "visible";
+	}
+	
+	attachContext(context){
+		this.context = context;
 	}
 
 	async updateResults(results, allMatches, term) {
