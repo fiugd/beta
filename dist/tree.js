@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T07:06:19.498Z )
+	Version 0.4.6 ( 2021-11-14T07:18:24.958Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1642,9 +1642,12 @@ class ServiceTree {
     }
     /*
 		this is for programmatically selecting a file/folder
-	*/    select(path, skipDomUpdate, noEmit) {
+	*/    select(path = "", skipDomUpdate, noEmit) {
         const splitPath = path.split("/");
         let currentNode = this.rootNode;
+        if (!path.trim() && !skipDomUpdate) {
+            Array.from(this.rootNode.querySelectorAll(".selected")).forEach((s => s.classList.remove("selected")));
+        }
         //TODO: dom traversal sucks, would be better to traverse an internal model?
                 for (var i = 0, len = splitPath.length; i < len; i++) {
             const nodeName = splitPath[i];
@@ -3602,11 +3605,13 @@ const fileSelectListener = (e, context) => {
 	*/};
 
 const fileCloseListener = (e, context) => {
+    const {treeSelect: treeSelect} = context.tree.api;
     if (!e?.detail?.next) {
-        //TODO: should be triggering a deselect with tree
+        treeSelect(null, null, "noEmit");
         return;
     }
-    fileSelectListener(e, context);
+    // will select next file
+        fileSelectListener(e, context);
 };
 
 /*

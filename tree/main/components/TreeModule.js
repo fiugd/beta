@@ -780,10 +780,15 @@ class ServiceTree {
 	/*
 		this is for programmatically selecting a file/folder
 	*/
-	select(path, skipDomUpdate, noEmit){
+	select(path='', skipDomUpdate, noEmit){
 		const splitPath = path.split('/');
 		let success = false;
 		let currentNode = this.rootNode;
+		
+		if(!path.trim() && !skipDomUpdate){
+			Array.from(this.rootNode.querySelectorAll('.selected'))
+				.forEach(s => s.classList.remove('selected'));
+		}
 
 		//TODO: dom traversal sucks, would be better to traverse an internal model?
 		for(var i=0, len=splitPath.length; i<len; i++){
