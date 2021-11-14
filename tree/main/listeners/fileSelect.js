@@ -5,7 +5,6 @@ import { noFrontSlash } from '../../utils/misc.js';
 const getFilePath = gfp(getCurrentService);
 
 const fileSelectListener = (e, context) => {
-	const { type='' } = e;
 	const { treeSelect } = context.tree.api;
 	if(e?.detail?.source === 'Tree') return;
 
