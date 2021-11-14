@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T21:59:52.034Z )
+	Version 0.4.6 ( 2021-11-14T22:08:11.744Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1970,7 +1970,9 @@ class SearchBox {
             "LI line-results": e => {
                 try {
                     const {triggers: {tree: {fileSelect: fileSelect}}} = this.context;
-                    fileSelect(e.target.dataset);
+                    fileSelect({
+                        detail: e.target.dataset
+                    });
                 } catch (error) {
                     console.error("unable to trigger file select from search results");
                     console.error(error);
