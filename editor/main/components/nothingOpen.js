@@ -46,6 +46,7 @@ const showNothingOpen = () => {
 				stroke: rgba(var(--main-theme-highlight-color),.4);
 			}
 			.editor-empty-blurb {
+				user-select: none;
 				/* visibility: hidden; */
 				font-variant: small-caps;
 				font-style: italic;

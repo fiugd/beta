@@ -34,6 +34,7 @@ function StatusBar(){
 			border-top: 0.5px solid #000A;
 			box-shadow: 0 -1px 5px #000F;
 			*/
+			user-select: none;
 		}
 		#status-bar .bg {
 			position: absolute;
