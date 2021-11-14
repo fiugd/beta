@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-14T07:30:17.493Z )
+	Version 0.4.6 ( 2021-11-14T22:35:19.716Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -12078,7 +12078,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
             if (!name) return;
             if (forceUpdate) await sleep(500);
             if (!forceUpdate && currentDoc && path === currentDoc.path) {
-                if (line) selectLine(this, currentDoc.editor, line, ch);
+                if (line) selectLine(this, this.doc, line, ch);
                 callback();
                 return;
             }

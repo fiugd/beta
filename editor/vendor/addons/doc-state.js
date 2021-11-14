@@ -220,7 +220,7 @@ further reference, see defineExtension here https://codemirror.net/doc/manual.ht
 			if(!name) return;
 			if(forceUpdate) await sleep(500);
 			if(!forceUpdate && currentDoc && path === currentDoc.path){
-				if(line) selectLine(this, currentDoc.editor, line, ch);
+				if(line) selectLine(this, this.doc, line, ch);
 				callback();
 				return;
 			}
