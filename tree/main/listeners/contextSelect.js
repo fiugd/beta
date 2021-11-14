@@ -47,9 +47,9 @@ const contextSelectListener = (e, context) => {
 		// TODO: should update tree, but...
 		// really should trigger file and folder copy/move
 		if(isMove){
-			treeMove(clipboard.data.type, source, target);
+			treeMove(clipboard.data.type, source.path, target.path);
 		} else {
-			treeAdd(clipboard.data.type, source, target);
+			treeAdd(clipboard.data.type, source.path, target.path);
 		}
 		clipboard = undefined;
 	}

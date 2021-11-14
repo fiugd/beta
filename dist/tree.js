@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:59:18.906Z )
+	Version 0.4.6 ( 2021-11-14T06:46:11.015Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3533,9 +3533,9 @@ const contextSelectListener = (e, context) => {
         // TODO: should update tree, but...
         // really should trigger file and folder copy/move
                 if (isMove) {
-            treeMove(clipboard.data.type, source, target);
+            treeMove(clipboard.data.type, source.path, target.path);
         } else {
-            treeAdd(clipboard.data.type, source, target);
+            treeAdd(clipboard.data.type, source.path, target.path);
         }
         clipboard = undefined;
     }
