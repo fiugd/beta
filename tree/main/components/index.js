@@ -1,53 +1,8 @@
 import TreeView from "./TreeView.js";
 import TreeModule from './TreeModule.js';
 
-import { setState, getState } from '../../utils/State.js';
+import { setState, getState, treeMemory } from '../../utils/State.js';
 import { extensionMapper } from '../../utils/misc.js';
-
-import "/shared/vendor/localforage.min.js";
-const driver = [
-	localforage.INDEXEDDB,
-	localforage.WEBSQL,
-	localforage.LOCALSTORAGE,
-];
-const changesStore = localforage.createInstance({
-	driver,
-	name: "service-worker",
-	version: 1.0,
-	storeName: "changes",
-	description: "keep track of changes not pushed to provider",
-});
-
-const treeMemory = (service, tree, action) => (...args) => {
-	const handlers = {
-		expand: async (args) => {
-			try {
-				const expanded = tree.context(args[0].target).path;
-				const oldExpanded = (await changesStore.getItem(`tree-${service.name}-expanded`)) || [];
-				const newExpanded = oldExpanded.includes(expanded)
-					? oldExpanded
-					: [...oldExpanded, expanded];
-				await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-			} catch(e) { debugger; }
-		},
-		collapse: async (args) => {
-			try {
-				const collapsed = tree.context(args[0].target).path;
-				const oldExpanded = (await changesStore.getItem(`tree-${service.name}-expanded`)) || [];
-				const newExpanded = oldExpanded.filter(x => x !== collapsed);
-				await changesStore.setItem(`tree-${service.name}-expanded`, newExpanded);
-			} catch(e) { debugger; }
-		},
-		select: async (args) => {
-			try {
-				const selected = tree.context(args[0].target).path;
-				await changesStore.setItem(`tree-${service.name}-selected`, selected);
-			} catch(e) { debugger; }
-		}
-	};
-	if(!handlers[action]) return;
-	handlers[action](args);
-};
 
 const newTree = ({ service, treeState }, context) => {
 	const { events: triggers } = context.tree;
@@ -78,7 +33,10 @@ const newTree = ({ service, treeState }, context) => {
 	}, {});
 	context.tree.api = methods; 
 
-	const memoryHandler = (action) => treeMemory(service, tree, action);
+	const memoryHandler = (action) => ({ target }) => {
+		const { path } = tree.context(target);
+		treeMemory[action](path);
+	}
 	tree.on('expand', memoryHandler('expand'));
 	tree.on('collapse', memoryHandler('collapse'));
 	tree.on('select', memoryHandler('select'));

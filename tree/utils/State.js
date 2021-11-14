@@ -1,3 +1,12 @@
+import "https://unpkg.com/localforage@latest/dist/localforage.nopromises.min.js";
+
+const changesStore = localforage.createInstance({
+	name: "service-worker",
+	version: 1.0,
+	storeName: "changes",
+	description: "keep track of changes not pushed to provider",
+});
+
 const DEBUG = true;
 
 let allServices;
@@ -92,6 +101,34 @@ const getClientId = () => {
 	return clientId;
 };
 
+/*
+TODO: this should leverage service worker instead
+should also probably be handled with a listener
+*/
+const treeMemory = {
+	expand: async (expanded) => {
+		try {
+			const oldExpanded = (await changesStore.getItem(`tree-${currentService.name}-expanded`)) || [];
+			const newExpanded = oldExpanded.includes(expanded)
+				? oldExpanded
+				: [...oldExpanded, expanded];
+			await changesStore.setItem(`tree-${currentService.name}-expanded`, newExpanded);
+		} catch(e) { debugger; }
+	},
+	collapse: async (collapsed) => {
+		try {
+			const oldExpanded = (await changesStore.getItem(`tree-${currentService.name}-expanded`)) || [];
+			const newExpanded = oldExpanded.filter(x => x !== collapsed);
+			await changesStore.setItem(`tree-${currentService.name}-expanded`, newExpanded);
+		} catch(e) { debugger; }
+	},
+	select: async (selected) => {
+		try {
+			await changesStore.setItem(`tree-${currentService.name}-selected`, selected);
+		} catch(e) { debugger; }
+	}
+};
+
 export {
 	DEBUG,
 
@@ -119,4 +156,5 @@ export {
 	getOpenedFiles,
 
 	getClientId,
+	treeMemory,
 };
