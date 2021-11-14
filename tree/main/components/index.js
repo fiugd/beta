@@ -272,7 +272,7 @@ const triggers = treeEvents.reduce((all, operation) => {
 		folderMove: 'moveFolder',
 	};
 	const treeEventHandler = (context) => (args) => {
-		console.log({ context, args });
+		//console.log({ context, args });
 		const { source, target, line, column } = args;
 		const name = (target || source).split('/').pop();
 		const parent = (target || source).split('/').slice(0,-1).join('/');

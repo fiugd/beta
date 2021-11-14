@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T00:42:49.853Z )
+	Version 0.4.6 ( 2021-11-14T00:55:25.029Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3400,10 +3400,7 @@ const triggers$2 = treeEvents.reduce(((all, operation) => {
         folderMove: "moveFolder"
     };
     const treeEventHandler = context => args => {
-        console.log({
-            context: context,
-            args: args
-        });
+        //console.log({ context, args });
         const {source: source, target: target, line: line, column: column} = args;
         const name = (target || source).split("/").pop();
         const parent = (target || source).split("/").slice(0, -1).join("/");
