@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:20:59.731Z )
+	Version 0.4.6 ( 2021-11-14T05:36:52.356Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3548,7 +3548,7 @@ const contextSelectListener = (e, context) => {
         }
     }
     if ([ "Copy Path", "Copy Relative Path" ].includes(which)) {
-        const path = which.includes("Relative") ? data.path : new URL(`${service.name}/${data.path}`, document.baseURI).href;
+        const path = which.includes("Relative") ? data.path : new URL(`${service.name}/${data.path}`, document.referrer).href;
         window.focus();
         navigator.clipboard.writeText(path).then((x => console.log(`Wrote path to clipboard: ${path}`))).catch((e => {
             console.error(`Error writing path to clipboard: ${path}`);
@@ -3556,7 +3556,7 @@ const contextSelectListener = (e, context) => {
         }));
     }
     if (which === "Open in New Window") {
-        const path = new URL(`${service.name}/${data.path}`, document.baseURI).href;
+        const path = new URL(`${service.name}/${data.path}`, document.referrer).href;
         const shouldNotPreview = [ ".svg", ".less", ".scss", ".css", ".json", ".txt", ".mjs" ].find((x => path.includes(x)));
         // overrides shouldNotPreview
                 const shouldPreview = [ ".jsx" ].find((x => path.includes(x)));

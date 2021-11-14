@@ -57,7 +57,7 @@ const contextSelectListener = (e, context) => {
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
 		const path = which.includes('Relative')
 			? data.path
-			: new URL(`${service.name}/${data.path}`, document.baseURI).href;
+			: new URL(`${service.name}/${data.path}`, document.referrer).href;
 		window.focus();
 		navigator.clipboard
 			.writeText(path)
@@ -69,7 +69,7 @@ const contextSelectListener = (e, context) => {
 	}
 
 	if (which === "Open in New Window") {
-		const path = new URL(`${service.name}/${data.path}`, document.baseURI).href;
+		const path = new URL(`${service.name}/${data.path}`, document.referrer).href;
 		const shouldNotPreview = [
 			".svg",
 			".less",
