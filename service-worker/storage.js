@@ -1,5 +1,7 @@
 import { RootService } from './root.js';
 
+const DEBUG = false;
+
 const StorageManager = (() => {
 	const getStores = () => {
 		var driver = [
@@ -423,19 +425,20 @@ const StorageManager = (() => {
 
 		let t0 = performance.now();
 		const perfNow = () => {
+			if(!DEBUG) return '---';
 			const d = performance.now() - t0;
 			t0 = performance.now();
 			return d.toFixed(3);
 		};
 
 		const changes = await changeCache(path);
-		console.log(`changes store: ${perfNow()}ms (${path})`);
+		DEBUG && console.log(`changes store: ${perfNow()}ms (${path})`);
 		if(changes && changes.type === 'update'){
 			return changes.value;
 		}
 
 		let file = await fileCache(path);
-		console.log(`file store: ${perfNow()}ms (${path})`);
+		DEBUG && console.log(`file store: ${perfNow()}ms (${path})`);
 
 		if(file && file.includes && file.includes('##PLACEHOLDER##')){
 			const services = await servicesCache();

@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.5 ( 2021-11-07T23:24:46.931Z )
+	Version 0.4.6 ( 2021-11-14T21:12:08.497Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -594,19 +594,12 @@ const StorageManager = (() => {
         changeCache = changeCache || cacheFn(changesStore.getItem.bind(changesStore), cacheTTL);
         fileCache = fileCache || cacheFn(filesStore.getItem.bind(filesStore), cacheTTL);
         servicesCache = servicesCache || cacheFn(getAllServices, serviesCacheTTL);
-        let t0 = performance.now();
-        const perfNow = () => {
-            const d = performance.now() - t0;
-            t0 = performance.now();
-            return d.toFixed(3);
-        };
+        performance.now();
         const changes = await changeCache(path);
-        console.log(`changes store: ${perfNow()}ms (${path})`);
         if (changes && changes.type === "update") {
             return changes.value;
         }
         let file = await fileCache(path);
-        console.log(`file store: ${perfNow()}ms (${path})`);
         if (file && file.includes && file.includes("##PLACEHOLDER##")) {
             const services = await servicesCache();
             services.sort(((a, b) => b.name.length - a.name.length));
@@ -60083,7 +60076,7 @@ var Handler = {
     init: init
 };
 
-const cacheName = "0.4.5";
+const cacheName = "0.4.6";
 
 //TODO: next lines won't work because rollup rewrites dep due to module root level "this"
 //import "/shared/vendor/localforage.min.js";
