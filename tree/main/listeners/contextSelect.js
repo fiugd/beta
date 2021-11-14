@@ -6,11 +6,11 @@ const listener = (e, context) => {
 		treeAdd, treeRename, treeDelete, treeMove
 	} = context.tree.api;
 	const { which, parent, data } = e.detail || {};
-	if (parent !== "TreeView") {
+	if (parent !== "Tree") {
 		//console.log('TreeView ignored a context-select event');
 		return;
 	}
-	
+
 	// this should in a listener for 'addFile'
 	if (["New File", "New Folder"].includes(which)) {
 		const parent = data.type === 'file'
