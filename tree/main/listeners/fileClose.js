@@ -4,7 +4,7 @@ const fileCloseListener = (e, context) => {
 	const { treeSelect } = context.tree.api;
 
 	if (!e?.detail?.next) {
-		treeSelect(null, null, 'noEmit');
+		treeSelect(null, null,'noEmit');
 		return;
 	}
 

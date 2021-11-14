@@ -780,12 +780,12 @@ class ServiceTree {
 	/*
 		this is for programmatically selecting a file/folder
 	*/
-	select(path='', skipDomUpdate, noEmit){
-		const splitPath = path.split('/');
+	select(path, skipDomUpdate, noEmit){
+		const splitPath = (path||'').split('/');
 		let success = false;
 		let currentNode = this.rootNode;
 		
-		if(!path.trim() && !skipDomUpdate){
+		if(!(path||'').trim() && !skipDomUpdate){
 			Array.from(this.rootNode.querySelectorAll('.selected'))
 				.forEach(s => s.classList.remove('selected'));
 		}
