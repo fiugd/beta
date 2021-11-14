@@ -53,9 +53,9 @@ class SearchBox {
 				"LI line-results": (e) => {
 					try {
 						const { triggers: { tree: { fileSelect } } } = this.context;
-						fileSelect({
-							detail: e.target.dataset
-						});
+						const { source, ...detail } = e.target.dataset;
+						detail.name = source;
+						fileSelect({ detail });
 					} catch(error){
 						console.error('unable to trigger file select from search results');
 						console.error(error);
