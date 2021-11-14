@@ -1,7 +1,10 @@
 import { getState } from '../../utils/State.js';
 
 const contextMenuHandler = (e, listenerContext) => {
-	const { tree, triggers } = listenerContext;
+	const { 
+		tree,
+		triggers: { tree: triggers }
+	} = listenerContext;
 	const { treeContext } = tree.api;
 	const clipboard = getState('clipboard');
 
@@ -75,14 +78,14 @@ const contextMenuHandler = (e, listenerContext) => {
 	// 	data: context,
 	// });
 	// return false;
-	
-	triggers.tree.contextMenuShow({
+
+	triggers.contextMenuShow({
 		detail: {
 			x: e.clientX,
 			y: e.clientY,
 			list: listItems,
 			parent: "Tree",
-			// data,
+			data: context,
 	}});
 	return false;
 };

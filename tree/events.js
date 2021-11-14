@@ -57,6 +57,9 @@ const triggers = {
 		eventName: "fileSelect",
 		type: 'raw',
 	}, {
+		eventName: "previewSelect",
+		type: 'raw',
+	}, {
 		eventName: "contextMenuShow",
 		type: 'raw',
 	}]

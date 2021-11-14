@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-11-14T05:03:08.092Z )
+	Version 0.4.6 ( 2021-11-14T05:15:47.716Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3431,7 +3431,7 @@ const triggers$2 = treeEvents.reduce(((all, operation) => {
 TreeView$1.events = triggers$2;
 
 const contextMenuHandler = (e, listenerContext) => {
-    const {tree: tree, triggers: triggers} = listenerContext;
+    const {tree: tree, triggers: {tree: triggers}} = listenerContext;
     const {treeContext: treeContext} = tree.api;
     const clipboard = getState("clipboard");
     /*
@@ -3481,12 +3481,13 @@ const contextMenuHandler = (e, listenerContext) => {
     // 	data: context,
     // });
     // return false;
-        triggers.tree.contextMenuShow({
+        triggers.contextMenuShow({
         detail: {
             x: e.clientX,
             y: e.clientY,
             list: listItems,
-            parent: "Tree"
+            parent: "Tree",
+            data: context
         }
     });
     return false;
@@ -3495,11 +3496,13 @@ const contextMenuHandler = (e, listenerContext) => {
 const contextSelectListener = (e, context) => {
     let clipboard;
     const {treeAdd: treeAdd, treeRename: treeRename, treeDelete: treeDelete, treeMove: treeMove} = context.tree.api;
+    const {triggers: {tree: triggers}} = context;
     const {which: which, parent: parent, data: data} = e.detail || {};
     if (parent !== "Tree") {
         //console.log('TreeView ignored a context-select event');
         return;
     }
+    const service = getCurrentService();
     // this should in a listener for 'addFile'
         if ([ "New File", "New Folder" ].includes(which)) {
         const parent = data.type === "file" ? data.parent.path : data.path;
@@ -3539,7 +3542,6 @@ const contextSelectListener = (e, context) => {
         }
     }
     if ([ "Copy Path", "Copy Relative Path" ].includes(which)) {
-        const service = getCurrentService();
         const path = which.includes("Relative") ? data.path : new URL(`${service.name}/${data.path}`, document.baseURI).href;
         window.focus();
         navigator.clipboard.writeText(path).then((x => console.log(`Wrote path to clipboard: ${path}`))).catch((e => {
@@ -3548,7 +3550,7 @@ const contextSelectListener = (e, context) => {
         }));
     }
     if (which === "Open in New Window") {
-        const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+        const path = new URL(`${service.name}/${data.path}`, document.baseURI).href;
         const shouldNotPreview = [ ".svg", ".less", ".scss", ".css", ".json", ".txt", ".mjs" ].find((x => path.includes(x)));
         // overrides shouldNotPreview
                 const shouldPreview = [ ".jsx" ].find((x => path.includes(x)));
@@ -3556,11 +3558,9 @@ const contextSelectListener = (e, context) => {
         window.open(path + query);
     }
     if (which === "Open in Preview") {
-        const event = new CustomEvent("previewSelect", {
-            bubbles: true,
+        triggers.previewSelect({
             detail: data
         });
-        document.body.dispatchEvent(event);
     }
     setState("clipboard", clipboard);
 };
@@ -3789,6 +3789,9 @@ const triggers$1 = {
         handlers: [ mainTriggers.operations ]
     }, {
         eventName: "fileSelect",
+        type: "raw"
+    }, {
+        eventName: "previewSelect",
         type: "raw"
     }, {
         eventName: "contextMenuShow",

@@ -6,11 +6,14 @@ const contextSelectListener = (e, context) => {
 	const {
 		treeAdd, treeRename, treeDelete, treeMove
 	} = context.tree.api;
+	const { triggers: { tree: triggers} } = context;
 	const { which, parent, data } = e.detail || {};
 	if (parent !== "Tree") {
 		//console.log('TreeView ignored a context-select event');
 		return;
 	}
+
+	const service = getCurrentService();
 
 	// this should in a listener for 'addFile'
 	if (["New File", "New Folder"].includes(which)) {
@@ -52,7 +55,6 @@ const contextSelectListener = (e, context) => {
 	}
 
 	if (["Copy Path", "Copy Relative Path"].includes(which)) {
-		const service = getCurrentService();
 		const path = which.includes('Relative')
 			? data.path
 			: new URL(`${service.name}/${data.path}`, document.baseURI).href;
@@ -67,7 +69,7 @@ const contextSelectListener = (e, context) => {
 	}
 
 	if (which === "Open in New Window") {
-		const path = new URL(`${currentServiceName}/${data.path}`, document.baseURI).href;
+		const path = new URL(`${service.name}/${data.path}`, document.baseURI).href;
 		const shouldNotPreview = [
 			".svg",
 			".less",
@@ -88,11 +90,7 @@ const contextSelectListener = (e, context) => {
 	}
 
 	if (which === "Open in Preview") {
-		const event = new CustomEvent("previewSelect", {
-			bubbles: true,
-			detail: data,
-		});
-		document.body.dispatchEvent(event);
+		triggers.previewSelect({ detail: data });
 	}
 
 	setState('clipboard', clipboard);
