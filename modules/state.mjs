@@ -58,6 +58,15 @@ modules/TreeView#L23
 - https://github.com/fiugd/beta/blob/main/modules/TreeView.mjs#L23
 */
 
+const debugIfMalformed = (opened) => {
+	const malformed = opened.find(x => {
+		const split = x.name.split('/');
+		const length = split.length;
+		return split[length-1] === split[length-2];
+	});
+	if(malformed) debugger;
+};
+
 class StateTracker {
 	constructor(){
 		const driver = [
@@ -81,6 +90,7 @@ class StateTracker {
 
 	async setState({ opened=[], selected={} }={}){
 		const { store } = this;
+		debugIfMalformed(opened);
 		opened && await store.setItem(`state-${currentService.name}-opened`, opened);
 		selected && await store.setItem(`tree-${currentService.name}-selected`, selected.name);
 	}
