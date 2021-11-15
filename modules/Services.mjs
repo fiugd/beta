@@ -776,8 +776,11 @@ function getServiceSelector(el, onSelect) {
 		</div>
 	`;
 	const select = el.querySelector("select");
+	
+	// broken by: https://github.com/fiugd/beta/commit/4916e2f6d762f
+	// TODO: fix this some day...
 	if (!window.M) {
-		console.error("could not build service map selector dropdown");
+		//console.error("could not build service map selector dropdown");
 		return;
 	}
 	const selectInstance = M.FormSelect.init(select, {
