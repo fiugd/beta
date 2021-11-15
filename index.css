@@ -2534,11 +2534,11 @@ notes-section.loading:after {
 	/* background-color: var(--main-theme-color); */
 	border-left: 1px solid var(--main-theme-background-color);
 	/* width: 50%; */
-	height: 100%;
-	bottom: 0px;
 	min-width: 250px;
 	padding-left: 15px;
 
+	height: 100%;
+	bottom: 0px;
 	right: 0 !important;
 	display: flex;
 	flex-direction: column;
