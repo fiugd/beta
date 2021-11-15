@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-14T22:35:19.716Z )
+	Version 0.4.6 ( 2021-11-15T10:01:41.824Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -25783,13 +25783,6 @@ const onChange = (context, cm, changeObj) => {
     const ignoreOrigins = [ "setValue" ];
     if (ignoreOrigins.includes(origin)) return;
     const {prevCode: prevCode, name: name, id: id, filename: filename, filePath: filePath, triggers: triggers} = context;
-    console.log({
-        prevCode: prevCode,
-        name: name,
-        id: id,
-        filename: filename,
-        filePath: filePath
-    });
     if (!triggers) return;
     triggers.fileChange({
         code: cm.getValue(),
