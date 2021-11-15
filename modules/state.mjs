@@ -487,10 +487,15 @@ async function getAllServices() {
 }
 
 function openFile({ name, parent, path, ...other }) {
-	path = path || parent;
-	const fullName = path
-		? `${path}/${name}`
-		: name;
+	const fullName = ((p, n) => {
+		if(!p) return n;
+		if(n && p.endsWith(n)) return p;
+		return `${p}/${n}`;
+	})(
+		(path || parent || '').trim(),
+		(name || '').trim()
+	);
+	
 	if(!state.openedFiles[fullName] || !state.openedFiles[fullName].selected){
 		//purposefully not awaiting this, should listen not block
 		stateTracker.openFile(fullName);
