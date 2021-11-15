@@ -85,8 +85,6 @@ const onChange = (context, cm, changeObj) => {
 		prevCode, name, id, filename, filePath,
 		triggers,
 	} = context;
-
-	console.log({ prevCode, name, id, filename, filePath });
 	if(!triggers) return;
 
 	triggers.fileChange({
