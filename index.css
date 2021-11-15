@@ -2530,18 +2530,19 @@ notes-section.loading:after {
 }
 
 #terminal {
-    background: var(--main-theme-color);
-    /* background-color: var(--main-theme-color); */
-    border-left: 1px solid var(--main-theme-background-color);
-    /* width: 50%; */
-    /* right: 0 !important; */
-    height: 100%;
-    bottom: 0px;
-    min-width: 250px;
-    padding-left: 15px;
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* z-index: 999; */
+	background: var(--main-theme-color);
+	/* background-color: var(--main-theme-color); */
+	border-left: 1px solid var(--main-theme-background-color);
+	/* width: 50%; */
+	height: 100%;
+	bottom: 0px;
+	min-width: 250px;
+	padding-left: 15px;
+
+	right: 0 !important;
+	display: flex;
+	flex-direction: column;
+	z-index: 999;
 }
 
 #terminal-menu {
