@@ -401,7 +401,7 @@
 				return { ...m, order: DEFAULT_ORDER };
 			});
 			const sorted = ordered.sort((a,b) => a.order - b.order);
-			console.log('module load order:\n' + sorted.map(x => x.route).join('\n'));
+			//console.log('module load order:\n' + sorted.map(x => x.route).join('\n'));
 			return sorted;
 		};
 
