@@ -9,11 +9,9 @@
 
 ![screenshot of fiug](https://user-images.githubusercontent.com/1816471/141071418-07de4741-7b09-4042-97f3-da2c8c5446e4.png)
 
-This is fiug, a hand-crafted, web-based editor and development platform aimed at helping you create, maintain, and learn software more quickly and less painfully.   
+This is fiug, a lean, hand-crafted, web-based editor and development platform aimed at helping you create, maintain, and learn software more quickly and less painfully.   
 
 Try it out at [fiug.dev](https://fiug.dev)!   
-
-Since fiug is hosted with github pages, you can fork and make it your own.   
 
 ### made possible by
 [github](https://github.com/)   
