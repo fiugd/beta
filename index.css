@@ -467,7 +467,8 @@ nav a.sidenav-trigger i,
 
 .cm-m-apl.cm-whitespace:before,
 .cm-m-brainfuck.cm-whitespace:before {
-	color: #0e0e0e !important;
+	color: #8889 !important;
+/* 	color: #0e0e0e !important; */
 }
 
 .CodeMirror-line .cm-m-apl {

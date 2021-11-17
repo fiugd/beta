@@ -22,6 +22,7 @@
 			]
 		},
 
+
 		"NOTE: -- TERMINAL UI /START --",
 		{
 			"route": "./_/modules/Terminal.mjs",
@@ -138,12 +139,9 @@
 			"resources": ["/shared/modules/TreeView.mjs"]
 		},
 		{
-			"route": "./_/modules/tree/tree.html",
-			"source": "dist/tree.html",
-		},
-		{
-			"route": "./_/modules/tree/tree.js",
-			"source": "dist/tree.js",
+			"route": "./_/modules/treeEvents.mjs",
+			"source": "modules/treeEvents.mjs",
+			"handler": null
 		},
 		"NOTE: -- TREE /END --",
 
