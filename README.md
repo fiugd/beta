@@ -27,5 +27,3 @@ Try it out at [fiug.dev](https://fiug.dev)!
 [qUnit](https://qunitjs.com/)   
 
 ...and a [whole lot more](https://github.com/fiugd/plugins)   
-
-test
