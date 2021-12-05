@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-11-15T10:01:41.824Z )
+	Version 0.4.6 ( 2021-12-05T06:08:41.437Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26031,6 +26031,55 @@ Editor$1.switchEditor = switchEditor;
 
 Editor$1.messageEditor = messageEditor;
 
+let tabs$1;
+
+const clearLastTab = operations => () => {
+    if (!tabs$1.length) return;
+    const lastTab = tabs$1[tabs$1.length - 1];
+    if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
+    tabs$1 = tabs$1.filter((t => t.id !== lastTab.id));
+    operations.removeTab(lastTab);
+    //tabs.map(operations.updateTab);
+};
+
+function getTabsToUpdate(filePath) {
+    const name = filePath?.split("/").pop();
+    const tabsToUpdate = [];
+    let foundTab;
+    for (var i = 0, len = tabs$1.length; i < len; i++) {
+        const nameAndParentMatch = name === tabs$1[i].name && filePath?.split("/").slice(0, -1).join("/") === tabs$1[i].parent;
+        if (nameAndParentMatch) {
+            foundTab = tabs$1[i];
+        }
+        // update: if tab exists and not active, activate it
+                if (nameAndParentMatch && !tabs$1[i].active) {
+            tabs$1[i].active = true;
+            tabsToUpdate.push(tabs$1[i]);
+        }
+        // update: remove active state from active tab
+                if (!nameAndParentMatch && tabs$1[i].active) {
+            delete tabs$1[i].active;
+            tabsToUpdate.push(tabs$1[i]);
+        }
+    }
+    return {
+        foundTab: foundTab,
+        tabsToUpdate: tabsToUpdate
+    };
+}
+
+const api = ({operations: operations}) => {
+    tabs$1 = [];
+    return {
+        list: () => tabs$1,
+        find: x => tabs$1.find(x),
+        update: t => tabs$1 = t,
+        push: t => tabs$1.push(t),
+        clearLast: clearLastTab(operations),
+        toUpdate: getTabsToUpdate
+    };
+};
+
 function scrollToChild(child) {
     window.parent = child.parentNode;
     const parentWindowMin = parent.scrollLeft;
@@ -26273,47 +26322,9 @@ function EditorTabs(tabsArray = [ {
         "open-settings-view": "Settings"
     };
     tabsContainer.operations = operations;
-    let tabs = [];
-    function clearLastTab() {
-        if (!tabs.length) return;
-        const lastTab = tabs[tabs.length - 1];
-        if (lastTab.changed || lastTab.touched || lastTab.name.includes("Untitled-")) return;
-        tabs = tabs.filter((t => t.id !== lastTab.id));
-        operations.removeTab(lastTab);
-        //tabs.map(operations.updateTab);
-        }
-    function getTabsToUpdate(filePath) {
-        const name = filePath?.split("/").pop();
-        const tabsToUpdate = [];
-        let foundTab;
-        for (var i = 0, len = tabs.length; i < len; i++) {
-            if (name === tabs[i].name) {
-                foundTab = tabs[i];
-            }
-            // update: if tab exists and not active, activate it
-                        if (name === tabs[i].name && !tabs[i].active) {
-                tabs[i].active = true;
-                tabsToUpdate.push(tabs[i]);
-            }
-            // update: remove active state from active tab
-                        if (name !== tabs[i].name && tabs[i].active) {
-                delete tabs[i].active;
-                tabsToUpdate.push(tabs[i]);
-            }
-        }
-        return {
-            foundTab: foundTab,
-            tabsToUpdate: tabsToUpdate
-        };
-    }
-    tabsContainer.api = {
-        list: () => tabs,
-        find: x => tabs.find(x),
-        update: t => tabs = t,
-        push: t => tabs.push(t),
-        clearLast: clearLastTab,
-        toUpdate: getTabsToUpdate
-    };
+    tabsContainer.api = api({
+        operations: operations
+    });
     return tabsContainer;
 }
 

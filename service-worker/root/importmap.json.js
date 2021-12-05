@@ -1,9 +1,13 @@
+/*
+	NOTE: chalk is locked to v4 until v5 get figured out by skypack
+*/
+
 export const importmap = () => {
 	return `
 {
 	imports: {
 		ansiEscapes: "https://cdn.skypack.dev/ansi-escapes",
-		chalk: "https://cdn.skypack.dev/chalk",
+		chalk: "https://cdn.skypack.dev/chalk@4",
 		fileSaver: "https://cdn.skypack.dev/file-saver",
 		jsZip: "https://cdn.skypack.dev/@progress/jszip-esm",
 		lodash: "https://cdn.skypack.dev/lodash",

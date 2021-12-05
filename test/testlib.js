@@ -11,6 +11,10 @@ import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
 
 let finish;
 
+const output = (...args) => {
+	console.log(...args);
+};
+
 const levels = {
 	disabled: 0,
 	basic16: 1,
@@ -39,7 +43,7 @@ const logJSON = x => {
 	// failing to do this because of json-colorizer
 	//https://stackoverflow.com/questions/3651294/remove-quotes-from-keys-in-a-json-string-using-jquery/3651373
 	const colored = jsonColors(x);
-	console.log(colored)
+	output(colored)
 };
 const safe = (fn) => {
 	try {
@@ -113,16 +117,16 @@ const renderTest = (args) => {
 
 	childSuites.forEach(suite => {
 		onlyShowTestsThatRan(suite);
-		suite.tests.length && writeSuite(console.log, colors)(suite);
+		suite.tests.length && writeSuite(output, colors)(suite);
 	});
 
 	allErrors.length && allErrors.forEach((e, i) => {
-		console.log();
-		console.log(colors.orange(`ERROR ${i+1}:\n  ${e.name}`));
+		output();
+		output(colors.orange(`ERROR ${i+1}:\n  ${e.name}`));
 		const { stack, message } = e.message && e.message.startsWith('{')
 			? JSON.parse(e.message) : {};
-		e.message && console.log(colors.orange(`  ${message || e.message}`));
-		console.log(colors.dullorange(
+		e.message && output(colors.orange(`  ${message || e.message}`));
+		output(colors.dullorange(
 			(stack || e.stack)
 				.split('\n')
 				.map(x => x
@@ -147,7 +151,7 @@ const renderTest = (args) => {
 			.join('')
 		)
 		.join('\n');
-	console.log('\nsummary\n'+summary);
+	output('\nsummary\n'+summary);
 };
 
 QUnit.on("testStart", (args) => {
@@ -156,7 +160,7 @@ QUnit.on("testStart", (args) => {
 QUnit.on("runEnd", (args) => {
 	renderTest(args);
 	setTimeout(() => {
-		//console.log(ansiEscapes.cursorShow);
+		//output(ansiEscapes.cursorShow);
 	}, 300);
 	if(finish) finish();
 });
@@ -177,8 +181,8 @@ QUnit.assert.custom = function(errors) {
 };
 
 const start = (done) => {
-	console.log(ansiEscapes.cursorHide);
-	console.log(ansiEscapes.clearScreen);
+	output(ansiEscapes.cursorHide);
+	output(ansiEscapes.clearScreen);
 	finish = done;
 	QUnit.start.bind(QUnit)();
 };
