@@ -1,3 +1,4 @@
+import './passEvents.js';
 import { flatFromProp, clone } from './misc.js';
 import { getClientId } from './State.js';
 

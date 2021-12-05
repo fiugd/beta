@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-05T06:08:41.437Z )
+	Version 0.4.6 ( 2021-12-05T07:42:37.127Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26418,6 +26418,31 @@ Editor.setOption('lineWrapping', true)
 }
 
 var status = StatusBar();
+
+const triggerTop = event => (type, name) => {
+    const triggerEvent = {
+        type: type,
+        detail: {
+            operation: name
+        }
+    };
+    window.top.postMessage({
+        triggerEvent: triggerEvent
+    }, location);
+    event.preventDefault();
+    return false;
+};
+
+const events$1 = [ [ e => e.shiftKey && e.altKey && e.key === "ArrowLeft", "ui", "prevDocument" ], [ e => e.shiftKey && e.altKey && e.key === "ArrowRight", "ui", "nextDocument" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f", "ui", "searchProject" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "p", "ui", "commandPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p", "ui", "searchPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s", "operations", "update" ], [ 
+// this will only work with electron
+e => e.ctrlKey && e.which === 9, "nextTab" ] ];
+
+const useCapture$1 = true;
+
+document.addEventListener("keydown", (function(event) {
+    const [_, ...found] = events$1.find((([check]) => check(event))) || [];
+    if (found) return triggerTop(event)(...found);
+}), useCapture$1);
 
 const listeners$1 = {};
 
