@@ -1,4 +1,4 @@
-import './passEvents.js';
+//import './passEvents.js';
 
 import comm from './terminal.comm.js';
 import { Git } from './terminal.git.js';
