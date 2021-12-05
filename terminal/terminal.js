@@ -1,3 +1,5 @@
+import './passEvents.js';
+
 import comm from './terminal.comm.js';
 import { Git } from './terminal.git.js';
 import { History } from './terminal.history.js';

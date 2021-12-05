@@ -49,7 +49,8 @@ document.addEventListener(
 	"keydown",
 	function (event) {
 		const [_, ...found] = events.find(([check]) => check(event)) || [];
-		if(found) return triggerTop(event)(...found);
+		if(found.length) return triggerTop(event)(...found);
+		return true;
 	},
 	useCapture
 );

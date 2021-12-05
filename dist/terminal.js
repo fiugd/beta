@@ -1,9 +1,35 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2021-11-07T21:26:14.277Z )
+	Version 0.4.6 ( 2021-12-05T08:03:46.052Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
+const triggerTop = event => (type, name) => {
+    const triggerEvent = {
+        type: type,
+        detail: {
+            operation: name
+        }
+    };
+    window.top.postMessage({
+        triggerEvent: triggerEvent
+    }, location);
+    event.preventDefault();
+    return false;
+};
+
+const events = [ [ e => e.shiftKey && e.altKey && e.key === "ArrowLeft", "ui", "prevDocument" ], [ e => e.shiftKey && e.altKey && e.key === "ArrowRight", "ui", "nextDocument" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f", "ui", "searchProject" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "p", "ui", "commandPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p", "ui", "searchPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s", "operations", "update" ], [ 
+// this will only work with electron
+e => e.ctrlKey && e.which === 9, "nextTab" ] ];
+
+const useCapture = true;
+
+document.addEventListener("keydown", (function(event) {
+    const [_, ...found] = events.find((([check]) => check(event))) || [];
+    if (found.length) return triggerTop(event)(...found);
+    return true;
+}), useCapture);
+
 const target = window.top;
 
 const queue$3 = {};
@@ -5355,7 +5381,7 @@ const Git = (term, comm) => ({
 
 const alotOfEvents = [ "ui", "fileClose", "fileSelect", "operations", "operationDone", "contextmenu", "contextmenu-select" ];
 
-const history = [ "watch -e fileSelect", `watch -e ${alotOfEvents.join(" ")}`, `watch`, `git branch`, `git pull`, `git push`, `git clone`, `git status`, `git diff terminal.git.mjs`, `git commit -m "commit me"`, `git config --global user.email johndoe@example.com`, `git config --local user.name "John Doe"`, `cat terminal/terminal.comm.js`, `node --watch terminal/.example.js`, `node --watch test/service-worker.services.test.js`, `node service-worker/_build.js`, `node shared/vendor/codemirror/update.js`, `git commit -m "editor in its own iframe"`, "preview editor/editor.html", "node editor/build/build.js", "preview --watch=false dist/editor.html", "node terminal/build/build.js" ];
+const history = [ "watch -e fileSelect", `watch -e ${alotOfEvents.join(" ")}`, `watch`, `git branch`, `git pull`, `git push`, `git clone`, `git status`, `git diff terminal.git.mjs`, `git commit -m "commit me"`, `git config --global user.email johndoe@example.com`, `git config --local user.name "John Doe"`, `cat terminal/terminal.comm.js`, `node --watch terminal/.example.js`, `node --watch test/service-worker.services.test.js`, `node service-worker/_build.js`, `node shared/vendor/codemirror/update.js`, `git commit -m "editor in its own iframe"`, "preview editor/editor.html", "node build/terminal.js", "node build/editor.js", "preview --watch=false dist/editor.html" ];
 
 const usage$1 = chalk => {
     const link = url => chalk.hex("#9cdcfe")(url);
