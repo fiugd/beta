@@ -50,6 +50,7 @@ document.addEventListener(
 	function (event) {
 		const [_, ...found] = events.find(([check]) => check(event)) || [];
 		if(found) return triggerTop(event)(...found);
+return true;
 	},
 	useCapture
 );
