@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-05T07:51:23.052Z )
+	Version 0.4.6 ( 2021-12-05T07:55:31.795Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26441,7 +26441,7 @@ const useCapture$1 = true;
 
 document.addEventListener("keydown", (function(event) {
     const [_, ...found] = events$1.find((([check]) => check(event))) || [];
-    if (found) return triggerTop(event)(...found);
+    if (found.length) return triggerTop(event)(...found);
     return true;
 }), useCapture$1);
 
