@@ -74,8 +74,7 @@ function getFileType(fileName = "") {
 	}
 	if (extension === "uml" || extension === "plantuml") {
 		type = {
-			name: "uml",
-			mimeType: "text/x-uml",
+			name: "plantuml",
 			icon: 'uml'
 		};
 	}

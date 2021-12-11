@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-11T23:33:21.835Z )
+	Version 0.4.6 ( 2021-12-11T23:56:15.332Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24204,8 +24204,7 @@ function getFileType(fileName = "") {
     }
     if (extension === "uml" || extension === "plantuml") {
         type = {
-            name: "uml",
-            mimeType: "text/x-uml",
+            name: "plantuml",
             icon: "uml"
         };
     }
@@ -26590,7 +26589,8 @@ Editor.setOption('lineWrapping', true)
             wat: "WebAssembly",
             piskel: "Piskel",
             javascript: "JavaScript",
-            "text/apl": "APL"
+            "text/apl": "APL",
+            plantuml: "UML"
         };
         if (extMap[type]) {
             docType = extMap[type];

@@ -145,6 +145,7 @@ function StatusBar(){
 			'piskel': 'Piskel',
 			'javascript': 'JavaScript',
 			'text/apl': 'APL',
+			'plantuml': 'UML'
 		};
 		if(extMap[type]){
 			docType = extMap[type];

@@ -81,6 +81,12 @@ function getFileType(fileName = "") {
 			icon: "info"
 		}
 	}
+	if (extension === "uml" || extension === "plantuml") {
+		type = {
+			name: "plantuml",
+			icon: 'uml'
+		};
+	}
 	return type;
 }
 
