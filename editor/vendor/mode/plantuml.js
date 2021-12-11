@@ -627,6 +627,6 @@ CodeMirror.defineMode("plantuml", function(config, parserConfig) {
     };
 });
 
-CodeMirror.defineMIME("text/x-uml", "uml");
+CodeMirror.defineMIME("text/x-uml", "plantuml");
 
 });

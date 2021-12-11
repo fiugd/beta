@@ -74,9 +74,9 @@ function getFileType(fileName = "") {
 	}
 	if (extension === "uml" || extension === "plantuml") {
 		type = {
-			name: "plantuml",
+			name: "uml",
 			mimeType: "text/x-uml",
-			icon: 'html'
+			icon: 'uml'
 		};
 	}
 	if (extension === 'hbs'){

@@ -786,6 +786,10 @@
   content: '\E08D';
   color: #519aba;
 }
+.icon-uml:before {
+  content: '\E039';
+  color: #6fb5ac;
+}
 .icon-vala:before {
   content: '\E08E';
   color: white;

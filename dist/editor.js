@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-11T23:05:38.762Z )
+	Version 0.4.6 ( 2021-12-11T23:33:21.835Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23525,7 +23525,7 @@ CodeMirror.defineMode("prolog", (function(t, e) {
                 for (!1; e.next() && !e.eol(); ) ;
             }
         };
-    })), e.defineMIME("text/x-uml", "uml");
+    })), e.defineMIME("text/x-uml", "plantuml");
 }));
 
 document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$2, sheet$1, sheet ];
@@ -24204,9 +24204,9 @@ function getFileType(fileName = "") {
     }
     if (extension === "uml" || extension === "plantuml") {
         type = {
-            name: "plantuml",
+            name: "uml",
             mimeType: "text/x-uml",
-            icon: "html"
+            icon: "uml"
         };
     }
     if (extension === "hbs") {
