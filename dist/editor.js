@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-11T22:35:54.303Z )
+	Version 0.4.6 ( 2021-12-11T23:05:38.762Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24199,6 +24199,13 @@ function getFileType(fileName = "") {
         type = {
             name: "htmlmixed",
             mimeType: "application/x-ejs",
+            icon: "html"
+        };
+    }
+    if (extension === "uml" || extension === "plantuml") {
+        type = {
+            name: "plantuml",
+            mimeType: "text/x-uml",
             icon: "html"
         };
     }

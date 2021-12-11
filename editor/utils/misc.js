@@ -72,6 +72,13 @@ function getFileType(fileName = "") {
 			icon: 'html'
 		};
 	}
+	if (extension === "uml" || extension === "plantuml") {
+		type = {
+			name: "plantuml",
+			mimeType: "text/x-uml",
+			icon: 'html'
+		};
+	}
 	if (extension === 'hbs'){
 		type = {name: "handlebars", base: "text/html"}
 	}
