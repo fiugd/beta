@@ -14322,7 +14322,7 @@ MODES: simple, multiplex, xml, javascript, css, clike, mllike, htmlmixed, htmlem
     })) : t in e || (e[t] = n.call(e) || 1) && "function" == typeof define && define.amd && define((function() {
         return e[t];
     }));
-}(undefined, "CodeMirrorGrammar", (function() {
+}(this, "CodeMirrorGrammar", (function() {
     function e(e) {
         var t = 0;
         return null === e ? t = Pt : !0 === e || !1 === e || e instanceof Boolean ? t = It : $t === e ? t = Et : (t = Kt[qt.call(e)] || _t, 
