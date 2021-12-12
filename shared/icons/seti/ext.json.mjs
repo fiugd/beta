@@ -189,5 +189,7 @@ export default {
 		"piskel": "image",
 
 		"scratch": "smarty",
-		"bugs": "platformio"
+		"bugs": "platformio",
+
+		"uml": "uml"
 }

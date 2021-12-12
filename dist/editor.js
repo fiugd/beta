@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-11T23:56:15.332Z )
+	Version 0.4.6 ( 2021-12-12T00:05:35.787Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23832,7 +23832,8 @@ var ext = {
     wat: "wat",
     piskel: "image",
     scratch: "smarty",
-    bugs: "platformio"
+    bugs: "platformio",
+    uml: "uml"
 };
 
 function codemirrorModeFromFileType(fileType) {

@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-12-11T23:56:31.610Z )
+	Version 0.4.6 ( 2021-12-12T00:05:45.576Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1494,7 +1494,8 @@ var ext = {
     wat: "wat",
     piskel: "image",
     scratch: "smarty",
-    bugs: "platformio"
+    bugs: "platformio",
+    uml: "uml"
 };
 
 //import mimeTypes from 'https://raw.githubusercontent.com/jshttp/mime-db/master/src/apache-types.json';
