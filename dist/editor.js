@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-12T00:05:35.787Z )
+	Version 0.4.6 ( 2021-12-12T03:55:45.276Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26582,6 +26582,9 @@ Editor.setOption('lineWrapping', true)
         if (type.name && type.name.includes("html")) {
             docType = "html";
         }
+        if (type.name && type.name.includes("plantuml")) {
+            docType = "uml";
+        }
         const extMap = {
             default: "Plain Text",
             "text/x-csrc": "C",
@@ -26591,7 +26594,7 @@ Editor.setOption('lineWrapping', true)
             piskel: "Piskel",
             javascript: "JavaScript",
             "text/apl": "APL",
-            plantuml: "UML"
+            uml: "UML"
         };
         if (extMap[type]) {
             docType = extMap[type];
@@ -26603,7 +26606,7 @@ Editor.setOption('lineWrapping', true)
             }
             docType = "Plain Text";
         }
-        const capThese = [ "css", "html", "json", "xml", "jsx", "php", "sql" ];
+        const capThese = [ "css", "html", "json", "xml", "jsx", "php", "sql", "uml" ];
         if (docType.toLowerCase && capThese.includes(docType.toLowerCase())) {
             el.classList.add("uppercase");
         }

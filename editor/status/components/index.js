@@ -136,6 +136,9 @@ function StatusBar(){
 		if(type.name && type.name.includes('html')){
 			docType = 'html';
 		}
+		if(type.name && type.name.includes('plantuml')){
+			docType = 'uml';
+		}
 		const extMap = {
 			'default': 'Plain Text',
 			'text/x-csrc': 'C',
@@ -145,7 +148,7 @@ function StatusBar(){
 			'piskel': 'Piskel',
 			'javascript': 'JavaScript',
 			'text/apl': 'APL',
-			'plantuml': 'UML'
+			'uml': 'UML'
 		};
 		if(extMap[type]){
 			docType = extMap[type];
@@ -158,7 +161,7 @@ function StatusBar(){
 			docType = 'Plain Text';
 		}
 
-		const capThese = ['css', 'html', 'json', 'xml', 'jsx', 'php', 'sql'];
+		const capThese = ['css', 'html', 'json', 'xml', 'jsx', 'php', 'sql', 'uml'];
 		if(docType.toLowerCase && capThese.includes(docType.toLowerCase())){
 			el.classList.add('uppercase');
 		}
