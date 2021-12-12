@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-12T19:22:22.180Z )
+	Version 0.4.6 ( 2021-12-12T19:51:56.040Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -14305,9 +14305,8 @@ this file is a bundle of many search addons
 Codemirror Mode Bundle
 8/31/2021, 1:22:00 PM
 
-MODES: simple, multiplex, xml, javascript, css, clike, mllike, htmlmixed, htmlembedded, ada, apl, asciidoc, clojure, commonlisp, crystal, d, dart, elixir, elm, erlang, forth, go, handlebars, haskell, ink, jsx, julia, lua, markdown, nim, pascal, perl, perl6, php, pony, powershell, prolog, properties, python, r, ruby, rust, scheme, shell, sql, stylus, swift, wast, yaml
+MODES: simple, multiplex, xml, javascript, css, clike, mllike, htmlmixed, htmlembedded, ada, apl, asciidoc, clojure, commonlisp, crystal, d, dart, elixir, elm, erlang, forth, go, handlebars, haskell, ink, jsx, julia, lua, markdown, nim, pascal, perl, perl6, php, uml, pony, powershell, prolog, properties, python, r, ruby, rust, scheme, shell, sql, stylus, swift, wast, yaml
 */
-
 // -----  simple.js
 !function(e) {
     "object" == typeof exports && "object" == typeof module ? e(require("../../lib/codemirror")) : "function" == typeof define && define.amd ? define([ "../../lib/codemirror" ], e) : e(CodeMirror);
@@ -23333,7 +23332,10 @@ CodeMirror.defineMode("prolog", (function(t, e) {
 }));
 
 // ----- uml.js
-const grammar = {
+/*
+	mode is called plantuml, change this and change editor handling of uml files
+	depends on codemirror-grammar being present in global scope, see editor.html > head
+*/ const grammar = {
     RegExpID: "RE::",
     Style: {
         comment: "comment",
