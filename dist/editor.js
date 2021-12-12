@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-12T03:55:45.276Z )
+	Version 0.4.6 ( 2021-12-12T04:05:17.672Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23376,7 +23376,7 @@ CodeMirror.defineMode("prolog", (function(t, e) {
                     if (e.match(/title/)) return t.name = "title", "keyword";
                     if (e.match(/:[a-zA-Z _!?]*;/)) return "def";
                     if (e.match(/note/)) return t.name = "note init", "keyword";
-                    if (m(e, [ "--()", "-()", "()-", "()--", "<|---", ":", "*-up-", "<|-down-" ])) return "operator";
+                    if (m(e, [ "--()", "-()", "()-", "()--", "<|---", ":", "*-up-", "<|-down-", "->>", "--\x3e>", "--\x3e", "->" ])) return "operator";
                     if (e.match(/\([a-zA-Z _!?]*\)/)) return "string";
                     if (e.match(/skinparam/)) return t.name = "skinparam", "keyword";
                     if (e.match(/class/)) return t.name = "class kw", "keyword";

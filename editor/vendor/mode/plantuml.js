@@ -194,7 +194,7 @@ CodeMirror.defineMode("plantuml", function(config, parserConfig) {
                     state.name = "note init";
                     return "keyword";
                 }             
-                if (operators(stream, ['--()', '-()', '()-', '()--', '<|---', ':', '*-up-', '<|-down-'])){
+                if (operators(stream, ['--()', '-()', '()-', '()--', '<|---', ':', '*-up-', '<|-down-', '->>', '-->>', '-->', '->'])){
                     return "operator";
                 }
                 if (stream.match(/\([a-zA-Z _!?]*\)/)){
