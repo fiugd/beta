@@ -234,7 +234,7 @@ const triggers = treeEvents.reduce((all, operation) => {
 		const { source, target, line, column } = args;
 		const name = (target || source).split('/').pop();
 		const parent = (target || source).split('/').slice(0,-1).join('/');
-		const _service = 'TODO';
+		const _service = (getState('currentService')||{}).name;
 		const handlerMessage = {
 			detail: {
 				name,

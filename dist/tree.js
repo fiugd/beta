@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-12-12T00:05:45.576Z )
+	Version 0.4.6 ( 2021-12-23T23:27:19.797Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3289,7 +3289,7 @@ const triggers$1 = treeEvents.reduce(((all, operation) => {
         const {source: source, target: target, line: line, column: column} = args;
         const name = (target || source).split("/").pop();
         const parent = (target || source).split("/").slice(0, -1).join("/");
-        const _service = "TODO";
+        const _service = (getState("currentService") || {}).name;
         const handlerMessage = {
             detail: {
                 name: name,
@@ -3304,7 +3304,7 @@ const triggers$1 = treeEvents.reduce(((all, operation) => {
                 line: line,
                 column: column,
                 body: {},
-                service: _service
+                service: _service || ""
             }
         };
         return handler(handlerMessage, context);
