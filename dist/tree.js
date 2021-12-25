@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2021-12-23T23:27:19.797Z )
+	Version 0.4.6 ( 2021-12-25T23:56:52.562Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3335,7 +3335,7 @@ const contextMenuHandler = (e, listenerContext) => {
         name: "New Folder"
     }, context.type === "file" ? "seperator" : "", {
         name: "Open in Preview",
-        hidden: context.type === "folder"
+        hidden: true
     }, {
         name: "Open in New Window",
         hidden: context.type === "folder"

@@ -1,35 +1,9 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2021-12-05T08:03:46.052Z )
+	Version 0.4.6 ( 2021-12-25T23:56:39.112Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
-const triggerTop = event => (type, name) => {
-    const triggerEvent = {
-        type: type,
-        detail: {
-            operation: name
-        }
-    };
-    window.top.postMessage({
-        triggerEvent: triggerEvent
-    }, location);
-    event.preventDefault();
-    return false;
-};
-
-const events = [ [ e => e.shiftKey && e.altKey && e.key === "ArrowLeft", "ui", "prevDocument" ], [ e => e.shiftKey && e.altKey && e.key === "ArrowRight", "ui", "nextDocument" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f", "ui", "searchProject" ], [ e => (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "p", "ui", "commandPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p", "ui", "searchPalette" ], [ e => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s", "operations", "update" ], [ 
-// this will only work with electron
-e => e.ctrlKey && e.which === 9, "nextTab" ] ];
-
-const useCapture = true;
-
-document.addEventListener("keydown", (function(event) {
-    const [_, ...found] = events.find((([check]) => check(event))) || [];
-    if (found.length) return triggerTop(event)(...found);
-    return true;
-}), useCapture);
-
 const target = window.top;
 
 const queue$3 = {};
@@ -7575,6 +7549,7 @@ var Xterm = () => {
     return term;
 };
 
+//import './passEvents.js';
 let ops;
 
 const term = Xterm();

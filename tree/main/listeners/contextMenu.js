@@ -32,7 +32,7 @@ const contextMenuHandler = (e, listenerContext) => {
 		context.type === 'file' ? "seperator" : '',
 		{
 			name: "Open in Preview",
-			hidden: context.type === 'folder'
+			hidden: true || context.type === 'folder'
 		},
 		{
 			name: "Open in New Window",
