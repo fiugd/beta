@@ -1,5 +1,5 @@
 import { Link } from './terminal.utils.js';
-import { WebLinksAddon } from 'https://cdn.skypack.dev/xterm-addon-web-links';
+import { WebLinksAddon } from 'https://cdn.skypack.dev/xterm-addon-web-links@0.4';
 
 export default () => {
 	const options = {
