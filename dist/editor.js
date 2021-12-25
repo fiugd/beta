@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2021-12-12T19:51:56.040Z )
+	Version 0.4.6 ( 2021-12-25T22:55:43.540Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -27317,7 +27317,11 @@ const handler$6 = (e, context) => {
     const path = foundTab.parent ? `/${service.name}/${foundTab.parent}/${foundTab.name}` : `/${service.name}/${foundTab.name}`;
     const file = service.code.find((x => x.path === path));
     triggers.fileSelect({
-        detail: file
+        detail: {
+            ...file,
+            name: foundTab.name,
+            parent: foundTab.parent
+        }
     }, context);
 };
 

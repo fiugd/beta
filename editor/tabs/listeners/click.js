@@ -72,7 +72,13 @@ const handler = (e, context) => {
 			? `/${service.name}/${foundTab.parent}/${foundTab.name}`
 			: `/${service.name}/${foundTab.name}`;
 	const file = service.code.find(x => x.path === path);
-	triggers.fileSelect({ detail: file }, context);
+	triggers.fileSelect({
+		detail: {
+			...file,
+			name: foundTab.name,
+			parent: foundTab.parent
+		}
+	}, context);
 };
 
 export default handler;
