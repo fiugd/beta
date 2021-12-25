@@ -68,15 +68,16 @@ const handler = (e, context) => {
 	// const { tabsToUpdate, foundTab } = getTabsToUpdate(name);
 	// tabsToUpdate.map(updateTab);
 	const service = getCurrentService({ pure: true });
-	const path = foundTab.parent
-			? `/${service.name}/${foundTab.parent}/${foundTab.name}`
-			: `/${service.name}/${foundTab.name}`;
-	const file = service.code.find(x => x.path === path);
+	// const path = foundTab.parent
+	// 		? `/${service.name}/${foundTab.parent}/${foundTab.name}`
+	// 		: `/${service.name}/${foundTab.name}`;
+	// const file = service.code.find(x => x.path === path);
 	triggers.fileSelect({
 		detail: {
-			...file,
+			//...file,
 			name: foundTab.name,
-			parent: foundTab.parent
+			parent: foundTab.parent,
+			service: service.name
 		}
 	}, context);
 };
