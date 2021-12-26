@@ -1,0 +1,16 @@
+flowchart TB
+	B["fa:fa-twitter"]
+	c1-->a2
+
+	subgraph " "
+		a1-->a2
+		end
+
+	subgraph " "
+		b1-->b2
+		b1-->a2
+	end
+
+	subgraph " "
+		c1<-->c2
+	end
