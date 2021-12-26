@@ -1,16 +1,19 @@
-flowchart TB
-	B["fa:fa-twitter"]
-	c1-->a2
-
-	subgraph " "
-		a1-->a2
-		end
-
-	subgraph " "
-		b1-->b2
-		b1-->a2
-	end
-
-	subgraph " "
-		c1<-->c2
-	end
+erDiagram
+	serviceWorker
+	windowTop ||--|| serviceWorker: " "
+	windowTop ||--|{ iframe: " "
+	iframe ||--|{ css: " "
+	iframe ||--|{ script: " "
+		script ||--|{ jscss: " "
+		script ||--|{ utils: " "
+		script ||--|{ helper: " "
+		script ||--|{ components: " "
+			components ||--|{ TreeModule: " "
+			components ||--|{ TreeView: " "
+				TreeView ||--|{ TreeMenu: " "
+				TreeView ||--|{ Search: " "
+				TreeView ||--|{ ProjectOpener: " "
+		windowTop ||--|| events: " "
+		script ||--|| events: " "
+			events ||--|{ triggers: " "
+			events ||--|{ listeners: " "
