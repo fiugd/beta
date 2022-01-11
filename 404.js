@@ -2,7 +2,11 @@ const notFound = () => {
 	document.body.innerHTML = 'not found';
 };
 const loadRepo = (path) => {
-	console.log('load repo: '+path)
+	//TODO: test if sw is installed
+	// - install sw
+	// - clone repo
+	// - set repo as active
+	console.log('load repo: '+path);
 };
 const onload = () => {
 	if(window !== window.parent) return notFound();
