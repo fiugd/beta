@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-01-13T05:10:18.885Z )
+	Version 0.4.6 ( 2022-01-13T05:38:24.635Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -153,6 +153,11 @@ const utils = (() => {
                 const mime = getMime(filename) || {};
         const contentType = mime.contentType || fetched.headers.get("Content-Type");
         let _contents = storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => filename.includes(x))) ? await fetched.blob() : await fetched.text();
+        try {
+            if (_contents.encoding === "base64" && _contents.content) {
+                _contents = atob(_contents.content);
+            }
+        } catch (e) {}
         return _contents;
     }
     const notImplementedHandler = async (params, event) => {
@@ -1005,11 +1010,12 @@ const StorageManager = (() => {
                         console.warn("WILL use github api for file retrieve");
                     }
                     let contents;
-							if(opts.headers.authorization){
-							try {
-								contents = atob((await fetchFileContents(url, opts)).content) }catch(e){}
-							}
-							contents = contents || await fetchFileContents(contentUrl);
+                    try {
+                        if (opts.headers.authorization) {
+                            contents = await fetchFileContents(url, opts);
+                        }
+                    } catch (e) {}
+                    contents = contents || await fetchFileContents(contentUrl);
                     return contents;
                 } catch (e) {
                     console.error(e);

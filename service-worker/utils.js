@@ -203,6 +203,11 @@ const utils = (() => {
 			!fileNameBlacklist.find((x) => filename.includes(x))
 				? await fetched.blob()
 				: await fetched.text();
+		try {
+			if(_contents.encoding === "base64" && _contents.content){
+				_contents = atob(_contents.content);
+			}
+		} catch(e){}
 		return _contents;
 	}
 
