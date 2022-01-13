@@ -469,16 +469,18 @@ const StorageManager = (() => {
 						.replace('{sha}', thisService.git.sha);
 					let opts = { headers: {} };
 					if(url && url.includes('api.github')){
-						console.warn('attempt to use github api for file retrieve');
-						let configText = await fileCache('~/.git/config');
-						configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
-						const config = ini.parse(configText);
-						console.log(config);
-						const auth = config.user.token;
-						if(auth) {
-							opts.headers.authorization = `token ${auth}`;
-							opts.headers.Accept = "application/vnd.github.v3+json";
-						}
+						try {
+							console.warn('attempt to use github api for file retrieve');
+							let configText = await changeCache('~/.git/config');
+							configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
+							const config = ini.parse(configText);
+							console.log(config);
+							const auth = config.user.token;
+							if(auth) {
+								opts.headers.authorization = `token ${auth}`;
+								opts.headers.Accept = "application/vnd.github.v3+json";
+							}
+						} catch(e){}
 					}
 					if(opts.headers.authorization){
 						console.warn('WILL use github api for file retrieve');
