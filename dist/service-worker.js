@@ -1004,7 +1004,7 @@ const StorageManager = (() => {
                     if (opts.headers.authorization) {
                         console.warn("WILL use github api for file retrieve");
                     }
-                    const contents = opts.headers.authorization ? await fetchfileContents(url, opts) : await fetchFileContents(contentUrl);
+                    const contents = opts.headers.authorization ? await fetchFileContents(url, opts) : await fetchFileContents(contentUrl);
                     return contents;
                 } catch (e) {
                     console.error(e);
