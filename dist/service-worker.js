@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-01-13T05:05:19.704Z )
+	Version 0.4.6 ( 2022-01-13T05:10:18.885Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -990,7 +990,7 @@ const StorageManager = (() => {
                     if (url && url.includes("api.github")) {
                         try {
                             console.warn("attempt to use github api for file retrieve");
-                            let configText = await changeCache("~/.git/config");
+                            let {value: configText} = await changeCache("~/.git/config");
                             configText = (configText || "").split("\n").map((x => x.trim())).filter((x => x)).join("\n");
                             const config = ini.parse(configText);
                             console.log(config);

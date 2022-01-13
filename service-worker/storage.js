@@ -471,7 +471,7 @@ const StorageManager = (() => {
 					if(url && url.includes('api.github')){
 						try {
 							console.warn('attempt to use github api for file retrieve');
-							let configText = await changeCache('~/.git/config');
+							let { value: configText } = await changeCache('~/.git/config');
 							configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
 							const config = ini.parse(configText);
 							console.log(config);
