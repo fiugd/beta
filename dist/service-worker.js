@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-01-13T05:57:29.543Z )
+	Version 0.4.6 ( 2022-01-13T14:33:17.658Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -141,10 +141,16 @@ const utils = (() => {
         }
         return result;
     };
-    const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json()
+    const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json();
+    function betterAtoB(str) {
+        try {
+            return decodeURIComponent(atob(str).split("").map((function(c) {
+                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })).join(""));
+        } catch (e) {}
+    }
     //TODO: ??? move to provider since fetching is a provider thing
-    ;
-    async function fetchFileContents(filename, opts) {
+        async function fetchFileContents(filename, opts) {
         const storeAsBlob = [ "image/", "audio/", "video/", "wasm", "application/zip" ];
         const storeAsBlobBlacklist = [ "image/svg", "image/x-portable-pixmap" ];
         const fileNameBlacklist = [ ".ts" ];
@@ -156,7 +162,7 @@ const utils = (() => {
         try {
             const _c = JSON.parse(_contents);
             if (_c.encoding === "base64" && _c.content) {
-                _contents = atob(_c.content);
+                _contents = betterAtoB(_c.content) || atob(_c.content);
             }
         } catch (e) {}
         return _contents;

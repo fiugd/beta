@@ -159,6 +159,14 @@ const utils = (() => {
 	};
 
 	const fetchJSON = async (url, opts) => await (await fetch(url, opts)).json();
+	
+	function betterAtoB(str) {
+		try {
+			return decodeURIComponent(atob(str).split('').map(function(c) {
+					return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+			}).join(''));
+		} catch(e){}
+	}
 
 	// unused: convert from base64 string to blob
 	 const base64toBlob = (base64) => {
@@ -207,7 +215,7 @@ const utils = (() => {
 		try {
 			const _c = JSON.parse(_contents);
 			if (_c.encoding === "base64" && _c.content) {
-				_contents = atob(_c.content);
+				_contents = betterAtoB(_c.content) || atob(_c.content);
 			}
 		} catch(e){}
 
