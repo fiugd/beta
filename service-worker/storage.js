@@ -462,42 +462,35 @@ const StorageManager = (() => {
 
 			const getFileContents = async ({ path, url }) => {
 				try {
-					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'
-						.replace('{path}', path)
-						.replace('{owner}', thisService.owner)
-						.replace('{repo}', thisService.repo)
-						.replace('{sha}', thisService.git.sha);
-					let opts = { headers: {} };
+					// use github API for file contents if possible
 					if(url && url.includes('api.github')){
+						let opts = { headers: {} };
 						try {
-							console.warn('attempt to use github api for file retrieve');
 							let { value: configText } = await changeCache('~/.git/config');
 							configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
 							const config = ini.parse(configText);
-							console.log(config);
 							const auth = config.user.token;
 							if(auth) {
 								opts.headers.authorization = `token ${auth}`;
 								opts.headers.Accept = "application/vnd.github.v3+json";
 							}
+							const githubContents = await fetchFileContents(url, opts);
+							if(githubContents) return githubContents;
 						} catch(e){}
 					}
-					if(opts.headers.authorization){
-						console.warn('WILL use github api for file retrieve');
-					}
-					let contents;
-					try {
-						if(opts.headers.authorization){
-							contents = await fetchFileContents(url, opts);
-						}
-					} catch(e){}
-					contents = contents || await fetchFileContents(contentUrl);
-					return contents;
+					// otherwise use github user content request
+					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'
+						.replace('{path}', path)
+						.replace('{owner}', thisService.owner)
+						.replace('{repo}', thisService.repo)
+						.replace('{sha}', thisService.git.sha);
+					return await fetchFileContents(contentUrl);
 				} catch(e){
 					console.error(e);
 					return;
 				}
 			};
+
 			file = await getFileContents(serviceFile);
 			if(file) filesStore.setItem(path, file);
 		}
