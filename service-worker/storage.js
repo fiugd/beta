@@ -1,3 +1,4 @@
+import ini from 'https://cdn.skypack.dev/ini';
 import { RootService } from './root.js';
 
 const DEBUG = false;
@@ -459,21 +460,38 @@ const StorageManager = (() => {
 			}
 			if(!serviceFile) return file;
 
-			const getFileContents = async ({ path }) => {
+			const getFileContents = async ({ path, url }) => {
 				try {
 					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'
 						.replace('{path}', path)
 						.replace('{owner}', thisService.owner)
 						.replace('{repo}', thisService.repo)
 						.replace('{sha}', thisService.git.sha);
-					const contents = await fetchFileContents(contentUrl);
+					let opts = { headers: {} };
+					if(url && url.includes('api.github')){
+						console.warn('attempt to use github api for file retrieve');
+						let configText = await fileCache('~/.git/config');
+						configText = (configText||'').split('\n').map(x=>x.trim()).filter(x=>x).join('\n');
+						const config = ini.parse(configText);
+						console.log(config);
+						const auth = config.user.token;
+						if(auth) {
+							opts.headers.authorization = `token ${auth}`;
+							opts.headers.Accept = "application/vnd.github.v3+json";
+						}
+					}
+					if(opts.headers.authorization){
+						console.warn('WILL use github api for file retrieve');
+					}
+					const contents = opts.headers.authorization
+						? await fetchfileContents(url, opts)
+						: await fetchFileContents(contentUrl);
 					return contents;
 				} catch(e){
 					console.error(e);
 					return;
 				}
 			};
-
 			file = await getFileContents(serviceFile);
 			if(file) filesStore.setItem(path, file);
 		}

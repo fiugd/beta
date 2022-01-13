@@ -190,6 +190,7 @@ const utils = (() => {
 		const fileNameBlacklist = [
 			".ts", // mistaken as video/mp2t
 		];
+
 		const fetched = await fetch(filename, opts);
 
 		//getting content type like this because can't trust server's CT headers
