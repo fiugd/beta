@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-15T22:40:54.148Z )
+	Version 0.4.6 ( 2022-02-15T22:53:01.599Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23605,6 +23605,13 @@ const getModeWithEffects = opts => {
     try {
         mode = opts.mode.name || mode;
     } catch (e) {}
+    console.log({
+        mode: mode
+    });
+    if (mode === "ne") {
+        opts.mode = "ebnf";
+        mode = "ebnf";
+    }
     if (mode === "lisp") {
         opts.mode = "commonlisp";
         mode = "commonlisp";
@@ -24270,6 +24277,12 @@ function getFileType(fileName = "") {
             name: "htmlmixed",
             mimeType: "application/x-ejs",
             icon: "html"
+        };
+    }
+    if (extension === "ne" || extension === "ebnf") {
+        type = {
+            name: "ebnf",
+            icon: "default"
         };
     }
     if (extension === "uml" || extension === "plantuml") {

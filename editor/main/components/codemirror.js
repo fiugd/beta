@@ -18,6 +18,12 @@ const getModeWithEffects = (opts) => {
 		mode = opts.mode.name || mode;
 	} catch(e){}
 
+	console.log({ mode })
+
+	if(mode === "ne"){
+		opts.mode = 'ebnf';
+		mode = 'ebnf';
+	}
 	if(mode === 'lisp'){
 		opts.mode = 'commonlisp';
 		mode = 'commonlisp';

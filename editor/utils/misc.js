@@ -72,6 +72,12 @@ function getFileType(fileName = "") {
 			icon: 'html'
 		};
 	}
+	if (extension === "ne" || extension === "ebnf") {
+		type = {
+			name: "ebnf",
+			icon: 'default'
+		};
+	}
 	if (extension === "uml" || extension === "plantuml") {
 		type = {
 			name: "plantuml",
