@@ -230,13 +230,18 @@ const utils = (() => {
 
 	const asBlobIfNeeded = (byteString, path) => {
 		if(!shouldBlob(path)) return byteString;
-		const { contentType: type } = getMime(filename) || {};
+		try {
+			const { contentType: type } = getMime(filename) || {};
 
-		var ia = new Uint8Array(byteString.length);
-		for (var i = 0; i < byteString.length; i++) {
-				ia[i] = byteString.charCodeAt(i);
+			var ia = new Uint8Array(byteString.length);
+			for (var i = 0; i < byteString.length; i++) {
+					ia[i] = byteString.charCodeAt(i);
+			}
+			return new Blob([ia], {type});
+		} catch (e){
+			console.log(e);
+			return byteString;
 		}
-		return new Blob([ia], {type});
 	};
 
 	const notImplementedHandler = async (params, event) => {

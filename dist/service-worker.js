@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-02-20T07:02:02.657Z )
+	Version 0.4.6 ( 2022-02-20T07:36:53.116Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -173,14 +173,19 @@ const utils = (() => {
     }
     const asBlobIfNeeded = (byteString, path) => {
         if (!shouldBlob(path)) return byteString;
-        const {contentType: type} = getMime(filename) || {};
-        var ia = new Uint8Array(byteString.length);
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
+        try {
+            const {contentType: type} = getMime(filename) || {};
+            var ia = new Uint8Array(byteString.length);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ ia ], {
+                type: type
+            });
+        } catch (e) {
+            console.log(e);
+            return byteString;
         }
-        return new Blob([ ia ], {
-            type: type
-        });
     };
     const notImplementedHandler = async (params, event) => {
         console.log("handler not implemented");
