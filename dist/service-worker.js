@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-02-20T07:36:53.116Z )
+	Version 0.4.6 ( 2022-02-20T07:41:17.163Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -174,7 +174,7 @@ const utils = (() => {
     const asBlobIfNeeded = (byteString, path) => {
         if (!shouldBlob(path)) return byteString;
         try {
-            const {contentType: type} = getMime(filename) || {};
+            const {contentType: type} = getMime(path) || {};
             var ia = new Uint8Array(byteString.length);
             for (var i = 0; i < byteString.length; i++) {
                 ia[i] = byteString.charCodeAt(i);

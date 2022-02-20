@@ -231,7 +231,7 @@ const utils = (() => {
 	const asBlobIfNeeded = (byteString, path) => {
 		if(!shouldBlob(path)) return byteString;
 		try {
-			const { contentType: type } = getMime(filename) || {};
+			const { contentType: type } = getMime(path) || {};
 
 			var ia = new Uint8Array(byteString.length);
 			for (var i = 0; i < byteString.length; i++) {
