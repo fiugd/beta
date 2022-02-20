@@ -476,7 +476,9 @@ const StorageManager = (() => {
 							}
 							const githubContents = await fetchFileContents(url, opts);
 							if(githubContents) return asBlobIfNeeded(githubContents, path);
-						} catch(e){}
+						} catch(e){
+							console.log(e)
+						}
 					}
 					// otherwise use github user content request
 					const contentUrl = 'https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}'

@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-02-20T07:41:17.163Z )
+	Version 0.4.6 ( 2022-02-20T07:59:45.704Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1032,7 +1032,9 @@ const StorageManager = (() => {
                             }
                             const githubContents = await fetchFileContents(url, opts);
                             if (githubContents) return asBlobIfNeeded(githubContents, path);
-                        } catch (e) {}
+                        } catch (e) {
+                            console.log(e);
+                        }
                     }
                     // otherwise use github user content request
                                         const contentUrl = "https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}".replace("{path}", path).replace("{owner}", thisService.owner).replace("{repo}", thisService.repo).replace("{sha}", thisService.git.sha);
