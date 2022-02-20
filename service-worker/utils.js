@@ -169,7 +169,7 @@ const utils = (() => {
 	}
 
 	// unused: convert from base64 string to blob
-	 const base64toBlob = (base64) => {
+	const base64toBlob = (base64) => {
 		const binary = atob(base64);
 		var array = new Uint8Array(binary.length)
 		for(var i = 0; i < binary.length; i++ ){
@@ -179,14 +179,13 @@ const utils = (() => {
 	};
 
 	// TODO: pattern part of fetchFileContents like this
-	 const Storeable = (path, content) => {
+	const Storeable = (path, content) => {
 		const storeAsBlob = path.endsWith('png');
 		if(storeAsBlob) return base64toBlob(content);
 		return atob(content);
-	 };
+	};
 
-	//TODO: ??? move to provider since fetching is a provider thing
-	async function fetchFileContents(filename, opts) {
+	const shouldBlob = (filename, otherContentType) => {
 		const storeAsBlob = [
 			"image/",
 			"audio/",
@@ -199,16 +198,23 @@ const utils = (() => {
 			".ts", // mistaken as video/mp2t
 		];
 
-		const fetched = await fetch(filename, opts);
-
 		//getting content type like this because can't trust server's CT headers
 		const mime = getMime(filename) || {};
-		const contentType = mime.contentType || fetched.headers.get("Content-Type");
+		const contentType = mime.contentType || otherContentType;
 
-		let _contents =
-			storeAsBlob.find((x) => contentType.includes(x)) &&
+		return !!storeAsBlob.find(
+			(x) => contentType.includes(x)) &&
 			!storeAsBlobBlacklist.find((x) => contentType.includes(x)) &&
-			!fileNameBlacklist.find((x) => filename.includes(x))
+			!fileNameBlacklist.find((x) => filename.includes(x)
+		);
+	};
+	
+	//TODO: ??? move to provider since fetching is a provider thing
+	async function fetchFileContents(filename, opts) {
+		const fetched = await fetch(filename, opts);
+		const headersContentType = fetched.headers.get("Content-Type");
+
+		let _contents = shouldBlob(filename, headersContentType)
 				? await fetched.blob()
 				: await fetched.text();
 
@@ -220,7 +226,18 @@ const utils = (() => {
 		} catch(e){}
 
 		return _contents;
-	}
+	};
+
+	const asBlobIfNeeded = (byteString, path) => {
+		if(!shouldBlob(path)) return byteString;
+		const { contentType: type } = getMime(filename) || {};
+
+		var ia = new Uint8Array(byteString.length);
+		for (var i = 0; i < byteString.length; i++) {
+				ia[i] = byteString.charCodeAt(i);
+		}
+		return new Blob([ia], {type});
+	};
 
 	const notImplementedHandler = async (params, event) => {
 		console.log("handler not implemented");
@@ -261,6 +278,7 @@ const utils = (() => {
 		unique,
 
 		// ugh
+		asBlobIfNeeded,
 		fetchFileContents,
 	};
 })();

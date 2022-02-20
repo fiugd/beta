@@ -408,7 +408,7 @@ const StorageManager = (() => {
 		const changesStore = this.stores.changes;
 		const filesStore = this.stores.files;
 		const servicesStore = this.stores.services;
-		const { fetchFileContents } = this.utils;
+		const { fetchFileContents, asBlobIfNeeded } = this.utils;
 
 		const getAllServices = async () => {
 			const keys = await servicesStore.keys();
@@ -475,7 +475,7 @@ const StorageManager = (() => {
 								opts.headers.Accept = "application/vnd.github.v3+json";
 							}
 							const githubContents = await fetchFileContents(url, opts);
-							if(githubContents) return githubContents;
+							if(githubContents) return asBlobIfNeeded(githubContents, path);
 						} catch(e){}
 					}
 					// otherwise use github user content request

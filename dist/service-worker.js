@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-01-13T15:40:38.813Z )
+	Version 0.4.6 ( 2022-02-20T07:02:02.657Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -149,16 +149,20 @@ const utils = (() => {
             })).join(""));
         } catch (e) {}
     }
-    //TODO: ??? move to provider since fetching is a provider thing
-        async function fetchFileContents(filename, opts) {
+    const shouldBlob = (filename, otherContentType) => {
         const storeAsBlob = [ "image/", "audio/", "video/", "wasm", "application/zip" ];
         const storeAsBlobBlacklist = [ "image/svg", "image/x-portable-pixmap" ];
         const fileNameBlacklist = [ ".ts" ];
-        const fetched = await fetch(filename, opts);
         //getting content type like this because can't trust server's CT headers
                 const mime = getMime(filename) || {};
-        const contentType = mime.contentType || fetched.headers.get("Content-Type");
-        let _contents = storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => filename.includes(x))) ? await fetched.blob() : await fetched.text();
+        const contentType = mime.contentType || otherContentType;
+        return !!storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => filename.includes(x)));
+    };
+    //TODO: ??? move to provider since fetching is a provider thing
+        async function fetchFileContents(filename, opts) {
+        const fetched = await fetch(filename, opts);
+        const headersContentType = fetched.headers.get("Content-Type");
+        let _contents = shouldBlob(filename, headersContentType) ? await fetched.blob() : await fetched.text();
         try {
             const _c = JSON.parse(_contents);
             if (_c.encoding === "base64" && _c.content) {
@@ -167,6 +171,17 @@ const utils = (() => {
         } catch (e) {}
         return _contents;
     }
+    const asBlobIfNeeded = (byteString, path) => {
+        if (!shouldBlob(path)) return byteString;
+        const {contentType: type} = getMime(filename) || {};
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ ia ], {
+            type: type
+        });
+    };
     const notImplementedHandler = async (params, event) => {
         console.log("handler not implemented");
         return JSON.stringify({
@@ -202,6 +217,7 @@ const utils = (() => {
         treeInsertFile: treeInsertFile,
         unique: unique,
         // ugh
+        asBlobIfNeeded: asBlobIfNeeded,
         fetchFileContents: fetchFileContents
     };
 })();
@@ -962,7 +978,7 @@ const StorageManager = (() => {
         const changesStore = this.stores.changes;
         const filesStore = this.stores.files;
         const servicesStore = this.stores.services;
-        const {fetchFileContents: fetchFileContents} = this.utils;
+        const {fetchFileContents: fetchFileContents, asBlobIfNeeded: asBlobIfNeeded} = this.utils;
         const getAllServices = async () => {
             const keys = await servicesStore.keys();
             let services = [];
@@ -1010,7 +1026,7 @@ const StorageManager = (() => {
                                 opts.headers.Accept = "application/vnd.github.v3+json";
                             }
                             const githubContents = await fetchFileContents(url, opts);
-                            if (githubContents) return githubContents;
+                            if (githubContents) return asBlobIfNeeded(githubContents, path);
                         } catch (e) {}
                     }
                     // otherwise use github user content request
