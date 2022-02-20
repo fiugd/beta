@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-02-20T07:59:45.704Z )
+	Version 0.4.6 ( 2022-02-20T08:05:29.788Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -156,6 +156,7 @@ const utils = (() => {
         //getting content type like this because can't trust server's CT headers
                 const mime = getMime(filename) || {};
         const contentType = mime.contentType || otherContentType;
+        if (!contentType) return false;
         return !!storeAsBlob.find((x => contentType.includes(x))) && !storeAsBlobBlacklist.find((x => contentType.includes(x))) && !fileNameBlacklist.find((x => filename.includes(x)));
     };
     //TODO: ??? move to provider since fetching is a provider thing
