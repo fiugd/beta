@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-15T22:53:01.599Z )
+	Version 0.4.6 ( 2022-02-23T17:22:39.343Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -23605,10 +23605,8 @@ const getModeWithEffects = opts => {
     try {
         mode = opts.mode.name || mode;
     } catch (e) {}
-    console.log({
-        mode: mode
-    });
-    if (mode === "ne") {
+    //console.log({ mode })
+        if (mode === "ne") {
         opts.mode = "ebnf";
         mode = "ebnf";
     }

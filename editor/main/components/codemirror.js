@@ -18,7 +18,7 @@ const getModeWithEffects = (opts) => {
 		mode = opts.mode.name || mode;
 	} catch(e){}
 
-	console.log({ mode })
+	//console.log({ mode })
 
 	if(mode === "ne"){
 		opts.mode = 'ebnf';

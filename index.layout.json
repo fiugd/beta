@@ -1,0 +1,74 @@
+{
+	"root": {
+		"type": "row",
+		"content": [
+			{
+				"title": "Tree",
+				"type": "component",
+				"componentType": "Tree",
+				"width": 15,
+				"hasHeaders": false
+			},
+			{
+				"type": "stack",
+				"isClosable": true,
+				"width": 50,
+				"hasHeaders": true,
+				"content": [
+					{
+						"title": "Editor 1",
+						"type": "component",
+						"componentType": "Editor"
+					},
+					{
+						"title": "Editor 2",
+						"type": "component",
+						"componentType": "Editor"
+					}
+				]
+			},
+			{
+				"title": "Editor 3",
+				"type": "component",
+				"componentType": "Editor",
+				"cssClass": "noTabs",
+				"hasHeaders": true
+			},
+			{
+				"type": "column",
+				"content": [
+					{
+						"type": "stack",
+						"isClosable": true,
+						"width": 50,
+						"hasHeaders": true,
+						"content": [
+							{
+								"title": "Terminal",
+								"type": "component",
+								"componentType": "Terminal"
+							},
+							{
+								"title": "Terminal 2",
+								"type": "component",
+								"componentType": "Terminal"
+							}
+						]
+					},
+					{
+						"title": "Terminal 3",
+						"type": "component",
+						"componentType": "Terminal",
+						"hasHeaders": true
+					}
+				]
+			}
+		]
+	},
+	"dimensions": {
+		"borderWidth": 2,
+		"headerHeight": 20,
+		"dragProxyWidth": 10,
+		"dragProxyHeight": 10,
+	}
+}

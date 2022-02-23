@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2021-12-25T23:56:39.112Z )
+	Version 0.4.6 ( 2022-02-23T20:13:46.675Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6423,7 +6423,7 @@ class Definitions extends Array {
         if (duplicateAlias) {
             halt("INVALID_DEFINITIONS", "Two or more option definitions have the same alias");
         }
-        const duplicateDefaultOption = hasDuplicates(this.map((def => def.defaultOption)));
+        const duplicateDefaultOption = this.filter((def => def.defaultOption === true)).length > 1;
         if (duplicateDefaultOption) {
             halt("INVALID_DEFINITIONS", "Only one option definition can be the defaultOption");
         }
@@ -7030,10 +7030,6 @@ const readSourceDir = async dir => {
     };
 };
 
-const updateSWCache = bins => {
-    console.warn(`\n\t\tTODO: add files to SW cache under /_/modules/terminal/bin\n\t\tthis avoids having to add these to service.manifest.json\n\t`.replace(/^\t+/gm, "").trim());
-};
-
 const debounce = (func, wait) => {
     let timeout;
     let throttleTime;
@@ -7236,7 +7232,6 @@ class DynamicOp {
 
 const GetDynamicOps = async (term, comm, getCwd) => {
     const bins = await readSourceDir("/terminal/bin");
-    updateSWCache();
     const ops = [];
     for (let i = 0, len = bins.response.length; i < len; i++) {
         const {name: name} = bins.response[i];

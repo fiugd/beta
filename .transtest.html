@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>transtest</title>
+	<meta name="description" content="">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	
+</head>
+
+
+<style>
+@media (prefers-color-scheme: dark) {
+	html { background: black; }
+}
+
+html, body{
+  height: 100%; margin: 0;
+}
+
+#wrapper{
+  display: flex;
+	flex-direction:column;
+  height: 100%
+}
+
+#layoutContainer {
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.lm_goldenlayout {
+	background: transparent !important;
+}
+
+</style>
+
+<body>
+	<div id="wrapper">
+		<div id="layoutContainer"></div>
+		<iframe sandbox="allow-same-origin allow-scripts allow-popups allow-modals allow-downloads allow-forms allow-top-navigation allow-popups-to-escape-sandbox" src="./dist/editor.html" style="height:100%;width:100%;border:0;flex:1 1 auto;"></iframe>
+	</div>
+</body>
+
+
+</html>

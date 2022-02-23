@@ -169,3 +169,30 @@ body { height: 100vh; width: 100vw; }
 }
 .field-container label { font-size: .75em; }
 /* SEARCH END */
+
+body {
+	display: flex;
+	flex-direction: column;
+}
+
+#explorer {
+	height: auto;
+	flex: 1;
+}
+
+#explorer #tree-view {
+	padding-bottom: 2em;
+}
+
+#status-bar {
+	position: relative;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 22px;
+	font-size: 12px;
+	padding: 2px 10px;
+	z-index: 10;
+	user-select: none;
+	text-align: start;
+}

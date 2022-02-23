@@ -33,6 +33,21 @@ export default (root, analyzeConfig, onwarn) => ({
 	}, {
 		from: `/${root}/terminal/terminal.css`,
 		to: `./${root}/dist/terminal.css`
+	}, {
+		from: `/${root}/terminal/terminal.utils.js`,
+		to: `./${root}/dist/terminal.utils.js`
+	}, {
+		from: `/${root}/terminal/bin/cat.js`,
+		to: `./${root}/dist/bin/cat.js`
+	}, {
+		from: `/${root}/terminal/bin/ls.js`,
+		to: `./${root}/dist/bin/ls.js`
+	}, {
+		from: `/${root}/terminal/bin/node.js`,
+		to: `./${root}/dist/bin/node.js`
+	}, {
+		from: `/${root}/terminal/bin/preview.js`,
+		to: `./${root}/dist/bin/preview.js`
 	}]
 });
 

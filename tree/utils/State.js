@@ -7,7 +7,7 @@ const changesStore = localforage.createInstance({
 	description: "keep track of changes not pushed to provider",
 });
 
-const DEBUG = true;
+const DEBUG = false;
 
 let allServices;
 let currentService;
