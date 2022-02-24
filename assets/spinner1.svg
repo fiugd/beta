@@ -1,0 +1,28 @@
+<svg viewBox="0 0 50 50">
+	<style>
+		/*circle, path { fill: none; stroke: currentColor; opacity: 0.4;}*/
+		circle {
+			fill: none;
+			stroke: currentColor;
+		}
+		circle {
+			transform-origin: center center;
+			stroke-width: 10;
+			stroke-dasharray: 16;
+			stroke-dashoffset: 0;
+			stroke-linecap: butt;
+			animation: dash 2s linear infinite;
+		}
+		text {
+			fill: currentColor;
+			stroke: none;
+		}
+		@keyframes dash {
+			100% {
+				transform: rotate(360deg);
+			}
+			50% { stroke: #888; stroke-width: 0;}
+		}
+	</style>
+	<circle cx="25" cy="25" r="20"/>
+</svg>
