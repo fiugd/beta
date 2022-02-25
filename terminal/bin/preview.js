@@ -36,10 +36,10 @@ const getDom = (() => {
 				}
 				#preview-container iframe {
 					position: absolute;
-					left: 1px;
-					top: 1px;
-					width: calc(100% - 1px);
-					height: calc(100% - 1px);
+					left: 0px;
+					top: 0px;
+					width: 100%;
+					height: 100%;
 					border: 0;
 					/*border: 1px solid blue;*/
 					/*border: 1px solid var(--tree-selected);*/

@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>fiug (new)</title>
+	<title>fiug (drag)</title>
 	<meta name="description" content="">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -160,15 +160,18 @@ body:after {
 
 <script type="module">
 	import * as gl from "https://cdn.skypack.dev/golden-layout@2.4.0";
-	console.log(Object.keys(gl))
-	const { GoldenLayout } = gl;
+	console.log(gl)
+	const { GoldenLayout, DragSource } = gl;
 
-	let savedLayout;
-	try {
-		savedLayout = JSON.parse(localStorage.getItem('layout'));
-	}catch(e){}
-	const layoutConfig = savedLayout || await fetch('index.layout.json').then(r => r.json());
+	const layoutConfig = await fetch('index.layout.json').then(r => r.json());
 	const layoutContainer = document.getElementById("layoutContainer");
+
+	let treeConfig;
+	layoutConfig.root.content = layoutConfig.root.content.filter(x => {
+		if(x.title === "Tree") x.width = 20;
+		return x.title === "Editor 3" || x.title === "Tree"
+	});
+	layoutConfig.root.content.push(layoutConfig.root.content[1])
 
 	window.addEventListener('resize', () => {
 		// handling of resize event is required if GoldenLayout does not use body element
@@ -177,136 +180,85 @@ body:after {
 		goldenLayout.setSize(width, height);
 	});
 
-	const iframeSandboxPermissions = [
-		"allow-same-origin",
-		"allow-scripts",
-		"allow-popups",
-		"allow-modals",
-		"allow-downloads",
-		"allow-forms",
-		"allow-top-navigation",
-		"allow-popups-to-escape-sandbox"
-	].join(' ');
-	const iframeUrls = {
-		Tree: "./dist/tree.html",
-		Editor: "./dist/editor.html",
-		Terminal: "./dist/terminal.html",
-	};
-
-	class Tree {
-		get rootHtmlElement() {
-			return this._root;
-		}
-		constructor(container){
-			this._root = document.createElement('div');
-			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Tree;
-			iframe.style="height:100%;width:100%;border:0;";
-			iframe.sandbox = iframeSandboxPermissions;
-			this._root.append(iframe);
-			this._root.classList.add('tree');
-		}
-	}
-	class Editor {
-		get rootHtmlElement() {
-			return this._root;
-		}
-		constructor(container){
-			this._root = document.createElement('div');
-			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor;
-			iframe.style="height:100%;width:100%;border:0;";
-			iframe.sandbox = iframeSandboxPermissions;
-			this._root.append(iframe);
-			this._root.classList.add('editor');
-		}
-	}
-	class Terminal {
-		get rootHtmlElement() {
-			return this._root;
-		}
-		constructor(container){
-			this._root = document.createElement('div');
-			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Terminal;
-			iframe.style="height:100%;width:100%;border:0;";
-			iframe.sandbox = iframeSandboxPermissions;
-			this._root.append(iframe);
-			this._root.classList.add('terminal');
-		}
-	}
 	class Action {
-		constructor(container){
+		constructor(container, state){
+			//console.log(arguments);
 			this.container = container;
 			container.id = 'action-bar';
 			container.element.innerHTML = `
-				<div style="background:#363636;width:100%;height: calc(100% - 22px);"></div>
+				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(state, null, 2)}</div>
 			`;
 		}
 	}
 
-	/*
-	const componentInstances = []
-	const createComponent = async (container, itemConfig) => {
-		//console.log(itemConfig)
-
-		const { componentType: type, componentState: props } = itemConfig;
-		let iframeContainer;
-		if(iframeUrls[type]){
-			//const component = { type, props }
-			//component.container = () => container;
-			const rootEl = document.createElement('div')
-			//component.rootElement = () => rootEl;
-			rootEl.style.position = 'absolute';
-			rootEl.style.overflow = 'hidden';
-			
-			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls[type];
-			iframe.style="height:100%;width:100%;border:0;";
-			iframe.sandbox = iframeSandboxPermissions;
-			rootEl.append(iframe);
-
-			layoutContainer.querySelector('.lm_root').append(rootEl);
-
-			const component = {
-				type, props, element: rootEl
+	const tree = (layout) => 
+	class Tree {
+		constructor(container){
+			//console.log(arguments)
+			const root = document.createElement('div');
+			this.rootHtmlElement = root;
+			root.id = 'dragPane';
+			root.innerHTML = `
+			<style>
+				#dragPane > div{ 
+					width: 100%;
+					color: #ccc;
+					font: 2vw arial;
+					height: calc(100% - 22px);
+					background: #2e2e2e;
+					position: inherit;
+				}
+				ul { list-style: none; }
+				ul li { user-select: none; }
+			</style>
+			<div>
+				<ul>
+					<li>drag item 1</i>
+					<li>drag item 2</i>
+					<li>drag item 3</i>
+					<li>drag item 4</i>
+					<li>drag item 5</i>
+				</ul>
+			</div>
+			`;
+			const element = document.createElement('div');
+			let dummy = {
+				type: 'Action',
+				state: {},
+				title: 'Hello'
 			};
-			component.virtualRectingRequiredEvent = (container, width, height) => {
-				console.log('virtualRectingRequiredEvent');
-			};
-			component.virtualVisibilityChangeRequiredEvent = (container, visible) => {
-				console.log('virtualVisibilityChangeRequiredEvent');
-			};
+			let getDummy = () => JSON.parse(JSON.stringify(dummy));
 
-			componentInstances.push(component);
-			return { component, virtual: true };
+			const listItems = Array.from(root.querySelectorAll('ul li'));
+			const dragSource = layout.newDragSource(root, getDummy, {}, 'drag source');
+			const pointerMove = (event) => dragSource._dragListener.onPointerMove(event);
+			for(var el of listItems){
+				el.onpointerdown = ev => {
+					el.onpointermove = pointerMove;
+					el.setPointerCapture(ev.pointerId);
+					dummy.title = event.target.textContent.trim();
+					dummy.state = { title: event.target.textContent.trim() };
+					dragSource._componentTypeOrFtn = () => dummy;
+					dragSource._dragListener._pointerTracking = true
+					dragSource._dragListener.startDrag();
+				}
+				el.onpointerup = ev => {
+					el.onpointermove = null
+					el.releasePointerCapture(ev.pointerId);
+					dragSource._dragListener.onPointerUp(event);
+				}
+			}
 		}
-		const component = {
-			//id: ++this.instanceId,
-			type,
-			props,
-			element: container.element,
-		};
-
-		//component.virtualRectingRequiredEvent = adaptComponent;
-		componentInstances.push(component);
-		return { component, virtual: false };
 	};
-	const destroyComponent = (container) => {
-		console.log('destroyComponent')
-	};*/
 
 	const goldenLayout = new GoldenLayout(layoutContainer);
 	goldenLayout.registerComponentConstructor('Action', Action);
-	goldenLayout.registerComponentConstructor('Tree', Tree, true);
-	goldenLayout.registerComponentConstructor('Editor', Editor, true);
-	goldenLayout.registerComponentConstructor('Terminal', Terminal, true);
+	goldenLayout.registerComponentConstructor('Tree', tree(goldenLayout), true);
+	goldenLayout.registerComponentConstructor('Editor', Action);
+	//goldenLayout.registerComponentConstructor('Terminal', iframe('Terminal'), true);
 	goldenLayout.loadLayout(layoutConfig);
-	
+
 	goldenLayout.on('stateChanged', function(){
-		//console.log('stateChanged')
-		//console.log(arguments)
-		//TODO: consider debounce
 		const state = JSON.stringify( goldenLayout.saveLayout() );
 		localStorage.setItem('layout', state );
 	});
@@ -322,6 +274,7 @@ body:after {
 		}
 	});
 
+	window.goldenLayout = goldenLayout;
 </script>
 
 </html>
