@@ -2538,8 +2538,10 @@ notes-section.loading:after {
 	min-width: 250px;
 	padding-left: 15px;
 
-	height: 100%;
-	bottom: 0px;
+	background: transparent;
+	bottom: -22px;
+	height: calc(100% + 22px);
+
 	right: 0 !important;
 	display: flex;
 	flex-direction: column;
