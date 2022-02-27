@@ -2499,13 +2499,16 @@ notes-section.loading:after {
 	background-color: var(--theme-subdued-color);
 	/* background-color: var(--main-theme-color); */
 	/* width: 200px; */
-	height: 100%;
-	/* height: calc(100% + 17px); */
+
 	min-width: 200px;
 	/* min-width: 150px; */
 	transition: background-color 2s ease-in;
 	/* margin-right: -17px; */
 	outline: none;
+	
+	background: transparent;
+	bottom: -22px;
+	height: calc(100% + 22px);
 }
 
 /* container for editor and terminal*/

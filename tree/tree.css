@@ -178,6 +178,7 @@ body {
 #explorer {
 	height: auto;
 	flex: 1;
+	background-color: var(--theme-subdued-color) !important;
 }
 
 #explorer #tree-view {

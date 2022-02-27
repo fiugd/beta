@@ -58,7 +58,7 @@ function StatusBar(){
 	<div class="bg"></div>
 
 	<div class="statusbar-item statusbar-entry left" statusbar-entry-priority="10000" statusbar-entry-alignment="0">
-		<a title="">${SYSTEM_NAME}</a>
+		<!-- a title="">${SYSTEM_NAME}</a -->
 	</div>
 
 	<div class="statusbar-item right">
