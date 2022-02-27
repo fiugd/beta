@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-27T21:15:51.608Z )
+	Version 0.4.6 ( 2022-02-27T21:17:45.658Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -43,7 +43,9 @@ const getSettings = dummyFunc("getSettings", {
     tabSize: 2
 });
 
-new URLSearchParams(window.location.search);
+const urlParams = new URLSearchParams(window.location.search);
+
+const fileParam = urlParams.get("file");
 
 const initState = (all, current) => {
     allServices = all;
@@ -58,7 +60,6 @@ const initState = (all, current) => {
             filePath: `${currentService.name}/${currentService.state.selected}`
         });
     }
-    const fileParam = urlPrams.get("file");
     if (fileParam) {
         currentService.state = {
             singleFileMode: true,
