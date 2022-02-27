@@ -24663,14 +24663,14 @@ TODO:
     nothingOpenDom && nothingOpenDom.classList.add("hidden");
     systemDocsView && systemDocsView.classList.add("hidden");
 		
-    const editorCmEl = document.querySelector("#editor-container .CodeMirror");
     const editorTabsEl = document.querySelector("#tabs");
-    if (singleFileMode) {
+    if(!editorDom && !editorTabsEl) return;
+	if (singleFileMode) {
         editorTabsEl.style.display = "none";
-        editorCmEl.style.height = "100%";
+        editorDom.style.height = "100%";
     } else {
         editorTabsEl.style.display = "";
-        editorCmEl.style.height = "";
+        editorDom.style.height = "";
     }
 
 };
