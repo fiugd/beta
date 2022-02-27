@@ -48,6 +48,8 @@ const closeFile = dummyFunc('closeFile');
 const moveFile = dummyFunc('moveFile');
 const getOpenedFiles = dummyFunc('getOpenedFiles');
 
+const urlParams = new URLSearchParams(window.location.search);
+
 const initState = (all, current) => {
 	allServices = all;
 
@@ -62,6 +64,18 @@ const initState = (all, current) => {
 		setCurrentFile({
 			filePath: `${currentService.name}/${currentService.state.selected}`
 		});
+	}
+
+	const fileParam = urlPrams.get('file');
+	if(fileParam){
+		currentService.state = {
+			singleFileMode: true,
+			opened: [{ name: fileParam, order:0 }],
+			selected: fileParam,
+			changed: currentService.state.changed.includes(fileParam)
+				? [currentService.state]
+				: []
+		}
 	}
 };
 

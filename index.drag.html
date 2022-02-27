@@ -169,6 +169,9 @@ body:after {
 	let treeConfig;
 	layoutConfig.root.content = layoutConfig.root.content.filter(x => {
 		if(x.title === "Tree") x.width = 20;
+		if(x.title === "Editor 3") {
+			x.componentState = { file: '404.js'}
+		}
 		return x.title === "Editor 3" || x.title === "Tree"
 	});
 	layoutConfig.root.content.push(layoutConfig.root.content[1])
@@ -198,12 +201,12 @@ body:after {
 	};
 
 	class Action {
-		constructor(container, state){
+		constructor(container, componentState){
 			//console.log(arguments);
 			this.container = container;
 			container.id = 'action-bar';
 			container.element.innerHTML = `
-				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(state, null, 2)}</div>
+				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(componentState, null, 2)}</div>
 			`;
 		}
 	}
@@ -212,17 +215,17 @@ body:after {
 		get rootHtmlElement() {
 			return this._root;
 		}
-		constructor(container, state){
+		constructor(container, componentState){
 			this._root = document.createElement('div');
-			if(!state.file){
+			console.log(componentState)
+			if(!componentState.file){
 				this._root.innerHTML = `
 					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
 				`;
 				return;
 			}
-
 			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor + '#' + state.file;
+			iframe.src = iframeUrls.Editor + '?=' + componentState.file;
 			iframe.style="height:100%;width:100%;border:0;";
 			iframe.sandbox = iframeSandboxPermissions;
 			this._root.append(iframe);
