@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-27T22:21:11.549Z )
+	Version 0.4.6 ( 2022-02-27T22:43:35.443Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24580,7 +24580,6 @@ TODO:
 */ const switchEditor = async (args, context) => {
     const {editor: editor} = context;
     const {filename: filename, mode: mode, line: line, column: column, singleFileMode: singleFileMode} = args;
-
     //TODO: should go into loading mode first
         if (mode === "systemDoc") {
         const editorCallback = () => {
@@ -24662,17 +24661,15 @@ TODO:
     editorPreview && editorPreview.classList.add("hidden");
     nothingOpenDom && nothingOpenDom.classList.add("hidden");
     systemDocsView && systemDocsView.classList.add("hidden");
-		
     const editorTabsEl = document.querySelector("#tabs");
-    if(!editorDom && !editorTabsEl) return;
-	if (singleFileMode) {
+    if (!editorDom && !editorTabsEl) return;
+    if (singleFileMode) {
         editorTabsEl.style.display = "none";
         editorDom.style.height = "100%";
     } else {
         editorTabsEl.style.display = "";
         editorDom.style.height = "";
     }
-
 };
 
 const messageEditor = (args, context) => {

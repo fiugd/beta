@@ -17,17 +17,6 @@ TODO:
 const switchEditor = async (args, context) => {
 	const { editor } = context;
 	const { filename, mode, line, column, singleFileMode } = args;
-
-	const editorCmEl = document.querySelector('#editor-container .CodeMirror');
-	const editorTabsEl = document.querySelector('#tabs');
-	if(singleFileMode){
-		editorTabsEl.style.display = 'none';
-		editorCmEl.style.height = '100%';
-	} else {
-		editorTabsEl.style.display = '';
-		editorCmEl.style.height = '';
-	}
-
 	//TODO: should go into loading mode first
 
 	if (mode === "systemDoc") {
@@ -117,6 +106,16 @@ const switchEditor = async (args, context) => {
 	editorPreview && editorPreview.classList.add("hidden");
 	nothingOpenDom && nothingOpenDom.classList.add("hidden");
 	systemDocsView && systemDocsView.classList.add("hidden");
+
+	const editorTabsEl = document.querySelector("#tabs");
+	if(!editorDom && !editorTabsEl) return;
+	if (singleFileMode) {
+		editorTabsEl.style.display = "none";
+		editorDom.style.height = "100%";
+	} else {
+		editorTabsEl.style.display = "";
+		editorDom.style.height = "";
+	}
 };
 
 const messageEditor = (args, context) => {
