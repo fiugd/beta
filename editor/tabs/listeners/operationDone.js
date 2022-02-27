@@ -12,24 +12,19 @@ const handler = (e, context) => {
 	if (!["read", "update"].includes(op) || !id) return;
 
 	const { opened=[], changed=[], singleFileMode } = result[0]?.state || {};
-	let tabs = opened.map(({ name, order }) => ({
-		id: "TAB" + Math.random().toString().replace("0.", ""),
-		name: name.split('/').pop(),
-		parent: name.split('/').slice(0,-1).join('/'),
-		touched: changed.includes(name),
-		changed: changed.includes(name),
-		active: order === 0,
-		//systemDocsName: sysDocNames[name.replace("system::", "")]
-	}));
+	let tabs = singleFileMode
+		? []
+		: opened.map(({ name, order }) => ({
+			id: "TAB" + Math.random().toString().replace("0.", ""),
+			name: name.split('/').pop(),
+			parent: name.split('/').slice(0,-1).join('/'),
+			touched: changed.includes(name),
+			changed: changed.includes(name),
+			active: order === 0,
+			//systemDocsName: sysDocNames[name.replace("system::", "")]
+		}));
 	container.api.update(tabs);
 	initTabs(tabs, context);
-
-	const tabsEl = document.querySelector('#tabs');
-	if(singleFileMode){
-		tabsEl.style.display = 'none';
-	} else {
-		tabsEl.style.display = '';
-	}
 };
 
 export default handler;

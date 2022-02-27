@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-27T21:59:44.184Z )
+	Version 0.4.6 ( 2022-02-27T22:21:11.549Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -24579,7 +24579,16 @@ TODO:
 	2. should probably delete (some/all ?) views (versus just hiding them)
 */ const switchEditor = async (args, context) => {
     const {editor: editor} = context;
-    const {filename: filename, mode: mode, line: line, column: column} = args;
+    const {filename: filename, mode: mode, line: line, column: column, singleFileMode: singleFileMode} = args;
+    const editorCmEl = document.querySelector("#editor-container .CodeMirror");
+    const editorTabsEl = document.querySelector("#tabs");
+    if (singleFileMode) {
+        editorTabsEl.style.display = "none";
+        editorCmEl.style.height = "100%";
+    } else {
+        editorTabsEl.style.display = "";
+        editorCmEl.style.height = "";
+    }
     //TODO: should go into loading mode first
         if (mode === "systemDoc") {
         const editorCallback = () => {
@@ -26969,8 +26978,9 @@ const getFilePath$1 = getFilePath$2(getCurrentService);
 
 const fileSelectHandler = async (event, context) => {
     const {editor: {switchEditor: switchEditor}} = context;
-    const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = event.detail;
-    const {line: line, column: column} = event.detail;
+    const {detail: detail, singleFileMode: singleFileMode} = event;
+    const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = detail;
+    const {line: line, column: column} = detail;
     /*
 	console.log(
 		`%c${name}: %ceditor %cfileSelect`,
@@ -27026,7 +27036,8 @@ const fileSelectHandler = async (event, context) => {
     switchEditor({
         filename: filePath,
         line: line,
-        column: column
+        column: column,
+        singleFileMode: singleFileMode
     }, context);
 };
 
@@ -27052,15 +27063,11 @@ const operationDoneHandler = (e, context) => {
         // setCurrentFile({
         // 	filePath: service.state.selected.path
         // });
-        /* END DUMB */        fileSelectHandler({
-            detail: service.state.selected
+        /* END DUMB */        const {selected: selected, singleFileMode: singleFileMode} = service.state;
+        fileSelectHandler({
+            detail: selected,
+            singleFileMode: singleFileMode
         }, context);
-        const editorCmEl = document.querySelector("#editor-container .CodeMirror");
-        if (service.state.singleFileMode) {
-            editorCmEl.style.height = "100%";
-        } else {
-            editorCmEl.style.height = "";
-        }
         return;
     }
 };
@@ -27353,7 +27360,7 @@ const handler$b = (e, context) => {
     if (result?.error) return;
     if (![ "read", "update" ].includes(op) || !id) return;
     const {opened: opened = [], changed: changed = [], singleFileMode: singleFileMode} = result[0]?.state || {};
-    let tabs = opened.map((({name: name, order: order}) => ({
+    let tabs = singleFileMode ? [] : opened.map((({name: name, order: order}) => ({
         id: "TAB" + Math.random().toString().replace("0.", ""),
         name: name.split("/").pop(),
         parent: name.split("/").slice(0, -1).join("/"),
@@ -27363,12 +27370,6 @@ const handler$b = (e, context) => {
     })));
     container.api.update(tabs);
     initTabs(tabs, context);
-    const tabsEl = document.querySelector("#tabs");
-    if (singleFileMode) {
-        tabsEl.style.display = "none";
-    } else {
-        tabsEl.style.display = "";
-    }
 };
 
 const handler$a = (e, {tabs: tabs}) => {

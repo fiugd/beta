@@ -28,14 +28,9 @@ const operationDoneHandler = (e, context) => {
 		// 	filePath: service.state.selected.path
 		// });
 		/* END DUMB */
-		fileSelect({ detail: service.state.selected }, context);
+		const { selected, singleFileMode } = service.state;
+		fileSelect({ detail: selected, singleFileMode }, context);
 
-		const editorCmEl = document.querySelector('#editor-container .CodeMirror');
-		if(service.state.singleFileMode){
-			editorCmEl.style.height = '100%';
-		} else {
-			editorCmEl.style.height = '';
-		}
 		return;
 	}
 };

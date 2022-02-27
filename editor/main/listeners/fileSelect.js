@@ -7,8 +7,9 @@ let firstLoad = true;
 
 const fileSelectHandler = async (event, context) => {
 	const { editor: { switchEditor } } = context;
-	const { name, path, next, nextPath, parent } = event.detail;
-	const { line, column } = event.detail;
+	const { detail, singleFileMode } = event;
+	const { name, path, next, nextPath, parent } = detail;
+	const { line, column } = detail;
 	let savedFileName;
 
 	/*
@@ -66,7 +67,7 @@ const fileSelectHandler = async (event, context) => {
 		return;
 	}
 
-	switchEditor({ filename: filePath, line, column }, context);
+	switchEditor({ filename: filePath, line, column, singleFileMode }, context);
 };
 
 export default fileSelectHandler;
