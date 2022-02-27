@@ -180,6 +180,23 @@ body:after {
 		goldenLayout.setSize(width, height);
 	});
 
+
+	const iframeSandboxPermissions = [
+		"allow-same-origin",
+		"allow-scripts",
+		"allow-popups",
+		"allow-modals",
+		"allow-downloads",
+		"allow-forms",
+		"allow-top-navigation",
+		"allow-popups-to-escape-sandbox"
+	].join(' ');
+	const iframeUrls = {
+		Tree: "/dist/tree.html",
+		Editor: "/dist/editor.html",
+		Terminal: "/dist/terminal.html",
+	};
+
 	class Action {
 		constructor(container, state){
 			//console.log(arguments);
@@ -188,6 +205,28 @@ body:after {
 			container.element.innerHTML = `
 				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(state, null, 2)}</div>
 			`;
+		}
+	}
+	
+	class Editor {
+		get rootHtmlElement() {
+			return this._root;
+		}
+		constructor(container, state){
+			this._root = document.createElement('div');
+			if(!state.file){
+				this._root.innerHTML = `
+					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
+				`;
+				return;
+			}
+
+			const iframe = document.createElement('iframe');
+			iframe.src = iframeUrls.Editor + '#' + state.file;
+			iframe.style="height:100%;width:100%;border:0;";
+			iframe.sandbox = iframeSandboxPermissions;
+			this._root.append(iframe);
+			this._root.classList.add('editor');
 		}
 	}
 
@@ -203,7 +242,7 @@ body:after {
 				#dragPane > div{ 
 					width: 100%;
 					color: #ccc;
-					font: 2vw arial;
+					font: 1.5vmax arial;
 					height: calc(100% - 22px);
 					background: #2e2e2e;
 					position: inherit;
@@ -213,19 +252,19 @@ body:after {
 			</style>
 			<div>
 				<ul>
-					<li>drag item 1</i>
-					<li>drag item 2</i>
-					<li>drag item 3</i>
-					<li>drag item 4</i>
-					<li>drag item 5</i>
+					<li>404.html</i>
+					<li>404.js</i>
+					<li>CNAME</i>
+					<li>LICENSE</i>
+					<li>README.md</i>
 				</ul>
 			</div>
 			`;
 			const element = document.createElement('div');
 			let dummy = {
-				type: 'Action',
+				type: 'Editor',
 				state: {},
-				title: 'Hello'
+				title: ''
 			};
 			let getDummy = () => JSON.parse(JSON.stringify(dummy));
 
@@ -237,7 +276,7 @@ body:after {
 					el.onpointermove = pointerMove;
 					el.setPointerCapture(ev.pointerId);
 					dummy.title = event.target.textContent.trim();
-					dummy.state = { title: event.target.textContent.trim() };
+					dummy.state = { file: event.target.textContent.trim() };
 					dragSource._componentTypeOrFtn = () => dummy;
 					dragSource._dragListener._pointerTracking = true
 					dragSource._dragListener.startDrag();
@@ -254,7 +293,7 @@ body:after {
 	const goldenLayout = new GoldenLayout(layoutContainer);
 	goldenLayout.registerComponentConstructor('Action', Action);
 	goldenLayout.registerComponentConstructor('Tree', tree(goldenLayout), true);
-	goldenLayout.registerComponentConstructor('Editor', Action);
+	goldenLayout.registerComponentConstructor('Editor', Editor, true);
 	//goldenLayout.registerComponentConstructor('Terminal', iframe('Terminal'), true);
 	goldenLayout.loadLayout(layoutConfig);
 
