@@ -225,7 +225,7 @@ body:after {
 				return;
 			}
 			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor + '?=' + componentState.file;
+			iframe.src = iframeUrls.Editor; // + '?file=' + componentState.file;
 			iframe.style="height:100%;width:100%;border:0;";
 			iframe.sandbox = iframeSandboxPermissions;
 			this._root.append(iframe);

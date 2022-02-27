@@ -61,11 +61,6 @@ const initState = (all, current) => {
 		if(x.path.startsWith('/')) return;
 		x.path = '/' + x.path;
 	});
-	if(typeof currentService.state.selected === "string" && currentService.state.selected){
-		setCurrentFile({
-			filePath: `${currentService.name}/${currentService.state.selected}`
-		});
-	}
 
 	if(fileParam){
 		currentService.state = {
@@ -76,6 +71,12 @@ const initState = (all, current) => {
 				? [currentService.state]
 				: []
 		}
+	}
+	
+	if(typeof currentService.state.selected === "string" && currentService.state.selected){
+		setCurrentFile({
+			filePath: `${currentService.name}/${currentService.state.selected}`
+		});
 	}
 };
 
