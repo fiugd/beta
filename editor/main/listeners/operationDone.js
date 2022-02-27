@@ -29,6 +29,13 @@ const operationDoneHandler = (e, context) => {
 		// });
 		/* END DUMB */
 		fileSelect({ detail: service.state.selected }, context);
+
+		const editorCmEl = document.querySelector('#editor-container .CodeMirror');
+		if(service.state.singleFileMode){
+			editorCmEl.style.height = '100%';
+		} else {
+			editorCmEl.style.height = '';
+		}
 		return;
 	}
 };

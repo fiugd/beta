@@ -32,6 +32,7 @@ if(!isRunningAsModule){
 	DEBUG && console.log(service)
 
 	initState([service], service);
+
 	rawTrigger({
 		e: {},
 		type: 'operationDone',

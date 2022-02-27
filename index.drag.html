@@ -170,11 +170,16 @@ body:after {
 	layoutConfig.root.content = layoutConfig.root.content.filter(x => {
 		if(x.title === "Tree") x.width = 20;
 		if(x.title === "Editor 3") {
-			x.componentState = { file: '404.js'}
+			x.componentState = { file: '404.js'};
+			x.title === "404.js";
 		}
 		return x.title === "Editor 3" || x.title === "Tree"
 	});
-	layoutConfig.root.content.push(layoutConfig.root.content[1])
+	layoutConfig.root.content.push({
+		...layoutConfig.root.content[1],
+		title: '404.html',
+		componentState: { file: '404.html'}
+	})
 
 	window.addEventListener('resize', () => {
 		// handling of resize event is required if GoldenLayout does not use body element
@@ -225,7 +230,7 @@ body:after {
 				return;
 			}
 			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor; // + '?file=' + componentState.file;
+			iframe.src = iframeUrls.Editor + '?file=' + componentState.file;
 			iframe.style="height:100%;width:100%;border:0;";
 			iframe.sandbox = iframeSandboxPermissions;
 			this._root.append(iframe);

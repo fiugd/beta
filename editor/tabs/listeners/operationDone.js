@@ -11,7 +11,7 @@ const handler = (e, context) => {
 	if(result?.error) return;
 	if (!["read", "update"].includes(op) || !id) return;
 
-	const { opened=[], changed=[] } = result[0]?.state || {};
+	const { opened=[], changed=[], singleFileMode } = result[0]?.state || {};
 	let tabs = opened.map(({ name, order }) => ({
 		id: "TAB" + Math.random().toString().replace("0.", ""),
 		name: name.split('/').pop(),
@@ -23,6 +23,13 @@ const handler = (e, context) => {
 	}));
 	container.api.update(tabs);
 	initTabs(tabs, context);
+
+	const tabsEl = document.querySelector('#tabs');
+	if(singleFileMode){
+		tabsEl.style.display = 'none';
+	} else {
+		tabsEl.style.display = '';
+	}
 };
 
 export default handler;

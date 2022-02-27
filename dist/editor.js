@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-27T21:31:35.082Z )
+	Version 0.4.6 ( 2022-02-27T21:59:44.184Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -27055,6 +27055,12 @@ const operationDoneHandler = (e, context) => {
         /* END DUMB */        fileSelectHandler({
             detail: service.state.selected
         }, context);
+        const editorCmEl = document.querySelector("#editor-container .CodeMirror");
+        if (service.state.singleFileMode) {
+            editorCmEl.style.height = "100%";
+        } else {
+            editorCmEl.style.height = "";
+        }
         return;
     }
 };
@@ -27346,7 +27352,7 @@ const handler$b = (e, context) => {
     const {op: op, id: id, result: result = []} = event.detail || {};
     if (result?.error) return;
     if (![ "read", "update" ].includes(op) || !id) return;
-    const {opened: opened = [], changed: changed = []} = result[0]?.state || {};
+    const {opened: opened = [], changed: changed = [], singleFileMode: singleFileMode} = result[0]?.state || {};
     let tabs = opened.map((({name: name, order: order}) => ({
         id: "TAB" + Math.random().toString().replace("0.", ""),
         name: name.split("/").pop(),
@@ -27357,6 +27363,12 @@ const handler$b = (e, context) => {
     })));
     container.api.update(tabs);
     initTabs(tabs, context);
+    const tabsEl = document.querySelector("#tabs");
+    if (singleFileMode) {
+        tabsEl.style.display = "none";
+    } else {
+        tabsEl.style.display = "";
+    }
 };
 
 const handler$a = (e, {tabs: tabs}) => {
