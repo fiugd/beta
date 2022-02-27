@@ -30,7 +30,9 @@ const getDom = (() => {
 		previewDom.innerHTML = `
 			<style>
 				#preview-container {
-					position: absolute; left:0; right:0; top:0; bottom:22px;
+					position: absolute;
+					left:0; right:0; top:0;
+					bottom:22px;
 					z-index: 9999;
 					background-color: var(--main-theme-color);
 				}
