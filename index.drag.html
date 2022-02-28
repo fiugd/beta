@@ -15,7 +15,7 @@
 	<meta name="dark-theme-color" content="#1e1e1e">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	
-	<link rel="stylesheet" href="index.css">
+	<link rel="stylesheet" href="/index.css">
 	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/goldenlayout-base.css">
 	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/themes/goldenlayout-dark-theme.css">
 </head>
@@ -47,6 +47,11 @@ body:after {
 	right: 0;
 	z-index: -1;
 }
+
+.icon:before {
+	display: inline-block;
+	padding-right: 0.3em;
+}
 /*
 .lm_item {
 	z-index:3;
@@ -77,17 +82,20 @@ body:after {
 	background: #6668;
 }
 
+.lm_header .lm_title {
+	font-size: 13px;
+}
 .lm_header, .lm_maximised .lm_header {
 	background: #262626;
 }
 
 .lm_header .lm_tab.lm_active {
-	background: #222222;
+	background: #1e1e1e;
 }
 
 .lm_header .lm_tab.lm_active.lm_focused {
 	color: #7debeb;
-	background-color: #222222;
+	background-color: #1e1e1e;
 }
 
 .lm_header .lm_tab {
@@ -168,18 +176,10 @@ body:after {
 
 	let treeConfig;
 	layoutConfig.root.content = layoutConfig.root.content.filter(x => {
-		if(x.title === "Tree") x.width = 20;
-		if(x.title === "Editor 3") {
-			x.componentState = { file: '404.js'};
-			x.title === "404.js";
-		}
-		return x.title === "Editor 3" || x.title === "Tree"
+		if(['Terminal','Action'].includes(x.componentType)) return false;
+		if(JSON.stringify(x).includes('Terminal')) return false;
+		return true;
 	});
-	layoutConfig.root.content.push({
-		...layoutConfig.root.content[1],
-		title: '404.html',
-		componentState: { file: '404.html'}
-	})
 
 	window.addEventListener('resize', () => {
 		// handling of resize event is required if GoldenLayout does not use body element
@@ -187,7 +187,6 @@ body:after {
 		const height = document.body.offsetHeight;
 		goldenLayout.setSize(width, height);
 	});
-
 
 	const iframeSandboxPermissions = [
 		"allow-same-origin",
@@ -215,20 +214,40 @@ body:after {
 			`;
 		}
 	}
-	
+
+	const iconMap = (ext) => {
+		let _ext;
+		try { _ext = (ext+'').toLowerCase(); }
+		catch(e) { console.log(ext); }
+		const icon = {
+			js: 'javascript',
+			html: 'html',
+			license: 'license',
+			md: 'info'
+		}[_ext];
+		if(!icon) console.log('no icon for: ' + ext);
+		return icon || 'default'
+	};
+
 	class Editor {
 		get rootHtmlElement() {
 			return this._root;
 		}
 		constructor(container, componentState){
 			this._root = document.createElement('div');
-			console.log(componentState)
 			if(!componentState.file){
 				this._root.innerHTML = `
 					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
 				`;
 				return;
 			}
+
+			const ext = componentState.file.split('.').slice(-1);
+			container.on( 'tab', function( tab ){
+				const title = tab.element.querySelector('.lm_title');
+				title.classList.add('icon', 'icon-' + iconMap(ext));
+			});
+
 			const iframe = document.createElement('iframe');
 			iframe.src = iframeUrls.Editor + '?file=' + componentState.file;
 			iframe.style="height:100%;width:100%;border:0;";
@@ -250,7 +269,7 @@ body:after {
 				#dragPane > div{ 
 					width: 100%;
 					color: #ccc;
-					font: 1.5vmax arial;
+					font: 1.5vh arial;
 					height: calc(100% - 22px);
 					background: #2e2e2e;
 					position: inherit;
@@ -260,11 +279,11 @@ body:after {
 			</style>
 			<div>
 				<ul>
-					<li>404.html</i>
-					<li>404.js</i>
-					<li>CNAME</i>
-					<li>LICENSE</i>
-					<li>README.md</i>
+					<li><span class="icon-html">404.html</span></li>
+					<li class="icon-javascript">404.js</li>
+					<li class="icon-default">CNAME</li>
+					<li class="icon-license">LICENSE</li>
+					<li class="icon-info">README.md</li>
 				</ul>
 			</div>
 			`;
@@ -279,21 +298,28 @@ body:after {
 			const listItems = Array.from(root.querySelectorAll('ul li'));
 			const dragSource = layout.newDragSource(root, getDummy, {}, 'drag source');
 			const pointerMove = (event) => dragSource._dragListener.onPointerMove(event);
+			const pointerUp = (el) => (event) => {
+				el.onpointermove = null;
+				el.releasePointerCapture(event.pointerId);
+				dragSource._dragListener.onPointerUp(event);
+			};
+			const pointerDown = (el) => (event) => {
+				const { button } = event;
+				if(button !== 0) return;
+				el.onpointermove = pointerMove;
+				el.onpointerup = pointerUp(el);
+				el.setPointerCapture(event.pointerId);
+
+				dragSource._componentTypeOrFtn = () => ({
+					type: 'Editor',
+					state: { file: event.target.textContent.trim() },
+					title: event.target.textContent.trim()
+				});
+				dragSource._dragListener._pointerTracking = true;
+				dragSource._dragListener.startDrag();
+			};
 			for(var el of listItems){
-				el.onpointerdown = ev => {
-					el.onpointermove = pointerMove;
-					el.setPointerCapture(ev.pointerId);
-					dummy.title = event.target.textContent.trim();
-					dummy.state = { file: event.target.textContent.trim() };
-					dragSource._componentTypeOrFtn = () => dummy;
-					dragSource._dragListener._pointerTracking = true
-					dragSource._dragListener.startDrag();
-				}
-				el.onpointerup = ev => {
-					el.onpointermove = null
-					el.releasePointerCapture(ev.pointerId);
-					dragSource._dragListener.onPointerUp(event);
-				}
+				el.onpointerdown = pointerDown(el);
 			}
 		}
 	};

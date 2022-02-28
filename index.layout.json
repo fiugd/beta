@@ -27,23 +27,32 @@
 				"popout": false,
 				"content": [
 					{
-						"title": "Editor 1",
+						"title": "404.js",
 						"type": "component",
-						"componentType": "Editor"
+						"componentType": "Editor",
+						"componentState": {
+							"file": "404.js"
+						}
 					},
 					{
-						"title": "Editor 2",
+						"title": "404.html",
 						"type": "component",
-						"componentType": "Editor"
+						"componentType": "Editor",
+						"componentState": {
+							"file": "404.html"
+						}
 					}
 				]
 			},
 			{
-				"title": "Editor 3",
+				"title": "LICENSE",
 				"type": "component",
 				"componentType": "Editor",
 				"cssClass": "noTabs",
-				"hasHeaders": true
+				"hasHeaders": true,
+				"componentState": {
+					"file": "LICENSE"
+				}
 			},
 			{
 				"type": "column",

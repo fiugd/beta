@@ -165,7 +165,7 @@ body:after {
 
 	let savedLayout;
 	try {
-		savedLayout = JSON.parse(localStorage.getItem('layout'));
+		//savedLayout = JSON.parse(localStorage.getItem('layout'));
 	}catch(e){}
 	const layoutConfig = savedLayout || await fetch('index.layout.json').then(r => r.json());
 	const layoutContainer = document.getElementById("layoutContainer");
@@ -189,7 +189,7 @@ body:after {
 	].join(' ');
 	const iframeUrls = {
 		Tree: "./dist/tree.html",
-		Editor: "./dist/editor.html",
+		Editor: "/dist/editor.html",
 		Terminal: "./dist/terminal.html",
 	};
 
@@ -211,10 +211,16 @@ body:after {
 		get rootHtmlElement() {
 			return this._root;
 		}
-		constructor(container){
+		constructor(container, componentState){
 			this._root = document.createElement('div');
+			if(!componentState.file){
+				this._root.innerHTML = `
+					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
+				`;
+				return;
+			}
 			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor;
+			iframe.src = iframeUrls.Editor + '?file=' + componentState.file;;
 			iframe.style="height:100%;width:100%;border:0;";
 			iframe.sandbox = iframeSandboxPermissions;
 			this._root.append(iframe);
