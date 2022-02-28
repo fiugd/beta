@@ -235,15 +235,17 @@ body:after {
 		}
 		constructor(container, componentState){
 			this._root = document.createElement('div');
-			if(!componentState.file){
+			const { file: filename, cssClass } = componentState;
+			if(!filename){
 				this._root.innerHTML = `
 					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
 				`;
 				return;
 			}
+			if(cssClass) console.log(cssClass);
 
-			const ext = componentState.file.split('.').slice(-1);
-			container.on( 'tab', function( tab ){
+			const ext = filename.split('.').slice(-1);
+			container.on('tab', function(tab){
 				const title = tab.element.querySelector('.lm_title');
 				title.classList.add('icon', 'icon-' + iconMap(ext));
 			});
@@ -331,6 +333,7 @@ body:after {
 	//goldenLayout.registerComponentConstructor('Terminal', iframe('Terminal'), true);
 	goldenLayout.loadLayout(layoutConfig);
 
+	/*
 	goldenLayout.on('stateChanged', function(){
 		const state = JSON.stringify( goldenLayout.saveLayout() );
 		localStorage.setItem('layout', state );
@@ -346,6 +349,15 @@ body:after {
 			item.element.classList.add(...classes);
 		}
 	});
+
+	goldenLayout.on( 'stackCreated', function( stack ){
+		console.log('stack created')
+	});
+	
+	goldenLayout.on( 'componentCreated', function( component ){
+		console.log('component created')
+	});
+	*/
 
 	window.goldenLayout = goldenLayout;
 </script>

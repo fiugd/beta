@@ -48,10 +48,10 @@
 				"title": "LICENSE",
 				"type": "component",
 				"componentType": "Editor",
-				"cssClass": "noTabs",
 				"hasHeaders": true,
 				"componentState": {
-					"file": "LICENSE"
+					"file": "LICENSE",
+					"cssClass": "noTabs"
 				}
 			},
 			{
@@ -85,6 +85,9 @@
 				]
 			}
 		]
+	},
+	"settings": {
+		"selectionEnabled": true
 	},
 	"header":{
 		"popout": false
