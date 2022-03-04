@@ -16,6 +16,7 @@ wrapper provides:
 	- utils for tracking "current pane"
 	- build system for layout
 	- identify where a frame is, let frame know this
+	- allow tab active/inactive color to be set
 
 GENERAL "NEW LAYOUT" TODO:
 	- terminal needs to load to the service it is passed in params
