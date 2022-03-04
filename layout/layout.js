@@ -15,6 +15,7 @@ wrapper provides:
 	- utils for programmatically spliting current pane
 	- utils for tracking "current pane"
 	- build system for layout
+	- identify where a frame is, let frame know this
 
 GENERAL "NEW LAYOUT" TODO:
 	- terminal needs to load to the service it is passed in params
