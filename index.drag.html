@@ -18,11 +18,13 @@
 	<link rel="stylesheet" href="/index.css">
 	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/goldenlayout-base.css">
 	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/themes/goldenlayout-dark-theme.css">
+
+	<link rel="stylesheet" href="./layout/layout.css">
 </head>
 
 <style>
 :root {
-	--status-bg: teal;
+	--status-bg: #34658d;
 }
 @media (prefers-color-scheme: dark) {
 	html { background: #1a1a1a; }
@@ -47,111 +49,6 @@ body:after {
 	right: 0;
 	z-index: -1;
 }
-
-.icon:before {
-	display: inline-block;
-	padding-right: 0.3em;
-}
-/*
-.lm_item {
-	z-index:3;
-}
-*/
-
-#layoutContainer {
-	flex: 1 1 auto;
-	height: 100%;
-}
-
-
-
-.lm_goldenlayout {
-	background: transparent !important;
-}
-.lm_content {
-	background: none !important;
-	border: 0 !important;
-}
-.lm_transition_indicator {
-	background-color: #3333 !important;
-	border: 0 !important;
-}
-.lm_dropTargetIndicator {
-	outline: 0 !important;
-	box-shadow: none !important;
-	background: #6668;
-}
-
-.lm_header .lm_title {
-	font-size: 13px;
-}
-.lm_header, .lm_maximised .lm_header {
-	background: #262626;
-}
-
-.lm_header .lm_tab.lm_active {
-	background: #1e1e1e;
-}
-
-.lm_header .lm_tab.lm_active.lm_focused {
-	color: #7debeb;
-	background-color: #1e1e1e;
-}
-
-.lm_header .lm_tab {
-	background: #363636;
-	box-shadow: none !important;
-	height: 26px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-/*
-.lm_splitter {
-	background: transparent !important;
-}
-.lm_splitter.lm_horizontal {
-	margin-left: -2.5px;
-	margin-right: -2.5px;
-}
-.lm_splitter.lm_vertical {
-	margin-top: -2.5px;
-	margin-bottom: -2.5px;
-}
-.lm_splitter:hover .lm_drag_handle {
-	background: #444444;
-	z-index:0;
-}
-*/
-
-.lm_header .lm_tab {
-	padding-right: 30px !important;
-}
-.lm_header .lm_tab .lm_close_tab {
-	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_close_white.png);
-	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.428 8L12 10.573 10.572 12 8 9.428 5.428 12 4 10.573 6.572 8 4 5.428 5.427 4 8 6.572 10.573 4 12 5.428 9.428 8z' fill='%23E8E8E8'/%3E%3C/svg%3E");
-	top: 9px;
-}
-.lm_controls {
-	top: 8px;
-}
-.lm_controls .lm_close {
-	background-image: url(../../img/lm_close_white.png);
-	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.428 8L12 10.573 10.572 12 8 9.428 5.428 12 4 10.573 6.572 8 4 5.428 5.427 4 8 6.572 10.573 4 12 5.428 9.428 8z' fill='%23E8E8E8'/%3E%3C/svg%3E");
-}
-.lm_controls .lm_maximise {
-	background-image: url(../../img/lm_maximise_white.png);
-	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_maximise_white.png);
-}
-.lm_maximised .lm_controls .lm_maximise {
-	background-image: url(../../img/lm_minimize_white.png);
-	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_minimize_white.png);
-}
-.lm_controls .lm_popout {
-	background-image: url(../../img/lm_popout_white.png);
-	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_popout_white.png);
-}
 </style>
 
 
@@ -159,21 +56,13 @@ body:after {
 	<div id="layoutContainer"></div>
 </body>
 
-<script>
-	//import layout from 'https://unpkg.com/golden-layout@2.4.0/dist/esm/index.js'
-	//console.log(layout)
+<script type="module">
+	import Layout from './layout/layout.js';
+
 	const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 	//console.log('Mode is: ' + (darkMode ? "dark" : "light"));
-</script>
-
-<script type="module">
-	import * as gl from "https://cdn.skypack.dev/golden-layout@2.4.0";
-	console.log(gl)
-	const { GoldenLayout, DragSource } = gl;
 
 	const layoutConfig = await fetch('index.layout.json').then(r => r.json());
-	const layoutContainer = document.getElementById("layoutContainer");
-
 	let treeConfig;
 	layoutConfig.root.content = layoutConfig.root.content.filter(x => {
 		if(['Terminal','Action'].includes(x.componentType)) return false;
@@ -181,185 +70,7 @@ body:after {
 		return true;
 	});
 
-	window.addEventListener('resize', () => {
-		// handling of resize event is required if GoldenLayout does not use body element
-		const width = document.body.offsetWidth;
-		const height = document.body.offsetHeight;
-		goldenLayout.setSize(width, height);
-	});
-
-	const iframeSandboxPermissions = [
-		"allow-same-origin",
-		"allow-scripts",
-		"allow-popups",
-		"allow-modals",
-		"allow-downloads",
-		"allow-forms",
-		"allow-top-navigation",
-		"allow-popups-to-escape-sandbox"
-	].join(' ');
-	const iframeUrls = {
-		Tree: "/dist/tree.html",
-		Editor: "/dist/editor.html",
-		Terminal: "/dist/terminal.html",
-	};
-
-	class Action {
-		constructor(container, componentState){
-			//console.log(arguments);
-			this.container = container;
-			container.id = 'action-bar';
-			container.element.innerHTML = `
-				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(componentState, null, 2)}</div>
-			`;
-		}
-	}
-
-	const iconMap = (ext) => {
-		let _ext;
-		try { _ext = (ext+'').toLowerCase(); }
-		catch(e) { console.log(ext); }
-		const icon = {
-			js: 'javascript',
-			html: 'html',
-			license: 'license',
-			md: 'info'
-		}[_ext];
-		if(!icon) console.log('no icon for: ' + ext);
-		return icon || 'default'
-	};
-
-	class Editor {
-		get rootHtmlElement() {
-			return this._root;
-		}
-		constructor(container, componentState){
-			this._root = document.createElement('div');
-			const { file: filename, cssClass } = componentState;
-			if(!filename){
-				this._root.innerHTML = `
-					<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
-				`;
-				return;
-			}
-			if(cssClass) console.log(cssClass);
-
-			const ext = filename.split('.').slice(-1);
-			container.on('tab', function(tab){
-				const title = tab.element.querySelector('.lm_title');
-				title.classList.add('icon', 'icon-' + iconMap(ext));
-			});
-
-			const iframe = document.createElement('iframe');
-			iframe.src = iframeUrls.Editor + '?file=' + componentState.file;
-			iframe.style="height:100%;width:100%;border:0;";
-			iframe.sandbox = iframeSandboxPermissions;
-			this._root.append(iframe);
-			this._root.classList.add('editor');
-		}
-	}
-
-	const tree = (layout) => 
-	class Tree {
-		constructor(container){
-			//console.log(arguments)
-			const root = document.createElement('div');
-			this.rootHtmlElement = root;
-			root.id = 'dragPane';
-			root.innerHTML = `
-			<style>
-				#dragPane > div{ 
-					width: 100%;
-					color: #ccc;
-					font: 1.5vh arial;
-					height: calc(100% - 22px);
-					background: #2e2e2e;
-					position: inherit;
-				}
-				ul { list-style: none; padding-left: 1em; }
-				ul li { user-select: none; }
-			</style>
-			<div>
-				<ul>
-					<li><span class="icon-html">404.html</span></li>
-					<li class="icon-javascript">404.js</li>
-					<li class="icon-default">CNAME</li>
-					<li class="icon-license">LICENSE</li>
-					<li class="icon-info">README.md</li>
-				</ul>
-			</div>
-			`;
-			const element = document.createElement('div');
-			let dummy = {
-				type: 'Editor',
-				state: {},
-				title: ''
-			};
-			let getDummy = () => JSON.parse(JSON.stringify(dummy));
-
-			const listItems = Array.from(root.querySelectorAll('ul li'));
-			const dragSource = layout.newDragSource(root, getDummy, {}, 'drag source');
-			const pointerMove = (event) => dragSource._dragListener.onPointerMove(event);
-			const pointerUp = (el) => (event) => {
-				el.onpointermove = null;
-				el.releasePointerCapture(event.pointerId);
-				dragSource._dragListener.onPointerUp(event);
-			};
-			const pointerDown = (el) => (event) => {
-				const { button } = event;
-				if(button !== 0) return;
-				el.onpointermove = pointerMove;
-				el.onpointerup = pointerUp(el);
-				el.setPointerCapture(event.pointerId);
-
-				dragSource._componentTypeOrFtn = () => ({
-					type: 'Editor',
-					state: { file: event.target.textContent.trim() },
-					title: event.target.textContent.trim()
-				});
-				dragSource._dragListener._pointerTracking = true;
-				dragSource._dragListener.startDrag();
-			};
-			for(var el of listItems){
-				el.onpointerdown = pointerDown(el);
-			}
-		}
-	};
-
-	const goldenLayout = new GoldenLayout(layoutContainer);
-	goldenLayout.registerComponentConstructor('Action', Action);
-	goldenLayout.registerComponentConstructor('Tree', tree(goldenLayout), true);
-	goldenLayout.registerComponentConstructor('Editor', Editor, true);
-	//goldenLayout.registerComponentConstructor('Terminal', iframe('Terminal'), true);
-	goldenLayout.loadLayout(layoutConfig);
-
-	/*
-	goldenLayout.on('stateChanged', function(){
-		const state = JSON.stringify( goldenLayout.saveLayout() );
-		localStorage.setItem('layout', state );
-	});
-
-	goldenLayout.on('itemCreated', function (item) {
-		console.log('itemCreated')
-		if (item?.config?.cssClass) {
-			console.log('itemCreated cssClass')
-			const classes = Array.isArray(item.config.cssClass)
-				? item.config.cssClass
-				: item.config.cssClass.split(' ');
-			item.element.classList.add(...classes);
-		}
-	});
-
-	goldenLayout.on( 'stackCreated', function( stack ){
-		console.log('stack created')
-	});
-	
-	goldenLayout.on( 'componentCreated', function( component ){
-		console.log('component created')
-	});
-	*/
-
-	window.goldenLayout = goldenLayout;
+	Layout(layoutConfig)
 </script>
 
 </html>

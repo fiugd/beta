@@ -1,0 +1,69 @@
+---
+settings:
+	selectionEnabled: true
+header:
+	popout: false
+dimensions:
+	borderWidth: 2
+	headerHeight: 32
+	minItemWidth: 30
+	dragProxyWidth: 0
+	dragProxyHeight: 0
+root:
+	type: row
+	content:
+	- title: Action
+		type: component
+		componentType: Action
+		minWidth: 45
+		width: 3
+		reorderEnabled: false
+		hasHeaders: false
+	- title: Tree
+		type: component
+		componentType: Tree
+		width: 15
+		minWidth: 200
+		hasHeaders: false
+	- type: stack
+		isClosable: true
+		width: 50
+		hasHeaders: true
+		popout: false
+		content:
+		- title: 404.js
+			type: component
+			componentType: Editor
+			componentState:
+				file: 404.js
+		- title: 404.html
+			type: component
+			componentType: Editor
+			componentState:
+				file: 404.html
+	- title: LICENSE
+		type: component
+		componentType: Editor
+		hasHeaders: true
+		componentState:
+			file: LICENSE
+			cssClass: noTabs
+	- type: column
+		content:
+		- type: stack
+			isClosable: false
+			width: 50
+			hasHeaders: true
+			content:
+			- title: Terminal
+				type: component
+				componentType: Terminal
+			- title: Terminal 2
+				type: component
+				componentType: Terminal
+		- title: Terminal 3
+			type: component
+			isClosable: false
+			componentType: Terminal
+			hasHeaders: true
+

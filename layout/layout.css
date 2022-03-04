@@ -1,0 +1,133 @@
+:root {
+	--status-bg: #34658d;
+}
+@media (prefers-color-scheme: dark) {
+	html { background: #1a1a1a; }
+}
+
+html, body{
+	height: 100%;
+	margin: 0;
+	display: flex;
+	flex-direction:column;
+	height: 100%
+}
+
+body:after {
+	display: block;
+	content: '';
+	position: absolute;
+	background: var(--status-bg);
+	bottom: 0;
+	left: 0;
+	height: 22px;
+	right: 0;
+	z-index: -1;
+}
+
+.icon:before {
+	display: inline-block;
+	padding-right: 0.3em;
+}
+/*
+.lm_item {
+	z-index:3;
+}
+*/
+
+#layoutContainer {
+	flex: 1 1 auto;
+	height: 100%;
+}
+
+.lm_goldenlayout {
+	background: transparent !important;
+}
+.lm_content {
+	background: none !important;
+	border: 0 !important;
+}
+.lm_transition_indicator {
+	background-color: #3333 !important;
+	border: 0 !important;
+}
+.lm_dropTargetIndicator {
+	outline: 0 !important;
+	box-shadow: none !important;
+	background: #6668;
+}
+
+.lm_splitter {
+	background: var(--status-bg) !important;
+}
+.lm_splitter:hover .lm_drag_handle {
+	background: var(--status-bg);
+}
+
+/*
+.lm_splitter.lm_horizontal {
+	margin-left: -2.5px;
+	margin-right: -2.5px;
+}
+.lm_splitter.lm_vertical {
+	margin-top: -2.5px;
+	margin-bottom: -2.5px;
+}
+.lm_splitter {
+	background: transparent !important;
+}
+.lm_splitter:hover .lm_drag_handle {
+	background: var(--status-bg);
+}
+*/
+
+
+.lm_header .lm_title {
+	font-size: 13px;
+}
+.lm_header, .lm_maximised .lm_header {
+	background: #262626;
+}
+
+.lm_header .lm_tab.lm_active {
+	background: #1e1e1e;
+}
+
+.lm_header .lm_tab.lm_active.lm_focused {
+	color: #7debeb;
+	background-color: #1e1e1e;
+}
+
+.lm_header .lm_tab {
+	background: #363636;
+	box-shadow: none !important;
+	height: 26px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding-right: 30px !important;
+}
+.lm_header .lm_tab .lm_close_tab {
+	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_close_white.png);
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.428 8L12 10.573 10.572 12 8 9.428 5.428 12 4 10.573 6.572 8 4 5.428 5.427 4 8 6.572 10.573 4 12 5.428 9.428 8z' fill='%23E8E8E8'/%3E%3C/svg%3E");
+	top: 9px;
+}
+.lm_controls {
+	top: 8px;
+}
+.lm_controls .lm_close {
+	background-image: url(../../img/lm_close_white.png);
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.428 8L12 10.573 10.572 12 8 9.428 5.428 12 4 10.573 6.572 8 4 5.428 5.427 4 8 6.572 10.573 4 12 5.428 9.428 8z' fill='%23E8E8E8'/%3E%3C/svg%3E");
+}
+.lm_controls .lm_maximise {
+	background-image: url(../../img/lm_maximise_white.png);
+	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_maximise_white.png);
+}
+.lm_maximised .lm_controls .lm_maximise {
+	background-image: url(../../img/lm_minimize_white.png);
+	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_minimize_white.png);
+}
+.lm_controls .lm_popout {
+	background-image: url(../../img/lm_popout_white.png);
+	background-image: url(https://cdnjs.cloudflare.com/ajax/libs/golden-layout/2.4.0/img/lm_popout_white.png);
+}
