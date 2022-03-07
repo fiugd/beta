@@ -1,3 +1,12 @@
+import layoutCSS from './layout.css' assert { type: "css" };
+
+document.adoptedStyleSheets = [
+	...document.adoptedStyleSheets,
+	layoutCSS
+];
+
+import YAML from 'https://cdn.skypack.dev/yaml';
+
 import * as gl from "https://cdn.skypack.dev/golden-layout@2.4.0";
 //import layout from 'https://unpkg.com/golden-layout@2.4.0/dist/esm/index.js'
 //console.log(layout)
@@ -29,7 +38,18 @@ GENERAL "NEW LAYOUT" TODO:
 
 
 
-const Layout = (layoutConfig) => {
+const Layout = async (layoutConfig) => {
+	if(typeof layoutConfig !== "object"){
+		const url = layoutConfig;
+		const source = await fetch(layoutConfig).then(r => r.text());
+		if(url.includes('.json')){
+			layoutConfig = JSON.parse(source);
+		}
+		if(url.includes('.yml') || url.includes('.yaml')){
+			layoutConfig = YAML.parse(source);
+		}
+	}
+	console.log(layoutConfig)
 	console.log(gl)
 	const { GoldenLayout, DragSource } = gl;
 
