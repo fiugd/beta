@@ -11,6 +11,54 @@ import * as gl from "https://cdn.skypack.dev/golden-layout@2.4.0";
 //import layout from 'https://unpkg.com/golden-layout@2.4.0/dist/esm/index.js'
 //console.log(layout)
 
+const adaptContent = (content) => {
+	for(var c of content){
+		//allow type to be used in place of componentType
+		if(!['stack', 'component', 'column', 'row'].includes(c.type)){
+			c.componentType = c.type;
+			c.type = 'component'
+		}
+		if(c.content){
+			c.content = adaptContent(c.content);
+		}
+	}
+	return content;
+}
+
+const ConfigWrapper = (config) => {
+	const layoutConfig = config;
+	const otherConfig = { content: []};
+
+	// reduced root hierarchy
+	if(config.rootType){
+		layoutConfig.root = {
+			type: config.rootType,
+			content: config.content
+		};
+		delete layoutConfig.content;
+		delete layoutConfig.rootType;
+	}
+
+	if(layoutConfig.root.content){
+		layoutConfig.root.content = adaptContent(layoutConfig.root.content);
+
+		for(var i in layoutConfig.root.content){
+			const item = layoutConfig.root.content[i];
+			if(!['Action', 'Tree'].includes(item.componentType)){
+				layoutConfig.root.content = layoutConfig.root.content.slice(i);
+				break;
+			}
+			otherConfig.content.push(item);
+		}
+	}
+
+	// TODO: any special config items should be returned as otherConfig
+	// TODO: layoutConfig should be adapted to match what GL expects
+
+	//console.log({ layoutConfig, otherConfig })
+	return { layoutConfig, otherConfig };
+}
+
 const Layout = async (layoutConfig) => {
 	if(typeof layoutConfig !== "object"){
 		const url = layoutConfig;
@@ -22,8 +70,12 @@ const Layout = async (layoutConfig) => {
 			layoutConfig = YAML.parse(source);
 		}
 	}
-	console.log(layoutConfig)
-	console.log(gl)
+	let otherConfig;
+	({ layoutConfig, ...otherConfig } = ConfigWrapper(layoutConfig));
+
+	//TODO: create non-GL components based on otherConfig.content
+
+	//console.log(gl)
 	const { GoldenLayout, DragSource } = gl;
 
 	const layoutContainer = document.getElementById("layoutContainer");
@@ -89,7 +141,7 @@ const Layout = async (layoutConfig) => {
 				`;
 				return;
 			}
-			if(cssClass) console.log(cssClass);
+			//if(cssClass) console.log(cssClass);
 
 			const ext = filename.split('.').slice(-1);
 			container.on('tab', function(tab){
@@ -111,6 +163,10 @@ const Layout = async (layoutConfig) => {
 			return this._root;
 		}
 		constructor(container){
+			container.on('tab', function(tab){
+				tab.element.classList.add('terminal');
+			});
+		
 			this._root = document.createElement('div');
 			const iframe = document.createElement('iframe');
 			iframe.src = iframeUrls.Terminal;

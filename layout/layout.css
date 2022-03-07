@@ -98,6 +98,11 @@ body:after {
 	background-color: #1e1e1e;
 }
 
+.lm_header .lm_tab.lm_active.terminal,
+.lm_header .lm_tab.lm_active.terminal.lm_focused {
+	background: #222222;
+}
+
 .lm_header .lm_tab {
 	background: #363636;
 	box-shadow: none !important;
