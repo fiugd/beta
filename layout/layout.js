@@ -71,9 +71,7 @@ const Layout = async (layoutConfig) => {
 		}
 	}
 	let otherConfig;
-	({ layoutConfig, ...otherConfig } = ConfigWrapper(layoutConfig));
-
-	//TODO: create non-GL components based on otherConfig.content
+	({ layoutConfig, otherConfig } = ConfigWrapper(layoutConfig));
 
 	//console.log(gl)
 	const { GoldenLayout, DragSource } = gl;
@@ -107,9 +105,9 @@ const Layout = async (layoutConfig) => {
 		constructor(container, componentState){
 			//console.log(arguments);
 			this.container = container;
-			container.id = 'action-bar';
+			container.element.id = 'action-bar';
 			container.element.innerHTML = `
-				<div style="background:#222222;width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;">${JSON.stringify(componentState, null, 2)}</div>
+				<div style="width:100%;height: calc(100% - 22px);color:white;white-space: pre;padding: 1em;box-sizing: border-box;"></div>
 			`;
 		}
 	}
@@ -185,19 +183,6 @@ const Layout = async (layoutConfig) => {
 			this.rootHtmlElement = root;
 			root.id = 'dragPane';
 			root.innerHTML = `
-			<style>
-				#dragPane > div{ 
-					width: 100%;
-					color: #ccc;
-					font: 13px arial;
-					height: calc(100% - 22px);
-					background: #2e2e2e;
-					position: inherit;
-				}
-				ul { list-style: none; padding-left: 1em; }
-				ul li { user-select: none; }
-			</style>
-			<div>
 				<ul>
 					<li><span class="icon-html">404.html</span></li>
 					<li class="icon-javascript">404.js</li>
@@ -205,7 +190,6 @@ const Layout = async (layoutConfig) => {
 					<li class="icon-license">LICENSE</li>
 					<li class="icon-info">README.md</li>
 				</ul>
-			</div>
 			`;
 			const element = document.createElement('div');
 			let dummy = {
@@ -244,8 +228,27 @@ const Layout = async (layoutConfig) => {
 			}
 		}
 	};
-
 	const goldenLayout = new GoldenLayout(layoutContainer);
+
+		//TODO: create non-GL components based on otherConfig.content
+	for(const component of otherConfig.content.reverse()){
+		const { componentType, componentState } = component;
+		const c = document.createElement('div');
+		if(componentType === 'Action'){
+			new Action({ element: c }, componentState || {});
+		}
+		if(componentType === 'Tree'){
+			const Tree = tree(goldenLayout);
+			const t = new Tree({}, componentState || {});
+			c.id = 'explorer';
+			c.append(t.rootHtmlElement);
+		}
+		document.body.insertAdjacentElement('afterbegin', c);
+		console.log(component)
+		//c.classList.add(componentType);
+		
+	}
+
 	goldenLayout.registerComponentConstructor('Action', Action);
 	goldenLayout.registerComponentConstructor('Tree', tree(goldenLayout), true);
 	goldenLayout.registerComponentConstructor('Editor', Editor, true);
