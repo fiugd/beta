@@ -32,7 +32,6 @@ content:
   type: Editor
   componentState:
     file: LICENSE
-    cssClass: noTabs
 - type: column
   content:
   - type: stack
@@ -45,4 +44,3 @@ content:
       type: Terminal
   - title: Terminal 3
     type: Terminal
-    isClosable: false
