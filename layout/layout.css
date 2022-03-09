@@ -41,6 +41,7 @@ body:after {
 /* 	flex: 1 1 auto; */
 	flex: 1;
 	position: relative;
+	overflow: hidden;
 }
 
 .lm_goldenlayout {
