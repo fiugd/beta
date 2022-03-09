@@ -78,13 +78,12 @@ const Layout = async (layoutConfig) => {
 
 	const layoutContainer = document.getElementById("layoutContainer");
 
-	// layoutContainer.addEventListener('resize', () => {
-	// console.log('resize happened')
-	// 	// handling of resize event is required if GoldenLayout does not use body element
-	// 	const width = layoutContainer.offsetWidth;
-	// 	const height = layoutContainer.offsetHeight;
-	// 	goldenLayout.setSize(width, height);
-	// });
+	document.body.addEventListener('resize', () => {
+		// handling of resize event is required if GoldenLayout does not use body element
+		const width = layoutContainer.offsetWidth;
+		const height = layoutContainer.offsetHeight;
+		goldenLayout.setSize(width, height);
+	});
 	
 	const ro = new ResizeObserver(entries => {
 		// for (const entry of entries) {
