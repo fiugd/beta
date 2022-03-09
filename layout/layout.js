@@ -78,12 +78,31 @@ const Layout = async (layoutConfig) => {
 
 	const layoutContainer = document.getElementById("layoutContainer");
 
-	window.addEventListener('resize', () => {
-		// handling of resize event is required if GoldenLayout does not use body element
-		const width = document.body.offsetWidth;
-		const height = document.body.offsetHeight;
+	// layoutContainer.addEventListener('resize', () => {
+	// console.log('resize happened')
+	// 	// handling of resize event is required if GoldenLayout does not use body element
+	// 	const width = layoutContainer.offsetWidth;
+	// 	const height = layoutContainer.offsetHeight;
+	// 	goldenLayout.setSize(width, height);
+	// });
+	
+	const ro = new ResizeObserver(entries => {
+		// for (const entry of entries) {
+		// 	const cr = entry.contentRect;
+		// 	const {
+		// 		width,
+		// 		height,
+		// 		top,
+		// 		left
+		// 	} = cr
+		// 	console.log(entry.target);
+		// 	console.log(width, height, top, left)
+		// }
+		const width = layoutContainer.offsetWidth;
+		const height = layoutContainer.offsetHeight;
 		goldenLayout.setSize(width, height);
 	});
+	ro.observe(layoutContainer);
 
 	const iframeSandboxPermissions = [
 		"allow-same-origin",
@@ -181,7 +200,7 @@ const Layout = async (layoutConfig) => {
 			//console.log(arguments)
 			const root = document.createElement('div');
 			this.rootHtmlElement = root;
-			root.id = 'dragPane';
+			root.classList.add('drag-pane');
 			root.innerHTML = `
 				<ul>
 					<li><span class="icon-html">404.html</span></li>
@@ -229,6 +248,8 @@ const Layout = async (layoutConfig) => {
 		}
 	};
 	const goldenLayout = new GoldenLayout(layoutContainer);
+	//goldenLayout.resizeWithContainerAutomatically = true;
+	//goldenLayout.resizeDebounceExtendedWhenPossible = false;
 
 		//TODO: create non-GL components based on otherConfig.content
 	for(const component of otherConfig.content.reverse()){
@@ -242,6 +263,28 @@ const Layout = async (layoutConfig) => {
 			const t = new Tree({}, componentState || {});
 			c.id = 'explorer';
 			c.append(t.rootHtmlElement);
+			const dragHandle = document.createElement('div');
+			dragHandle.classList.add('drag-handle');
+
+			//TODO: snap closed effect
+			//const minWidth = Number((c.style.minWidth+'').replace('px', ''));
+			let originalX, originalW;
+			dragHandle.onpointerdown = (e) => {
+				originalX = e.pageX;
+				originalW = t.rootHtmlElement.clientWidth;
+				dragHandle.setPointerCapture(e.pointerId);
+				dragHandle.onpointermove = (e) => {
+					const width = originalW + e.pageX - originalX;
+					//if(minWidth >= width) return;
+					c.style.width = width + 'px';
+				};
+				dragHandle.onpointerup = (e) => {
+					dragHandle.releasePointerCapture(e.pointerId);
+					dragHandle.onpointermove = null;
+					dragHandle.onpointerup = null;
+				};
+			};
+			c.append(dragHandle);
 		}
 		document.body.insertAdjacentElement('afterbegin', c);
 		console.log(component)

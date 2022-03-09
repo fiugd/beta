@@ -150,15 +150,36 @@ body:after {
 #explorer {
 	min-width: 250px;
 	height: 100%;
+	position: relative;
+	top: 0;
+/* 	resize: horizontal; */
 }
-#explorer > div { 
+#explorer .drag-pane { 
 	width: 100%;
 	color: #ccc;
 	font: 13px arial;
 	height: calc(100% - 22px);
 	background: #222;
-	position: inherit;
+	position: absolute;
 	padding-top: 1em;
 }
 #explorer ul { list-style: none; padding-left: 1em; margin: 0; }
 #explorer ul li { user-select: none; }
+
+#explorer .drag-handle {
+	content: '';
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 5px;
+	cursor: ew-resize;
+	background: var(--status-bg);
+	opacity: 0;
+	transition: opacity 0s;
+}
+#explorer .drag-handle:hover {
+	opacity: 1;
+	transition: opacity .5s;
+}
