@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-02-27T05:33:52.837Z )
+	Version 0.4.6 ( 2022-03-11T23:56:33.071Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -4123,6 +4123,8 @@ const BEL = "";
 
 const SEP = ";";
 
+const isTerminalApp = process$1.env.TERM_PROGRAM === "Apple_Terminal";
+
 const ansiEscapes = {};
 
 ansiEscapes.cursorTo = (x, y) => {
@@ -4163,9 +4165,9 @@ ansiEscapes.cursorBackward = (count = 1) => ESC + count + "D";
 
 ansiEscapes.cursorLeft = ESC + "G";
 
-ansiEscapes.cursorSavePosition = ESC + "s";
+ansiEscapes.cursorSavePosition = isTerminalApp ? "7" : ESC + "s";
 
-ansiEscapes.cursorRestorePosition = ESC + "u";
+ansiEscapes.cursorRestorePosition = isTerminalApp ? "8" : ESC + "u";
 
 ansiEscapes.cursorGetPosition = ESC + "6n";
 
@@ -5470,6 +5472,56 @@ var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
         keyHandler: keyHandler
     };
 };
+
+/*
+TODO:
+ - handles left and right arrow keys + editing
+ - handles tab completion
+ - maybe bring other code into here (history, etc)
+
+also see https://github.com/wavesoft/local-echo
+*/ class CommandLineAddon {
+    _terminal;
+    _disposables=[];
+    _cursor=0;
+    constructor({setBuffer: setBuffer, getBuffer: getBuffer}) {
+        this.setBuffer = setBuffer;
+        this.getBuffer = getBuffer;
+    }
+    activate(terminal) {
+        this._terminal = terminal;
+        this._disposables.push(terminal.onData((data => this._onData(data))));
+        this._disposables.push(terminal.onBinary((data => this._onBinary(data))));
+    }
+    dispose() {
+        for (const d of this._disposables) {
+            d.dispose();
+        }
+    }
+    _onData(data) {
+        const buffer = this.getBuffer();
+        console.log(buffer);
+        console.log(this._cursor);
+        // if cursor is not set to end and char is got
+        // make sure buffer is updated correctly
+                if ([ "[C" ].includes(data.substr(1))) {
+            this._terminal.write(data);
+            this._cursor = this._cursor + 1;
+            return;
+        }
+        if ([ "[D" ].includes(data.substr(1))) {
+            if (this._cursor <= 0) return;
+            this._terminal.write(data);
+            this._cursor = this._cursor - 1;
+            return;
+        }
+        this._cursor = this._cursor + 1;
+    }
+    _onBinary(data) {
+        console.log("got binary");
+        console.log(data);
+    }
+}
 
 /*!
 	from https://beta.fiug.dev/package.json
@@ -6867,6 +6919,11 @@ const prompt$1 = async (term, ops) => {
 };
 
 var Lib = ({term: term, ops: ops, setBuffer: setBuffer, getBuffer: getBuffer, setRunning: setRunning, getRunning: getRunning, comm: comm}) => {
+    const cliAddon = new CommandLineAddon({
+        setBuffer: setBuffer,
+        getBuffer: getBuffer
+    });
+    term.loadAddon(cliAddon);
     const showPrompt = async () => await prompt$1(term, ops);
     const writeLine = term.write.bind(term);
     const eraseLine = () => {

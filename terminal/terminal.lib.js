@@ -1,3 +1,4 @@
+import CommandLineAddon from './addons/xterm-addon-command-line.js';
 import packageJson from "/package.json" assert { type: "json" };
 import { chalk } from './terminal.utils.js';
 
@@ -91,6 +92,9 @@ const prompt = async (term, ops) => {
 };
 
 export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm }) => {
+	const cliAddon = new CommandLineAddon({ setBuffer, getBuffer });
+	term.loadAddon(cliAddon);
+
 	const showPrompt = async () => await prompt(term, ops);
 	const writeLine = term.write.bind(term);
 	const eraseLine = () => {
