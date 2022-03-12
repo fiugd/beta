@@ -34,8 +34,8 @@ export default class CommandLineAddon {
 
 	_onData(data){
 		const buffer = this.getBuffer();
-		console.log(buffer);
-		console.log(this._cursor);
+		// console.log(buffer);
+		// console.log(this._cursor);
 
 		// if cursor is not set to end and char is got
 		// make sure buffer is updated correctly

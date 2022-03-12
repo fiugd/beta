@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-11T23:56:33.071Z )
+	Version 0.4.6 ( 2022-03-12T00:02:24.348Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5499,9 +5499,9 @@ also see https://github.com/wavesoft/local-echo
         }
     }
     _onData(data) {
-        const buffer = this.getBuffer();
-        console.log(buffer);
-        console.log(this._cursor);
+        this.getBuffer();
+        // console.log(buffer);
+        // console.log(this._cursor);
         // if cursor is not set to end and char is got
         // make sure buffer is updated correctly
                 if ([ "[C" ].includes(data.substr(1))) {
