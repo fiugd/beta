@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-14T01:05:08.345Z )
+	Version 0.4.6 ( 2022-03-14T16:56:55.032Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5428,7 +5428,9 @@ there may be an easier way to handle copy/paste
 
 https://github.com/xtermjs/xtermjs.org/pull/128/files#diff-668881c29904cdf1945728abb06b4933d7829e6aec6c66e6f651acc93cf4dd71R23-R37
 
-*/ const getKeysToBubbleUp = () => {
+*/ const DEBUG$1 = document.URL.includes("beta.fiug.dev/fiugd/beta/dist");
+
+const getKeysToBubbleUp = () => {
     const F5 = 116;
     const F11 = 122;
     return [ F5, F11 ];
@@ -5463,6 +5465,7 @@ var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
         if (keys[key]) return keys[key](e);
         if (!mods.printable) return;
         if (termKey.length !== 1) return;
+        if (DEBUG$1) return;
         history.updateBuffer();
         const buffer = getBuffer();
         setBuffer(buffer + termKey);
@@ -5481,7 +5484,9 @@ TODO:
  - maybe bring other code into here (history, etc)
 
 also see https://github.com/wavesoft/local-echo
-*/ class CommandLineAddon {
+*/ const DEBUG = document.URL.includes("beta.fiug.dev/fiugd/beta/dist");
+
+class CommandLineAddon {
     _terminal;
     _disposables=[];
     _cursor=0;
@@ -5508,8 +5513,14 @@ also see https://github.com/wavesoft/local-echo
         }
         // if cursor is not set to end and char is got
         // make sure buffer is updated correctly
-        //console.log(data.substr(1))
-                switch (data.substr(1)) {
+                DEBUG && console.log(data);
+        switch (data.substr(1)) {
+          case "[A":
+ //up arrow
+                      case "[B":
+            //down arrow
+            break;
+
           case "[C":
             this._terminal.write(data);
             this._cursor = this._cursor + 1;
@@ -5520,8 +5531,34 @@ also see https://github.com/wavesoft/local-echo
             this._terminal.write(data);
             this._cursor = this._cursor - 1;
             break;
+
+          default:
+            if (!DEBUG) break;
+            if (buffer.length - this._cursor > 0) {
+                if (data === "") {
+                    // BACKSPACE
+                    console.log("backspace");
+                    this._terminal.write(" ");
+                    break;
+                }
+                this._terminal.write(data + buffer.slice(this._cursor));
+                new Array(buffer.length - this._cursor).fill().forEach((x => this._terminal.write("[D")));
+                this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
+            } else {
+                if (data === "") {
+                    // BACKSPACE
+                    break;
+                }
+                this._terminal.write(data);
+                this.setBuffer(buffer + data);
+            }
+            this._cursor = this._cursor + 1;
+            break;
         }
-        //console.log({ buffer, cursor: this._cursor });
+        DEBUG && console.log({
+            buffer: this.getBuffer(),
+            cursor: this._cursor
+        });
         //this._cursor = this._cursor + 1;
         }
     _onBinary(data) {

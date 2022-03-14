@@ -6,6 +6,9 @@ TODO:
 
 also see https://github.com/wavesoft/local-echo
 */
+const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
+
+
 export default class CommandLineAddon {
 	_terminal;
 	_disposables = [];
@@ -42,8 +45,11 @@ export default class CommandLineAddon {
 
 		// if cursor is not set to end and char is got
 		// make sure buffer is updated correctly
-		//console.log(data.substr(1))
+		DEBUG && console.log(data)
 		switch(data.substr(1)) {
+			case '[A': //up arrow
+			case '[B': //down arrow
+				break;
 			case '[C':
 				this._terminal.write(data);
 				this._cursor = this._cursor + 1;
@@ -54,24 +60,29 @@ export default class CommandLineAddon {
 				this._cursor = this._cursor - 1;
 				break;
 			default:
-				// if(buffer.length - this._cursor > 0){
-				// 	if(data === "\x7F"){ // BACKSPACE
-				// 		console.log('backspace')
-				// 		this._terminal.write(' ');
-				// 		break;
-				// 	}
-				// 	this._terminal.write(data + buffer.slice(this._cursor));
-				// 	new Array(buffer.length - this._cursor).fill().forEach(x => this._terminal.write('\x1b[D'));
-				// 	this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
-				// } else {
-				// 	this._terminal.write(data);
-				// 	this.setBuffer(buffer + data);
-				// }
-				// this._cursor = this._cursor + 1;
+				if(!DEBUG) break;
+
+				if(buffer.length - this._cursor > 0){
+					if(data === "\x7F"){ // BACKSPACE
+						console.log('backspace')
+						this._terminal.write(' ');
+						break;
+					}
+					this._terminal.write(data + buffer.slice(this._cursor));
+					new Array(buffer.length - this._cursor).fill().forEach(x => this._terminal.write('\x1b[D'));
+					this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
+				} else {
+					if(data === "\x7F"){ // BACKSPACE
+						break;
+					}
+					this._terminal.write(data);
+					this.setBuffer(buffer + data);
+				}
+				this._cursor = this._cursor + 1;
 				break;
 		}
 
-		//console.log({ buffer, cursor: this._cursor });
+		DEBUG && console.log({ buffer: this.getBuffer(), cursor: this._cursor });
 
 		//this._cursor = this._cursor + 1;
 	}
