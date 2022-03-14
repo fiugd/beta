@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-12T00:02:24.348Z )
+	Version 0.4.6 ( 2022-03-14T00:06:19.952Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5464,9 +5464,10 @@ var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
         if (!mods.printable) return;
         if (termKey.length !== 1) return;
         history.updateBuffer();
-        setBuffer(getBuffer() + termKey);
-        writeLine(termKey);
-    };
+        // 		const buffer = getBuffer();
+        // 		setBuffer(buffer + termKey);
+        // 		writeLine(termKey);
+        };
     return {
         bubbleHandler: bubbleHandler,
         keyHandler: keyHandler
@@ -5484,6 +5485,7 @@ also see https://github.com/wavesoft/local-echo
     _terminal;
     _disposables=[];
     _cursor=0;
+    _currentLine;
     constructor({setBuffer: setBuffer, getBuffer: getBuffer}) {
         this.setBuffer = setBuffer;
         this.getBuffer = getBuffer;
@@ -5499,24 +5501,50 @@ also see https://github.com/wavesoft/local-echo
         }
     }
     _onData(data) {
-        this.getBuffer();
-        // console.log(buffer);
-        // console.log(this._cursor);
+        const buffer = this.getBuffer();
+        if (buffer !== this._currentLine) {
+            this._currentLine = buffer;
+            this._cursor = buffer.length;
+        }
         // if cursor is not set to end and char is got
         // make sure buffer is updated correctly
-                if ([ "[C" ].includes(data.substr(1))) {
+                console.log(data.substr(1));
+        switch (data.substr(1)) {
+          case "[C":
             this._terminal.write(data);
             this._cursor = this._cursor + 1;
-            return;
-        }
-        if ([ "[D" ].includes(data.substr(1))) {
-            if (this._cursor <= 0) return;
+            break;
+
+          case "[D":
+            if (this._cursor <= 0) break;
             this._terminal.write(data);
             this._cursor = this._cursor - 1;
-            return;
+            break;
+
+          default:
+            if (data === "") {
+                // BACKSPACE
+                console.log("backspace");
+                this._terminal.write(" ");
+                break;
+            }
+            if (buffer.length - this._cursor > 0) {
+                this._terminal.write(data + buffer.slice(this._cursor));
+                new Array(buffer.length - this._cursor).fill().forEach((x => this._terminal.write("[D")));
+                this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
+            } else {
+                this._terminal.write(data);
+                this.setBuffer(buffer + data);
+            }
+            this._cursor = this._cursor + 1;
+            break;
         }
-        this._cursor = this._cursor + 1;
-    }
+        console.log({
+            buffer: buffer,
+            cursor: this._cursor
+        });
+        //this._cursor = this._cursor + 1;
+        }
     _onBinary(data) {
         console.log("got binary");
         console.log(data);
@@ -6931,7 +6959,11 @@ var Lib = ({term: term, ops: ops, setBuffer: setBuffer, getBuffer: getBuffer, se
         term.write("[2K\r");
     };
     const eraseToPrompt = () => eraseLine() & writePromptIndicator(term);
-    const setLine = replace => eraseToPrompt() & term.write(replace);
+    const setLine = replace => {
+        eraseToPrompt();
+        term.write(replace);
+        setBuffer(replace);
+    };
     const history = ops.find((x => x.keyword === "history"));
     history.writeLine = writeLine;
  //NOTE: hate to do this..

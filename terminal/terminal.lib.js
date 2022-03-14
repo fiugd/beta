@@ -102,7 +102,11 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 		term.write('\x1B[2K\r');
 	}
 	const eraseToPrompt = () => eraseLine() & writePromptIndicator(term);
-	const setLine = (replace) => eraseToPrompt() & term.write(replace);
+	const setLine = (replace) => {
+		eraseToPrompt();
+		term.write(replace);
+		setBuffer(replace)
+	}
 
 	const history = ops.find(x => x.keyword === "history");
 	history.writeLine = writeLine; //NOTE: hate to do this..
