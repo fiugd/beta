@@ -42,7 +42,7 @@ export default class CommandLineAddon {
 
 		// if cursor is not set to end and char is got
 		// make sure buffer is updated correctly
-		console.log(data.substr(1))
+		//console.log(data.substr(1))
 		switch(data.substr(1)) {
 			case '[C':
 				this._terminal.write(data);

@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-14T01:00:35.387Z )
+	Version 0.4.6 ( 2022-03-14T01:05:08.345Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5508,8 +5508,8 @@ also see https://github.com/wavesoft/local-echo
         }
         // if cursor is not set to end and char is got
         // make sure buffer is updated correctly
-                console.log(data.substr(1));
-        switch (data.substr(1)) {
+        //console.log(data.substr(1))
+                switch (data.substr(1)) {
           case "[C":
             this._terminal.write(data);
             this._cursor = this._cursor + 1;
