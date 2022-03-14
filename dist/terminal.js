@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-14T00:06:19.952Z )
+	Version 0.4.6 ( 2022-03-14T01:00:35.387Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5464,10 +5464,10 @@ var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
         if (!mods.printable) return;
         if (termKey.length !== 1) return;
         history.updateBuffer();
-        // 		const buffer = getBuffer();
-        // 		setBuffer(buffer + termKey);
-        // 		writeLine(termKey);
-        };
+        const buffer = getBuffer();
+        setBuffer(buffer + termKey);
+        writeLine(termKey);
+    };
     return {
         bubbleHandler: bubbleHandler,
         keyHandler: keyHandler
@@ -5520,29 +5520,8 @@ also see https://github.com/wavesoft/local-echo
             this._terminal.write(data);
             this._cursor = this._cursor - 1;
             break;
-
-          default:
-            if (data === "") {
-                // BACKSPACE
-                console.log("backspace");
-                this._terminal.write(" ");
-                break;
-            }
-            if (buffer.length - this._cursor > 0) {
-                this._terminal.write(data + buffer.slice(this._cursor));
-                new Array(buffer.length - this._cursor).fill().forEach((x => this._terminal.write("[D")));
-                this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
-            } else {
-                this._terminal.write(data);
-                this.setBuffer(buffer + data);
-            }
-            this._cursor = this._cursor + 1;
-            break;
         }
-        console.log({
-            buffer: buffer,
-            cursor: this._cursor
-        });
+        //console.log({ buffer, cursor: this._cursor });
         //this._cursor = this._cursor + 1;
         }
     _onBinary(data) {

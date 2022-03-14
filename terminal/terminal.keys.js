@@ -53,9 +53,9 @@ export default ({ lib, getBuffer, setBuffer }) => {
 		if (termKey.length !== 1) return;
 
 		history.updateBuffer();
-// 		const buffer = getBuffer();
-// 		setBuffer(buffer + termKey);
-// 		writeLine(termKey);
+		const buffer = getBuffer();
+		setBuffer(buffer + termKey);
+		writeLine(termKey);
 	};
 
 	return { bubbleHandler, keyHandler };

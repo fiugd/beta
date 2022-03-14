@@ -54,24 +54,24 @@ export default class CommandLineAddon {
 				this._cursor = this._cursor - 1;
 				break;
 			default:
-				if(data === "\x7F"){ // BACKSPACE
-					console.log('backspace')
-					this._terminal.write(' ');
-					break;
-				}
-				if(buffer.length - this._cursor > 0){
-					this._terminal.write(data + buffer.slice(this._cursor));
-					new Array(buffer.length - this._cursor).fill().forEach(x => this._terminal.write('\x1b[D'));
-					this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
-				} else {
-					this._terminal.write(data);
-					this.setBuffer(buffer + data);
-				}
-				this._cursor = this._cursor + 1;
+				// if(buffer.length - this._cursor > 0){
+				// 	if(data === "\x7F"){ // BACKSPACE
+				// 		console.log('backspace')
+				// 		this._terminal.write(' ');
+				// 		break;
+				// 	}
+				// 	this._terminal.write(data + buffer.slice(this._cursor));
+				// 	new Array(buffer.length - this._cursor).fill().forEach(x => this._terminal.write('\x1b[D'));
+				// 	this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
+				// } else {
+				// 	this._terminal.write(data);
+				// 	this.setBuffer(buffer + data);
+				// }
+				// this._cursor = this._cursor + 1;
 				break;
 		}
 
-		console.log({ buffer, cursor: this._cursor });
+		//console.log({ buffer, cursor: this._cursor });
 
 		//this._cursor = this._cursor + 1;
 	}
