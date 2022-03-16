@@ -4,7 +4,7 @@ there may be an easier way to handle copy/paste
 https://github.com/xtermjs/xtermjs.org/pull/128/files#diff-668881c29904cdf1945728abb06b4933d7829e6aec6c66e6f651acc93cf4dd71R23-R37
 
 */
-const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
+//const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
 
 const getKeysToBubbleUp = () => {
 	const F5 = 116;
@@ -16,7 +16,7 @@ const getKeys = (lib) => ({
 	ArrowUp: lib.history.prev,
 	ArrowDown: lib.history.next,
 	Enter: lib.enterCommand,
-	Backspace: lib.backspaceCommand,
+	Backspace: () => {},  //lib.backspaceCommand,
 	controlc: lib.copyKillCommand,
 	controlv: lib.pasteCommand,
 	controla: lib.selectAll,
@@ -53,11 +53,12 @@ export default ({ lib, getBuffer, setBuffer }) => {
 		if (!mods.printable) return;
 		if (termKey.length !== 1) return;
 
-		if(DEBUG) return;
-		history.updateBuffer();
-		const buffer = getBuffer();
-		setBuffer(buffer + termKey);
-		writeLine(termKey);
+		//if(DEBUG)
+		return;
+		// history.updateBuffer();
+		// const buffer = getBuffer();
+		// setBuffer(buffer + termKey);
+		// writeLine(termKey);
 	};
 
 	return { bubbleHandler, keyHandler };

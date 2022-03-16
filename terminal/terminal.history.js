@@ -1,3 +1,5 @@
+//const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
+
 const alotOfEvents = [
 	'ui', 'fileClose', 'fileSelect', 'operations', 'operationDone', 'contextmenu',
 	'contextmenu-select'

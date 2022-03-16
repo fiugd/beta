@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-03-14T16:56:55.032Z )
+	Version 0.4.6 ( 2022-03-16T04:03:36.499Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -5353,7 +5353,9 @@ const Git = (term, comm) => ({
     event: Array.isArray(opConfig.event) ? opConfig.event : [ opConfig.event ],
     required: (opConfig.args || []).filter((x => x.required)).map((x => x.name)),
     help: () => commandHelp$1(opConfig)
-});
+})
+//const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
+;
 
 const alotOfEvents = [ "ui", "fileClose", "fileSelect", "operations", "operationDone", "contextmenu", "contextmenu-select" ];
 
@@ -5428,8 +5430,8 @@ there may be an easier way to handle copy/paste
 
 https://github.com/xtermjs/xtermjs.org/pull/128/files#diff-668881c29904cdf1945728abb06b4933d7829e6aec6c66e6f651acc93cf4dd71R23-R37
 
-*/ const DEBUG$1 = document.URL.includes("beta.fiug.dev/fiugd/beta/dist");
-
+*/
+//const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
 const getKeysToBubbleUp = () => {
     const F5 = 116;
     const F11 = 122;
@@ -5440,14 +5442,14 @@ const getKeys = lib => ({
     ArrowUp: lib.history.prev,
     ArrowDown: lib.history.next,
     Enter: lib.enterCommand,
-    Backspace: lib.backspaceCommand,
+    Backspace: () => {},
+    //lib.backspaceCommand,
     controlc: lib.copyKillCommand,
     controlv: lib.pasteCommand,
     controla: lib.selectAll
 });
 
 var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
-    const {writeLine: writeLine, history: history} = lib;
     const keys = getKeys(lib);
     const keysToBubbleUp = getKeysToBubbleUp();
     const bubbleHandler = ({which: which, keyCode: keyCode}) => {
@@ -5465,12 +5467,13 @@ var Keys = ({lib: lib, getBuffer: getBuffer, setBuffer: setBuffer}) => {
         if (keys[key]) return keys[key](e);
         if (!mods.printable) return;
         if (termKey.length !== 1) return;
-        if (DEBUG$1) return;
-        history.updateBuffer();
-        const buffer = getBuffer();
-        setBuffer(buffer + termKey);
-        writeLine(termKey);
-    };
+        //if(DEBUG)
+                return;
+        // history.updateBuffer();
+        // const buffer = getBuffer();
+        // setBuffer(buffer + termKey);
+        // writeLine(termKey);
+        };
     return {
         bubbleHandler: bubbleHandler,
         keyHandler: keyHandler
@@ -5484,13 +5487,14 @@ TODO:
  - maybe bring other code into here (history, etc)
 
 also see https://github.com/wavesoft/local-echo
-*/ const DEBUG = document.URL.includes("beta.fiug.dev/fiugd/beta/dist");
-
+*/
+//const DEBUG = document.URL.includes('beta.fiug.dev/fiugd/beta/dist');
 class CommandLineAddon {
     _terminal;
     _disposables=[];
     _cursor=0;
     _currentLine;
+    _history=[];
     constructor({setBuffer: setBuffer, getBuffer: getBuffer}) {
         this.setBuffer = setBuffer;
         this.getBuffer = getBuffer;
@@ -5507,18 +5511,39 @@ class CommandLineAddon {
     }
     _onData(data) {
         const buffer = this.getBuffer();
+        const prevLine = this._currentLine;
+        const prevCursor = this._cursor;
         if (buffer !== this._currentLine) {
             this._currentLine = buffer;
             this._cursor = buffer.length;
         }
-        // if cursor is not set to end and char is got
-        // make sure buffer is updated correctly
-                DEBUG && console.log(data);
+        if (data === "\r") {
+            this._cursor = 0;
+            this._currentLine = "";
+            this.setBuffer("");
+            return;
+        }
         switch (data.substr(1)) {
           case "[A":
- //up arrow
-                      case "[B":
+            //up arrow
+            if (this._history.length && this._history[this._history.length - 1] === buffer) break;
+            this._history.push({
+                buffer: prevLine || "",
+                cursor: prevCursor || 0
+            });
+            break;
+
+          case "[B":
             //down arrow
+            const historyItem = this._history.pop();
+            if (historyItem === undefined) return;
+            const {buffer: buff, cursor: cursor} = historyItem;
+            if (buff === undefined) break;
+            this.setBuffer(buff);
+            this._cursor = cursor;
+            if (this._history.length) break;
+            new Array(buffer.length).fill().forEach((x => this._terminal.write("\b \b")));
+            this._terminal.write(buff);
             break;
 
           case "[C":
@@ -5533,34 +5558,37 @@ class CommandLineAddon {
             break;
 
           default:
-            if (!DEBUG) break;
             if (buffer.length - this._cursor > 0) {
                 if (data === "") {
                     // BACKSPACE
-                    console.log("backspace");
-                    this._terminal.write(" ");
+                    if (this._cursor <= 0) return;
+                    this.setBuffer(buffer.slice(0, this._cursor - 1) + buffer.slice(this._cursor));
+                    this._terminal.write("[D" + buffer.slice(this._cursor) + " ");
+                    new Array(buffer.length - this._cursor + 1).fill().forEach((x => this._terminal.write("[D")));
+                    this._cursor = this._cursor - 1;
                     break;
                 }
                 this._terminal.write(data + buffer.slice(this._cursor));
                 new Array(buffer.length - this._cursor).fill().forEach((x => this._terminal.write("[D")));
                 this.setBuffer(buffer.slice(0, this._cursor) + data + buffer.slice(this._cursor));
+                this._cursor = this._cursor + 1;
             } else {
                 if (data === "") {
                     // BACKSPACE
+                    if (this._cursor <= 0) return;
+                    this.setBuffer(buffer.slice(0, -1));
+                    this._cursor = this._cursor - 1;
+                    this._terminal.write("\b \b");
                     break;
                 }
                 this._terminal.write(data);
                 this.setBuffer(buffer + data);
+                this._cursor = this._cursor + 1;
             }
-            this._cursor = this._cursor + 1;
             break;
         }
-        DEBUG && console.log({
-            buffer: this.getBuffer(),
-            cursor: this._cursor
-        });
-        //this._cursor = this._cursor + 1;
-        }
+        this._currentLine = this.getBuffer();
+    }
     _onBinary(data) {
         console.log("got binary");
         console.log(data);
