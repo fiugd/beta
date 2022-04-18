@@ -1,4 +1,4 @@
-import "./Listeners.mjs";
+import "../_/modules/Listeners.mjs";
 
 const iframeSandboxPermissions = [
 	"allow-same-origin",
