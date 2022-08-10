@@ -62,7 +62,7 @@ const init = async ({ cacheName }) => {
 			return response;
 		}
 
-		let { contentType } = utils.getMime(event.request.url) || {};
+		let { contentType } = utils.getMime(event.request.url.split('?').shift()) || {};
 		if (!contentType && serviceAPIMatch && !res?.type) {
 			({ contentType } = utils.getMime(".json"));
 		}
