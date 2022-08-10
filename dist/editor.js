@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-02-27T22:43:35.443Z )
+	Version 0.4.6 ( 2022-08-10T16:08:24.549Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -27849,6 +27849,18 @@ var events = {
 
 //import indexCSS from '../index.css';
 document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$3 ];
+
+// used by @fiug/layout to determin active pane
+document.body.addEventListener("pointerdown", (() => {
+    window.top.postMessage({
+        triggerEvent: {
+            type: "cursorActivity"
+        },
+        detail: {
+            source: "Editor " + getClientId()
+        }
+    }, location);
+}));
 
 attachEvents(events, {
     editor: Editor$1,

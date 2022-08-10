@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2022-02-27T03:41:18.133Z )
+	Version 0.4.6 ( 2022-08-10T14:57:08.999Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3684,5 +3684,16 @@ document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet ];
 attachEvents(events, {
     tree: TreeView$1
 });
+
+document.body.addEventListener("pointerdown", (() => {
+    window.top.postMessage({
+        triggerEvent: {
+            type: "cursorActivity"
+        },
+        detail: {
+            source: "Tree " + getClientId()
+        }
+    }, location);
+}));
 
 devHelper.module();

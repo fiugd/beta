@@ -35,7 +35,20 @@ const callWithRetry = async (fn, depth = 0, max) => {
 		await delay(1.3 ** depth * 1000);
 		return callWithRetry(fn, depth + 1);
 	}
-}
+};
+
+
+// used by @fiug/layout to determin active pane
+document.body.addEventListener('pointerdown', () => {
+	window.top.postMessage({
+		triggerEvent: {
+			type: 'cursorActivity',
+		},
+		detail: {
+			source: 'Terminal'
+		}
+	}, location);
+});
 
 setTimeout(async () => {
 	try {

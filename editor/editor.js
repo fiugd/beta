@@ -14,6 +14,19 @@ import status from './status/components/index.js'
 import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.js";
 import events from './events.js';
 
+import { getClientId } from './utils/State.js';
+// used by @fiug/layout to determin active pane
+document.body.addEventListener('pointerdown', () => {
+	window.top.postMessage({
+		triggerEvent: {
+			type: 'cursorActivity',
+		},
+		detail: {
+			source: 'Editor ' + getClientId()
+		}
+	}, location);
+});
+
 attachEvents(events, { editor, tabs, status });
 
 const isPreview = document.location.href.includes("/::preview::/");
