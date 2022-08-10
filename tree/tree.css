@@ -175,10 +175,11 @@ body {
 	flex-direction: column;
 }
 
-#explorer {
+body #explorer {
 	height: auto;
 	flex: 1;
 	background-color: var(--theme-subdued-color) !important;
+	transition: unset !important;
 }
 
 #explorer #tree-view {

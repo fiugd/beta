@@ -170,10 +170,12 @@ label {
 	background: linear-gradient(90deg, var(--main-theme-color), transparent);
 	background-color: var(--theme-main-color);
 	background-size: 200% 200%;
+	/*
 	-webkit-animation: PaneLoadingAnim 3s ease infinite;
 	-moz-animation: PaneLoadingAnim 3s ease infinite;
 	animation: PaneLoadingAnim 2s ease-in infinite;
 	transition: background-color 2s ease-in;
+	*/
 }
 
 @-webkit-keyframes PaneLoadingAnim {
@@ -2502,7 +2504,7 @@ notes-section.loading:after {
 
 	min-width: 200px;
 	/* min-width: 150px; */
-	transition: background-color 2s ease-in;
+	/*transition: background-color 2s ease-in;*/
 	/* margin-right: -17px; */
 	outline: none;
 	
