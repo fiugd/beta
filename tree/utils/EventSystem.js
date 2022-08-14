@@ -209,6 +209,7 @@ function attachEvents(events, context) {
 window.top.postMessage({
 	subscribe: 'Tree ' + getClientId()
 }, location);
+
 const useCapture = false;
 window.addEventListener('message', function(messageEvent) {
 	trigger({ ...messageEvent.data, external: true });

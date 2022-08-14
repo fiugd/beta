@@ -11,19 +11,6 @@ import tree from './main/components/index.js';
 import { attachEvents  } from "./utils/EventSystem.js";
 import events from './events.js';
 
-import { getClientId } from './utils/State.js';
-// used by @fiug/layout to determin active pane
-document.body.addEventListener('pointerdown', () => {
-	window.top.postMessage({
-		triggerEvent: {
-			type: 'cursorActivity',
-		},
-		detail: {
-			source: 'Tree ' + getClientId()
-		}
-	}, location);
-});
-
 attachEvents(events, { tree });
 
 devHelper.module();

@@ -12,6 +12,8 @@ import showSearch from './showSearch.js';
 import showServiceCode from './showServiceCode.js';
 import ui from './ui.js';
 
+import pointerdown from './pointerdown.js';
+
 export default formatHandlers('Tree', {
 	contextMenu,
 	contextSelect,
@@ -24,6 +26,7 @@ export default formatHandlers('Tree', {
 	showSearch,
 	showServiceCode,
 	ui,
+	pointerdown,
 });
 
 /*

@@ -46,6 +46,11 @@ const listeners = [{
 	handlers: [
 		mainListeners.noServiceSelected
 	]
+}, {
+	eventName: "pointerdown",
+	handlers: [
+		mainListeners.pointerdown,
+	]
 }];
 
 const triggers = {
