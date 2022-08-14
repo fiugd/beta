@@ -22,7 +22,7 @@ const pointerleave = (ev) => {
 };
 
 const pointerup = (ev) => {
-	dragEnd();
+	//dragEnd();
 	pointerleave(ev);
 };
 

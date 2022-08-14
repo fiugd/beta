@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2022-08-14T01:08:27.273Z )
+	Version 0.4.6 ( 2022-08-14T01:22:56.965Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3691,18 +3691,7 @@ const t = t => {
 E.classList.add("drag-preview", "hidden"), E.style.left = "-999px", E.style.top = "-999px", 
 document.body.append(E);
 
-let S = !1;
-
-const z = ({pane: t, splitDirection: e} = {}) => {
-    S = !1;
-    const n = JSON.stringify({
-        dragEnd: !0,
-        pane: t,
-        splitDirection: e,
-        source: location.href.split("/").pop()
-    });
-    window.parent.postMessage(n, "*");
-}, D = (t, e) => {
+const D = (t, e) => {
     const n = e || document.body, i = document.createElement("div");
     i.classList.add("mouse"), n.append(i);
     const o = document.createElement("div");
@@ -3735,26 +3724,8 @@ const z = ({pane: t, splitDirection: e} = {}) => {
     n.ondragleave = t => {
         t.preventDefault(), a(o), o.classList.add("hidden"), i.innerHTML = "", n.hoverClassWait = void 0;
     };
-    const l = t => r(t);
-    n.onpointerenter = () => {
-        S && (n.addEventListener("pointermove", l), n.classList.contains("dragTo") ? (n.classList.add("dragging"), 
-        o.classList.remove("hidden")) : n.classList.add("noDrag"));
-    }, n.onpointerleave = () => {
-        S && (n.classList.remove("dragging", "noDrag"), n.removeEventListener("pointermove", l), 
-        o.classList.add("hidden"), i.innerHTML = "", n.hoverClassWait = void 0);
-    };
-    const c = e => {
-        if (!S) return;
-        n.classList.remove("dragging", "noDrag"), n.removeEventListener("pointermove", l), 
-        e.preventDefault(), S = !1, i.innerHTML = "";
-        const s = o.classList.value.replace("drag-target", "").replace("-hover", "").trim();
-        return z({
-            pane: {
-                id: n.id
-            },
-            splitDirection: s
-        }), o.classList.add("hidden"), a(o), n.hoverClassWait = void 0, t && t(), !1;
-    };
+    n.onpointerenter = () => {}, n.onpointerleave = () => {};
+    const c = e => {};
     return n.addEventListener("pointerup", c), n.addEventListener("pointercancel", c), 
     {
         dragover: r
@@ -3763,7 +3734,7 @@ const z = ({pane: t, splitDirection: e} = {}) => {
 
 window.newPane = f;
 
-const R = z, P = (t, e) => {
+const P = (t, e) => {
     const n = JSON.stringify({
         pointerId: t.pointerId,
         dragStart: e.target.textContent,
@@ -3795,7 +3766,7 @@ const pointerleave = ev => {
 };
 
 const pointerup = ev => {
-    R();
+    //dragEnd();
     pointerleave(ev);
 };
 
