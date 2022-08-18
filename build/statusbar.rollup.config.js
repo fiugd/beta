@@ -24,16 +24,14 @@ export default (root, analyzeConfig, onwarn) => ({
 	external: [],
 	output: {
 		format: 'es',
-		//sourcemap: true
-		//name: 'service-worker-handler.js',
-		//format: 'iife',
-		// sourcemap: 'inline',
-		//minifyInternalExports: true
 		file: root + '/dist/statusbar.js',
 		banner,
 	},
 	copyFiles: [{
 		from: `/${root}/statusbar/statusbar.html`,
 		to: `./${root}/dist/statusbar.html`
+	}, {
+		from: `/${root}/statusbar/statusbar.css`,
+		to: `./${root}/dist/statusbar.css`
 	}],
 });

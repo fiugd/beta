@@ -4,7 +4,7 @@ import css from './_common/rollup-plugin-css.js';
 import analyze from './_common/rollup-plugin-analyze.js';
 
 const banner = `/*!
-	fiug actionbarr component
+	fiug actionbar component
 	Version {{VERSION}} ( {{DATE}} )
 	https://github.com/fiugd/fiug/actionbar
 	(c) 2020-2021 Harrison Cross, MIT License
@@ -24,16 +24,14 @@ export default (root, analyzeConfig, onwarn) => ({
 	external: [],
 	output: {
 		format: 'es',
-		//sourcemap: true
-		//name: 'service-worker-handler.js',
-		//format: 'iife',
-		// sourcemap: 'inline',
-		//minifyInternalExports: true
 		file: root + '/dist/actionbar.js',
 		banner,
 	},
 	copyFiles: [{
 		from: `/${root}/actionbar/actionbar.html`,
 		to: `./${root}/dist/actionbar.html`
+	}, {
+		from: `/${root}/actionbar/actionbar.css`,
+		to: `./${root}/dist/actionbar.css`
 	}],
 });
