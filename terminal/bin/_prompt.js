@@ -1,6 +1,8 @@
 /*
 here's an example of how to build CLI apps
 TODO: build this!!!
+
+also, consider using parent dependency, `mri`, which maybe doesn't call process.exit
 */
 
 import sade from 'https://cdn.skypack.dev/sade';
