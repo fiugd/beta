@@ -1,7 +1,7 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2022-08-14T01:22:56.965Z )
-	https://github.com/fiugd/fiug/terminal
+	Version 0.4.6 ( 2022-08-19T20:28:36.302Z )
+	https://github.com/fiugd/fiug/tree
 	(c) 2020-2021 Harrison Cross, MIT License
 */
 const sheet = new CSSStyleSheet;

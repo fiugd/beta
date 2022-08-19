@@ -1,6 +1,6 @@
 /*!
 	fiug actionbar component
-	Version 0.4.6 ( 2022-08-18T22:52:41.879Z )
+	Version 0.4.6 ( 2022-08-19T20:19:40.460Z )
 	https://github.com/fiugd/fiug/actionbar
 	(c) 2020-2021 Harrison Cross, MIT License
 */

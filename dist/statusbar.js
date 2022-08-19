@@ -1,6 +1,6 @@
 /*!
 	fiug statusbar component
-	Version 0.4.6 ( 2022-08-18T16:55:27.181Z )
+	Version 0.4.6 ( 2022-08-19T20:28:07.313Z )
 	https://github.com/fiugd/fiug/statusbar
 	(c) 2020-2021 Harrison Cross, MIT License
 */

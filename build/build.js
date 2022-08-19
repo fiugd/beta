@@ -68,9 +68,12 @@ const SaveBuild =  (config) => async (args) => {
 	return await writeFile({ path, code });
 };
 
-const build = async (configUrl) => {
+const build = async (rollupConfigDef) => {
 	let error;
-	const rollupConfig = (await import(configUrl)).default;
+
+	const rollupConfig = typeof rollupConfigDef === "function"
+		? rollupConfigDef
+		: (await import(rollupConfigDef)).default;
 
 	const {
 		componentName,
