@@ -408,6 +408,39 @@ function ContextPane() {
 
 	contextPane.innerHTML = `
 <style>
+ul { list-style: none; padding: 0; margin: 0; }
+
+:root {
+	/* --main-theme-color: #47414a; */
+	--main-theme-color: #1e1e1e;
+
+	/* --main-theme-highlight-color: #40f7ac; */
+	/* --main-theme-highlight-color: #026292; */
+	/* --main-theme-highlight-color: #2b5046; */
+	/* --main-theme-highlight-color: 20, 160, 210; */
+	--main-theme-highlight-color: 60, 180, 190;
+
+	/* --main-theme-highlight-color: 20, 201, 210; */
+	/* --main-theme-highlight-color: 64, 210, 20; */
+	--main-theme-highlight-color-FOR-PICKER: rgb(60, 180, 190);
+	/* --main-theme-background-color: #363238; */
+	/* --main-theme-background-color: #3b3b3b; */
+	--main-theme-background-color: #363636; /* #2d2d2d */
+	--main-theme-background-dark-color: #29252b;
+	--main-theme-text-color-dark: green;
+	/* --main-theme-text-color: #d8d8d8; */
+	--main-theme-text-color: #c2c2c2;
+	/* --main-theme-text-invert-color: #d0c0d8; */
+	--main-theme-text-invert-color: #818181;
+	/* --theme-subdued-color: #483f48; */
+	--theme-subdued-color: #262626;
+	--theme-text-color: black;
+	--theme-text-selected: #82e3ae;
+	--tree-selected: #094771;
+	--tree-hover: #333;
+	--code-line-selected: orange;
+}
+
 .ContextOverlay {
 	--horiz-pad: 20px;
 	--vert-pad: 10px;
