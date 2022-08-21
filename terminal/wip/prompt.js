@@ -4,6 +4,14 @@ TODO: build this!!!
 
 also, consider using parent dependency, `mri`, which maybe doesn't call process.exit
 
+Did you mean (feature):
+-----------------------
+
+typed     ->  git opne 1
+suggested -> Did you mean "git open 1" ?
+
+I can type 'y' to run the corrected command
+
 Required arguments are wrapped with < and > characters.
 Optional arguments are wrapped with [ and ] characters.
 */
