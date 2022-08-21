@@ -1,7 +1,7 @@
 # fiug
 
 <!-- badges -->
-[![fiug.dev](https://img.shields.io/badge/fiug.dev-fiug%20it!-blue)](web+fiug:fiugd/beta)
+[![fiug.dev](https://img.shields.io/badge/fiug.dev-fiug%20it!-blue)](https://beta.fiug.dev?repo=fiugd/beta)
 [![Discord Channel](https://img.shields.io/discord/887775860881514557?color=%237289DA&logo=Discord&logoColor=white)](https://discord.gg/pdYZvsUexX)
 [![Youtube Playlist](https://img.shields.io/badge/youtube-watch-yall?color=%23C4302B&logo=Youtube&logoColor=white)](https://www.youtube.com/playlist?list=PLzxw4c2I_GGe6q7XHWH2lXsc9VBfzsNB_)
 [![Fiug Blog](https://img.shields.io/badge/blog-read-yall?color=%23EE802F&logo=Rss&logoColor=white)](https://blog.fiug.dev)
