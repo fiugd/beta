@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>fiug (new)</title>
+	<meta name="description" content="">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<meta name="theme-color" content="#1e1e1e">
+	<meta name="light-page-color" content="white">
+	<meta name="light-theme-color" content="#227a9c">
+	<meta name="dark-page-color" content="#2d2d2d">
+	<meta name="dark-theme-color" content="#1e1e1e">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	
+	<link rel="stylesheet" href="/index.css">
+	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/goldenlayout-base.css">
+	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/themes/goldenlayout-dark-theme.css">
+
+</head>
+
+<body>
+	<div id="layoutContainer"></div>
+</body>
+
+<script type="module">
+	import Layout from './layout/golden/layout.js';
+	await Layout('./layout/golden/layout.yaml');
+
+	const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+</script>
+
+</html>

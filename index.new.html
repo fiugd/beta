@@ -1,35 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<head>
+		<title>fiug.dev</title>
+		<meta charset="utf-8" />
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+		<link rel="stylesheet" href="./layout/layout.css" />
+	</head>
 
-<head>
-	<meta charset="utf-8">
-	<title>fiug (new)</title>
-	<meta name="description" content="">
-	<meta name="mobile-web-app-capable" content="yes">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		@media (prefers-color-scheme: dark) {
+			html {
+				background: #2a2a2a;
+				color: white;
+			}
+		}
+		html,
+		body {
+			overscroll-behavior: none;
+		}
+	</style>
 
-	<meta name="theme-color" content="#1e1e1e">
-	<meta name="light-page-color" content="white">
-	<meta name="light-theme-color" content="#227a9c">
-	<meta name="dark-page-color" content="#2d2d2d">
-	<meta name="dark-theme-color" content="#1e1e1e">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-	
-	<link rel="stylesheet" href="/index.css">
-	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/goldenlayout-base.css">
-	<link rel="stylesheet" href="https://cdn.skypack.dev/golden-layout@2.4.0/dist/css/themes/goldenlayout-dark-theme.css">
+	<body>
+		<div id="layout"></div>
+	</body>
 
-</head>
+	<script type="module">
+		//import Layout from "/fiugd/beta/dist/layout.js";
+		import Layout from "./layout/layout.js";
+		import Menus from "/fiugd/beta/dist/menus.js";
 
-<body>
-	<div id="layoutContainer"></div>
-</body>
+		const layout = await Layout();
+		const menus = Menus();
 
-<script type="module">
-	import Layout from './layout/layout.js';
-	await Layout('./layout/layout.yaml');
+		document.body.append(Menus());
 
-	const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-</script>
-
+	</script>
 </html>

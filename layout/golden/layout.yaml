@@ -1,0 +1,46 @@
+---
+settings:
+  selectionEnabled: true
+header:
+  popout: false
+dimensions:
+  borderWidth: 2
+  headerHeight: 32
+  minItemWidth: 30
+  dragProxyWidth: 0
+  dragProxyHeight: 0
+rootType: row
+content:
+- type: Action
+  fixedWidth: 45
+- type: Tree
+  minWidth: 200
+- type: stack
+  isClosable: true
+  width: 50
+  popout: false
+  content:
+  - title: 404.js
+    type: Editor
+    componentState:
+      file: 404.js
+  - title: 404.html
+    type: Editor
+    componentState:
+      file: 404.html
+- title: LICENSE
+  type: Editor
+  componentState:
+    file: LICENSE
+- type: column
+  content:
+  - type: stack
+    isClosable: false
+    width: 50
+    content:
+    - title: Terminal
+      type: Terminal
+    - title: Terminal 2
+      type: Terminal
+  - title: Terminal 3
+    type: Terminal
