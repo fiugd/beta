@@ -3,18 +3,18 @@ here's an example of how to build CLI apps
 TODO: build this!!!
 
 also, consider using parent dependency, `mri`, which maybe doesn't call process.exit
+
+Required arguments are wrapped with < and > characters.
+Optional arguments are wrapped with [ and ] characters.
 */
 
 import sade from 'https://cdn.skypack.dev/sade';
 const prog = sade("builder");
 
-/*
-Required arguments are wrapped with < and > characters.
-Optional arguments are wrapped with [ and ] characters.
-*/
-
-console.error = processWrite;
-console.log = processWrite;
+if(typeof processWrite !== "undefined"){
+	console.error = processWrite;
+	console.log = processWrite;
+}
 
 // const argv = ["", "", "--help"];
 // const argv = ["", "", "build", "--help"];
