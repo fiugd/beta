@@ -20,6 +20,28 @@ body {
 	overflow: hidden;
 }
 
+#layout .option {
+	font-size: 0.8em;
+	position: relative;
+}
+#layout .option.active {
+	background: unset;
+}
+#layout .option.active:after {
+	content: '';
+	height: 1px;
+	background: currentColor;
+	display: block;
+	position: absolute;
+	bottom: 3px;
+	left: 10px;
+	right: 0px;
+	opacity: 0.5;
+}
+#layout .option .tab-close {
+	display: none;
+}
+
 #layout > .layout-container > .layout-container .pane {
 	margin-bottom: -23px;
 }

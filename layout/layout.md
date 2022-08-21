@@ -1,7 +1,14 @@
 ## TODO
-- [X] action bar
-- [X] status bar
-- [X] menus
+- [ ] explorer tabs customize
+- [ ] terminal tabs (hide)
+- [ ] programitically change tabs
+
+- [ ] operations
+	- wired up to service worker (in general)
+	- save/load layout config using service worker
+	- respond to fileDelete/fileClose
+	- respond to (acks) terminal's fileOpen operation event
+
 - [ ] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id
 	- or event should be sent through layout module
@@ -10,15 +17,19 @@
 	- action bar: settings icon -> menu -> fullscreen
 - [ ] editor should no longer handle tabs
 	- ie. `Could not find a tab named .test.html to update`
-- [ ] wired up to service worker
-- [ ] operations
-	- respond to fileDelete/fileClose
-	- respond to (acks) terminal's fileOpen operation event
+	- at least should tolerate tabs not existing
 - [ ] create build for /dist/layout (or for fiug page in general)
 - [ ] handle hotkeys
 - [ ] close tabs en masse
 - [ ] mobile view
 - [ ] open with fiug.dev
+- [ ] paste an image
+	- when editor has focus, should do like github does
+	- when terminal has focus, ...
+	- when tree has focus, ...
+- [X] action bar
+- [X] status bar
+- [X] menus
 
 ### frame communication
 [comlink](https://github.com/GoogleChromeLabs/comlink)   
