@@ -2,12 +2,19 @@
 - [X] action bar
 - [X] status bar
 - [X] menus
+- [ ] menus need to appear at the correct spot
+	- iframe where click occured should share its pane id
+	- or event should be sent through layout module
+- [ ] settings icon + menu
+	- fullscreen triggers from menu(page) context
+	- action bar: settings icon -> menu -> fullscreen
+- [ ] editor should no longer handle tabs
 - [ ] wired up to service worker
-- [ ] layout module responds to fileDelete/fileClose
-- [ ] respond to (acks) terminal's fileOpen event
-- [ ] create build for /dist/layout
+- [ ] operations
+	- respond to fileDelete/fileClose
+	- respond to (acks) terminal's fileOpen operation event
+- [ ] create build for /dist/layout (or for fiug page in general)
 - [ ] handle hotkeys
-- [ ] action bar: settings icon -> menu -> fullscreen
 
 
 ## frame communication
@@ -26,7 +33,7 @@
 ### FIUG Architecture
 ```mermaid
 flowchart TD
-    
+
     SERVICE_WORKER["Service\nWorker"]
     subgraph BUS[" "]
         MB_F((" ")) 

@@ -38,5 +38,38 @@
 
 		document.body.append(Menus());
 
+		const operations = (e) => {
+			const { triggerEvent} = event.data;
+			const { detail } = triggerEvent;
+			console.log({ detail });
+		};
+
+		window.addEventListener("message", (event) => {
+			if(event.source === window)
+				return;
+			const { triggerEvent, subscribe } = event.data;
+			const layoutHandler = triggerEvent
+				? layout.eventHandlers[triggerEvent.type]
+				: undefined;
+			if(layoutHandler)
+				layoutHandler(layout, event);
+
+			if(triggerEvent?.type === "operations"){
+				return operations(event);
+			}
+
+			if (!layoutHandler && triggerEvent)
+				return console.log(`event triggered: `, triggerEvent);
+
+			if (subscribe)
+				return console.log(`request to subscribe: ${subscribe}`);
+			console.log(event.data);
+		});
+
+		navigator.registerProtocolHandler(
+			"web+fiug",
+			"https://beta.fiug.dev/?repo=%s",
+			"Handle fiug.dev links"
+		);
 	</script>
 </html>

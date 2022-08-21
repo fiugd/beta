@@ -99,7 +99,7 @@ const resizeHandler = () => {
 
 // EXTERNAL
 const fileSelect = (layout, e) => {
-	//TODO: something like this belongs in the module, not sure how to do it
+	//TODO: something like this belongs in the layout module, not sure how to do it
 	const file = `/fiugd/beta/dist/editor.html?file=${e.src}`;
 	const allPanes = Array.from(document.querySelectorAll('.pane.tabbed'));
 	const panesWithFileOpen = [];
@@ -149,8 +149,11 @@ const cursorActivity = (layout, e) => {
 	const params = new Proxy(new URLSearchParams(e.source.location.search), {
 		get: (searchParams, prop) => searchParams.get(prop),
 	});
-	const file = params.file && e.source.location.pathname + `?file=${params.file}`;
-	if(!file) return layout.activate({ pane });
+	const file = params.file
+		? e.source.location.pathname + `?file=${params.file}`
+		: undefined;
+	if(!file)
+		return layout.activate({ pane });
 	layout.openTab({ pane, file });
 };
 
@@ -162,7 +165,10 @@ export default async () => {
 		events: { createTab, createPane }
 	});
 
-	activeEditor = document.querySelector('.pane.tabbed.active')?.id;
+	const activePane = document.querySelector('.pane.tabbed.active');
+	activeEditor = activePane
+		? activePane.id
+		: undefined;
 
 	layout.on('change', changeHandler);
 	layout.on('open', openHandler);
@@ -170,25 +176,16 @@ export default async () => {
 	layout.on('select', selectHandler);
 	layout.on('resize', resizeHandler);
 
-	window.addEventListener("message", (event) => {
-		if(event.source === window) return;
-		const { triggerEvent, subscribe } = event.data;
-		if (triggerEvent?.type === "fileSelect")
-			return fileSelect(layout, triggerEvent?.detail);
-		if (triggerEvent?.type === "fileClose")
-			return fileRemove(layout, triggerEvent?.detail);
-		if (triggerEvent?.type === "fileDelete")
-			return fileRemove(layout, triggerEvent?.detail);
-		if (triggerEvent?.type === "fileChange")
-			return fileChange(layout, triggerEvent?.detail);
+	const useDetail = (fn) => (layout, event) =>
+		fn(layout, event.data.triggerEvent.detail);
 
-		if (triggerEvent?.type === "cursorActivity")
-			return cursorActivity(layout, event);
-
-		if (triggerEvent) return console.log(`event triggered: `, triggerEvent);
-		if (subscribe) return console.log(`request to subscribe: ${subscribe}`);
-		console.log(event.data);
-	});
+	layout.eventHandlers = {
+		fileSelect: useDetail(fileSelect),
+		fileClose: useDetail(fileRemove),
+		fileDelete: useDetail(fileRemove),
+		fileChange: useDetail(fileChange),
+		cursorActivity,
+	};
 
 	return layout;
 };
