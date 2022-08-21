@@ -1,4 +1,4 @@
-# TODO
+## TODO
 - [X] action bar
 - [X] status bar
 - [X] menus
@@ -9,15 +9,18 @@
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
 - [ ] editor should no longer handle tabs
+	- ie. `Could not find a tab named .test.html to update`
 - [ ] wired up to service worker
 - [ ] operations
 	- respond to fileDelete/fileClose
 	- respond to (acks) terminal's fileOpen operation event
 - [ ] create build for /dist/layout (or for fiug page in general)
 - [ ] handle hotkeys
+- [ ] close tabs en masse
+- [ ] mobile view
+- [ ] open with fiug.dev
 
-
-## frame communication
+### frame communication
 [comlink](https://github.com/GoogleChromeLabs/comlink)   
 [comlink experiment](https://github.com/fiugd/incubator/tree/d44c82640df1a2175c236a0c7dc55a0f082059f1/xterm-tui/comlink)   
 [postmate](https://github.com/dollarshaveclub/postmate)   
