@@ -2,5 +2,5 @@ import build from './build.js';
 import commonConfig from './.common.rollup.config.js';
 
 await build(
-	commonConfig("actionbar")
+	commonConfig("actionbar", { html: true, css: true })
 );

@@ -11,7 +11,7 @@ const banner = (MODULENAME) => `/*!
 */
 `;
 
-export default (MODULENAME) => {
+export default (MODULENAME, { html: copyHTML, css: copyCSS }={}) => {
 	return (root, analyzeConfig, onwarn) => ({
 		componentName: `fiug ${MODULENAME}`,
 		input: `/${MODULENAME}/${MODULENAME}.js`,
@@ -28,13 +28,16 @@ export default (MODULENAME) => {
 			file: root + `/dist/${MODULENAME}.js`,
 			banner: banner(MODULENAME),
 		},
-		copyFiles: [{
-			from: `/${root}/${MODULENAME}/${MODULENAME}.html`,
-			to: `./${root}/dist/${MODULENAME}.html`
-		}, {
-			from: `/${root}/${MODULENAME}/${MODULENAME}.css`,
-			to: `./${root}/dist/${MODULENAME}.css`
-		}],
+		copyFiles: [
+			copyHTML && {
+				from: `/${root}/${MODULENAME}/${MODULENAME}.html`,
+				to: `./${root}/dist/${MODULENAME}.html`
+			},
+			copyCSS && {
+				from: `/${root}/${MODULENAME}/${MODULENAME}.css`,
+				to: `./${root}/dist/${MODULENAME}.css`
+			}
+		].filter(x => x),
 	});
 };
 

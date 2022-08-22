@@ -99,7 +99,6 @@ const selectHandler = ({ file, pane }) => {
 	// - a tab has been selected
 	// - a pane has been selected
 	// - set activeEditor to pane (if tabbed)
-	console.log({ file, pane })
 	if(file && file.includes("/editor.html") ){
 		activeEditor = pane;
 		const path = file.split('file=').pop().split("pane=").shift();

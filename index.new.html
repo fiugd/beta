@@ -53,12 +53,11 @@
 				? triggerEvent.type
 				: eventType;
 			const layoutHandler = layout.eventHandlers[type];
-			if(layoutHandler) layoutHandler(layout, event);
-
-			if(triggerEvent?.type === "operations"){
+			if(layoutHandler)
+				return layoutHandler(layout, event);
+			if(type === "operations"){
 				return operations(event);
 			}
-
 			if (subscribe)
 				return console.log(`request to subscribe: ${subscribe}`);
 			console.log(event.data);

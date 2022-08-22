@@ -1,9 +1,23 @@
 /*!
-	fiug menus component
-	Version 0.4.6 ( 2022-08-22T20:43:50.974Z )
-	https://github.com/fiugd/fiug/menus
+	fiug operations component
+	Version 0.4.6 ( 2022-08-22T20:54:07.070Z )
+	https://github.com/fiugd/fiug/operations
 	(c) 2020-2021 Harrison Cross, MIT License
 */
+//https://webbjocke.com/javascript-check-data-types/
+// also, OMG should I have to use Typescript instead???
+// also, should use array functions and try/catch in case variable is not defined
+function isString(x) {
+    try {
+        const value = isFunction(x) ? x() : x;
+        return typeof value === "string" || value instanceof String;
+    } catch (e) {}
+}
+
+function isFunction(value) {
+    return typeof value === "function";
+}
+
 const listeners = {};
 
 const triggers = {};
@@ -257,199 +271,6 @@ window.addEventListener("message", (function(messageEvent) {
         key: key
     });
 }), false);
-
-var ext = {
-    mp3: "audio",
-    wav: "audio",
-    ogg: "audio",
-    adb: "ada",
-    ads: "ada",
-    adoc: "asciidoc",
-    apl: "apl",
-    bowerrc: "bower",
-    bf: "brainfuck",
-    cs: "csharp",
-    c: "c",
-    h: "c",
-    m: "c",
-    ctp: "cake_php",
-    clj: "clojure",
-    cljc: "clojure",
-    cljs: "clojure",
-    cjsx: "react",
-    jsx: "react",
-    tmp: "clock",
-    coffee: "coffee",
-    cfc: "coldfusion",
-    cfm: "coldfusion",
-    config: "config",
-    cpp: "cpp",
-    cr: "crystal",
-    cs: "csharp",
-    css: "css",
-    dart: "dart",
-    sss: "css",
-    csv: "csv",
-    edn: "clojure",
-    editorconfig: "config",
-    ejs: "ejs",
-    elm: "elm",
-    ttf: "font",
-    woff: "font",
-    woff2: "font",
-    eot: "font",
-    gitkeep: "git",
-    gitconfig: "git",
-    gitattributes: "git",
-    gitmodules: "git",
-    gitignore: "git",
-    go: "go",
-    gradle: "gradle",
-    grails: "grails",
-    groovy: "grails",
-    hh: "hacklang",
-    haml: "haml",
-    hs: "haskell",
-    lhs: "haskell",
-    lisp: "lisp",
-    htm: "html",
-    html: "html",
-    shtml: "html",
-    dhtml: "html",
-    ai: "ai",
-    png: "image",
-    ico: "image",
-    jpg: "image",
-    bmp: "image",
-    jpeg: "image",
-    gif: "image",
-    jade: "jade",
-    java: "java",
-    mjs: "javascript",
-    js: "javascript",
-    es6: "javascript",
-    es7: "javascript",
-    erl: "erlang",
-    ex: "elixir",
-    gltf: "json",
-    ipynb: "json",
-    json: "json",
-    jl: "julia",
-    less: "less",
-    license: "license",
-    liquid: "liquid",
-    ls: "livescript",
-    lua: "lua",
-    md: "markdown",
-    mustache: "mustache",
-    handlebars: "mustache",
-    hbs: "mustache",
-    hjs: "mustache",
-    stache: "mustache",
-    npmignore: "npm",
-    ml: "ocaml",
-    mli: "ocaml",
-    cmx: "ocaml",
-    cmxa: "ocaml",
-    pdf: "pdf",
-    pl: "perl",
-    pro: "prolog",
-    psd: "photoshop",
-    php: "php",
-    "php.inc": "php",
-    pug: "pug",
-    pp: "puppet",
-    py: "python",
-    rb: "ruby",
-    "erb.html": "ruby",
-    "html.erb": "ruby",
-    rs: "rust",
-    sass: "sass",
-    scss: "sass",
-    scm: "scheme",
-    sbt: "sbt",
-    scala: "scala",
-    sql: "sql",
-    sh: "shell",
-    cmd: "shell",
-    zsh: "shell",
-    fish: "shell",
-    profile: "shell",
-    slim: "slim",
-    smarty: "smarty",
-    "smarty.tpl": "smarty",
-    styl: "stylus",
-    svg: "svg",
-    swift: "swift",
-    tf: "terraform",
-    "tf.json": "terraform",
-    tex: "tex",
-    sty: "tex",
-    cls: "tex",
-    dtx: "tex",
-    ins: "tex",
-    txt: "default",
-    twig: "twig",
-    as: "assemblyscript",
-    ts: "typescript",
-    tsx: "react",
-    direnv: "config",
-    env: "config",
-    static: "config",
-    slugignore: "config",
-    vala: "vala",
-    wmv: "video",
-    mov: "video",
-    ogv: "video",
-    webm: "video",
-    avi: "video",
-    mpg: "video",
-    mp4: "video",
-    xml: "xml",
-    yml: "yml",
-    yaml: "yml",
-    vue: "vue",
-    babelrc: "babel",
-    eslintrc: "eslint",
-    jshintrc: "jshint",
-    xcodeproj: "xcode",
-    zip: "zip",
-    rar: "zip",
-    gz: "zip",
-    iso: "zip",
-    key: "key",
-    pem: "key",
-    fs: "fsharp",
-    vimrc: "vim",
-    vim: "vim",
-    viminfo: "vim",
-    sql: "sql",
-    bat: "shell",
-    htaccess: "apache",
-    wxml: "wxml",
-    wxss: "wxss",
-    ini: "config",
-    clj: "clojure",
-    r: "r",
-    lock: "lock",
-    asp: "asp",
-    flowconfig: "flow",
-    nim: "nim",
-    kt: "kotlin",
-    ink: "ink",
-    zig: "zig",
-    pas: "pascal",
-    raku: "raku",
-    fth: "forth",
-    d: "d",
-    pony: "pony",
-    ppm: "ppm",
-    wat: "wat",
-    piskel: "image",
-    scratch: "smarty",
-    bugs: "platformio",
-    uml: "uml"
-};
 
 /*!
     localForage -- Offline Storage, Improved
@@ -1803,7 +1624,13 @@ attachTrigger({
 
 let listenerQueue = [];
 
-let currentService;
+let currentService$1;
+
+let currentFile;
+
+let currentFilePath;
+
+let currentFolder;
 
 const state = {
     changedFiles: {},
@@ -1863,14 +1690,14 @@ class StateTracker {
     async setState({opened: opened = [], selected: selected = {}} = {}) {
         const {store: store} = this;
         debugIfMalformed(opened);
-        opened && await store.setItem(`state-${currentService.name}-opened`, opened);
-        selected && await store.setItem(`tree-${currentService.name}-selected`, selected.name);
+        opened && await store.setItem(`state-${currentService$1.name}-opened`, opened);
+        selected && await store.setItem(`tree-${currentService$1.name}-selected`, selected.name);
     }
     async getState(which = []) {
         const {store: store} = this;
         const state = {
-            opened: () => store.getItem(`state-${currentService.name}-opened`),
-            changed: async () => (await store.keys()).filter((key => key.startsWith(currentService.name))).map((key => key.replace(currentService.name + "/", "")))
+            opened: () => store.getItem(`state-${currentService$1.name}-opened`),
+            changed: async () => (await store.keys()).filter((key => key.startsWith(currentService$1.name))).map((key => key.replace(currentService$1.name + "/", "")))
         };
         const results = {};
         for (let i = 0, len = which.length; i < len; i++) {
@@ -1881,7 +1708,7 @@ class StateTracker {
     }
     withState(depends, fn) {
         return async arg => {
-            if (!currentService) return;
+            if (!currentService$1) return;
             const {setState: setState, getState: getState} = this;
             const current = await getState(depends);
             const result = await fn(current, arg);
@@ -1892,7 +1719,7 @@ class StateTracker {
     closeFile({opened: opened = []}, filename) {
         if (!filename) return {};
         if (filename.startsWith("/")) filename = filename.slice(1);
-        filename = filename.replace(currentService.name + "/", "");
+        filename = filename.replace(currentService$1.name + "/", "");
         const filterOpened = isFolder(filename) ? x => !x.name.startsWith(filename) : x => x.name !== filename;
         opened = opened.filter(filterOpened);
         [ ...opened ].sort(((a, b) => a.order - b.order)).forEach(((x, i) => x.order = i));
@@ -1905,7 +1732,7 @@ class StateTracker {
     openFile({changed: changed = [], opened: opened = []}, filename) {
         if (!filename) return {};
         if (filename.startsWith("/")) filename = filename.slice(1);
-        filename = filename.replace(currentService.name + "/", "");
+        filename = filename.replace(currentService$1.name + "/", "");
         const lastFile = opened[opened.length - 1];
         const lastFileIsChanged = lastFile ? changed.includes(lastFile.name) : true;
         let selected = opened.find((x => x.name === filename));
@@ -1943,7 +1770,7 @@ class ServiceSwitcher {
     }
     switch() {
         const {newService: newService} = this;
-        currentService = newService;
+        currentService$1 = newService;
         // TODO: other things that could be set here (maybe should not)
         // currentFile;
         // currentFilePath;
@@ -1953,46 +1780,7 @@ class ServiceSwitcher {
 
 const serviceSwitcher = new ServiceSwitcher;
 
-const sortAlg = (propFn = (x => x), alg = "alpha") => {
-    if (alg === "alpha") {
-        const lowSafe = (x = "") => x.toLowerCase();
-        return (a, b) => {
-            const afilename = lowSafe(propFn(a)).split(".").slice(0, -1).join(".") || lowSafe(propFn(a));
-            const bfilename = lowSafe(propFn(b)).split(".").slice(0, -1).join(".") || lowSafe(propFn(b));
-            if (afilename < bfilename) {
-                return -1;
-            }
-            if (afilename > bfilename) {
-                return 1;
-            }
-            const aExt = lowSafe(propFn(a)).replace(afilename, "");
-            const bExt = lowSafe(propFn(b)).replace(bfilename, "");
-            if (aExt < bExt) {
-                return -1;
-            }
-            if (aExt > bExt) {
-                return 1;
-            }
-            return (a, b) => propFn(a) - propFn(b);
-        };
-    }
-    console.log(`sort algorithm not found: ${alg}`);
-};
-
-function getFileType(fileName = "") {
-    let type = "default";
-    const extension = ((fileName.match(/\.[0-9a-z]+$/i) || [])[0] || "").replace(/^\./, "");
-    //console.log(extension)
-        if (ext[extension]) {
-        type = ext[extension];
-    }
-    if (extension === "md") {
-        type = "info";
-    }
-    return type;
-}
-
-const flattenTree = (tree, folderPaths) => {
+const flattenTree$2 = (tree, folderPaths) => {
     const results = [];
     const recurse = (branch, parent = "/") => {
         const leaves = Object.keys(branch);
@@ -2019,26 +1807,32 @@ const flattenTree = (tree, folderPaths) => {
     return results;
 };
 
-const getCurrentServiceTree = ({flat: flat, folders: folders} = {}) => flat ? flattenTree(currentService.tree, folders).map((({name: name, path: path} = {}) => ({
-    name: name,
-    path: path,
-    relativePath: path.split(currentService.name).slice(1).join(""),
-    type: getFileType(name)
-}))).sort(sortAlg((x => x.name))) : currentService.tree;
+function getDefaultFile(service) {
+    let defaultFile;
+    try {
+        const manifestJson = JSON.parse(service.code.find((x => x.name === "service.manifest.json")).code);
+        defaultFile = manifestJson.main;
+    } catch (e) {}
+    try {
+        const packageJson = JSON.parse(service.code.find((x => x.name === "package.json")).code);
+        defaultFile = packageJson.main;
+    } catch (e) {}
+    return defaultFile || "index.js";
+}
 
 // has side effects of setting current code
 const getCurrentService = ({pure: pure} = {}) => {
     if (pure) {
         //if (!currentService?.code) debugger;
-        return currentService;
+        return currentService$1;
     }
     const changedArray = Object.keys(state.changedFiles).map((k => state.changedFiles[k]));
     const mostRecent = changedArray.map((x => x[x.length - 1]));
     //error here because currentService is wrong sometimes
     // SIDE EFFECTS!!!
         mostRecent.forEach((m => {
-        const found = currentService.code.find((x => {
-            x.path === `/${currentService.name}/${m.filename}` || x.name === m.filename;
+        const found = currentService$1.code.find((x => {
+            x.path === `/${currentService$1.name}/${m.filename}` || x.name === m.filename;
         }));
         if (!found) {
             console.error({
@@ -2051,7 +1845,84 @@ const getCurrentService = ({pure: pure} = {}) => {
         }
         found.code = m.code;
     }));
-    return currentService;
+    return currentService$1;
+};
+
+// has side-effects of setting currentService and currentFile
+// this should really be broken out into:
+//    setCurrentFile, setCurrentService
+//    getCurrentFile, getCurrentService
+function setCurrentFile({filePath: filePath, fileName: fileName}) {
+    if (filePath) {
+        currentFile = filePath.split("/").pop();
+        //currentFilePath = `/${currentService.name}/${filePath}`;
+                currentFilePath = filePath;
+        return;
+    }
+    currentFile = fileName;
+    currentFilePath = undefined;
+}
+
+function getCurrentFile() {
+    return currentFilePath || currentFile;
+}
+
+function setCurrentService(service) {
+    return getCodeFromService(service);
+}
+
+function getCodeFromService(service, file) {
+    const serviceAction = !!service ? "set" : "get";
+    const fileAction = !!file ? "set" : "get";
+    if (serviceAction === "set" && currentService$1 && Number(currentService$1.id) !== Number(service.id)) {
+        resetState();
+    }
+    if (serviceAction === "set") {
+        currentService$1 = service;
+    }
+    if (serviceAction === "get") {
+        //this caues service files based on changedArray
+        getCurrentService();
+    }
+    if (fileAction === "set") {
+        currentFile = file;
+    }
+    if (fileAction === "get") {
+        currentFile = currentFile || getDefaultFile(currentService$1);
+    }
+    const code = Array.isArray(currentService$1.code) ? (currentService$1.code.find((x => x.name === currentFile)) || {}).code || "" : isString((() => currentService$1.code)) ? currentService$1.code : "";
+    return {
+        name: currentService$1.name,
+        id: currentService$1.id,
+        // may be able to make next two lines go away (and also other code and file related stuff
+        code: code,
+        filename: currentFile
+    };
+}
+
+function getState({folderPaths: folderPaths, serviceRelative: serviceRelative} = {}) {
+    //TODO: should probably pull only latest state change
+    let paths;
+    try {
+        const tree = serviceRelative ? currentService$1.tree[currentService$1.name] : currentService$1.tree;
+        paths = flattenTree$2(tree, folderPaths);
+    } catch (e) {}
+    return JSON.parse(JSON.stringify({
+        ...state,
+        paths: paths
+    }));
+}
+
+const getCurrentFolder = () => currentFolder;
+
+const setCurrentFolder = path => {
+    currentFolder = path;
+};
+
+const resetState = () => {
+    //console.log(`Current Service reset!`);
+    currentFile = currentService$1 = null;
+    state.changedFiles = {};
 };
 
 function openFile({name: name, parent: parent, path: path, ...other}) {
@@ -2102,7 +1973,16 @@ function closeFile({name: name, filename: filename, parent: parent, path: path, 
     state.openedFiles = Object.fromEntries(objEntries);
 }
 
-const operationDoneHandler = event => {
+function getOpenedFiles() {
+    return Object.entries(state.openedFiles).map((([key, value]) => value)).sort(((a, b) => a.order - b.order)).map(((x, i) => ({
+        ...x,
+        ...{
+            order: i
+        }
+    })));
+}
+
+const operationDoneHandler$1 = event => {
     if (serviceSwitcher.shouldSwitch(event)) serviceSwitcher.switch();
     if (listenerQueue.length === 0) {
         //console.warn('nothing listening!');
@@ -2124,7 +2004,7 @@ const operationDoneHandler = event => {
     return true;
 };
 
-const operationsHandler = event => {
+const operationsHandler$1 = event => {
     const {operation: operation} = event.detail || {};
     if (!operation || ![ "deleteFile" ].includes(operation)) return;
     if (operation === "deleteFile") {
@@ -2135,10 +2015,10 @@ const operationsHandler = event => {
 
 const events = [ {
     eventName: "operationDone",
-    listener: operationDoneHandler
+    listener: operationDoneHandler$1
 }, {
     eventName: "operations",
-    listener: operationsHandler
+    listener: operationsHandler$1
 }, {
     eventName: "fileClose",
     listener: event => closeFile(event.detail)
@@ -2157,318 +2037,1629 @@ events.map((args => attach({
     ...args
 })));
 
-const safe = fn => {
-    try {
-        return fn();
-    } catch (e) {}
+// https://davidwalsh.name/javascript-debounce-function
+/*
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+*/ const debounce = (func, wait) => {
+    let timeout;
+    let throttleTime;
+    let args;
+    let context;
+    return function() {
+        context = this;
+        args = arguments;
+        const later = function() {
+            func.apply(context, args);
+            timeout = null;
+        };
+        if (!timeout) throttleTime = performance.now();
+        if (timeout && performance.now() - throttleTime > wait) {
+            func.apply(context, args);
+            throttleTime = performance.now();
+        }
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 };
 
-function htmlToElement(html) {
-    var template = document.createElement("template");
-    template.innerHTML = html.trim();
-    return template.content.firstChild;
+/*
+2021-02-26 15:21
+
+there are two different ways of handling a Management Operation
+
+1) trigger event.type=operation event with detail.operation = {some management op}
+	- tree does this
+
+2) trigger event.type={some management op} event
+	- terminal does this
+
+THIS IS CONFUSING - going to kill #2
+
+*/ const pathNoServiceName = (service, path) => {
+    if (!path.includes("/")) return path;
+    if (!path.includes(service.name)) return stripLeadSlash(path);
+    return stripLeadSlash(stripLeadSlash(path).replace(service.name, ""));
+};
+
+const tryFn = (fn, _default) => {
+    try {
+        return fn();
+    } catch (e) {
+        return _default;
+    }
+};
+
+const stripLeadSlash = (path = "") => path[0] === "/" ? path.slice(1) : path;
+
+const flattenTree$1 = tree => {
+    const results = [];
+    const recurse = (branch, parent = "/") => {
+        const leaves = Object.keys(branch);
+        leaves.map((x => {
+            results.push({
+                name: x,
+                parent: parent
+            });
+            recurse(branch[x], x);
+        }));
+    };
+    recurse(tree);
+    return results;
+};
+
+const guessCurrentFolder = (currentFile, currentService) => {
+    if ((currentFile || "").includes("/")) {
+        const parent = currentFile.split("/").slice(0, -1).join("/");
+        return parent.includes(currentService.name) ? parent.replace(`${currentService.name}/`, "") : parent;
+    }
+    if (!currentService) return "/";
+    //return currentService.name;
+        let parent;
+    try {
+        const flat = flattenTree$1(currentService.tree[Object.keys(currentService.tree)[0]]);
+        // TODO: should follow parents up tree and build path from that
+                let done;
+        let path = [];
+        let file = currentFile;
+        while (!done) {
+            file = flat.find((x => x.name === file)).parent;
+            if (file === "/") {
+                done = true;
+            } else {
+                path.push(file);
+            }
+        }
+        parent = "/" + path.reverse().join("/");
+    } catch (e) {}
+    return parent;
+};
+
+async function performOp(currentService, operations, performOperation, externalStateRequest, callback) {
+    const files = JSON.parse(JSON.stringify(currentService.code));
+    const body = {
+        id: currentService.id,
+        name: currentService.name,
+        code: JSON.stringify({
+            tree: currentService.tree,
+            files: files
+        })
+    };
+    const foundOp = operations.find((x => x.name === "update"));
+    const foundOpClone = JSON.parse(JSON.stringify(foundOp));
+    foundOpClone.config = foundOpClone.config || {};
+    foundOpClone.config.body = JSON.stringify(body);
+    foundOpClone.eventToBody = foundOp.eventToBody;
+    foundOpClone.eventToParams = foundOp.eventToParams;
+    foundOpClone.after = (...args) => {
+        foundOp.after(...args);
+        callback && callback(null, "DONE");
+    };
+    await performOperation(foundOpClone, {
+        body: body
+    }, externalStateRequest);
 }
 
-let paletteModal;
+// -----------------------------------------------------
+const showCurrentFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, getCurrentFolder: getCurrentFolder}) => event => {
+    // this should move to management.mjs
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentFile = getCurrentFile();
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFolder = getCurrentFolder();
+    if (!currentService) {
+        callback && callback("unable to read current service");
+        return;
+    }
+    const parent = currentFolder ? currentFolder : guessCurrentFolder(currentFile, currentService);
+    const currentFolderResponse = parent === "/" ? currentService.name + "/" : `${currentService.name}/${stripLeadSlash(parent)}`;
+    callback && callback(!parent ? "trouble finding current path" : false, currentFolderResponse, currentService?.name);
+};
 
-function PaletteModal(parentEl) {
-    if (paletteModal) return paletteModal;
-    const style = `\n\t<style>\n\t\t#paletteModal ::-webkit-scrollbar * { background:transparent; }\n\t\t#paletteModal ::-webkit-scrollbar { width: 5px; }\n\t\t#paletteModal ::-webkit-scrollbar-track { background: transparent; -webkit-box-shadow: none; opacity: 0; }\n\t\t#paletteModal ::-webkit-scrollbar-thumb { background: rgb(57, 57, 58); }\n\t\t#paletteModal ::-webkit-scrollbar-thumb:hover { background: rgb(77, 77, 78); }\n\n\t\t/* TODO: enable the following some fancy day */\n\t\t/* #paletteModal ::-webkit-scrollbar { display: none; } */\n\t\t/* #paletteModal:hover ::-webkit-scrollbar { display: block; } */\n\n\t\t#paletteModal {\n\t\t\tposition: absolute;\n\t\t\ttop: 1px;\n\t\t\twidth: 100%;\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\tjustify-content: center;\n\t\t\talign-items: center;\n\t\t\tvisibility: hidden;\n\t\t}\n\t\t#paletteModal.open {\n\t\t\tvisibility: visible;\n\t\t}\n\t\t#paletteModal .palette-menu {\n\t\t\tbackground-color: rgb(37, 37, 38);\n\t\t\tcolor: rgb(204, 204, 204);\n\t\t\tbox-shadow: rgb(0, 0, 0) 0px 5px 8px;\n\t\t\twidth: 600px;\n\t\t}\n\t\t#paletteModal .palette-menu:focus {\n\t\t\toutline: none;\n\t\t}\n\t\t.palette-title { display: none; }\n\t\t.palette-title.visible {\n\t\t\tdisplay: inherit;\n\t\t\tpadding: 5px 5px 3px 5px;\n\t\t\ttext-align: center;\n\t\t\tbackground: #3b3b3c;\n\t\t}\n\t\t.palette-input { display: flex; padding: 5px; }\n\t\t.palette-input input {\n\t\t\tbackground: var(--main-theme-background-color) !important;\n\t\t\tmargin: 0 !important;\n\t\t\tborder: 0 !important;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tpadding-left: .5em !important;\n\t\t\tpadding-right: .5em !important;\n\t\t\tfont-size: 1.1em !important;\n\t\t\tbox-sizing: border-box !important;\n\t\t\tpadding-top: .25em !important;\n\t\t\tpadding-bottom: .25em !important;\n\t\t\theight: unset !important;\n\t\t\ttransition: unset !important;\n\t\t\tborder: 1px solid !important;\n\t\t\tborder-color: transparent !important;\n\t\t}\n\t\t.palette-input > button { display: none; }\n\t\t.palette-input > button.visible {\n\t\t\tdisplay: inherit;\n\t\t\tmargin: 0 0 0 5px;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color),0.5);\n\t\t\tborder: 0;\n\t\t\tcolor: var(--main-theme-text-color);\n\t\t\tfilter: contrast(1.5);\n\t\t\tpadding: 0 5px;\n\t\t}\n\t\t.palette-input input:focus {\n\t\t\tbox-shadow: none !important;\n\t\t\tborder-color: rgb(var(--main-theme-highlight-color)) !important;\n\t\t}\n\t\t.palette-progress { display: none; }\n\t\t.palette-progress.visible {\n\t\t\tdisplay: inherit;\n\t\t\theight: 1px;\n\t\t\twidth: 100%;\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 1);\n\t\t}\n\t\t.palette-suggest ul {\n\t\t\tmargin: 5px 0px 5px 5px; /* lame - scrollbar makes me do this */\n\t\t\tmax-height: 500px;\n\t\t\toverflow-x: hidden;\n\t\t\toverflow-y: scroll;\n\t\t}\n\t\t.palette-suggest ul li {\n\t\t\tpadding: 3px 10px 3px 10px;\n\t\t\tdisplay: flex;\n\t\t}\n\t\t.palette-suggest ul li.selected {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.3);\n\t\t\tbackground: #0d3048;\n\t\t}\n\t\t.palette-suggest ul li:hover {\n\t\t\tbackground: rgba(var(--main-theme-highlight-color), 0.3);\n\t\t}\n\t\t.palette-suggest ul li div {\n\t\t\tuser-select: none;\n\t\t\tpointer-events: none;\n\t\t}\n\t\t.palette-file [class^="icon-"]:before {\n\t\t\twidth: 10px;\n\t\t}\n\t\t.palette-suggest span { white-space:pre; }\n\t\t.palette-suggest .highlight {\n\t\t\tcolor: rgba(var(--main-theme-highlight-color), 1);\n\t\t}\n\t\t.palette-file-name {}\n\t\t.palette-file-path {\n\t\t\topacity: .6;\n\t\t\tpadding-left: 12px;\n\t\t}\n\t</style>`;
-    paletteModal = htmlToElement(`\n\t\t<div id="paletteModal">\n\t\t\t${style}\n\t\t\t<div class="palette-menu" tabindex="-1">\n\t\t\t\t<div class="palette-title">Title</div>\n\t\t\t\t<div class="palette-input">\n\t\t\t\t\t<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="">\n\t\t\t\t\t<button>OK</button>\n\t\t\t\t</div>\n\t\t\t\t<div class="palette-progress"></div>\n\t\t\t\t<div class="palette-suggest">\n\t\t\t\t\t<ul></ul>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t`.replace(/		/g, ""));
-    const modalMenu = paletteModal.querySelector(".palette-menu");
-    const suggestList = paletteModal.querySelector(".palette-suggest");
-    const searchInput = modalMenu.querySelector(".palette-input input");
-    const triggerSelectFile = el => {
-        if (!el) {
-            console.error("palette modal: could not find selected element");
+const changeCurrentFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, getCurrentFolder: getCurrentFolder, setCurrentFolder: setCurrentFolder}) => event => {
+    console.log("OPERATIONS: changeCurrentFolder");
+    const {detail: detail} = event;
+    const {callback: callback, folderPath: folderPath} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    const currentFolder = getCurrentFolder() || guessCurrentFolder(currentFile, currentService);
+    const firsChar = folderPath[0];
+    let currentPath = (firsChar === "/" ? folderPath : (currentFolder || "") + "/" + folderPath).replace(/\/\//g, "/");
+    if (folderPath.includes("..")) {
+        currentPath = (currentFolder || "").split("/").slice(0, -1).join("/") || "/";
+        const restOfPath = folderPath.replace("..", "");
+        if (restOfPath) {
+            currentPath += restOfPath;
+        }
+    }
+    setCurrentFolder(currentPath);
+    const folderSelectEvent = new CustomEvent("folderSelect", {
+        bubbles: true,
+        detail: {
+            name: currentPath
+        }
+    });
+    document.body.dispatchEvent(folderSelectEvent);
+    callback && callback(null, " ");
+};
+
+const addFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, operations: operations, getOperations: getOperations}) => async event => {
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    operations = operations || getOperations((() => {}), (() => {}));
+    event.detail.operation = event.detail.operation || event.type;
+    const op = managementOp(event);
+    op(event, currentService, currentFile);
+    await performOp(currentService, operations, performOperation, externalStateRequest, callback);
+};
+
+const renameFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, operations: operations}) => async event => {
+    // console.log('OPERATIONS: renameFolder');
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    event.detail.operation = event.detail.operation || event.type;
+    managementOp(event, currentService, currentFile);
+    //currentService, operations, performOperation, externalStateRequest
+        await performOp(currentService, operations, performOperation, externalStateRequest, callback);
+};
+
+const deleteFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, operations: operations}) => async event => {
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    event.detail.operation = event.detail.operation || event.type;
+    managementOp(event, currentService, currentFile);
+    await performOp(currentService, operations, performOperation, externalStateRequest, callback);
+};
+
+const moveFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, operations: operations}) => async event => {
+    //console.log('OPERATIONS: move');
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    event.detail.operation = event.detail.operation || event.type;
+    managementOp(event, currentService, currentFile);
+    await performOp(currentService, operations, performOperation, externalStateRequest, callback);
+};
+
+const moveFileHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, operations: operations}) => async event => {
+    //console.log('OPERATIONS: move');
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFile = getCurrentFile();
+    event.detail.operation = event.detail.operation || event.type;
+    managementOp(event, currentService, currentFile);
+    await performOp(currentService, operations, performOperation, externalStateRequest, callback);
+};
+
+const readFolderHandler = ({managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, getCurrentFolder: getCurrentFolder}) => event => {
+    // this should move to management.mjs
+    const {detail: detail} = event;
+    const {callback: callback} = detail;
+    const currentFile = getCurrentFile();
+    const currentService = getCurrentService({
+        pure: true
+    });
+    const currentFolder = getCurrentFolder();
+    const parent = currentFolder ? currentFolder : guessCurrentFolder(currentFile, currentService);
+    event.detail.operation = "readFolder";
+    const op = managementOp(event, currentService, currentFile, currentFolder);
+    const children = op(event, currentService, currentFile, parent);
+    callback && callback(!parent || !children ? "trouble finding current path or children" : false, children && children.length ? children.join("\n") : "<empty>");
+};
+
+const fileChangeHandler = (...args) => debounce((event => {
+    const {getState: getState, getOperations: getOperations, performOperation: performOperation, triggerOperationDone: triggerOperationDone, getCurrentService: getCurrentService} = args[0];
+    getState();
+    const service = getCurrentService({
+        pure: true
+    }).name;
+    const operations = getOperations();
+    const changeOp = (operations || []).find((x => x.name === "change"));
+    const {filePath: filePath, code: code} = event.detail;
+    const path = `./${service}/${filePath}`;
+    (async () => {
+        const results = await performOperation(changeOp, {
+            path: path,
+            code: code,
+            service: service
+        });
+        triggerOperationDone(results);
+    })();
+}), 300)
+// ----------------------------------------------------------------------------------------------------------
+;
+
+const updateServiceHandler = async ({getCurrentService: getCurrentService, getState: getState, performOperation: performOperation, foundOp: foundOp, manOp: manOp}) => {
+    try {
+        const service = getCurrentService();
+        const state = getState();
+        //TODO: maybe some day get fancy and only send changes
+        // for now, just update all service files that have changed and send whole service
+                Object.keys(state.changedFiles).forEach((chKey => {
+            const [serviceId, serviceName, filename] = chKey.split("|");
+            const changes = state.changedFiles[chKey];
+            const foundFile = service.code.find((x => x.name === filename));
+            foundFile.code = changes[changes.length - 1];
+        }));
+        const body = service;
+        const eventData = {
+            body: body
+        };
+        if (manOp && manOp.listener) {
+            eventData.listener = manOp.listener;
+        }
+        const results = await performOperation(foundOp, eventData);
+        return results;
+    } catch (e) {
+        console.error("error updating service");
+        console.error(e);
+    }
+};
+
+const serviceOperation = async ({service: {name: service}, operation: command, filename: filename, folderName: folderName, parent: parent = ""}) => {
+    const base = parent.includes(service) ? parent : `${service}/${parent}`;
+    const path = `/${base}/${filename || folderName}`;
+    const options = {
+        method: "POST",
+        body: JSON.stringify({
+            path: path,
+            command: command,
+            service: service
+        })
+    };
+    const result = await fetch("service/change", options).then((x => x.json()));
+    return result;
+};
+
+const operationsHandler = ({managementOp: managementOp, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, setCurrentService: setCurrentService, getCurrentFolder: getCurrentFolder, setCurrentFolder: setCurrentFolder, getState: getState, resetState: resetState, getOperations: getOperations, getReadAfter: getReadAfter, getUpdateAfter: getUpdateAfter, performOperation: performOperation, operationsListener: operationsListener, triggerOperationDone: triggerOperationDone, getChainedTrigger: getChainedTrigger}) => async event => {
+    try {
+        // deprecate from dummyFunc -> updateAfter -> readAfter;
+        const dummyFunc = () => {};
+        const updateAfter = getUpdateAfter(dummyFunc, dummyFunc, dummyFunc);
+        const readAfter = getReadAfter(dummyFunc);
+        const allOperations = getOperations(updateAfter, readAfter);
+        const {detail: detail} = event;
+        const {callback: callback} = detail;
+        // NOTE: simple operations handling - tell service worker to do everything
+                const stripLeadingSlash = (s = "") => s.startsWith("/") ? s.slice(1) : s;
+        const swOps = {
+            addFile: (detail, op, service) => {
+                const {parent: parent, filename: filename} = detail;
+                op.target = stripLeadingSlash(`${parent}/${filename}`.replace(service + "/", ""));
+                op.source = "\n";
+            },
+            addFolder: (detail, op, service) => {
+                const {folderName: folderName, parent: parent} = detail;
+                op.target = stripLeadingSlash(`${parent}/${folderName}`.replace(service + "/", ""));
+                delete op.source;
+            },
+            moveFile: (detail, op, service) => {
+                debugger;
+            },
+            moveFolder: (detail, op, service) => {
+                const {folderName: folderName} = detail;
+                if (op.target === op.source) return {
+                    error: "invalid move operation"
+                };
+                op.target = op.target.replace(new RegExp(`${folderName}$`), "");
+            },
+            copyFile: (detail, op, service) => {
+                debugger;
+            },
+            copyFolder: (detail, op, service) => {
+                debugger;
+            },
+            renameFile: (detail, op, service) => {
+                debugger;
+            },
+            renameFolder: (detail, op, service) => {
+                debugger;
+            },
+            deleteFile: (detail, op, service) => {
+                const {parent: parent, filename: filename} = detail;
+                op.source = stripLeadingSlash(`${parent}/${filename}`.replace(service + "/", ""));
+                delete op.target;
+            },
+            deleteFolder: (detail, op, service) => {
+                const {parent: parent, filename: filename} = detail;
+                op.source = stripLeadingSlash(`${parent}/${filename}`.replace(service + "/", ""));
+                delete op.target;
+            }
+        };
+        if (Object.keys(swOps).includes(detail?.operation)) {
+            console.log("%c using service worker for: %c" + detail.operation, "color: blue;", "color: yellow;");
+            const updateOp = allOperations.find((x => x.name === "update"));
+            const currentService = getCurrentService() || {};
+            currentService.name = currentService.name || "service-not-found";
+            const body = {
+                name: currentService.name,
+                id: currentService.id,
+                operation: {
+                    name: event.detail.operation
+                }
+            };
+            try {
+                body.operation.source = event.detail.src.replace(currentService.name + "/", "");
+            } catch (e) {}
+            try {
+                body.operation.target = event.detail.tgt.replace(currentService.name + "/", "");
+            } catch (e) {}
+            const {error: error} = swOps[detail.operation](event.detail, body.operation, currentService.name) || {};
+            if (error) {
+                console.error("time to reconsider your life..");
+                debugger;
+                return;
+            }
+            const result = await performOperation(updateOp, {
+                body: body
+            });
+            const updatedService = result?.detail?.result[0];
+            setCurrentService(updatedService);
+            triggerOperationDone(result);
+            callback && callback(undefined, result);
             return;
         }
-        const name = el.querySelector(".palette-file-name").textContent;
-        const path = el.querySelector(".palette-file-path").getAttribute("relative");
-        const service = (() => {
-            const svc = getCurrentService({
+        if (detail && detail.operation === "showCurrentFolder") {
+            return showCurrentFolderHandler({
+                getCurrentFile: getCurrentFile,
+                getCurrentService: getCurrentService,
+                getCurrentFolder: getCurrentFolder
+            })(event);
+        }
+        if (detail && detail.operation === "changeCurrentFolder") {
+            return changeCurrentFolderHandler({
+                getCurrentFile: getCurrentFile,
+                getCurrentService: getCurrentService,
+                getCurrentFolder: getCurrentFolder,
+                setCurrentFolder: setCurrentFolder
+            })(event);
+        }
+        const manageOp = managementOp(event);
+        if (manageOp) {
+            const currentService = getCurrentService();
+            const currentFile = getCurrentFile();
+            const currentFolder = getCurrentFolder() || guessCurrentFolder(currentFile, currentService);
+            const manageOpResult = manageOp(event, currentService, currentFile, currentFolder);
+            if (!manageOpResult || manageOpResult.operation !== "updateProject") {
+                if (!callback) {
+                    debugger;
+                    return;
+                }
+                //some management ops do not require state update!?
+                                callback(null, manageOpResult);
+                //might be cool to do this another way (but needs work)
+                //triggerOperationDone(manageOpResult);
+                                return;
+            }
+            // deleteFolder, addFolder, moveFile, moveFolder(?) needs to handle non-callback flow (operationDone)
+                        const foundOp = allOperations.find((x => x.name === "update"));
+            const result = await updateServiceHandler({
+                getCurrentService: getCurrentService,
+                getState: getState,
+                performOperation: performOperation,
+                foundOp: foundOp,
+                manOp: manageOpResult
+            });
+            //if this is a deleteFile or deleteFolder, provider needs to know (and shouldn't have to guess)
+            //this probably is the only thing that needs to be done (and not what is above!)
+                        let deleteResult;
+            if ([ "deleteFile", "deleteFolder" ].includes(event.detail.operation)) {
+                deleteResult = await serviceOperation({
+                    service: currentService,
+                    ...event.detail
+                });
+                console.log(JSON.stringify(deleteResult, null, 2));
+            }
+            triggerOperationDone(result);
+            const chainedTrigger = getChainedTrigger(event);
+            if (chainedTrigger) {
+                await chainedTrigger();
+            }
+            callback && callback(undefined, deleteResult || result);
+            return;
+        }
+        const foundOp = allOperations.find((x => x.name === event.detail.operation));
+        if (!foundOp) {
+            return;
+        }
+        if (foundOp.name === "update") {
+            const result = await updateServiceHandler({
+                getCurrentService: getCurrentService,
+                getState: getState,
+                performOperation: performOperation,
+                foundOp: foundOp
+            });
+            triggerOperationDone(result);
+            return;
+        }
+        const result = await performOperation(foundOp, event.detail);
+        triggerOperationDone(result);
+        //wrangle context(state?)?
+        //execute operation with context
+        //debugger;
+        } catch (e) {
+        console.error(e);
+    }
+};
+
+const providerHandler = ({managementOp: managementOp, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, setCurrentService: setCurrentService, getCurrentFolder: getCurrentFolder, setCurrentFolder: setCurrentFolder, getState: getState, resetState: resetState, getOperations: getOperations, getReadAfter: getReadAfter, getUpdateAfter: getUpdateAfter, performOperation: performOperation, operationsListener: operationsListener, triggerOperationDone: triggerOperationDone}) => event => {
+    const {detail: detail, type: type} = event;
+    if (![ "provider-test", "provider-save", "provider-add-service" ].includes(type)) {
+        return;
+    }
+    let {data: data} = detail;
+    data = data.reduce(((all, one) => {
+        // this is just an extra step, probably should remove it
+        const mappedName = {
+            "provider-url": "providerUrl",
+            "provider-type": "providerType",
+            "provider-access-token": "auth",
+            "provider-repository": "repo",
+            "provider-repository-branch": "branch"
+        }[one.name];
+        if (!mappedName) {
+            console.error("could not find data mapping!");
+            return;
+        }
+        all[mappedName] = one.value;
+        return all;
+    }), {});
+    //TODO: provider-add-service should just be service/create with provider passed as argument
+        const handler = operationsHandler({
+        managementOp: managementOp,
+        externalStateRequest: externalStateRequest,
+        getCurrentFile: getCurrentFile,
+        getCurrentService: getCurrentService,
+        setCurrentService: setCurrentService,
+        getCurrentFolder: getCurrentFolder,
+        setCurrentFolder: setCurrentFolder,
+        getState: getState,
+        resetState: resetState,
+        getOperations: getOperations,
+        getReadAfter: getReadAfter,
+        getUpdateAfter: getUpdateAfter,
+        performOperation: performOperation,
+        operationsListener: operationsListener,
+        triggerOperationDone: triggerOperationDone
+    });
+    return handler({
+        detail: {
+            ...data,
+            operation: type
+        }
+    });
+};
+
+const operationDoneHandler = ({getCurrentService: getCurrentService, setCurrentService: setCurrentService, triggerServiceSwitchNotify: triggerServiceSwitchNotify}) => event => {
+    const result = tryFn((() => event.detail.result), []);
+    const op = tryFn((() => event.detail.op), "");
+    const inboundService = tryFn((() => event.detail.result[0]), {});
+    const wasAllServicesRead = !event.detail.id && event.detail.id !== 0;
+    const readOneServiceDone = result?.length === 1 && op === "read" && (inboundService?.id || inboundService?.id === 0) && inboundService?.id !== "*" && !wasAllServicesRead;
+    if (!readOneServiceDone) return;
+    // TODO: this should be handled in state event handler..
+        if (readOneServiceDone) {
+        const currentService = getCurrentService({
+            pure: true
+        });
+        const isNewService = !currentService || Number(inboundService.id) !== Number(currentService.id);
+        if (!isNewService) return;
+        setCurrentService(inboundService);
+        triggerServiceSwitchNotify();
+        return;
+    }
+};
+
+const handlers = {
+    showCurrentFolderHandler: showCurrentFolderHandler,
+    changeCurrentFolderHandler: changeCurrentFolderHandler,
+    addFolderHandler: addFolderHandler,
+    readFolderHandler: readFolderHandler,
+    deleteFolderHandler: deleteFolderHandler,
+    renameFolderHandler: renameFolderHandler,
+    moveFolderHandler: moveFolderHandler,
+    moveFileHandler: moveFileHandler,
+    operationsHandler: operationsHandler,
+    operationDoneHandler: operationDoneHandler,
+    "provider-test": providerHandler,
+    "provider-save": providerHandler,
+    "provider-add-service": providerHandler,
+    fileChangeHandler: fileChangeHandler
+};
+
+const getChainedTrigger = ({triggers: triggers}) => event => {
+    const handler = {
+        addFile: async () => {
+            const service = getCurrentService({
                 pure: true
-            }) || {};
-            return svc.name || "";
-        })();
-        if (!service) return console.error("palette modal: issue getting selected service name for selected file");
-        if (typeof path === "undefined") return console.error("palette modal: issue getting path for selected file");
-        if (!name) return console.error("palette modal: issue getting name for selected file");
-        // TODO: should be doing this with triggers
-                const event = new CustomEvent("fileSelect", {
+            });
+            const name = event.detail.parent ? `${event.detail.parent}/${event.detail.name}` : event.detail.name;
+            triggers.triggerFileSelect({
+                detail: {
+                    name: pathNoServiceName(service, name)
+                }
+            });
+        },
+        deleteFile: async () => {
+            const name = event.detail.parent ? `${event.detail.parent}/${event.detail.name}` : event.detail.name;
+            const allOpen = getOpenedFiles() || [];
+            const opened = allOpen.filter((x => x.name !== name));
+            if (allOpen?.length === opened?.length) return;
+            let next;
+            if (opened.length) {
+                next = opened[opened.length - 1].name;
+            }
+            const alreadySelected = allOpen.find((x => x.selected));
+            if (alreadySelected) {
+                next = alreadySelected.name;
+            }
+            triggers.triggerFileClose({
+                detail: {
+                    name: name,
+                    next: next
+                }
+            });
+        }
+    }[event.detail.operation];
+    return handler;
+};
+
+function attachListeners(args) {
+    const triggers = {
+        triggerServiceSwitchNotify: attachTrigger({
+            name: "Operations",
+            eventName: "service-switch-notify",
+            type: "raw"
+        }),
+        triggerOperationDone: attachTrigger({
+            name: "Operations",
+            eventName: "operationDone",
+            type: "raw"
+        }),
+        triggerFileSelect: attachTrigger({
+            name: "Operations",
+            eventName: "fileSelect",
+            type: "raw"
+        }),
+        triggerFileClose: attachTrigger({
+            name: "Operations",
+            eventName: "fileClose",
+            type: "raw"
+        })
+    };
+    const mapListeners = handlerName => {
+        const eventName = handlerName.replace("Handler", "");
+        attach({
+            name: "Operations",
+            eventName: eventName,
+            listener: handlers[handlerName]({
+                ...triggers,
+                getChainedTrigger: getChainedTrigger({
+                    triggers: triggers
+                }),
+                ...args
+            })
+        });
+    };
+    Object.keys(handlers).map(mapListeners);
+    return triggers;
+}
+
+const manageOp = {
+    operation: "updateProject"
+};
+
+const flattenTree = tree => {
+    const results = [];
+    const recurse = (branch, parent = "/") => {
+        const leaves = Object.keys(branch);
+        leaves.map((x => {
+            results.push({
+                name: x,
+                parent: parent
+            });
+            recurse(branch[x], x);
+        }));
+    };
+    recurse(tree);
+    return results;
+};
+
+function getContextFromPath(root, folderPath) {
+    const split = folderPath.split("/").filter((x => !!x));
+    const folderName = split.pop();
+    const parentObject = split.reduce(((all, one) => {
+        all[one] = all[one] || {};
+        return all[one];
+    }), root);
+    return {
+        folderName: folderName,
+        parentObject: parentObject
+    };
+}
+
+function uberManageOp({currentFolder: currentFolder = "/", currentService: currentService, oldName: oldName, newName: newName, createNewTree: createNewTree, deleteOldTree: deleteOldTree, createNewFile: createNewFile, deleteOldFile: deleteOldFile}) {
+    let operationComplete;
+    try {
+        //TODO: guard against empty/improper filename
+        //TODO: if path not included or relative to current
+        //      add currentFolder to oldName/newName
+        const rootFolderName = Object.keys(currentService.tree)[0];
+        const root = currentService.tree[rootFolderName];
+        let {folderName: folderName, parentObject: parentObject} = getContextFromPath(root, oldName);
+        const oldFolderParent = parentObject;
+        const oldFolderName = folderName;
+        if (createNewTree) {
+            // this clone causes problems with JSX and HTML files
+            // TODO: fix probably deals with < being escaped properly
+            const clonedOldFolderContents = JSON.parse(JSON.stringify(oldFolderParent[oldFolderName]));
+            ({folderName: folderName, parentObject: parentObject} = getContextFromPath(root, newName));
+            const newFolderParent = parentObject;
+            const newFolderName = folderName;
+            newFolderParent[newFolderName] = clonedOldFolderContents;
+        }
+        if (deleteOldTree) {
+            delete oldFolderParent[oldFolderName];
+        }
+        if (createNewFile) {
+            const oldContents = (currentService.code.find((x => x.name === oldFolderName)) || {}).code;
+            currentService.code.push({
+                name: folderName,
+                code: oldContents
+            });
+        }
+        if (deleteOldFile) {
+            currentService.code = currentService.code.filter((x => x.name !== oldFolderName));
+        }
+        operationComplete = true;
+    } catch (e) {}
+    return operationComplete;
+}
+
+function addFile(e, currentService, currentFile) {
+    let {filename: filename, parent: parent, listener: listener, untracked: untracked} = e.detail;
+    let manageOp, currentServiceCode, treeEntryAdded;
+    if (parent) {
+        filename = parent + "/" + filename;
+    }
+    if (untracked) {
+        currentServiceCode = JSON.parse(JSON.stringify(currentService.code));
+        const currentlyUsedNumbers = currentServiceCode.filter((x => x.name.includes("Untitled-"))).map((x => Number(x.name.replace("Untitled-", ""))));
+        let foundNumber;
+        let potentialNumber = 1;
+        while (!foundNumber) {
+            if (currentlyUsedNumbers.includes(potentialNumber)) {
+                potentialNumber++;
+                continue;
+            }
+            foundNumber = potentialNumber;
+        }
+        const untitledName = `Untitled-${foundNumber}`;
+        e.detail.filename = untitledName;
+        currentServiceCode.push({
+            name: untitledName,
+            untracked: true,
+            code: ""
+        });
+        manageOp = {
+            operation: "updateProject",
+            listener: listener
+        };
+        currentService.code = currentServiceCode;
+        return manageOp;
+    }
+    try {
+        //TODO: guard against empty/improper filename
+        const split = filename.split("/").filter((x => !!x));
+        const file = split.length > 1 ? split[split.length - 1] : undefined;
+        const codePath = filename.includes(currentService.name) ? `/${filename}` : `/${currentService.name}/${filename}`;
+        currentServiceCode = JSON.parse(JSON.stringify(currentService.code));
+        currentServiceCode.push({
+            name: file || filename,
+            code: codePath,
+            path: codePath
+        });
+        if (e.detail.untracked) {}
+        let alreadyPlaced;
+        if (file) {
+            let parentPath = split.filter((x => x !== file)).join("/");
+            const rootFolderName = Object.keys(currentService.tree)[0];
+            parentPath = parentPath.replace(new RegExp(`^${rootFolderName}/`), "");
+            const root = currentService.tree[rootFolderName];
+            const {parentObject: parentObject} = getContextFromPath(root, parentPath);
+            const context = parentObject[parentPath.split("/").pop()] || parentObject;
+            context[file] = {};
+            alreadyPlaced = true;
+        }
+        !alreadyPlaced && (currentService.tree[Object.keys(currentService.tree)[0]][filename] = {});
+        treeEntryAdded = true;
+        manageOp = {
+            operation: "updateProject",
+            listener: listener
+        };
+    } catch (e) {
+        console.log("could not add file");
+        console.log(e);
+        return;
+    }
+    if (manageOp && currentServiceCode && treeEntryAdded) {
+        currentService.code = currentServiceCode;
+    }
+    return manageOp;
+}
+
+function renameFile(e, currentService, currentFile) {
+    const {filename: filename, newName: newName} = e.detail;
+    let manageOp, currentServiceCode, treeEntryRenamed;
+    try {
+        //TODO: guard against empty/improper filename, newName
+        currentServiceCode = JSON.parse(JSON.stringify(currentService.code));
+        const fileToRename = currentServiceCode.find((x => x.name === filename));
+        fileToRename.name = newName;
+        //TODO: only handles root level files!!!
+                const rootLevel = currentService.tree[Object.keys(currentService.tree)[0]];
+        delete rootLevel[filename];
+        rootLevel[newName] = {};
+        treeEntryRenamed = true;
+        manageOp = {
+            operation: "updateProject"
+        };
+    } catch (e) {
+        console.log("could not rename file");
+        console.log(e);
+    }
+    if (manageOp && currentServiceCode && treeEntryRenamed) {
+        currentService.code = currentServiceCode;
+    }
+    // console.log(JSON.stringify({ currentService }, null, 2 ));
+    // return;
+        return manageOp;
+}
+
+function deleteFile(e, currentService, currentFile) {
+    //console.log('deleteFile');
+    let {filename: filename, parent: parent, listener: listener} = e.detail;
+    let manageOp, currentServiceCode, treeEntryDeleted;
+    if (parent) {
+        filename = parent + "/" + filename;
+    }
+    try {
+        const split = filename.split("/").filter((x => !!x));
+        const file = split[split.length - 1];
+        let alreadyDeleted;
+        if (file) {
+            let parentPath = split.filter((x => x !== file)).join("/");
+            const rootFolderName = Object.keys(currentService.tree)[0];
+            parentPath = parentPath.replace(new RegExp(`^${rootFolderName}/`), "");
+            const root = currentService.tree[rootFolderName];
+            const {parentObject: parentObject} = getContextFromPath(root, parentPath);
+            const context = parentObject[parentPath.split("/").pop()] || parentObject;
+            delete context[file];
+            alreadyDeleted = true;
+        }
+        !alreadyDeleted && delete currentService.tree[Object.keys(currentService.tree)[0]][filename];
+        treeEntryDeleted = true;
+        //TODO: guard against empty/improper filename
+                currentServiceCode = currentService.code.filter((x => x.name !== (file || filename)));
+        manageOp = {
+            operation: "updateProject",
+            listener: listener
+        };
+    } catch (e) {
+        console.log("could not delete file");
+        console.log(e);
+        return;
+    }
+    if (manageOp && currentServiceCode && treeEntryDeleted) {
+        currentService.code = currentServiceCode;
+    }
+    return manageOp;
+}
+
+function moveFile(e, currentService, currentFile) {
+    //console.log('moveFile');
+    const {target: target, destination: destination} = e.detail;
+    //TODO: is either current selected folder or parent of currentFile
+        const currentFolder = "/";
+    //TODO: may want to keep same target name but move to diff folder
+        const fileRenamed = uberManageOp({
+        currentFolder: currentFolder,
+        currentService: currentService,
+        oldName: target,
+        newName: destination,
+        createNewTree: true,
+        deleteOldTree: true,
+        createNewFile: true,
+        deleteOldFile: true
+    });
+    return fileRenamed ? manageOp : undefined;
+}
+
+function renameProject(e, currentService, currentFile) {
+    console.log("renameProject");
+    return;
+}
+
+function addFolder(e, currentService, currentFile) {
+    //console.log('addFolder');
+    let {folderName: folderName, parent: parent, listener: listener} = e.detail;
+    let manageOp, folderAdded;
+    if (parent) {
+        folderName = parent + "/" + folderName;
+    }
+    try {
+        //TODO: guard against empty/improper folder name
+        const rootFolderName = Object.keys(currentService.tree)[0];
+        folderName = folderName.replace(new RegExp(`^/${rootFolderName}`), "");
+        let parentObject = currentService.tree[rootFolderName];
+        if (folderName.includes("/")) {
+            ({folderName: folderName, parentObject: parentObject} = getContextFromPath(parentObject, folderName));
+        }
+        // adding child of .keep make sure this is a folder
+        // TODO: remove .keep if adding a child folder or file
+        // TODO: add .keep if deleting last child folder or file
+                parentObject[folderName] = {
+            ".keep": {}
+        };
+        folderAdded = true;
+        manageOp = {
+            operation: "updateProject",
+            listener: listener
+        };
+    } catch (e) {
+        console.log("could not add folder");
+        console.log(e);
+        return;
+    }
+    return manageOp;
+}
+
+function renameFolder(e, currentService, currentFile) {
+    const {oldName: oldName, newName: newName} = e.detail;
+    //TODO: is either current selected folder or parent of currentFile
+        const currentFolder = "/";
+    const folderRenamed = uberManageOp({
+        currentFolder: currentFolder,
+        currentService: currentService,
+        oldName: oldName,
+        newName: newName,
+        createNewTree: true,
+        deleteOldTree: true,
+        createNewFile: false,
+        deleteOldFile: false
+    });
+    return folderRenamed ? manageOp : undefined;
+}
+
+function deleteFolder(e, currentService) {
+    // console.log('deleteFolder');
+    let {folderName: folderName, parent: parent, listener: listener} = e.detail;
+    if (parent) {
+        folderName = parent + "/" + folderName;
+    }
+    //TODO: is either current selected folder or parent of currentFile
+        const currentFolder = "/";
+    // delete all child files
+        const rootFolderName = Object.keys(currentService.tree)[0];
+    folderName = folderName.replace(new RegExp(`^/${rootFolderName}`), "");
+    const root = currentService.tree[rootFolderName];
+    const {folderName: folder, parentObject: parentObject} = getContextFromPath(root, folderName);
+    const children = flattenTree(parentObject[folder]).map((x => x.name));
+    const currentServiceCode = currentService.code.filter((c => !children.includes(c.name)));
+    currentService.code = currentServiceCode;
+    const folderdeleted = uberManageOp({
+        deleteOldTree: true,
+        oldName: folderName,
+        currentFolder: currentFolder,
+        currentService: currentService,
+        newName: "",
+        createNewTree: false,
+        createNewFile: false,
+        deleteOldFile: false
+    });
+    if (manageOp) {
+        manageOp.listener = listener;
+    }
+    return folderdeleted ? manageOp : undefined;
+}
+
+function moveFolder(e, currentService, currentFile) {
+    //console.log('moveFolder');
+    const {target: target, destination: destination} = e.detail;
+    //TODO: is either current selected folder or parent of currentFile
+        const currentFolder = "/";
+    //TODO: may want to keep same target name but move to diff folder
+        const folderRenamed = uberManageOp({
+        currentFolder: currentFolder,
+        currentService: currentService,
+        oldName: target,
+        newName: destination,
+        createNewTree: true,
+        deleteOldTree: true,
+        createNewFile: false,
+        deleteOldFile: false
+    });
+    return folderRenamed ? manageOp : undefined;
+}
+
+function readFolder(e, currentService, currentFile, currentFolder) {
+    const rootFolderName = Object.keys(currentService.tree)[0];
+    const root = currentService.tree[rootFolderName];
+    const {folderName: folderName, parentObject: parentObject} = getContextFromPath(root, currentFolder);
+    const context = parentObject[folderName] || parentObject;
+    const children = Object.keys(context).map((c => {
+        const isFolder = !currentService.code.find((x => x.name === c));
+        return isFolder ? `...${c}/` : c;
+    })).sort().map((x => x.replace("...", "")));
+    return children;
+}
+
+const ops = {
+    addFile: addFile,
+    renameFile: renameFile,
+    deleteFile: deleteFile,
+    moveFile: moveFile,
+    addFolder: addFolder,
+    renameFolder: renameFolder,
+    deleteFolder: deleteFolder,
+    moveFolder: moveFolder,
+    renameProject: renameProject,
+    readFolder: readFolder
+};
+
+function managementOp(e, currentService, currentFile, currentFolder) {
+    const thisOps = Object.keys(ops);
+    const {operation: operation = ""} = e && e.detail || {};
+    //console.log({ operation, e });
+        if (!thisOps.includes(operation)) {
+        return;
+    }
+    return ops[operation];
+}
+
+const defaultCode = _name => [ {
+    name: "index.js",
+    code: `const serviceName = '${_name}';\n\nconst send = (message) => {\n\tconst serviceMessage = \`\${serviceName}: \${message}\`;\n\t(process.send || console.log)\n\t\t.call(null, \`\${serviceName}: \${message}\`);\n};\n\nprocess.on('message', parentMsg => {\n\tconst _message = parentMsg + ' PONG.';\n\tsend(_message);\n});\n`
+}, {
+    name: "package.json",
+    code: JSON.stringify({
+        name: _name,
+        main: "react-example.jsx",
+        description: "",
+        template: "",
+        port: ""
+    }, null, "\t")
+}, {
+    name: "react-example.jsx",
+    code: exampleReact()
+} ];
+
+const defaultTree = _name => ({
+    [_name]: {
+        "index.js": {},
+        "package.json": {},
+        "react-example.jsx": {}
+    }
+});
+
+const defaultServices = [ {
+    id: 1,
+    name: "API Server",
+    tree: defaultTree("API Server"),
+    code: defaultCode("API Server")
+}, {
+    id: 10,
+    name: "UI Service",
+    tree: defaultTree("UI Service"),
+    code: defaultCode("UI Service")
+}, {
+    id: 777,
+    name: "welcome",
+    tree: [ {
+        welcome: {
+            "service.json": {}
+        }
+    } ],
+    code: [ {
+        name: "service.json",
+        code: JSON.stringify({
+            id: 777,
+            type: "frontend",
+            persist: "filesystem",
+            path: ".welcome",
+            version: .4,
+            tree: null,
+            code: null
+        }, null, 2)
+    } ]
+} ];
+
+const dummyService = (_id, _name) => ({
+    id: _id + "",
+    name: _name,
+    code: defaultCode(_name),
+    tree: defaultTree(_name)
+});
+
+const getServicesFromLS = () => {
+    try {
+        return JSON.parse(localStorage.getItem("localServices"));
+    } catch (e) {
+        return;
+    }
+};
+
+const saveServiceToLS = (currentServices = [], service) => {
+    try {
+        const serviceToUpdate = currentServices.find((x => Number(x.id) === Number(service.id)));
+        if (!serviceToUpdate) {
+            currentServices.push(service);
+        } else {
+            serviceToUpdate.name = service.name;
+            serviceToUpdate.id = service.id;
+            serviceToUpdate.code = JSON.parse(service.code).files;
+            serviceToUpdate.tree = JSON.parse(service.code).tree;
+        }
+        localStorage.setItem("localServices", JSON.stringify(currentServices));
+    } catch (e) {
+        return;
+    }
+};
+
+let lsServices = [];
+
+//TODO: this is intense, but save a more granular approach for future
+async function fileSystemTricks({result: result}) {
+    if (!result.result[0].code.find) {
+        const parsed = JSON.parse(result.result[0].code);
+        result.result[0].code = parsed.files;
+        result.result[0].tree = parsed.tree;
+        console.log("will weird things ever stop happening?");
+        return;
+    }
+    const serviceJSONFile = result.result[0].code.find((item => item.name === "service.json"));
+    if (serviceJSONFile && !serviceJSONFile.code) {
+        const fetched = await fetch(`./.${result.result[0].name}/service.json`);
+        serviceJSONFile.code = await fetched.text();
+    }
+    if (serviceJSONFile) {
+        let serviceJSON = JSON.parse(serviceJSONFile.code);
+        if (!serviceJSON.tree) {
+            const fetched = await fetch(`./${serviceJSON.path}/service.json`);
+            serviceJSONFile.code = await fetched.text();
+            serviceJSON = JSON.parse(serviceJSONFile.code);
+        }
+        result.result[0].code = serviceJSON.files;
+        result.result[0].tree = {
+            [result.result[0].name]: serviceJSON.tree
+        };
+    }
+    const len = result.result[0].code.length;
+    for (var i = 0; i < len; i++) {
+        const item = result.result[0].code[i];
+        if (!item.code && item.path) {
+            const fetched = await fetch("./" + item.path);
+            item.code = await fetched.text();
+        }
+    }
+}
+
+async function externalStateRequest(op) {
+    //debugger
+    //console.log(op.name);
+    let result;
+    let readId, updateId;
+    try {
+        readId = op.name === "read" && op.url.split("read/")[1];
+        if (readId) {
+            localStorage.setItem("lastService", readId);
+            //console.log(`should set: ${readId}`);
+                }
+        updateId = op.name === "update" && (o => {
+            try {
+                return JSON.parse(o.config.body).id;
+            } catch (e) {
+                return;
+            }
+        })(op);
+        if (document.location.href.includes("apps.crosshj.com")) {
+            throw new Error("Server not implemented for apps.crosshj.com");
+        }
+        op.config.headers = op.config.headers || {};
+        if (localStorage.getItem("reloadServices") === "true") {
+            op.config.headers["x-cache"] = "reload";
+        } else {
+            op.config.headers["x-cache"] = "force-cache";
+        }
+        const response = await fetch(op.url, op.config);
+        result = await response.json();
+        if (result.message === "read" && readId) {
+            await fileSystemTricks({
+                result: result
+            });
+        }
+    } catch (e) {
+        console.log(e);
+        lsServices = getServicesFromLS() || defaultServices;
+        if (op.name === "update") {
+            if (!op.config || !op.config.body) {
+                console.error("when updating, should have an operation body");
+                return;
+            }
+            let serviceToUpdate;
+            try {
+                serviceToUpdate = JSON.parse(op.config.body);
+            } catch (e) {}
+            if (!serviceToUpdate) {
+                console.error("when updating, operation body should be service to update");
+                return;
+            }
+            if (!serviceToUpdate.name || !serviceToUpdate.id) {
+                console.error("service to update is malformed!");
+                return;
+            }
+            const untrickCode = JSON.parse(serviceToUpdate.code);
+            //TODO: this is where diff between filesytem backed files would be useful
+                        untrickCode.files.forEach((f => {
+                if (f.path && f.name === "service.json") {
+                    f.code = "";
+                }
+            }));
+            serviceToUpdate.code = JSON.stringify(untrickCode);
+            //debugger
+                        if (window.DEBUG) {
+                const c = JSON.parse(serviceToUpdate.code);
+                debugger;
+                serviceToUpdate.code = JSON.stringify(c);
+            }
+            saveServiceToLS(lsServices, serviceToUpdate);
+            lsServices = getServicesFromLS() || [];
+            //console.log(JSON.stringify(op, null, 2));
+                }
+        if (op.name === "create") {
+            const {id: id, name: name, code: code} = JSON.parse(op.config.body);
+            saveServiceToLS(lsServices, dummyService(id, name));
+            lsServices = getServicesFromLS() || [];
+            //debugger
+                }
+        if (op.name === "delete") {
+            const {id: id} = JSON.parse(op.config.body);
+            lsServices = getServicesFromLS() || [];
+            lsServices = lsServices.filter((x => Number(x.id) !== Number(id)));
+            localStorage.setItem("localServices", JSON.stringify(lsServices));
+        }
+        if (readId) {
+            const result = {
+                result: lsServices.filter((x => Number(x.id) === Number(readId)))
+            };
+            await fileSystemTricks({
+                result: result
+            });
+            return result;
+        }
+        if (updateId) {
+            return {
+                result: lsServices.filter((x => Number(x.id) === Number(updateId)))
+            };
+        }
+        result = {
+            result: lsServices
+        };
+    }
+    return result;
+}
+
+function exampleReact() {
+    return `\n// (p)react hooks\nfunction useStore() {\n  let [value, setValue] = useState(1);\n\n  const add = useCallback(\n    () => setValue(value+2),\n    [value]\n  );\n\n  return { value, add };\n}\n\nconst Style = () => (\n<style dangerouslySetInnerHTML={{__html: \`\n  body { display: flex; font-size: 3em; }\n  body > * { margin: auto; }\n  #clicker {\n    cursor: pointer;\n    background: url("data:image/svg+xml,%3Csvg width='100%' height='100%' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg'%3E%3Cpath d='m11.61724,2.39725c0,0.78044 -0.39092,1.94771 -0.92661,2.95967c0.00514,0.00382 0.01027,0.00764 0.01538,0.01151c0.73296,-0.83424 0.95997,-2.34561 2.82973,-2.46949c1.86977,-0.12388 4.76668,5.72251 1.72228,6.863c-0.72347,0.27102 -0.16185,0.31797 -1.28384,0.14343c0.99502,0.4928 0.39169,0.19741 0.83213,0.81656c1.90904,2.68368 -4.33675,7.09457 -6.24582,4.41089c-0.44902,-0.63121 -0.30316,-0.19483 -0.45163,-1.33693l-0.00042,0.00003l-0.00624,0c-0.1,1 0.1,0.65 -0.4,1.3c-1.9,2.7 -7.9,-2.6 -6,-5.3c0.4,-0.6 0.9,-0.2 1.9,-0.7c-1.1,0.2 -1.4,-0.1 -2,-0.3c-3,-1.1 -0.3,-6.7 2.7,-5.6c0.7,0.3 0.8,0 1.5,1l0,0c-0.5,-1 -0.6,-0.9 -0.6,-1.7c0,-3.3 6.5,-3.2 6.5,0z' fill='%238f0047' stroke-miterlimit='23' stroke-width='0' transform='rotate(118.8 8.3,8)'/%3E%3C/svg%3E") 50% no-repeat;\n    text-align: center;\n    padding: 45px;\n    padding-top: 150px;\n    user-select: none;\n    height: 200px;\n    width: 280px;\n    background-color: #002e00;\n  }\n  #clicker p { margin-top: 2px; margin-left: -50px }\n  #clicker * { filter: drop-shadow(3px 13px 4px #006600); }\n\`}} />);\n\n\n//(p)react\nconst App = () => {\n  const { value, add } = useStore();\n\n  return (\n    <div onClick={add} id="clicker" title="just click the flower already...">\n      <Style />\n      <span>kiliki aʻu</span>\n      <p>{value}</p>\n    </div>\n  );\n};`;
+}
+
+function getReadAfter(List, inlineEditor, getCodeFromService) {
+    return ({result: result = {}} = {}) => {};
+}
+
+function getUpdateAfter(setCurrentService) {
+    return ({result: result = {}}) => {
+        //TODO: why is this even needed?
+        //console.warn('Update After');
+        const services = result?.result;
+        if (!services || !services.length) {
+            return console.error("updateAfter: error setting current service");
+        }
+        setCurrentService(services[0], null, "set");
+    };
+}
+
+function getOperations(updateAfter, readAfter) {
+    const operations = [ {
+        name: "",
+        url: "",
+        config: {}
+    }, {
+        name: "create",
+        url: "service/create/{id}",
+        config: {
+            method: "POST"
+        },
+        eventToParams: ({body: body = {}}) => {
+            const {id: id} = body;
+            if (!id) throw new Error("id is required when creating service");
+            return {
+                id: id
+            };
+        },
+        eventToBody: ({body: body = {}}) => {
+            const {name: name, id: id} = body;
+            if (!name) throw new Error("name is required when creating service");
+            if (!id) throw new Error("id is required when creating service");
+            return JSON.stringify({
+                name: name,
+                id: id
+            }, null, 2);
+        },
+        after: updateAfter
+    }, {
+        name: "read",
+        url: "service/read/{id}",
+        after: readAfter,
+        eventToParams: ({body: body = {}}) => {
+            const {id: id = ""} = body;
+            return {
+                id: id
+            };
+        }
+    }, {
+        name: "update",
+        url: "service/update/{id}",
+        config: {
+            method: "POST"
+        },
+        after: updateAfter,
+        eventToParams: ({body: body = {}}) => {
+            const {id: id = ""} = body;
+            return {
+                id: id
+            };
+        },
+        eventToBody: ({body: body = {}}) => {
+            const {name: name, id: id} = body;
+            if (!name) throw new Error("name is required when updating service");
+            if (!id && typeof id !== "number") throw new Error("id is required when updating service");
+            return JSON.stringify(body, null, 2);
+        }
+    }, {
+        name: "change",
+        url: "service/change",
+        config: {
+            method: "POST"
+        },
+        eventToBody: ({path: path, code: code, service: service} = {}) => {
+            if (!path) throw new Error("path is required when changing service files");
+            return JSON.stringify({
+                path: path,
+                code: code || "",
+                service: service
+            }, null, 2);
+        }
+    }, {
+        name: "delete",
+        url: "service/delete/{id}",
+        config: {
+            method: "POST"
+        },
+        eventToParams: ({body: body = {}}) => {
+            const {id: id = ""} = body;
+            return {
+                id: id
+            };
+        }
+    }, {
+        name: "manage",
+        url: "manage"
+    }, {
+        name: "monitor",
+        url: "monitor"
+    }, {
+        name: "persist",
+        url: "persist"
+    }, {
+        name: "provider-test",
+        url: "service/provider/test",
+        config: {
+            method: "POST"
+        },
+        eventToBody: eventData => JSON.stringify(eventData, null, 2)
+    }, {
+        name: "provider-save",
+        url: "service/provider/create",
+        config: {
+            method: "POST"
+        },
+        eventToBody: eventData => JSON.stringify(eventData, null, 2)
+    }, {
+        name: "provider-add-service",
+        url: "service/create/provider",
+        config: {
+            method: "POST"
+        },
+        eventToBody: eventData => JSON.stringify(eventData, null, 2)
+    } ];
+    operations.forEach((x => {
+        //x.url = `./${x.url}`;
+        // if (x.config && x.config.body) {
+        // 	x.config.body = JSON.stringify(x.config.body);
+        // }
+        x.config = x.config || {};
+        x.config.headers = {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+        };
+    }));
+    return operations;
+}
+
+async function performOperation(operation, eventData = {}) {
+    const {body: body = {}, after: after} = eventData;
+    if (operation.name !== "read") {
+        try {
+            body.id = body.id === 0 ? body.id : body.id || (currentService || {}).id;
+        } catch (e) {}
+    }
+    let {id: id} = body;
+    const op = JSON.parse(JSON.stringify(operation));
+    op.after = operation.after;
+    if (after && op.name !== "read") {
+        op.after = (...args) => {
+            after(...args);
+            op.after(...args);
+        };
+    } else {
+        op.after = after || op.after;
+    }
+    if (id === "*") {
+        id = "";
+    }
+    if (id !== "" && Number(id) === 0) {
+        id = "0";
+    }
+    // op.config = op.config || {};
+    // op.config.headers = {
+    // 	...{
+    // 		'Accept': 'application/json',
+    // 		'Content-Type': 'application/json'
+    // 	}, ...((op.config || {}).headers || {})
+    // };
+    // if (op.config.method !== "POST") {
+    // 	delete op.config.body;
+    // }
+        op.url = op.url.replace("bartok/", "");
+    //, externalStateRequest
+    //const result = await externalStateRequest(op);
+        if (operation.eventToBody) {
+        op.config.body = operation.eventToBody(eventData);
+    }
+    if (operation.eventToParams) {
+        const params = operation.eventToParams(eventData);
+        Object.keys(params).forEach((key => {
+            op.url = op.url.replace(`{${key}}`, !!params[key] || params[key] === 0 || params[key] === "0" ? params[key] : "");
+        }));
+    }
+    const response = await fetch(op.url, op.config);
+    const result = await response.json();
+    if (op.after) {
+        op.after({
+            result: result
+        });
+    }
+    const currentServiceId = localStorage.getItem("lastService");
+    if (operation.name === "read" && id && id !== "*" && Number(id) !== Number(currentServiceId)) {
+        localStorage.setItem("lastService", id);
+        sessionStorage.removeItem("tree");
+        sessionStorage.removeItem("editorFile");
+        sessionStorage.removeItem("tabs");
+        sessionStorage.removeItem("statusbar");
+    }
+    return {
+        detail: {
+            op: operation.name,
+            id: id,
+            result: result ? result.result || result : {},
+            listener: eventData.listener
+        }
+    };
+}
+
+const operationsListener = async (e, {operations: operations, managementOp: managementOp, performOperation: performOperation, externalStateRequest: externalStateRequest, getCurrentFile: getCurrentFile, getCurrentService: getCurrentService, resetState: resetState}) => {
+    if (e.detail.body.id === "undefined") {
+        e.detail.body.id = undefined;
+    }
+    if (e.detail.body.name === "undefined") {
+        e.detail.body.name = undefined;
+    }
+    const currentFile = getCurrentFile();
+    const currentService = getCurrentService();
+    // console.log(e.detail);
+        const manageOp = managementOp(e, currentService, currentFile);
+    let eventOp = (manageOp || {}).operation || e.detail.operation;
+    if (eventOp === "cancel") {
+        const foundOp = operations.find((x => x.name === "read"));
+        performOperation(foundOp, {
+            body: {
+                id: ""
+            }
+        }, externalStateRequest);
+        return;
+    }
+    // this updates project with current editor window's code
+        if (eventOp === "update") {
+        // console.log(JSON.stringify({ currentService}, null, 2));
+        const files = JSON.parse(JSON.stringify(currentService.code));
+        // NEXT: this is not needed because getCurrentService has sideffects of
+        // adding  current changes to service (safe to assume???)
+        // (files.find(x => x.name === currentFile) || {})
+        // 	.code = e.detail.body.code;
+                e.detail.body.code = JSON.stringify({
+            tree: currentService.tree,
+            files: files
+        });
+    }
+    if (eventOp === "updateProject") {
+        // console.log(JSON.stringify({ currentService}, null, 2));
+        const files = JSON.parse(JSON.stringify(currentService.code));
+        e.detail.body.code = JSON.stringify({
+            tree: currentService.tree,
+            files: files
+        });
+        e.detail.body.id = currentService.id;
+        e.detail.body.name = currentService.name;
+        eventOp = "update";
+    }
+    const foundOp = operations.find((x => x.name === eventOp));
+    if (!foundOp) {
+        console.error("Could not find operation!");
+        console.error({
+            eventOp: eventOp,
+            manageOp: manageOp
+        });
+        e.detail.done && e.detail.done("ERROR\n");
+        return;
+    }
+    foundOp.config = foundOp.config || {};
+    //foundOp.config.body = foundOp.config.body ? JSON.parse(foundOp.config.body) : undefined;
+        if (foundOp.name !== "read") {
+        e.detail.body.id = e.detail.body.id === 0 ? e.detail.body.id : e.detail.body.id || (currentService || {}).id;
+    }
+    try {
+        e.detail.body.id = e.detail.body.id || currentService.id;
+        e.detail.body.name = e.detail.body.name || currentService.name;
+    } catch (e) {}
+    if (foundOp.name === "create") {
+        e.detail.body.code = "";
+    }
+    foundOp.config.body = JSON.stringify(e.detail.body);
+    const opsWhichResetState = [ "read" ];
+    if (e.type === "operations" && opsWhichResetState.includes(e.detail.operation) && e.detail.body.id !== "*") {
+        //console.log("id: " + e.detail.body.id);
+        resetState();
+    }
+    await performOperation(foundOp, e.detail, externalStateRequest);
+    e.detail.done && e.detail.done("DONE\n");
+};
+
+async function Operations() {
+    const {triggerOperationDone: triggerOperationDone} = attachListeners({
+        managementOp: managementOp,
+        externalStateRequest: externalStateRequest,
+        getCurrentFile: getCurrentFile,
+        getCurrentService: getCurrentService,
+        setCurrentService: setCurrentService,
+        getCurrentFolder: getCurrentFolder,
+        setCurrentFolder: setCurrentFolder,
+        getState: getState,
+        resetState: resetState,
+        getOperations: getOperations,
+        getReadAfter: getReadAfter,
+        getUpdateAfter: getUpdateAfter,
+        performOperation: performOperation,
+        operationsListener: operationsListener
+    });
+    const lastService = localStorage.getItem("lastService") || 0;
+    if (!lastService && ![ 0, "0" ].includes(lastService)) {
+        const event = new CustomEvent("noServiceSelected", {
+            bubbles: true,
+            detail: {}
+        });
+        document.body.dispatchEvent(event);
+        return;
+    }
+    // APPLICATION STATE BOOTSTRAP
+        const operations = getOperations((() => {}), (
+    // occurs after call to init?
+    // TODO: would be nice to do away with this
+    (...args) => {
+        const service = args[0]?.result?.result[0];
+        if (!service) return console.error("no service!");
+        setCurrentService(service);
+        const selected = service.treeState?.select;
+        if (!selected) console.error("no tree state!");
+        setCurrentFile({
+            filePath: selected || ""
+        });
+        const name = selected.includes("/") ? selected.split("/").pop() : selected;
+        const parent = selected.includes("/") ? selected.replace(`/${name}`, "") : "";
+        const event = new CustomEvent("fileSelect", {
             bubbles: true,
             detail: {
                 name: name,
-                path: path,
-                service: service
+                parent: parent
             }
         });
         document.body.dispatchEvent(event);
-        paletteModal.hide();
-    };
-    let selected;
-    const modalClickListener = event => {
-        const modalWasClicked = modalMenu.contains(event.target);
-        if (!modalWasClicked) return paletteModal.hide();
-        const el = event.target.tagName === "LI" ? event.target.closest("li") : event.target;
-        triggerSelectFile(el);
-        selected = undefined;
-    };
-    const keyListener = function(event) {
-        const handler = {
-            Enter: () => {
-                triggerSelectFile(selected || suggestList.querySelector(".selected"));
-                selected = undefined;
-            },
-            Escape: paletteModal.hide,
-            ArrowUp: () => {
-                const selectedEl = suggestList.querySelector("li.selected");
-                let previous = selectedEl.previousElementSibling;
-                if (!previous) {
-                    previous = suggestList.querySelector("li:last-child");
-                }
-                selectedEl.classList.remove("selected");
-                previous.classList.add("selected");
-                previous.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest"
-                });
-                selected = previous;
-            },
-            ArrowDown: () => {
-                const selectedEl = suggestList.querySelector("li.selected");
-                let next = selectedEl.nextElementSibling;
-                if (!next) {
-                    next = suggestList.querySelector("li:first-child");
-                }
-                selectedEl.classList.remove("selected");
-                next.classList.add("selected");
-                next.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest"
-                });
-                selected = next;
-            }
-        }[event.key];
-        if (handler) {
-            handler();
-            event.preventDefault();
-            return false;
+    }));
+    //const operations = getOperations(()=>{}, ()=>{});
+    // TODO: this should go away at some point!!!
+    // request a list of services from server (and determine if server is accessible)
+        const foundOp = operations.find((x => x.name === "read"));
+    const result = await performOperation(foundOp, {
+        body: {
+            id: lastService
         }
-    };
-    let inputChangeListener;
-    paletteModal.show = async event => {
-        searchInput.value = "";
-        const listHTML = (arr, template, search) => `<ul>${arr.map(((x, i) => `<li${i === 0 ? ' class="selected"' : ""}>${template(x, search)}</li>`)).join("\n")}</ul>`;
-        const highlight = (term = "", str = "") => {
-            const caseMap = str.split("").map((x => x.toLowerCase() === x ? "lower" : "upper"));
-            let html = "<span>" + str.toLowerCase().split(term.toLowerCase()).join(`</span><span class="highlight">${term.toLowerCase()}</span><span>`) + "</span>";
-            html = html.split("");
-            let intag = false;
-            for (let char = 0, i = 0; i < html.length; i++) {
-                const thisChar = html[i];
-                if (thisChar === "<") {
-                    intag = true;
-                    continue;
-                }
-                if (thisChar === ">") {
-                    intag = false;
-                    continue;
-                }
-                if (intag) continue;
-                if (caseMap[char] === "upper") {
-                    html[i] = html[i].toUpperCase();
-                }
-                char++;
-            }
-            return html.join("");
-        };
-        const searchPallete = async () => {
-            const getFileItems = () => new Promise((resolve => {
-                const files = getCurrentServiceTree({
-                    flat: true,
-                    folders: false
-                });
-                const fileList = files.map((({name: name, path: path, type: type, relativePath: relativePath}) => ({
-                    name: name,
-                    type: type,
-                    path: path.replace("/" + name, ""),
-                    relativePath: relativePath.replace("/" + name, "")
-                })));
-                resolve(fileList);
-            }));
-            const fileTemplate = ({name: name, type: type, path: path, relativePath: relativePath}, search) => `\n\t\t\t\t<div class="palette-file icon-${type}"></div>\n\t\t\t\t<div class="palette-file-name">${search ? highlight(search, name) : name}</div>\n\t\t\t\t<div class="palette-file-path" relative="${relativePath}">${path}</div>\n\t\t\t`;
-            const files = await getFileItems();
-            let listEl;
-            const render = term => {
-                const _files = term ? files.filter((x => x.name.toLowerCase().includes(term.toLowerCase()))) : files;
-                const noMatch = [ {
-                    name: "No matches",
-                    path: ""
-                } ];
-                listEl.innerHTML = listHTML(_files.length ? _files : noMatch, fileTemplate, term);
-            };
-            const handler = list => {
-                listEl = list || listEl;
-                render();
-            };
-            handler.search = render;
-            return handler;
-        };
-        const commandPallete = async () => {
-            const getCommandItems = async () => new Array(100).fill().map(((x, i) => `Command ${i}`));
-            const commandTemplate = (command, search) => search ? highlight(search, command) : command;
-            const commands = await getCommandItems();
-            let listEl;
-            const render = term => {
-                const _commands = term ? commands.filter((x => x.toLowerCase().includes(term.toLowerCase()))) : commands;
-                const noMatch = [ "No matches" ];
-                listEl.innerHTML = listHTML(_commands.length ? _commands : noMatch, commandTemplate, term);
-            };
-            const handler = list => {
-                listEl = list || listEl;
-                render();
-            };
-            handler.search = render;
-            return handler;
-        };
-        const listHandler = {
-            savePalette: async () => {},
-            commandPalette: await commandPallete(),
-            searchPalette: await searchPallete()
-        }[safe((() => event.detail.operation))];
-        if (!listHandler) return console.error(`unable to display palette for: ${event.detail}!`);
-        suggestList.innerHTML = "<ul><li>loading...</li></ul>";
-        listHandler(suggestList);
-        paletteModal.classList.add("open");
-        parentEl.show();
-        setTimeout((() => searchInput.focus()), 0);
-        inputChangeListener = event => {
-            listHandler.search(event.target.value);
-        };
-        searchInput.addEventListener("input", inputChangeListener);
-        document.body.addEventListener("click", modalClickListener, true);
-        modalMenu.addEventListener("blur", modalClickListener, true);
-        document.body.addEventListener("keydown", keyListener, true);
-    };
-    paletteModal.hide = event => {
-        parentEl.hide();
-        paletteModal.classList.remove("open");
-        searchInput.removeEventListener("input", inputChangeListener);
-        inputChangeListener = undefined;
-        document.body.removeEventListener("keydown", keyListener, true);
-        document.body.removeEventListener("click", modalClickListener, true);
-        modalMenu.removeEventListener("blur", modalClickListener, true);
-    };
-    return paletteModal;
+    });
+    triggerOperationDone(result);
 }
 
-let contextPane;
-
-function ContextPane() {
-    if (contextPane) {
-        return contextPane;
-    }
-    contextPane = document.createElement("div");
-    contextPane.classList.add("ContextOverlay");
-    contextPane.innerHTML = `\n<style>\nul { list-style: none; padding: 0; margin: 0; }\n\n:root {\n\t/* --main-theme-color: #47414a; */\n\t--main-theme-color: #1e1e1e;\n\n\t/* --main-theme-highlight-color: #40f7ac; */\n\t/* --main-theme-highlight-color: #026292; */\n\t/* --main-theme-highlight-color: #2b5046; */\n\t/* --main-theme-highlight-color: 20, 160, 210; */\n\t--main-theme-highlight-color: 60, 180, 190;\n\n\t/* --main-theme-highlight-color: 20, 201, 210; */\n\t/* --main-theme-highlight-color: 64, 210, 20; */\n\t--main-theme-highlight-color-FOR-PICKER: rgb(60, 180, 190);\n\t/* --main-theme-background-color: #363238; */\n\t/* --main-theme-background-color: #3b3b3b; */\n\t--main-theme-background-color: #363636; /* #2d2d2d */\n\t--main-theme-background-dark-color: #29252b;\n\t--main-theme-text-color-dark: green;\n\t/* --main-theme-text-color: #d8d8d8; */\n\t--main-theme-text-color: #c2c2c2;\n\t/* --main-theme-text-invert-color: #d0c0d8; */\n\t--main-theme-text-invert-color: #818181;\n\t/* --theme-subdued-color: #483f48; */\n\t--theme-subdued-color: #262626;\n\t--theme-text-color: black;\n\t--theme-text-selected: #82e3ae;\n\t--tree-selected: #094771;\n\t--tree-hover: #333;\n\t--code-line-selected: orange;\n}\n\n.ContextOverlay {\n\t--horiz-pad: 20px;\n\t--vert-pad: 10px;\n\t--sep-height: 10px;\n}\n.ContextOverlay {\n\tposition: absolute;\n\tleft: 0; top: 0;\n\tz-index: 999;\n\tvisibility: hidden;\n\tpointer-events: none;\n\tbackground-color: transparent;\n\ttransition: background-color 0.5s ease;\n}\n.ContextContainer {\n\tposition: relative;\n\twidth: 100vw;\n\theight: 100vh;\n}\n.ContextMenu {\n\tposition: absolute;\n\tbackground: transparent;\n\tvisibility: hidden;\n}\n.ContextMenu .menu-container {\n\tposition: relative;\n}\n.ContextMenu .menu-container:after {\n\tcontent: '';\n\tposition: absolute;\n\tbackground: var(--main-theme-background-color);\n\tborder: 1px solid #777;\n\tbox-shadow: 3px 2px 5px black;\n\tborder-radius: 3px;\n\topacity: 0.9;\n\twidth: 100%;\n\theight: 100%;\n\tbackdrop-filter: blur(5px);\n\tz-index: -1;\n\ttop: 0;\n}\n.ContextMenu.open {\n\tvisibility: visible;\n\tpointer-events: all;\n}\n.ContextMenu ul.list {\n\tmargin: 0; padding: var(--vert-pad) 0;\n\tmin-width: 185px;\n\tuser-select: none;\n}\n.ContextMenu .list .item button {\n\tbackground: transparent;\n\tborder: 0;\n\tcolor: white;\n\tpadding: 2px var(--horiz-pad);\n\twidth: 100%;\n\ttext-align: left;\n\tpointer-events: none; /* so clicks are never registered on this element */\n}\n.ContextMenu .list .item:hover {\n\tbackground: rgb(var(--main-theme-highlight-color));\n}\n.ContextMenu .list .item {\n\tline-height: 0;\n}\n.ContextMenu .list .item.disabled {\n\t\tuser-select: none;\n\t\tpointer-events: none;\n\t\topacity: 0.4;\n}\n.ContextMenu .list .context-seperator {\n\tmargin: calc(var(--sep-height) / 2) 0px;\n\tcolor: #4a4a4a;\n\tborder-bottom: 1px solid;\n}\n\n</style>\n\t`;
-    contextPane.innerHTML += `\n<div class="ContextContainer">\n\t<div class="ContextMenu">\n\t\t<div class="menu-container">\n\t\t\t<ul class="list">\n\t\t\t</ul>\n\t\t</div>\n\t</div>\n</div>\n\t`;
-    const menuItem = item => item === "seperator" ? `<li class="context-seperator"></li>` : `\n\t\t<li class="item${item.disabled ? " disabled" : ""}" data-text="${item.name}">\n\t\t\t<button name="${item.name}" class="">\n\t\t\t\t<div class="linkContent">\n\t\t\t\t\t<span class="itemText">${item.name}</span>\n\t\t\t\t</div>\n\t\t\t</button>\n\t\t</li>\n\t`;
-    contextPane.show = () => {
-        contextPane.style.visibility = "visible";
-        contextPane.style.pointerEvents = "all";
-        contextPane.style.backgroundColor = "#00000029";
-    };
-    contextPane.hide = () => {
-        contextPane.style.removeProperty("visibility");
-        contextPane.style.removeProperty("pointerEvents");
-        contextPane.style.removeProperty("backgroundColor");
-    };
-    contextPane.appendChild(PaletteModal(contextPane));
-    document.body.appendChild(contextPane);
-    function hideMenu() {
-        contextPane.hide();
-        const Menu = contextPane.querySelector(".ContextMenu");
-        Menu.classList.remove("open");
-    }
-    function showMenu({x: x = 0, y: y = 0, parent: parent = "unknown", data: data, list: list} = {}) {
-        // warn if menu will appear offscreen?
-        // handle case where menu is opened near edge of screen
-        // menu should know what items to show
-        // menu items should know what event to trigger
-        contextPane.show();
-        const listDiv = contextPane.querySelector(".list");
-        listDiv.innerHTML = list.map(menuItem).join("\n");
-        const Menu = contextPane.querySelector(".ContextMenu");
-        Menu.classList.add("open");
-        const menuGoesOffScreen = y + Menu.clientHeight > window.innerHeight;
-        if (menuGoesOffScreen) {
-            Menu.style.top = undefined;
-            Menu.style.bottom = `calc(100vh - ${y}px)`;
-        } else {
-            Menu.style.top = y + "px";
-            Menu.style.bottom = undefined;
-        }
-        Menu.style.left = x + "px";
-        //attach a listener to body that hides menu and detaches itself
-                const menuClickListener = event => {
-            const menuWasClicked = Menu.contains(event.target);
-            if (menuWasClicked && event.target.tagName !== "LI") {
-                return;
-            }
-            hideMenu();
-            document.body.removeEventListener("click", menuClickListener, false);
-            if (!menuWasClicked) {
-                return;
-            }
-            contextMenuSelect({
-                detail: {
-                    which: event.target.dataset.text,
-                    parent: parent,
-                    data: data
-                }
-            });
-        };
-        document.body.addEventListener("click", menuClickListener);
-    }
-    window.showMenu = showMenu;
-    window.hideMenu = hideMenu;
-    const contextMenuSelect = attachTrigger({
-        name: "Context Menu",
-        eventName: "contextmenu-select",
-        type: "raw"
-    });
-    attach({
-        name: "Context Menu",
-        eventName: "context-menu-show",
-        listener: event => {
-            console.error("TODO: context-menu-show versus window.showMenu!");
-        }
-    });
-    attach({
-        name: "Context Menu",
-        eventName: "contextMenuShow",
-        listener: event => {
-            showMenu(event.detail);
-        }
-    });
-    attach({
-        name: "Context Menu",
-        eventName: "modal-menu-show",
-        listener: event => {
-            console.error("TODO: context-menu-show versus window.showMenu!");
-        }
-    });
-    attach({
-        name: "Context Menu",
-        eventName: "ui",
-        listener: event => {
-            const {detail: detail} = event;
-            const toHandle = [ "savePalette", "commandPalette", "searchPalette" ];
-            if (!toHandle.includes(detail.operation)) return;
-            paletteModal.show(event);
-        }
-    });
-}
-
-export { ContextPane as default };
+export { Operations as default };

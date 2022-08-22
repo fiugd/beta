@@ -1,11 +1,3 @@
-## why layout module?, or why 0.4.6?
-- need side-by-side editor
-- need "close all tabs" or "close other tabs" or "close tabs to the right"
-- need "preview close" in status bar
-- need "each editor has its own status bar" or "fiug status bar is different"
-- need "each pane is its own thing"
-- need "open editors" and option to turn off tabs?
-
 ## TODO
 - [ ] operations
 	- wired up to service worker (in general)
@@ -38,6 +30,15 @@
 - [X] action bar
 - [X] status bar
 - [X] menus 
+
+## why layout module?, or why 0.4.6?
+- need side-by-side editor
+- need "close all tabs" or "close other tabs" or "close tabs to the right"
+- need "preview close" in status bar
+- need "each editor has its own status bar" or "fiug status bar is different"
+- need "each pane is its own thing"
+- need "open editors" and option to turn off tabs?
+
 
 ### frame communication
 [comlink](https://github.com/GoogleChromeLabs/comlink)   
