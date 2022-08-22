@@ -1,4 +1,7 @@
 ## TODO
+- [ ] menus need to appear at the correct spot
+	- iframe where click occured should share its pane id
+	- or event should be sent through layout module
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
@@ -6,15 +9,7 @@
 - [ ] handle hotkeys
 - [ ] close tabs en masse
 - [ ] mobile view
-- [ ] open with fiug.dev
-- [ ] paste an image
-	- when editor has focus, should do like github does
-	- when terminal has focus, ...
-	- when tree has focus, ...
 
-- [X] menus need to appear at the correct spot
-	- iframe where click occured should share its pane id
-	- or event should be sent through layout module
 - [X] operations
 	- wired up to service worker (in general)
 	- save/load layout config using service worker
