@@ -186,8 +186,10 @@ const addFrameOffsets = (event, triggerEvent) => {
 				.contains(event.source.frameElement);
 		}catch(_){}
 	};
+	const paneId = event.source.location.href.split('paneid=').pop();
+	const pane = document.querySelector('#'+paneId);
 
-	const parent = [terminal, editor].find(isEventParent)
+	const parent = [pane, terminal, editor].find(isEventParent)
 	if(!parent) return;
 
 	const {offsetLeft, offsetTop} = parent;
@@ -199,6 +201,9 @@ window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
+
+	if(source === window || source[0] === window)
+		return;
 
 	if(data?.subscribe){
 		clients[data.subscribe] = { source, origin };

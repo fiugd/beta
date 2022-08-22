@@ -1,13 +1,4 @@
 ## TODO
-- [ ] operations
-	- wired up to service worker (in general)
-	- save/load layout config using service worker
-	- respond to fileDelete/fileClose
-	- respond to (acks) terminal's fileOpen operation event
-
-- [ ] menus need to appear at the correct spot
-	- iframe where click occured should share its pane id
-	- or event should be sent through layout module
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
@@ -21,6 +12,14 @@
 	- when terminal has focus, ...
 	- when tree has focus, ...
 
+- [X] menus need to appear at the correct spot
+	- iframe where click occured should share its pane id
+	- or event should be sent through layout module
+- [X] operations
+	- wired up to service worker (in general)
+	- save/load layout config using service worker
+	- respond to fileDelete/fileClose
+	- respond to (acks) terminal's fileOpen operation event
 - [X] explorer tabs customize
 - [X] terminal tabs (hide)
 - [X] programmaitically change tabs

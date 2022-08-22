@@ -1,5 +1,5 @@
-import Layout from "https://unpkg.com/@fiug/layout@0.0.5";
-//import Layout from "../src/index.js";
+import Layout from "https://unpkg.com/@fiug/layout@0.0.6";
+// import Layout from "/fiugd/layout/src/index.js";
 import YAML from "https://cdn.skypack.dev/yaml";
 import iconMap from './icons.js';
 
@@ -118,8 +118,8 @@ const selectHandler = ({ file, pane }) => {
 	}
 };
 const resizeHandler = () => {
-	console.log('');
-	console.log('optionally notify status bar of resize')
+	//console.log('');
+	//console.log('optionally notify status bar of resize')
 };
 
 // EXTERNAL
@@ -151,11 +151,17 @@ const fileSelect = (layout, e) => {
 	layout.openTab({ pane, file });
 };
 const fileRemove = (layout, e) => {
+	const { file } = e.detail;
 	/*
 		- if file is open in allPanes, close it
 		- if file was active, activate the next tab
 	*/
-	console.log('handle file being closed from outside layout');
+	const allOpen = document.querySelectorAll(`.tab[path="${file}"]`);
+	for(const tab of allOpen){
+		const pane = tab.closest('.pane');
+		layout.closeTab({ tab, pane });
+	}
+	console.log('remove:' + file);
 };
 const fileChange = (layout, e) => {
 	/*
@@ -193,6 +199,15 @@ const showServiceCode = (layout, e) => {
 	const pane = searchTab.closest('.pane')?.id;
 	layout.openTab({ pane, file });
 };
+const operations = (layout, e) => {
+	const { triggerEvent = {} } = event.data || {};
+	const { detail = {} } = triggerEvent;
+	const { operation = "" } = detail;
+	console.log({ detail });
+	if(operation === "deleteFile")
+		return fileRemove(layout, { detail });
+};
+
 
 export default async () => {
 	const layoutConfig = await getConfig();
@@ -230,6 +245,7 @@ export default async () => {
 		showSearch: useDetail(showSearch),
 		showServiceCode: useDetail(showServiceCode),
 		cursorActivity,
+		operations
 	};
 
 	return layout;

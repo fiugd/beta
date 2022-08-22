@@ -1,7 +1,12 @@
 const listeners = {};
 const triggers = {};
 
-const clients = {};
+const clients = {
+	top: {
+		source: window.top,
+		origin: '/'
+	}
+};
 
 const clone = (x) => {
 	try {
@@ -199,6 +204,9 @@ window.addEventListener('message', function(messageEvent) {
 	const { data } = messageEvent;
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
+
+	if(source === window || source?.[0] === window)
+		return;
 
 	if(data?.subscribe){
 		clients[data.subscribe] = { source, origin };

@@ -32,17 +32,14 @@
 		//import Layout from "/fiugd/beta/dist/layout.js";
 		import Layout from "./layout/layout.js";
 		import Menus from "/fiugd/beta/dist/menus.js";
+		import Operations from "/fiugd/beta/dist/operations.js";
 
 		const layout = await Layout();
 		const menus = Menus();
+		
+		await Operations();
 
 		document.body.append(Menus());
-
-		const operations = (e) => {
-			const { triggerEvent} = event.data;
-			const { detail } = triggerEvent;
-			console.log({ detail });
-		};
 
 		window.addEventListener("message", (event) => {
 			if(event.source === window)
@@ -55,12 +52,9 @@
 			const layoutHandler = layout.eventHandlers[type];
 			if(layoutHandler)
 				return layoutHandler(layout, event);
-			if(type === "operations"){
-				return operations(event);
-			}
 			if (subscribe)
-				return console.log(`request to subscribe: ${subscribe}`);
-			console.log(event.data);
+				return /*console.log(`request to subscribe: ${subscribe}`)*/;
+			//console.log(event.data);
 		});
 
 		navigator.registerProtocolHandler(

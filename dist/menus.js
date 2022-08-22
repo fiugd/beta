@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-08-22T20:43:50.974Z )
+	Version 0.4.6 ( 2022-08-22T23:01:11.414Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -195,7 +195,9 @@ const addFrameOffsets = (event, triggerEvent) => {
             return el.querySelector("iframe").contentDocument.contains(event.source.frameElement);
         } catch (_) {}
     };
-    const parent = [ terminal, editor ].find(isEventParent);
+    const paneId = event.source.location.href.split("paneid=").pop();
+    const pane = document.querySelector("#" + paneId);
+    const parent = [ pane, terminal, editor ].find(isEventParent);
     if (!parent) return;
     const {offsetLeft: offsetLeft, offsetTop: offsetTop} = parent;
     triggerEvent.detail.x += offsetLeft;
@@ -206,6 +208,7 @@ window.addEventListener("message", (function(messageEvent) {
     const {data: data} = messageEvent;
     const source = messageEvent.source;
     const origin = messageEvent.source;
+    if (source === window || source[0] === window) return;
     if (data?.subscribe) {
         clients[data.subscribe] = {
             source: source,
