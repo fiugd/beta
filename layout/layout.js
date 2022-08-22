@@ -49,22 +49,27 @@ const createTab = ({ tab, file, pane }) => {
 	const title = tab.querySelector('span');
 	if(title.textContent.includes('tree.html')){
 		tab.classList.add('option');
+		tab.id = "explorerTab";
 		title.textContent = "EXPLORER";
 		return;
 	}
 	if(title.textContent.includes('search.html')){
 		tab.classList.add('option');
+		tab.id = "searchTab";
 		title.textContent = "SEARCH";
 		return;
 	}
 	if(title.textContent.includes('terminal.html')){
 		tab.classList.add('option');
 		title.textContent = "TERMINAL";
+		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
 	if(title.textContent.includes('preview.html')){
 		tab.classList.add('option');
+		tab.id = "previewTab";
 		title.textContent = "PREVIEW";
+		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
 	title.classList.add('icon', 'icon-' + iconMap(file));
@@ -177,6 +182,18 @@ const cursorActivity = (layout, e) => {
 		return layout.activate({ pane });
 	layout.openTab({ pane, file });
 };
+const showSearch = (layout, e) => {
+	const searchTab = document.getElementById('searchTab');
+	const file = searchTab.getAttribute('path');
+	const pane = searchTab.closest('.pane')?.id;
+	layout.openTab({ pane, file });
+};
+const showServiceCode = (layout, e) => {
+	const searchTab = document.getElementById('explorerTab');
+	const file = searchTab.getAttribute('path');
+	const pane = searchTab.closest('.pane')?.id;
+	layout.openTab({ pane, file });
+};
 
 export default async () => {
 	const layoutConfig = await getConfig();
@@ -197,14 +214,22 @@ export default async () => {
 	layout.on('select', selectHandler);
 	layout.on('resize', resizeHandler);
 
-	const useDetail = (fn) => (layout, event) =>
-		fn(layout, event.data.triggerEvent.detail);
+	const useDetail = (fn) => (layout, event) => {
+		const { triggerEvent, detail } = event.data;
+		if(triggerEvent)
+			return fn(layout, triggerEvent.detail);
+		if(!detail)
+			return;
+		return fn(layout, detail);
+	};
 
 	layout.eventHandlers = {
 		fileSelect: useDetail(fileSelect),
 		fileClose: useDetail(fileRemove),
 		fileDelete: useDetail(fileRemove),
 		fileChange: useDetail(fileChange),
+		showSearch: useDetail(showSearch),
+		showServiceCode: useDetail(showServiceCode),
 		cursorActivity,
 	};
 

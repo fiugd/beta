@@ -7,10 +7,6 @@
 - need "open editors" and option to turn off tabs?
 
 ## TODO
-- [ ] explorer tabs customize
-- [ ] terminal tabs (hide)
-- [ ] programmaitically change tabs
-
 - [ ] operations
 	- wired up to service worker (in general)
 	- save/load layout config using service worker
@@ -32,6 +28,10 @@
 	- when editor has focus, should do like github does
 	- when terminal has focus, ...
 	- when tree has focus, ...
+
+- [X] explorer tabs customize
+- [X] terminal tabs (hide)
+- [X] programmaitically change tabs
 - [X] editor should no longer handle tabs
 	- ie. `Could not find a tab named .test.html to update`
 	- at least should tolerate tabs not existing

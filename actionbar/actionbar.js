@@ -1,4 +1,4 @@
-import { attach, attachTrigger as connectTrigger } from "../modules/Listeners.mjs";
+import { attach, attachTrigger as connectTrigger } from "./Listeners.mjs";
 
 let actionBar;
 function ActionBar() {

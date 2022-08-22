@@ -47,19 +47,17 @@
 		window.addEventListener("message", (event) => {
 			if(event.source === window)
 				return;
-			const { triggerEvent, subscribe } = event.data;
-			const layoutHandler = triggerEvent
-				? layout.eventHandlers[triggerEvent.type]
-				: undefined;
-			if(layoutHandler)
-				layoutHandler(layout, event);
+			const { triggerEvent, subscribe, type: eventType } = event.data;
+
+			const type = triggerEvent
+				? triggerEvent.type
+				: eventType;
+			const layoutHandler = layout.eventHandlers[type];
+			if(layoutHandler) layoutHandler(layout, event);
 
 			if(triggerEvent?.type === "operations"){
 				return operations(event);
 			}
-
-			if (!layoutHandler && triggerEvent)
-				return console.log(`event triggered: `, triggerEvent);
 
 			if (subscribe)
 				return console.log(`request to subscribe: ${subscribe}`);

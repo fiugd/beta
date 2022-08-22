@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2022-08-19T20:28:36.302Z )
+	Version 0.4.6 ( 2022-08-22T19:14:33.360Z )
 	https://github.com/fiugd/fiug/tree
 	(c) 2020-2021 Harrison Cross, MIT License
 */

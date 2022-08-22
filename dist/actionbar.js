@@ -1,6 +1,6 @@
 /*!
 	fiug actionbar component
-	Version 0.4.6 ( 2022-08-19T20:19:40.460Z )
+	Version 0.4.6 ( 2022-08-22T18:16:28.209Z )
 	https://github.com/fiugd/fiug/actionbar
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -8,7 +8,12 @@ const listeners = {};
 
 const triggers = {};
 
-const clients = {};
+const clients = {
+    top: {
+        source: window.top,
+        origin: "/"
+    }
+};
 
 const clone = x => {
     try {
@@ -206,6 +211,7 @@ window.addEventListener("message", (function(messageEvent) {
     const {data: data} = messageEvent;
     const source = messageEvent.source;
     const origin = messageEvent.source;
+    if (source === window || source[0] === window) return;
     if (data?.subscribe) {
         clients[data.subscribe] = {
             source: source,

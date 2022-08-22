@@ -23,10 +23,13 @@ body {
 #layout .option {
 	font-size: 0.8em;
 	position: relative;
+	display: none;
 }
 #layout .option.active {
 	background: unset;
+	display: flex;
 }
+/*
 #layout .option.active:after {
 	content: '';
 	height: 1px;
@@ -38,6 +41,7 @@ body {
 	right: 0px;
 	opacity: 0.5;
 }
+*/
 #layout .option .tab-close {
 	display: none;
 }
