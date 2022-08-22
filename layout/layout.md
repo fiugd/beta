@@ -1,15 +1,15 @@
 ## TODO
-- [ ] menus need to appear at the correct spot
-	- iframe where click occured should share its pane id
-	- or event should be sent through layout module
+- [ ] handle hotkeys
+- [ ] close tabs en masse
+- [ ] mobile view
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
 - [ ] create build for /dist/layout (or for fiug page in general)
-- [ ] handle hotkeys
-- [ ] close tabs en masse
-- [ ] mobile view
 
+- [X] menus need to appear at the correct spot
+	- iframe where click occured should share its pane id
+	- or event should be sent through layout module
 - [X] operations
 	- wired up to service worker (in general)
 	- save/load layout config using service worker
