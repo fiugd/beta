@@ -15,7 +15,7 @@ import { attachEvents, list, trigger as rawTrigger  } from "./utils/EventSystem.
 import events from './events.js';
 
 import { getClientId } from './utils/State.js';
-// used by @fiug/layout to determin active pane
+// used by @fiug/layout to determine active pane
 document.body.addEventListener('pointerdown', () => {
 	window.top.postMessage({
 		triggerEvent: {
@@ -26,6 +26,18 @@ document.body.addEventListener('pointerdown', () => {
 		}
 	}, location);
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+const fileParam = urlParams.get('file');
+
+if(fileParam){
+	// don't attach tabs listeners if singleFile mode
+	for(const listener of events.listeners){
+		listener.handlers = listener.handlers
+			.filter(x => x.name !== "Tabs");
+	}
+	events.listeners = events.listeners.filter(x => x.handlers.length)
+}
 
 attachEvents(events, { editor, tabs, status });
 

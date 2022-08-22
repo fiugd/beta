@@ -1,7 +1,15 @@
+## why layout module?, or why 0.4.6?
+- need side-by-side editor
+- need "close all tabs" or "close other tabs" or "close tabs to the right"
+- need "preview close" in status bar
+- need "each editor has its own status bar" or "fiug status bar is different"
+- need "each pane is its own thing"
+- need "open editors" and option to turn off tabs?
+
 ## TODO
 - [ ] explorer tabs customize
 - [ ] terminal tabs (hide)
-- [ ] programitically change tabs
+- [ ] programmaitically change tabs
 
 - [ ] operations
 	- wired up to service worker (in general)
@@ -15,9 +23,6 @@
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
-- [ ] editor should no longer handle tabs
-	- ie. `Could not find a tab named .test.html to update`
-	- at least should tolerate tabs not existing
 - [ ] create build for /dist/layout (or for fiug page in general)
 - [ ] handle hotkeys
 - [ ] close tabs en masse
@@ -27,9 +32,12 @@
 	- when editor has focus, should do like github does
 	- when terminal has focus, ...
 	- when tree has focus, ...
+- [X] editor should no longer handle tabs
+	- ie. `Could not find a tab named .test.html to update`
+	- at least should tolerate tabs not existing
 - [X] action bar
 - [X] status bar
-- [X] menus
+- [X] menus 
 
 ### frame communication
 [comlink](https://github.com/GoogleChromeLabs/comlink)   

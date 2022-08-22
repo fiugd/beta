@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-08-19T20:28:29.526Z )
+	Version 0.4.6 ( 2022-08-22T17:43:57.147Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -43,9 +43,9 @@ const getSettings = dummyFunc("getSettings", {
     tabSize: 2
 });
 
-const urlParams = new URLSearchParams(window.location.search);
+const urlParams$1 = new URLSearchParams(window.location.search);
 
-const fileParam = urlParams.get("file");
+const fileParam$1 = urlParams$1.get("file");
 
 const initState = (all, current) => {
     allServices = all;
@@ -55,15 +55,15 @@ const initState = (all, current) => {
         if (x.path.startsWith("/")) return;
         x.path = "/" + x.path;
     }));
-    if (fileParam) {
+    if (fileParam$1) {
         currentService.state = {
             singleFileMode: true,
             opened: [ {
-                name: fileParam,
+                name: fileParam$1,
                 order: 0
             } ],
-            selected: fileParam,
-            changed: currentService.state.changed.includes(fileParam) ? [ currentService.state ] : []
+            selected: fileParam$1,
+            changed: currentService.state.changed.includes(fileParam$1) ? [ currentService.state ] : []
         };
     }
     if (typeof currentService.state.selected === "string" && currentService.state.selected) {
@@ -27850,7 +27850,7 @@ var events = {
 //import indexCSS from '../index.css';
 document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet$3 ];
 
-// used by @fiug/layout to determin active pane
+// used by @fiug/layout to determine active pane
 document.body.addEventListener("pointerdown", (() => {
     window.top.postMessage({
         triggerEvent: {
@@ -27861,6 +27861,18 @@ document.body.addEventListener("pointerdown", (() => {
         }
     }, location);
 }));
+
+const urlParams = new URLSearchParams(window.location.search);
+
+const fileParam = urlParams.get("file");
+
+if (fileParam) {
+    // don't attach tabs listeners if singleFile mode
+    for (const listener of events.listeners) {
+        listener.handlers = listener.handlers.filter((x => x.name !== "Tabs"));
+    }
+    events.listeners = events.listeners.filter((x => x.handlers.length));
+}
 
 attachEvents(events, {
     editor: Editor$1,
