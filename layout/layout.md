@@ -1,4 +1,5 @@
 ## TODO
+- [ ] use editor service params in layout
 - [ ] hotkeys
 - [ ] command palette & file select palette
 - [ ] settings icon + menu
@@ -15,7 +16,7 @@
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
 - [ ] github flavored markdown (in markdown preview)
 
-- [X] `editor?file="foo.md"&service="user/repo"&line=23&column=0`
+- [X] `editor.html?file="foo.md"&service="user/repo"&line=23&column=0`
 - [X] search pane
 - [X] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id
