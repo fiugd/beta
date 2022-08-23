@@ -90,6 +90,10 @@ ul {
 ul > li {
 	list-style-type: none;
 }
+input {
+	border-radius: 0;
+	outline: none;
+}
 
 .tree-search {
 	display: flex;

@@ -1,5 +1,4 @@
 ## TODO
-- [ ] search pane
 - [ ] `editor?file="foo.md"&service="user/repo"&line=23&column=0`
 - [ ] hotkeys
 - [ ] command palette & file select palette
@@ -17,6 +16,7 @@
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
 - [ ] github flavored markdown (in markdown preview)
 
+- [X] search pane
 - [X] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id
 	- or event should be sent through layout module
