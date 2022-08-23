@@ -67,9 +67,7 @@ const initState = (all, current) => {
 			singleFileMode: true,
 			opened: [{ name: fileParam, order:0 }],
 			selected: fileParam,
-			changed: currentService.state.changed.includes(fileParam)
-				? [currentService.state]
-				: []
+			changed: []
 		}
 	}
 	

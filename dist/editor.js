@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-08-23T22:40:04.968Z )
+	Version 0.4.6 ( 2022-08-23T22:50:47.983Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -63,7 +63,7 @@ const initState = (all, current) => {
                 order: 0
             } ],
             selected: fileParam$1,
-            changed: currentService.state.changed.includes(fileParam$1) ? [ currentService.state ] : []
+            changed: []
         };
     }
     if (typeof currentService.state.selected === "string" && currentService.state.selected) {
@@ -27895,14 +27895,8 @@ const getService = async params => {
         name: serviceParam,
         code: [ {
             name: fileParam.split("/").pop(),
-            code: `/${serviceParam}/${fileParam}`,
             path: `/${serviceParam}/${fileParam}`
-        } ],
-        state: {
-            changed: [],
-            selected: "",
-            opened: []
-        }
+        } ]
     };
     const ROOT_SERVICE_ID = 0;
     const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;

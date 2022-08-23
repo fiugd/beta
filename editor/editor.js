@@ -55,14 +55,8 @@ const getService = async (params) => {
 		name: serviceParam,
 		code: [{
 			name: fileParam.split('/').pop(),
-			code: `/${serviceParam}/${fileParam}`,
 			path: `/${serviceParam}/${fileParam}`,
-		}],
-		state: {
-			changed: [],
-			selected: '',
-			opened: []
-		}
+		}]
 	};
 
 	const ROOT_SERVICE_ID = 0;
