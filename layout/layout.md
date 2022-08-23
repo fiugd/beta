@@ -1,4 +1,6 @@
 ## TODO
+- [ ] search pane
+- [ ] editor?file="foo.md"&service="user/repo"
 - [ ] handle hotkeys
 - [ ] close tabs en masse
 - [ ] mobile view
