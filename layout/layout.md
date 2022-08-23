@@ -1,15 +1,21 @@
 ## TODO
 - [ ] search pane
-- [ ] editor?file="foo.md"&service="user/repo"
-- [ ] handle hotkeys
-- [ ] close tabs en masse
-- [ ] mobile view
+- [ ] `editor?file="foo.md"&service="user/repo"&line=23&column=0`
+- [ ] hotkeys
+- [ ] command palette & file select palette
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
+
+- [ ] hide/customize explorer menu/actions
+- [ ] close tabs en masse
+- [ ] mobile view
+
 - [ ] create build for /dist/index
 	- would include all the modules that load on main page
 	- would not include modules that load in a frame
+- [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
+- [ ] github flavored markdown (in markdown preview)
 
 - [X] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id
@@ -37,8 +43,7 @@
 - need "each pane is its own thing"
 - need "open editors" and option to turn off tabs?
 
-
-### frame communication
+## frame communication
 [comlink](https://github.com/GoogleChromeLabs/comlink)   
 [comlink experiment](https://github.com/fiugd/incubator/tree/d44c82640df1a2175c236a0c7dc55a0f082059f1/xterm-tui/comlink)   
 [postmate](https://github.com/dollarshaveclub/postmate)   
@@ -51,7 +56,7 @@
 - [ ] Connect panes in layout to bus.
 - [ ] One service should send/receive messages from service worker.
 
-### FIUG Architecture
+## FIUG Architecture
 ```mermaid
 flowchart TD
 
