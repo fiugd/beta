@@ -91,8 +91,8 @@ ul > li {
 	list-style-type: none;
 }
 input {
-    border-radius: 0;
-    outline: none;
+	border-radius: 0;
+	outline: none;
 }
 
 .tree-search {

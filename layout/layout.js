@@ -125,12 +125,16 @@ const resizeHandler = () => {
 // EXTERNAL
 const fileSelect = (layout, e) => {
 	//TODO: something like this belongs in the layout module, not sure how to do it
-	const file = `/fiugd/beta/dist/editor.html?file=${e.src}`;
+	const path = e.pathWithService
+		? e.pathWithService.split("/").filter(x=>x).slice(2).join('/')
+		: undefined;
+	const filePath = path || e.src;
+	const file = `/fiugd/beta/dist/editor.html?file=${filePath}`;
 	const allPanes = Array.from(document.querySelectorAll('.pane.tabbed'));
 	const panesWithFileOpen = [];
 	const panesWithFileActive = [];
 	for(const pane of allPanes){
-		const fileTab = pane.querySelector(`.tab[path^="${e.src}"]`);
+		const fileTab = pane.querySelector(`.tab[path^="${filePath}"]`);
 		if(!fileTab) continue;
 		panesWithFileOpen.push(pane.id);
 		if(!fileTab.classList.contains('active')) continue;

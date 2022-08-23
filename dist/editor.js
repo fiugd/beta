@@ -10,7 +10,7 @@ sheet$3.replaceSync(`body { height: 100vh; width: 100vw; }\n\n::-webkit-scrollba
 
 const DEBUG = false;
 
-let allServices;
+let allServices;//dist
 
 let currentService;
 

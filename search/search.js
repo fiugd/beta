@@ -11,6 +11,10 @@ import search from './main/components/index.js';
 import { attachEvents  } from "./utils/EventSystem.js";
 import events from './events.js';
 
-attachEvents(events, { search });
+const context = { search };
+search.context = context;
+
+attachEvents(events, context);
+
 
 devHelper.module();

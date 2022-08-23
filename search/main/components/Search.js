@@ -53,8 +53,9 @@ class SearchBox {
 				"LI line-results": (e) => {
 					try {
 						const { triggers: { tree: { fileSelect } } } = this.context;
-						const { source, ...detail } = e.target.dataset;
+						const { source, src, ...detail } = e.target.dataset;
 						detail.name = source;
+						detail.pathWithService = src;
 						fileSelect({ detail });
 					} catch(error){
 						console.error('unable to trigger file select from search results');
@@ -167,7 +168,7 @@ class SearchBox {
 			const limit = 1; //only highlight one occurence
 			const listItemEl = (Array.isArray(result) ? result : [result]).map(
 				(r, i) => `
-					<li data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">
+					<li data-src="${r.file}" data-source="${r.file}" data-line="${r.line}" data-column="${r.column}">
 						<div class="hover-highlight"></div>
 						${utils.highlight(term, utils.htmlEscape(r.text.trim()), limit)}
 					</li>
