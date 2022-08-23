@@ -101,16 +101,20 @@ const selectHandler = ({ file, pane }) => {
 	// - set activeEditor to pane (if tabbed)
 	if(file && file.includes("/editor.html") ){
 		activeEditor = pane;
-		const path = file.split('file=').pop().split("pane=").shift();
+		const urlParams = new URLSearchParams(file.split('?').pop());
+		const path = urlParams.get('file');
 		const name = path.split('/').pop();
 		const parent = path.replace("/"+name, "");
+		//TODO: get service from params
+		const service = "fiugd/layout";
+
 		const treeFrame = document.querySelector('iframe[src*="dist/tree.html"]');
 		treeFrame.contentWindow.postMessage({
 			type: "fileSelect",
 			detail: {
 				name,
 				parent,
-				service: "fiugd/layout",
+				service,
 				source: "Tabs",
 				data: {},
 			}
@@ -129,7 +133,13 @@ const fileSelect = (layout, e) => {
 		? e.pathWithService.split("/").filter(x=>x).slice(2).join('/')
 		: undefined;
 	const filePath = path || e.src;
-	const file = `/fiugd/beta/dist/editor.html?file=${filePath}`;
+
+	//TODO: change to /dist/editor.html
+	let file = `/fiugd/beta/dist/editor.html?file=${filePath}`;
+	
+	//TODO: cannot do this until layout.tabbed supports better urlparams parsing
+	//if(e.service) file += `&service=${e.service}`;
+
 	const allPanes = Array.from(document.querySelectorAll('.pane.tabbed'));
 	const panesWithFileOpen = [];
 	const panesWithFileActive = [];
