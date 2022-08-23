@@ -201,14 +201,14 @@ export default ({ term, ops, setBuffer, getBuffer, setRunning, getRunning, comm 
 			term.write(getBuffer());
 		} catch(e){}
 	};
-	
+
 	const selectAll = async (e) => {
 		setTimeout(term.selectAll.bind(term), 1);
 	};
-	
+
 	return {
 		clearTerminal, showPrompt, eraseToPrompt, writeLine, selectAll,
 		enterCommand, backspaceCommand, copyKillCommand, pasteCommand,
 		history
-	}
+	}; 
 };

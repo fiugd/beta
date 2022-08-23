@@ -25,7 +25,7 @@
 	- at least should tolerate tabs not existing
 - [X] action bar
 - [X] status bar
-- [X] menus 
+- [X] menus
 
 ## why layout module?, or why 0.4.6?
 - need side-by-side editor
