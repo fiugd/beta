@@ -5,7 +5,9 @@
 - [ ] settings icon + menu
 	- fullscreen triggers from menu(page) context
 	- action bar: settings icon -> menu -> fullscreen
-- [ ] create build for /dist/layout (or for fiug page in general)
+- [ ] create build for /dist/index
+	- would include all the modules that load on main page
+	- would not include modules that load in a frame
 
 - [X] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id

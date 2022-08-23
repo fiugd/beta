@@ -35,11 +35,11 @@
 		import Operations from "/fiugd/beta/dist/operations.js";
 
 		const layout = await Layout();
-		const menus = Menus();
-		
-		await Operations();
 
+		const menus = Menus();
 		document.body.append(Menus());
+
+		await Operations();
 
 		window.addEventListener("message", (event) => {
 			if(event.source === window)
@@ -57,10 +57,11 @@
 			//console.log(event.data);
 		});
 
-		navigator.registerProtocolHandler(
-			"web+fiug",
-			"https://beta.fiug.dev/?repo=%s",
-			"Handle fiug.dev links"
-		);
+		// <a href="web+fiug:/github/fiugd/layout">open repo in fiug</a>
+		// navigator.registerProtocolHandler(
+		// 	"web+fiug",
+		// 	"https://beta.fiug.dev/?repo=%s",
+		// 	"Handle fiug.dev links"
+		// );
 	</script>
 </html>
