@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-08-22T17:43:57.147Z )
+	Version 0.4.6 ( 2022-08-23T22:40:04.968Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -10,7 +10,7 @@ sheet$3.replaceSync(`body { height: 100vh; width: 100vw; }\n\n::-webkit-scrollba
 
 const DEBUG = false;
 
-let allServices;//dist
+let allServices;
 
 let currentService;
 
@@ -27888,13 +27888,33 @@ if (isPreview) {
     document.getElementsByTagName("head")[0].appendChild(base);
 }
 
-const isRunningAsModule = document.location.href.includes("_/modules");
-
-if (!isRunningAsModule) {
+const getService = async params => {
+    const serviceParam = params.get("service");
+    const fileParam = urlParams.get("file");
+    if (serviceParam && fileParam) return {
+        name: serviceParam,
+        code: [ {
+            name: fileParam.split("/").pop(),
+            code: `/${serviceParam}/${fileParam}`,
+            path: `/${serviceParam}/${fileParam}`
+        } ],
+        state: {
+            changed: [],
+            selected: "",
+            opened: []
+        }
+    };
     const ROOT_SERVICE_ID = 0;
     const currentServiceId = localStorage.getItem("lastService") || ROOT_SERVICE_ID;
     const serviceUrl = `/service/read/${currentServiceId}`;
     const {result: [service]} = await fetch(serviceUrl).then((x => x.json()));
+    return service;
+};
+
+const isRunningAsModule = document.location.href.includes("_/modules");
+
+if (!isRunningAsModule) {
+    const service = await getService(urlParams);
     initState([ service ], service);
     trigger$2({
         e: {},

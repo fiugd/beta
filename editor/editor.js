@@ -48,14 +48,35 @@ if(isPreview){
 	document.getElementsByTagName('head')[0].appendChild(base);
 }
 
-const isRunningAsModule = document.location.href.includes("_/modules");
-if(!isRunningAsModule){
+const getService = async (params) => {
+	const serviceParam = params.get('service');
+	const fileParam = urlParams.get('file');
+	if(serviceParam && fileParam) return {
+		name: serviceParam,
+		code: [{
+			name: fileParam.split('/').pop(),
+			code: `/${serviceParam}/${fileParam}`,
+			path: `/${serviceParam}/${fileParam}`,
+		}],
+		state: {
+			changed: [],
+			selected: '',
+			opened: []
+		}
+	};
+
 	const ROOT_SERVICE_ID = 0;
 	const currentServiceId = localStorage.getItem('lastService') || ROOT_SERVICE_ID;
 	const serviceUrl = `/service/read/${currentServiceId}`;
-	const { result: [service] } = await fetch(serviceUrl).then(x => x.json())
-	DEBUG && console.log(service)
+	const { result: [service] } = await fetch(serviceUrl).then(x => x.json());
+	return service;
+};
 
+const isRunningAsModule = document.location.href.includes("_/modules");
+if(!isRunningAsModule){
+	const service = await getService(urlParams);
+
+	DEBUG && console.log(service);
 	initState([service], service);
 
 	rawTrigger({

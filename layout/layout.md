@@ -27,7 +27,7 @@
 	- respond to (acks) terminal's fileOpen operation event
 - [X] explorer tabs customize
 - [X] terminal tabs (hide)
-- [X] programmaitically change tabs
+- [X] programmatically change tabs
 - [X] editor should no longer handle tabs
 	- ie. `Could not find a tab named .test.html to update`
 	- at least should tolerate tabs not existing
@@ -38,7 +38,7 @@
 ## why layout module?, or why 0.4.6?
 - need side-by-side editor
 - need "close all tabs" or "close other tabs" or "close tabs to the right"
-- need "preview close" in status bar
+- need "preview close" in terminal status bar
 - need "each editor has its own status bar" or "fiug status bar is different"
 - need "each pane is its own thing"
 - need "open editors" and option to turn off tabs?
