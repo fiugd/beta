@@ -1,7 +1,28 @@
-import Layout from "https://unpkg.com/@fiug/layout@0.0.6";
+import Layout from "https://unpkg.com/@fiug/layout@0.0.11";
 // import Layout from "/fiugd/layout/src/index.js";
+
 import YAML from "https://cdn.skypack.dev/yaml";
 import iconMap from './icons.js';
+
+function UrlParams(url=""){
+	const paramsString = url.includes('?')
+		? url.split('?').pop()
+		: "";
+	const urlParams = new URLSearchParams(paramsString);
+	return urlParams;
+}
+function addParams(url, toAdd){
+	const currentParams = Object.fromEntries(
+		UrlParams(url)
+	);
+	const newParams = new URLSearchParams({
+		...currentParams,
+		...toAdd
+	});
+	return url.split("?").shift() + "?" + newParams.toString();
+}
+
+
 
 // TODO: take activeEditor out of global module scope
 let activeEditor;
@@ -47,32 +68,35 @@ const getConfig = async () => {
 // CUSTOMIZE LAYOUT INTERNAL
 const createTab = ({ tab, file, pane }) => {
 	const title = tab.querySelector('span');
-	if(title.textContent.includes('tree.html')){
+	const source = tab.getAttribute('source');
+	if(source.includes('tree.html')){
 		tab.classList.add('option');
 		tab.id = "explorerTab";
 		title.textContent = "EXPLORER";
 		return;
 	}
-	if(title.textContent.includes('search.html')){
+	if(source.includes('search.html')){
 		tab.classList.add('option');
 		tab.id = "searchTab";
 		title.textContent = "SEARCH";
 		return;
 	}
-	if(title.textContent.includes('terminal.html')){
+	if(source.includes('terminal.html')){
 		tab.classList.add('option');
 		title.textContent = "TERMINAL";
 		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
-	if(title.textContent.includes('preview.html')){
+	if(source.includes('preview.html')){
 		tab.classList.add('option');
 		tab.id = "previewTab";
 		title.textContent = "PREVIEW";
 		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
-	title.classList.add('icon', 'icon-' + iconMap(file));
+	const urlParams = new URLSearchParams(file.split('?').pop());
+	const fileName = urlParams.get("file");
+	title.classList.add('icon', 'icon-' + iconMap(fileName || file));
 };
 const createPane = ({ pane }) => {
 	//TODO: customize pane
@@ -106,7 +130,7 @@ const selectHandler = ({ file, pane }) => {
 		const name = path.split('/').pop();
 		const parent = path.replace("/"+name, "");
 		//TODO: get service from params
-		const service = "fiugd/layout";
+		const service = urlParams.get('service');
 
 		const treeFrame = document.querySelector('iframe[src*="dist/tree.html"]');
 		treeFrame.contentWindow.postMessage({
@@ -135,10 +159,13 @@ const fileSelect = (layout, e) => {
 	const filePath = path || e.src;
 
 	//TODO: change to /dist/editor.html
-	let file = `/fiugd/beta/dist/editor.html?file=${filePath}`;
-	
-	//TODO: cannot do this until layout.tabbed supports better urlparams parsing
-	//if(e.service) file += `&service=${e.service}`;
+	let file = addParams(
+		`/fiugd/beta/dist/editor.html`,
+		{ file: filePath }
+	);
+
+	if(e.service)
+		file = addParams(file, { service: e.service });
 
 	const allPanes = Array.from(document.querySelectorAll('.pane.tabbed'));
 	const panesWithFileOpen = [];
