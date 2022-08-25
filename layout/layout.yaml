@@ -20,7 +20,7 @@ rows:
           - active: true
             width: 50%
             tabs:
-              - iframe: /fiugd/beta/dist/editor.html?file=README.md
+              - iframe: /fiugd/beta/dist/editor.html?file=README.md&service=fiugd/beta
                 active: true
           - width: 50%
             drop: false

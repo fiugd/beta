@@ -202,7 +202,7 @@ window.addEventListener('message', function(messageEvent) {
 	const source = messageEvent.source;
 	const origin = messageEvent.source;
 
-	if(source === window || source[0] === window)
+	if(source === window || source?.[0] === window)
 		return;
 
 	if(data?.subscribe){

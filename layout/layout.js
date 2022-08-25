@@ -68,7 +68,17 @@ const getConfig = async () => {
 // CUSTOMIZE LAYOUT INTERNAL
 const createTab = ({ tab, file, pane }) => {
 	const title = tab.querySelector('span');
+	
 	const source = tab.getAttribute('source');
+	const paramsString = source.split('?').pop() || "";
+	const params = new URLSearchParams(paramsString);
+	const service = params.get("service") || "{service}";
+	const fileName = params.get("file");
+
+	// const service = tab.getAttribute('service') || "{service}";
+	//const path = tab.getAttribute('path') || "{path}";
+	tab.setAttribute('title', `${service}/${file}`)
+
 	if(source.includes('tree.html')){
 		tab.classList.add('option');
 		tab.id = "explorerTab";
@@ -94,8 +104,6 @@ const createTab = ({ tab, file, pane }) => {
 		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
-	const urlParams = new URLSearchParams(file.split('?').pop());
-	const fileName = urlParams.get("file");
 	title.classList.add('icon', 'icon-' + iconMap(fileName || file));
 };
 const createPane = ({ pane }) => {

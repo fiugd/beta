@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-08-22T23:01:11.414Z )
+	Version 0.4.6 ( 2022-08-25T20:13:07.088Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -208,7 +208,7 @@ window.addEventListener("message", (function(messageEvent) {
     const {data: data} = messageEvent;
     const source = messageEvent.source;
     const origin = messageEvent.source;
-    if (source === window || source[0] === window) return;
+    if (source === window || source?.[0] === window) return;
     if (data?.subscribe) {
         clients[data.subscribe] = {
             source: source,
