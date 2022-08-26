@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-08-23T22:50:47.983Z )
+	Version 0.4.6 ( 2022-08-26T23:47:47.015Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -47,15 +47,16 @@ const urlParams$1 = new URLSearchParams(window.location.search);
 
 const fileParam$1 = urlParams$1.get("file");
 
+const serviceParam = urlParams$1.get("service");
+
 const initState = (all, current) => {
     allServices = all;
     currentService = current;
-    // TODO: this is UGLY - service worker should be consistent with how it returns files...
-        currentService.code.forEach((x => {
-        if (x.path.startsWith("/")) return;
-        x.path = "/" + x.path;
-    }));
-    if (fileParam$1) {
+    if (fileParam$1 && serviceParam) {
+        currentService.code = [ {
+            name: serviceParam + "/" + fileParam$1,
+            path: serviceParam + "/" + fileParam$1
+        } ];
         currentService.state = {
             singleFileMode: true,
             opened: [ {
@@ -66,6 +67,11 @@ const initState = (all, current) => {
             changed: []
         };
     }
+    // TODO: this is UGLY - service worker should be consistent with how it returns files...
+        currentService.code.forEach((x => {
+        if (x.path.startsWith("/")) return;
+        x.path = "/" + x.path;
+    }));
     if (typeof currentService.state.selected === "string" && currentService.state.selected) {
         setCurrentFile({
             filePath: `${currentService.name}/${currentService.state.selected}`
@@ -27054,6 +27060,8 @@ const operationDoneHandler = (e, context) => {
         return;
     }
     if ([ "read", "update" ].includes(op)) {
+        const current = getCurrentService();
+        if (op === "update" && current.state.singleFileMode) return;
         const [service] = result;
         // service.state.selected = {
         // 	name: service.state.selected.split('/').pop(),

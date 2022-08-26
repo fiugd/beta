@@ -50,11 +50,25 @@ const getOpenedFiles = dummyFunc('getOpenedFiles');
 
 const urlParams = new URLSearchParams(window.location.search);
 const fileParam = urlParams.get('file');
+const serviceParam = urlParams.get('service');
 
 const initState = (all, current) => {
 	allServices = all;
 
 	currentService = current;
+
+	if(fileParam && serviceParam){
+		currentService.code = [{
+			name: serviceParam + '/' + fileParam,
+			path: serviceParam + '/' + fileParam
+		}];
+		currentService.state = {
+			singleFileMode: true,
+			opened: [{ name: fileParam, order:0 }],
+			selected: fileParam,
+			changed: []
+		};
+	}
 
 	// TODO: this is UGLY - service worker should be consistent with how it returns files...
 	currentService.code.forEach(x => {
@@ -62,15 +76,6 @@ const initState = (all, current) => {
 		x.path = '/' + x.path;
 	});
 
-	if(fileParam){
-		currentService.state = {
-			singleFileMode: true,
-			opened: [{ name: fileParam, order:0 }],
-			selected: fileParam,
-			changed: []
-		}
-	}
-	
 	if(typeof currentService.state.selected === "string" && currentService.state.selected){
 		setCurrentFile({
 			filePath: `${currentService.name}/${currentService.state.selected}`

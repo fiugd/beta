@@ -1,5 +1,5 @@
 import fileSelect from './fileSelect.js';
-import { initState } from "../../utils/State.js"
+import { initState, getCurrentService } from "../../utils/State.js"
 
 const operationDoneHandler = (e, context) => {
 	const { messageEditor } = context;
@@ -17,6 +17,9 @@ const operationDoneHandler = (e, context) => {
 	}
 
 	if (['read', 'update'].includes(op)) {
+		const current = getCurrentService();
+		if(op === "update" && current.state.singleFileMode) return;
+
 		const [service] = result;
 		// service.state.selected = {
 		// 	name: service.state.selected.split('/').pop(),
