@@ -1,6 +1,7 @@
 ## TODO
 - [ ] use module param when splitting pane
 - [ ] get tree/search buttons working correctly
+- [ ] differentiate between `repoOne/file.md` and `repoTwo/file.md`
 - [ ] hotkeys
 - [ ] command palette & file select palette
 - [ ] settings icon + menu
