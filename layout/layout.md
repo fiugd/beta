@@ -1,5 +1,5 @@
 ## TODO
-- [ ] use editor service params in layout
+- [ ] use config's module param when splitting pane
 - [ ] hotkeys
 - [ ] command palette & file select palette
 - [ ] settings icon + menu
@@ -14,9 +14,10 @@
 	- would include all the modules that load on main page
 	- would not include modules that load in a frame
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
-- [ ] github flavored markdown (in markdown preview)
 
+- [X] use editor service params in layout
 - [X] `editor.html?file="foo.md"&service="user/repo"&line=23&column=0`
+- [X] github flavored markdown (in markdown preview)
 - [X] search pane
 - [X] menus need to appear at the correct spot
 	- iframe where click occured should share its pane id
