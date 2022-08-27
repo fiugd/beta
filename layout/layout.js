@@ -276,7 +276,8 @@ const cursorActivity = (layout, e) => {
 	// 	? e.source.location.pathname + `?file=${params.file}`
 	// 	: undefined;
 	//if(!file)
-	
+
+	//TODO: fix activate pane does not update config
 	return layout.activate({ pane });
 	//layout.openTab({ pane, file });
 };
