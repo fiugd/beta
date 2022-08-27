@@ -67,7 +67,7 @@ const getConfig = async () => {
 // CUSTOMIZE LAYOUT INTERNAL
 const createTab = ({ tab, file, pane }) => {
 	const title = tab.querySelector('span');
-	
+
 	const source = tab.getAttribute('source');
 	const paramsString = source.split('?').pop() || "";
 	const params = new URLSearchParams(paramsString);
@@ -79,24 +79,32 @@ const createTab = ({ tab, file, pane }) => {
 	tab.setAttribute('title', `${service}/${file}`)
 
 	if(source.includes('tree.html')){
+		tab.setAttribute('title', ``);
+		tab.setAttribute('path', source);
 		tab.classList.add('option');
 		tab.id = "explorerTab";
 		title.textContent = "EXPLORER";
 		return;
 	}
 	if(source.includes('search.html')){
+		tab.setAttribute('title', ``);
+		tab.setAttribute('path', source);
 		tab.classList.add('option');
 		tab.id = "searchTab";
 		title.textContent = "SEARCH";
 		return;
 	}
 	if(source.includes('terminal.html')){
+		tab.setAttribute('title', ``);
+		tab.setAttribute('path', source);
 		tab.classList.add('option');
 		title.textContent = "TERMINAL";
 		tab.closest('.tabs-container').style.display = "none";
 		return;
 	}
 	if(source.includes('preview.html')){
+		tab.setAttribute('title', ``);
+		tab.setAttribute('path', source);
 		tab.classList.add('option');
 		tab.id = "previewTab";
 		title.textContent = "PREVIEW";
@@ -121,7 +129,7 @@ const createTabContent = ({ pane, file, layout }) => {
 
 	const paramsString = params.toString().replace(/%2F/g, '/');
 
-	const src = paneModule
+	let src = paneModule
 		? `${paneModule||''}?${paramsString}`
 		: `${file}?${params.toString().replace(/%2F/g, '/')}`;
 
