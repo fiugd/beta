@@ -1,4 +1,6 @@
 ## TODO
+- [ ] when selecting file multiple times, config (but not UI) keeps adding file to tabs
+- [ ] when closing file, editor freaks out
 - [ ] use module param when splitting pane
 - [ ] get tree/search buttons working correctly
 - [ ] differentiate between `repoOne/file.md` and `repoTwo/file.md`
