@@ -1,4 +1,4 @@
-import Layout from "https://unpkg.com/@fiug/layout@0.0.11";
+import Layout from "https://unpkg.com/@fiug/layout@0.0.12";
 // import Layout from "/fiugd/layout/src/index.js";
 
 import YAML from "https://cdn.skypack.dev/yaml";
@@ -21,7 +21,6 @@ function addParams(url, toAdd){
 	});
 	return url.split("?").shift() + "?" + newParams.toString();
 }
-
 
 
 // TODO: take activeEditor out of global module scope
@@ -106,6 +105,50 @@ const createTab = ({ tab, file, pane }) => {
 	}
 	title.classList.add('icon', 'icon-' + iconMap(fileName || file));
 };
+const createTabContent = ({ pane, file, layout }) => {
+	const params = new URLSearchParams(
+		file.includes('?')
+			? file.split('?').pop()
+			: ''
+	);
+	const paramsFile = params.get("file");
+	const service = params.get("service");
+	const paneid = params.get("paneid")
+	!paneid && params.set("paneid", pane);
+	
+	const paneConfig = layout.flatConfig().find(x => x.id === (pane||paneid));
+	const paneModule = paneConfig?.module;
+
+	const paramsString = params.toString().replace(/%2F/g, '/');
+
+	const src = paneModule
+		? `${paneModule||''}?${paramsString}`
+		: `${file}?${params.toString().replace(/%2F/g, '/')}`;
+
+	// return '<pre>' + JSON.stringify({
+	// 	src,
+	// 	paneModule,
+	// 	params: Object.fromEntries(params)
+	// }, null, 2) + '</pre>';
+
+	const sandbox = [
+		"allow-same-origin",
+		"allow-scripts",
+		"allow-popups",
+		"allow-modals",
+		"allow-downloads",
+		"allow-forms",
+		"allow-top-navigation",
+		"allow-popups-to-escape-sandbox",
+	].join(" ");
+	const iframe = `<iframe
+		src="${src}"
+		allowtransparency=”true”
+		sandbox="${sandbox}"
+		width="100%" height="100%"
+	></iframe>`;
+	return iframe;
+};
 const createPane = ({ pane }) => {
 	//TODO: customize pane
 	console.log(`pane created: ${pane.id}`)
@@ -127,32 +170,32 @@ const closeHandler = ({ file, pane }) => {
 	// - a pane has been closed
 	console.log(`closed: ${file}`);
 };
-const selectHandler = ({ file, pane }) => {
-	// - a tab has been selected
-	// - a pane has been selected
-	// - set activeEditor to pane (if tabbed)
-	if(file && file.includes("/editor.html") ){
-		activeEditor = pane;
-		const urlParams = new URLSearchParams(file.split('?').pop());
-		const path = urlParams.get('file');
-		const name = path.split('/').pop();
-		const parent = path.replace("/"+name, "");
-		//TODO: get service from params
-		const service = urlParams.get('service');
+// const selectHandler = ({ file, pane }) => {
+// 	// - a tab has been selected
+// 	// - a pane has been selected
+// 	// - set activeEditor to pane (if tabbed)
+// 	if(file && file.includes("/editor.html") ){
+// 		activeEditor = pane;
+// 		const urlParams = new URLSearchParams(file.split('?').pop());
+// 		const path = urlParams.get('file');
+// 		const name = path.split('/').pop();
+// 		const parent = path.replace("/"+name, "");
+// 		//TODO: get service from params
+// 		const service = urlParams.get('service');
 
-		const treeFrame = document.querySelector('iframe[src*="dist/tree.html"]');
-		treeFrame.contentWindow.postMessage({
-			type: "fileSelect",
-			detail: {
-				name,
-				parent,
-				service,
-				source: "Tabs",
-				data: {},
-			}
-		}, location);
-	}
-};
+// 		const treeFrame = document.querySelector('iframe[src*="dist/tree.html"]');
+// 		treeFrame.contentWindow.postMessage({
+// 			type: "fileSelect",
+// 			detail: {
+// 				name,
+// 				parent,
+// 				service,
+// 				source: "Tabs",
+// 				data: {},
+// 			}
+// 		}, location);
+// 	}
+// };
 const resizeHandler = () => {
 	//console.log('');
 	//console.log('optionally notify status bar of resize')
@@ -168,7 +211,7 @@ const fileSelect = (layout, e) => {
 
 	//TODO: change to /dist/editor.html
 	let file = addParams(
-		`/fiugd/beta/dist/editor.html`,
+		"", //`/fiugd/beta/dist/editor.html`,
 		{ file: filePath }
 	);
 
@@ -263,7 +306,7 @@ export default async () => {
 	const layout = new Layout({
 		...layoutConfig,
 		parent: document.querySelector('#layout'),
-		events: { createTab, createPane }
+		events: { createTab, createPane, createTabContent }
 	});
 
 	const activePane = document.querySelector('.pane.tabbed.active');
@@ -274,7 +317,7 @@ export default async () => {
 	layout.on('change', changeHandler);
 	layout.on('open', openHandler);
 	layout.on('close', closeHandler);
-	layout.on('select', selectHandler);
+	//layout.on('select', selectHandler);
 	layout.on('resize', resizeHandler);
 
 	const useDetail = (fn) => (layout, event) => {

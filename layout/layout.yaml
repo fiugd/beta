@@ -19,8 +19,9 @@ rows:
         columns:
           - active: true
             width: 50%
+            module: /fiugd/beta/dist/editor.html
             tabs:
-              - iframe: /fiugd/beta/dist/editor.html?file=README.md&service=fiugd/beta
+              - iframe: ?file=README.md&service=fiugd/beta
                 active: true
           - width: 50%
             drop: false
