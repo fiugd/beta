@@ -269,15 +269,16 @@ const cursorActivity = (layout, e) => {
 	if(location.href.includes("/editor.html") ){
 		activeEditor = pane;
 	}
-	const params = new Proxy(new URLSearchParams(e.source.location.search), {
-		get: (searchParams, prop) => searchParams.get(prop),
-	});
-	const file = params.file
-		? e.source.location.pathname + `?file=${params.file}`
-		: undefined;
-	if(!file)
-		return layout.activate({ pane });
-	layout.openTab({ pane, file });
+	// const params = new Proxy(new URLSearchParams(e.source.location.search), {
+	// 	get: (searchParams, prop) => searchParams.get(prop),
+	// });
+	// const file = params.file
+	// 	? e.source.location.pathname + `?file=${params.file}`
+	// 	: undefined;
+	//if(!file)
+	
+	return layout.activate({ pane });
+	//layout.openTab({ pane, file });
 };
 const showSearch = (layout, e) => {
 	const searchTab = document.getElementById('searchTab');
