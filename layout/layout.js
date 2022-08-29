@@ -1,5 +1,5 @@
-import Layout from "https://unpkg.com/@fiug/layout@0.0.14";
-//import Layout from "/fiugd/layout/src/index.js";
+//import Layout from "https://unpkg.com/@fiug/layout@0.0.14";
+import Layout from "/fiugd/layout/src/index.js";
 
 import YAML from "https://cdn.skypack.dev/yaml";
 import iconMap from './icons.js';
@@ -19,7 +19,7 @@ function addParams(url, toAdd){
 		...currentParams,
 		...toAdd
 	});
-	return url.split("?").shift() + "?" + newParams.toString();
+	return url.split("?").shift() + "?" + newParams.toString().replace(/%2F/g, '/');
 }
 
 

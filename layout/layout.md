@@ -1,7 +1,5 @@
 ## TODO
-- [ ] get splitting working again
 - [ ] get tree/search buttons working correctly
-- [ ] differentiate between `repoOne/file.md` and `repoTwo/file.md`
 - [ ] hotkeys
 - [ ] command palette & file select palette
 - [ ] settings icon + menu
@@ -17,6 +15,8 @@
 	- would not include modules that load in a frame
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
 
+- [X] differentiate between `repoOne/file.md` and `repoTwo/file.md`
+- [X] get splitting working again
 - [X] use module param when splitting pane
 - [X] when selecting file multiple times, config (but not UI) keeps adding file to tabs
 - [X] when closing file, editor freaks out
