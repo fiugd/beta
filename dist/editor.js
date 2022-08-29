@@ -1,6 +1,6 @@
 /*!
 	fiug editor component
-	Version 0.4.6 ( 2022-08-26T23:47:47.015Z )
+	Version 0.4.6 ( 2022-08-29T03:45:28.097Z )
 	https://github.com/fiugd/fiug/editor
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -26983,6 +26983,8 @@ window.addEventListener("message", (function(messageEvent) {
 const getFilePath$1 = getFilePath$2(getCurrentService);
 
 const fileSelectHandler = async (event, context) => {
+    const current = getCurrentService();
+    const {singleFileMode: currentSingleFileMode} = current.state;
     const {editor: {switchEditor: switchEditor}} = context;
     const {detail: detail, singleFileMode: singleFileMode} = event;
     const {name: name, path: path, next: next, nextPath: nextPath, parent: parent} = detail;
@@ -27043,7 +27045,7 @@ const fileSelectHandler = async (event, context) => {
         filename: filePath,
         line: line,
         column: column,
-        singleFileMode: singleFileMode
+        singleFileMode: singleFileMode || currentSingleFileMode
     }, context);
 };
 

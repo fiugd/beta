@@ -1,7 +1,5 @@
 ## TODO
-- [ ] when selecting file multiple times, config (but not UI) keeps adding file to tabs
-- [ ] when closing file, editor freaks out
-- [ ] use module param when splitting pane
+- [ ] get splitting working again
 - [ ] get tree/search buttons working correctly
 - [ ] differentiate between `repoOne/file.md` and `repoTwo/file.md`
 - [ ] hotkeys
@@ -19,6 +17,9 @@
 	- would not include modules that load in a frame
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
 
+- [X] use module param when splitting pane
+- [X] when selecting file multiple times, config (but not UI) keeps adding file to tabs
+- [X] when closing file, editor freaks out
 - [X] use editor service params in layout
 - [X] `editor.html?file="foo.md"&service="user/repo"&line=23&column=0`
 - [X] search pane

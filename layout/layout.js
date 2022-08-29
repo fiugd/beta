@@ -1,5 +1,5 @@
-import Layout from "https://unpkg.com/@fiug/layout@0.0.12";
-// import Layout from "/fiugd/layout/src/index.js";
+//import Layout from "https://unpkg.com/@fiug/layout@0.0.13?";
+import Layout from "/fiugd/layout/src/index.js";
 
 import YAML from "https://cdn.skypack.dev/yaml";
 import iconMap from './icons.js';
@@ -123,7 +123,7 @@ const createTabContent = ({ pane, file, layout }) => {
 	const service = params.get("service");
 	const paneid = params.get("paneid")
 	!paneid && params.set("paneid", pane);
-	
+
 	const paneConfig = layout.flatConfig().find(x => x.id === (pane||paneid));
 	const paneModule = paneConfig?.module;
 
@@ -178,12 +178,15 @@ const closeHandler = ({ file, pane }) => {
 	// - a pane has been closed
 	console.log(`closed: ${file}`);
 };
-// const selectHandler = ({ file, pane }) => {
-// 	// - a tab has been selected
-// 	// - a pane has been selected
-// 	// - set activeEditor to pane (if tabbed)
-// 	if(file && file.includes("/editor.html") ){
-// 		activeEditor = pane;
+const selectHandler = (layout) => ({ file, pane }) => {
+	// - a tab has been selected
+	// - a pane has been selected
+	// - set activeEditor to pane (if tabbed)
+	const paneConfig = layout.flatConfig().find(x => x.id === pane);
+	const paneModule = paneConfig?.module;
+	
+	if(file && paneModule.includes("/editor.html") ){
+		activeEditor = pane;
 // 		const urlParams = new URLSearchParams(file.split('?').pop());
 // 		const path = urlParams.get('file');
 // 		const name = path.split('/').pop();
@@ -202,8 +205,8 @@ const closeHandler = ({ file, pane }) => {
 // 				data: {},
 // 			}
 // 		}, location);
-// 	}
-// };
+	}
+};
 const resizeHandler = () => {
 	//console.log('');
 	//console.log('optionally notify status bar of resize')
@@ -247,6 +250,7 @@ const fileSelect = (layout, e) => {
 			? activeEditor
 			: panesWithFileActive[0];
 	}
+	if(!file && activeEditor === pane) return;
 	activeEditor = pane;
 	layout.openTab({ pane, file });
 };
@@ -327,7 +331,7 @@ export default async () => {
 	layout.on('change', changeHandler);
 	layout.on('open', openHandler);
 	layout.on('close', closeHandler);
-	//layout.on('select', selectHandler);
+	layout.on('select', selectHandler(layout));
 	layout.on('resize', resizeHandler);
 
 	const useDetail = (fn) => (layout, event) => {
