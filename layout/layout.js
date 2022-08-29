@@ -1,5 +1,5 @@
-//import Layout from "https://unpkg.com/@fiug/layout@0.0.14";
-import Layout from "/fiugd/layout/src/index.js";
+import Layout from "https://unpkg.com/@fiug/layout@0.0.16";
+//import Layout from "/fiugd/layout/src/index.js";
 
 import YAML from "https://cdn.skypack.dev/yaml";
 import iconMap from './icons.js';
@@ -76,7 +76,7 @@ const createTab = ({ tab, file, pane }) => {
 
 	// const service = tab.getAttribute('service') || "{service}";
 	//const path = tab.getAttribute('path') || "{path}";
-	tab.setAttribute('title', `${service}/${file}`)
+	tab.setAttribute('title', `${service}/${fileName}`)
 
 	if(source.includes('tree.html')){
 		tab.setAttribute('title', ``);

@@ -1,4 +1,7 @@
 ## TODO
+- [ ] tab select causes new tab to open
+- [ ] delete pane messes up drag/drop (but is okay on refresh)
+
 - [ ] get tree/search buttons working correctly
 - [ ] hotkeys
 - [ ] command palette & file select palette
@@ -15,6 +18,7 @@
 	- would not include modules that load in a frame
 - [ ] uml in markdown preview [codeblocks](https://github.com/Bloggify/showdown-highlight)
 
+- [X] two tabs created on split/add
 - [X] differentiate between `repoOne/file.md` and `repoTwo/file.md`
 - [X] get splitting working again
 - [X] use module param when splitting pane
