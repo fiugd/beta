@@ -1,6 +1,6 @@
 /*!
 	fiug tree component
-	Version 0.4.6 ( 2022-08-22T19:14:33.360Z )
+	Version 0.4.6 ( 2022-08-29T15:46:34.229Z )
 	https://github.com/fiugd/fiug/tree
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -3591,168 +3591,28 @@ const uiListener = (event, context) => {
     return;
 };
 
-const t = t => {
-    let e = t.split("/").pop();
-    return e.includes("&paneid=") && (e = e.split("&paneid=").shift()), e.includes("?file=") && (e = e.split("?file=").pop()), 
-    e;
-}, e = [ {
-    title: "TODO:",
-    disabled: !0
-}, {
-    seperator: !0
-}, {
-    title: "Close All Tabs",
-    disabled: !0
-}, {
-    title: "Close Pane",
-    disabled: !0
-}, {
-    title: "Close Inactive Tabs",
-    disabled: !0
-}, {
-    title: "Close Inactive Left",
-    disabled: !0
-}, {
-    title: "Close Inactive Right",
-    disabled: !0
-} ], n = t => t.seperator ? '<div class="seperator"></div>' : `\n\t\t<li class="${[ t.hidden && "hidden", t.disabled && "disabled" ].filter((t => t)).join(" ")}"\n\t\t\tdata-action="${t.title.replace(" ", "").toLowerCase()}"\n\t\t>\n\t\t\t${t.title}\n\t\t</li>\n\t`, i = t => `\n\t<div class="tabs-menu hidden">\n\t\t<ul>\n\t\t\t${(t = t || []).map(n).join("")}\n\t\t</ul>\n\t</div>\n\t`, o = (e, n) => {
-    const i = t(n), o = (t => {
-        let e = t;
-        return e.includes("&paneid=") && (e = e.split("&paneid=").shift()), e.includes("?file=") && (e = e.split("?file=").pop()), 
-        e;
-    })(n);
-    return `\n\t<div\n\t\tclass="tab${e ? " active" : ""}"\n\t\tsource="${n}"\n\t\tfile="${i}"\n\t\tpath="${o}"\n\t>\n\t\t<span>${i}</span>\n\t\t\n\t<div class="tab-close">\n\t\t<div class="action-item">\n\t\t\t<svg viewBox="0 0 10 10" class="icon fill">\n\t\t\t\t<line x1="1" y1="1" x2="9" y2="9"></line>\n\t\t\t\t<line x1="9" y1="1" x2="1" y2="9"></line>\n\t\t\t</svg>\n\t\t</div>\n\t</div>\n\n\t</div>\n\t`;
-}, s = [ "one.json", "two.jpg", "three.png", "four.js", "five.css", "six.html" ], a = (t, e) => t.includes("/_/modules") || t.includes("/dist/") ? t.includes("?file") ? t + "&paneid=" + e : t + "?paneid=" + e : t, r = ({src: t, srcdoc: e, childrenOnly: n, paneid: i}) => {
-    const o = s.includes(t) ? "document.html" : t, r = [ "allow-same-origin", "allow-scripts", "allow-popups", "allow-modals", "allow-downloads", "allow-forms", "allow-top-navigation", "allow-popups-to-escape-sandbox" ].join(" "), l = t ? `<iframe\n\t\t\tsrc="${i ? a(o, i) : o}"\n\t\t\tallowtransparency=”true”\n\t\t\tsandbox="${r}"\n\t\t\twidth="100%" height="100%"\n\t\t\t></iframe>` : `<iframe\n\t\t\tsrcdoc='${e}'\n\t\t\tallowtransparency=”true”\n\t\t\tsandbox="${r}"\n\t\t\twidth="100%" height="100%"\n\t\t\t></iframe>`;
-    return n ? l : `<div class="content">${l}</div>`;
-}, c = (n, s) => `\n\t${s ? `<div class="tabs-container">\n\t\t\t\t<div class="tabs">\n\t\t\t\t\t${o(!0, t(n))}\n\t\t\t\t</div>\n\t\t\t\t\n\t<div class="tabs-controls">\n\t\t<div class="action-item" data-action="fullscreen">\n\t\t\t<svg viewBox="0 0 10 10" class="icon stroke">\n\t\t\t\t<line x1="1" y1="1" x2="9" y2="1"></line>\n\t\t\t\t<line x1="1" y1="2" x2="9" y2="2"></line>\n\t\t\t\t<line x1="1" y1="1" x2="1" y2="9"></line>\n\t\t\t\t<line x1="9" y1="1" x2="9" y2="9"></line>\n\t\t\t\t<line x1="1" y1="9" x2="9" y2="9"></line>\n\t\t\t</svg>\n\t\t</div>\n\t\t<div class="action-item hidden" data-action="exitfullscreen">\n\t\t\t<svg viewBox="0 0 10 10" class="icon stroke">\n\t\t\t\t<line x1="1" y1="9" x2="9" y2="9"></line>\n\t\t\t</svg>\n\t\t</div>\n\t\t<div class="action-item" data-action="menu">\n\t\t\t<svg viewBox="0 0 10 10" class="icon fill">\n\t\t\t\t<circle cx="1" cy="5" r="1"></circle>\n\t\t\t\t<circle cx="5" cy="5" r="1"></circle>\n\t\t\t\t<circle cx="9" cy="5" r="1"></circle>\n\t\t\t</svg>\n\t\t</div>\n\t</div>\n\n\t\t\t</div>` : ""}\n\t${r({
-    src: s ? "document.html" : "terminal.html"
-})}\n\t${s && i(e)}\n\t`, m = (t = "_") => t + Math.random().toString(16).replace("0.", ""), h = (t, e, n, i, o) => {
-    const s = m(), a = m(), r = document.createElement("div");
-    r.classList.add("layout-container"), r.id = s;
-    const l = o ? "column" : "row", d = t.classList.contains("tabbed"), p = t.classList.contains("dragTo");
-    if (r.innerHTML = `\n\t\t${n ? `<div class="sizer ${l}"></div>` : ""}\n\t\t${((t, e, n, i, o) => `\n\t<div class="${[ "pane", e && "tabbed", n && "dragTo", o && "bottomDocked" ].filter((t => t)).join(" ")}"\n\t\tid="${i}"\n\t>\n\t\t${c(t, e)}\n\t</div>\n`)(e, d, p, a)}\n\t\t${n ? "" : `<div class="sizer ${l}"></div>`}\n\t`, 
-    i ? (r.classList.add("row"), r.style.gridTemplateRows = "50% 0px 50%") : (r.classList.add("column"), 
-    r.style.gridTemplateColumns = "50% 0px 50%"), t.insertAdjacentElement("beforebegin", r), 
-    p) {
-        const t = r.querySelector("#" + a);
-        D(void 0, t);
-    }
-    const u = n ? "afterbegin" : "beforeend";
-    r.insertAdjacentElement(u, t);
-    const h = {
-        parent: r.parentNode.id,
-        container: s,
-        orient: i ? "row" : "column",
-        pane: a,
-        sibling: t.id,
-        location: u,
-        file: e,
-        tabbed: d,
-        dragTo: p
-    };
-    return o ? h.width = "50%" : h.height = "50%", {
-        splitPane: h
-    };
-}, g = (t, e, n, i, o) => {
-    let s = o ? t.parentNode.style.gridTemplateRows.split(" ").filter((t => t)) : t.parentNode.style.gridTemplateColumns.split(" ").filter((t => t));
-    const a = Array.from(t.parentNode.children).indexOf(t), r = (t => {
-        let e = "";
-        return t.includes("px") && (e = "px"), t.includes("fr") && (e = "fr"), t.includes("%") && (e = "%"), 
-        .5 * Number(t.replace(e, "")) + e;
-    })(s[a]);
-    s[a] = [ r, "0px", r ], s = s.flat(), o ? t.parentNode.style.gridTemplateRows = s.join(" ") : t.parentNode.style.gridTemplateColumns = s.join(" ");
-    const l = document.createElement("div");
-    l.classList.add("sizer", o ? "row" : "column");
-    const d = document.createElement("div");
-    d.classList.add("pane");
-    const p = t.classList.contains("tabbed"), u = t.classList.contains("dragTo"), h = m();
-    d.innerHTML = c(e, p), d.id = h;
-    const g = n ? "afterend" : "beforebegin";
-    t.insertAdjacentElement(g, d), t.insertAdjacentElement(g, l), p && d.classList.add("tabbed"), 
-    u && (D(void 0, d), d.classList.add("dragTo"));
-    const f = {
-        parent: t.parentNode.id,
-        pane: h,
-        location: g,
-        sibling: t.id,
-        file: e,
-        tabbed: p,
-        dragTo: u
-    };
-    return o ? f.height = r : f.width = r, {
-        addedPane: f
-    };
-}, f = (t, e, n) => {
-    const i = e.parentNode.classList.contains("row"), o = e.parentNode.classList.contains("column"), s = [ "left", "right" ].includes(t), a = [ "up", "down" ].includes(t), r = [ "right", "down" ].includes(t), l = o && s || i && a ? g : o && a || i && s ? h : void 0;
-    if (l) return l(e, n, r, a, i);
-}, E = document.createElement("div");
-
-E.classList.add("drag-preview", "hidden"), E.style.left = "-999px", E.style.top = "-999px", 
-document.body.append(E);
-
-const D = (t, e) => {
-    const n = e || document.body, i = document.createElement("div");
-    i.classList.add("mouse"), n.append(i);
-    const o = document.createElement("div");
-    o.classList.add("drag-target", "hidden");
-    const s = n.querySelector(".content");
-    function a(t) {
-        t.classList.remove("left-hover"), t.classList.remove("right-hover"), t.classList.remove("top-hover"), 
-        t.classList.remove("bottom-hover");
-    }
-    s ? s.append(o) : n.append(o), n.append(o);
-    const r = (t, e) => {
-        if (t.preventDefault(), !n.classList.contains("dragTo")) return;
-        const s = [ t.offsetX / n.clientWidth, t.offsetY / n.clientHeight ];
-        if (i.innerHTML = `${"done" === n.hoverClassWait ? "DONE" : "WAIT"} : ${(100 * s[0]).toFixed(2)}, ${(100 * s[1]).toFixed(2)}`, 
-        n.hoverClassWait || (n.hoverClassWait = "inprogress", setTimeout((() => {
-            "inprogress" === n.hoverClassWait && (n.hoverClassWait = "done");
-        }), 750)), "inprogress" === n.hoverClassWait) return;
-        const r = function(t, e) {
-            return t < .25 ? "left-hover" : t > .75 ? "right-hover" : e < .25 ? "top-hover" : e > .75 ? "bottom-hover" : "";
-        }(...s);
-        r || a(o), r && !o.classList.contains(r) && (a(o), o.classList.add(r)), o.classList.remove("hidden");
-    };
-    n.ondragover = r, n.ondrop = e => {
-        e.preventDefault();
-        const s = e.dataTransfer.getData("text");
-        o.classList.add("hidden"), i.innerHTML = "", a(o), n.hoverClassWait = void 0, t({
-            name: s
-        });
-    };
-    n.ondragleave = t => {
-        t.preventDefault(), a(o), o.classList.add("hidden"), i.innerHTML = "", n.hoverClassWait = void 0;
-    };
-    n.onpointerenter = () => {}, n.onpointerleave = () => {};
-    const c = e => {};
-    return n.addEventListener("pointerup", c), n.addEventListener("pointercancel", c), 
-    {
-        dragover: r
-    };
-};
-
-window.newPane = f;
-
-const P = (t, e) => {
-    const n = JSON.stringify({
-        pointerId: t.pointerId,
-        dragStart: e.target.textContent,
-        file: e.target.textContent,
-        source: location.href.split("/").pop()
-    });
-    window.parent.postMessage(n, "*"), t.preventDefault();
-};
-
+//import { dragStart, dragEnd } from "https://unpkg.com/@fiug/layout@0.0.1";
 const clientId = getClientId();
 
 let file, dragging;
+
+const dragStart = (ev, draggedEv) => {
+    const message = JSON.stringify({
+        pointerId: ev.pointerId,
+        dragStart: draggedEv.target.textContent,
+        file: draggedEv.target.textContent,
+        service: draggedEv.service,
+        source: location.href.split("/").pop()
+    });
+    window.parent.postMessage(message, "*");
+    ev.preventDefault();
+};
 
 const pointermove = ev => {
     ev.preventDefault();
     if (file && !dragging) {
         dragging = ev;
-        P(dragging, file);
+        dragStart(dragging, file);
     }
 };
 
@@ -3798,10 +3658,12 @@ const pointerDownListener = (e, context) => {
     if (!isAFile) return;
     const treeLeafContent = target.querySelector(".tree-leaf-content");
     const item = JSON.parse(treeLeafContent?.dataset?.item || "");
+    const service = getCurrentService();
     file = {
         target: {
             textContent: item.id
-        }
+        },
+        service: service.name
     };
     drag(e);
 };

@@ -1,8 +1,20 @@
-import { dragStart, dragEnd } from "https://unpkg.com/@fiug/layout@0.0.1";
-import { getClientId } from '../../utils/State.js';
+//import { dragStart, dragEnd } from "https://unpkg.com/@fiug/layout@0.0.1";
+import { getClientId, getCurrentService } from '../../utils/State.js';
 
 const clientId = getClientId();
 let file, dragging;
+
+const dragStart = (ev, draggedEv) => {
+	const message = JSON.stringify({
+		pointerId: ev.pointerId,
+		dragStart: draggedEv.target.textContent,
+		file: draggedEv.target.textContent,
+		service: draggedEv.service,
+		source: location.href.split('/').pop()
+	});
+	window.parent.postMessage(message, '*');
+	ev.preventDefault();
+};
 
 const pointermove = (ev) => {
 	ev.preventDefault();
@@ -57,11 +69,13 @@ const pointerDownListener = (e, context) => {
 
 	const treeLeafContent = target.querySelector('.tree-leaf-content');
 	const item = JSON.parse(treeLeafContent?.dataset?.item || "");
+	const service = getCurrentService();
 
 	file = {
 		target: {
 			textContent: item.id
-		}
+		},
+		service: service.name
 	};
 	drag(e);
 };
