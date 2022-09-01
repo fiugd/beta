@@ -234,6 +234,10 @@ const Router = (() => {
 			handler,
 		});
 	};
+	
+	const noHash = (path="") => path.includes("#")
+		? path.split("#").shift()
+		: path;
 
 	const _expressHandler = ({ templates, storage }) => {
 		const { getFile } = storage;
@@ -249,11 +253,12 @@ const Router = (() => {
 				const previewMode = path.includes("/::preview::/");
 				const templateUrl = path.includes(".templates/");
 
-				let filename = previewMode
-					? cleanPath.split("/").pop()
-					: path.split("/").pop();
-				if(filename.includes("#"))
-					filename = filename.split("#").shift();
+				const filename = noHash(
+					previewMode
+						? cleanPath.split("/").pop()
+						: path.split("/").pop()
+				);
+					
 
 				let xformedFile;
 
@@ -267,8 +272,8 @@ const Router = (() => {
 				// } catch(e){
 				// 	console.error(e);
 				// }
-				const file = await getFile(`${base}/${cleanPath}`)
-					|| await getFile(`./${base}/${cleanPath}`);
+				const file = await getFile(`${base}/${noHash(cleanPath)}`)
+					|| await getFile(`./${base}/${noHash(cleanPath)}`);
 
 				let fileJSONString;
 				try {

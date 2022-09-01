@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-09-01T19:36:14.879Z )
+	Version 0.4.6 ( 2022-09-01T19:44:58.503Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1412,6 +1412,7 @@ const Router = (() => {
             handler: handler
         });
     };
+    const noHash = (path = "") => path.includes("#") ? path.split("#").shift() : path;
     const _expressHandler = ({templates: templates, storage: storage}) => {
         const {getFile: getFile} = storage;
         //bind to base, ie. when a service is added
@@ -1423,8 +1424,7 @@ const Router = (() => {
                 const cleanPath = decodeURI(path.replace("/::preview::/", ""));
                 const previewMode = path.includes("/::preview::/");
                 path.includes(".templates/");
-                let filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
-                if (filename.includes("#")) filename = filename.split("#").shift();
+                const filename = noHash(previewMode ? cleanPath.split("/").pop() : path.split("/").pop());
                 let xformedFile;
                 // if headers.event-requestor is 'editor-state': let getFile know so it can track
                 // try {
@@ -1436,7 +1436,7 @@ const Router = (() => {
                 // } catch(e){
                 // 	console.error(e);
                 // }
-                                const file = await getFile(`${base}/${cleanPath}`) || await getFile(`./${base}/${cleanPath}`);
+                                const file = await getFile(`${base}/${noHash(cleanPath)}`) || await getFile(`./${base}/${noHash(cleanPath)}`);
                 let fileJSONString;
                 try {
                     if (typeof file !== "string") {
