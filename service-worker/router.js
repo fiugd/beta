@@ -249,9 +249,12 @@ const Router = (() => {
 				const previewMode = path.includes("/::preview::/");
 				const templateUrl = path.includes(".templates/");
 
-				const filename = previewMode
+				let filename = previewMode
 					? cleanPath.split("/").pop()
 					: path.split("/").pop();
+				if(filename.includes("#"))
+					filename = filename.split("#").shift();
+
 				let xformedFile;
 
 				// if headers.event-requestor is 'editor-state': let getFile know so it can track

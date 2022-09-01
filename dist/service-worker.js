@@ -1,6 +1,6 @@
 /*!
 	fiug service-worker
-	Version 0.4.6 ( 2022-09-01T19:13:27.960Z )
+	Version 0.4.6 ( 2022-09-01T19:36:14.879Z )
 	https://github.com/fiugd/fiug/service-worker
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -1423,7 +1423,8 @@ const Router = (() => {
                 const cleanPath = decodeURI(path.replace("/::preview::/", ""));
                 const previewMode = path.includes("/::preview::/");
                 path.includes(".templates/");
-                const filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
+                let filename = previewMode ? cleanPath.split("/").pop() : path.split("/").pop();
+                if (filename.includes("#")) filename = filename.split("#").shift();
                 let xformedFile;
                 // if headers.event-requestor is 'editor-state': let getFile know so it can track
                 // try {
