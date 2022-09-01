@@ -15,10 +15,17 @@ const utils = (() => {
 			return cache;
 		};
 	})();
-	const getMime = (filename) =>
-		xfrmMimes(mimeTypes).find((m) =>
-			m.extensions.includes(filename.split(".").pop())
+	const getMime = (filename="") => {
+		let file = filename;
+		if(file.includes('?'))
+			file = file.split('?').shift();
+		if(file.includes('#'))
+			file = file.split('#').shift();
+		const ext = file.split(".").pop();
+		return xfrmMimes(mimeTypes).find((m) =>
+			m.extensions.includes(ext)
 		);
+	};
 	// this call may not finish before mimetypes is used
 	const initMimeTypes = async () => {
 		mimeTypes = await fetchJSON("https://cdn.jsdelivr.net/npm/mime-db@1.45.0/db.json");
