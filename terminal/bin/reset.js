@@ -3,6 +3,25 @@ const args = [];
 
 const operation = async (args) => {
 	localStorage.removeItem('moduleCache');
+	/*
+		TODO:
+		cache.terminal-cache
+		cache.service worker?
+		
+		indexDB.service-worker files?
+			- any files that are ##PLACEHOLDER## ?
+		indexDB.service-worker handlers?
+		indexDB.service-worker changes?
+			- opened
+			- expanded
+			- selected
+
+		indexDB.editorState?
+
+		what about resetting a service/repo?
+		
+		sessionStorage?
+	*/
 	return '';
 };
 
