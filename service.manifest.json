@@ -110,6 +110,10 @@
 			"route": "./_/modules/terminal/bin/ls.js",
 			"source": "terminal/bin/ls.js"
 		},
+		{
+			"route": "./_/modules/terminal/bin/reset.js",
+			"source": "terminal/bin/reset.js"
+		},
 		"NOTE: -- TERMINAL UI /END --",
 
 

@@ -48,6 +48,9 @@ export default (root, analyzeConfig, onwarn) => ({
 	}, {
 		from: `/${root}/terminal/bin/preview.js`,
 		to: `./${root}/dist/bin/preview.js`
+	}, {
+		from: `/${root}/terminal/bin/reset.js`,
+		to: `./${root}/dist/bin/reset.js`
 	}]
 });
 

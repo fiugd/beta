@@ -1,6 +1,6 @@
 /*!
 	fiug terminal component
-	Version 0.4.6 ( 2022-08-10T16:08:34.518Z )
+	Version 0.4.6 ( 2022-09-06T14:25:33.125Z )
 	https://github.com/fiugd/fiug/terminal
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -492,7 +492,7 @@ const unsafe = (val, doUnesc) => {
         }
         try {
             val = JSON.parse(val);
-        } catch (_) {}
+        } catch {}
     } else {
         let esc = false;
         let unesc = "";
