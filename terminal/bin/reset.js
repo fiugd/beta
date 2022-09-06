@@ -7,7 +7,7 @@ const operation = async (args) => {
 		TODO:
 		cache.terminal-cache
 		cache.service worker?
-		
+
 		indexDB.service-worker files?
 			- any files that are ##PLACEHOLDER## ?
 		indexDB.service-worker handlers?
@@ -21,6 +21,8 @@ const operation = async (args) => {
 		what about resetting a service/repo?
 		
 		sessionStorage?
+
+		output a message?
 	*/
 	return '';
 };
