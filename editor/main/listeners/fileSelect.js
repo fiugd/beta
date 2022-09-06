@@ -6,7 +6,7 @@ const getFilePath = gfp(getCurrentService);
 let firstLoad = true;
 
 const fileSelectHandler = async (event, context) => {
-	const current = getCurrentService() || {};
+	const current = getCurrentService() || { state: {} };
 	const { singleFileMode: currentSingleFileMode } = current.state;
 	const { editor: { switchEditor } } = context;
 	const { detail, singleFileMode } = event;

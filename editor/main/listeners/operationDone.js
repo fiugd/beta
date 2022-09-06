@@ -17,7 +17,7 @@ const operationDoneHandler = (e, context) => {
 	}
 
 	if (['read', 'update'].includes(op)) {
-		const current = getCurrentService();
+		const current = getCurrentService() || { state: {} };
 		if(op === "update" && current.state.singleFileMode) return;
 
 		const [service] = result;
