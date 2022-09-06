@@ -10,6 +10,7 @@ export default class Node {
 	name = 'Reset';
 	keyword = 'reset';
 	listenerKeys = [];
+	type = 'plain';
 	description = description;
 	usage = '';
 	args = args;
