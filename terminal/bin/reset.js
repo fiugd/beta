@@ -4,6 +4,9 @@ const args = [];
 const operation = async (args) => {
 	localStorage.removeItem('moduleCache');
 	/*
+		delete cache storage:
+		https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage/delete
+
 		TODO:
 		cache.terminal-cache
 		cache.service worker?
