@@ -1,3 +1,5 @@
+import handlebars from "https://unpkg.com/@fiug/handlebars-esm";
+
 import {
 	attach as connectListener,
 	attachTrigger as connectTrigger,
@@ -399,10 +401,19 @@ function PaletteModal(parentEl) {
 }
 
 let contextPane;
-function ContextPane() {
+const templates = {};
+
+function ContextPane({ forms={} } = {}) {
 	if (contextPane) {
 		return contextPane;
 	}
+	(async () => {
+		for(const [name, path] of Object.entries(forms)){
+			const template = await handlebars.compile({ path });
+			templates[path] = template;
+		}
+	})();
+
 	contextPane = document.createElement("div");
 	contextPane.classList.add("ContextOverlay");
 
@@ -535,7 +546,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 		item === "seperator"
 			? `<li class="context-seperator"></li>`
 			: `
-		<li class="item${item.disabled ? " disabled" : ""}" data-text="${item.name}">
+		<li class="item${item.disabled ? " disabled" : ""}" data-text="${item.name}" data-modal="${item.modal||''}">
 			<button name="${item.name}" class="">
 				<div class="linkContent">
 					<span class="itemText">${item.name}</span>
@@ -563,14 +574,31 @@ ul { list-style: none; padding: 0; margin: 0; }
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.remove("open");
 	}
+	
+	function showModal({ modal, data, template }){
+		console.log(template(data));
+		console.log({ modal, data });
+	}
 
-	function showMenu({ x = 0, y = 0, parent = "unknown", data, list } = {}) {
+	function showMenu({
+			x = 0, y = 0,
+			parent = "unknown",
+			data, list, modal
+	} = {}) {
 		// warn if menu will appear offscreen?
 		// handle case where menu is opened near edge of screen
 
 		// menu should know what items to show
 
 		// menu items should know what event to trigger
+
+		if(modal && templates[modal]){
+			return showModal({
+				modal,
+				data,
+				template: templates[modal]
+			});
+		}
 
 		contextPane.show();
 
@@ -606,6 +634,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 			contextMenuSelect({
 				detail: {
 					which: event.target.dataset.text,
+					modal: event.target.dataset.modal,
 					parent,
 					data,
 				},
