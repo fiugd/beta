@@ -575,6 +575,21 @@ ul { list-style: none; padding: 0; margin: 0; }
 		Menu.classList.remove("open");
 	}
 	
+	function serializeFormData (data) {
+		let obj = {};
+		for (let [key, value] of data) {
+			if (obj[key] !== undefined) {
+				if (!Array.isArray(obj[key])) {
+					obj[key] = [obj[key]];
+				}
+				obj[key].push(value);
+			} else {
+				obj[key] = value;
+			}
+		}
+		return obj;
+	}
+	
 	function showModal({ modal, data, template }){
 		const templateHtml = template(data);
 
@@ -599,7 +614,13 @@ ul { list-style: none; padding: 0; margin: 0; }
 			div.remove();
 			hideMenu();
 			event.preventDefault();
-			console.log(event.target, submitter)
+			const isCancel = event.submitter.value === 'cancel';
+			if(isCancel) return;
+			// Get all field data from the form
+			const data = serializeFormData(
+				new FormData(event.target)
+			);
+			console.log(data);
 			return false;
 		};
 		container.appendChild(div);
