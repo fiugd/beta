@@ -586,7 +586,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.add("open");
 
-		const div = document.body.createElement('div');
+		const div = document.createElement('div');
 		div.innerHTML = templateHtml;
 		contextPane.appendChild(div);
 	}

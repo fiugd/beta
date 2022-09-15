@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T22:30:41.161Z )
+	Version 0.4.6 ( 2022-09-15T22:33:57.186Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6203,7 +6203,7 @@ function ContextPane({forms: forms = {}} = {}) {
         listDiv.innerHTML = "";
         const Menu = contextPane.querySelector(".ContextMenu");
         Menu.classList.add("open");
-        const div = document.body.createElement("div");
+        const div = document.createElement("div");
         div.innerHTML = templateHtml;
         contextPane.appendChild(div);
     }
