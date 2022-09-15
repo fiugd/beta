@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T22:04:03.329Z )
+	Version 0.4.6 ( 2022-09-15T22:06:33.778Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
