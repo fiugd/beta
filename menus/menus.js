@@ -585,10 +585,24 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.add("open");
+		Menu.classList.add("modal");
+		Menu.style.top = undefined;
+		Menu.style.bottom = undefined;
+
+		const container = contextPane.querySelector(".menu-container");
 
 		const div = document.createElement('div');
 		div.innerHTML = templateHtml;
-		contextPane.appendChild(div);
+		const form = div.querySelector('form');
+		form.onsubmit = (event) => {
+			Menu.classList.remove("modal");
+			div.remove();
+			hideMenu();
+			debugger;
+			event.preventDefault();
+			return false;
+		};
+		container.appendChild(div);
 	}
 
 	function showMenu({
