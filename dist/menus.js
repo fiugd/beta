@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T21:45:35.774Z )
+	Version 0.4.6 ( 2022-09-15T22:04:03.329Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6167,7 +6167,7 @@ function ContextPane({forms: forms = {}} = {}) {
             const template = await i.compile({
                 path: path
             });
-            templates[path] = template;
+            templates[name] = template;
         }
     })();
     contextPane = document.createElement("div");

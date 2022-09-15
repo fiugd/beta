@@ -410,7 +410,7 @@ function ContextPane({ forms={} } = {}) {
 	(async () => {
 		for(const [name, path] of Object.entries(forms)){
 			const template = await handlebars.compile({ path });
-			templates[path] = template;
+			templates[name] = template;
 		}
 	})();
 
