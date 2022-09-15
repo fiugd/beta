@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T22:06:33.778Z )
+	Version 0.4.6 ( 2022-09-15T22:30:41.161Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6193,11 +6193,19 @@ function ContextPane({forms: forms = {}} = {}) {
         Menu.classList.remove("open");
     }
     function showModal({modal: modal, data: data, template: template}) {
-        console.log(template(data));
+        const templateHtml = template(data);
         console.log({
             modal: modal,
             data: data
         });
+        contextPane.show();
+        const listDiv = contextPane.querySelector(".list");
+        listDiv.innerHTML = "";
+        const Menu = contextPane.querySelector(".ContextMenu");
+        Menu.classList.add("open");
+        const div = document.body.createElement("div");
+        div.innerHTML = templateHtml;
+        contextPane.appendChild(div);
     }
     function showMenu({x: x = 0, y: y = 0, parent: parent = "unknown", data: data, list: list, modal: modal} = {}) {
         // warn if menu will appear offscreen?

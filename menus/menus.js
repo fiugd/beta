@@ -576,8 +576,19 @@ ul { list-style: none; padding: 0; margin: 0; }
 	}
 	
 	function showModal({ modal, data, template }){
-		console.log(template(data));
+		const templateHtml = template(data);
 		console.log({ modal, data });
+
+		contextPane.show();
+		const listDiv = contextPane.querySelector(".list");
+		listDiv.innerHTML = '';
+
+		const Menu = contextPane.querySelector(".ContextMenu");
+		Menu.classList.add("open");
+
+		const div = document.body.createElement('div');
+		div.innerHTML = templateHtml;
+		contextPane.appendChild(div);
 	}
 
 	function showMenu({
