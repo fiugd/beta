@@ -577,15 +577,15 @@ ul { list-style: none; padding: 0; margin: 0; }
 	
 	function showModal({ modal, data, template }){
 		const templateHtml = template(data);
-		console.log({ modal, data });
 
 		contextPane.show();
+		contextPane.classList.add("modal");
+
 		const listDiv = contextPane.querySelector(".list");
 		listDiv.innerHTML = '';
 
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.add("open");
-		Menu.classList.add("modal");
 		Menu.style.top = undefined;
 		Menu.style.bottom = undefined;
 
@@ -594,12 +594,12 @@ ul { list-style: none; padding: 0; margin: 0; }
 		const div = document.createElement('div');
 		div.innerHTML = templateHtml;
 		const form = div.querySelector('form');
-		form.onsubmit = (event) => {
-			Menu.classList.remove("modal");
+		form.onsubmit = (event, submitter) => {
+			contextPane.classList.add("modal");
 			div.remove();
 			hideMenu();
-			debugger;
 			event.preventDefault();
+			console.log(event.target, submitter)
 			return false;
 		};
 		container.appendChild(div);

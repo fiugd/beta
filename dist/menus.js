@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T22:47:42.339Z )
+	Version 0.4.6 ( 2022-09-15T23:09:40.587Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6194,28 +6194,24 @@ function ContextPane({forms: forms = {}} = {}) {
     }
     function showModal({modal: modal, data: data, template: template}) {
         const templateHtml = template(data);
-        console.log({
-            modal: modal,
-            data: data
-        });
         contextPane.show();
+        contextPane.classList.add("modal");
         const listDiv = contextPane.querySelector(".list");
         listDiv.innerHTML = "";
         const Menu = contextPane.querySelector(".ContextMenu");
         Menu.classList.add("open");
-        Menu.classList.add("modal");
         Menu.style.top = undefined;
         Menu.style.bottom = undefined;
         const container = contextPane.querySelector(".menu-container");
         const div = document.createElement("div");
         div.innerHTML = templateHtml;
         const form = div.querySelector("form");
-        form.onsubmit = event => {
-            Menu.classList.remove("modal");
+        form.onsubmit = (event, submitter) => {
+            contextPane.classList.add("modal");
             div.remove();
             hideMenu();
-            debugger;
             event.preventDefault();
+            console.log(event.target, submitter);
             return false;
         };
         container.appendChild(div);
