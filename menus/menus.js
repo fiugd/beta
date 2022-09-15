@@ -610,7 +610,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 		div.innerHTML = templateHtml;
 		const form = div.querySelector('form');
 		form.onsubmit = (event, submitter) => {
-			contextPane.classList.add("modal");
+			contextPane.classList.remove("modal");
 			div.remove();
 			hideMenu();
 			event.preventDefault();

@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T23:14:12.499Z )
+	Version 0.4.6 ( 2022-09-15T23:33:34.786Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6221,7 +6221,7 @@ function ContextPane({forms: forms = {}} = {}) {
         div.innerHTML = templateHtml;
         const form = div.querySelector("form");
         form.onsubmit = (event, submitter) => {
-            contextPane.classList.add("modal");
+            contextPane.classList.remove("modal");
             div.remove();
             hideMenu();
             event.preventDefault();
