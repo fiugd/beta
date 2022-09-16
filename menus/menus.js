@@ -575,7 +575,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 		Menu.classList.remove("open");
 	}
 	
-	function serializeFormData (data) {
+	function getFormData (form) {
+		const data = new FormData(form);
 		let obj = {};
 		for (let [key, value] of data) {
 			if (obj[key] !== undefined) {
@@ -603,6 +604,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 		Menu.classList.add("open");
 		Menu.style.top = undefined;
 		Menu.style.bottom = undefined;
+		Menu.style.left = undefined;
 
 		const container = contextPane.querySelector(".menu-container");
 
@@ -614,12 +616,9 @@ ul { list-style: none; padding: 0; margin: 0; }
 			div.remove();
 			hideMenu();
 			event.preventDefault();
-			const isCancel = event.submitter.value === 'cancel';
+			const isCancel = event.submitter.value.toLowerCase() === 'cancel';
 			if(isCancel) return;
-			// Get all field data from the form
-			const data = serializeFormData(
-				new FormData(event.target)
-			);
+			const data = getFormData(event.target);
 			console.log(data);
 			return false;
 		};

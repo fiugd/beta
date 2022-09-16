@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-15T23:33:34.786Z )
+	Version 0.4.6 ( 2022-09-16T00:00:22.833Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6192,7 +6192,8 @@ function ContextPane({forms: forms = {}} = {}) {
         const Menu = contextPane.querySelector(".ContextMenu");
         Menu.classList.remove("open");
     }
-    function serializeFormData(data) {
+    function getFormData(form) {
+        const data = new FormData(form);
         let obj = {};
         for (let [key, value] of data) {
             if (obj[key] !== undefined) {
@@ -6216,6 +6217,7 @@ function ContextPane({forms: forms = {}} = {}) {
         Menu.classList.add("open");
         Menu.style.top = undefined;
         Menu.style.bottom = undefined;
+        Menu.style.left = undefined;
         const container = contextPane.querySelector(".menu-container");
         const div = document.createElement("div");
         div.innerHTML = templateHtml;
@@ -6225,10 +6227,9 @@ function ContextPane({forms: forms = {}} = {}) {
             div.remove();
             hideMenu();
             event.preventDefault();
-            const isCancel = event.submitter.value === "cancel";
+            const isCancel = event.submitter.value.toLowerCase() === "cancel";
             if (isCancel) return;
-            // Get all field data from the form
-                        const data = serializeFormData(new FormData(event.target));
+            const data = getFormData(event.target);
             console.log(data);
             return false;
         };
