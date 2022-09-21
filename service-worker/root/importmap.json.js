@@ -6,7 +6,7 @@ export const importmap = () => {
 	return `
 {
 	imports: {
-		ansiEscapes: "https://cdn.skypack.dev/ansi-escapes",
+		ansiEscapes: "https://cdn.skypack.dev/ansi-escapes@4.3.2",
 		chalk: "https://cdn.skypack.dev/chalk@4",
 		fileSaver: "https://cdn.skypack.dev/file-saver",
 		jsZip: "https://cdn.skypack.dev/@progress/jszip-esm",

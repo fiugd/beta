@@ -7,7 +7,7 @@ this kinda does the same thing as service map was imagined to do
 
 */
 
-import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes';
+import ansiEscapes from 'https://cdn.skypack.dev/ansi-escapes@4.3.2';
 import chalk from "chalk";
 
 chalk.enabled = true;
