@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-22T17:39:10.808Z )
+	Version 0.4.6 ( 2022-09-22T17:46:11.947Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6267,7 +6267,7 @@ function ContextPane({forms: forms = {}} = {}) {
             if (menuWasClicked && event.target.tagName !== "LI") {
                 return;
             }
-            !contextPane.classList.includes("modal") && hideMenu();
+            !contextPane.classList.contains("modal") && hideMenu();
             document.body.removeEventListener("click", menuClickListener, false);
             if (!menuWasClicked) {
                 return;

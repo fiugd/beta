@@ -674,7 +674,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 				return;
 			}
 
-			!contextPane.classList.includes("modal") && hideMenu();
+			!contextPane.classList.contains("modal") && hideMenu();
 			document.body.removeEventListener("click", menuClickListener, false);
 			if (!menuWasClicked) {
 				return;
