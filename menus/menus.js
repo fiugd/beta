@@ -684,6 +684,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 				detail: {
 					which: event.target.dataset.text,
 					modal: event.target.dataset.modal,
+					...event.target.dataset,
 					parent,
 					data,
 				},

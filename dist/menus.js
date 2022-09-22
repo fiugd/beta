@@ -1,6 +1,6 @@
 /*!
 	fiug menus component
-	Version 0.4.6 ( 2022-09-22T17:46:11.947Z )
+	Version 0.4.6 ( 2022-09-22T17:50:56.543Z )
 	https://github.com/fiugd/fiug/menus
 	(c) 2020-2021 Harrison Cross, MIT License
 */
@@ -6276,6 +6276,7 @@ function ContextPane({forms: forms = {}} = {}) {
                 detail: {
                     which: event.target.dataset.text,
                     modal: event.target.dataset.modal,
+                    ...event.target.dataset,
                     parent: parent,
                     data: data
                 }
