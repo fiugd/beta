@@ -546,8 +546,12 @@ ul { list-style: none; padding: 0; margin: 0; }
 		item === "seperator"
 			? `<li class="context-seperator"></li>`
 			: `
-		<li class="item${item.disabled ? " disabled" : ""}" data-text="${item.name}" data-modal="${item.modal||''}">
-			<button name="${item.name}" class="">
+		<li class="item${item.disabled ? " disabled" : ""}"
+			${item.key ? `data-key="${item.key}"` : ""}
+			${item.modal ? `data-modal="${item.modal}"` : ""}
+			data-text="${item.name||''}"
+		>
+			<button name="${item.name||''}" class="">
 				<div class="linkContent">
 					<span class="itemText">${item.name}</span>
 				</div>
