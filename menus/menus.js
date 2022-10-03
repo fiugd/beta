@@ -578,24 +578,35 @@ ul { list-style: none; padding: 0; margin: 0; }
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.remove("open");
 	}
-	
-	function getFormData (form) {
+
+	async function getFormData (form) {
 		const data = new FormData(form);
 		let obj = {};
 		for (let [key, value] of data) {
-			if (obj[key] !== undefined) {
-				if (!Array.isArray(obj[key])) {
-					obj[key] = [obj[key]];
-				}
-				obj[key].push(value);
-			} else {
-				obj[key] = value;
+			let xformValue = value;
+			if(value instanceof File){
+				const xform = await new Promise(resolve => {
+					const r=new FileReader;
+					r.onload=()=>resolve(r.result);
+					r.readAsDataURL(value);
+				});
+				xformValue = {
+					name: value.name,
+					type: value.type,
+					size: value.size,
+					value: xform
+				};
 			}
+			if (obj[key] === undefined){
+				obj[key] = [xformValue];
+				continue;
+			}
+			obj[key].push(xformValue);
 		}
 		return obj;
 	}
-	
-	function showModal({ modal, data, template }){
+
+	function showModal({ modal, data, template, parent }){
 		const templateHtml = template(data);
 
 		contextPane.show();
@@ -615,15 +626,22 @@ ul { list-style: none; padding: 0; margin: 0; }
 		const div = document.createElement('div');
 		div.innerHTML = templateHtml;
 		const form = div.querySelector('form');
-		form.onsubmit = (event, submitter) => {
+		form.onsubmit = async (event, submitter) => {
 			contextPane.classList.remove("modal");
 			div.remove();
 			hideMenu();
 			event.preventDefault();
 			const isCancel = event.submitter.value.toLowerCase() === 'cancel';
 			if(isCancel) return;
-			const data = getFormData(event.target);
-			console.log(data);
+			const data = await getFormData(event.target);
+			contextMenuSelect({
+				detail: {
+					key: event.target.dataset.action,
+					modal,
+					parent,
+					form: data,
+				},
+			});
 			return false;
 		};
 		container.appendChild(div);
@@ -645,6 +663,7 @@ ul { list-style: none; padding: 0; margin: 0; }
 			return showModal({
 				modal,
 				data,
+				parent,
 				template: templates[modal]
 			});
 		}
