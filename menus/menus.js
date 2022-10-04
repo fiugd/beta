@@ -636,7 +636,12 @@ ul { list-style: none; padding: 0; margin: 0; }
 			hideMenu();
 			event.preventDefault();
 			const isCancel = event.submitter.value.toLowerCase() === 'cancel';
-			if(isCancel) return;
+			if(isCancel){
+				contextMenuSelect({
+					detail: { key: 'cancel-modal' }
+				});
+				return;
+			};
 			const data = await getFormData(event.target);
 			contextMenuSelect({
 				detail: {
