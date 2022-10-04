@@ -7,6 +7,8 @@ import {
 
 import { getCurrentServiceTree, getCurrentService } from "./state.mjs";
 
+const MenuState = {};
+
 const safe = (fn) => {
 	try {
 		return fn();
@@ -577,6 +579,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 		contextPane.hide();
 		const Menu = contextPane.querySelector(".ContextMenu");
 		Menu.classList.remove("open");
+		MenuState.data = undefined;
+		MenuState.parent = undefined;
 	}
 
 	async function getFormData (form) {
@@ -652,6 +656,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 			parent = "unknown",
 			data, list, modal
 	} = {}) {
+		MenuState.data = data;
+		MenuState.parent = parent;
 		// warn if menu will appear offscreen?
 		// handle case where menu is opened near edge of screen
 
@@ -685,34 +691,31 @@ ul { list-style: none; padding: 0; margin: 0; }
 			Menu.style.bottom = undefined;
 		}
 		Menu.style.left = x + "px";
-
-		//attach a listener to body that hides menu and detaches itself
-		const menuClickListener = (event) => {
-			const menuWasClicked = Menu.contains(event.target);
-			if (menuWasClicked && event.target.tagName !== "LI") {
-				return;
-			}
-
-			!contextPane.classList.contains("modal") && hideMenu();
-			document.body.removeEventListener("click", menuClickListener, false);
-			if (!menuWasClicked) {
-				return;
-			}
-
-			contextMenuSelect({
-				detail: {
-					which: event.target.dataset.text,
-					modal: event.target.dataset.modal,
-					...event.target.dataset,
-					parent,
-					data,
-				},
-			});
-		};
-		document.body.addEventListener("click", menuClickListener);
 	}
+
 	window.showMenu = showMenu;
 	window.hideMenu = hideMenu;
+
+	const Menu = contextPane.querySelector(".ContextMenu");
+	const menuClickListener = (event) => {
+		const menuWasClicked = Menu.contains(event.target);
+		if (menuWasClicked && event.target.tagName !== "LI") {
+			return;
+		}
+		!contextPane.classList.contains("modal") && hideMenu();
+		if (!menuWasClicked) {
+			return;
+		}
+		contextMenuSelect({
+			detail: {
+				which: event.target.dataset.text,
+				modal: event.target.dataset.modal,
+				...event.target.dataset,
+				...MenuState
+			},
+		});
+	};
+	document.body.addEventListener("click", menuClickListener);
 
 	const contextMenuSelect = connectTrigger({
 		name: "Context Menu",
