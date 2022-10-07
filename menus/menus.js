@@ -634,14 +634,14 @@ ul { list-style: none; padding: 0; margin: 0; }
 			contextPane.classList.remove("modal");
 			div.remove();
 			hideMenu();
-			event.preventDefault();
-			const isCancel = event.submitter.value.toLowerCase() === 'cancel';
-			if(isCancel){
+			const isCancel = event === "cancel";
+			if (isCancel) {
 				contextMenuSelect({
-					detail: { key: 'cancel-modal' }
+					detail: { key: "cancel-modal" }
 				});
 				return;
-			};
+			}
+			event.preventDefault();
 			const data = await getFormData(event.target);
 			contextMenuSelect({
 				detail: {
