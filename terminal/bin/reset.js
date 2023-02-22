@@ -1,10 +1,10 @@
 const description = "Reset fiug's state";
 const args = [{
-	name: 'editor', type: Boolean, defaultOption: false, required: false
+	name: 'editor', type: Boolean, defaultValue: false, alias: 'e', required: false
 }, {
-	name: 'module', type: Boolean, defaultOption: false, required: false
+	name: 'module', type: Boolean, defaultValue: false, alias: 'm', required: false
 }, {
-	name: 'repo', type: String, required: false
+	name: 'repo', type: String, alias: 'r', required: false
 }];
 
 /*
@@ -14,19 +14,28 @@ const args = [{
 */
 
 const operation = async (args) => {
-	const { logger, ...rest } = args;
-	logger('ARGUMENTS:\n\n'+JSON.stringify(rest, null, 2) + '\n\n');
+	const { logger, event } = args;
+	const { editor, module, repo } = event;
+	//logger('ARGUMENTS:\n\n'+JSON.stringify(rest, null, 2) + '\n\n');
 
-	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
-	logger('reset editorStore\n');
-	const editorStore = localForage.createInstance({
-		name: 'editorState',
-		storeName: 'editor',
-	});
-	editorStore.clear();
+	if(editor){
+		const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
+		logger('reset editorStore\n');
+		const editorStore = localForage.createInstance({
+			name: 'editorState',
+			storeName: 'editor',
+		});
+		editorStore.clear();
+	}
 
-	logger('reset moduleCache\n');
-	localStorage.removeItem('moduleCache');
+	if(module){
+		logger('reset moduleCache\n');
+		localStorage.removeItem('moduleCache');
+	}
+	
+	if(repo){
+		logger(`TODO: reset repo [${repo}]\n`);
+	}
 
 	/*
 		delete cache storage:
