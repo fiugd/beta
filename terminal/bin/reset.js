@@ -8,16 +8,15 @@ const args = [];
 */
 
 const operation = async (args) => {
-	const { logger } = args;
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
-	logger('reset editorStore\n');
+	console.log('reset editorStore');
 	const editorStore = localForage.createInstance({
 		name: 'editorState',
 		storeName: 'editor',
 	});
 	editorStore.clear();
 
-	logger('reset moduleCache\n');
+	console.log('reset moduleCache');
 	localStorage.removeItem('moduleCache');
 
 	/*
@@ -44,7 +43,7 @@ const operation = async (args) => {
 
 		output a message?
 	*/
-	return '';
+	return 'Refresh browser window to complete reset.';
 };
 
 export default class Node {
