@@ -2,6 +2,7 @@ const description = "Reset fiug's state";
 const args = [];
 
 const operation = async (args) => {
+	console.log('remove moduleCache')
 	localStorage.removeItem('moduleCache');
 	return '';
 };
