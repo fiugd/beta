@@ -112,7 +112,7 @@
 		},
 		{
 			"route": "./_/modules/terminal/bin/reset.js",
-			"source": "dist/bin/reset.js"
+			"source": "terminal/bin/reset.js"
 		},
 		"NOTE: -- TERMINAL UI /END --",
 
