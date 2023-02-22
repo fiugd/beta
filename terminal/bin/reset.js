@@ -2,10 +2,12 @@ const description = "Reset fiug's state";
 const args = [];
 
 const operation = async (args) => {
+	const localForage = await import("https://cdn.skypack.dev/localforage");
+	console.log(localForage);
+
 	console.log('reset moduleCache');
 	localStorage.removeItem('moduleCache');
-	importScripts("/shared/vendor/localforage.min.js");
-	console.log(localForage);
+
 	/*
 		delete cache storage:
 		https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage/delete
