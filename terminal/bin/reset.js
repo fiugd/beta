@@ -2,8 +2,13 @@ const description = "Reset fiug's state";
 const args = [];
 
 const operation = async (args) => {
-	const localForage = await import("https://cdn.skypack.dev/localforage");
-	console.log(localForage);
+	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
+	console.log('reset editorStore');
+	const editorStore = localforage.createInstance({
+		name: 'editorState',
+		storeName: 'editor',
+	});
+	editorStore.clear();
 
 	console.log('reset moduleCache');
 	localStorage.removeItem('moduleCache');
