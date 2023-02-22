@@ -14,6 +14,7 @@ const args = [{
 */
 
 const operation = async (args) => {
+	let output;
 	const { logger, event } = args;
 	const { editor, module, repo } = event;
 	//logger('ARGUMENTS:\n\n'+JSON.stringify(rest, null, 2) + '\n\n');
@@ -26,11 +27,13 @@ const operation = async (args) => {
 			storeName: 'editor',
 		});
 		editorStore.clear();
+		output = 'Refresh browser window to complete reset.'
 	}
 
 	if(module){
 		logger('reset moduleCache\n');
 		localStorage.removeItem('moduleCache');
+		output = 'Refresh browser window to complete reset.'
 	}
 	
 	if(repo){
@@ -61,7 +64,7 @@ const operation = async (args) => {
 
 		output a message?
 	*/
-	return 'Refresh browser window to complete reset.';
+	return output;
 };
 
 export default class Node {
