@@ -8,7 +8,9 @@ const args = [];
 */
 
 const operation = async (args) => {
-	const { logger } = args;
+	const { logger, ...rest } = args;
+	console.log(JSON.stringify(rest, null, 2) + '\n\n');
+
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
 	logger('reset editorStore\n');
 	const editorStore = localForage.createInstance({
