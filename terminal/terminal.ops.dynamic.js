@@ -166,7 +166,7 @@ class ProcessWorker {
 						serviceUrl = (new URL(`/${event.detail.service}`, location)).href;
 					} catch(e){}
 					const result = await module.operation({
-						...args, event, eventName, serviceUrl
+						...args, event, eventName, serviceUrl, logger
 					}, (msg)=>{
 						msg && logger(msg);
 						finish(resolve);

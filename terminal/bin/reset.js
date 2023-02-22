@@ -8,15 +8,16 @@ const args = [];
 */
 
 const operation = async (args) => {
+	const { logger } = args;
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
-	console.log('reset editorStore');
+	logger('reset editorStore\n');
 	const editorStore = localForage.createInstance({
 		name: 'editorState',
 		storeName: 'editor',
 	});
 	editorStore.clear();
 
-	console.log('reset moduleCache');
+	logger('reset moduleCache\n');
 	localStorage.removeItem('moduleCache');
 
 	/*
