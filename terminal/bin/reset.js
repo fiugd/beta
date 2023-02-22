@@ -1,6 +1,12 @@
 const description = "Reset fiug's state";
 const args = [];
 
+/*
+	this is a "plain" type script which means
+	that operation function runs in the page context
+	this does NOT run in a worker
+*/
+
 const operation = async (args) => {
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
 	console.log('reset editorStore');
