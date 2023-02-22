@@ -10,7 +10,7 @@ const args = [];
 const operation = async (args) => {
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
 	console.log('reset editorStore');
-	const editorStore = localforage.createInstance({
+	const editorStore = localForage.createInstance({
 		name: 'editorState',
 		storeName: 'editor',
 	});
