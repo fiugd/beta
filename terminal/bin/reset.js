@@ -1,5 +1,11 @@
 const description = "Reset fiug's state";
-const args = [];
+const args = [{
+	name: 'editor', type: Boolean, defaultOption: false, required: false
+}, {
+	name: 'module', type: Boolean, defaultOption: false, required: false
+}, {
+	name: 'repo', type: String, required: false
+}];
 
 /*
 	this is a "plain" type script which means
@@ -9,7 +15,7 @@ const args = [];
 
 const operation = async (args) => {
 	const { logger, ...rest } = args;
-	console.log(JSON.stringify(rest, null, 2) + '\n\n');
+	logger('ARGUMENTS:\n\n'+JSON.stringify(rest, null, 2) + '\n\n');
 
 	const { default: localForage } = await import("https://cdn.skypack.dev/localforage");
 	logger('reset editorStore\n');
