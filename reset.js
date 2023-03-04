@@ -16,7 +16,7 @@ const getItems = (store) => new Promise(async (resolve) => {
 	resolve(all);
 });
 
-const storesDef =[
+const storesDef = [
 	['service-worker', 'changes'],
 	['service-worker', 'files'],
 	['service-worker', 'services'],
